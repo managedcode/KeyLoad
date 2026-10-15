@@ -95,7 +95,8 @@ internal static class SubscriptionContinuationAssertions
         {
             var key = KeySpace.Partition(SourceFamily, source.Partition, source.Resource, source.Generation, record.Position);
             var bytes = store.Read(view => view.ReadOwnedValue(key));
-            await Assert.That(bytes is not null && bytes.AsSpan().SequenceEqual(NativeSerialization.Serialize(record))).IsTrue();
+            await Assert.That(bytes).IsNotNull();
+            await EqualAsync(NativeSerialization.Deserialize<SourceEventRecord>(bytes!), record);
             var id = KeySpace.Partition(SourceIdentityFamily, source.Partition, source.Resource, source.Generation, record.Data.EventId);
             var identity = store.Read(view => view.ReadOwnedValue(id));
             await Assert.That(identity).IsNotNull();
@@ -104,7 +105,7 @@ internal static class SubscriptionContinuationAssertions
         var headKey = KeySpace.Partition(SourceHeadFamily, source.Partition, source.Resource);
         var head = store.Read(view => view.ReadOwnedValue(headKey));
         await Assert.That(head).IsNotNull();
-        var storedBytes = expected.Sum(record => NativeSerialization.Serialize(record).LongLength);
+        var storedBytes = page.Records.Sum(row => (long)row.Value.Length);
         await EqualAsync(NativeSerialization.Deserialize<TopicHead>(head!),
             new(HealthyPosition, RetainedFloor, source.Generation, storedBytes));
         var sequence = store.Read(view => view.ReadOwnedValue(KeySpace.Partition(SourceSequenceFamily, source.Partition)));
@@ -164,6 +165,7 @@ internal static class SubscriptionContinuationAssertions
     }
 
     private static async Task EqualAsync<T>(T actual, T expected)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+    {
+        await SubscriptionNativeValueAssertions.EqualAsync(actual, expected);
+    }
 }

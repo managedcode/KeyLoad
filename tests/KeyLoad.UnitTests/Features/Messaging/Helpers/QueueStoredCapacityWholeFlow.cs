@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -26,7 +27,7 @@ internal static class QueueStoredCapacityWholeFlow
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var owner = fixture.CreateConfiguredDatabase(cold);
-        await Assert.That(cold.Identity).IsEqualTo(identity);
+        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position + QueueEnqueueAuthorityProtocol.First);
         await QueueStoredCapacityAssertions.RefuseAsync(owner, cold, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
         QueueStoredCapacityRows.Repair(cold, rows);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position + QueueEnqueueAuthorityProtocol.Second, originalImage);
@@ -91,7 +92,7 @@ internal static class QueueStoredCapacityWholeFlow
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var secondOwner = fixture.CreateConfiguredDatabase(second);
         token.ThrowIfCancellationRequested();
-        await Assert.That(second.Identity).IsEqualTo(identity);
+        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, finalImage);
         await QueueEnqueueColdAssertions.RequireHealthyAsync(secondOwner, fixture.Partition, state.ScheduledAt);
         await QueueStoredCapacityStateAssertions.TerminalAsync(secondOwner, second, fixture.Partition);

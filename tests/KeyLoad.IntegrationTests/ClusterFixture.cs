@@ -85,6 +85,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         : this(databaseLimits)
         => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
 
+    /// <summary>Composes validated HTTP admission and query capabilities in the same Aspire RF3 cohort.</summary>
+    internal ClusterFixture(HttpAdmissionLimits httpAdmission, DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
+        : this(databaseLimits, queryExecution)
+        => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
+
     /// <summary>Gets the unique private host directory used by the Aspire application.</summary>
     public string Root
     {
@@ -155,7 +160,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
             (AdminKey, peerSecret, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
             diagnosticIncarnation = ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation;
-            await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);
+            await ClusterFixtureApplicationStartup.StartOwnedAsync(App, repository.FullName, containerNames,
+                coverage, localImageSession?.Selection, isolationOwner, timeout.Token).ConfigureAwait(false);
             if (isolationOwner is not null)
             {
                 await isolationOwner.VerifyStartedAsync(App, timeout.Token).ConfigureAwait(false);
@@ -167,12 +173,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             throw;
         }
     }
-
-    private Task StartApplicationAsync(IReadOnlyDictionary<string, string> containerNames,
-        string repository, CancellationToken token)
-        => isolationOwner is null
-            ? ClusterFixtureApplicationStartup.StartAsync(App, repository, containerNames, coverage, localImageSession?.Selection, token)
-            : isolationOwner.StartAsync(App, token);
 
     internal ReplicaIsolationOwner RequireReplicaIsolation() => isolationOwner
         ?? throw new InvalidOperationException("This fixture does not own a native namespace fault cohort.");

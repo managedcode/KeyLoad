@@ -11,3 +11,13 @@ Native Unit phases preserve whole store image/position/identity after every resp
 This source change does not close WHOLE KL049 by presence. Current exact-source compiler/native discovery and full Unit/recovery/RF3/Linux fault/resource/cancellation gates remain OPEN. New UIDs/counts are UNKNOWN until Root builds/discovers the actual image. Existing SecurityAndQueryTests, ComposedProjectionLineageTests/Rf3, QueryAdapterContractTests, indexed 200-document/50-query and cursor cases remain mandatory; this regression does not replace them. Distributed estimates/fanout/cross-partition plans and matched Linux performance remain separately unqualified. No local benchmark or optimizer speed claim. Native wire is not enabled in this original shared RF3 fixture; real native-session conformance remains its existing independent gate.
 
 Native mutation receipts also assert the JSON-ignored CompositionReferences array is empty on original Batch and every native Batch replay; full public JSON is not treated as a native fifth-field proof. Public seed token incarnation/epoch is bound to the actual pre-commit placement resolution and its full partition, with a positive opaque position; no predicted physical position. Both cold attempts retain their original failure ledgers and settle before aggregate throw, preserving original deadline/tokens.
+
+```mermaid
+flowchart LR
+    Prefix[Partial composite equality prefix] --> Complete{Null and missing suffixes retained?}
+    Complete -->|Yes| Index[Use complete candidate index]
+    Complete -->|No| Alternative[Find complete shorter index]
+    Alternative --> Consent[Require explicit consent for bounded scan]
+    Index --> Rows[Full independently expected rows]
+    Consent --> Rows
+```

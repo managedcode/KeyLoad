@@ -20,6 +20,9 @@ public sealed class HttpAdmissionGovernor
     private const string QueryPath = "/v1/query";
     private const string SearchPath = "/v1/search";
     private const string GraphTraversalPath = "/v1/graph/traverse";
+    private const string GraphSearchPath = "/v1/search/graph";
+    private const string GraphShortestPath = "/v1/graph/shortest-path";
+    private const string GraphIncomingPath = "/v1/graph/incoming";
     private const string SeriesReadPath = "/v1/series/read";
     private const string StreamReadPath = "/v1/streams/read";
     private const string EventReadPath = "/v1/events/read";
@@ -90,6 +93,10 @@ public sealed class HttpAdmissionGovernor
         => path.StartsWith(QueryPath, StringComparison.OrdinalIgnoreCase)
            || path.Equals(SearchPath, StringComparison.OrdinalIgnoreCase)
            || path.Equals(GraphTraversalPath, StringComparison.OrdinalIgnoreCase)
+           || path.Equals(GraphSearchPath, StringComparison.OrdinalIgnoreCase)
+           || path.Equals(AnnSearchProtocol.Route, StringComparison.OrdinalIgnoreCase)
+           || path.Equals(GraphShortestPath, StringComparison.OrdinalIgnoreCase)
+           || path.Equals(GraphIncomingPath, StringComparison.OrdinalIgnoreCase)
            || path.Equals(SeriesReadPath, StringComparison.OrdinalIgnoreCase)
            || path.Equals(TimeSeriesReadProtocol.LatestRoute, StringComparison.OrdinalIgnoreCase)
            || path.Equals(TimeSeriesReadProtocol.AggregateRoute, StringComparison.OrdinalIgnoreCase)

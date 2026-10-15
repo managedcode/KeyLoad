@@ -623,3 +623,8 @@ flowchart LR
 
 Canonical slice Authorization; ADR014 persisted scopes and ADR125 signed
 connection operations apply. Additional frontend or storage-format changes: N/A.
+
+
+## KL096 current required queue-processing input
+
+REQ-REQUIRED-PROCESSING-001..005 and AC-REQUIRED-PROCESSING-001..005 refine ADR029 and existing REQ/AC-AUTH-006/007/008/009 plus REQ/AC-MSG-002. The native queue Processing authorization must enforce current resource body/header RequiredForProcessing raw-read grants after its original QueueAck check and before authorizing output effects. A resource-only classification change must not leave a signed live delivery able to ACK and publish derived effects without current required input. [Complete required-input operation and evidence boundary](Authorization/RequiredProcessingInput.md) freezes same-lease repair, immutable failed/success outcome replay, fresh epoch fencing, full native metadata-only refusals, actual SDK/official MCP/native T-SQL privacy, cancellation contracts and both native/RF3 cold attempts. Subscription processing already checks caller and data-principal input; ACK, lease, inbox, subscription and persisted contracts remain unchanged. Actual source/compiler/native/Linux and broader KL096 qualification remain open.

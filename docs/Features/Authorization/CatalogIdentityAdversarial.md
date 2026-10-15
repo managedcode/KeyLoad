@@ -9,3 +9,12 @@ The two whole native operations use real committed documents, sensitive catalog 
 After repair, genuine persisted use-only grant epoch2 permits the protected predicate while output stays redacted. Persisted revocation epoch3 refuses authentication and native SQL/AST/point reads without effects. Persisted repair epoch4 permits independently literal complete raw output. A genuine current reader patch returns the complete independent receipt, leaves the catalog unchanged and replays its original GUID/outcome without effects; original seed receipt replay remains intact. Two joined same-root native cold owners preserve the complete native StoreIdentity/image/cut and repeat authentication, full healthy output and both original receipt replays. No bytes containing signing keys, verifier or private payload are dumped in assertions.
 
 The source defect and operation code do not constitute runtime or public transport proof. No public corruption endpoint is added. Existing real ASP.NET subject-only admission, signed server-owned connection execution, protected membership, row/field/alias/token/session/export/trace adversarial operations and their actual SDK/official MCP Aspire RF3 classes remain mandatory. Exact native discovery counts/UIDs are UNKNOWN until Root's current-image discovery; full Unit, process recovery, Linux native-SIMD and RF3 gates remain OPEN. The supported model does not promise timing/statistical noninterference or absence of host-level side channels. Frontend/public schema/data migration are N/A for this current native validation repair.
+
+```mermaid
+flowchart LR
+    Catalog[Persisted key and body] --> Bind[Bind current identity]
+    Bind --> Reject[Reject mismatched record]
+    Reject --> Repair[Restore exact owned record]
+    Repair --> Policy[Fresh grant and revocation flow]
+    Policy --> Cold[Replay across two cold owners]
+```

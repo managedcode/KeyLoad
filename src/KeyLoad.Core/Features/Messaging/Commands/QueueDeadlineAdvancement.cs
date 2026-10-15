@@ -43,9 +43,12 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         }
-        var counters = RemoveQueueLifecycleReferences(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
-        counters = ReleaseQueueStored(counters, body.Bytes);
-        RemoveQueueOrder(tx, lane, policy, body.Body, metadata);
+        var removal = PrepareQueueLifecycleRemoval(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
+        var counters = ReleaseQueueStored(removal.Counters, body.Bytes);
+        var order = PrepareQueueOrderRemoval(tx, lane, policy, body.Body, metadata);
+        RequireQueueDueStateCapacity(metadata);
+        ApplyQueueLifecycleRemoval(tx, removal);
+        ApplyQueuePreparedOrderRemoval(tx, order);
         var updated = metadata with
         {
             State = MessageState.Expired,

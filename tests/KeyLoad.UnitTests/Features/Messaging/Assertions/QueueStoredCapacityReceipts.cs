@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -15,8 +16,10 @@ internal static class QueueStoredCapacityReceipts
     }
 
     internal static async Task ReceiptAsync(OperationResult actual, Guid id, CommitToken token, ImmutableArray<MutationReceipt> mutations)
-        => await QueueClaimVersionExhaustionAssertions.EqualAsync(actual.Get<CommitReceipt>(),
-            new CommitReceipt(id, token, mutations, DurabilityProfile.ProcessDurable));
+        => await NativeReplayResultAssertions.Same<CommitReceipt>(actual, new(null)
+        {
+            NativeValue = new CommitReceipt(id, token, mutations, DurabilityProfile.ProcessDurable)
+        });
 
     internal static async Task<Delivery> ClaimAsync(DatabaseEngine owner, OperationResult actual,
         QueueStoredCapacityState state, PartitionRef partition, CommitToken token)
@@ -27,10 +30,12 @@ internal static class QueueStoredCapacityReceipts
         var expected = new Delivery(QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.ReadyJson,
             QueueEnqueueColdProtocol.Headers, delivery.Token, QueueEnqueueAuthorityProtocol.First,
             state.Receive.EvaluatedAt.AddSeconds(request.LeaseSeconds), QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First);
-        await QueueClaimVersionExhaustionAssertions.EqualAsync(actual.Get<ReceiveResult>(),
-            new ReceiveResult(state.Receive.Id, [expected], token));
+        await NativeReplayResultAssertions.Same<ReceiveResult>(actual, new(null)
+        {
+            NativeValue = new ReceiveResult(state.Receive.Id, [expected], token)
+        });
         await Assert.That(delivery.Token).IsNotEqualTo(string.Empty);
-        await QueueClaimVersionExhaustionAssertions.EqualAsync(owner.Verify<DeliveryClaims>(delivery.Token),
+        await Assert.That(owner.Verify<DeliveryClaims>(delivery.Token)).IsEqualTo(
             new DeliveryClaims(lane, QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.Root, QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First, token.Incarnation));
         return delivery;
     }

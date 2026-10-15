@@ -18,7 +18,7 @@ internal static class QueueEnqueueProcessAssertions
     }
 
     internal static async Task ReceiptAsync(OperationResult result, CommandRequest command, CommitToken expected)
-        => await QueueClaimAckRecoveryAssertions.EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, expected,
+        => await QueueEnqueueProcessValueAssertions.EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, expected,
             command.Mutations.Select(mutation => mutation switch
             {
                 PutDocument document => new MutationReceipt(QueueEnqueueCrashProtocol.PutKind, document.Collection, document.Id, QueueEnqueueCrashProtocol.First),

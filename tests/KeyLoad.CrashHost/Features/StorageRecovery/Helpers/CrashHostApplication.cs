@@ -52,6 +52,10 @@ internal static class CrashHostApplication
         {
             return;
         }
+        if (await global::KeyLoad.CrashHost.Features.Messaging.ExternalQueueWorkerCrashScenario.TryRunAsync(args))
+        {
+            return;
+        }
         var directory = args[ArgsFirstIndex];
         var stage = Enum.Parse<CommitStage>(args[ArgsSecondIndex]);
         var mutationIndex = int.Parse(args[ArgsComponentIndex], CultureInfo.InvariantCulture);
@@ -75,6 +79,8 @@ internal static class CrashHostApplication
                 => global::KeyLoad.CrashHost.Features.Messaging.RemoteTransferAttemptCrashScenario.RunAsync(directory, store, boundary),
             global::KeyLoad.CrashHost.Features.Messaging.TargetInboxCrashProtocol.Mode
                 => global::KeyLoad.CrashHost.Features.Messaging.TargetInboxCrashScenario.RunAsync(directory, store, boundary),
+            global::KeyLoad.CrashHost.Features.Messaging.LocalInboxProcessingCrashContract.Mode
+                => global::KeyLoad.CrashHost.Features.Messaging.LocalInboxProcessingCrashScenario.RunAsync(directory, store, boundary),
             CrashFixtureValues.ProjectionMode => ProjectionCrashScenario.RunAsync(directory, store, boundary),
             CrashFixtureValues.SubscriptionMode => SubscriptionCrashScenario.RunAsync(directory, store, boundary),
             SubscriptionFilterCrashScenario.Mode => SubscriptionFilterCrashScenario.RunAsync(directory, store, boundary),

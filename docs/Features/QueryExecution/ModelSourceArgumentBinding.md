@@ -9,3 +9,13 @@ The original Unit AcSqlView001EventAndQueueSourcesLowerToBoundedTypedAst method 
 The original public InvalidSourcesAndModelCursorRejectBeforeScanning method retains its original errors/rows/timeout. Existing scenario retains the same seed Guid/payload and captures its entire original CommandRequest/CommitReceipt for SDK/official MCP replay, rather than discarding those objects. Additional original-owner SDK and official MCP refusal/healthy projected pages are independently literal. Each response observes primary then complete original event stream/both message inspections/outbox, full original receipt replay and conservation. Official clients settle/dispose before each of the two same-AppHost cold cuts; original SDK owner/token/endpoints remain. Public cuts remain opaque. Native wire is NOT enabled by this original shared fixture; matching native-session/model-source and physical owner qualification remains OPEN.
 
 This does not close whole KL048: arbitrary expression/functions/type inference and all source/policy/alias model combinations, exact-source Linux native discovery/build/Unit/recovery/RF3/fault/resource qualification remain mandatory. The original composed projection lineage classes continue to own protected nested/reference projection, forged source alias, predicate/reference Use revocation and two-cold proofs. Root/other owners'051 builder/062 pointer/045 capability surfaces are not changed. No runtime/sourceY claim follows from the draft.
+
+```mermaid
+flowchart LR
+    SQL[Original model-source SQL] --> Parse[ScriptDOM bounded argument validation]
+    Parse --> Refuse[Reject unsupported collation]
+    Parse --> AST[Canonical typed model AST]
+    AST --> Execute[Fresh authorized bounded operation]
+    Refuse --> Witness[Full unchanged state witness]
+    Execute --> Witness
+```

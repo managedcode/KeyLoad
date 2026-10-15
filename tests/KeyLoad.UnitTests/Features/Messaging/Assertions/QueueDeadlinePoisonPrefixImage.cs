@@ -21,7 +21,7 @@ internal static class QueueDeadlinePoisonPrefixImage
             {
                 var seed = new EnqueueMessage(lane.Queue, value.Id, QueueDeadlinePoisonPrefixProtocol.Json, QueueDeadlinePoisonPrefixProtocol.Json,
                     NotBefore: value.Id == QueueDeadlinePoisonPrefixProtocol.ScheduledMessage ? originalDue : null);
-                var body = new MessageBody(value.Id, QueueDeadlinePoisonPrefixProtocol.Json, QueueDeadlinePoisonPrefixProtocol.Json, null, JsonData.Fingerprint(seed));
+                var body = new MessageBody(value.Id, QueueDeadlinePoisonPrefixProtocol.Json, new string(QueueDeadlinePoisonPrefixProtocol.Json.AsSpan()), null, JsonData.Fingerprint(seed));
                 Add(rows, KeySpace.Partition(QueueDeadlinePoisonPrefixProtocol.Body, lane.Partition, lane.Queue, value.Id), body);
                 var bytes = NativeSerialization.Serialize(body).LongLength;
                 storedBytes += bytes;

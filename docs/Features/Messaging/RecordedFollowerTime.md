@@ -13,3 +13,12 @@ Cold close marks every node's directory retained before DI disposal, starts all 
 The cold phase is recovery hydration and validation of the already-applied committed prefix. It does not claim to replay an unapplied tail or execute a new elected public-client workload after cold. Exact original canonical and replica images, positions, identities, cuts, entries and outcomes survive this phase. Independent terminal oracles require the two complete ACKed metadata records, no message bodies, zero stored/in-flight counters, the exact final ready sequence and empty ready/scheduled/lease/pending/parked/dead-letter/queue-order/inbox prefixes. Each native scan refuses HasMore. Business-expiry discovery uses message-meta in this schema; all terminal ExpiresAt values are independently null, rather than asserting a fabricated expiry keyspace.
 
 This profile introduces no public product API, serializer alias or field ID. The new physical clock policy and admission gate are a separate, still-open implementation and Linux qualification boundary. Source review, prepared syntax/size checks and native TestCluster execution are distinct evidence levels; no runtime or required Linux qualification follows from a prepared packet alone.
+
+```mermaid
+flowchart LR
+    Leader[Actual elected leader] --> Entry[Original committed evaluation time]
+    Entry --> Follower[Native followers with offset database UTC]
+    Follower --> Apply[Original ordered materializer]
+    Apply --> Image[Compare complete canonical results]
+    Image --> Cold[Join owners before same-root cold reopen]
+```

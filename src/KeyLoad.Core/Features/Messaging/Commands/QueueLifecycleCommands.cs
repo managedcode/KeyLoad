@@ -23,8 +23,13 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, QueueLifecycleProtocol.ExpiredRedrive);
         }
-        var counters = RemoveQueueLifecycleReferences(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
+        var removal = PrepareQueueLifecycleRemoval(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
+        var counters = removal.Counters;
         var scheduled = request.NotBefore > now;
+        var order = PrepareQueueRedriveOrder(tx, lane, resource.QueuePolicy, body.Body, metadata, counters);
+        RequireQueueLifecycleIdentityCapacity(metadata);
+        RequireQueueRedriveReadyCapacity(counters, scheduled);
+        ApplyQueueLifecycleRemoval(tx, removal);
         var sequence = scheduled ? QueueLifecycleProtocol.Initial : checked(counters.NextReadySequence + QueueLifecycleProtocol.Increment);
         var updated = metadata with
         {
@@ -40,7 +45,7 @@ public sealed partial class DatabaseEngine
             SafeFailureCode = null,
             ParkedSequence = QueueLifecycleProtocol.Initial
         };
-        updated = RedriveQueueOrder(tx, lane, resource.QueuePolicy, body.Body, metadata, updated, ref counters);
+        updated = ApplyQueueRedriveOrder(tx, lane, order, updated, ref counters);
         tx.PutRecord(scheduled ? QueueKey(ScheduledQueueSpace, lane, request.NotBefore!.Value, metadata.Id)
             : QueueKey(ReadyQueueSpace, lane, sequence, metadata.Id), metadata.Id);
         tx.PutRecord(QueueKey(MessageMetadataSpace, lane, metadata.Id), updated);
@@ -55,10 +60,13 @@ public sealed partial class DatabaseEngine
     {
         var lane = new QueueLaneRef(partition, request.Queue);
         var (metadata, body) = RequireQueueLifecycleState(tx, lane, request);
-        var counters = RemoveQueueLifecycleReferences(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
+        var removal = PrepareQueueLifecycleRemoval(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
         var resource = Resource(tx, partition, lane.Queue, ResourceKind.WorkQueue);
-        RemoveQueueOrder(tx, lane, resource.QueuePolicy, body.Body, metadata);
-        counters = ReleaseQueueStored(counters, body.Bytes);
+        var order = PrepareQueueOrderRemoval(tx, lane, resource.QueuePolicy, body.Body, metadata);
+        var counters = ReleaseQueueStored(removal.Counters, body.Bytes);
+        RequireQueueLifecycleIdentityCapacity(metadata);
+        ApplyQueueLifecycleRemoval(tx, removal);
+        ApplyQueuePreparedOrderRemoval(tx, order);
         var updated = metadata with
         {
             State = MessageState.Cancelled,
@@ -96,8 +104,10 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, QueueLifecycleProtocol.FullDeadLetter);
         }
-        DeleteQueuePendingReference(tx, lane, metadata);
-        var updated = AdmitQueueDeadLetter(tx, lane, resource.QueuePolicy, metadata, body.Bytes, ref counters);
+        var removal = PrepareQueueLifecycleRemoval(tx, lane, metadata, counters, body.Bytes);
+        var admission = PrepareQueueDeadLetterAdmission(tx, lane, resource.QueuePolicy, metadata, body.Bytes, counters);
+        ApplyQueueLifecycleRemoval(tx, removal);
+        var updated = ApplyQueueDeadLetterAdmission(tx, lane, admission, ref counters);
         tx.PutRecord(QueueKey(MessageMetadataSpace, lane, metadata.Id), updated);
         tx.PutRecord(QueueKey(QueueCountersSpace, lane), counters);
         return new(QueueLifecycleProtocol.ParkKind, lane.Queue, metadata.Id, updated.StateVersion);

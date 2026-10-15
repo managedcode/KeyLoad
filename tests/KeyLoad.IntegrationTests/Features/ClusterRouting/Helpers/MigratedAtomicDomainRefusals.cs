@@ -8,7 +8,7 @@ internal static class MigratedAtomicDomainRefusals
     private const string DomainDetail = "The resource belongs to a different transaction domain.";
 
     internal static async Task<MigratedAtomicDomainState> CreateAsync(PartitionMovementPublicParentRf3Seed seed,
-        TransferredAtomicScopeState atomic, long directoryRevision, CancellationToken token)
+        TransferredAtomicScopeState atomic, long directoryRevision, PartitionMoveResult moved, CancellationToken token)
     {
         var original = seed.Originals[0].Command;
         await Assert.That(original.Partition).IsEqualTo(seed.Partition);
@@ -33,7 +33,7 @@ internal static class MigratedAtomicDomainRefusals
             Revision = 0,
             IsFallback = true
         };
-        var domain = new MigratedAtomicDomainState(changed, fallback);
+        var domain = new MigratedAtomicDomainState(changed, fallback, moved);
         await MigratedAtomicDomainCurrent.RunAsync(seed, atomic, domain, token);
         await ReplayAsync(seed, atomic, domain, token);
         return domain;
@@ -56,5 +56,6 @@ internal static class MigratedAtomicDomainRefusals
         await MigratedAtomicDomainCurrent.RunAsync(seed, atomic, domain, token);
         await PartitionMovementPublicParentRf3Cut.RequireModelsAsync(seed, token);
         await MigratedAtomicDomainCurrent.RunAsync(seed, atomic, domain, token);
+        await WholeAtomicMoveInputBoundary.RunAsync(seed, atomic, domain, token);
     }
 }

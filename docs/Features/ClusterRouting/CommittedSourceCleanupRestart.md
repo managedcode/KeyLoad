@@ -12,3 +12,12 @@ Coverage counterevidence: existing PhysicalShard fault mapper accepts only Prepa
 SourceN-only. Current standard whole-source identities are preserved separately from native proof. New test declaration/UID, native admission, compiler, runtime/clock fit and all-stage Linux qualification remain OPEN. No product cause or actual runtime failure is claimed.
 
 RF3 acknowledgement is not silently upgraded to all-three applied completion at the immediate kill cut. The original callback voter must contain the exact successful outcome and cleanup cursor. Other source followers may not have applied yet; every available cleanup state must equal the independently authored first cursor, and existing actual recovery/full-model/public receipt/cold replay oracles then close the recovered plan. No original assertion is relaxed. The current MoveJournalReceipt factory uses catalog.DefaultShard/commandId/native position/digest and the record default EffectDigest=null; this is a source-proven field, not copied output.
+
+```mermaid
+flowchart LR
+    Retire[Original authenticated retirement] --> Commit[Commit bounded cleanup batch]
+    Commit --> Marker[Capture original submit boundary]
+    Marker --> Stop[Stop owned RF3 resources]
+    Stop --> Resume[Reopen and resume original operation]
+    Resume --> Verify[Full model and receipt checks]
+```

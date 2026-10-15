@@ -32,7 +32,8 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
         await PhysicalShardPartitionMovementRf3Placement.RequireAsync(seed, seed.FirstRequest, seed.OriginalPlacement,
             seed.Directory.ControlOwner, moved, publication, publication, token);
         var atomicScope = await TransferredAtomicScopeRefusals.CreateAndRequireAsync(seed, token);
-        var domainScope = await MigratedAtomicDomainRefusals.CreateAsync(seed, atomicScope, publication, token);
+        var domainScope = await MigratedAtomicDomainRefusals.CreateAsync(seed, atomicScope, publication, moved, token);
+        await MigratedCatalogScopeRefusals.RunAsync(seed, atomicScope, domainScope, token);
         await RequireInvalidAsync(seed, original, token);
         await CurrentOwnershipTokenAfterMovementRf3ReadControls.InvalidAsync(seed, original, controls.Cursor, token);
         await MovementCursorRf3Query.RefuseAsync(seed, cursorOriginal.Pages, token);
@@ -95,6 +96,7 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
     {
         await TransferredAtomicScopeRefusals.ReplayAsync(seed, atomicScope, token);
         await MigratedAtomicDomainRefusals.ReplayAsync(seed, atomicScope, domainScope, token);
+        await MigratedCatalogScopeRefusals.RunAsync(seed, atomicScope, domainScope, token);
         var currentPages = await MovementCursorRf3Query.CaptureAsync(seed, token);
         var currentLives = await MovementCursorRf3Live.CaptureAsync(seed, token);
         var currentStreams = await MovementCursorRf3Stream.CaptureAsync(seed, token);
@@ -115,6 +117,7 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
         await RequireReadAsync(seed, expected.Reference, receipt.Token, expected, token);
         atomicScope = await TransferredAtomicScopeCurrent.AfterHealthyAsync(seed, atomicScope, expected, token);
         await MigratedAtomicDomainRefusals.ReplayAsync(seed, atomicScope, domainScope, token);
+        await MigratedCatalogScopeRefusals.RunAsync(seed, atomicScope, domainScope, token);
         await CurrentOwnershipTokenAfterMovementRf3ReadControls.HealthyAsync(seed, receipt.Token,
             originalPolicyEpoch, currentCursor, expected, token);
         await MovementCursorRf3Query.ContinueAsync(seed, currentPages, token);
@@ -144,6 +147,7 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
         await SqlRf3Protocol.EqualAsync(before, after);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
         await MigratedAtomicDomainRefusals.ReplayAsync(seed, atomicScope, domainScope, token);
+        await MigratedCatalogScopeRefusals.RunAsync(seed, atomicScope, domainScope, token);
     }
 
     private static async Task RequireReceiptAsync(PartitionMovementPublicParentRf3Seed seed, CommandRequest command,

@@ -62,7 +62,9 @@ public sealed partial class DatabaseEngine
             && PlacementOwnerIsTenantExclusive(view, owner, cohort, request, control, token));
         var candidates = total >= policy.PromotionBytes ? dedicated
             : total <= policy.DemotionBytes ? owners.Where(owner => owner.PhysicalShardId == control.PhysicalShardId)
-            : owners.Where(owner => selection.All(item => item.Owner == owner.PhysicalShardId));
+            : owners.Where(owner => selection.All(item => item.Owner == owner.PhysicalShardId)
+                && (owner.PhysicalShardId == control.PhysicalShardId
+                    || PlacementOwnerIsTenantExclusive(view, owner, cohort, request, control, token)));
         var target = Features.ClusterRouting.PlacementRendezvousChoice.Choose(policy,
             candidates.Where(owner => Features.ClusterRouting.PlacementCapacityEligibility.Eligible(policy,
                 owner, cohort, selection.Where(item => item.Owner != owner.PhysicalShardId).Sum(item => item.Bytes)))

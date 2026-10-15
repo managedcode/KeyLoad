@@ -13,6 +13,8 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
     private bool rootOwned;
     private bool retainEvidence;
     private LocalRf3ImageTestSession? localImage;
+    private NodeEpochRf3Profile? queryColdProfile;
+    private readonly ConnectionQueryContextColdEvidence queryColdEvidence = new();
     private RequestCqrsRf3Wave? wave;
     private RequestCqrsRf3Callers? administrator;
     private RequestCqrsProbeFixture? controls;
@@ -60,18 +62,13 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
         RequestCqrsPhaseFaultProvisioning.CreatePrivateRoot(root, () => rootOwned = true);
         var data = Path.Combine(root, "data");
         var profile = (await NodeEpochRf3Profile.CreatePriorAsync(data, cancellationToken).ConfigureAwait(false)).Profile;
+        queryColdProfile = profile;
         var images = await RequestCqrsRf3ImageProof.ReadAsync(cancellationToken, localImage?.Selection).ConfigureAwait(false);
         controls = RequestCqrsProbeFixture.Create(data, Guid.NewGuid());
         wave = await RequestCqrsRf3Wave.StartProbedAsync(data,
             RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current), controls, cancellationToken,
             selection: localImage?.Selection).ConfigureAwait(false);
-        var discovery = new ReplicaSiloDiscovery[RequestCqrsRf3Protocol.NodeCount];
-        for (var index = 0; index < discovery.Length; index++)
-        {
-            discovery[index] = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.App,
-                RequestCqrsRf3Protocol.NodeName(index), profile, cancellationToken).ConfigureAwait(false);
-        }
-        Discovery = discovery;
+        Discovery = await ConnectionRf3DiscoveryCapture.ReadAsync(wave, profile, cancellationToken).ConfigureAwait(false);
         administrator = await RequestCqrsRf3Callers.ConnectAsync(wave.App, RequestCqrsRf3Protocol.Node1,
             profile.AdminKey, cancellationToken).ConfigureAwait(false);
         Identity = await RequestCqrsPhaseFaultProvisioning.CreatePersistedIdentityAsync(Administrator, cancellationToken)
@@ -127,6 +124,17 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
         return await ConnectionRf3WitnessReader.WaitAsync(Controls, marker, Discovery, closed: true,
             cancellationToken).ConfigureAwait(false);
     }
+
+    internal async Task RestartQueryContextsColdAsync(long ordinal, CancellationToken cancellationToken)
+    {
+        var current = await ConnectionQueryContextCold.RunAsync(wave ?? throw Missing(), controls ?? throw Missing(),
+            operations, callers, administrator ?? throw Missing(), queryColdProfile ?? throw Missing(),
+            Discovery, queryColdEvidence, ordinal, cancellationToken).ConfigureAwait(false);
+        administrator = current.Administrator;
+        Discovery = current.Discovery;
+    }
+
+    internal Task RequireQueryColdReceiptsAsync(CancellationToken token) => queryColdEvidence.RequireAsync(token);
 
     internal async Task VerifyDocumentAsync(RequestCqrsPhaseFaultIdentity identity, string json, long revision,
         CancellationToken cancellationToken)

@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -48,7 +49,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var owner = fixture.CreateConfiguredDatabase(cold);
-        await Assert.That(cold.Identity).IsEqualTo(identity);
+        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position, image);
         await QueueStoredCapacityReceipts.FailureAsync(owner, cold, fixture.Partition, operation, result);
         await QueueEnqueueSequenceAssertions.ResultAsync(owner, cold, lane, command,
@@ -59,7 +60,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         cold.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var restored = fixture.CreateConfiguredDatabase(second);
-        await Assert.That(second.Identity).IsEqualTo(identity);
+        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, final);
         await QueueStoredCapacityReceipts.FailureAsync(restored, second, fixture.Partition, operation, result);
         await QueueStoredCapacityReceipts.FailureAsync(restored, second, fixture.Partition, healthy.Operation, healthy.Result);

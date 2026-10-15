@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class TenantCapacityPlacementRf3OccupiedAssertions
 {
     private const long OriginalDocumentRevision = 1;
-    private const string McpUnavailableDetail = "The database operation could not be completed.";
+    private const string McpUnavailableDetail = "The operation exceeds the available resource capacity.";
     internal static async Task RefuseAsync(PartitionMovementPublicParentRf3Seed seed,
         TenantCapacityPlacementRf3Provisioning.State capacity, CancellationToken token)
     {

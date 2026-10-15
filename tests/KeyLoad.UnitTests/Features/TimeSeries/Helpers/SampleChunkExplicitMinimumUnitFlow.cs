@@ -26,7 +26,7 @@ internal static class SampleChunkExplicitMinimumUnitFlow
                 fixture.Request, minimum, ReaderId, token);
             var reader = Reader(fixture.Owner, FirstEpoch, permitted: true);
             fixture.Owner.Submit(OperationKind.ConfigurePrincipal,
-                Reader(fixture.Owner, RevokedEpoch, permitted: false)).Get<PrincipalRecord>();
+                new ConfigurePrincipalRequest(Reader(fixture.Owner, RevokedEpoch, permitted: false))).Get<PrincipalRecord>();
             await SampleChunkExplicitMinimumUnitReads.PermissionAsync(fixture.Owner.Database, fixture.Owner.Store,
                 fixture.Request with
                 {
@@ -36,10 +36,10 @@ internal static class SampleChunkExplicitMinimumUnitFlow
                     }
                 }, ReaderId, token);
             fixture.Owner.Submit(OperationKind.ConfigurePrincipal,
-                reader with
+                new ConfigurePrincipalRequest(reader with
                 {
                     PolicyEpoch = RepairedEpoch
-                }).Get<PrincipalRecord>();
+                })).Get<PrincipalRecord>();
             await SampleChunkExplicitMinimumUnitReads.RunAsync(fixture.Owner.Database, fixture.Owner.Store,
                 fixture.Request, minimum, ReaderId, token);
             await ReplayAsync(fixture.Owner.Database, fixture.Owner.Store, fixture, commands, token);
@@ -87,7 +87,7 @@ internal static class SampleChunkExplicitMinimumUnitFlow
             await SampleChunkExplicitMinimumUnitReads.EqualAsync(expected, actual);
             commands.Add((request, expected));
         }
-        fixture.Owner.Submit(OperationKind.ConfigurePrincipal, Reader(fixture.Owner, FirstEpoch, permitted: true))
+        fixture.Owner.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(Reader(fixture.Owner, FirstEpoch, permitted: true)))
             .Get<PrincipalRecord>();
         return commands;
     }

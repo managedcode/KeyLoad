@@ -12,7 +12,13 @@ internal static class RecordedQueueFollowerFlow
         var token = linked.Token;
         var clocks = PeerDiscoveryNativeCluster.Voters.ToDictionary(voter => voter, _ => new RecordedQueueFollowerClockFault());
         using var profile = new PeerDiscoveryNativeClockProfile(clocks.ToDictionary(pair => pair.Key, pair => (TimeProvider)pair.Value));
-        await using var cluster = new PeerDiscoveryNativeCluster(profile);
+        var cluster = new PeerDiscoveryNativeCluster(profile);
+        await RecordedQueueFollowerFailureLifetime.RunAsync(cluster, () => RunOwnedAsync(cluster, clocks, token));
+    }
+
+    private static async Task RunOwnedAsync(PeerDiscoveryNativeCluster cluster,
+        IReadOnlyDictionary<string, RecordedQueueFollowerClockFault> clocks, CancellationToken token)
+    {
         await cluster.InitializeAsync();
         var leader = await RecordedQueueFollowerNative.LeaderAsync(cluster, token);
         var direction = ClockFault;

@@ -5,3 +5,12 @@ The original R59 Unit failures remain original evidence; no rerun or success is 
 The newly added correction tag positive premise used numeric JSON23 while the public TagValue is string and native SampleChunkTagPredicate.Matches accepts only an actual JSON string with ordinal equality. Use JSON string23 only for that new correction; preserve numeric17 in the original base corpus, exact original sample bits, sequence4, revision7/8, generation2/3, all bounds, same tag string23, and every independently authored full row/page. This is not numeric/string coercion or a changed product matcher. The same TaggedJson input remains used by the actual append and the independent full expected correction record.
 
 The complete original three cases, failed outcomes, current permission/cancellation/replay and same-root cold flows remain mandatory. Compilation, native discovery, full original runtime and Linux qualification are OPEN until Root runs the coherent image.
+
+```mermaid
+flowchart LR
+    Native[Native replica admission] --> Receipt[ProcessDurable receipt]
+    Native --> Tags[Actual string tag correction]
+    Receipt --> Minimum[Current minimum and permission checks]
+    Tags --> Minimum
+    Minimum --> Cold[Original replay and two cold owners]
+```

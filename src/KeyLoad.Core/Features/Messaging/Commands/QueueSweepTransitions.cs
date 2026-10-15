@@ -80,68 +80,16 @@ public sealed partial class DatabaseEngine
         }
         RequireCurrentQueueDueEntry(lane, metadata, now, leased, item.Key.Span);
         var current = counters ?? Counters(tx, lane);
-        tx.Delete(item.Key.ToArray());
         if (leased)
         {
             current = ReleaseQueueInFlight(current, body.Bytes);
         }
-        var updated = DueMetadata(tx, lane, policy, now, metadata, body.Bytes, ref current, operation, item.Key.Span);
-        tx.PutRecord(metadataKey, updated);
-        return current;
+        var plan = PrepareQueueDueTransition(tx, lane, policy, now, metadata, body.Body,
+            body.Bytes, current, operation, item.Key.Span);
+        tx.Delete(item.Key.ToArray());
+        ApplyQueueDueTransition(tx, lane, plan);
+        tx.PutRecord(metadataKey, plan.Metadata);
+        return plan.Counters;
     }
 
-    private MessageMetadata DueMetadata(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
-        DateTimeOffset now, MessageMetadata metadata, long bodyBytes, ref QueueCounters counters,
-        ReplicatedOperation operation, ReadOnlySpan<byte> dueKey)
-    {
-        if (metadata.ExpiresAt <= now)
-        {
-            counters = ReleaseQueueStored(counters, bodyBytes);
-            var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, metadata.Id))
-                ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
-            RemoveQueueOrder(tx, lane, policy, body.Body, metadata);
-            tx.Delete(QueueKey(MessageBodySpace, lane, metadata.Id));
-            return metadata with
-            {
-                State = MessageState.Expired,
-                ActiveOrderSequence = QueueOrderProtocol.Initial,
-                StateVersion = metadata.StateVersion + QueueSweepTransitionsVersionOne,
-                LeaseOwner = null,
-                LeaseUntil = null
-            };
-        }
-        if (metadata.Attempts >= policy.MaxAttempts)
-        {
-            return AdmitQueueDeadLetter(tx, lane, policy, metadata, bodyBytes, ref counters);
-        }
-        if (metadata.State == MessageState.Leased && policy.RetryJitter == QueueRetryJitter.Full)
-        {
-            var available = QueueRetryAt(operation, lane, policy, metadata, dueKey);
-            tx.PutRecord(QueueKey(ScheduledQueueSpace, lane, available, metadata.Id), metadata.Id);
-            return metadata with
-            {
-                State = MessageState.Scheduled,
-                NotBefore = available,
-                StateVersion = checked(metadata.StateVersion + QueueSweepTransitionsVersionOne),
-                LeaseOwner = null,
-                LeaseUntil = null,
-                SafeFailureCode = RetryRequested
-            };
-        }
-        var sequence = checked(counters.NextReadySequence + QueueSweepTransitionsAdjacentElementOffset);
-        counters = counters with
-        {
-            NextReadySequence = sequence
-        };
-        tx.PutRecord(QueueKey(ReadyQueueSpace, lane, sequence, metadata.Id), metadata.Id);
-        return metadata with
-        {
-            State = MessageState.Ready,
-            ReadySequence = sequence,
-            StateVersion = metadata.StateVersion + QueueSweepTransitionsVersionOne,
-            LeaseOwner = null,
-            LeaseUntil = null,
-            NotBefore = null
-        };
-    }
 }

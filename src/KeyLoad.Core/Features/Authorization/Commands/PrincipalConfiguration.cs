@@ -7,6 +7,8 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private const int CredentialVerifierCharacters = 64;
+    private const long InitialPrincipalPolicyEpoch = 1L;
+    private const string InvalidInitialPrincipalEpoch = "An initial principal policy epoch must be positive.";
     private const string PolicyEpochMustAdvanceMessage = "A policy update must advance its epoch.";
     private const string CredentialSha256RequiredMessage = "An API key requires a SHA-256 verifier.";
     private const string InvalidConfiguredCredentialVerifierMessage = "The credential verifier is invalid.";
@@ -19,6 +21,10 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(principal.Id);
         JsonData.Identifier(principal.TenantId);
         var previous = transaction.GetRecord<PrincipalRecord>(KeySpace.Principal(principal.Id));
+        if (previous is null && principal.PolicyEpoch < InitialPrincipalPolicyEpoch)
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidInitialPrincipalEpoch);
+        }
         if (previous is not null && principal.PolicyEpoch <= previous.PolicyEpoch)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, PolicyEpochMustAdvanceMessage);

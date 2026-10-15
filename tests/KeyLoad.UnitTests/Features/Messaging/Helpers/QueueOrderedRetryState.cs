@@ -8,6 +8,10 @@ internal sealed class QueueOrderedRetryState(PartitionRef partition, DateTimeOff
 {
     internal PartitionRef Partition { get; } = partition;
     internal string Principal { get; } = principal;
+    internal Action<DatabaseEngine, ReplicatedOperation>? BeforeApply
+    {
+        get; init;
+    }
     internal Dictionary<Guid, byte[]> HistoricalOutcomes { get; } = [];
     internal byte[]? RestoredResourceBytes
     {
@@ -30,6 +34,7 @@ internal sealed class QueueOrderedRetryState(PartitionRef partition, DateTimeOff
         var operation = database.NormalizeOperation(new(id, kind, Principal, Time,
             JsonSerializer.Serialize(payload, JsonDefaults.Options)));
         operation = database.PrepareQueueRetryOperation(operation);
+        BeforeApply?.Invoke(database, operation);
         var result = database.Apply(operation);
         Outcomes.Add((operation, result));
         return result;

@@ -50,6 +50,14 @@ internal static class RequestCqrsMovementJournalCapture
         {
             return Record(claim, voter, siloAddress, partition, Guid.Empty, null, null, error);
         }
+        if (actual.NativeValue is PartitionMovePhaseResult { Stage: PartitionMovePeerStage.Retire } retired)
+        {
+            if (retired.Journal.CommandId != arm.CommandId || !RequestCqrsRetireJournalShape.Valid(retired, partition))
+            {
+                throw Invalid();
+            }
+            return Record(claim, voter, siloAddress, partition, retired.MoveId, retired.Stage, retired.Journal, null);
+        }
         if (actual.NativeValue is not PartitionMovePhaseResult phase
             || !RequestCqrsMovementJournalInventory.IsObservedControlStage(phase.Stage) || phase.Control is not { } control
             || control.Partition != partition || control.MoveId != phase.MoveId

@@ -9,3 +9,12 @@ QueueDeadlinePoisonPrefixWholeFlowTests uses actual ZoneTree scheduled and lease
 Source review found no independently specified physical-drift readiness threshold beyond the existing committed-clock monotonic lower-bound refusal. This remains a contract review and RF3 physical-clock qualification gap; transport signature skew is a different boundary. Current native Aspire cold restart begins every killed resource before awaiting healthy quorum and joins original ownership receipts. Historical sequential restart evidence is retained as history.
 
 This source packet does not qualify Linux RF3 identical follower decisions, physical drift/readiness, measured lateness, endurance or power-loss durability. Original autonomous/leader/renewal/process and joined lifecycle flows remain required against the coherent compiled source.
+
+```mermaid
+flowchart LR
+    Prefix[Oversized native due prefix] --> Refuse[Bounded refusal without advancement]
+    Refuse --> Other[Independent due family progresses]
+    Other --> Repair[Remove exact fixture-owned poison]
+    Repair --> Resume[Original work advances once]
+    Resume --> Cold[Complete state and replay across cold owners]
+```

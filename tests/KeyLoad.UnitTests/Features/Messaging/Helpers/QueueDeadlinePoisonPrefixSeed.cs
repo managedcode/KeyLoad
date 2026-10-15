@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -40,8 +41,10 @@ internal static class QueueDeadlinePoisonPrefixSeed
         var result = database.Apply(operation);
         await Assert.That(result.Error).IsNull();
         await Assert.That(result.Json).IsNull();
-        await Assert.That(NativeSerialization.Serialize(result.Get<CommitReceipt>()).SequenceEqual(
-            NativeSerialization.Serialize(expected))).IsTrue();
+        await NativeReplayResultAssertions.Same<CommitReceipt>(result, new(null)
+        {
+            NativeValue = expected
+        });
         return (operation, result);
     }
 }

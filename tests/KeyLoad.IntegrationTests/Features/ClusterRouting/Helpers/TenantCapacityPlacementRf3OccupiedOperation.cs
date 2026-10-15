@@ -62,5 +62,6 @@ internal static class TenantCapacityPlacementRf3OccupiedOperation
             {
                 DirectoryRevision = CompletedDirectoryRevision
             }, healthy, token);
+        await TenantPlacementHysteresisExclusiveRf3Flow.RunAsync(wave, seed, capacity, packed, healthy, token);
     }
 }

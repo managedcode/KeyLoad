@@ -75,6 +75,8 @@ public sealed partial class DatabaseEngine
             case OperationKind.Processing:
                 var processing = Payload<ProcessingRequest>(operation);
                 Authorization.Require(principal, processing.Lane.Partition, processing.Lane.Queue, Capability.QueueAck);
+                Authorization.RequireWorkerInput(principal,
+                    Resource(view, processing.Lane.Partition, processing.Lane.Queue, ResourceKind.WorkQueue));
                 AuthorizeBatch(view, principal, new(processing.CommandId, processing.Lane.Partition, processing.Effects), allowEmpty: true);
                 break;
             default:

@@ -17,3 +17,12 @@ and a fresh healthy enqueue/claim/ACK continuation remain in the same whole flow
 Source review does not qualify this scenario. Existing discovered SDK/official MCP
 RF3 cases must execute against the exact built image through Aspire with original
 Linux artifacts. No power-loss, speed, endurance or production claim follows.
+
+```mermaid
+flowchart LR
+    Claim[Original multi-lane Receive] --> Commit[Commit first lane]
+    Commit --> Lost[Interrupt caller after commit]
+    Lost --> Replay[Resolve original current lease]
+    Replay --> Ack[ACK and healthy next work]
+    Ack --> Cold[Full lane and receipt checks after cold]
+```

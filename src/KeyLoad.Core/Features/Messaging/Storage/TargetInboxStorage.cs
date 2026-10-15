@@ -5,6 +5,7 @@ namespace KeyLoad.Core.Features.Messaging;
 
 internal static class TargetInboxStorage
 {
+    private const int CapacityWitnessRecords = 1;
     internal static byte[] Key(CommitInboxRequest request)
         => KeySpace.Partition(TargetInboxProtocol.RecordSpace, request.Target.Partition, request.Target.Queue,
             request.HandlerScope, request.ExecutionGeneration.ToString(CultureInfo.InvariantCulture),
@@ -39,7 +40,33 @@ internal static class TargetInboxStorage
         {
             throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt);
         }
+        RequireCapacityWitness(view, target, current);
         return current;
+    }
+
+    private static void RequireCapacityWitness(IKeyValueView view, QueueLaneRef target, TargetInboxCapacity capacity)
+    {
+        var firstBytes = TargetInboxProtocol.EmptyCount;
+        var witness = view.VisitRange(KeySpace.Partition(TargetInboxProtocol.RecordSpace, target.Partition, target.Queue),
+            CapacityWitnessRecords, (key, value) =>
+            {
+                firstBytes = checked((long)key.Length + value.Length);
+                return true;
+            });
+        if ((witness.Records == TargetInboxProtocol.EmptyCount) != (capacity.Count == TargetInboxProtocol.EmptyCount)
+            || capacity.Bytes < firstBytes
+            || witness.HasMore && capacity.Count <= TargetInboxProtocol.MinimumCount)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt);
+        }
+    }
+
+    internal static void RequireSelectedCapacity(TargetInboxCapacity capacity, long bytes)
+    {
+        if (capacity.Count < TargetInboxProtocol.MinimumCount || capacity.Bytes < bytes)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt);
+        }
     }
 
     internal static TargetInboxCapacity Add(TargetInboxCapacity current, long bytes, InboxPolicy policy)

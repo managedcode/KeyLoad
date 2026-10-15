@@ -24,9 +24,12 @@ public sealed partial class DatabaseEngine
         var key = TargetInboxStorage.Key(request);
         var identity = TargetInboxStorage.Identity(request);
         var fingerprint = JsonData.Fingerprint(request.Effects);
-        if (transaction.GetRecord<TargetInboxRecord>(key) is { } existing)
+        var retained = transaction.ReadOwnedValue(key);
+        var currentCapacity = TargetInboxStorage.Capacity(transaction, request.Target, required: retained is not null);
+        if (retained is not null)
         {
-            _ = TargetInboxStorage.Capacity(transaction, request.Target, required: true);
+            var existing = NativeSerialization.Deserialize<TargetInboxRecord>(retained);
+            TargetInboxStorage.RequireSelectedCapacity(currentCapacity, checked(key.LongLength + retained.LongLength));
             if (existing.IdentityFingerprint != identity || existing.Receipt is null || string.IsNullOrEmpty(existing.EffectsFingerprint))
             {
                 throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt);
@@ -42,7 +45,7 @@ public sealed partial class DatabaseEngine
         var receipt = new CommitReceipt(request.CommandId, Token(transaction, request.Target.Partition, position), effects, Durability);
         var record = NativeSerialization.Serialize(new TargetInboxRecord(identity, fingerprint, receipt));
         var bytes = checked(key.LongLength + record.LongLength);
-        var capacity = TargetInboxStorage.Add(TargetInboxStorage.Capacity(transaction, request.Target, required: false),
+        var capacity = TargetInboxStorage.Add(currentCapacity,
             bytes, resource.InboxPolicy!);
         transaction.Put(key, record);
         transaction.PutRecord(TargetInboxStorage.CapacityKey(request.Target), capacity);

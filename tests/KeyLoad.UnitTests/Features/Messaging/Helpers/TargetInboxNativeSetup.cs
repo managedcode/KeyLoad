@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class TargetInboxNativeSetup
 {
-    internal static (QueueLaneRef Source, QueueLaneRef Target, Delivery Delivery, CommitInboxRequest Request) Create(TestDatabase fixture)
+    internal static (QueueLaneRef Source, QueueLaneRef Target, Delivery Delivery, CommitInboxRequest Request) Create(TestDatabase fixture, long receiptCapacity = TargetInboxUnitProtocol.ReceiptCapacity)
     {
         fixture.Configure(TargetInboxUnitProtocol.Input, ResourceKind.WorkQueue);
         fixture.Configure(TargetInboxUnitProtocol.Output, ResourceKind.WorkQueue);
@@ -11,7 +11,7 @@ internal static class TargetInboxNativeSetup
         fixture.Configure(TargetInboxUnitProtocol.Events, ResourceKind.StreamSet);
         var resource = new ResourceDefinition(TargetInboxUnitProtocol.Target, ResourceKind.WorkQueue, fixture.Partition.TransactionDomainId)
         {
-            InboxPolicy = new(TargetInboxUnitProtocol.ReceiptCapacity, TargetInboxUnitProtocol.ByteCapacity)
+            InboxPolicy = new(receiptCapacity, TargetInboxUnitProtocol.ByteCapacity)
         };
         _ = fixture.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, resource)).Get<ResourceDefinition>();

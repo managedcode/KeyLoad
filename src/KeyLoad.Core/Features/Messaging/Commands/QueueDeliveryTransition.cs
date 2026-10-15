@@ -26,6 +26,13 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.ResourceExhausted, QueueDeliveryVersionExhausted);
         }
         var counters = Counters(tx, command.Lane);
+        QueueDeadLetterAdmissionPlan? deadLetter = null;
+        if (command.Action == DeliveryAction.Nack && metadata.Attempts >= resource.QueuePolicy.MaxAttempts)
+        {
+            var released = ReleaseQueueInFlight(counters, lease.BodyBytes);
+            deadLetter = PrepareQueueDeadLetterAdmission(tx, command.Lane, resource.QueuePolicy,
+                metadata, lease.BodyBytes, released);
+        }
         tx.Delete(QueueKey(LeasedQueueSpace, command.Lane, metadata.LeaseUntil!.Value, metadata.Id));
         MessageMetadata updated;
         if (command.Action == DeliveryAction.Renew)
@@ -47,7 +54,7 @@ public sealed partial class DatabaseEngine
         {
             counters = ReleaseQueueInFlight(counters, lease.BodyBytes);
             updated = CompleteDeliveryAction(tx, command.Lane, resource.QueuePolicy, command.Action,
-                metadata, lease.BodyBytes, now, ref counters, operation);
+                metadata, lease.BodyBytes, now, ref counters, operation, deadLetter);
         }
         tx.PutRecord(QueueKey(MessageMetadataSpace, command.Lane, metadata.Id), updated);
         tx.PutRecord(QueueKey(QueueCountersSpace, command.Lane), counters);
@@ -56,7 +63,8 @@ public sealed partial class DatabaseEngine
     }
 
     private MessageMetadata CompleteDeliveryAction(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
-        DeliveryAction action, MessageMetadata metadata, long bodyBytes, DateTimeOffset now, ref QueueCounters counters, ReplicatedOperation? operation)
+        DeliveryAction action, MessageMetadata metadata, long bodyBytes, DateTimeOffset now, ref QueueCounters counters,
+        ReplicatedOperation? operation, QueueDeadLetterAdmissionPlan? deadLetter = null)
     {
         if (action == DeliveryAction.Ack)
         {
@@ -76,7 +84,7 @@ public sealed partial class DatabaseEngine
         }
         if (metadata.Attempts >= policy.MaxAttempts)
         {
-            return AdmitQueueDeadLetter(tx, lane, policy, metadata, bodyBytes, ref counters);
+            return AdmitQueueDeadLetter(tx, lane, policy, metadata, bodyBytes, ref counters, deadLetter);
         }
         var available = policy.RetryJitter == QueueRetryJitter.None
             ? now.AddMilliseconds(QueueRetryCap(policy, metadata.Attempts))

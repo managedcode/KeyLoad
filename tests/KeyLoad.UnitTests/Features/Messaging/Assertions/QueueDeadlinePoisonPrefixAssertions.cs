@@ -41,8 +41,8 @@ internal static class QueueDeadlinePoisonPrefixAssertions
             new MessageInspection(new(QueueDeadlinePoisonPrefixProtocol.ExpiringMessage, MessageState.Expired, QueueDeadlinePoisonPrefixProtocol.Initial, QueueDeadlinePoisonPrefixProtocol.Second, QueueDeadlinePoisonPrefixProtocol.Second, null, due), null, null));
         var scheduled = new EnqueueMessage(lane.Queue, QueueDeadlinePoisonPrefixProtocol.ScheduledMessage, QueueDeadlinePoisonPrefixProtocol.Json, QueueDeadlinePoisonPrefixProtocol.Json, NotBefore: due);
         var originalLease = new EnqueueMessage(lane.Queue, QueueDeadlinePoisonPrefixProtocol.LeasedMessage, QueueDeadlinePoisonPrefixProtocol.Json, QueueDeadlinePoisonPrefixProtocol.Json);
-        var scheduledBody = new MessageBody(scheduled.MessageId, QueueDeadlinePoisonPrefixProtocol.Json, QueueDeadlinePoisonPrefixProtocol.Json, null, JsonData.Fingerprint(scheduled));
-        var leasedBody = new MessageBody(originalLease.MessageId, QueueDeadlinePoisonPrefixProtocol.Json, QueueDeadlinePoisonPrefixProtocol.Json, null, JsonData.Fingerprint(originalLease));
+        var scheduledBody = new MessageBody(scheduled.MessageId, QueueDeadlinePoisonPrefixProtocol.Json, new string(QueueDeadlinePoisonPrefixProtocol.Json.AsSpan()), null, JsonData.Fingerprint(scheduled));
+        var leasedBody = new MessageBody(originalLease.MessageId, QueueDeadlinePoisonPrefixProtocol.Json, new string(QueueDeadlinePoisonPrefixProtocol.Json.AsSpan()), null, JsonData.Fingerprint(originalLease));
         await Assert.That(database.Store.Read(view => view.GetRecord<MessageBody>(
             KeySpace.Partition(QueueDeadlinePoisonPrefixProtocol.Body, lane.Partition, lane.Queue, scheduled.MessageId)))).IsEqualTo(scheduledBody);
         await Assert.That(database.Store.Read(view => view.GetRecord<MessageBody>(

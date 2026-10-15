@@ -31,11 +31,11 @@ internal static class ModelEventQueryRows
         }
         var headKey = KeySpace.Partition(HeadSpace, partition, resource.Name, source.Item);
         var head = budget.ReadRecord<StreamHead>(view, headKey) ?? new StreamHead(TailRevisionEmptyCount, FirstAvailableRevisionSingleItemCount, GenerationSingleItemCount);
+        ValidateHead(head);
         if (head.Generation != source.Generation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, StaleGeneration);
         }
-        ValidateHead(head);
         if (explain || head.TailRevision == EmptyTailRevision)
         {
             return;
@@ -46,11 +46,13 @@ internal static class ModelEventQueryRows
 
     private static void ValidateHead(StreamHead head)
     {
+        const int GenerationValidationBoundary = 1;
         const int TailRevisionValidationBoundary = 0;
         const int FirstAvailableRevisionValidationBoundary = 1;
         const int TailRevisionStep = 1;
 
-        if (head.TailRevision < TailRevisionValidationBoundary || head.FirstAvailableRevision < FirstAvailableRevisionValidationBoundary
+        if (head.Generation < GenerationValidationBoundary || head.TailRevision < TailRevisionValidationBoundary
+            || head.FirstAvailableRevision < FirstAvailableRevisionValidationBoundary
             || head.TailRevision < long.MaxValue && head.FirstAvailableRevision > head.TailRevision + TailRevisionStep)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventCorrupt);

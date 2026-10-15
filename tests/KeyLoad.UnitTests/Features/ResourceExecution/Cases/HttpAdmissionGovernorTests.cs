@@ -45,6 +45,7 @@ internal sealed class HttpAdmissionGovernorTests
         var query = Begin(governor, "/V1/QUERY/AST/");
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(20_480);
         var paths = new[] { "/v1/search", "/v1/graph/traverse", "/v1/changes/read",
+            "/v1/search/graph", AnnSearchProtocol.Route, "/v1/graph/shortest-path", "/v1/graph/incoming",
             SampleChunkProtocol.ReadRoute, SampleRollupProtocol.ReadRoute,
             "/V1/SERIES/CHUNKS/WINDOW/", "/V1/SERIES/ROLLUPS/READ/" };
         foreach (var path in paths)

@@ -9,6 +9,13 @@ internal static class ClusterFixtureApplicationStartup
     internal static ClusterFixtureColdStartObservation ObserveColdStart(string root)
         => new(root, Directory.Exists(root), File.Exists(root));
 
+    internal static Task StartOwnedAsync(DistributedApplication application, string repository,
+        IReadOnlyDictionary<string, string> containerNames, NativeCoverageRf3FixtureOwner? coverage,
+        LocalRf3ImageSelection.Selection? selection, ReplicaIsolationOwner? isolationOwner, CancellationToken token)
+        => isolationOwner is null
+            ? StartAsync(application, repository, containerNames, coverage, selection, token)
+            : isolationOwner.StartAsync(application, token);
+
     internal static async Task StartAsync(DistributedApplication application, string repository,
         IReadOnlyDictionary<string, string> containerNames, NativeCoverageRf3FixtureOwner? coverage,
         LocalRf3ImageSelection.Selection? selection, CancellationToken token)

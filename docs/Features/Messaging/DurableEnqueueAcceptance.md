@@ -48,3 +48,13 @@ cases, with original exact-source Linux artifacts. Coverage, endurance, power-lo
 performance and production readiness remain separate gates. Root coordinates the
 shared source and runner windows and updates the master status and evidence only
 from authentic results.
+
+```mermaid
+flowchart LR
+    Producer[Original atomic producer batch] --> Validate[Validate quota and sequence authority]
+    Validate --> Commit[Commit body metadata index and counters]
+    Commit --> Replay[Original command replay]
+    Commit --> Recover[Seven actual process recovery boundaries]
+    Replay --> Cold[Full value and canonical image checks]
+    Recover --> Cold
+```

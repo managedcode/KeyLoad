@@ -19,52 +19,9 @@ public sealed partial class DatabaseEngine
     }
 
     private static MessageMetadata AdmitQueueDeadLetter(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
-        MessageMetadata metadata, long bodyBytes, ref QueueCounters counters)
+        MessageMetadata metadata, long bodyBytes, ref QueueCounters counters, QueueDeadLetterAdmissionPlan? prepared = null)
     {
-        var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, metadata.Id))
-            ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
-        if (metadata.State == MessageState.PendingDeadLetter && policy.OrderingProfile == QueueOrderingProfile.StrictPerKey
-            && policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue
-            && (metadata.EnqueueSequence <= QueueOrderProtocol.Initial || metadata.ActiveOrderSequence != QueueOrderProtocol.Initial))
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
-        }
-        var ordered = metadata.State == MessageState.PendingDeadLetter
-            && policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue
-            ? metadata : ParkQueueOrder(tx, lane, policy, body.Body, metadata);
-        var updated = ordered with
-        {
-            StateVersion = checked(metadata.StateVersion + QueueLifecycleProtocol.Increment),
-            LeaseOwner = null,
-            LeaseUntil = null,
-            NotBefore = null,
-            SafeFailureCode = AttemptsExhausted
-        };
-        if (!FitsQueueDeadLetter(policy, counters, bodyBytes))
-        {
-            tx.PutRecord(QueueKey(QueueLifecycleProtocol.PendingSpace, lane, metadata.Id),
-                new QueuePendingDeadLetterReference(metadata.Id, metadata.DeliveryGeneration, AttemptsExhausted));
-            return updated with
-            {
-                State = MessageState.PendingDeadLetter,
-                ParkedSequence = QueueLifecycleProtocol.Initial
-            };
-        }
-        var sequence = checked(counters.NextParkedSequence + QueueLifecycleProtocol.Increment);
-        var admitted = counters with
-        {
-            DeadLetterMessages = checked(counters.DeadLetterMessages + QueueLifecycleProtocol.Increment),
-            DeadLetterBytes = checked(counters.DeadLetterBytes + bodyBytes),
-            NextParkedSequence = sequence
-        };
-        tx.PutRecord(QueueKey(DeadLetterQueueSpace, lane, metadata.Id), metadata.Id);
-        tx.PutRecord(QueueKey(QueueLifecycleProtocol.ParkedSpace, lane, sequence, metadata.Id),
-            new QueueDeadLetterReference(metadata.Id, sequence, metadata.DeliveryGeneration, AttemptsExhausted));
-        counters = admitted;
-        return updated with
-        {
-            State = MessageState.DeadLettered,
-            ParkedSequence = sequence
-        };
+        var admission = prepared ?? PrepareQueueDeadLetterAdmission(tx, lane, policy, metadata, bodyBytes, counters);
+        return ApplyQueueDeadLetterAdmission(tx, lane, admission, ref counters);
     }
 }

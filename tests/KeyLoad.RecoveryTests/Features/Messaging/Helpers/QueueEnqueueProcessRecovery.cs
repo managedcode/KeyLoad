@@ -15,7 +15,7 @@ internal static class QueueEnqueueProcessRecovery
         var baseline = NativeSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.BaselineFile), token));
         var command = JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson);
         var due = command.Mutations.OfType<EnqueueMessage>().Single(message => message.MessageId == QueueEnqueueCrashProtocol.Scheduled).NotBefore;
-        await QueueClaimAckRecoveryAssertions.EqualAsync(command, new CommandRequest(QueueEnqueueCrashProtocol.OperationId,
+        await QueueEnqueueProcessValueAssertions.EqualAsync(command, new CommandRequest(QueueEnqueueCrashProtocol.OperationId,
             QueueEnqueueCrashProtocol.Partition,
             [new PutDocument(QueueEnqueueCrashProtocol.Collection, QueueEnqueueCrashProtocol.Ready, QueueEnqueueCrashProtocol.Payload),
                 new EnqueueMessage(QueueEnqueueCrashProtocol.Queue, QueueEnqueueCrashProtocol.Ready, QueueEnqueueCrashProtocol.Payload, QueueEnqueueCrashProtocol.Headers),
@@ -66,7 +66,7 @@ internal static class QueueEnqueueProcessRecovery
         store.Dispose();
         using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var owner = QueueLifecycleRecoveryAssertions.Open(cold);
-        await QueueClaimAckRecoveryAssertions.EqualAsync(cold.Identity, identity);
+        await QueueEnqueueProcessValueAssertions.IdentityAsync(cold.Identity, identity);
         await Assert.That(cold.Position).IsEqualTo(position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await QueueEnqueueProcessAssertions.InitialAsync(owner, cold, command);

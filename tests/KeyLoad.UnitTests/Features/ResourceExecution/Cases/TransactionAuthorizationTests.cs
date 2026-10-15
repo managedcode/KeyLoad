@@ -8,7 +8,8 @@ internal sealed class TransactionAuthorizationTests
         using var db = new TestDatabase();
         var definition = new ResourceDefinition("invalid", ResourceKind.Collection, db.Partition.TransactionDomainId);
         foreach (var invalid in new[] { definition with { Indexes = [null!] }, definition with { FieldPolicies = [null!] },
-            definition with { HeaderPolicies = [null!] }, definition with { Indexes = [new("field", [null!])] }, definition with { Kind = (ResourceKind)99 } })
+            definition with { HeaderPolicies = [null!] }, definition with { FieldPolicies = [new(null!, definition.Name)] },
+            definition with { HeaderPolicies = [new(null!, definition.Name)] }, definition with { Indexes = [new("field", [null!])] }, definition with { Kind = (ResourceKind)99 } })
         {
             await Assert.That(db.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest("tenant", "database", invalid)).Error).IsEqualTo(ErrorCode.Validation);
         }

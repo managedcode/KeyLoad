@@ -71,7 +71,7 @@ internal static class RequestCqrsMovementJournalInventory
             }
             return;
         }
-        if (value.MoveId == Guid.Empty || !IsObservedControlStage(value.Stage)
+        if (value.MoveId == Guid.Empty || !(IsObservedControlStage(value.Stage) || value.Stage == PartitionMovePeerStage.Retire)
             || value.Journal is not { } journal || journal.CommandId != value.CommandId
             || journal.AppliedPosition <= UnappliedJournalPosition || !Digest(journal.ControlIntentDigest)
             || journal.EffectDigest is { } effect && !Digest(effect)

@@ -1,0 +1,64 @@
+namespace KeyLoad.UnitTests.Features.Messaging;
+
+internal enum QueueDeadlineCapacityFault
+{
+    StateVersion,
+    ReadySequence,
+    ParkedSequence,
+    FullDeadLetterMaxPark,
+    ExpiryBeforeDeadLetterMaxPark
+}
+
+internal static class QueueDeadlineCapacityProtocol
+{
+    internal const string Queue = "deadline-capacity-queue";
+    internal const string Message = "original";
+    internal const string HealthyMessage = "healthy";
+    internal const string Json = "{}";
+    internal const string Root = "root";
+    internal const string RetryFailureCode = "RetryRequested";
+    internal const string MissingFaultRow = "The original capacity row is absent.";
+    internal const string ByteSeparator = ":";
+    internal const string StaleClaimDetail = "The delivery lease is stale.";
+    internal const string AttemptsExhausted = "AttemptsExhausted";
+    internal const int InsufficientDeadLetterBytes = 1;
+    internal const string CapacityDetail = "The queue lifecycle version or sequence is exhausted.";
+    internal const string Metadata = "message-meta";
+    internal const string Body = "message-body";
+    internal const string Counters = "queue-counters";
+    internal const string Ready = "ready";
+    internal const string Scheduled = "scheduled";
+    internal const string Lease = "lease";
+    internal const string Pending = "queue-pending-dead-letter";
+    internal const string Parked = "queue-dead-letter-order";
+    internal const string DeadLetter = "dead-letter";
+    internal const string Order = "queue-order";
+    internal const string Inbox = "inbox";
+    internal const string AdvanceReceipt = "advanceQueueDeadline";
+    internal const string EnqueueReceipt = "enqueue";
+    internal const string AckReceipt = "Ack";
+    internal const int UnexhaustedAttemptLimit = 5;
+    internal const int NoUsage = 0;
+    internal const int InitialStateVersion = 1;
+    internal const int InitialReadySequence = 1;
+    internal const int NoReadySequence = 0;
+    internal const int InitialLeaseVersion = 1;
+    internal const int FirstAttempt = 1;
+    internal const int NoAttempts = 0;
+    internal const int SingleMessageCount = 1;
+    internal const int SingleReceiveMessage = 1;
+    internal const int AttemptsBeforeDeadLetter = 1;
+    internal const int FirstParkedSequence = 1;
+    internal const int NoParkedSequence = 0;
+    internal const int NoOrderSequence = 0;
+    internal const int InitialClaimedStateVersion = 2;
+    internal const int StateVersionStep = 1;
+    internal const int LeaseVersionStep = 1;
+    internal const int AttemptStep = 1;
+    internal const int ReadySequenceStep = 1;
+    internal const int CommitPositionStep = 1;
+    internal const int MinimumJitterMilliseconds = 1;
+    internal const int LeaseSeconds = 30;
+    internal const int RetryCapMilliseconds = 1000;
+    internal const int ImageBound = 4096;
+}

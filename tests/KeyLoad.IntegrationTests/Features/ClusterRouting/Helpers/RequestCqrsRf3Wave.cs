@@ -106,6 +106,9 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         McpTransportMethodCategory methodCategory, CancellationToken cancellationToken)
         => diagnostics.WaitForRecordAsync(node, stage, methodCategory, cancellationToken);
 
+    internal Task RestartOriginalQueryOwnersAsync(string scenario, CancellationToken cancellationToken)
+        => ConnectionQueryContextColdOwners.RunAsync(runtime, scenario, cancellationToken);
+
     internal Task RestartAsync(string node, CancellationToken cancellationToken)
         => runtime.RestartAsync(node, cancellationToken);
 

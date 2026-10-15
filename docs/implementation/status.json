@@ -1,4 +1,90 @@
 {
+  "STAGE69-WHOLE-TASK-BATCH-001": {
+    "title": "Whole-task parallel implementation batch after observed TUnit50 run",
+    "status": "in_progress",
+    "originalAcceptedTasks": 20,
+    "originalTasks": 104,
+    "additionalPerformanceTask": "KL-105 open",
+    "fullTaskPromotion": false,
+    "mainWholePackets": [
+      "KL-052",
+      "KL-053",
+      "KL-054",
+      "KL-057",
+      "KL-060",
+      "KL-061",
+      "KL-079",
+      "KL-095",
+      "KL-096"
+    ],
+    "mainAdoptedPaths": 169,
+    "mainAdoptionReceipts": [
+      "TestResults/stage61-native-join/root-r69-six-whole-task-113-path-actual-adoption.original.json",
+      "TestResults/stage61-native-join/root-r69-whole-kl096-21-path-actual-adoption.original.json",
+      "TestResults/stage61-native-join/root-r69-whole-kl095-kl057-35-path-actual-adoption.original.json"
+    ],
+    "companion1AdoptedPaths": 51,
+    "companion1Receipt": "TestResults/stage61-native-join/r79-root-seven-whole-packets-51-path-standard-sourceY.original.json",
+    "companion1ReceiptSha256": "8674ea86097d2fbedc2368e04637fd0abd07a4a8c3062013881af4f59da09b52",
+    "companion1Scopes": [
+      "KL-070 bounded hysteresis",
+      "KL-069 full migrated scope chain",
+      "KL-071 dedicated actor, ownership-aware resume and actual retire capture"
+    ],
+    "companion2Integration": {
+      "paths": 176,
+      "manifest": "TestResults/stage61-native-join/root-r68-reviewed-complete-union.sourceN.json",
+      "manifestSha256": "f1255fcb443c1dcffc0c8865d5907c148eaec82a86f2ccdf2820c47b9d0f59aa",
+      "receipt": "TestResults/stage61-native-join/root-r68-reviewed-complete-union.sourceY.receipt.original.json",
+      "scope": [
+        "KL-088/092 complete joined lifecycle preflight",
+        "KL-090 full local processing/inbox and recovery",
+        "KL-093 worker host and crash endpoint",
+        "Materializer cleanup and original R68 value/image oracle corrections"
+      ],
+      "allActualPostHashesVerified": true,
+      "recordedFollowerRootCause": "Still open; original fault capture only, no repair claim."
+    },
+    "rootRepairs": [
+      "Allow valid empty JSON policy root while retaining null and malformed index refusal; original four full model operations and invalid-catalog healthy continuation retained.",
+      "Wrap every initial/revoke/repair principal operation in actual ConfigurePrincipalRequest in original explicit sample minimum flow."
+    ],
+    "lastFreshRuntimeSource": "8bc5fea5fd55d943b87dc3095654a0fba8af2ed0",
+    "lastFreshRuntimeSummary": "97 changed Unit:79passed18failed,15Recovery:7passed8failed; zero skipped, allsource/images unchanged. Observed TRX interval peak50Unit and15Recovery.",
+    "earlierFailuresRetained": "Original five unchanged movement/typed-INSERT and original RecoveryHostLifetime failures were not rerun and remain open.",
+    "qualification": "Source review and fresh selected cases do not qualify full tasks; final whole solution, canonical formatting, Unit/recovery/Aspire RF3 and exact-source Linux acceptance remain open.",
+    "linuxQualified": false,
+    "productionQualified": false,
+    "canonicalFormatter": {
+      "nativeExitCode": 0,
+      "elapsedSeconds": 294.30726537504233,
+      "sourceChanges": 105,
+      "compiledChanges": 0,
+      "nativeLexicalReview": "TestResults/stage61-native-join/root-r70-formatter-native-token-review.original.json",
+      "nativeLexicalReviewSha256": "6124c62de717d3acd3e9fd6f650f59d29b0cb84fde6f1af164ab1b4cebde4a4f",
+      "nonImportTokensIdentical": 90,
+      "bodyDeltaFiles": [
+        "src/KeyLoad.Client/Features/Messaging/Execution/QueueWorkerFailureLedger.cs",
+        "src/KeyLoad.Core/Features/Messaging/Storage/TargetInboxStorage.cs",
+        "tests/KeyLoad.IntegrationTests/Features/ChangeFeeds/Assertions/DocumentLiveProfileRf3Values.cs",
+        "tests/KeyLoad.IntegrationTests/Features/ChangeFeeds/Helpers/DocumentLiveProfileRf3Pages.cs",
+        "tests/KeyLoad.IntegrationTests/Features/ChangeFeeds/Models/DocumentLiveProfileRf3State.cs",
+        "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/PhysicalShardAuthorityBoundaryRf3Actor.cs",
+        "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Assertions/MaterializerCombinedFailureSecondCold.cs",
+        "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Fixtures/MaterializerCombinedFailureFixture.cs",
+        "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Fixtures/PeerDiscoveryNativeNode.cs",
+        "tests/KeyLoad.RecoveryTests/Features/Messaging/Helpers/LocalInboxProcessingProcessRecovery.cs",
+        "tests/KeyLoad.UnitTests/Features/Authorization/Fixtures/RequiredProcessingPolicyFixture.cs",
+        "tests/KeyLoad.UnitTests/Features/Authorization/Helpers/RequiredProcessingPolicyFlow.cs",
+        "tests/KeyLoad.UnitTests/Features/Authorization/Helpers/RequiredProcessingPolicyProcessing.cs",
+        "tests/KeyLoad.UnitTests/Features/Messaging/Helpers/QueueDeadlineCapacityFlow.cs",
+        "tests/KeyLoad.UnitTests/Features/Messaging/Helpers/TargetInboxCapacityAuthorityContinuationFlow.cs"
+      ],
+      "review": "All15bodydeltas inspected against hashverifiedpreimages: pure methods made static with all currentcallers changed, exact-inferred types/field-to-property ownership preserving samevalues, using-declaration at terminal method scope, and originaltokenforwarding. Directory identity/lifecycle/fullvalue oracles retained; no constructor/member generation applied for unresolved CS1503.",
+      "compilerAndRuntimeQualified": false
+    },
+    "compilerPreflight": "Formatter reports unresolved semantic/style diagnostics without source locations; required fresh whole solution compiler pending, no inferred error count."
+  },
   "STAGE65-PARALLEL-QUALIFICATION-001": {
     "title": "Parallel whole-task implementation and fresh assembly qualification",
     "status": "in_progress",
@@ -82,6 +168,87 @@
       "stdoutSha256": "0ce52d446f8c4130da32bc316e32e32445f2121f5360073d37f9805aa8ef776a",
       "sourceCorrection": "Applied target-typed new; next fresh compiler gate pending.",
       "protectedSourceDrift": 0
+    },
+    "currentCommittedCheckpoint": "8bc5fea5",
+    "testAssemblies20261015": {
+      "unit": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 218.68887712503783,
+        "stdoutSha256": "ac40878f07a75910ecd2e7caa43ec9ed858e31a81690e6bfc67c60d99b9d9ee4",
+        "sourceDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "scope": "Single test assembly and existing product references, not the required final whole-solution build."
+      },
+      "recovery": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 22.410661458969116,
+        "stdoutSha256": "780a559c7df19559056893ce9f92cba3862768fbf3bac621b363bc3899c0c915",
+        "sourceDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "scope": "Single test assembly and existing product references, not the required final whole-solution build."
+      },
+      "integration": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 176.4677177919075,
+        "stdoutSha256": "f89ef55c9107709df0e1e337819f7ca8597bd27462b5bb5fee10fb20cb6b0038",
+        "sourceDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "scope": "Single test assembly and existing product references, not the required final whole-solution build."
+      }
+    },
+    "latestWholeOperations": {
+      "unit": {
+        "nativeExitCode": 2,
+        "counts": {
+          "Passed": 79,
+          "Failed": 18
+        },
+        "elapsedSeconds": 21.723909500055015,
+        "configuredParallelTests": 50,
+        "observedTrxOperationOverlapPeak": 50,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "trxPath": "TestResults/stage61-native-join/root-r68-unit-changed-whole-operations-native/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "trxSha256": "a24185f44236904067c7aa17690e17ec53c8a5890454a4f06eea3c0fb003a2cf"
+      },
+      "recovery": {
+        "nativeExitCode": 2,
+        "counts": {
+          "Failed": 8,
+          "Passed": 7
+        },
+        "elapsedSeconds": 15.920617999974638,
+        "configuredParallelTests": 50,
+        "observedTrxOperationOverlapPeak": 15,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "trxPath": "TestResults/stage61-native-join/root-r68-recovery-changed-whole-operations-native/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+        "trxSha256": "13e03c1597c2e756c3132e34b2792eadbf79ed8e4f430e1b06c382b9bcefd6c3"
+      }
+    },
+    "latestSelectedFunctionalCoverage": {
+      "attributes": {
+        "line-rate": "0.10596032646080053",
+        "branch-rate": "0.08428349503180232",
+        "complexity": "70925",
+        "version": "1.9",
+        "timestamp": "1792025513",
+        "lines-covered": "11399",
+        "lines-valid": "107578",
+        "branches-covered": "5751",
+        "branches-valid": "68234"
+      },
+      "sha256": "ea0a8549c314d8c39236b87a536f84f0c6edcd068161a37e90cd87a9d31f1ea0",
+      "source": "TestResults/stage61-native-join/root-r68-unit-changed-whole-operations-native/functional.cobertura.xml",
+      "qualification": "97 changed whole-operation cases include18failures. This narrower selection is not comparable to prior429-case coverage and is not complete product coverage. No load or benchmark credit."
+    },
+    "latestFailureLedger": "TestResults/stage61-native-join/root-r68-actual-whole-operation-result-ledger.original.json",
+    "followupRootRepairs": {
+      "rootPointerCatalog": "Valid empty pointer accepted, null still refused; pending fresh full operation execution.",
+      "explicitSampleMinimum": "All three principal operations now use native ConfigurePrincipalRequest; pending original operation rerun."
     }
   },
   "STAGE64-PUBLIC-MODELS-001": {

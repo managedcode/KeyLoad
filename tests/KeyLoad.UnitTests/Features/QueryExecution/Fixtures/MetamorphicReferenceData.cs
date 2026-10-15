@@ -1,0 +1,72 @@
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Text.Json.Nodes;
+
+namespace KeyLoad.UnitTests.Features.QueryExecution;
+
+internal sealed record MetamorphicReferenceRow(string Id, string Status, decimal? Score, bool Missing, int Bucket, string Tag, string Json);
+
+internal static class MetamorphicReferenceData
+{
+    internal const string Collection = "metamorphic_rows";
+    internal const string Index = "by-status";
+    internal const string Reader = "metamorphic-reader";
+    internal const string Secret = "metamorphic-reader.persisted-credential-32-characters";
+    internal const string Wanted = "відкрито";
+    internal const string Tag = "é";
+    internal const decimal Minimum = 1m;
+    internal const int Count = 48;
+    internal const int PageSize = 3;
+    internal const string ReadGrant = "status.read";
+    internal const string UseGrant = "status.use";
+    internal static ImmutableArray<MetamorphicReferenceRow> Rows(int seed)
+    {
+        var result = ImmutableArray.CreateBuilder<MetamorphicReferenceRow>();
+        string[] tags = [Tag, "e\u0301", "🚀", "λ"];
+        for (var index = 0; index < Count; index++)
+        {
+            var value = (index * 17 + seed) % Count;
+            var id = "m" + index.ToString("D2", CultureInfo.InvariantCulture);
+            var status = value % 3 == 0 ? "закрито" : Wanted;
+            var missing = value % 5 == 0;
+            var score = Score(value);
+            var body = new JsonObject
+            {
+                ["status"] = status,
+                ["bucket"] = value % 4,
+                ["tag"] = tags[value % 4],
+                ["title"] = "PRIVATE-54 O'Brien /~ " + id
+            };
+            if (!missing)
+            {
+                body["score"] = score is null ? null : JsonValue.Create(score.Value);
+            }
+            result.Add(new(id, status, score, missing, value % 4, tags[value % 4], body.ToJsonString()));
+        }
+        return result.ToImmutable();
+    }
+    private static decimal? Score(int value) => value switch
+    {
+        var candidate when candidate % 5 is 0 or 1 => null,
+        47 => decimal.MaxValue,
+        42 => decimal.MinValue,
+        _ => value % 7 - 3
+    };
+    internal static ImmutableArray<MetamorphicReferenceRow> Reference(ImmutableArray<MetamorphicReferenceRow> rows, bool descending, int offset)
+    {
+        var matches = rows.Where(row => string.Equals(row.Status, Wanted, StringComparison.Ordinal)
+            && (row.Score is { } score && score >= Minimum || string.Equals(row.Tag, Tag, StringComparison.Ordinal)));
+        var ordered = descending ? matches.OrderByDescending(row => row.Bucket) : matches.OrderBy(row => row.Bucket);
+        return [.. ordered.ThenBy(row => row.Id, StringComparer.Ordinal).Skip(offset)];
+    }
+    internal static QueryRow Expected(MetamorphicReferenceRow row)
+    {
+        var body = new JsonObject { ["status"] = row.Status, ["bucket"] = row.Bucket, ["tag"] = row.Tag };
+        if (!row.Missing)
+        {
+            body["score"] = row.Score is null ? null : JsonValue.Create(row.Score.Value);
+        }
+        return new(row.Id, 1L, body.ToJsonString(), true, ["/title"]);
+    }
+    internal static string Path(int shape) => shape is 0 or 2 ? "index:" + Index : "bounded-full-scan";
+}

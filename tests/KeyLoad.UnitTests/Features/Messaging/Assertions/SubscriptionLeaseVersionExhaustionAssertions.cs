@@ -21,6 +21,7 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
         await Assert.That(result.Json).IsNull();
         await Assert.That(result.NativeValue).IsNull();
         await Assert.That(store.Position).IsEqualTo(position + NextPosition);
+        await RequireLocatorAsync(store, request);
         await Assert.That(Domain(store, request)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(due);
         await Assert.That(OutcomeStoreOracle.ReadPartition(store, request.Subscription.Source.Partition, Subject, request.RequestId))
@@ -43,8 +44,20 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
     private static string[] Domain(ZoneTreeStore store, ReceiveSubscriptionRequest request)
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(request.Subscription.Source.Partition, Subject, request.RequestId));
+        var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(request.Subscription.Source.Partition, Subject, request.RequestId));
         var clock = Convert.ToHexString(KeySpace.ClockBytes);
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + ":", StringComparison.Ordinal)
+            && !row.StartsWith(locator + ":", StringComparison.Ordinal)
             && !row.StartsWith(clock + ":", StringComparison.Ordinal)).ToArray();
+    }
+
+    private static async Task RequireLocatorAsync(ZoneTreeStore store, ReceiveSubscriptionRequest request)
+    {
+        var partition = request.Subscription.Source.Partition;
+        var key = KeySpace.OutcomeLocatorV2(partition, Subject, request.RequestId);
+        var expected = KeySpace.PartitionOutcome(partition, Subject, request.RequestId);
+        var actual = store.Read(view => view.ReadOwnedValue(key));
+        await Assert.That(actual).IsNotNull();
+        await Assert.That(actual!.AsSpan().SequenceEqual(expected)).IsTrue();
     }
 }

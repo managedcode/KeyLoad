@@ -28,7 +28,7 @@ internal sealed class PhysicalShardCleanupRestartRf3Producer
         var retained = producer.proof ?? throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
         await PhysicalShardCleanupRestartRf3Assertions.ColdAsync(wave, seeds, retained,
             wave.QueryControls.ArmFor(arm).GateVoter!);
-        await PhysicalShardPartitionMovementRf3FaultOwner.ResumeAsync(wave, seeds, requests, token);
+        await PhysicalShardNonRetiredPlanRf3Resume.RunAsync(wave, seeds, requests, token);
         await wave.QueryControls.RetireArmAsync(arm, token);
     }
 
