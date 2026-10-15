@@ -135,6 +135,7 @@ internal static class ClusterResources
             resource.WithBindMount(coverageDirectory!, NativeCoverageRf3Protocol.CoverageOutputDirectory);
             coverageImage.Apply(resource, name);
         }
+        ClusterTelemetryResources.Apply(resource);
         KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
         ClusterResourceSettings.Apply(builder, resource, containerUser);
         probes?.Apply(resource, name);

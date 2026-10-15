@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
@@ -15,8 +16,8 @@ internal sealed class ContainerRuntimeControl(
     IReadOnlyDictionary<string, string> containerNames,
     string repositoryRoot, LocalRf3ImageSelection.Selection? localImageSelection = null)
 {
-    private readonly Dictionary<string, ContainerRestartOwnership> restartOwners = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, ContainerRuntimeKillReceipt> pendingReceipts = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, ContainerRestartOwnership> restartOwners = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, ContainerRuntimeKillReceipt> pendingReceipts = new(StringComparer.Ordinal);
     private readonly ClusterFailureReceipts restartFailureReceipts = new(ClusterFailureReceiptKind.Restart);
     private const string RestartDiagnosticsFailureKey = "KeyLoad.Rf3RestartDiagnosticsFailure";
 
@@ -45,12 +46,16 @@ internal sealed class ContainerRuntimeControl(
         ContainerRuntimeDocker.EnsureSuccessful(kill, ContainerRuntimeProtocol.KillOperation, resourceName);
         var killCompletedAtUtc = TimeProvider.System.GetUtcNow();
         var stopped = await ContainerRuntimeDocker.WaitForExitedAsync(containerName, resourceName, cancellationToken);
-        pendingReceipts[resourceName] = new(scenario, resourceName, containerName, before, stopped,
+        var receipt = new ContainerRuntimeKillReceipt(scenario, resourceName, containerName, before, stopped,
             kill.ExitCode, kill.StandardOutput, kill.StandardError)
         {
             KillStartedAtUtc = killStartedAtUtc,
             KillCompletedAtUtc = killCompletedAtUtc
         };
+        if (!pendingReceipts.TryAdd(resourceName, receipt))
+        {
+            throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure);
+        }
     }
 
     /// <summary>Starts through Aspire, awaits healthy/running state and records a changed runtime start timestamp.</summary>
@@ -69,8 +74,8 @@ internal sealed class ContainerRuntimeControl(
         try
         {
             await RestartAndRecordAsync(receipt, capture, progress, cancellationToken);
-            pendingReceipts.Remove(resourceName);
-            restartOwners.Remove(resourceName);
+            pendingReceipts.TryRemove(resourceName, out _);
+            restartOwners.TryRemove(resourceName, out _);
         }
         catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {
@@ -143,14 +148,7 @@ internal sealed class ContainerRuntimeControl(
     }
 
     private ContainerRestartOwnership RequireRestartOwner(string resourceName)
-    {
-        if (!restartOwners.TryGetValue(resourceName, out var owner))
-        {
-            owner = new ContainerRestartOwnership();
-            restartOwners.Add(resourceName, owner);
-        }
-        return owner;
-    }
+        => restartOwners.GetOrAdd(resourceName, static _ => new ContainerRestartOwnership());
 
     private static async Task SaveRestartFailureAsync(ContainerRestartFailureCapture capture,
         ContainerRestartStage stage, Exception failure)
@@ -166,7 +164,10 @@ internal sealed class ContainerRuntimeControl(
     }
 
     internal IReadOnlyDictionary<string, ContainerRuntimeKillReceipt> RequireKilledOwners(DistributedApplication originalOwner)
-        => ContainerRuntimeKilledOwnerValidation.Require(app, originalOwner, containerNames, pendingReceipts);
+    {
+        var original = pendingReceipts.ToArray().ToDictionary(static pair => pair.Key, static pair => pair.Value, StringComparer.Ordinal);
+        return ContainerRuntimeKilledOwnerValidation.Require(app, originalOwner, containerNames, original);
+    }
 
     private string GetContainerName(string resourceName) => containerNames.TryGetValue(resourceName, out var name)
         ? name

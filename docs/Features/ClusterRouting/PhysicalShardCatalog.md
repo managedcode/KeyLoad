@@ -220,3 +220,8 @@ Mapping: PhysicalShardCatalogPolicyOutcomeTests.AcScat001DeniedBootstrapKeepsOri
 ## Capacity-derived placement intents
 
 See [CapacityAwarePlacement](CapacityAwarePlacement.md) and ADR-129 for the bounded capacity-derived whole-partition plan and Control RF3 intent CAS. Existing native physical catalog ownership, placement epochs and original Move receipts remain authoritative. Fresh complete tenant partition roster is validated at persistence and apply; no new physical-handle migration or global atomic batch is promised. Original policy/intent bytes and exact same-GUID outcomes survive real cold opens. Source-only proposals do not qualify Linux/RF3 acceptance or future tenant-exclusive enrollment.
+
+
+### Bounded same-command bootstrap settlement amendment, 2026-10-15
+
+[CatalogBootstrapSettlement](CatalogBootstrapSettlement.md) completes the already declared bounded same-ID uncertain retry after actual R151 cold-start failures. Initial persisted authentication and the native prerequisite remain one original attempt. Only the exact native InterruptedWrite unknown outcome or NoLeader ownership result from bootstrap/final quorum verification repeats the same original command and unchanged body, using the existing heartbeat interval within the same linked startup lifetime. All other failures remain terminal and readiness stays closed. This narrowly refines the earlier one-shot post-prerequisite startup wording; it does not retry authentication or weaken a quorum, identity, permission, corruption or cancellation check. Root owns this source change and original full-flow verification; source preparation closes no acceptance gate.

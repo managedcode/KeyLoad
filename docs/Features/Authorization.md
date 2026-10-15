@@ -1,5 +1,9 @@
 # Authorization
 
+[FoundationOtlp](Authorization/FoundationOtlp.md) defines native Aspire OTLP
+configuration and early initialization of the existing app-owned telemetry
+providers. Model/source proof remains distinct from actual RF3 export/privacy.
+
 Database-persisted API-key verifiers, principals, grants and policy epochs determine
 every public operation. HTTP/MCP callers cannot supply trusted roles. Existing
 authorization and field/row projection remain subject to ADR-032's layout debt;

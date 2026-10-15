@@ -1,4 +1,67 @@
 {
+  "STAGE86-FOUNDATION-EXECUTION-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "originalTasks": 104,
+    "additionalRequiredTask": "KL-105 open",
+    "totalRequiredTasks": 105,
+    "fullTaskPromotion": false,
+    "record": "docs/implementation/qualification-stage86-foundation.md",
+    "foundationPlan": "docs/implementation/foundation-dependencies.json",
+    "parentCommit": "924e782f1142bdb0487b108cc67ef4e89dab3b1e",
+    "verification": {
+      "fullSolutionRelease": {
+        "exitCode": 0,
+        "warnings": 0,
+        "errors": 0,
+        "stdoutSha256": "62c6a3fa2c43e10a1283baaaf12ce4a349f8599241ec8ff5eb16aca4abcaf10c"
+      },
+      "canonicalFormatter": {
+        "exitCode": 0,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "elapsedSeconds": 230.9095724581275
+      },
+      "relatedFunctionalUnit": {
+        "passed": 32,
+        "failed": 0,
+        "skipped": 0,
+        "nativeParallelLimit": 50,
+        "actualTrxOverlapPeak": 27
+      },
+      "realProcessRecovery": {
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "relatedAspireRf3": {
+        "passed": 10,
+        "failed": 1,
+        "skipped": 0,
+        "total": 11,
+        "exitCode": 2,
+        "elapsedSeconds": 1639.8610673751682,
+        "trxSha256": "1b0ce6f59e595d6f2d0ff9287989253e5511a8d7b7cc9f205a58d0574030c67f",
+        "failure": "NativeDatabaseMigrationRf3Tests: TwoRf3QueryProbe.Create rejects local protected diagnostic profile before node creation.",
+        "repair": "Explicit native protected-movement diagnostic enrollment prepared; not executed in this original cohort."
+      },
+      "selectedUnitCoverage": {
+        "coveredLines": 3835,
+        "validLines": 106921,
+        "coveredBranches": 1909,
+        "validBranches": 67799,
+        "classification": "Selected functional run only; not full-product coverage or comparable trend."
+      },
+      "sourceDrift": 0,
+      "compiledDrift": 0
+    },
+    "remaining": [
+      "Integrate and execute the explicit local migration profile repair and whole original migration flow.",
+      "Complete foundation cold-start revocation, native shutdown and storage/admission regression intake.",
+      "Qualify actual native telemetry delivery/privacy and native current-clock provider.",
+      "Exact-source Linux full required suites, faults/endurance, complete task acceptance, final measurements and release remain open."
+    ]
+  },
   "STAGE85-AUTHORIZED-MODEL-OPERATIONS-001": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,

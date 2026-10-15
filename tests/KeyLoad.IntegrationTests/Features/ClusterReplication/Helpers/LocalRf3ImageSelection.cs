@@ -59,6 +59,8 @@ internal static class LocalRf3ImageSelection
     private const string CurrentCompetingInboxFilterArgument = "--KeyLoadTests:Filter=/*/*/CompetingInboxPublicTests/*";
     private const string CurrentQueueViewLeaseFilterArgument = "--KeyLoadTests:Filter=/*/*/QueueViewLeaseIsolationTests/*";
     private const string CurrentCombinedFilterArgument = "--KeyLoadTests:Filter=/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests)/*";
+    private const string NativeMigrationFilterArgument = "--KeyLoadTests:Filter=/*/*/NativeDatabaseMigrationRf3Tests/*";
+    private const string FoundationCombinedFilterArgument = "--KeyLoadTests:Filter=/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests|NativeDatabaseMigrationRf3Tests)/*";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -106,7 +108,8 @@ internal static class LocalRf3ImageSelection
                 or RetainedSnapshotFilterArgument or NullQueueDeadlineFilterArgument or GraphIncomingFilterArgument or SignedPurposeFilterArgument or EventFeedOpenFilterArgument or ResourcePolicyFilterArgument or McpCurrentAuthorityFilterArgument or McpCredentialAuthorityFilterArgument or McpInitialCredentialFilterArgument
                 or ProjectionReplayFilterArgument or ProjectionPolicyFilterArgument or ProjectionColdFilterArgument or RemoteAnnPublicationFilterArgument or GraphEventLineageAuthenticationFilterArgument or OriginalRefusalCompositionFilterArgument or PublicModelFlowFilterArgument or ExpandedPublicModelFlowFilterArgument or SuccessorPublicModelFlowFilterArgument or TenantCapacityPlacementFilterArgument or PublicCohortFilterArgument or SuccessorPublicCohortFilterArgument or FinalPublicCohortFilterArgument
                 or ReleaseDistributedQueryAuthorityRf3FilterArgument or ReleaseEarlyAdmissionQualificationFilterArgument or ReleaseMetadataBootstrapRf3FilterArgument or ReleaseQueryRuleOptimizationRf3FilterArgument or ReleaseStrongReadSessionAbsenceRf3FilterArgument or ReleaseTimeSeriesChunkQualificationRf3FilterArgument or ReleaseCombinedFilterArgument
-                or CurrentSafeProjectorFilterArgument or CurrentSqlParserAdmissionFilterArgument or CurrentGraphSearchLineageFilterArgument or CurrentAtomicTriadFilterArgument or CurrentCompetingInboxFilterArgument or CurrentQueueViewLeaseFilterArgument or CurrentCombinedFilterArgument, EnabledArgument]
+                or CurrentSafeProjectorFilterArgument or CurrentSqlParserAdmissionFilterArgument or CurrentGraphSearchLineageFilterArgument or CurrentAtomicTriadFilterArgument or CurrentCompetingInboxFilterArgument or CurrentQueueViewLeaseFilterArgument or CurrentCombinedFilterArgument
+                or NativeMigrationFilterArgument or FoundationCombinedFilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

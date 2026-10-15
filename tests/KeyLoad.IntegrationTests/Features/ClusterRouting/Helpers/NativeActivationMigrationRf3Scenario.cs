@@ -55,7 +55,7 @@ internal static class NativeActivationMigrationRf3Scenario
         await RequestCqrsPhaseFaultAssertions.VerifyDocumentAsync(callers, identity,
             RequestCqrsRf3Protocol.ChangedDocumentJson, NativeActivationRf3Protocol.CommittedRevision, cancellationToken).ConfigureAwait(false);
         await NativeActivationMigrationRf3Operation.VerifyAsync(wave, administrator, callers, identity, command,
-            first.Witness, first.Receipt, discovery, cancellationToken).ConfigureAwait(false);
+            first.Witness, first.Receipt, discovery, cancellationToken, qualifyOriginalSession: true).ConfigureAwait(false);
         await AtomicMembershipScopeTrial.RunAsync(wave, administrator, callers, identity,
             cancellationToken).ConfigureAwait(false);
     }

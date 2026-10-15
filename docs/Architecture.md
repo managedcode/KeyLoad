@@ -1,5 +1,12 @@
 # KeyLoad architecture and ownership map
 
+The owner-selected [foundation-first delivery contract](Features/RepositoryGovernance/FoundationDelivery.md)
+and [all-105 dependency graph](implementation/foundation-dependencies.json) control
+execution order. Native Orleans, node-local ZoneTree/RF3, current persisted identity,
+bounded connections and native OpenTelemetry precede broad model expansion;
+comparative measurement, complete audits and release qualification follow it.
+Implementation milestones never replace whole-task acceptance.
+
 [ResourceExecution TimeProvider](Features/ResourceExecution/TimeProvider.md) and
 [ADR-115](ADR/ADR-115-time-provider.md) require explicitly owned clocks for UTC
 timestamps, monotonic budgets, delays and timers. Composition selects the native

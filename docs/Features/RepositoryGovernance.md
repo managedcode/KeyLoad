@@ -1,5 +1,10 @@
 # RepositoryGovernance
 
+Owner correction 2026-10-15: [FoundationDelivery](RepositoryGovernance/FoundationDelivery.md)
+owns the complete KL-001..KL-105 definition review, implementation dependency graph,
+foundation gates and later independent directions. It preserves every required
+acceptance gate and keeps status in the existing canonical ledger.
+
 Status: configured locally and independently reviewed; GitHub delivery pending. Owner: KeyLoad lead/integrator. Source: [MCAF tutorial](https://mcaf.managed-code.com/tutorial), upstream edcfac048c3cb5e158e841378bd61fe457dc34e7. Skills are not installed by explicit owner instruction.
 
 ## Requirements

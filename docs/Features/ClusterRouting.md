@@ -1,5 +1,10 @@
 # ClusterRouting
 
+[OriginalSessionTokenAfterActivationMovement](ClusterRouting/OriginalSessionTokenAfterActivationMovement.md)
+qualifies the same original receipt minimum through actual native activation
+replacement, current persisted reader revocation/repair and current-root restart.
+Prepared whole-operation source is distinct from executed RF3/Linux evidence.
+
 ## TASK-KL079-CONSUMPTION-CLOSED-CAUSE-001
 
 REQ/AC-ROUTE-008/009 preserve existing event1003, request GUID, stage/category, public error and safe detail. The private failure-kind enum appends KeyLoad, Json and Format without renumbering existing values. Existing Protocol category and Consumption stage remain unchanged; only the former three-type Kind=Protocol union becomes a distinct closed safe label. No exception object, CLR type name, exception message, stack, inner exception, caller identity, credential, signed request or payload enters the log. No new request, logger resource, metric, provider, retry, timeout or fault seam.

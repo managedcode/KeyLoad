@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
+using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -24,8 +25,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         var token = operation.Token;
         await AwaitNativeReplicaPrerequisiteAsync(token).ConfigureAwait(false);
         var administrator = await AuthenticateAdministratorAsync(token).ConfigureAwait(false);
-        await SubmitBootstrapAsync(administrator, token).ConfigureAwait(false);
-        await VerifyCatalogAsync(administrator.Id, token).ConfigureAwait(false);
+        await SettleBootstrapAsync(administrator, token).ConfigureAwait(false);
         node.OpenCatalogAdmission(this, administrator.Id, token);
         return administrator;
     }
@@ -97,20 +97,42 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         return principal;
     }
 
-    private async Task SubmitBootstrapAsync(PrincipalRecord administrator, CancellationToken cancellationToken)
+    private async Task SubmitBootstrapAsync(PrincipalRecord administrator, Guid commandId, byte[] payload,
+        CancellationToken cancellationToken)
     {
-        var commandId = PhysicalShardCatalogIdentity.CreateBootstrapCommandId(options.PhysicalShardId);
         var requestId = Guid.NewGuid();
-        var request = new BootstrapPhysicalShardCatalogRequest(PhysicalShardCatalogStartupProtocol.Version,
-            PhysicalShardCatalogStartupProtocol.ExpectedRevision, options.PhysicalShardId,
-            partition.Configuration.Incarnation, partition.Configuration.VoterIds);
-        var payload = NativeSerialization.Serialize(request);
         var codec = node.CatalogRequestCodec();
         var signed = codec.CreateCommand(requestId, administrator.Id,
             OperationKind.BootstrapPhysicalShardCatalog, commandId, payload);
         using var requestContext = node.OpenRequestContext(administrator, requestId, commandId, cancellationToken);
         _ = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: true,
             cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task SettleBootstrapAsync(PrincipalRecord administrator, CancellationToken cancellationToken)
+    {
+        var commandId = PhysicalShardCatalogIdentity.CreateBootstrapCommandId(options.PhysicalShardId);
+        var request = new BootstrapPhysicalShardCatalogRequest(PhysicalShardCatalogStartupProtocol.Version,
+            PhysicalShardCatalogStartupProtocol.ExpectedRevision, options.PhysicalShardId,
+            partition.Configuration.Incarnation, partition.Configuration.VoterIds);
+        var payload = NativeSerialization.Serialize(request);
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await SubmitBootstrapAsync(administrator, commandId, payload, cancellationToken).ConfigureAwait(false);
+                await VerifyCatalogAsync(administrator.Id, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            catch (KeyLoadException error) when ((error.Code == ErrorCode.UnknownWriteOutcome
+                && error.Message == ReplicaProtocol.InterruptedWrite)
+                || (error.Code == ErrorCode.OwnershipLost
+                && error.Message == ReplicaProtocol.NoLeader))
+            {
+                await Task.Delay(partition.Configuration.HeartbeatInterval, clock, cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 
     private async Task VerifyCatalogAsync(string principalId, CancellationToken cancellationToken)

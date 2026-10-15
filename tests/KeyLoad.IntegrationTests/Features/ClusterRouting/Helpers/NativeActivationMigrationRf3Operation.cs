@@ -11,7 +11,29 @@ internal static class NativeActivationMigrationRf3Operation
     internal static async Task VerifyAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
         RequestCqrsRf3Callers callers, RequestCqrsPhaseFaultIdentity identity, CommandRequest command,
         RequestCqrsProbeActivationRecord established, CommitReceipt receipt,
-        IReadOnlyList<ReplicaSiloDiscovery> discovery, CancellationToken cancellationToken)
+        IReadOnlyList<ReplicaSiloDiscovery> discovery, CancellationToken cancellationToken,
+        bool qualifyOriginalSession = false)
+    {
+        if (!qualifyOriginalSession)
+        {
+            await VerifyCoreAsync(wave, administrator, callers, identity, command, established, receipt,
+                discovery, null, cancellationToken);
+            return;
+        }
+        await NativeActivationOriginalSessionReader.RunAsync(wave, administrator, command, receipt,
+            async session =>
+            {
+                await NativeActivationOriginalSessionFlow.StartAsync(administrator, callers, session, cancellationToken);
+                await VerifyCoreAsync(wave, administrator, callers, identity, command, established, receipt,
+                    discovery, session, cancellationToken);
+            }, cancellationToken);
+    }
+
+    private static async Task VerifyCoreAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
+        RequestCqrsRf3Callers callers, RequestCqrsPhaseFaultIdentity identity, CommandRequest command,
+        RequestCqrsProbeActivationRecord established, CommitReceipt receipt,
+        IReadOnlyList<ReplicaSiloDiscovery> discovery, NativeActivationOriginalSessionState? session,
+        CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
         var placement = await NativeActivationMigrationRf3Ownership.ReadPlacementAsync(administrator, identity.Partition, cancellationToken);
@@ -20,9 +42,11 @@ internal static class NativeActivationMigrationRf3Operation
         _ = await NativeActivationMigrationRf3Attempt.RunAsync(wave, callers, identity, command, established, receipt,
             discovery, target, cancel: false, foreign: true, failures, cancellationToken);
         await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await NativeActivationOriginalSessionFlow.ReadIfSelectedAsync(administrator, callers, session, cancellationToken);
         _ = await NativeActivationMigrationRf3Attempt.RunAsync(wave, callers, identity, command, established, receipt,
             discovery, target, cancel: true, foreign: false, failures, cancellationToken);
         await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await NativeActivationOriginalSessionFlow.ReadIfSelectedAsync(administrator, callers, session, cancellationToken);
         var before = await NativeActivationMigrationRf3Attempt.RunAsync(wave, callers, identity, command, established,
             receipt, discovery, target, cancel: false, foreign: false, failures, cancellationToken);
         var after = await NativeActivationRf3HeldCall.ExecuteAsync(wave, callers, identity, command,
@@ -32,16 +56,27 @@ internal static class NativeActivationMigrationRf3Operation
         await Assert.That(after.Witness.SiloAddress).IsEqualTo(target.SiloAddress);
         await SqlRf3Protocol.EqualAsync(receipt, after.Receipt);
         await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await NativeActivationOriginalSessionFlow.ReadIfSelectedAsync(administrator, callers, session, cancellationToken);
         if (failures.Count != EmptyFailureCount)
         {
             ServerFailureObserver.ThrowIfAny(failures);
         }
+        if (session is not null)
+        {
+            await NativeActivationOriginalSessionPolicy.RunAsync(administrator, callers, session, cancellationToken);
+        }
         await NativeActivationRf3ColdOutcome.VerifyAsync(wave, identity, command, receipt, cancellationToken);
         await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await NativeActivationOriginalSessionFlow.ReadIfSelectedAsync(administrator, callers, session, cancellationToken);
         var reference = new EntityRef(identity.Partition, RequestCqrsRf3Protocol.AdminCollection, RequestCqrsRf3Protocol.DocumentId);
         await RequestCqrsFaultReplayContinuation.VerifyAsync(callers, administrator.Sdk, reference, command,
             receipt, RequestCqrsRf3Protocol.DocumentJson, NativeActivationRf3Protocol.CommittedRevision,
             RequestCqrsRf3Protocol.ChangedDocumentJson, cancellationToken);
+        if (session is not null)
+        {
+            await NativeActivationOriginalSessionFlow.ReadAsync(administrator, callers, session,
+                checked(NativeActivationRf3Protocol.CommittedRevision + 1L), RequestCqrsRf3Protocol.DocumentJson, cancellationToken);
+        }
     }
 
     private static async Task RequireStateAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,

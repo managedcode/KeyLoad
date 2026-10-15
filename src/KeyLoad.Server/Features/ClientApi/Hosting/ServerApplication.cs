@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
+using OpenTelemetry;
 
 namespace KeyLoad.Server;
 
@@ -18,6 +19,7 @@ internal static class ServerApplication
         {
             try
             {
+                app.Services.GetRequiredService<ITelemetryHostInitializer>().Initialize();
                 partition = app.Services.GetRequiredService<PartitionHost>();
                 administration = app.Services.GetRequiredService<INodeAdministration>();
                 silo = app.Services.GetRequiredService<OrleansNode>();
