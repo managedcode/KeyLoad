@@ -134,7 +134,7 @@ internal static class ZoneTreeBackupRestoreFiles
             throw Errors.Fail(ErrorCode.Corruption, BackupFileIsLink);
         }
 
-        using var sourceFile = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, streamBufferBytes);
+        using var sourceFile = ZoneTreeBackupArchiveJournalOpen.Open(source, streamBufferBytes);
         if (sourceFile.Length != item.Length)
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);

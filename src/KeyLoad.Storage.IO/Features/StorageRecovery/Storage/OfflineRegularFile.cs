@@ -8,14 +8,6 @@ internal static class OfflineRegularFile
     private const int FirstValidDescriptor = 0;
     private const int NoBufferBytes = 0;
     private const char NullPathCharacter = '\0';
-    private const int LinuxReadOnly = 0;
-    private const int LinuxReadWrite = 0x2;
-    private const int LinuxNoFollow = 0x20000;
-    private const int LinuxCloseOnExec = 0x80000;
-    private const int MacReadOnly = 0;
-    private const int MacReadWrite = 0x2;
-    private const int MacNoFollow = 0x100;
-    private const int MacCloseOnExec = 0x1000000;
     private const uint RegularType = 0x8000;
     private const int MaximumBufferBytes = 65536;
 
@@ -65,11 +57,22 @@ internal static class OfflineRegularFile
 
     internal static FileStream OpenWithIdentity(string path, OfflineFileIdentity expected,
         FileAccess access, FileShare share, int bufferSize)
+        => OpenWithIdentityCore(path, expected, access, share, bufferSize, writeThrough: false);
+
+    internal static FileStream OpenWriteThrough(string path, FileShare share, int bufferSize)
+        => OpenWriteThrough(path, Inspect(path), share, bufferSize);
+
+    internal static FileStream OpenWriteThrough(string path, OfflineFileIdentity expected,
+        FileShare share, int bufferSize)
+        => OpenWithIdentityCore(path, expected, FileAccess.ReadWrite, share, bufferSize, writeThrough: true);
+
+    private static FileStream OpenWithIdentityCore(string path, OfflineFileIdentity expected,
+        FileAccess access, FileShare share, int bufferSize, bool writeThrough)
     {
         ValidateArguments(path, access, share, bufferSize);
         path = Path.GetFullPath(path);
 
-        using var lease = OpenNative(path, access);
+        using var lease = OpenNative(path, access, writeThrough);
         try
         {
             VerifyDescriptor(lease.Handle, expected);
@@ -110,9 +113,9 @@ internal static class OfflineRegularFile
         }
     }
 
-    private static OfflineNativeHandleLease OpenNative(string path, FileAccess access)
+    private static OfflineNativeHandleLease OpenNative(string path, FileAccess access, bool writeThrough = false)
     {
-        var (flags, isMac) = OpenFlags(access);
+        var (flags, isMac) = OfflineRegularFileOpenFlags.Create(access, writeThrough);
         int descriptor;
         try
         {
@@ -169,23 +172,6 @@ internal static class OfflineRegularFile
         }
     }
 
-    private static (int Flags, bool IsMac) OpenFlags(FileAccess access)
-    {
-        var isMac = OperatingSystem.IsMacOS();
-        var flags = isMac ? MacNoFollow | MacCloseOnExec : LinuxNoFollow | LinuxCloseOnExec;
-        if (isMac)
-        {
-            flags |= access == FileAccess.Read ? MacReadOnly : MacReadWrite;
-            flags |= MacNonBlocking;
-        }
-        else
-        {
-            flags |= access == FileAccess.Read ? LinuxReadOnly : LinuxReadWrite;
-            flags |= LinuxNonBlocking;
-        }
-        return (flags, isMac);
-    }
-
     private static void ValidateArguments(string path, FileAccess access, FileShare share, int bufferSize)
     {
         ValidatePath(path);
@@ -212,6 +198,4 @@ internal static class OfflineRegularFile
 
     private static bool IsSupportedArchitecture() => RuntimeInformation.ProcessArchitecture is Architecture.X64 or Architecture.Arm64;
 
-    private const int LinuxNonBlocking = 0x800;
-    private const int MacNonBlocking = 4;
 }

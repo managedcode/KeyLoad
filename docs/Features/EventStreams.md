@@ -810,3 +810,30 @@ four-event pages, original captured three-event cursors and original receipts
 through two actual cold owners with joined primary/cleanup ledgers.
 This combines the immutable row-key predecessor with the related gap authority
 repair. Native source preview is not compiler/runtime/Linux/RF3 qualification.
+
+
+## TASK-KL084-NATIVE-PROVIDER-HOST-001 — production advisory-provider reachability
+
+REQ-EVENTFEED-PROVIDER-HOST-001: the actual OrleansSiloConfiguration.Configure must register the existing EventFeedNativeProviderRegistration once for each native silo, immediately after the existing NativeRuntimeJournalRegistration call. Reuse the unchanged named `keyload-event-feed-advisory-v1` provider, keyed EventFeedPubSubStorage, native memory adapter, bounded cache/hint admission and registered serializers. Preserve every original option, native lifecycle default, membership/directory/repartitioning registration and RuntimeJournal registration order. Do not add another provider, dispatcher, fallback, timeout or synthetic readiness.
+
+AC-EVENTFEED-PROVIDER-HOST-001: the existing `EventFeedFirstOpenRf3Tests.ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold` must execute its complete genuine six-owner SDK/official MCP/Q1 Open → Offer → receiving-only Tail, current source/control refusal and repair, original outcome replay, three original distinct same-root restart stages, including referenced-outcome fault repair and healthy continuation. Keep all original events, receipts, hidden references, authorization, resource charges, cancellation, deadlines and joined caller/fixture cleanup oracles. The existing whole EventFeedPubSubStorageTests remain supporting native storage/CAS/quota/disposal evidence; they cannot substitute for actual silo provider activation, callback/loss/drain or RF3 execution.
+
+The current parent path resolves this provider both for Tail subscription and for an advisory notification after a successful non-Tail parent outcome with the original matching map ID. A missing registration can therefore fail after the canonical parent operation has already produced its outcome. Register the owning native helper; do not suppress that lookup/publication failure, recreate the operation or replace its original outcome. Earlier native-read and standalone pubsub-storage stages explicitly left production registration inactive; their original evidence does not prove a past runtime failure or qualify this host integration.
+
+```mermaid
+flowchart TD
+    C[Actual silo Configure] --> J[Original RuntimeJournal registration]
+    J --> P[Existing EventFeed native registration]
+    P --> B[Original host Build and Start]
+    B --> L[Native stream provider initialization and agents]
+    L --> A[Original catalog bootstrap and RuntimeJournal initialization]
+    A --> R[Original DatabaseReady admission]
+    R --> O[Authenticated connection-owned parent operation]
+    O --> H[Advisory hint or Tail subscription and authoritative recheck]
+```
+
+The pinned Microsoft.Orleans.Streaming 10.4.0 package identifies upstream commit `d114d7522a53b8cce4c6b97d44293e5c7273d766`. Its [native configurator](https://github.com/dotnet/orleans/blob/d114d7522a53b8cce4c6b97d44293e5c7273d766/src/Orleans.Streaming/SiloPersistentStreamConfigurator.cs) supplies provider lifecycle participation and validates keyed pubsub storage. The original stream lifecycle initializes at ApplicationServices and starts at Active within native host startup. Existing adapter and pubsub construction do not request the later catalog administrator or RuntimeJournal admission. Preserve that ordering and the original database readiness checks; source inspection establishes no explicit bootstrap dependency cycle and supplies no runtime startup witness.
+
+ZoneTree records, original persisted outcomes, source pins and RF3 RuntimeJournal remain authoritative. The memory provider is a disposable advisory transport; hints confer no authorization, delivery durability or canonical read-cut authority. Preserve ADR125's actual connection grain, separate signed operation GUIDs, fresh persisted permissions, bounded CQRS progress/results and original cancellation/Unsubscribe cleanup. Activation movement never moves node-local storage handles.
+
+REQ/AC-EVENTFEED-PROVIDER-HOST-001 supports REQ/AC-EVENTS-TAIL-OWNER-001/002 and ADR025 without closing them. Compiler/analyzer/format, successful semantic caller evidence, actual native startup and provider resolution, complete original RF3 clients, native provider pressure/loss/cancellation and exact-source Linux qualification remain required. In particular, the pinned [native provider shutdown](https://github.com/dotnet/orleans/blob/d114d7522a53b8cce4c6b97d44293e5c7273d766/src/Orleans.Streaming/PersistentStreams/PersistentStreamProvider.cs) can stop waiting when its lifecycle token cancels while pulling-manager cleanup continues. Registration or host/provider disposal alone is not proof that the original native agents, callbacks and producers joined. No native defect, runtime pass, durable memory provider or full shutdown acceptance is claimed by this wiring correction.

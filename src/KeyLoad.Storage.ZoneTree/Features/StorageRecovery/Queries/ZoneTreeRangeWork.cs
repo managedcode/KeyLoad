@@ -36,5 +36,6 @@ internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageRe
         providerBytes += providerCharge;
         ReadBytes += bytes;
         observer?.Invoke(bytes);
+        Check();
     }
 }

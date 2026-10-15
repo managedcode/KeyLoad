@@ -7,6 +7,11 @@ node-owned disposable operational history alongside OpenTelemetry. Actual
 published-package integration and all execution gates remain open; the owner
 expects NuGet publication, so the current unpublished state is not a defect.
 
+Linux clock prerequisites are specified in
+[NativeClockPrerequisiteProducer](ResourceExecution/NativeClockPrerequisiteProducer.md).
+The manual CI producer records native ABI and read-only syscall evidence;
+runtime provider adoption and Linux qualification remain open.
+
 Actual database phase diagnostics are specified in
 [DatabasePhaseProfiling](ResourceExecution/DatabasePhaseProfiling.md) under
 [ADR-063](../ADR/ADR-063-bounded-database-phase-profiling.md),
@@ -734,3 +739,24 @@ REQ-MP-002 / AC-MP-004/012: the original AcMp012_ReadBudgetFailureReleasesAllowa
 ## Original analytical admission healthy T-SQL continuation
 
 REQ-MP-002/005 and AC-MP-004/011/012, with REQ/AC-TSQL-001/002/006, require the existing AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries healthy SQL continuation to use selected native T-SQL: SELECT TOP (1) * FROM orders. The original malformed SQL used during saturation remains unchanged, so admission still refuses before parsing/storage while the actual held search owns the reservation. All six saturated entries, complete read diagnostics, independent database, original gate release and worker joins, zero final reservations, empty healthy result and ten-second coordination limit remain unchanged. Original319c run38578269537 failed at the final healthy query because LIMIT is retired syntax; this is a fixture language repair, not an admission or parser workaround. Original test declaration and arguments remain. Compiler, whole-operation runtime and exact-source Linux qualification remain OPEN.
+
+
+## TASK-HTTP-FIXTURE-PROJECTION-001 — complete typed native HTTP admission projection
+
+REQ-HTTP-FIXTURE-PROJECTION-001: when ClusterFixture receives an HttpAdmissionLimits snapshot, validate it with the existing HttpAdmissionLimits.Validate contract and project all twelve numeric properties to each of the same three actual Aspire ContainerResources. Keep the existing late WithEnvironment seam: AppHost construction has already captured its own options and emitted its initial node environment. Do not replace the supplied snapshot with production defaults, mutate the cached AppHost options, use reflection, add another options provider or change native governor policy.
+
+AC-HTTP-FIXTURE-PROJECTION-001 maps to the existing `SlowBodyAdmissionReturnTests.CanceledAndDisconnectedSlowBodiesReturnCapacityThenBothCallersAndTwoCold`. The complete genuine RF3 operation must reach its first resource configuration and seed, both caller-cancellation and actual physical-disconnect slow-body modes, exact complete admission counters, fresh persisted authorization, original outcomes/replay, healthy SDK/official MCP continuation and both original cold stages, with every original producer/caller/socket/fixture cleanup retained. Preserve its supplied MaxReservedBytes=130000, OtherReservedBytes=0, ReservedControlBytes=20000 and all other supplied values. No limit, timeout, policy, case or oracle is relaxed.
+
+The original R196 failure was a ResourceExhausted SDK result at the first ConfigureResource call, before seed, slow-body attempts or cold continuation. The fixture emitted only four properties; its omitted OtherReservedBytes and ReservedControlBytes remained those of the earlier AppHost snapshot. Under the source-derived default OtherReservedBytes=8388608, even a zero-body ordinary request needs at least 8392704 reserved bytes including the native envelope, exceeding the supplied 130000 ceiling. Original runtime options were not read back, so these exact effective values are a source projection witness rather than an observed runtime snapshot. Preserve the original failure evidence and require new real execution after integration.
+
+```mermaid
+flowchart TD
+    A[AppHost captures validated production options] --> B[Original three node environment]
+    B --> C[Fixture validates supplied HTTP snapshot]
+    C --> D[Project all twelve exact numeric fields]
+    D --> E[Native node options and unchanged governors]
+    E --> F[Original seed and slow-body whole flow]
+    F --> G[Both original cold stages and healthy replay]
+```
+
+The adjacent existing `AdmissionClusterTests.OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds` remains mandatory regression coverage for declared/chunked rejection, unchanged command identity and healthy control admission. Production HttpAdmissionLimits defaults, HttpAdmissionGovernor, CommandAdmissionGovernor, AppHost global projection, public/serializer contracts, persisted authority and RF3 ownership remain unchanged. Source/native numeric checks do not qualify compiler/analyzers, actual effective node options, native producer/socket joins, real client/RF3 execution or exact-source Linux delivery.

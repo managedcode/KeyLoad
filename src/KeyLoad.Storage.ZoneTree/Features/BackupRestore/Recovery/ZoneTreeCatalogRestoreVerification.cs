@@ -10,13 +10,14 @@ internal static class ZoneTreeCatalogRestoreVerification
     internal static void Require(string backup, string staging, StoreIdentity originalIdentity,
         long originalPosition, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
         Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>> verifyCatalog,
-        CancellationToken cancellationToken)
+        ZoneTreeRestoreStagingOwnership ownership, CancellationToken cancellationToken)
     {
         var metadata = ZoneTreeCatalogBackupMetadataFile.ReadVerified(backup, originalIdentity,
             originalPosition, executionOptions.Value);
         cancellationToken.ThrowIfCancellationRequested();
         ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), originalIdentity,
             executionOptions.Value.IdentityBufferBytes);
+        ownership.BeginOpen();
         var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(staging).ResolveExecutionOptions(executionOptions));
         var source = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
         Exception? primary = null;
@@ -36,14 +37,16 @@ internal static class ZoneTreeCatalogRestoreVerification
             });
         }
         catch (Exception failure) { primary = failure; throw; }
-        finally { Dispose(source, primary); }
+        finally { Dispose(source, primary, ownership); }
     }
 
-    private static void Dispose(ZoneTreeStore source, Exception? primary)
+    private static void Dispose(ZoneTreeStore source, Exception? primary,
+        ZoneTreeRestoreStagingOwnership ownership)
     {
         try
         {
             source.Dispose();
+            ownership.CompleteClose();
         }
         catch (Exception cleanup)
         {

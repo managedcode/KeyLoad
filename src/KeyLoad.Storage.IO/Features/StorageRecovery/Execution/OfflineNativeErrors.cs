@@ -8,6 +8,8 @@ internal static class OfflineNativeErrors
     private const int LinuxSymlinkLoopErrno = 40;
     private const int LinuxUnsupportedSyscallErrno = 38;
     private const int MissingFileErrno = 2;
+    private const int LinuxWouldBlockErrno = 11;
+    private const int MacWouldBlockErrno = 35;
     private const string MissingFileMessage = "Offline input file was not found.";
     private const string FileSystemFailureMessage = "Offline filesystem operation failed.";
     private const string ChangedInputMessage = "Offline input changed during validation.";
@@ -32,6 +34,15 @@ internal static class OfflineNativeErrors
         }
         return new IOException(FileSystemFailureMessage, new Win32Exception(error));
     }
+
+    internal static bool IsInvalidEntry(KeyLoadException error) => error.Code == ErrorCode.FormatUnsupported
+        && string.Equals(error.Message, InvalidPath, StringComparison.Ordinal);
+
+    internal static bool IsLockContention(IOException error) =>
+        string.Equals(error.Message, FileSystemFailureMessage, StringComparison.Ordinal)
+        && error.InnerException is Win32Exception native
+        && (OperatingSystem.IsLinux() && native.NativeErrorCode == LinuxWouldBlockErrno
+            || OperatingSystem.IsMacOS() && native.NativeErrorCode == MacWouldBlockErrno);
 
     internal static bool IsUnavailable(Exception error) => error is DllNotFoundException
         or EntryPointNotFoundException or BadImageFormatException;

@@ -41,6 +41,17 @@ internal static class ClusterFixtureComposition
         return (root, readiness?.Apply(arguments) ?? arguments, readiness);
     }
 
+    internal static async Task<(IDistributedApplicationTestingBuilder Builder, ReplicaIsolationBuilderOwnership? Isolation)> CreateBuilderAsync(
+        string[] arguments, KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpRf3Selection? telemetry,
+        bool isolateReplicaNamespace, CancellationToken token)
+    {
+        var builder = telemetry is null
+            ? await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments, token)
+            : await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
+                KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpRf3Configuration.Options(telemetry.Value), arguments, token);
+        return (builder, isolateReplicaNamespace ? new ReplicaIsolationBuilderOwnership(builder) : null);
+    }
+
     internal static KeyLoadClient CreateClient(DistributedApplication application, string node, string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(node);
@@ -101,6 +112,7 @@ internal static class ClusterFixtureComposition
             return;
         }
 
+        limits.Validate();
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
             var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
@@ -113,6 +125,22 @@ internal static class ClusterFixtureComposition
                 limits.MaxReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
             node.WithEnvironment(ClusterFixtureProtocol.HttpHeavyReadBytesSetting,
                 limits.HeavyReadReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpRequestsSetting,
+                limits.MaxRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpTenantRequestsSetting,
+                limits.MaxTenantRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpPrincipalRequestsSetting,
+                limits.MaxPrincipalRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpControlRequestsSetting,
+                limits.ReservedControlRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpControlReservedBytesSetting,
+                limits.ReservedControlBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpTenantControlRequestsSetting,
+                limits.MaxTenantControlRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpPrincipalControlRequestsSetting,
+                limits.MaxPrincipalControlRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpOtherReservedBytesSetting,
+                limits.OtherReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 

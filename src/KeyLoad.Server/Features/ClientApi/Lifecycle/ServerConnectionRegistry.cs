@@ -10,6 +10,7 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, ServerConnectionFeature> connections = [];
     private bool closing;
+    private Task? shutdown;
 
     internal async Task RunAsync(BaseConnectionContext transport, Func<Task> next)
     {
@@ -46,19 +47,29 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal async Task ShutdownAsync(CancellationToken cancellationToken)
+    internal Task ShutdownAsync(CancellationToken cancellationToken)
     {
-        ServerConnectionFeature[] owned;
+        Task original;
         lock (gate)
         {
             closing = true;
-            owned = [.. connections.Values];
+            shutdown ??= ShutdownCoreAsync([.. connections.Values]);
+            original = shutdown;
         }
+        return original.WaitAsync(cancellationToken);
+    }
+
+    private static async Task ShutdownCoreAsync(ServerConnectionFeature[] owned)
+    {
+        // Initialize the original task under the registry gate before invoking transport callbacks.
+        await Task.Yield();
+        var failures = new List<Exception>();
         foreach (var connection in owned)
         {
-            connection.RequestClose();
+            ServerFailureObserver.Observe(connection.RequestClose, failures);
         }
-        await Task.WhenAll(owned.Select(connection => connection.Completion.Task))
-            .WaitAsync(cancellationToken).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => Task.WhenAll(
+            owned.Select(connection => connection.Completion.Task)), failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

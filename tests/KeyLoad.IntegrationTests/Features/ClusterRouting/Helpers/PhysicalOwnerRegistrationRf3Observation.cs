@@ -20,10 +20,12 @@ internal static class PhysicalOwnerRegistrationRf3Observation
     {
         evidence?.Enter(PhysicalOwnerRegistrationRf3Phase.LogService);
         var logs = app.Services.GetRequiredService<ResourceLoggerService>();
+        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Take(TwoRf3MembershipProtocol.MembersPerGroup))
         {
             evidence?.BeginNode(node);
-            await WaitForCompletionAsync(logs, node, evidence, token).ConfigureAwait(false);
+            var resource = model.Resources.OfType<ContainerResource>().Single(candidate => candidate.Name == node);
+            await WaitForCompletionAsync(logs, resource, evidence, token).ConfigureAwait(false);
             using var http = app.CreateHttpClient(node);
             evidence?.Enter(PhysicalOwnerRegistrationRf3Phase.HealthSend);
             using var response = await http.GetAsync(Health, token).ConfigureAwait(false);
@@ -32,11 +34,11 @@ internal static class PhysicalOwnerRegistrationRf3Observation
         }
     }
 
-    private static async Task WaitForCompletionAsync(ResourceLoggerService logs, string node, PhysicalOwnerRegistrationRf3Evidence? evidence,
+    private static async Task WaitForCompletionAsync(ResourceLoggerService logs, ContainerResource resource, PhysicalOwnerRegistrationRf3Evidence? evidence,
         CancellationToken token)
     {
         evidence?.Enter(PhysicalOwnerRegistrationRf3Phase.LogWatch);
-        await foreach (var batch in logs.WatchAsync(node).WithCancellation(token).ConfigureAwait(false))
+        await foreach (var batch in logs.WatchAsync(resource).WithCancellation(token).ConfigureAwait(false))
         {
             foreach (var line in batch)
             {

@@ -19,11 +19,11 @@ internal sealed class ClusterRestoreRf3OperatorObservation
     private int retainedCharacters;
     private bool joined;
 
-    internal ClusterRestoreRf3OperatorObservation(ResourceLoggerService logs, int maximumCharacters,
+    internal ClusterRestoreRf3OperatorObservation(ResourceLoggerService logs, ExecutableResource resource, int maximumCharacters,
         CancellationToken cancellationToken)
     {
         this.maximumCharacters = maximumCharacters;
-        read = ReadAsync(logs, cancellationToken);
+        read = ReadAsync(logs, resource, cancellationToken);
     }
 
     internal async Task JoinAsync()
@@ -95,10 +95,10 @@ internal sealed class ClusterRestoreRf3OperatorObservation
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
-    private async Task ReadAsync(ResourceLoggerService logs, CancellationToken cancellationToken)
+    private async Task ReadAsync(ResourceLoggerService logs, ExecutableResource resource, CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
-        var reader = logs.WatchAsync(ClusterRestoreRf3Protocol.RestoreResource).GetAsyncEnumerator(cancellationToken);
+        var reader = logs.WatchAsync(resource).GetAsyncEnumerator(cancellationToken);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             while (await reader.MoveNextAsync().ConfigureAwait(false))

@@ -1,3 +1,5 @@
+using KeyLoad.Storage.IO;
+
 namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeMetadataFile
@@ -7,9 +9,21 @@ internal static class ZoneTreeMetadataFile
     private const int EndOfStreamRead = 0;
     private const int FirstBufferByte = 0;
 
+    private static FileStream Open(string path, int streamBufferBytes, string unsupportedDetail)
+    {
+        try
+        {
+            return OfflineRegularFile.Open(path, FileAccess.Read, FileShare.Read, streamBufferBytes);
+        }
+        catch (KeyLoadException original) when (OfflineNativeErrors.IsInvalidEntry(original))
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, unsupportedDetail, original);
+        }
+    }
+
     internal static ReadOnlyMemory<byte> Read(string path, int maximumBytes, int streamBufferBytes, string unsupportedDetail)
     {
-        using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, streamBufferBytes);
+        using var file = Open(path, streamBufferBytes, unsupportedDetail);
         if (file.Length > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, unsupportedDetail);

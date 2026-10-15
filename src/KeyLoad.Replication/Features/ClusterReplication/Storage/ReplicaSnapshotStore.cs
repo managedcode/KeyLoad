@@ -212,7 +212,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
             {
                 throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidSnapshot);
             }
-            using var image = File.OpenRead(files.ImagePath(snapshot));
+            using var image = files.OpenPublishedRead(snapshot);
             if (image.Length != snapshot.Length)
             {
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);

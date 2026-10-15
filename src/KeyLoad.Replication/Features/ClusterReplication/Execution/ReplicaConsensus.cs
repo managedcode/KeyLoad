@@ -1,4 +1,4 @@
-using System.Runtime.ExceptionServices;
+using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -8,8 +8,6 @@ namespace KeyLoad.Replication;
 public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
 {
     private const int NoLeaderReadyPosition = 0;
-    private const int SingleShutdownFailure = 1;
-    private const int FirstShutdownFailureIndex = 0;
 
     private readonly ReplicaState state;
     private readonly ReplicaRpcClient rpc;
@@ -165,18 +163,8 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     /// <summary>Acquires a quorum-backed cut for trusted native membership without spending application read admission.</summary>
     /// <param name="cancellationToken">Native membership caller cancellation within the unchanged read deadline.</param>
     /// <returns>Completion after the current-term majority cut is applied locally.</returns>
-    public async Task ReadControlBarrierAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await reads.ExecuteAsync(ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException original) when (!cancellationToken.IsCancellationRequested)
-        {
-            throw ReplicaReadFailureMetadata.Preserve(original,
-                Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader));
-        }
-    }
+    public Task ReadControlBarrierAsync(CancellationToken cancellationToken)
+        => reads.ExecuteControlAsync(cancellationToken);
 
     /// <inheritdoc />
     public async Task<ReadOnlyMemory<byte>> HandleAsync(ReplicaRpc method, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
@@ -202,24 +190,63 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         }
     }
 
-    private async Task StopCoreAsync()
+    private Task StopCoreAsync()
+        => ReplicaShutdownStage.RunAsync(activity, state, lifetime, transportReady, worker,
+            followers, snapshots, maintenance, stoppingToken);
+
+    private async Task DisposeCoreAsync()
     {
-        var drained = activity.Close();
-        state.Ready = false;
         var failures = new List<Exception>();
-        await ReplicaShutdownStage.ObserveAsync(lifetime.CancelAsync(), failures);
-        transportReady.TrySetCanceled(stoppingToken);
-        await ReplicaShutdownStage.ObserveAsync(Task.WhenAll(drained, worker ?? Task.CompletedTask), failures);
-        await ReplicaShutdownStage.ObserveAsync(Task.WhenAll(followers.DrainAsync(CancellationToken.None),
-            snapshots.DrainAsync(CancellationToken.None), maintenance.DrainAsync(CancellationToken.None)), failures);
-        if (failures.Count == SingleShutdownFailure)
+        await ReplicaShutdownStage.ObserveAsync(StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        try
         {
-            ExceptionDispatchInfo.Capture(failures[FirstShutdownFailureIndex]).Throw();
+            leader.Dispose();
         }
-        if (failures.Count > SingleShutdownFailure)
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
         {
-            throw new AggregateException(failures);
+            failures.Add(failure);
         }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        try
+        {
+            snapshots.Dispose();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        try
+        {
+            followers.Dispose();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        try
+        {
+            lifetime.Dispose();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        ReplicaShutdownStage.ThrowIfAny(failures);
     }
 
     /// <summary>Stops protocol work before the composition root disposes node-owned storage.</summary>
@@ -228,8 +255,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     {
         lock (lifecycle)
         {
-            disposal ??= ReplicaProtocolDisposal.DisposeAsync(StopAsync(CancellationToken.None), leader, snapshots,
-                followers, lifetime);
+            disposal ??= DisposeCoreAsync();
             return new(disposal);
         }
     }

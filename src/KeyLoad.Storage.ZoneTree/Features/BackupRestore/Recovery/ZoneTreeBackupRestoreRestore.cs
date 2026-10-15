@@ -22,6 +22,7 @@ internal static class ZoneTreeBackupRestoreRestore
         var staging = Path.Combine(Path.GetDirectoryName(destinationPath)!,
             RestoreTemporaryPrefix + Guid.NewGuid().ToString(GuidFormat));
         ZoneTreeStoreFiles.CreatePrivateDirectory(staging);
+        var ownership = new ZoneTreeRestoreStagingOwnership();
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -30,14 +31,14 @@ internal static class ZoneTreeBackupRestoreRestore
             {
                 ZoneTreeCatalogRestoreEntry.RequireFreshIdentity(originalIdentity, newIncarnation, newSigningKey);
                 ZoneTreeCatalogRestoreVerification.Require(backup, staging, originalIdentity, originalPosition,
-                    executionOptions, verifyCatalog, cancellationToken);
+                    executionOptions, verifyCatalog, ownership, cancellationToken);
             }
             cancellationToken.ThrowIfCancellationRequested();
             var identity = CreateRestoredIdentity(originalIdentity, newIncarnation, newSigningKey);
             ZoneTreeCatalogRestoreEntry.RequireFreshIdentity(originalIdentity,
                 identity.Incarnation, identity.SigningKey.ToArray());
             ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity, policy.IdentityBufferBytes);
-            var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions, originalIdentity.Incarnation);
+            var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions, originalIdentity.Incarnation, ownership);
             Publish(staging, destinationPath);
             return restoredIdentity;
         }
@@ -45,7 +46,7 @@ internal static class ZoneTreeBackupRestoreRestore
         {
             try
             {
-                if (Directory.Exists(staging))
+                if (ownership.IsSettled && Directory.Exists(staging))
                 {
                     Directory.Delete(staging, recursive: true);
                 }
@@ -102,8 +103,9 @@ internal static class ZoneTreeBackupRestoreRestore
     }
 
     private static StoreIdentity ApplyRestoreAuthorityState(string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid sourceIncarnation)
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid sourceIncarnation, ZoneTreeRestoreStagingOwnership ownership)
     {
+        ownership.BeginOpen();
         var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(destination).ResolveExecutionOptions(executionOptions));
         var restored = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
         Exception? primary = null;
@@ -130,14 +132,16 @@ internal static class ZoneTreeBackupRestoreRestore
             primary = failure;
             throw;
         }
-        finally { DisposeRestoredStore(restored, primary); }
+        finally { DisposeRestoredStore(restored, primary, ownership); }
     }
 
-    private static void DisposeRestoredStore(ZoneTreeStore restored, Exception? primary)
+    private static void DisposeRestoredStore(ZoneTreeStore restored, Exception? primary,
+        ZoneTreeRestoreStagingOwnership ownership)
     {
         try
         {
             restored.Dispose();
+            ownership.CompleteClose();
         }
         catch (Exception cleanup)
         {

@@ -30,6 +30,9 @@ internal sealed class ReplicaSnapshotFiles
     internal string ImagePath(ReplicaSnapshot snapshot) => PathFor(snapshot.FileName);
     internal string TemporaryPath(ReplicaSnapshot snapshot) => PathFor(snapshot.FileName + ReplicaProtocol.TemporarySuffix);
 
+    internal FileStream OpenPublishedRead(ReplicaSnapshot snapshot)
+        => ReplicaSnapshotReadOpen.Read(ImagePath(snapshot), execution.FileBufferBytes);
+
     private static string PrepareDirectory(ReplicaConfiguration configuration)
     {
         configuration.Validate();
@@ -112,7 +115,7 @@ internal sealed class ReplicaSnapshotFiles
         {
             return null;
         }
-        using var file = File.OpenRead(path);
+        using var file = ReplicaSnapshotReadOpen.Read(path, execution.MaximumManifestBytes);
         if (file.Length > execution.MaximumManifestBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);

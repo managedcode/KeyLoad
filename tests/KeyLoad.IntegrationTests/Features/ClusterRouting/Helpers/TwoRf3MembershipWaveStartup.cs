@@ -23,13 +23,16 @@ internal static class TwoRf3MembershipWaveStartup
         }
         if (wave.startupCallbacks is { } capture)
         {
-            ServerFailureObserver.Observe(() => capture.Failed(failures[0], cancellationToken.IsCancellationRequested), failures);
+            ServerFailureObserver.Observe(() => capture.Failed(wave.builderLifetime.OriginalStartupFailure ?? failures[0], cancellationToken.IsCancellationRequested), failures);
         }
         await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
     }
-    internal static async Task StartCoreAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken, Action<string>? observe = null)
+    internal static Task StartCoreAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken, Action<string>? observe = null)
+        => wave.builderLifetime.RunAsync(wave, () => StartOriginalCoreAsync(wave, observe, cancellationToken));
+
+    private static async Task StartOriginalCoreAsync(TwoRf3MembershipWave wave, Action<string>? observe, CancellationToken cancellationToken)
     {
         var firstStart = wave.dataRoot is null;
         var root = wave.dataRoot ?? wave.CreateOwnedRoot();
@@ -49,6 +52,7 @@ internal static class TwoRf3MembershipWaveStartup
         observe?.Invoke("BuilderCreate");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             (_, settings) => wave.capacity.BindOriginalParameters(settings), cancellationToken).ConfigureAwait(false);
+        wave.builderLifetime.Register(builder);
         observe?.Invoke("OriginalParameters");
         await wave.capacity.RequireOriginalParametersAsync(builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
         await NativeBlobWireWaveLifecycle.PublishOwnerAsync(wave, builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
@@ -74,13 +78,10 @@ internal static class TwoRf3MembershipWaveStartup
         }
         observe?.Invoke("BuildApplication");
         wave.application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
+        wave.builderLifetime.Transfer();
         wave.applicationDisposed = false;
         wave.nodeLocksReleased = false;
-        if (wave.remoteDocumentReads)
-        {
-            wave.RemoteRuntimeOwner = new ContainerRuntimeControl(wave.application, containerNames, repository,
-            wave.localImageSelection);
-        }
+        ConfigureRuntimeOwner(wave, wave.application, containerNames, repository);
         observe?.Invoke("VerifyImageBeforeStart");
         await VerifyBeforeStartAsync(wave, wave.application, repository, githubReference, cancellationToken)
             .ConfigureAwait(false);
@@ -93,6 +94,16 @@ internal static class TwoRf3MembershipWaveStartup
             await capture.Ready().ConfigureAwait(false);
         }
     }
+    private static void ConfigureRuntimeOwner(TwoRf3MembershipWave wave, DistributedApplication application,
+        Dictionary<string, string> containerNames, string repository)
+    {
+        if (wave.remoteDocumentReads)
+        {
+            wave.RemoteRuntimeOwner = new ContainerRuntimeControl(application, containerNames, repository,
+            wave.localImageSelection);
+        }
+    }
+
     private static async Task VerifyBeforeStartAsync(TwoRf3MembershipWave wave,
         DistributedApplication application, string repository, string? githubReference,
         CancellationToken cancellationToken)

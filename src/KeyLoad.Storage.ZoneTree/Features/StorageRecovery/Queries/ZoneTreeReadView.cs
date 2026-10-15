@@ -32,6 +32,7 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
             return null;
         }
 
+        ZoneTreeNativeValueHeader.RequireLive(value.Span);
         var borrowed = value.Span[StorageValueHeaderBytes..];
         runtime.ReadCounters.Point(owned: true, (long)key.Length + borrowed.Length);
         using var candidate = admission.TryPrepare(key, borrowed.Length, generation);
@@ -74,6 +75,7 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
             return false;
         }
 
+        ZoneTreeNativeValueHeader.RequireLive(value.Span);
         var borrowed = value.Span[StorageValueHeaderBytes..];
         runtime.ReadCounters.Point(owned: false, (long)key.Length + borrowed.Length);
         using var candidate = admission.TryPrepare(key, borrowed.Length, generation);

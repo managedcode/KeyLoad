@@ -54,6 +54,8 @@ internal static class NativeSubmissionFaultRf3Flow
             command, token).ConfigureAwait(false);
         await NativeSubmissionFullOutcomeInspection.RequireAsync(owner, command, retry, originalStatus, acknowledged, token)
             .ConfigureAwait(false);
+        await NativeSubmissionColdContinuation.RunAsync(owner, command, retry, originalStatus, token)
+            .ConfigureAwait(false);
     }
 
     private static void StartOriginal(NativeSubmissionFaultRf3Owner owner, bool officialMcp, CommandRequest command)

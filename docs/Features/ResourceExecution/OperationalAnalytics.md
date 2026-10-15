@@ -1,6 +1,6 @@
 # ResourceExecution: Derived operational analytics
 
-Status: dependency selected, implementation contract PROPOSED. Package publication and every source/runtime gate remain OPEN. ADR: [ADR-134](../../ADR/ADR-134-node-owned-derived-analytics.md).
+Status: dependency selected, implementation contract PROPOSED. Published package1.0.0 is verified, centrally pinned, restored and compiled; native source/runtime and production-activation gates remain OPEN. ADR: [ADR-134](../../ADR/ADR-134-node-owned-derived-analytics.md).
 
 ## Requirements
 
@@ -19,7 +19,7 @@ All cases below are required proposed whole-operation regressions, not existing 
 
 | Acceptance | Required real operation and observable oracle | Gate |
 |---|---|---|
-| AC-ANALYTICS-001 | Original NuGet package/version/license/dependency metadata; actual pinned restore/build, no source substitution | OPEN external publication |
+| AC-ANALYTICS-001 | Original NuGet package/version/license/dependency metadata; actual pinned restore/build, no source substitution | PASS publication/pin/restore/dependency build; native integration OPEN |
 | AC-ANALYTICS-002 | Real native engine tracks fixed values, explicit flush, exact independent native hourly result/coverage; raw/session/identity disabled; query cannot raw-fallback | OPEN implementation/runtime |
 | AC-ANALYTICS-003 | Actual node SDK and official MCP writes advance committed/applied native state; bounded sampler reports genuine corresponding state without changing original receipts; failed/canceled operation retains canonical result | OPEN RF3 |
 | AC-ANALYTICS-004 | Full native queue acceptance/drop/cancellation, bounded query admission/native timeout and original query join; healthy fresh operation follows refusal | OPEN implementation/runtime |

@@ -10,6 +10,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Owns one real production application, silo and physical stores; borrowed operation never owns them.</summary>
 internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
 {
+    private const string UnjoinedApplication = "The HTTP application has not joined; retain its borrowed storage.";
     internal WebApplication Application
     {
         get;
@@ -107,21 +108,10 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
 
     private async Task CloseApplicationAndStorageAsync(List<Exception> failures, CancellationToken cancellationToken)
     {
-        Task? applicationStop = null;
-        await ServerFailureObserver.ObserveAsync(async () =>
+        await ServerFailureObserver.ObserveAsync(() => Application.StopAsync(cancellationToken), failures).ConfigureAwait(false);
+        if (!await JoinApplicationDisposalAsync(failures, cancellationToken).ConfigureAwait(false))
         {
-            applicationStop = Application.StopAsync(cancellationToken);
-            await applicationStop.ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            applicationDisposal ??= Application.DisposeAsync().AsTask();
-            await applicationDisposal.WaitAsync(cancellationToken).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        if (applicationStop is not { IsCompletedSuccessfully: true }
-            && applicationDisposal is not { IsCompletedSuccessfully: true })
-        {
-            failures.Add(new InvalidOperationException("The HTTP application has not joined; retain its borrowed storage."));
+            failures.Add(new InvalidOperationException(UnjoinedApplication));
             return;
         }
         if (partition is { } actualPartition)
@@ -133,4 +123,45 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
             }, failures).ConfigureAwait(false);
         }
     }
+
+    private async Task<bool> JoinApplicationDisposalAsync(List<Exception> failures, CancellationToken cancellationToken)
+    {
+        Task? original = null;
+        ServerFailureObserver.Observe(() => original = applicationDisposal ??= Application.DisposeAsync().AsTask(), failures);
+        if (original is null)
+        {
+            return false;
+        }
+        Task? bounded = null;
+        ServerFailureObserver.Observe(() => bounded = original.WaitAsync(cancellationToken), failures);
+        if (bounded is not null)
+        {
+            await bounded.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
+        await ObserveTerminalAsync(original, bounded, failures, cancellationToken).ConfigureAwait(false);
+        return original.IsCompletedSuccessfully;
+    }
+
+    private static async Task ObserveTerminalAsync(Task original, Task? bounded,
+        List<Exception> failures, CancellationToken cancellationToken)
+    {
+        var waiting = new List<Exception>();
+        if (bounded is not null && !ReferenceEquals(bounded, original)
+            && bounded.IsCanceled && cancellationToken.IsCancellationRequested)
+        {
+            await ServerFailureObserver.ObserveAsync(() => bounded, waiting).ConfigureAwait(false);
+        }
+        var terminal = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => original, terminal).ConfigureAwait(false);
+        foreach (var canceled in waiting.OfType<OperationCanceledException>())
+        {
+            if (canceled.CancellationToken == cancellationToken
+                && !terminal.OfType<OperationCanceledException>().Any(error => error.CancellationToken == cancellationToken))
+            {
+                failures.Add(canceled);
+            }
+        }
+        failures.AddRange(terminal);
+    }
+
 }

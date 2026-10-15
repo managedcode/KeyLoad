@@ -8,6 +8,19 @@ internal sealed class ReplicaReadRoundExecutor(ReplicaState state, ReplicaRpcCli
     private const int FirstCommittedPosition = 1;
     private const int FirstElectionTerm = 1;
 
+    internal async Task ExecuteControlAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await ExecuteAsync(ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException original) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw ReplicaReadFailureMetadata.Preserve(original,
+                Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader));
+        }
+    }
+
     internal async Task ExecuteAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         using var active = activity.Enter();

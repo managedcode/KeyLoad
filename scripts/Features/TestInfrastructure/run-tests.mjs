@@ -60,6 +60,7 @@ localImageFilters.add("/*/*/RowRevisionInferenceRf3Tests/*");
 localImageFilters.add("/*/*/(NativeDatabaseMigrationRf3Tests|SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests)/*");
 localImageFilters.add("/*/*/CatalogBootstrapAuthorityRf3Tests/*");
 localImageFilters.add("/*/*/(SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests|CatalogBootstrapAuthorityRf3Tests)/*");
+localImageFilters.add("/*/*/FoundationOtlpRf3Tests/NativeDashboardReceivesActualRf3SdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs");
 const nativeTextPreparedFilter = '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*';
 const localImageGithubIdentity = ['KEYLOAD_IMAGE_RECEIPT', 'GITHUB_SHA', 'GITHUB_ACTIONS'];
 const localImageInheritedIdentity = ['KEYLOAD_IMAGE_PROVENANCE', 'KEYLOAD_LOCAL_IMAGE_RECEIPT',

@@ -14,13 +14,13 @@ internal sealed class RowRevisionInferenceRf3Tests
     public async Task HiddenRowRevisionGuessesStayPrivateAcrossFreshSdkMcpAdmissionRepairAndTwoRf3ColdCuts(string kind)
     {
         var failures = new List<Exception>();
-        using var deadline = McpCallerDeadline.Create();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var fixture = new ClusterFixture();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
+                using var deadline = McpCallerDeadline.Create();
                 await RowRevisionInferenceRf3Flow.RunAsync(fixture, kind, deadline.Token);
             }, failures);
         }, failures);

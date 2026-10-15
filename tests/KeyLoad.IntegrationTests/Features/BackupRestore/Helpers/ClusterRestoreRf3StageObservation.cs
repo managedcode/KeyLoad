@@ -14,13 +14,13 @@ internal sealed class ClusterRestoreRf3StageObservation
     private readonly Task reader;
     private int characters;
 
-    internal ClusterRestoreRf3StageObservation(ResourceLoggerService logs, Guid operationId,
+    internal ClusterRestoreRf3StageObservation(ResourceLoggerService logs, ExecutableResource resource, Guid operationId,
         NativeClusterRestoreStage stage, int maximumCharacters, CancellationToken cancellationToken)
     {
         this.operationId = operationId;
         this.stage = stage;
         this.maximumCharacters = maximumCharacters;
-        reader = ReadAsync(logs, cancellationToken);
+        reader = ReadAsync(logs, resource, cancellationToken);
     }
 
     internal async Task<int> WaitAsync(CancellationToken cancellationToken)
@@ -39,10 +39,10 @@ internal sealed class ClusterRestoreRf3StageObservation
 
     internal Task JoinAsync() => reader;
 
-    private async Task ReadAsync(ResourceLoggerService logs, CancellationToken cancellationToken)
+    private async Task ReadAsync(ResourceLoggerService logs, ExecutableResource resource, CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
-        var owned = logs.WatchAsync(ClusterRestoreRf3Protocol.RestoreResource).GetAsyncEnumerator(cancellationToken);
+        var owned = logs.WatchAsync(resource).GetAsyncEnumerator(cancellationToken);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             while (await owned.MoveNextAsync().ConfigureAwait(false))

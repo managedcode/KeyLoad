@@ -8,6 +8,7 @@
     <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
     <PackageVersion Include="Cartograph.Catalog" Version="0.1.0-alpha" />
     <PackageVersion Include="ZoneTree" Version="2.0.1" />
+    <PackageVersion Include="ZoneTree.Analytics" Version="1.0.0" />
     <PackageVersion Include="ZoneTree.FullTextSearch" Version="1.0.9" />
     <PackageVersion Include="ManagedCode.Communication" Version="10.3.7" />
     <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.3.7" />

@@ -93,6 +93,7 @@ internal static class ZoneTreeCheckpointWriter
         {
             while (iterator.Next())
             {
+                ZoneTreeNativeValueHeader.RequireLive(iterator.CurrentValue.Span);
                 var item = new StorageMutation(iterator.CurrentKey.ToArray(), iterator.CurrentValue.Span[
                     ZoneTreePersistenceFormat.StorageValueHeaderBytes..].ToArray());
                 batch.Add(item);

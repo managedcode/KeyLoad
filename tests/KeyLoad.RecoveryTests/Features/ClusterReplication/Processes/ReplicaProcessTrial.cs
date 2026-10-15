@@ -93,7 +93,9 @@ internal sealed class ReplicaProcessTrial : IAsyncDisposable
         return output.ToString();
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync() => DisposeAsync(retainDirectory: false);
+
+    internal async ValueTask DisposeAsync(bool retainDirectory)
     {
         using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
         if (!process.HasExited)
@@ -107,7 +109,10 @@ internal sealed class ReplicaProcessTrial : IAsyncDisposable
             await Console.Error.WriteLineAsync(errors);
         }
         process.Dispose();
-        await ReplicaProcessFiles.DeleteAsync(DirectoryPath, deadline.Token);
+        if (!retainDirectory)
+        {
+            await ReplicaProcessFiles.DeleteAsync(DirectoryPath, deadline.Token);
+        }
     }
 
 }

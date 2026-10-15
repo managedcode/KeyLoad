@@ -1,4 +1,362 @@
 {
+  "STAGE88-NATIVE-FOUNDATION-INTAKE-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "inProgressRequiredTasks": 85,
+    "originalTasks": 104,
+    "additionalRequiredTask": "KL-105 open",
+    "totalRequiredTasks": 105,
+    "fullTaskPromotion": false,
+    "record": "docs/implementation/qualification-stage88-foundation.md",
+    "foundationPlan": "docs/implementation/foundation-dependencies.json",
+    "sourceIntake": {
+      "R201StoragePaths": 82,
+      "R202FoundationPaths": 46,
+      "R203LifecyclePaths": 13,
+      "R205NativeLogPaths": 7,
+      "R207ExistingOwnerDisposalOverlayPaths": 3,
+      "adoptionReceipts": [
+        "TestResults/stage61-native-join/root-r201-storage82-adoption.original.json",
+        "TestResults/stage61-native-join/root-r202-small-foundation-adoption.original.json",
+        "TestResults/stage61-native-join/root-r203-lifecycle13-adoption.original.json",
+        "TestResults/stage61-native-join/root-r205-log7-adoption.original.json",
+        "TestResults/stage61-native-join/root-r207-owner-disposal3-adoption.original.json"
+      ],
+      "qualification": "Reviewed source adoption only. Later overlays/deletion/additions are not summed as unique paths or accepted tasks.",
+      "additionalAdoptionReceipts": [
+        {
+          "path": "TestResults/stage61-native-join/root-r211-direct-owner-disposal5-adoption.original.json",
+          "sha256": "2bba611228e2aab2a939d0349ed491be8ce5423a629d5f35f2c0c5fdbd0f2d33"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r213-fencing10-adoption.original.json",
+          "sha256": "8610b21783ce12a0afdf1fed6644139f2a34f9dba452fc782cc45bbf4bf07a91"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r214-metadata-owner3-adoption.original.json",
+          "sha256": "7c4f9b322f85629d42260bfa08da70fdaea1ea5a02a093e77a78c911c56a107d"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r216-native-clock-prerequisite8-adoption.original.json",
+          "sha256": "95d08f94981ef306cd36d0560916d68258ad1e13a65404140165276372ef47a8"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r219-storage-unit9-adoption.original.json",
+          "sha256": "5592fe571ff38e20ecfac4de40d8bffe589f8fd328c4794c119e19c86b240e13"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r220-private-receipt1-adoption.original.json",
+          "sha256": "770ab8f38cc773e591b1f16fc64727b4883a6a3b8cf53e2266eb97fc7532a212"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r221-authorization-clientapi5-adoption.original.json",
+          "sha256": "3255dc87d8596b06f1c0d06a754f2fc83d990b2b6b880cc1eabf70a77a5ef401"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r223-otlp-r150-adoption.original.json",
+          "sha256": "bec28809a28793e683775eace2c68374c1917a98fc5738f8e2cce91f893d3164"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r212-format-disposal-adoption-processing-flow-r1.original.json",
+          "sha256": "30f76b4ce3ad6041666a786bfd2a72b247675a152628f2386bbd98aadb491764"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r223-otlp-r150-adoption.original.json",
+          "sha256": "bec28809a28793e683775eace2c68374c1917a98fc5738f8e2cce91f893d3164"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r225-r224-native-owner-platform-frame-adoption.original.json",
+          "sha256": "9c38eb5c608ab23e6257a84e3ab7bc3d842aca7d2bd8ac96e656106a16992388"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r227-r224-receiver-style-adoption.original.json",
+          "sha256": "2ffbcab980cbdf827e29446ffd4c9086910447afdcbc6fb9e469e1817b08c767"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r229-published-analytics-pin.original.json",
+          "sha256": "37a5221b6b0a3cd47eeb45c28a61d945e869349e2257c963523f942b5f0656f0"
+        },
+        {
+          "path": "TestResults/stage61-native-join/root-r232-retained-store-lexical-ownership.adoption.original.json",
+          "sha256": "b2d6951919b78c420285a452c949f0316853792635192394e2a490709f8bb925"
+        }
+      ]
+    },
+    "historicalVerification": {
+      "scope": "Original local development source/binaries only; never transferred to current source",
+      "R191Release": {
+        "exitCode": 0,
+        "warnings": 0,
+        "errors": 0,
+        "elapsedSeconds": 331.9840756668709
+      },
+      "R193FunctionalUnit": {
+        "passed": 124,
+        "failed": 0,
+        "skipped": 0
+      },
+      "R198SupplementalUnit": {
+        "passed": 30,
+        "failed": 0,
+        "skipped": 0
+      },
+      "R194ProcessRecovery": {
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "R195MigrationRf3": {
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "exitCode": 2
+      },
+      "R196PrivateColdRf3": {
+        "passed": 3,
+        "failed": 4,
+        "skipped": 0,
+        "exitCode": 2,
+        "failures": [
+          "RowRevisionInferenceRf3Tests put",
+          "RowRevisionInferenceRf3Tests patch",
+          "RowRevisionInferenceRf3Tests delete",
+          "SlowBodyAdmissionReturnTests"
+        ],
+        "passedScope": "CatalogBootstrapAuthority key-revoked/principal-revoked/principal-demoted"
+      },
+      "R197CanonicalFormatter": {
+        "exitCode": 0,
+        "elapsedSeconds": 515.8440376250073
+      },
+      "R204ReleaseBeforeR205R207": {
+        "exitCode": 1,
+        "warnings": 0,
+        "errors": 4,
+        "diagnostic": "CA2213 ReplicaConsensus leader/snapshots/followers/lifetime",
+        "elapsedSeconds": 77.87541091581807
+      },
+      "originalProcessesJoined": true,
+      "originalOutputFilesClosed": true,
+      "nativeParallelLimit": 50,
+      "R208ReleaseAfterOwnerLocalCorrection": {
+        "exitCode": 1,
+        "warnings": 0,
+        "errors": 7,
+        "IDE0200": 4,
+        "CA2213": 3,
+        "elapsedSeconds": 76.65430779196322,
+        "scope": "Original full build failed;3 owned fields still diagnosed; no compiler closure inferred from source peer."
+      },
+      "R215OriginalFullRelease": {
+        "exitCode": 1,
+        "warnings": 0,
+        "errors": 1,
+        "elapsedSeconds": 48.68022079207003,
+        "diagnosticsByCode": {
+          "CA1068": 1
+        },
+        "processJoined": true,
+        "bothOutputFilesClosed": true,
+        "timedOut": false
+      },
+      "R217OriginalFullRelease": {
+        "exitCode": 1,
+        "warnings": 0,
+        "errors": 2,
+        "elapsedSeconds": 87.45799333392642,
+        "diagnosticsByCode": {
+          "KLD0035": 1,
+          "KLD0036": 1
+        },
+        "processJoined": true,
+        "bothOutputFilesClosed": true,
+        "timedOut": false
+      },
+      "R218OriginalFullRelease": {
+        "exitCode": 1,
+        "warnings": 0,
+        "errors": 33,
+        "elapsedSeconds": 213.1695674159564,
+        "diagnosticsByCode": {
+          "CA1001": 1,
+          "CA2016": 1,
+          "CS0103": 1,
+          "CS8602": 1,
+          "CS1061": 3,
+          "CS0121": 1,
+          "CA2000": 8,
+          "CA1416": 4,
+          "CA2234": 3,
+          "IDE0007": 1,
+          "KLD0024": 1,
+          "CA1849": 1,
+          "CA1822": 2,
+          "CA1068": 2,
+          "IDE0031": 1,
+          "IDE0032": 1,
+          "IDE0005": 1
+        },
+        "processJoined": true,
+        "bothOutputFilesClosed": true,
+        "timedOut": false
+      },
+      "R212FocusedFormatterApplication": {
+        "exitCode": 0,
+        "scopePaths": 134,
+        "changedPaths": 18,
+        "elapsedSeconds": 74.00167800020427,
+        "qualification": "Original application only; no current formatter/compiler proof"
+      },
+      "R224OriginalFullRelease": {
+        "exitCode": 1,
+        "elapsedSeconds": 350.1689646251034,
+        "processJoined": true,
+        "bothOutputFilesClosed": true,
+        "timedOut": false,
+        "warnings": 0,
+        "errors": 18,
+        "terminalReceipt": {
+          "path": "TestResults/stage61-native-join/root-r224-native-foundation-r218-batch-repaired-release.completion.original.json",
+          "sha256": "8614ca0ca0df9d66341db39bb7f652d8cf174b458f085adc88c359360d994652"
+        }
+      },
+      "R231OriginalFullRelease": {
+        "exitCode": 1,
+        "elapsedSeconds": 292.32252979208715,
+        "processJoined": true,
+        "bothOutputFilesClosed": true,
+        "timedOut": false,
+        "warnings": 0,
+        "errors": 1,
+        "terminalReceipt": {
+          "path": "TestResults/stage61-native-join/root-r231-native-foundation-corrected-published-analytics-release.completion.original.json",
+          "sha256": "37f40774dd3bb23c423c812565a308a2951f0365da25410945360b3fb34a6a3d"
+        }
+      }
+    },
+    "selectedFunctionalCoverage": {
+      "path": "TestResults/stage61-native-join/root-r209-new-foundation-unit/functional.cobertura.xml",
+      "sha256": "22b0b9c5e8b6a650871d53b8b2b98f721b03e790e4ac22d6a41f33890a54815c",
+      "coveredLines": 10167,
+      "validLines": 107354,
+      "coveredBranches": 4601,
+      "validBranches": 67943,
+      "linePercent": 9.47053672895281,
+      "branchPercent": 6.7718528766760375,
+      "scope": "Current selected43 Unit only;3failures included; not full-product coverage, no merged/cross-selection trend",
+      "loadTestsIncluded": false
+    },
+    "currentVerification": {
+      "fullSolutionRelease": {
+        "state": "PASS_LOCAL_DEVELOPMENT",
+        "exitCode": 0,
+        "warnings": 0,
+        "errors": 0,
+        "elapsedSeconds": 699.0570672920439,
+        "sourceDrift": [],
+        "terminalReceipt": {
+          "path": "TestResults/stage61-native-join/root-r233-native-foundation-lexical-owner-release.completion.original.json",
+          "sha256": "7a535cfde99560ac5644ea97da14a445d1c2bbbb6853a76e443be9261e9c9a3d"
+        }
+      },
+      "fastFunctionalUnit43": {
+        "state": "FAIL_LOCAL_DEVELOPMENT",
+        "executed": 43,
+        "passed": 40,
+        "failed": 3,
+        "skipped": 0,
+        "actualPeakTestIntervals": 36,
+        "configuredNativeLimit": 50,
+        "sourceDrift": [],
+        "compiledDrift": [],
+        "trx": {
+          "path": "TestResults/stage61-native-join/root-r209-new-foundation-unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "5f200a2751fe02709d21a1833348f037c5ad6d8ad18f2ef189317f771ce737eb"
+        },
+        "terminalReceipt": {
+          "path": "TestResults/stage61-native-join/root-r209-new-foundation-unit.completion.original.json",
+          "sha256": "94c5c3582d9490bce146be26002def309a35b1e40d4c4df2b5ca017b2a7060c6"
+        }
+      },
+      "processRecovery7": {
+        "state": "PASS_LOCAL_DEVELOPMENT",
+        "executed": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "actualPeakTestIntervals": 7,
+        "configuredNativeLimit": 50,
+        "sourceDrift": [],
+        "compiledDrift": [],
+        "trx": {
+          "path": "TestResults/stage61-native-join/root-r210-native-snapshot-process-recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+          "sha256": "ce680a9f953fe1c2f56eb530a11c97c2e9400cbd1d8dcd857fdea1027330d0e4"
+        },
+        "terminalReceipt": {
+          "path": "TestResults/stage61-native-join/root-r210-native-snapshot-process-recovery.completion.original.json",
+          "sha256": "4e22a52985e277aa95269f42135278924e32649e1f95c065ac486fcbd903e7de"
+        }
+      },
+      "canonicalFormatter": {
+        "state": "PASS_LOCAL_DEVELOPMENT",
+        "exitCode": 0,
+        "elapsedSeconds": 367.0729310421739,
+        "sourceDrift": [],
+        "compiledDrift": [],
+        "terminalReceipt": {
+          "path": "TestResults/stage61-native-join/root-r236-current-foundation-canonical-format.completion.original.json",
+          "sha256": "01c0ea355fa2e67d8770fa07073d68ad9f798101bb50cb61d2034c13008cbce2"
+        }
+      },
+      "sdkOfficialMcpAspireRf3": {
+        "state": "OPEN",
+        "terminalReceipt": null
+      },
+      "deliveredSourceLinux": {
+        "state": "OPEN",
+        "terminalReceipt": null
+      },
+      "nativeClockPrerequisites": {
+        "state": "OPEN",
+        "actualAbiExecuted": false,
+        "actualNativeObservationExecuted": false,
+        "managedProviderQualified": false,
+        "authenticatedWorkflowReceipt": null
+      }
+    },
+    "remaining": [
+      "Preserve original R195/R196 failures and execute exact current owning declarations after successful current full build.",
+      "Complete required native clock ABI/provider/caller/lifetime and RF3 telemetry gates; no source-ready promotion.",
+      "Integrate and execute the published Analytics private native component; retain production activation behind actual kernel/scheduler and lifecycle gates.",
+      "Complete full mandatory Linux suites, fault/endurance, functional coverage and all original acceptance criteria; measurements/releases remain downstream."
+    ],
+    "previousSelectedFunctionalCoverage": {
+      "run": "R193 selected124 functional Unit only",
+      "coveredLines": 9082,
+      "validLines": 107563,
+      "coveredBranches": 4078,
+      "validBranches": 68298,
+      "linePercent": 8.443423853927467,
+      "branchPercent": 5.970892266244985,
+      "originalSha256": "27bc2e5ca41f5f532b5d38946de4c2ed3ee6427e4b60cf9bdc239b2d140f5d45",
+      "loadTestsIncluded": false,
+      "classification": "Original R193 selection only; not full-product/current-source coverage or trend; no merged R198 coverage claim."
+    },
+    "publishedAnalyticsDependency": {
+      "version": "1.0.0",
+      "repositoryCommit": "f7511306bbf0c375a918fc8a93845b1f596777b7",
+      "nupkgSha256": "14254385f46a979ddbfee6c874833b4a3a5e754655bdc39b0525d99262370452",
+      "license": "Original MIT, Ahmed Yasin Koculu",
+      "dependency": "ZoneTree2.0.1/net10.0",
+      "restore": "PASS R230",
+      "dependencyBuild": "PASS R233",
+      "runtimeIntegration": "OPEN; native engine/tests SourceN not adopted; real kernel/scheduler activation gate retained",
+      "packageReceipt": {
+        "path": "TestResults/stage61-native-join/root-r228-published-analytics-package.original.json",
+        "sha256": "a649729ed0655d54c6d3ad6a86a49f1daf9451541b9fd00934e73c6b0f5d34f5"
+      }
+    }
+  },
   "STAGE87-NATIVE-FOUNDATION-SOURCE-001": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,

@@ -66,6 +66,7 @@ internal static class LocalRf3ImageSelection
     private const string FoundationAdmissionRepairFilterArgument = "--KeyLoadTests:Filter=/*/*/(NativeDatabaseMigrationRf3Tests|SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests)/*";
     private const string CatalogBootstrapAuthorityFilterArgument = "--KeyLoadTests:Filter=/*/*/CatalogBootstrapAuthorityRf3Tests/*";
     private const string FoundationAdmissionAuthorityFilterArgument = "--KeyLoadTests:Filter=/*/*/(SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests|CatalogBootstrapAuthorityRf3Tests)/*";
+    private const string FoundationTelemetryFilterArgument = "--KeyLoadTests:Filter=/*/*/FoundationOtlpRf3Tests/NativeDashboardReceivesActualRf3SdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -117,7 +118,7 @@ internal static class LocalRf3ImageSelection
                 or NativeMigrationFilterArgument or FoundationCombinedFilterArgument
                 or SlowBodyReturnFilterArgument or RowRevisionAdmissionFilterArgument
                 or FoundationAdmissionRepairFilterArgument or CatalogBootstrapAuthorityFilterArgument
-                or FoundationAdmissionAuthorityFilterArgument, EnabledArgument]
+                or FoundationAdmissionAuthorityFilterArgument or FoundationTelemetryFilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

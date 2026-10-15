@@ -87,6 +87,7 @@ internal static class ZoneTreeRangeReader
 
             var keepGoing = useStaged ? visitor(key, value!) : visitor(key, baseline.Value.Span);
             delivered++;
+            work.Check();
             if (!keepGoing)
             {
                 return new(delivered, false, true, work.ReadBytes);

@@ -2,12 +2,9 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.BackupRestore;
 
@@ -182,19 +179,17 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
             return builder.BuildAsync(cancellationToken);
         }).ConfigureAwait(false);
         await TwoRf3MembershipImageAssertions.VerifyAsync(application, image, cancellationToken).ConfigureAwait(false);
-        if (cli is not null)
+        cli?.OnBeforeResourceStarted((resource, beforeStart, _) =>
         {
-            operatorObservation = new(application.Services.GetRequiredService<ResourceLoggerService>(),
-                application.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.CleanupOutputCharacters,
-                cancellationToken);
+            operatorObservation = ClusterRestoreRf3ObservationCreation.Operator(beforeStart.Services, resource, cancellationToken);
             operatorHistory.Observations.Add(operatorObservation);
             if (cut is { } selected)
             {
-                HeldObservation = new(application.Services.GetRequiredService<ResourceLoggerService>(), OperationId,
-                    selected, application.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.CleanupOutputCharacters,
-                    cancellationToken);
+                HeldObservation = ClusterRestoreRf3ObservationCreation.Held(beforeStart.Services, resource, OperationId,
+                    selected, cancellationToken);
             }
-        }
+            return Task.CompletedTask;
+        });
         started = true;
         joined = false;
         if (!restore)

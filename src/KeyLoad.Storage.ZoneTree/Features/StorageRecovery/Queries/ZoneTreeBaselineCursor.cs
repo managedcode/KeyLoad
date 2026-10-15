@@ -75,6 +75,7 @@ internal sealed class ZoneTreeBaselineCursor : IDisposable
             }
 
             Key = key;
+            ZoneTreeNativeValueHeader.RequireLive(iterator.CurrentValue.Span);
             Value = iterator.CurrentValue[StorageValueHeaderBytes..];
             work.ChargeBaseline((long)key.Length + Value.Length);
             return true;

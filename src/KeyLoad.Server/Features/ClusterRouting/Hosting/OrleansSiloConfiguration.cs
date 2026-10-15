@@ -153,5 +153,6 @@ internal static class OrleansSiloConfiguration
 #pragma warning restore ORLEANSEXP001
         ConnectionGrainGraphRegistration.Register(silo, options.RequestCqrsProbe.Enabled);
         NativeRuntimeJournalRegistration.Register(silo, journal, jobs);
+        EventFeedNativeProviderRegistration.Register(silo);
     }
 }

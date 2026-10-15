@@ -14,15 +14,18 @@ internal static class SampleChunkPendingRf3Log
         var expected = SampleChunkPendingRf3Protocol.RefusalPrefix
             + actualCommandId.ToString(SampleChunkPendingRf3Protocol.GuidFormat)
             + SampleChunkPendingRf3Protocol.RefusalSuffix;
+        var model = wave.Application.Services.GetRequiredService<DistributedApplicationModel>();
+        var resources = RequestCqrsProbeFixtureProtocol.Nodes.Select(node => model.Resources.OfType<ContainerResource>()
+            .Single(resource => resource.Name == node)).ToArray();
         using var owned = CancellationTokenSource.CreateLinkedTokenSource(token);
-        await RequireOwnedAsync(logs, expected, owned, token).ConfigureAwait(false);
+        await RequireOwnedAsync(logs, resources, expected, owned, token).ConfigureAwait(false);
     }
 
-    private static async Task RequireOwnedAsync(ResourceLoggerService logs, string expected,
+    private static async Task RequireOwnedAsync(ResourceLoggerService logs, IReadOnlyList<ContainerResource> resources, string expected,
         CancellationTokenSource owned, CancellationToken token)
     {
         var ownedToken = owned.Token;
-        var readers = RequestCqrsProbeFixtureProtocol.Nodes.Select(node => ReadAsync(logs, node, expected, ownedToken)).ToArray();
+        var readers = resources.Select(resource => ReadAsync(logs, resource, expected, ownedToken)).ToArray();
         var failures = new List<Exception>();
         string? original = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -41,11 +44,11 @@ internal static class SampleChunkPendingRf3Log
         await TestContext.Current!.OutputWriter.WriteLineAsync(original);
     }
 
-    private static async Task<string?> ReadAsync(ResourceLoggerService logs, string node, string expected,
+    private static async Task<string?> ReadAsync(ResourceLoggerService logs, ContainerResource resource, string expected,
         CancellationToken token)
     {
         var failures = new List<Exception>();
-        var reader = logs.WatchAsync(node).GetAsyncEnumerator(token);
+        var reader = logs.WatchAsync(resource).GetAsyncEnumerator(token);
         string? observed = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {

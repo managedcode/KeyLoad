@@ -32,6 +32,14 @@ internal static class ClusterFixtureProtocol
     internal const string HttpControlBodyBytesSetting = "KeyLoad__HttpAdmission__MaxControlBodyBytes";
     internal const string HttpReservedBytesSetting = "KeyLoad__HttpAdmission__MaxReservedBytes";
     internal const string HttpHeavyReadBytesSetting = "KeyLoad__HttpAdmission__HeavyReadReservedBytes";
+    internal const string HttpRequestsSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.MaxRequests);
+    internal const string HttpTenantRequestsSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.MaxTenantRequests);
+    internal const string HttpPrincipalRequestsSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.MaxPrincipalRequests);
+    internal const string HttpControlRequestsSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.ReservedControlRequests);
+    internal const string HttpControlReservedBytesSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.ReservedControlBytes);
+    internal const string HttpTenantControlRequestsSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.MaxTenantControlRequests);
+    internal const string HttpPrincipalControlRequestsSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.MaxPrincipalControlRequests);
+    internal const string HttpOtherReservedBytesSetting = "KeyLoad__HttpAdmission__" + nameof(HttpAdmissionLimits.OtherReservedBytes);
     internal const string HealthCheckLoggerCategory = "Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService";
     internal const string ArtifactDirectory = "artifacts";
     internal const string QualificationDirectory = "qualification";

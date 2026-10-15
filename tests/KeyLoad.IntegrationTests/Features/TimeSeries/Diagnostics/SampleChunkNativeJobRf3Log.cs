@@ -22,16 +22,19 @@ internal static class SampleChunkNativeJobRf3Log
         Guid commandId, bool executing, CancellationToken token)
     {
         var logs = wave.Application.Services.GetRequiredService<ResourceLoggerService>();
+        var model = wave.Application.Services.GetRequiredService<DistributedApplicationModel>();
+        var resources = TwoRf3MembershipProtocol.Nodes.Select(node => model.Resources.OfType<ContainerResource>()
+            .Single(resource => resource.Name == node)).ToArray();
         using var owned = CancellationTokenSource.CreateLinkedTokenSource(token);
-        return await ReadOwnedAsync(logs, commandId, executing, owned, token).ConfigureAwait(false);
+        return await ReadOwnedAsync(logs, resources, commandId, executing, owned, token).ConfigureAwait(false);
     }
 
-    private static async Task<SampleChunkNativeJobRf3Receipt> ReadOwnedAsync(ResourceLoggerService logs,
+    private static async Task<SampleChunkNativeJobRf3Receipt> ReadOwnedAsync(ResourceLoggerService logs, IReadOnlyList<ContainerResource> resources,
         Guid commandId, bool executing, CancellationTokenSource owned, CancellationToken token)
     {
         var ownedToken = owned.Token;
-        var readers = TwoRf3MembershipProtocol.Nodes
-            .Select(node => ReadNodeAsync(logs, node, commandId, executing, ownedToken)).ToArray();
+        var readers = resources
+            .Select(resource => ReadNodeAsync(logs, resource, commandId, executing, ownedToken)).ToArray();
         var failures = new List<Exception>();
         SampleChunkNativeJobRf3Receipt? receipt = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -51,10 +54,10 @@ internal static class SampleChunkNativeJobRf3Log
     }
 
     private static async Task<SampleChunkNativeJobRf3Receipt?> ReadNodeAsync(ResourceLoggerService logs,
-        string node, Guid commandId, bool executing, CancellationToken token)
+        ContainerResource resource, Guid commandId, bool executing, CancellationToken token)
     {
         var failures = new List<Exception>();
-        var reader = logs.WatchAsync(node).GetAsyncEnumerator(token);
+        var reader = logs.WatchAsync(resource).GetAsyncEnumerator(token);
         SampleChunkNativeJobRf3Receipt? receipt = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {

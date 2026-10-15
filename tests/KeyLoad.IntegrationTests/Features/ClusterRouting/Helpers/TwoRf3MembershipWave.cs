@@ -8,6 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 {
     internal readonly TwoRf3MembershipCapacity capacity = new();
+    internal readonly TwoRf3MembershipBuilderLifetime builderLifetime = new();
     internal DistributedApplication? application;
     internal KeyLoad.IntegrationTests.Features.RelationalStorage.SqlTypedInsertMovementTls? SqlInsertTls
     {
@@ -174,6 +175,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal async Task DisposeApplicationAsync(List<Exception> failures)
     {
         NativeCanonicalModelCutWaveLifecycle.StopAdmission(this, failures);
+        await builderLifetime.DisposeBeforeTransferAsync(this, failures).ConfigureAwait(false);
         var owned = application;
         if (owned is null)
         {
@@ -200,13 +202,11 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal void RetainRoots()
     {
         retainRoots = true;
-        queryControls?.RetainEvidence();
-        nativeMembershipControls?.RetainEvidence();
-        canonicalCutControls?.RetainEvidence();
+        TwoRf3MembershipBuilderLifetime.RetainControls(this);
     }
 
     private bool CanDeleteRoot(List<Exception> failures)
-        => !retainRoots && dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
+        => !retainRoots && !builderLifetime.RetentionVeto && dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
             && (!startAttempted || nodeLocksReleased) && (application is null || applicationDisposed);
 
     internal void AssertAllNodeLocksReleased()

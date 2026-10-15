@@ -112,13 +112,16 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
             }
             var bytes = checked((long)record.Key.Length + record.Value.Length);
             observer?.Invoke(bytes);
+            cancellationToken.ThrowIfCancellationRequested();
             examined = checked(examined + bytes);
             if (delivered == maxRecords)
             {
                 return new(delivered, true, false, examined);
             }
             delivered++;
-            if (!visitor(record.Key.Span, record.Value.Span))
+            var keepGoing = visitor(record.Key.Span, record.Value.Span);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!keepGoing)
             {
                 return new(delivered, false, true, examined);
             }

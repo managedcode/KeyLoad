@@ -1,6 +1,6 @@
 # ADR-134: Node-owned derived operational analytics
 
-Status: PROPOSED; user selected ZoneTree.Analytics for adoption. Publication, source integration and all execution gates remain OPEN. No package version is admitted by this decision candidate.
+Status: PROPOSED; user selected ZoneTree.Analytics for adoption. Published package1.0.0 is verified, centrally pinned, restored and compiled as a dependency. Native engine source integration and all operation/production-activation gates remain OPEN.
 
 ## Context and verified dependency
 
@@ -45,3 +45,7 @@ flowchart LR
     Shutdown --> Native
     Ack[Original RF3 ACK and canonical authority] --> Canonical
 ```
+
+## Published package prerequisite update
+
+On 2026-10-15 the official NuGet feed supplied ZoneTree.Analytics1.0.0, repository commit `f7511306bbf0c375a918fc8a93845b1f596777b7`, nupkg SHA256 `14254385f46a979ddbfee6c874833b4a3a5e754655bdc39b0525d99262370452`. Its net10.0 dependency is ZoneTree2.0.1. The original MIT license/copyright is copied unchanged into server output/publish content. R230 restore and R233 full Release build pass; this closes the publication/pin prerequisite only. The earlier404 observations above remain original history. Native component operation proof and actual kernel/scheduler/lifecycle ownership remain open before production activation.

@@ -13,6 +13,10 @@ internal sealed class NativeSubmissionFaultRf3Owner
     private bool startupAttempted;
     private LocalRf3ImageTestSession? localImage;
     private CancellationTokenSource? operationCancellation;
+    private IReadOnlyDictionary<string, string>? waveImages;
+    private bool waveClosed;
+    private bool waveAcquisitionUnknown;
+    private bool waveCloseAttempted;
     internal List<Exception> Failures { get; } = [];
     internal RequestCqrsProbeFixture? Controls
     {
@@ -93,11 +97,12 @@ internal sealed class NativeSubmissionFaultRf3Owner
         var profile = (await NodeEpochRf3Profile.CreatePriorAsync(data, token).ConfigureAwait(false)).Profile;
         Profile = profile;
         var images = await RequestCqrsRf3ImageProof.ReadAsync(token, localImage?.Selection).ConfigureAwait(false);
+        waveImages = RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current);
         var controls = RequestCqrsProbeFixture.Create(data, Guid.NewGuid());
         Controls = controls;
         startupAttempted = true;
         var wave = await RequestCqrsRf3Wave.StartProbedAsync(data,
-            RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current), controls, token,
+            waveImages, controls, token,
             selection: localImage?.Selection).ConfigureAwait(false);
         Wave = wave;
         var administrator = await RequestCqrsRf3Callers.ConnectAsync(wave.App, RequestCqrsRf3Protocol.Node1,
@@ -115,6 +120,11 @@ internal sealed class NativeSubmissionFaultRf3Owner
 
     internal async Task StopForOutcomeInspectionAsync()
     {
+        if (waveCloseAttempted)
+        {
+            throw Missing();
+        }
+        waveCloseAttempted = true;
         var failures = new List<Exception>();
         if (Caller is { } caller)
         {
@@ -135,13 +145,34 @@ internal sealed class NativeSubmissionFaultRf3Owner
         await ServerFailureObserver.ObserveAsync(
             () => (Wave ?? throw Missing()).StopAsync(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
+        waveClosed = true;
+    }
+
+    internal async Task ResumeAfterInspectionAsync(CancellationToken token)
+    {
+        if (!waveClosed || Wave?.NativeAdmissionOwnersJoined is not true)
+        {
+            throw Missing();
+        }
+        var profile = Profile ?? throw Missing();
+        waveClosed = false;
+        waveAcquisitionUnknown = true;
+        var wave = await RequestCqrsRf3Wave.StartProbedAsync(DataRoot,
+            waveImages ?? throw Missing(), Controls ?? throw Missing(), token,
+            selection: localImage?.Selection).ConfigureAwait(false);
+        Wave = wave;
+        waveAcquisitionUnknown = false;
+        waveCloseAttempted = false;
+        Administrator = await RequestCqrsRf3Callers.ConnectAsync(wave.App, RequestCqrsRf3Protocol.Node1,
+            profile.AdminKey, token).ConfigureAwait(false);
     }
 
     private async Task CleanupAsync()
     {
         // Preserve the actual original data/control evidence on any failed acceptance step.
         await ServerFailureObserver.ObserveAsync(() => RequestCqrsPhaseFaultCleanup.RunAsync(root,
-            rootOwned && Failures.Count == 0, Controls, Wave, startupAttempted, Caller, Administrator,
+            rootOwned && Failures.Count == 0, Controls,
+            waveAcquisitionUnknown || waveCloseAttempted && !waveClosed ? null : Wave, startupAttempted, Caller, Administrator,
             Discovery.Length == 0 ? null : Discovery, operationCancellation, null, SdkCall, McpCall,
             SourceArm, Failures, DescendantArm == Guid.Empty ? [] : [DescendantArm]), Failures).ConfigureAwait(false);
         if (localImage is not null)

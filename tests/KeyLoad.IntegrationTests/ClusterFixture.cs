@@ -1,6 +1,5 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Testing;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -19,6 +18,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
     private readonly long? commandBytes;
+    private readonly Features.Authorization.FoundationOtlpRf3Selection? telemetry;
     private readonly Features.Messaging.QueueDeadlineRf3Selection? queueDeadline;
     private readonly Features.QueryExecution.PostgresRf3FixtureOwnership nativeSql = new();
     private readonly HttpAdmissionLimits? httpAdmission;
@@ -47,6 +47,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     public ClusterFixture()
     {
     }
+
+    internal ClusterFixture(Features.Authorization.FoundationOtlpRf3Selection selection)
+        => telemetry = Features.Authorization.FoundationOtlpRf3Configuration.Validate(selection);
 
     internal ClusterFixture(RemoteTransferCoordinatorFixtureSelection selection)
         => transferCoordinator = RemoteTransferCoordinatorFixtureConfiguration.Validate(selection);
@@ -134,12 +137,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             SnapshotReadiness = selection.Readiness;
             var arguments = nativeSql.Prepare(Root, selection.Arguments);
             ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
-            var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-                arguments, timeout.Token);
-            if (isolateReplicaNamespace)
-            {
-                isolationBuilder = new(builder);
-            }
+            var (builder, isolationOwnership) = await ClusterFixtureComposition.CreateBuilderAsync(
+                arguments, telemetry, isolateReplicaNamespace, timeout.Token);
+            isolationBuilder = isolationOwnership;
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
             queueDeadline?.Configure(builder);
             nativeSql.Configure(builder, Root);

@@ -48,6 +48,10 @@ internal static class CrashHostApplication
         {
             return;
         }
+        if (await global::KeyLoad.CrashHost.Features.ClusterReplication.SnapshotManifestEntryProbe.TryRunAsync(args))
+        {
+            return;
+        }
         if (await ReplicaPrefixGcCrashScenario.TryRunAsync(args) || await ReplicaCrashScenario.TryRunAsync(args))
         {
             return;
