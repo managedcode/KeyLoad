@@ -72,6 +72,7 @@ internal sealed class SqlGraphPathRejectionTests
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
         var engine = CreateEngine(database);
         var token = TestContext.Current!.Execution.CancellationToken;
+        await ScriptDomOrdinalGraphAdmission.RunAsync(database, engine, token);
         var missing = SqlGraphPathTestSupport.Parameters((GraphParameter, SqlGraphPathTestSupport.Graph));
         var wrongString = SqlGraphPathTestSupport.Parameters((GraphParameter, new[] { SqlGraphPathTestSupport.Graph }));
         var wrongInteger = SqlGraphPathTestSupport.Parameters(

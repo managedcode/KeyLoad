@@ -3,9 +3,10 @@ using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.Server;
 
-internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::System.Text.Json.JsonElement>? parameters,
+internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::System.Text.Json.JsonElement>? suppliedParameters,
     int? positionalCount, Action checkBudget, CancellationToken token)
 {
+    private readonly Dictionary<string, global::System.Text.Json.JsonElement>? parameters = CopyParameters(suppliedParameters, checkBudget, token);
     private readonly HashSet<string> used = new(StringComparer.Ordinal);
     internal T Read<T>(Dom.ScalarExpression expression)
     {
@@ -25,7 +26,10 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
             token.ThrowIfCancellationRequested();
             return result;
         }
-        catch (global::System.Text.Json.JsonException) { throw ScriptDomOperationErrors.Invalid(); }
+        catch (global::System.Text.Json.JsonException)
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
     }
     internal void Complete()
     {
@@ -60,6 +64,27 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
     }
     private const int EmptyCount = 0;
 
+    private static Dictionary<string, global::System.Text.Json.JsonElement>? CopyParameters(
+        Dictionary<string, global::System.Text.Json.JsonElement>? supplied, Action checkBudget, CancellationToken token)
+    {
+        if (supplied is null)
+        {
+            return null;
+        }
+        var owned = new Dictionary<string, global::System.Text.Json.JsonElement>(supplied.Count, StringComparer.Ordinal);
+        foreach (var entry in supplied)
+        {
+            token.ThrowIfCancellationRequested();
+            checkBudget();
+            if (!owned.TryAdd(entry.Key, entry.Value))
+            {
+                throw ScriptDomOperationErrors.Invalid();
+            }
+        }
+        token.ThrowIfCancellationRequested();
+        checkBudget();
+        return owned;
+    }
     private string Name(Dom.ScalarExpression expression)
     {
         if (expression is Dom.PrimaryExpression { Collation: not null })

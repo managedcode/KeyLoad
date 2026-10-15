@@ -15,7 +15,6 @@ public sealed partial class DatabaseEngine
         const int SamplesLengthValidationBoundary = 1;
         const string SampleBatchBudgetDetail = "The sample batch exceeds its budget.";
         const string SampleSequenceSpace = "sample-sequence";
-        const int AppendAbsentCount = 0;
         const string NonFiniteSampleValueDetail = "A sample value must be finite.";
         const string SampleIdentitySpace = "sample-id";
 
@@ -33,8 +32,8 @@ public sealed partial class DatabaseEngine
 
         var tags = JsonData.Validate(append.TagsJson, Limits);
         var sequenceKey = KeySpace.Partition(SampleSequenceSpace, partition, append.SeriesSet, append.SeriesId);
-        var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : AppendAbsentCount;
-        var retention = SampleRetentionStateReader.Read(tx, partition, append.SeriesSet, append.SeriesId);
+        var watermark = SampleRollupRecords.Watermark(tx, partition, append.SeriesSet, append.SeriesId);
+        var sequence = watermark.Sequence;
         var chunks = new SampleChunkAppendOwner(this, tx, partition, append.SeriesSet, append.SeriesId, TimeSeriesOptions);
         foreach (var sample in append.Samples)
         {
@@ -59,7 +58,7 @@ public sealed partial class DatabaseEngine
 
                 continue;
             }
-            if (retention is not null && sample.Timestamp.UtcTicks < retention.BeforeUtcTicks)
+            if (watermark.Floor is { } floor && sample.Timestamp.UtcTicks < floor)
             {
                 throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleBeforeRetentionFloorDetail);
             }

@@ -10,9 +10,64 @@
     "deliveredSourceScope": [
       "Removed rejected native clock tooling/job/active prerequisites; historical observations retained",
       "Native automatic Immovable policy for five locality-sensitive grains, existing same-RF3 diagnostic manual hook retained",
-      "Original physical ownership, SDK response, cache policy and native test lifetime batches integrated before one-host replacement"
+      "Original physical ownership, SDK response, cache policy and native test lifetime batches integrated before one-host replacement",
+      "KL047: exact ordinal native T-SQL parameter binding, including complete SDK/official MCP RF3 reads, typed writes, replay and two cold owners",
+      "KL055: validate canonical graph adjacency before filtering; complete model and public persisted-policy operation flows",
+      "KL078: refuse invalid canonical sample sequence before publishing chunk corrections; complete failed-materializer repair/replay/two-cold operation"
     ],
     "localVerification": {
+      "release": {
+        "lane": "R359",
+        "result": "passed",
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 124.5706314,
+        "sourceDrift": 0,
+        "stdoutSha256": "dbe10bf315cfffccf1f0cc35430d4a858f85982b510a9c2bd2060671601ed13f"
+      },
+      "functionalUnit": {
+        "lane": "R348 within joined R360 cohort",
+        "passed": 105,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 20.6114639,
+        "configuredNativeParallelLimit": 50,
+        "actualPeakNativeIntervals": 50,
+        "stdoutSha256": "4536628de661fd5d68b9c9eda5fa7f87a8a2d573e338f087a71d1d41bc89b97c",
+        "boundary": "Selected twenty whole-operation class groups; 105 tests, not 105 accepted tasks or a full Unit assembly pass."
+      },
+      "sdkOfficialMcpAspireRf3": {
+        "lane": "R361",
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 276.0642623750027,
+        "selector": "SqlParserAdmissionRf3WholeFlowTests complete original operation",
+        "stdoutSha256": "54870ac6f55c97996676d60319507f2c3db5ed4a00ac693e822d310c00e10d0f",
+        "boundary": "Actual test-owned Aspire/Docker RF3, SDK and official MCP, named reads/typed writes/refusals/full receipt replay/two cold owners. Public graph and correction-predicate RF3 operations remain unexecuted."
+      },
+      "formatter": {
+        "lane": "R349 within joined R360 cohort",
+        "result": "passed",
+        "elapsedSeconds": 169.8689137,
+        "sourceDrift": 0,
+        "compiledDrift": 0
+      },
+      "testCohortSourceAndCompiledDrift": 0,
+      "developmentOnly": true,
+      "originalCompilerFailuresRetained": [
+        "R347: eight test-helper compiler/analyzer diagnostics",
+        "R355: sole remaining CA2000 test fixture ownership diagnostic; fixed by lexical using, before successful R359"
+      ]
+    },
+    "implementationPending": "Complete coherent one-host/silo-local Grain Service/native journal/jobs contributions remain separately prepared, not integrated/runtime-qualified. Reviewed model/public43-file batch compiles with zero warnings/errors, selected105 Unit tests and full formatter pass; original SQL SDK/official MCP Aspire RF3 operation passes. Public graph-policy and sample correction-predicate RF3 operations still require their actual execution. No full acceptance promotion.",
+    "remaining": [
+      "Complete one-host physical-owner/native lifecycle integration and its original partial-start/shutdown/recovery/SDK-MCP RF3 operations",
+      "Qualify original public graph-policy and sample correction-predicate SDK/MCP Aspire RF3 operations; keep whole-feature Linux and remaining original acceptance gates open",
+      "Complete original native migration operation, supported SQL parity, telemetry export/privacy and per-feature acceptance",
+      "Complete exact-source Linux, full functional coverage, security/fault/endurance/resource gates; performance/profiling/comparisons and release remain downstream"
+    ],
+    "preModelLocalVerification": {
       "release": {
         "lane": "R338",
         "result": "passed",
@@ -42,19 +97,21 @@
         "boundary": "Actual three-voter test-owned Docker/Aspire, real SDK+official MCP, original complete credential/read/outbox/replay/cold operations; pre-one-host replacement development proof only."
       },
       "formatter": {
-        "completeVerify": "R341 failed5 IMPORTS only",
-        "scopedApply": "R342 nativeexit0; exact5directive sets and every nonimport byte conserved; full verification pending",
+        "completeVerify": "R343 passed nativeexit0 after R341 original5 IMPORTS failures",
+        "scopedApply": "R342 nativeexit0; exact5directive sets and every nonimport byte conserved",
+        "elapsedSeconds": 231.7958618751727,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "boundary": "Full pre-model-batch formatter; the subsequently integrated KL047/KL055/KL078 source requires fresh verification",
         "qualified": false
       },
       "testCohortSourceAndCompiledDrift": 0
     },
-    "implementationPending": "Complete coherent one-host/silo-local Grain Service/native journal/jobs source contributions are prepared separately; not yet integrated or runtime-qualified. Model regression batches remain SourceN pending joined intake.",
-    "remaining": [
-      "Complete one-host physical-owner/native lifecycle integration and its original partial-start/shutdown/recovery/SDK-MCP RF3 operations",
-      "Finish canonical full formatter verification after the five import-order corrections",
-      "Complete original native migration operation, supported SQL parity, telemetry export/privacy and per-feature acceptance",
-      "Complete exact-source Linux, full functional coverage, security/fault/endurance/resource gates; performance/profiling/comparisons and release remain downstream"
-    ]
+    "selectedFunctionalCoverage": {
+      "record": "TestResults/stage61-native-join/kl078-r249-final-original-unit-and-six-file-coverage.original.json",
+      "sha256": "47d522f79db770d96d642a01879884c8af3015b0f79bef15bd49ee0bb2197a9c",
+      "scope": "Actual selected functional Unit operation coverage for six changed product files; original Cobertura and exact source/DLL/PDB identities retained. No load tests, no full-product coverage or acceptance claim."
+    }
   },
   "STAGE89-NATIVE-OPERATIONS-001": {
     "status": "in_progress",

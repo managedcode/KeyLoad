@@ -7,6 +7,7 @@ internal static class SqlTypedInsertParameterParity
 {
     internal static async Task RunAsync(TestDatabase fixture, SqlTypedInsertState state, CancellationToken token)
     {
+        await global::KeyLoad.UnitTests.Features.QueryExecution.ScriptDomOrdinalWriteAdmission.RunAsync(fixture, state, token);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
         var limits = UnitExecutionOptions.DatabaseLimits();

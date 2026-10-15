@@ -8,9 +8,10 @@ internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Opti
     ReadExecutionBudget? budget, int maximumNodes, Dictionary<string, global::System.Text.Json.JsonElement>? parameters = null,
     int? positionalParameterCount = null)
 {
+    private readonly Dictionary<string, global::System.Text.Json.JsonElement>? ownedParameters = CopyParameters(parameters, budget);
     private int nodes;
     internal bool UseDocumentMetadata { get; set; } = true;
-    internal Dictionary<string, global::System.Text.Json.JsonElement>? Parameters => parameters;
+    internal Dictionary<string, global::System.Text.Json.JsonElement>? Parameters => ownedParameters;
     internal int? PositionalParameterCount => positionalParameterCount;
     internal DatabaseLimits Limits => limitsOptions.Value;
     internal QueryExecutionOptions Execution => executionOptions.Value;
@@ -30,4 +31,24 @@ internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Opti
             throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail);
         }
     }
+    private static Dictionary<string, global::System.Text.Json.JsonElement>? CopyParameters(
+        Dictionary<string, global::System.Text.Json.JsonElement>? supplied, ReadExecutionBudget? work)
+    {
+        if (supplied is null)
+        {
+            return null;
+        }
+        var owned = new Dictionary<string, global::System.Text.Json.JsonElement>(supplied.Count, StringComparer.Ordinal);
+        foreach (var entry in supplied)
+        {
+            work?.Check();
+            if (!owned.TryAdd(entry.Key, entry.Value))
+            {
+                throw ScriptDomErrors.Invalid();
+            }
+        }
+        work?.Check();
+        return owned;
+    }
+
 }

@@ -36,6 +36,10 @@ internal sealed class SampleChunkAppendOwner
             return;
         }
         var window = windows[index];
+        if (record.Sequence <= window.SourceSequence)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         var next = window with
         {
             SourceSequence = record.Sequence,

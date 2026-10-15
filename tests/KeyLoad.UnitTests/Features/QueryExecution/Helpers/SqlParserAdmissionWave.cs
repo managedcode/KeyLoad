@@ -7,6 +7,7 @@ internal static class SqlParserAdmissionWave
 {
     internal static async Task RunAsync(SqlParserAdmissionFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
     {
+        await ScriptDomOrdinalReadAdmission.RunAsync(fixture, database, store, token);
         await SqlParserAdmissionUnicode.RunAsync(fixture, database, store, token);
         await SqlParserAdmissionNumericControls.RunAsync(fixture, database, store, token);
         await SqlParserAdmissionModelPages.InsertRefusalAsync(fixture, database, store, token);

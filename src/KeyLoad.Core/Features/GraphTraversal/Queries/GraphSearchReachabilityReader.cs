@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.GraphTraversal.Validation;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.GraphTraversal;
@@ -64,14 +65,14 @@ internal sealed class GraphSearchReachabilityReader(
         var prefix = KeySpace.Partition(AdjacencySpace, partition, walk.Graph, OutDirection,
             current.Reference.Collection, current.Reference.Id);
         var remaining = Math.Min(walk.MaxEdges, walk.MaxEdges - examinedEdges + OverflowProbeRows);
-        var scan = budget.VisitRange(view, prefix, remaining, (_, value) => VisitEdge(value, current));
+        var scan = budget.VisitRange(view, prefix, remaining, (key, value) => VisitEdge(key, value, current));
         if (scan.HasMore)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeLimit);
         }
     }
 
-    private bool VisitEdge(ReadOnlySpan<byte> value, GraphSearchReachability current)
+    private bool VisitEdge(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, GraphSearchReachability current)
     {
         const int HopIncrement = 1;
 
@@ -80,10 +81,15 @@ internal sealed class GraphSearchReachabilityReader(
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeLimit);
         }
-        var edgeId = NativeSerialization.Deserialize<string>(value);
+        var edgeId = NativeSerialization.Deserialize<string>(value)
+            ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace, partition, walk.Graph, edgeId))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
-        if (edge.Id != edgeId || edge.From != current.Reference || edge.To.Partition != partition)
+        GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        budget.Check();
+        if (edge.Id != edgeId || edge.From != current.Reference || edge.To.Partition != partition
+            || !key.SequenceEqual(KeySpace.Partition(AdjacencySpace, partition, walk.Graph,
+                OutDirection, current.Reference.Collection, current.Reference.Id, edgeId)))
         {
             throw Errors.Fail(ErrorCode.Corruption, MismatchedEdge);
         }

@@ -8,6 +8,7 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal sealed class ScriptDomGraphContext(QueryRequest query, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget, string parameterDetail)
 {
+    private readonly Dictionary<string, JsonElement>? parameters = CopyParameters(query.Parameters, budget, parameterDetail);
     private int nodes;
     internal QueryRequest Query => query;
     internal string ParameterDetail => parameterDetail;
@@ -38,11 +39,30 @@ internal sealed class ScriptDomGraphContext(QueryRequest query, IOptions<Databas
         }
         var name = variable.Name[PrefixLength..];
         JsonData.Identifier(name);
-        if (query.Parameters is null || !query.Parameters.TryGetValue(name, out var value))
+        if (parameters is null || !parameters.TryGetValue(name, out var value))
         {
             throw Errors.Fail(ErrorCode.Validation, parameterDetail);
         }
         return value;
+    }
+    private static Dictionary<string, JsonElement>? CopyParameters(Dictionary<string, JsonElement>? supplied,
+        ReadExecutionBudget work, string detail)
+    {
+        if (supplied is null)
+        {
+            return null;
+        }
+        var owned = new Dictionary<string, JsonElement>(supplied.Count, StringComparer.Ordinal);
+        foreach (var entry in supplied)
+        {
+            work.Check();
+            if (!owned.TryAdd(entry.Key, entry.Value))
+            {
+                throw Errors.Fail(ErrorCode.Validation, detail);
+            }
+        }
+        work.Check();
+        return owned;
     }
     private const char Prefix = '@';
     private const int PrefixLength = 1;

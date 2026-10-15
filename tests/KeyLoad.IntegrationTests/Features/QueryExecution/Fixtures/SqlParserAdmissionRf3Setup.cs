@@ -29,7 +29,7 @@ internal static class SqlParserAdmissionRf3Setup
                 [new("created", "Created", "{\"value\":1}", "{}"), new("updated", "Updated", "{\"value\":2}", "{}")], ExpectedStreamRevision.NoStream)]);
         var eventReceipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(events, token));
         var insert = new SqlOperationRequest(partition,
-            "INSERT INTO [parser-typed] (id,title,amount) VALUES ('typed-row','literal',-1)", CommandId: Guid.NewGuid());
+            ScriptDomNamedParameterRf3Protocol.InsertSql, ScriptDomNamedParameterRf3Writes.Parameters(), CommandId: Guid.NewGuid());
         var inserted = await SqlRf3Protocol.SdkAsync<CommitReceipt>(root.Sdk, insert, token);
         var stream = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ReadStreamAsync(new(new(partition,
             SqlParserAdmissionRf3State.EventResource, "source")), token));

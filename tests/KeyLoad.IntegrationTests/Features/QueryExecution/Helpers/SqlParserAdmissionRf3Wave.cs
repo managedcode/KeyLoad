@@ -8,6 +8,8 @@ internal static class SqlParserAdmissionRf3Wave
     internal static async Task RunAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
         SqlParserAdmissionRf3State state, CancellationToken token)
     {
+        await ScriptDomNamedParameterRf3Reads.RunAsync(root, reader, state, token);
+        await ScriptDomNamedParameterRf3Writes.RunAsync(root, state, token);
         await SqlParserAdmissionRf3Unicode.RunAsync(root, reader, state, token);
         await SqlParserAdmissionRf3NumericControls.RunAsync(reader, state, token);
         foreach (var (sql, code, detail) in SqlParserAdmissionRf3Inputs.Corpus())

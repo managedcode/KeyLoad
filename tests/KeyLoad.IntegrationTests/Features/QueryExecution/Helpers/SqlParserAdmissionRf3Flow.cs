@@ -1,4 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Server;
 
@@ -13,7 +14,13 @@ internal static class SqlParserAdmissionRf3Flow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var fixture = new ClusterFixture();
+            var retention = ClusterFixtureFailureRootRetention.For(fixture);
+            retention.Enable();
             await ServerFailureObserver.ObserveAsync(() => BodyAsync(fixture), failures);
+            if (failures.Count != 0)
+            {
+                retention.Retain();
+            }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -21,23 +28,18 @@ internal static class SqlParserAdmissionRf3Flow
     {
         await fixture.InitializeAsync();
         SqlParserAdmissionRf3State state;
-        var failures = new List<Exception>();
         using (var deadline = McpCallerDeadline.Create())
         {
             state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
                 root => SqlParserAdmissionRf3Setup.RunAsync(fixture, root, deadline.Token), deadline.Token);
         }
-        await ServerFailureObserver.ObserveAsync(() => CallersAsync(fixture, state, true), failures);
+        await CallersAsync(fixture, state, true);
         for (var cold = 0; cold < ColdCycles; cold++)
         {
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                using var deadline = McpCallerDeadline.Create();
-                await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
-                await CallersAsync(fixture, state, false);
-            }, failures);
+            using var deadline = McpCallerDeadline.Create();
+            await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
+            await CallersAsync(fixture, state, false);
         }
-        ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task CallersAsync(ClusterFixture fixture, SqlParserAdmissionRf3State state, bool warm)
     {
