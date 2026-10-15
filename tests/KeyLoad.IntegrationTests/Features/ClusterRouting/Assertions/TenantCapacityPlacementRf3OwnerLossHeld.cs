@@ -1,6 +1,5 @@
 using KeyLoad.Client;
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -10,6 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class TenantCapacityPlacementRf3OwnerLossHeld
 {
+    private const string SafeConflictDetail = "The database operation could not be completed.";
     private const string LostWrite = "The write response is unavailable. Retry the same command ID.";
 
     internal sealed record Identity(Guid ApplyId, ApplyPlacementIntentRequest Apply, Guid PersistId,
@@ -44,7 +44,7 @@ internal static class TenantCapacityPlacementRf3OwnerLossHeld
             }, token);
         await McpCallerAssertions.ErrorAsync(refused, ErrorCode.Conflict, dispatched: true);
         await Assert.That(refused.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
-            .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(TenantPlacementPolicyProtocol.Stale);
+            .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(SafeConflictDetail);
         await SqlRf3Protocol.EqualAsync(applying,
             await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadPlacementIntentAsync(query, token)));
         await SqlRf3Protocol.EqualAsync(proof, RequestCqrsMovementJournalReader.Read(controls, marker));

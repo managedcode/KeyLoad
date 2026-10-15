@@ -59,5 +59,13 @@ internal static class RecordedQueueFollowerAssertions
     }
 
     internal static async Task EqualAsync<T>(T actual, T expected)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+    {
+        if (actual is null || expected is null)
+        {
+            await Assert.That(actual is null).IsTrue();
+            await Assert.That(expected is null).IsTrue();
+            return;
+        }
+        await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+    }
 }

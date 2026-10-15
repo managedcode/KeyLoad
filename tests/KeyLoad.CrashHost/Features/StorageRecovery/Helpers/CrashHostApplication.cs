@@ -87,6 +87,8 @@ internal static class CrashHostApplication
             DatabaseCompositionCrashScenario.Mode => DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary),
             AggregateReplayCrashScenario.Mode => AggregateReplayCrashScenario.RunAsync(directory, store, boundary),
             EventAppendCrashContract.Mode => EventAppendCrashScenario.RunAsync(directory, store, boundary),
+            global::KeyLoad.CrashHost.Features.EventStreams.SharedDomainCrashProtocol.Mode
+                => global::KeyLoad.CrashHost.Features.EventStreams.SharedDomainCrashScenario.RunAsync(directory, store, boundary),
             TopicPurgeCrashContract.Mode => TopicPurgeCrashScenario.RunAsync(directory, store, boundary, false),
             TopicPurgeCrashContract.Mode + TopicPurgeCrashContract.PinnedSuffix => TopicPurgeCrashScenario.RunAsync(directory, store, boundary, true),
             SampleRollupCrashContract.PrepareMode or SampleRollupCrashContract.RefreshFaultMode

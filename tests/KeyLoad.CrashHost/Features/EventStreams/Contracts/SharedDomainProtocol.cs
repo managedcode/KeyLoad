@@ -1,0 +1,52 @@
+namespace KeyLoad.CrashHost.Features.EventStreams;
+
+internal static class SharedDomainProtocol
+{
+    internal const string Tenant = "tenant";
+    internal const string Database = "database";
+    internal const string LiteralKey = "same-literal-key";
+    internal const string Root = "root";
+    internal const string Writer = "kl081-writer";
+    internal const string FirstDomain = "kl081-shared-a";
+    internal const string SecondDomain = "kl081-shared-b";
+    internal const string FirstDocuments = "kl081-a-documents";
+    internal const string FirstStreams = "kl081-a-events";
+    internal const string FirstQueue = "kl081-a-queue";
+    internal const string SecondDocuments = "kl081-b-documents";
+    internal const string SecondStreams = "kl081-b-events";
+    internal const string SecondQueue = "kl081-b-queue";
+    internal const string IsolatedDocuments = "kl081-isolated-documents";
+    internal const string IsolatedStreams = "kl081-isolated-events";
+    internal const string IsolatedQueue = "kl081-isolated-queue";
+    internal const string FirstPayload = "{\"domain\":\"a\"}";
+    internal const string SecondPayload = "{\"domain\":\"b\"}";
+    internal const string IsolatedDocumentPayload = "{\"isolated\":\"document\"}";
+    internal const string IsolatedEventPayload = "{\"isolated\":\"event\"}";
+    internal const string IsolatedQueuePayload = "{\"isolated\":\"queue\"}";
+    internal const string Headers = "{\"source\":\"kl081\"}";
+    internal const string Item = "same-identity";
+    internal const string Processed = "processed";
+    internal const string Refused = "refused";
+    internal const string Healthy = "healthy";
+    internal const string EventType = "Created";
+    internal const string Handler = "kl081-handler";
+    internal const string GuidFormat = "N";
+    internal const string IdentitySeparator = ":";
+    internal const string DomainDetail = "The resource belongs to a different transaction domain.";
+    internal const string BindingDetail = "The requested resource definition change is unsupported.";
+    internal const string MissingNative = "The original native shared-domain row is absent.";
+    internal const string ImageLimit = "The genuine shared-domain image exceeded its bounded scan.";
+    internal const int ImageBound = 4096;
+    internal const int FirstIndex = 0;
+    internal const int SecondIndex = 1;
+    internal const int DocumentScopeIndex = 2;
+    internal const int EventScopeIndex = 3;
+    internal const int QueueScopeIndex = 4;
+    internal const long NoRevision = 0L;
+    internal const long FirstRevision = 1L;
+    internal const long SecondRevision = 2L;
+    internal const long AckVersion = 3L;
+    internal const long Generation = 1L;
+    private const string OriginalCommand = "dba9efb0-1c9a-4409-8600-ae329176e80a";
+    internal static Guid CommandId { get; } = Guid.Parse(OriginalCommand);
+}

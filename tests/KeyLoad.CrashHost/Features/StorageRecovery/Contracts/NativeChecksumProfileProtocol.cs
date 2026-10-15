@@ -13,6 +13,8 @@ internal static class NativeChecksumProfileProtocol
     internal const string FirstAppend = "first-append";
     internal const string SecondAppend = "second-append";
     internal const string Cold = "cold";
+    internal const string CorruptionRefusal = "corruption-refusal";
+    internal const string CorruptionRefusedSignal = "native-checksum-corruption-refused:Corruption";
     internal const string CutFile = "native-checksum-profile-cut.bin";
     internal const string FollowUpCommandFile = "native-checksum-profile-follow-up-command.bin";
     internal const string FollowUpReceiptFile = "native-checksum-profile-follow-up.bin";

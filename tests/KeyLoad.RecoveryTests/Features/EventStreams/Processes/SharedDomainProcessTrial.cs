@@ -1,0 +1,82 @@
+using System.Diagnostics;
+using System.Globalization;
+using KeyLoad.CrashHost;
+using KeyLoad.CrashHost.Features.EventStreams;
+using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Storage.ZoneTree;
+
+namespace KeyLoad.RecoveryTests.Features.EventStreams;
+
+internal static class SharedDomainProcessTrial
+{
+    private const string RootPrefix = "keyload-shared-domain-crash-";
+    private const string Dotnet = "dotnet";
+    private const string RetainedRootKey = "KeyLoad.SharedDomainCrash.RetainedRoot";
+    private const string UnsettledChild = "The original shared-domain child or readers did not settle.";
+
+    internal static async Task RunAsync(CommitStage stage, int index, CancellationToken callerToken)
+    {
+        using var admission = await StorageTrialLease.AcquireAsync(callerToken);
+        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+        var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
+            CrashFixtureValues.CrashMarker);
+        Exception? primary = null;
+        var policy = SharedDomainProcessConfiguration.Create().Value;
+        using var timeout = new CancellationTokenSource(policy.ExecutionTimeout, TimeProvider.System);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeout.Token);
+        try
+        {
+            child.Start(CreateStart(root, stage, index));
+            child.ThrowStartupFailure();
+            await child.WaitForAcknowledgementAsync(linked.Token);
+            await child.StopAndJoinAsync(linked.Token);
+            RecoveryFileInventory.AssertNativeHandlesReleased(root);
+            child.CloseNativeProcessAfterJoin();
+            await SharedDomainRecoveryOracle.VerifyAsync(root, stage, linked.Token);
+            RecoveryFileInventory.AssertNativeHandlesReleased(root);
+        }
+        catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
+        {
+            primary = failure;
+            primary.Data[RetainedRootKey] = root;
+        }
+        catch (Exception failure) when (!CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
+        {
+            primary = failure;
+            primary.Data[RetainedRootKey] = root;
+        }
+        using var cleanup = new CancellationTokenSource(policy.CleanupTimeout, TimeProvider.System);
+        var failures = new List<Exception>();
+        await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
+        if (!child.IsSettled)
+        {
+            failures.Add(new IOException(UnsettledChild));
+        }
+        if (primary is null && failures.Count == 0)
+        {
+            await CommandIdempotencyProcess.CleanTrialAsync(root, failures, cleanup.Token);
+        }
+        foreach (var failure in failures)
+        {
+            failure.Data[RetainedRootKey] = root;
+        }
+        CommandIdempotencyProcess.ThrowFailures(primary, failures);
+    }
+
+    private static ProcessStartInfo CreateStart(string root, CommitStage stage, int index)
+    {
+        var start = new ProcessStartInfo(Dotnet)
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
+            index.ToString(CultureInfo.InvariantCulture), SharedDomainCrashProtocol.Mode })
+        {
+            start.ArgumentList.Add(argument);
+        }
+        return start;
+    }
+}

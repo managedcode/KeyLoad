@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 internal static class EventAppendRf3Authorization
 {
     internal static async Task RunAsync(ClusterFixture fixture, McpEventStreamScenario scenario,
-        CommandRequest retained, CommitReceipt original, CancellationToken token)
+        CommandRequest retained, CancellationToken token)
     {
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             McpEventStreamTokens.StreamSet, Capability.EventsRead, token);
@@ -21,7 +21,7 @@ internal static class EventAppendRf3Authorization
             {
                 official = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, identity.Secret, token);
                 var expected = McpEventStreamScenario.ExpectedEvents.ToArray();
-                var before = await EventAppendRf3Assertions.PageAsync(reader, official, scenario, expected, original, token);
+                var before = await EventAppendRf3Assertions.PageAsync(reader, official, scenario, expected, token);
                 var fresh = EventAppendRf3Flow.Command(scenario, [McpEventStreamScenario.InputEvents[EventAppendRf3Protocol.FirstEventIndex] with
                     { EventId = EventAppendRf3Protocol.PartialEventId }], ExpectedStreamRevision.Any);
                 await EventAppendRf3Assertions.RejectedAsync(reader, official, fresh, ErrorCode.PermissionDenied,
@@ -29,7 +29,7 @@ internal static class EventAppendRf3Authorization
                 await EventAppendRf3Assertions.RejectedAsync(reader, official, retained, ErrorCode.PermissionDenied,
                     EventAppendRf3Protocol.DeniedDetail, identity.Secret, token);
                 await EventAppendRf3Assertions.SameStreamAsync(before,
-                    await EventAppendRf3Assertions.PageAsync(reader, official, scenario, expected, original, token));
+                    await EventAppendRf3Assertions.PageAsync(reader, official, scenario, expected, token));
             }, failures).ConfigureAwait(false);
             if (official is { } owned)
             {

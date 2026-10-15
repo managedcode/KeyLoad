@@ -3,7 +3,6 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.Messaging;
 using KeyLoad.Storage.ZoneTree;
-using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -14,7 +13,7 @@ internal static class LocalInboxProcessingRecoveryContinuation
     private const string StaleDetail = "The delivery lease is stale.";
 
     internal static async Task<LocalInboxProcessingRecoveryState> RunAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation original, OperationResult result)
+        ReplicatedOperation original, OperationResult result, (byte[] Key, byte[] Value)[] originalRows)
     {
         var history = new List<(ReplicatedOperation, OperationResult)> { (original, result) };
         var request = JsonDefaults.Deserialize<ProcessingRequest>(Encoding.UTF8.GetBytes(original.PayloadJson));
@@ -24,26 +23,30 @@ internal static class LocalInboxProcessingRecoveryContinuation
         });
         var before = LocalInboxProcessingRecoveryDomain.Read(store);
         var dedup = database.Apply(duplicate);
-        await Assert.That(NativeSerialization.Serialize(dedup)).IsEquivalentTo(NativeSerialization.Serialize(result), CollectionOrdering.Matching);
+        await LocalInboxProcessingRecoveryImage.ResultAsync(dedup, result);
         await LocalInboxProcessingRecoveryDomain.SameAsync(store, before);
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         history.Add((duplicate, dedup));
         var changed = Operation(original, request with
         {
             CommandId = Guid.NewGuid(),
             Effects = [new PutDocument(LocalInboxProcessingCrashContract.Documents, "refused", LocalInboxProcessingCrashContract.Payload)]
         });
-        history.Add((changed, await RefuseAsync(database, store, changed, ErrorCode.Conflict, ConflictDetail)));
+        history.Add((changed, await RefuseAsync(database, store, changed, ErrorCode.Conflict, ConflictDetail, originalRows)));
         var stale = Operation(original, request with
         {
             CommandId = Guid.NewGuid(),
             ExecutionGeneration = NewGeneration,
             Effects = []
         });
-        history.Add((stale, await RefuseAsync(database, store, stale, ErrorCode.StaleLease, StaleDetail)));
-        var (receiveOperation, received) = await LocalInboxProcessingHealthyContinuation.RunAsync(database, store, original, history);
+        history.Add((stale, await RefuseAsync(database, store, stale, ErrorCode.StaleLease, StaleDetail, originalRows)));
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
+        var (receiveOperation, received) = await LocalInboxProcessingHealthyContinuation.RunAsync(database, store, original, history, originalRows);
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         foreach (var entry in history)
         {
             await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, entry.Item1, entry.Item2);
+            await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         }
         return new(history.ToArray(), receiveOperation, received);
     }
@@ -56,7 +59,7 @@ internal static class LocalInboxProcessingRecoveryContinuation
         };
 
     private static async Task<OperationResult> RefuseAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, ErrorCode code, string detail)
+        ReplicatedOperation operation, ErrorCode code, string detail, (byte[] Key, byte[] Value)[] originalRows)
     {
         var before = LocalInboxProcessingRecoveryDomain.Read(store);
         var result = database.Apply(operation);
@@ -65,7 +68,9 @@ internal static class LocalInboxProcessingRecoveryContinuation
         await Assert.That(result.Json).IsNull();
         await Assert.That(result.NativeValue).IsNull();
         await LocalInboxProcessingRecoveryDomain.SameAsync(store, before);
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, operation, result);
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         return result;
     }
 }

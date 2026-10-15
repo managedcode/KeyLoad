@@ -1,6 +1,8 @@
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.BackupRestore;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
 
@@ -15,7 +17,7 @@ internal static class SubscriptionOldCutFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new TestDatabase(timeProvider: clock);
+            fixture = new TestDatabase(timeProvider: clock, nativeReplicaAdmission: true);
             await OwnedAsync(fixture, token);
         }, failures);
         if (fixture is not null)
@@ -30,7 +32,9 @@ internal static class SubscriptionOldCutFlow
         await SubscriptionOldCutSeed.RunAsync(fixture, state);
         var root = Path.Combine(fixture.Directory, "old-cut-backup");
         var target = Path.Combine(fixture.Directory, "restored-owner");
-        var backupPosition = fixture.Store.CreateBackup(root);
+        await Assert.That(fixture.Database.LastApplied).IsGreaterThan(MissingAppliedIndex);
+        var capture = MixedEventingCatalogRestore.Capture(fixture, root, token);
+        var backupPosition = capture.Position;
         await SubscriptionOldCutAssertions.StatusAsync(fixture.Database, state, 1, 0, 3, 3);
         var first = new SubscriptionDeliveryCommand(Guid.NewGuid(), state.Group,
             state.OriginalClaim.Deliveries[0].Token, DeliveryAction.Ack);
@@ -43,7 +47,7 @@ internal static class SubscriptionOldCutFlow
         var archive = Directory.GetFiles(root).ToDictionary(path => Path.GetFileName(path)!, File.ReadAllBytes,
             StringComparer.Ordinal);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => RestoreAsync(fixture, state, root, target, token), failures);
+        await ServerFailureObserver.ObserveAsync(() => RestoreAsync(fixture, state, capture, root, target, token), failures);
         await ServerFailureObserver.ObserveAsync(() => SubscriptionOldCutAssertions.ConservedAsync(fixture.Store,
             original, position, identity), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -59,9 +63,9 @@ internal static class SubscriptionOldCutFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task RestoreAsync(TestDatabase fixture, SubscriptionOldCutState state,
-        string backup, string target, CancellationToken token)
+        NativeCatalogBackupCapture capture, string backup, string target, CancellationToken token)
     {
-        ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution());
+        var restoredPosition = await MixedEventingCatalogRestore.RestoreAsync(fixture, capture, backup, target, token);
         ZoneTreeStore? store = null;
         var failures = new List<Exception>();
         string[] bytes = [];
@@ -74,7 +78,10 @@ internal static class SubscriptionOldCutFlow
             await Assert.That(store.Identity.Incarnation).IsNotEqualTo(fixture.Store.Identity.Incarnation);
             await Assert.That(store.Identity.SigningKey.Span.SequenceEqual(fixture.Store.Identity.SigningKey.Span)).IsFalse();
             await Assert.That(store.Identity.DispatchPaused).IsTrue();
+            await Assert.That(store.Position).IsEqualTo(restoredPosition);
             var database = SubscriptionOldCutCold.Open(store, state);
+            var placement = database.ReadAtomicPartitionPlacement("root", new(AtomicPartitionPlacementProtocol.CurrentVersion, state.Group.Source.Partition));
+            await Assert.That(placement.Incarnation).IsEqualTo(store.Identity.Incarnation);
             await SubscriptionOldCutAssertions.StatusAsync(database, state, 1, 0, 3, 3);
             await SubscriptionOldCutRefusal.RunAsync(database, store, state.OriginalProcessingOperation,
                 ErrorCode.TokenInvalidated, "This command belongs to a previous database incarnation.");
@@ -102,4 +109,5 @@ internal static class SubscriptionOldCutFlow
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
+    private const long MissingAppliedIndex = 0;
 }

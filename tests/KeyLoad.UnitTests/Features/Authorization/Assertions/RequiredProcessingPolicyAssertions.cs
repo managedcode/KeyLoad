@@ -7,7 +7,8 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class RequiredProcessingPolicyAssertions
 {
     internal static async Task EqualAsync<T>(T expected, T actual)
-        => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        => await Assert.That(System.Text.Json.JsonSerializer.Serialize(actual, JsonDefaults.Options))
+            .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));
     internal static Task ObserveAsync(ZoneTreeStore store, Func<Task> action) => GraphLabelUseOperations.ObserveAsync(store, action);
     internal static byte[] Outcome(ZoneTreeStore store, PartitionRef partition, string principal, Guid id)
         => store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(partition, principal, id)))

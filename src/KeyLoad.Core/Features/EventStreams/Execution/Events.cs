@@ -82,6 +82,8 @@ public sealed partial class DatabaseEngine
         const string EventIdentitySpace = "event-id";
         const string EventRecordSpace = "event";
         const string MissingRetainedEventDetail = "A retained event ID has no event.";
+        const string InvalidRetainedEventDetail = "A retained event ID does not match its canonical event.";
+        const int MinimumRetainedRevision = 1;
 
         JsonData.Identifier(item.EventId);
         JsonData.Identifier(item.EventType);
@@ -113,8 +115,17 @@ public sealed partial class DatabaseEngine
         };
         if (retained is not null)
         {
+            if (retained.StreamId != stream.StreamId || retained.Generation != stream.Generation
+                || retained.Revision < MinimumRetainedRevision || retained.Revision > tail)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidRetainedEventDetail);
+            }
             var existing = tx.GetRecord<EventRecord>(KeySpace.Partition(EventRecordSpace, partition, append.StreamSet, retained.StreamId, retained.Generation, retained.Revision))
                 ?? throw Errors.Fail(ErrorCode.Corruption, MissingRetainedEventDetail);
+            if (existing.Stream != stream || existing.Revision != retained.Revision || existing.Data.EventId != data.EventId)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidRetainedEventDetail);
+            }
             RejectDuplicateEvent(existing.Data, data);
         }
         var record = new EventRecord(stream, checked(++tail), checked(++sequence), data, now);

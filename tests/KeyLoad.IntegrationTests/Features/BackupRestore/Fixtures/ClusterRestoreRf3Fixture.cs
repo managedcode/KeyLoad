@@ -92,10 +92,11 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     internal Task StartRejectedResumedCredentialAsync(string actualCredential, bool published, CancellationToken cancellationToken)
         => StartRetainedRejectionAsync(new(ErrorCode.Unauthenticated, published, actualCredential, null, null, null), cancellationToken);
 
-    internal Task StartRejectedPlanAsync(bool signer, bool published, CancellationToken cancellationToken)
+    internal Task StartRejectedPlanAsync(bool signer, bool published, CancellationToken cancellationToken,
+        ImmutableArray<ClusterRestoreOwnerMapping>? planMappings = null)
         => StartRetainedRejectionAsync(new(ErrorCode.Conflict, published, null,
             ClusterRestoreRf3ResumeProtocol.PlanMismatch, signer ? Secret() : null, signer ? null
-                : [.. Mappings.Select((mapping, ordinal) => ordinal == FirstMapping
+                : planMappings ?? [.. Mappings.Select((mapping, ordinal) => ordinal == FirstMapping
                     ? mapping with { Target = mapping.Target with { PhysicalShardId = Guid.NewGuid() } } : mapping)]), cancellationToken);
 
     internal Task StartRejectedCorruptPlanAsync(bool published, CancellationToken cancellationToken)

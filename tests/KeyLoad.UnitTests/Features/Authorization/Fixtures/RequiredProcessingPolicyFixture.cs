@@ -16,8 +16,8 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
     internal ResourceDefinition Resource { get; private set; } = null!;
     internal List<(ReplicatedOperation Operation, CommitReceipt Receipt, byte[] Outcome)> Producers { get; } = [];
     internal QueueLaneRef Lane => new(Harness.Partition, Queue);
-    internal string Payload => header ? "{\"value\":1}" : "{\"value\":1,\"secret\":\"BODY-PROCESSING-CANARY\"}";
-    internal string Headers => header ? "{\"trace\":\"one\",\"secret\":\"HEADER-PROCESSING-CANARY\"}" : "{\"trace\":\"one\"}";
+    internal string Payload => header ? "{\"value\":1}" : "{\"secret\":\"BODY-PROCESSING-CANARY\",\"value\":1}";
+    internal string Headers => header ? "{\"secret\":\"HEADER-PROCESSING-CANARY\",\"trace\":\"one\"}" : "{\"trace\":\"one\"}";
     internal EntityRef Reference(string id) => new(Harness.Partition, Derived, id);
     internal static string EffectJson(string id) => id == "first" ? "{\"processed\":1}" : "{\"processed\":2}";
     internal ProcessingRequest Processing(Guid id, Delivery delivery, string document)

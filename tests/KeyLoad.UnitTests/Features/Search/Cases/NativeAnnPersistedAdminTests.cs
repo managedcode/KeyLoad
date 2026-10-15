@@ -42,5 +42,6 @@ internal sealed class NativeAnnPersistedAdminTests
         catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
+        await NativeAnnActiveIdentityFlow.RunAsync(database);
     }
 }

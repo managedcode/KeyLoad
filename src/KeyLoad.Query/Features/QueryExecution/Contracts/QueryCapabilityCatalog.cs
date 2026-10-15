@@ -33,6 +33,7 @@ internal static class QueryCapabilityCatalog
     private const string LiveProfile = "scalarLiveQuery";
     private const string ModelProfile = "modelViewsV1";
     private const string GraphSearchProfile = "graph-search-v1";
+    private const string AstExplainProfile = "AST.Explain.v1";
     private const string JoinProfile = "Q2.InnerJoin.v1";
     private const string LeftPredicateProfile = "Q2.InnerJoin.LeftPredicate.v1";
     private const string QueueJoinProfile = "Q2.QueueEntityRefJoin.v1";
@@ -59,6 +60,6 @@ internal static class QueryCapabilityCatalog
         [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, NotInCapability, BetweenCapability, NotBetweenCapability, NullCapability, NotNullCapability, DistinctCapability, NotDistinctCapability, AstMissingCapability],
         limits.MaxResults, limits.MaxScanRecords, QueryResultBudgetPolicy.Resolve(limits, execution), limits.MaxQueryDepth, true, true,
         limits.MaxQueryReadBytes,
-        [Q1Profile, FeedProfile, LiveProfile, ModelProfile, JoinProfile, LeftPredicateProfile, QueueJoinProfile, EventJoinProfile, Q1OffsetProfile, Q2OffsetProfile, AstNullOrderingProfile, NativeSyntaxProfile, TopProfile, OffsetFetchProfile, DistinctProfile, AllProfile, AliasProfile, DefaultJoinProfile, OrdinalProfile, NamedParameterProfile, WireSlotProfile, DecimalProfile, NationalStringProfile, GraphSearchProfile],
+        [Q1Profile, FeedProfile, LiveProfile, ModelProfile, JoinProfile, LeftPredicateProfile, QueueJoinProfile, EventJoinProfile, Q1OffsetProfile, Q2OffsetProfile, AstNullOrderingProfile, NativeSyntaxProfile, TopProfile, OffsetFetchProfile, DistinctProfile, AllProfile, AliasProfile, DefaultJoinProfile, OrdinalProfile, NamedParameterProfile, WireSlotProfile, DecimalProfile, NationalStringProfile, GraphSearchProfile, AstExplainProfile],
         SupportedVersions, SupportedVersions);
 }

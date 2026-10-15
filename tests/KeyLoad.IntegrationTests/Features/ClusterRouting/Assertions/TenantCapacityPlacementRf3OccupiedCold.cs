@@ -11,12 +11,21 @@ internal static class TenantCapacityPlacementRf3OccupiedCold
         PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State capacity,
         TenantDedicatedOwnerRf3State packed, PartitionMoveRequest move, PartitionMoveResult receipt,
         AtomicPartitionPlacementResolution sibling, long directoryRevision, CancellationToken token)
+        => await RequireAsync(wave, seed, capacity, packed, move, receipt, sibling, directoryRevision,
+            static _ => Task.CompletedTask, token);
+
+    internal static async Task RequireAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State capacity,
+        TenantDedicatedOwnerRf3State packed, PartitionMoveRequest move, PartitionMoveResult receipt,
+        AtomicPartitionPlacementResolution sibling, long directoryRevision,
+        Func<PartitionMovementPublicParentRf3NativeCut[], Task> observe, CancellationToken token)
     {
         PartitionMovementPublicParentRf3NativeCut[]? original = null;
         for (var index = FirstColdCut; index < RequiredColdCuts; index++)
         {
             var cuts = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, move, token);
             await PartitionMovementPublicParentRf3Cut.RequireCompactedAsync(cuts);
+            await observe(cuts);
             foreach (var cut in cuts)
             {
                 await SqlRf3Protocol.EqualAsync(cut,

@@ -26,15 +26,30 @@ internal static class LocalInboxProcessingRecoveryImage
     });
 
     internal static async Task ExactAsync<T>(T actual, T expected)
-        => await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected), CollectionOrdering.Matching);
+    {
+        await QueueEnqueueProcessValueAssertions.EqualAsync(actual, expected);
+        if (actual is OutboxEntry entry && expected is OutboxEntry expectedEntry)
+        {
+            await Assert.That(JsonDefaults.Serialize(entry.Receipt.CompositionReferences))
+                .IsEquivalentTo(JsonDefaults.Serialize(expectedEntry.Receipt.CompositionReferences), CollectionOrdering.Matching);
+        }
+    }
+
+    internal static async Task ResultAsync(OperationResult actual, OperationResult expected)
+    {
+        await Assert.That(actual.Json).IsEqualTo(expected.Json);
+        await Assert.That(actual.Error).IsEqualTo(expected.Error);
+        await Assert.That(actual.SafeDetail).IsEqualTo(expected.SafeDetail);
+        await Assert.That(actual.NativeValue?.GetType()).IsEqualTo(expected.NativeValue?.GetType());
+        await ExactAsync(actual.NativeValue, expected.NativeValue);
+    }
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
         ReplicatedOperation operation, OperationResult expected)
     {
         var image = All(store);
         var position = store.Position;
-        await Assert.That(NativeSerialization.Serialize(database.Apply(operation)))
-            .IsEquivalentTo(NativeSerialization.Serialize(expected), CollectionOrdering.Matching);
+        await ResultAsync(database.Apply(operation), expected);
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(All(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

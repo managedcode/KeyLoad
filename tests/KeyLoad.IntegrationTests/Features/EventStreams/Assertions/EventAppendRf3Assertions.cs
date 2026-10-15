@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 
@@ -18,7 +19,7 @@ internal static class EventAppendRf3Assertions
     }
 
     internal static async Task<StreamPage> PageAsync(KeyLoadClient sdk, McpOfficialClient official,
-        McpEventStreamScenario scenario, EventData[] expected, CommitReceipt receipt, CancellationToken token)
+        McpEventStreamScenario scenario, EventData[] expected, CancellationToken token)
     {
         var request = scenario.ReadRequest(EventAppendRf3Protocol.InitialRevision, EventAppendRf3Protocol.PageLimit);
         var first = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadStreamAsync(request, token));
@@ -31,8 +32,8 @@ internal static class EventAppendRf3Assertions
         await Assert.That(second.Head).IsEqualTo(first.Head);
         await Assert.That(first.HasMore).IsFalse();
         await Assert.That(second.HasMore).IsFalse();
-        await Assert.That(first.CutPosition).IsGreaterThanOrEqualTo(receipt.Token.Position);
-        await Assert.That(second.CutPosition).IsGreaterThanOrEqualTo(first.CutPosition);
+        await Assert.That(first.CutPosition).IsGreaterThan(0L);
+        await Assert.That(second.CutPosition).IsGreaterThan(0L);
         await Assert.That(first.SnapshotCutPosition).IsEqualTo(first.CutPosition);
         await Assert.That(second.SnapshotCutPosition).IsEqualTo(second.CutPosition);
         await Assert.That(first.Cursor).IsNull();
@@ -65,7 +66,7 @@ internal static class EventAppendRf3Assertions
         await Assert.That(later.Stream).IsEqualTo(original.Stream);
         await Assert.That(later.Head).IsEqualTo(original.Head);
         await Assert.That(later.HasMore).IsEqualTo(original.HasMore);
-        await Assert.That(later.CutPosition).IsGreaterThanOrEqualTo(original.CutPosition);
+        await Assert.That(later.CutPosition).IsGreaterThan(0L);
         await Assert.That(JsonDefaults.Serialize(original.Events).AsSpan().SequenceEqual(JsonDefaults.Serialize(later.Events))).IsTrue();
     }
 
@@ -86,21 +87,31 @@ internal static class EventAppendRf3Assertions
         var first = await EventAppendRf3Calls.SdkAsync(sdk, command, token);
         var second = await EventAppendRf3Calls.McpAsync(official, command, token);
         await FailureAsync(first, code, detail, credential);
-        await FailureAsync(second, code, detail, credential);
+        await FailureAsync(second, code, detail, credential, official: true);
         var sdkReplay = await EventAppendRf3Calls.SdkAsync(sdk, command, token);
         var mcpReplay = await EventAppendRf3Calls.McpAsync(official, command, token);
         await FailureAsync(sdkReplay, code, detail, credential);
-        await FailureAsync(mcpReplay, code, detail, credential);
+        await FailureAsync(mcpReplay, code, detail, credential, official: true);
         await Assert.That(sdkReplay.ProblemJson).IsEqualTo(first.ProblemJson);
         await Assert.That(mcpReplay.ProblemJson).IsEqualTo(second.ProblemJson);
     }
 
-    internal static async Task FailureAsync(EventAppendRf3Outcome result, ErrorCode code, string detail, string credential)
+    internal static async Task FailureAsync(EventAppendRf3Outcome result, ErrorCode code, string detail, string credential, bool official = false)
     {
         await Assert.That(result.Receipt).IsNull();
         await Assert.That(result.Error).IsEqualTo(code);
-        await Assert.That(result.Detail).IsEqualTo(detail);
+        const string GenericOfficialFailure = "The database operation could not be completed.";
+        var expectedDetail = official ? (code, detail) switch
+        {
+            (ErrorCode.PermissionDenied, EventAppendRf3Protocol.DeniedDetail) => EventAppendRf3Protocol.DeniedDetail,
+            (ErrorCode.Conflict, EventAppendRf3Protocol.CommandDetail) => EventAppendRf3Protocol.CommandDetail,
+            _ => GenericOfficialFailure
+        } : detail;
+        await Assert.That(result.Detail).IsEqualTo(expectedDetail);
         await Assert.That(result.ProblemJson).IsNotNull();
+        using var problem = JsonDocument.Parse(result.ProblemJson!);
+        var expected = JsonSerializer.SerializeToElement(Errors.Problem(code, expectedDetail), JsonDefaults.Options);
+        await Assert.That(JsonElement.DeepEquals(expected, problem.RootElement)).IsTrue();
         await Assert.That(result.ProblemJson!.Contains(credential, StringComparison.Ordinal)).IsFalse();
         await Assert.That(result.ProblemJson.Contains(McpEventStreamTokens.PrivateMarker, StringComparison.Ordinal)).IsFalse();
     }

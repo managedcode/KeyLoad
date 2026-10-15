@@ -19,7 +19,7 @@ internal static class LocalInboxProcessingHealthyContinuation
     private const long MissingDocumentRevision = 0L;
 
     internal static async Task<(ReplicatedOperation Operation, OperationResult Result)> RunAsync(DatabaseEngine database,
-        ZoneTreeStore store, ReplicatedOperation original, List<(ReplicatedOperation, OperationResult)> history)
+        ZoneTreeStore store, ReplicatedOperation original, List<(ReplicatedOperation, OperationResult)> history, (byte[] Key, byte[] Value)[] originalRows)
     {
         var receive = new ReceiveRequest(Guid.NewGuid(), LocalInboxProcessingCrashContract.OutputLane);
         var receiveOperation = original with
@@ -37,6 +37,7 @@ internal static class LocalInboxProcessingHealthyContinuation
                 database.Sign(claims), OriginalLeaseVersion, receiveOperation.EvaluatedAt.AddSeconds(receive.LeaseSeconds),
                 InitialAttempt, LocalInboxProcessingCrashContract.Generation)], receiveToken);
         var received = database.Apply(receiveOperation);
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         await LocalInboxProcessingRecoveryImage.ExactAsync(received.Get<ReceiveResult>(), expected);
         var delivery = await Assert.That(received.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await LocalInboxProcessingRecoveryImage.ExactAsync(database.Verify<DeliveryClaims>(delivery.Token), claims);
@@ -49,6 +50,7 @@ internal static class LocalInboxProcessingHealthyContinuation
         };
         var healthyToken = NextToken(database, store);
         var completed = database.Apply(healthyOperation);
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         await LocalInboxProcessingRecoveryImage.ExactAsync(completed.Get<CommitReceipt>(), new CommitReceipt(healthy.CommandId,
             healthyToken, [new(DocumentKind, LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Healthy, HealthyDocumentRevision),
                 new(AckKind, LocalInboxProcessingCrashContract.Output, LocalInboxProcessingCrashContract.Message,

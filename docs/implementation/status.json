@@ -1,4 +1,90 @@
 {
+  "STAGE83-COHERENT-WHOLE-OPERATIONS-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "originalTasks": 104,
+    "additionalPerformanceTask": "KL-105 open",
+    "sourceBaseline": "85e406e1551aa2e1b348bbd90f312fb70093580f plus coherent current source; SourceN-only packets excluded",
+    "record": "docs/implementation/qualification-stage83-native-whole-flows.md",
+    "verification": {
+      "fullSolutionRelease": {
+        "nativeExitCode": 0,
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 463.3761489999015,
+        "sourceDriftCount": 0,
+        "sourceInputs": 12642,
+        "stdoutSha256": "71362ace9dc2dbf1ecd0561a65d1294a1e4b38d645f0062b516558473b0e15f1",
+        "compiledImageChanges": "16 Clustering DLL/PDB copies and Unit DLL/PDB; four repaired cases run afterward; earlier runs do not qualify regenerated images"
+      },
+      "canonicalFormatterVerify": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 178.20175304217264,
+        "sourceDriftCount": 0,
+        "compiledImageDriftCount": 0
+      },
+      "selectedUnitInitial": {
+        "passed": 54,
+        "failed": 4,
+        "skipped": 0,
+        "elapsedSeconds": 26.912419583881274,
+        "actualConcurrentPeak": 50,
+        "scope": "58 cases in21 whole classes; not full suite"
+      },
+      "repairedOriginalUnit": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 12.827794375130907,
+        "trxSha256": "541e406cfc16bd8f33423d62cf1bd540e1b58708992c8564abf5d08525691c21",
+        "sourceAndCompiledDriftCount": 0,
+        "boundary": "four original failures only, final R104 images; not one fresh58-case cohort"
+      },
+      "selectedRecoveryInitial": {
+        "passed": 46,
+        "failed": 1,
+        "skipped": 0,
+        "elapsedSeconds": 55.01225141691975
+      },
+      "repairedOriginalRecovery": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 23.471712457947433,
+        "boundary": "same original complete follower flow after both-null oracle repair; earlier46 passes retained, not one fresh47-case/full-suite claim"
+      },
+      "selectedFunctionalCoverage": {
+        "coveredLines": 13377,
+        "totalLines": 108668,
+        "coveredBranches": 6677,
+        "totalBranches": 68817,
+        "selection": "R97 related58 functional operations including4 failures; no load or benchmark contribution, not comparable full-module coverage",
+        "gapLedger": "TestResults/stage61-native-join/root-r97-functional-coverage-production-gap-ledger.original.json"
+      },
+      "diagnostics105": {
+        "functionalAnn10kPassed": true,
+        "elapsedSeconds": 36.041558,
+        "deliveredCpuSamples": 0,
+        "otherCollectors": "not started before process exit",
+        "failure": "Native EventPipe CPU attach returned UnsupportedRuntime/unproved NativeAOT classification; later Unknown/ServerNotAvailable with exit race. No hotspot, overhead or speed claim.",
+        "receiptSha256": "dfc57990eab9da6805315d7946f299c5b15ebfd06a6843a99a2793bdd2cd6b46"
+      },
+      "stoppedOrRejectedRuns": [
+        "R95 IPC permission denied before any tests",
+        "R101 wrapper configuration rejected before SDK launch",
+        "R102 stopped after381 seconds without compiler output/images; native exit0 after SIGTERM does not qualify build"
+      ],
+      "linuxCi": "Build and Tests38674118943 for85e406 queued with19 jobs at inspection2026-10-15; no runner-cause or success claim"
+    },
+    "open": [
+      "earlier five movement/typed INSERT, RecoveryHostLifetime and model Explain failures remain assigned and were not rerun unchanged",
+      "current actual Aspire Docker RF3 SDK/official MCP operations, all native suites and full functional coverage thresholds",
+      "exact delivered-source Linux CI, all feature acceptance, fault/endurance/power-loss and matched100k/1m performance",
+      "next132-source-file8-task packet prepared, not part of this validated checkpoint"
+    ],
+    "sourceDoesNotCountAsAcceptance": true,
+    "productionQualified": false
+  },
   "STAGE81-CURRENT-COMPILER-AND-RUNTIME-001": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,

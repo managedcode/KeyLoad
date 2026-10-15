@@ -76,10 +76,8 @@ internal static class ClusterRestoreRf3ResumeTrial
         await target.StartRejectedResumedCredentialAsync(UnavailableCredential, published, cancellationToken).ConfigureAwait(false);
         await Assert.That(ClusterRestoreRf3RetainedCut.Operation(target).SequenceEqual(originalOperation)).IsTrue();
         await ClusterRestoreRf3NativeArchive.RequireOriginalAsync(originals, archives, cancellationToken).ConfigureAwait(false);
-        await target.StartRejectedPlanAsync(signer: true, published, cancellationToken).ConfigureAwait(false);
-        await Assert.That(ClusterRestoreRf3RetainedCut.Operation(target).SequenceEqual(originalOperation)).IsTrue();
-        await target.StartRejectedPlanAsync(signer: false, published, cancellationToken).ConfigureAwait(false);
-        await Assert.That(ClusterRestoreRf3RetainedCut.Operation(target).SequenceEqual(originalOperation)).IsTrue();
+        await ClusterRestoreRf3PlanBindingsTrial.RunAsync(target, originals, archives, stage,
+            originalOperation, cancellationToken).ConfigureAwait(false);
         await ClusterRestoreRf3PlanCorruption.RequireAsync(target, published, cancellationToken).ConfigureAwait(false);
         await Assert.That(ClusterRestoreRf3RetainedCut.Operation(target).SequenceEqual(originalOperation)).IsTrue();
         await target.StartOperatorOnlyAsync(cancellationToken).ConfigureAwait(false);

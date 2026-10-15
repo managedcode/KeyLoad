@@ -44,9 +44,12 @@ internal static class EventAppendRf3Calls
         var sdkTask = SdkAsync(sdk, first, token);
         var mcpTask = McpAsync(official, second, token);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => Task.WhenAll(sdkTask, mcpTask), failures).ConfigureAwait(false);
+        EventAppendRf3Outcome? sdkResult = null;
+        EventAppendRf3Outcome? mcpResult = null;
+        await ServerFailureObserver.ObserveAsync(async () => sdkResult = await sdkTask.ConfigureAwait(false), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(async () => mcpResult = await mcpTask.ConfigureAwait(false), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
-        return (await sdkTask.ConfigureAwait(false), await mcpTask.ConfigureAwait(false));
+        return (sdkResult!, mcpResult!);
     }
 
     private static ErrorCode ReadCode(JsonElement problem)

@@ -17,20 +17,20 @@ internal static class EventAppendRf3Flow
         var original = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(originalCommand, token));
         await EventAppendRf3Assertions.ReceiptAsync(original, originalCommand, EventAppendRf3Protocol.SeedRevision);
         var expected = McpEventStreamScenario.ExpectedEvents.ToArray();
-        var initial = await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, original, token);
+        var initial = await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, token);
         var partialFailure = await RejectBoundariesAsync(sdk, official, scenario, originalCommand, fixture.AdminKey, token);
-        await EventAppendRf3Authorization.RunAsync(fixture, scenario, originalCommand, original, token);
+        await EventAppendRf3Authorization.RunAsync(fixture, scenario, originalCommand, token);
         await EventAppendRf3Assertions.ReplayAsync(sdk, official, originalCommand, original, token);
         await EventAppendRf3Assertions.SameStreamAsync(initial,
-            await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, original, token));
+            await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, token));
         var winner = await ConcurrentAsync(sdk, official, scenario, fixture.AdminKey, token);
         await EventAppendRf3Assertions.ReceiptIdentityAsync(original, winner.Receipt);
         expected = [.. expected, winner.Expected];
-        var afterWinner = await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, winner.Receipt, token);
+        var afterWinner = await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, token);
         await EventAppendRf3Assertions.PrefixAsync(initial, afterWinner);
         await EventAppendRf3Assertions.ReplayAsync(sdk, official, winner.Command, winner.Receipt, token);
         await EventAppendRf3Assertions.SameStreamAsync(afterWinner,
-            await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, winner.Receipt, token));
+            await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, expected, token));
         var healthyData = McpEventStreamScenario.InputEvents[EventAppendRf3Protocol.FirstEventIndex] with
         {
             EventId = EventAppendRf3Protocol.PartialEventId,
@@ -42,14 +42,14 @@ internal static class EventAppendRf3Flow
         await EventAppendRf3Assertions.ReceiptIdentityAsync(winner.Receipt, receipt);
         EventData[] healthyExpected = [.. expected, McpEventStreamScenario.ExpectedEvents[EventAppendRf3Protocol.FirstEventIndex] with
         { EventId = EventAppendRf3Protocol.PartialEventId, PayloadJson = EventAppendRf3Protocol.HealthyExpected }];
-        var complete = await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, healthyExpected, receipt, token);
+        var complete = await EventAppendRf3Assertions.PageAsync(sdk, official, scenario, healthyExpected, token);
         await EventAppendRf3Assertions.PrefixAsync(afterWinner, complete);
         await EventAppendRf3Assertions.ReplayAsync(sdk, official, healthy, receipt, token);
         await EventAppendRf3Assertions.ReplayAsync(sdk, official, originalCommand, original, token);
         await EventAppendRf3Assertions.RejectedAsync(sdk, official, partialFailure, ErrorCode.DuplicateEventId,
             EventAppendRf3Protocol.DuplicateDetail, fixture.AdminKey, token);
         await EventAppendRf3Assertions.SameStreamAsync(complete, await EventAppendRf3Assertions.PageAsync(sdk, official,
-            scenario, healthyExpected, receipt, token));
+            scenario, healthyExpected, token));
     }
 
     private static async Task<CommandRequest> RejectBoundariesAsync(KeyLoadClient sdk, McpOfficialClient official,
@@ -109,7 +109,7 @@ internal static class EventAppendRf3Flow
             ?? throw new InvalidOperationException(EventAppendRf3Protocol.MissingReceipt);
         await EventAppendRf3Assertions.ReceiptAsync(receipt, command, EventAppendRf3Protocol.WinnerRevision);
         await EventAppendRf3Assertions.FailureAsync(sdkWon ? results.Mcp : results.Sdk, ErrorCode.RevisionConflict,
-            EventAppendRf3Protocol.RevisionDetail, credential);
+            EventAppendRf3Protocol.RevisionDetail, credential, official: sdkWon);
         await EventAppendRf3Assertions.RejectedAsync(sdk, official, sdkWon ? second : first, ErrorCode.RevisionConflict,
             EventAppendRf3Protocol.RevisionDetail, credential, token);
         return (command, receipt, McpEventStreamScenario.ExpectedEvents[EventAppendRf3Protocol.FirstEventIndex] with

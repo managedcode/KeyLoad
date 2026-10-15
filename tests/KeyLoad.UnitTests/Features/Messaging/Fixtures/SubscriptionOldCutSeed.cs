@@ -12,11 +12,11 @@ internal static class SubscriptionOldCutSeed
         fixture.Configure(SubscriptionOldCutState.Collection, ResourceKind.Collection);
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(state.Principal(1, true)))
             .Get<PrincipalRecord>();
-        var producerCut = fixture.Store.Position;
+        var producerIndex = checked(fixture.ReadJournalCut().LastIndex + 1L);
         state.Producer = fixture.Commit(new PublishTopic(SubscriptionOldCutState.Topic,
             [new("event1", "Created", "{\"n\":1}"), new("event2", "Created", "{\"n\":2}"), new("event3", "Created", "{\"n\":3}")]));
         await SubscriptionOldCutAssertions.ReceiptAsync(state.Producer, state.Producer.CommandId, fixture.Store,
-            fixture.Partition, producerCut + 1, new MutationReceipt("publishTopic", SubscriptionOldCutState.Topic, "event3", 3));
+            fixture.Partition, producerIndex, new MutationReceipt("publishTopic", SubscriptionOldCutState.Topic, "event3", 3));
         var configure = new ConfigureSubscriptionRequest(Guid.NewGuid(), state.Group, state.Definition);
         state.Apply(fixture.Database, OperationKind.ConfigureSubscription, configure, configure.CommandId).Get<SubscriptionInfo>();
         state.OriginalReceive = new(Guid.NewGuid(), state.Group, 3);

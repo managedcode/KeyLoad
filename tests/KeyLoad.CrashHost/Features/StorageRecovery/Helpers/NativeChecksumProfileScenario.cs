@@ -39,6 +39,11 @@ internal static class NativeChecksumProfileScenario
 
     private static async Task RunOwnedPhaseAsync(string root, string phase, List<Exception> failures)
     {
+        if (phase == NativeChecksumProfileProtocol.CorruptionRefusal)
+        {
+            NativeChecksumCorruptionRefusal.Require(root);
+            return;
+        }
         using var store = new ZoneTreeStore(new(root), CrashExecutionOptions.StorageExecution(),
             CrashExecutionOptions.PointCacheExecution());
         await ServerFailureObserver.ObserveAsync(() => RunPhaseAsync(root, store, phase), failures);

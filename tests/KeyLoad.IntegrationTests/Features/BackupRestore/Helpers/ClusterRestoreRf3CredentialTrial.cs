@@ -22,6 +22,7 @@ internal static class ClusterRestoreRf3CredentialTrial
         string ownedRoot, CancellationToken cancellationToken)
     {
         await ClusterRestoreRf3CaptureAuthorityTrial.RunAsync(source, seed, cancellationToken).ConfigureAwait(false);
+        var principalCapture = await ClusterBackupPrincipalCaptureFlow.RunAsync(source, seed, cancellationToken).ConfigureAwait(false);
         var credentials = new List<string>();
         foreach (var revoked in new[] { true, false })
         {
@@ -46,6 +47,8 @@ internal static class ClusterRestoreRf3CredentialTrial
             cancellationToken).ConfigureAwait(false);
         var archives = await ClusterRestoreRf3NativeArchive.CopyAsync(source, originals,
             Path.Combine(ownedRoot, ArchiveRoot), cancellationToken).ConfigureAwait(false);
+        principalCapture = await ClusterBackupPrincipalCaptureFlow.CopyAsync(source, principalCapture, ownedRoot,
+            cancellationToken).ConfigureAwait(false);
         foreach (var credential in credentials)
         {
             await RequireRejectedCredentialAsync(source, ownedRoot, originals, archives, credential,
@@ -54,8 +57,10 @@ internal static class ClusterRestoreRf3CredentialTrial
                 cancellationToken).ConfigureAwait(false);
         }
         await source.RestartJoinedAsync(cancellationToken).ConfigureAwait(false);
-        await ClusterRestoreRf3Scenario.RunAsync(source, seed, Path.Combine(ownedRoot, HealthyRoot),
-            credentials, cancellationToken).ConfigureAwait(false);
+        await ClusterBackupPrincipalCaptureFlow.ReplayAsync(source, seed, principalCapture, cancellationToken).ConfigureAwait(false);
+        await ClusterRestoreRf3Scenario.RunWithCaptureReplayAsync(source, seed, Path.Combine(ownedRoot, HealthyRoot),
+            credentials, current => ClusterBackupPrincipalCaptureFlow.ReplayAsync(source, seed, principalCapture, current),
+            cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task RequireRejectedCredentialAsync(TwoRf3MembershipWave source, string ownedRoot,

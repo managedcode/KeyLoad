@@ -80,7 +80,7 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
             var peers = Options.Create(Peers);
             Discovery = new(configured, peers, local, StoreReaderContract.RuntimeJournal);
             Authentication = new(configured, peers, Discovery, TimeProvider.System,
-                Options.Create(new ReplicaTransportOptions()), Options.Create(Peers.ReplayLimits));
+                Options.Create(new ReplicaTransportOptions()), Options.Create(Peers.ReplayLimits), canonicalDatabase: journal.Database);
         }
         catch (Exception primary)
         {

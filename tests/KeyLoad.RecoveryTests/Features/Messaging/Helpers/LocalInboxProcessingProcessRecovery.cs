@@ -21,6 +21,7 @@ internal static class LocalInboxProcessingProcessRecovery
         string[] image = [];
         var finalPosition = 0L;
         StoreIdentity? identity = null;
+        (byte[] Key, byte[] Value)[] originalRows = [];
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -37,12 +38,15 @@ internal static class LocalInboxProcessingProcessRecovery
                 await LocalInboxProcessingRecoveryImage.CutAsync(database, store, original, input, position, tail, outcome is not null);
                 var reconciled = database.Apply(original);
                 await LocalInboxProcessingRecoveryReceipt.RequireAsync(store, original, reconciled.Get<CommitReceipt>(), position + 1L, tail);
+                originalRows = LocalInboxProcessingRecoveryOriginalRows.Capture(store, original, tail);
                 await LocalInboxProcessingRecoveryImage.CutAsync(database, store, original, input, position, tail, committed: true);
                 if (outcome is not null)
                 {
                     await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, original, outcome);
+                    await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
                 }
-                state = await LocalInboxProcessingRecoveryContinuation.RunAsync(database, store, original, reconciled);
+                state = await LocalInboxProcessingRecoveryContinuation.RunAsync(database, store, original, reconciled, originalRows);
+                await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
                 image = LocalInboxProcessingRecoveryImage.All(store);
                 finalPosition = store.Position;
                 identity = store.Identity;
@@ -64,17 +68,27 @@ internal static class LocalInboxProcessingProcessRecovery
                 await LocalInboxProcessingRecoveryImage.ExactAsync(store.Identity, identity);
                 await Assert.That(store.Position).IsEqualTo(finalPosition);
                 await Assert.That(LocalInboxProcessingRecoveryImage.All(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
+                await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
                 var database = TargetInboxRecoveryDatabase.Open(store);
-                foreach (var item in state.History)
-                {
-                    await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, item.Operation, item.Result);
-                }
-                await LocalInboxProcessingRecoveryHealthy.ModelsAsync(database);
-                await LocalInboxProcessingRecoveryReceiveFence.RequireAsync(database, store, state);
+                await VerifyContinuationAsync(database, store, state, originalRows);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
+
+    private static async Task VerifyContinuationAsync(KeyLoad.Core.DatabaseEngine database, ZoneTreeStore store,
+        LocalInboxProcessingRecoveryState state, (byte[] Key, byte[] Value)[] originalRows)
+    {
+        foreach (var item in state.History)
+        {
+            await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, item.Operation, item.Result);
+            await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
+        }
+        await LocalInboxProcessingRecoveryHealthy.ModelsAsync(database);
+        await LocalInboxProcessingRecoveryReceiveFence.RequireAsync(database, store, state);
+        await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
+    }
+
     private static void RequireOriginalRoot(string root)
     {
         if (!Path.IsPathFullyQualified(root)

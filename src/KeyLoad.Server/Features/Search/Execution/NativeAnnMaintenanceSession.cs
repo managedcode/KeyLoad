@@ -45,7 +45,7 @@ internal sealed class NativeAnnMaintenanceSession(Guid id, AnnMaintenanceRequest
     internal void Require(Guid id, AnnMaintenanceRequest request, string principal)
     {
         if (id != Id || principal != PrincipalId
-            || !NativeSerialization.Serialize(request).AsSpan().SequenceEqual(NativeSerialization.Serialize(Request)))
+            || !NativeAnnOriginalResults.SameRequest(request, Request))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.Ownership);
         }

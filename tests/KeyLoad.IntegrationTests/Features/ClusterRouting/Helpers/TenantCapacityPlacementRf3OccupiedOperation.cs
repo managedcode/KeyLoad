@@ -20,6 +20,7 @@ internal static class TenantCapacityPlacementRf3OccupiedOperation
         await TenantDedicatedOwnerRf3Assertions.DeniedAsync(wave, packed, token);
         await TenantDedicatedOwnerRf3Assertions.SiblingAsync(wave, packed,
             packed.SiblingPlacement.DirectoryRevision + ControlBindingRevisionStep, token);
+        var late = await PlacementPackingLateOccupancyStages.SeedAsync(wave, seed, capacity, packed, token);
         var forward = packed.DeniedMove;
         var occupied = await TenantCapacityPlacementRf3OccupiedMoves.RunAsync(wave, forward, token);
         var occupiedPlacement = TenantCapacityPlacementRf3OccupiedPlacement.Published(
@@ -28,8 +29,10 @@ internal static class TenantCapacityPlacementRf3OccupiedOperation
         await TenantCapacityPlacementRf3OccupiedPlacement.RequireAsync(
             seed, capacity, packed, occupiedPlacement, OccupiedDirectoryRevision, token);
         await TenantCapacityPlacementRf3OccupiedAssertions.RefuseAsync(seed, capacity, token);
+        var lateCold = await PlacementPackingLateOccupancyStages.OccupiedAsync(wave, seed, capacity,
+            packed, late, occupiedPlacement, token);
         await TenantCapacityPlacementRf3OccupiedCold.RequireAsync(wave, seed, capacity, packed,
-            forward, occupied, occupiedPlacement, OccupiedDirectoryRevision, token);
+            forward, occupied, occupiedPlacement, OccupiedDirectoryRevision, lateCold.RequireAsync, token);
         var reverse = new PartitionMoveRequest(Guid.NewGuid(), packed.Sibling.Partition,
             seed.Directory.ControlOwner.PhysicalShardId, OccupiedDirectoryRevision, PartitionMoveMode.Transfer);
         var repaired = await TenantCapacityPlacementRf3OccupiedMoves.RunAsync(wave, reverse, token);
@@ -38,6 +41,8 @@ internal static class TenantCapacityPlacementRf3OccupiedOperation
         await TenantCapacityPlacementRf3OccupiedAssertions.SiblingAsync(wave, packed, repairedPlacement, token);
         await TenantCapacityPlacementRf3OccupiedPlacement.RequireAsync(
             seed, capacity, packed, repairedPlacement, RepairedDirectoryRevision, token);
+        await PlacementPackingLateOccupancyStages.RepairedAsync(wave, seed, capacity,
+            packed, late, repairedPlacement, token);
         await TenantCapacityPlacementRf3OccupiedMoves.ReplayAsync(wave, forward, occupied, token);
         var plan = await TenantCapacityPlacementRf3OccupiedPlan.ReadAsync(seed, capacity, token);
         var id = Guid.NewGuid();

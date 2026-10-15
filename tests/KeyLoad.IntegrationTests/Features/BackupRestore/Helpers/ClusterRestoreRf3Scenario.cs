@@ -26,9 +26,19 @@ internal static class ClusterRestoreRf3Scenario
         string ownedRoot, IReadOnlyList<string>? invalidCredentials, CancellationToken cancellationToken)
         => RunAsync(source, seed, ownedRoot, invalidCredentials, null, cancellationToken);
 
-    internal static async Task RunAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+    internal static Task RunAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
         string ownedRoot, IReadOnlyList<string>? invalidCredentials, ClusterRestoreMixedRetentionRf3State? mixed,
         CancellationToken cancellationToken)
+        => RunCoreAsync(source, seed, ownedRoot, invalidCredentials, mixed, null, cancellationToken);
+
+    internal static Task RunWithCaptureReplayAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+        string ownedRoot, IReadOnlyList<string>? invalidCredentials, Func<CancellationToken, Task> replay,
+        CancellationToken cancellationToken)
+        => RunCoreAsync(source, seed, ownedRoot, invalidCredentials, null, replay, cancellationToken);
+
+    private static async Task RunCoreAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+        string ownedRoot, IReadOnlyList<string>? invalidCredentials, ClusterRestoreMixedRetentionRf3State? mixed,
+        Func<CancellationToken, Task>? replay, CancellationToken cancellationToken)
     {
         var started = TimeProvider.System.GetTimestamp();
         var drill = new ClusterRestoreDrillEvidence(TimeProvider.System);
@@ -50,8 +60,8 @@ internal static class ClusterRestoreRf3Scenario
         {
             await ClusterRestoreMixedRetentionRf3NativeCut.SourceAsync(originals, archives, mixed, cancellationToken).ConfigureAwait(false);
         }
-        await ClusterRestoreRf3ColdCapture.RequireAsync(source, seed, originals, archives,
-            cancellationToken).ConfigureAwait(false);
+        await ClusterRestoreRf3ColdCapture.RequireWithReplayAsync(source, seed, originals, archives,
+            replay, cancellationToken).ConfigureAwait(false);
         var target = new ClusterRestoreRf3Fixture(ownedRoot, source.Profile.AdminKey, originals, archives);
         Exception? initiatingFailure = null;
         var cleanupCompleted = false;

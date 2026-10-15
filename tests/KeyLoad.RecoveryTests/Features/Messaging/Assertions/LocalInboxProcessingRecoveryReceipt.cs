@@ -4,7 +4,6 @@ using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.Messaging;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -22,7 +21,7 @@ internal static class LocalInboxProcessingRecoveryReceipt
             store.Identity.Durability));
         var inbox = store.Read(view => view.GetRecord<InboxRecord>(LocalInboxProcessingRecoveryImage.InboxKey()))!;
         await Assert.That(string.IsNullOrEmpty(inbox.Fingerprint)).IsFalse();
-        await Assert.That(NativeSerialization.Serialize(inbox.Receipt)).IsEquivalentTo(NativeSerialization.Serialize(receipt), CollectionOrdering.Matching);
+        await LocalInboxProcessingRecoveryImage.ExactAsync(inbox.Receipt, receipt);
         var request = JsonDefaults.Deserialize<ProcessingRequest>(Encoding.UTF8.GetBytes(operation.PayloadJson));
         for (var ordinal = 0; ordinal < request.Effects.Length; ordinal++)
         {
@@ -33,7 +32,10 @@ internal static class LocalInboxProcessingRecoveryReceipt
                 LocalInboxProcessingCrashContract.Payload, new(), operation.EvaluatedAt) : null;
             var expectedEntry = new OutboxEntry(sequence, ordinal, receipt.Token, operation.EvaluatedAt,
                 request.Effects[ordinal], expected[ordinal], null, after);
-            await Assert.That(NativeSerialization.Serialize(entry)).IsEquivalentTo(NativeSerialization.Serialize(expectedEntry), CollectionOrdering.Matching);
+            await Assert.That(entry).IsNotNull();
+            await Assert.That(entry.GetType()).IsEqualTo(typeof(OutboxEntry));
+            await Assert.That(entry.Mutation.GetType()).IsEqualTo(request.Effects[ordinal].GetType());
+            await LocalInboxProcessingRecoveryImage.ExactAsync(entry, expectedEntry);
         }
     }
 }
