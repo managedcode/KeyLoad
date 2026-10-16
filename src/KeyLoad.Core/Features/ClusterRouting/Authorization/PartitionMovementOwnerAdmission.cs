@@ -34,6 +34,25 @@ public sealed partial class DatabaseEngine
         }
     }
 
+    /// <summary>Proves movement-authority absence from the original gated view without consulting or publishing the live cache.</summary>
+    internal bool CaptureUnconfiguredMovementAbsence(IKeyValueView original, ReadExecutionBudget budget)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        ArgumentNullException.ThrowIfNull(budget);
+        budget.Check();
+        if (configuredPhysicalOwner is not null)
+        {
+            return false;
+        }
+        foreach (var prefix in MovementAuthorityPrefixes)
+        {
+            budget.VisitRange(original, prefix, MovementFirstAuthorityRecord, static (_, _) =>
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Fenced));
+        }
+        budget.Check();
+        return true;
+    }
+
     private void RequireUnconfiguredMovementAbsent(IKeyValueView view)
     {
         if (view is IPartitionMovementReadScope { MovementAuthorityAbsent: true })

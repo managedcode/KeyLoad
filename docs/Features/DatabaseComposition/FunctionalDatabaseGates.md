@@ -33,6 +33,12 @@ integrity and current persisted authorization assertions. The document initializ
 creates `gate_docs_0/anchor` before dependent models initialize. Iteration IDs are
 unique across workers; each topology owns fresh storage and credentials.
 
+Captured search must retain its original-cut movement-authority proof while
+other model operations commit. Advancing the live store must neither force an
+uncaptured lookup nor publish an old absence proof into the live authority
+cache. Ranking uses the bounded captured source; terminal authorization and
+ownership are checked again against current persisted state.
+
 The target is at least 10,000 successful caller-visible database operations per
 topology, with both SDK and MCP represented. Counts are incremented only after
 the original public result reports success; every exercise also verifies its
@@ -54,3 +60,31 @@ test resource lifetime; the identity worker owns real persisted users. Companion
 chats own distinct document/SQL/composition, events/queues/blobs and
 graph/search/analytics modules. Available workers repair actual gate-blocking
 defects while the other modules continue.
+
+## Current local execution evidence
+
+R446 Gate1 passed the original native single-instance case with 10,258 successful
+public operations (5,288 SDK and 4,970 official MCP), 41 waves, eight persisted
+workload users and one queue operator. Its terminal evaluator accepted the
+joined runner/readers, original passing TRX, fixture cleanup and zero
+source/executable/image identity drift. The evaluator is
+`TestResults/stage61-native-join/root-r446-gate1-terminal-evaluation.original.json`
+(SHA-256 `1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea`).
+
+R447 Gate2 failed after 2,332 successful public operations in nine waves.
+Queue inspection through SDK and blob metadata through official MCP failed
+with `OwnershipLost` at wave 4. A further 1,237 operations succeeded, but both
+original failures keep Gate2 open. The captured full-text scope error from
+R441 was not observed in this run. Its direct regression and seven related
+whole-operation cases passed in R450; the full Release build passed without
+warnings or errors. R440/R441 remain immutable historical evidence.
+
+The gate deletes data, rows, blobs and edges. `DROP TABLE` and resource
+catalog deletion are not implemented and remain part of open SQLC-DDL
+requirements. Selected T-SQL and verified cross-model references do not
+qualify complete unified SQL or cross-partition/failover behavior.
+
+These are local functional gates. Original task acceptance remains 20 done and
+85 in progress; complete Linux, recovery, fault/endurance, security, coverage,
+performance and release qualification remain open. Neither gate alone declares
+the complete product accepted or production ready.

@@ -35,7 +35,7 @@ internal sealed partial class NativeTextCapturedRead
         {
             observed.ObserveOriginalPosting(callback);
         }
-        return captured!;
+        return new NativeSearchCapturedReadScope(captured!, authority, budget);
     }
 
     public void VerifyTerminal(IReadOnlyList<EntityRef> selected)

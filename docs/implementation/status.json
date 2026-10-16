@@ -23,34 +23,28 @@
     "persistedQueueOperators": 1,
     "minimumSuccessfulOperationsPerTopology": 10000,
     "orchestration": "Aspire AppHost owns native Azure Table membership through local Azurite, actual one/three-node resources, readiness, endpoints and joined shutdown",
-    "gate1": "PASSED for the recorded R440 source/executable cohort: genuine one-instance Aspire topology, 10258 successful SDK/MCP public operations, all model scenarios and joined cleanup. Repeat after any gate-affecting repair.",
-    "gate2": "OPEN: R441 genuine three-node RF3 run failed only at full-text search with HistoryUnavailable for an uncaptured frozen read scope; repair then repeat matched Gate1/Gate2.",
+    "gate1": "PASSED for the recorded R446 original-cut-authority source/executable cohort: genuine one-instance Aspire topology, 10258 successful SDK/MCP public operations, all model scenarios and joined cleanup, zero source/compiled/image identity drift. Repeat after any gate-affecting repair.",
+    "gate2": "OPEN: original R447 three-node RF3 scenario failed two operations at wave4 with OwnershipLost, while later operations continued. The R441 captured full-text scope defect is repaired; current RF3 quorum/read-deadline failure remains to be repaired and matched Gate1/Gate2 repeated.",
     "latestLocalExecution": {
-      "lane": "Root R441",
+      "lane": "Root R447",
       "result": "failed",
       "nodes": 3,
-      "elapsedSeconds": 100.79314624983817,
-      "successfulPublicOperations": 1971,
+      "elapsedSeconds": 306.3209691669326,
+      "successfulPublicOperations": 2332,
       "completedInitialWaves": 9,
       "failedModels": [
-        "full-text search"
-      ],
-      "modelsWithoutAnObservedExerciseFailure": [
-        "documents",
-        "relational",
-        "composition",
-        "events",
-        "queues/topics",
-        "blobs",
-        "graphs",
-        "time-series/analytics"
+        "queue inspection through SDK",
+        "blob metadata through official MCP"
       ],
       "sourceDrift": 0,
       "compiledDrift": 0,
       "processJoined": true,
-      "stdoutSha256": "101d5d84b73ea12bfa6d164f97e954b14e4d12a7bec815b66b17820137e94fb6",
-      "originalReport": "TestResults/stage61-native-join/root-r441-three-node-working-database-functional-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
-      "boundary": "Initial full-model RF3 cycles are partial evidence; HistoryUnavailable from full-text search fails the whole gate before 10000 operations. All original errors and native cleanup retained. No full-task or performance promotion."
+      "bothReadersJoined": true,
+      "stdoutSha256": "ca02e6abea1c131dacba3a2ead21d7313557537611c4626a01067f60b86d7e68",
+      "originalReport": "TestResults/stage61-native-join/root-r447-three-node-original-cut-authority-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "originalReportSha256": "3cdd11f0d142e4efdc8a715ac1014bdbe38690c3045e6320c775bdcb1d307e96",
+      "requiredGate1TerminalEvaluationSha256": "1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea",
+      "boundary": "Both original operations failed with no current leader/reachable-majority. Later1237 successfuloperations do not turn failures into PASS. PeerRound Stage4 Flags0 and runtime stalls are retained observations, not proof of membership death. No secondary cleanup exception was reported. Whole Gate2 remains OPEN."
     },
     "qualification": "No gate pass, full-task promotion, RF3 durability inference from RF1, throughput claim or production readiness follows from source, package presence or build alone",
     "originalTaskStatusCounts": {
@@ -59,7 +53,7 @@
       "total": 105
     },
     "gate1Evidence": {
-      "lane": "Root R440",
+      "lane": "Root R446",
       "result": "passed",
       "nodes": 1,
       "successfulPublicOperations": 10258,
@@ -75,16 +69,108 @@
         "failed": 0,
         "skipped": 0
       },
-      "elapsedSeconds": 221.52084870799445,
+      "elapsedSeconds": 359.3232375411317,
       "sourceDrift": 0,
       "compiledDrift": 0,
       "processJoined": true,
-      "stdoutSha256": "33162d2b4e9fc4da81b7dea10496979e53fddecd826a599615fc07b2c874ac6b",
-      "originalReport": "TestResults/stage61-native-join/root-r440-single-instance-native-tsql-redrive-canonical-samples-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
-      "terminalEvaluation": "TestResults/stage61-native-join/root-r440-gate1-terminal-evaluation.original.json",
-      "terminalEvaluationSha256": "5736001d6c8b43f998be5bb9461cba82b10c56303e30c0615849fba766ec1463",
-      "boundary": "Native TUnit passed after caller/Aspire shutdown and storage lock release assertions. Local functional evidence only; single-instance acknowledgement is not RF3 durability or Linux production qualification."
-    }
+      "stdoutSha256": "9cd510b2117b9c7065a0a059e6213de1c892785e8a406e6b7714305b0c255faa",
+      "originalReport": "TestResults/stage61-native-join/root-r446-single-instance-original-cut-authority-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "terminalEvaluation": "TestResults/stage61-native-join/root-r446-gate1-terminal-evaluation.original.json",
+      "terminalEvaluationSha256": "1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea",
+      "boundary": "Native TUnit passed after caller/Aspire shutdown and storage lock release assertions. Local functional evidence only; single-instance acknowledgement is not RF3 durability or Linux production qualification.",
+      "bothReadersJoined": true,
+      "cohortBinding": {
+        "sourceCohortDigest": "b508a94a55a19bda7f84705df7deec7cac0ca725c76d7865613bcce45d1e8438",
+        "compiledCohortDigest": "dbdd8dc86a52bc1b5132f1e2f0bc7be19c1dca53c166712ed4ee0c3dd6dd3bbe",
+        "imageInputDigest": "sha256:70485eeed7e1eb04d091d05db20438d4b990cb4810f7e6eb3484053a27fdfc84"
+      },
+      "imageIdentityDrift": 0
+    },
+    "historicalLocalExecutions": [
+      {
+        "lane": "Root R440",
+        "result": "passed",
+        "nodes": 1,
+        "successfulPublicOperations": 10258,
+        "sdkOperations": 5288,
+        "mcpOperations": 4970,
+        "completedWaves": 41,
+        "persistedWorkloadUsers": 8,
+        "persistedQueueOperators": 1,
+        "resourcesPerModel": 3,
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        "elapsedSeconds": 221.52084870799445,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "processJoined": true,
+        "stdoutSha256": "33162d2b4e9fc4da81b7dea10496979e53fddecd826a599615fc07b2c874ac6b",
+        "originalReport": "TestResults/stage61-native-join/root-r440-single-instance-native-tsql-redrive-canonical-samples-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+        "terminalEvaluation": "TestResults/stage61-native-join/root-r440-gate1-terminal-evaluation.original.json",
+        "terminalEvaluationSha256": "5736001d6c8b43f998be5bb9461cba82b10c56303e30c0615849fba766ec1463",
+        "boundary": "Native TUnit passed after caller/Aspire shutdown and storage lock release assertions. Local functional evidence only; single-instance acknowledgement is not RF3 durability or Linux production qualification."
+      },
+      {
+        "lane": "Root R441",
+        "result": "failed",
+        "nodes": 3,
+        "elapsedSeconds": 100.79314624983817,
+        "successfulPublicOperations": 1971,
+        "completedInitialWaves": 9,
+        "failedModels": [
+          "full-text search"
+        ],
+        "modelsWithoutAnObservedExerciseFailure": [
+          "documents",
+          "relational",
+          "composition",
+          "events",
+          "queues/topics",
+          "blobs",
+          "graphs",
+          "time-series/analytics"
+        ],
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "processJoined": true,
+        "stdoutSha256": "101d5d84b73ea12bfa6d164f97e954b14e4d12a7bec815b66b17820137e94fb6",
+        "originalReport": "TestResults/stage61-native-join/root-r441-three-node-working-database-functional-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+        "boundary": "Initial full-model RF3 cycles are partial evidence; HistoryUnavailable from full-text search fails the whole gate before 10000 operations. All original errors and native cleanup retained. No full-task or performance promotion."
+      }
+    ],
+    "focusedRepairVerification": {
+      "releaseBuild": {
+        "lane": "Root R448",
+        "result": "passed",
+        "warnings": 0,
+        "errors": 0
+      },
+      "unitBuild": {
+        "lane": "Root R449",
+        "result": "passed",
+        "warnings": 0,
+        "errors": 0
+      },
+      "wholeOperationTests": {
+        "lane": "Root R450",
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "evidence": "TestResults/stage61-native-join/root-r450-functional-read-cut-repair-evidence.original.json",
+        "evidenceSha256": "c09fbaddda72569575bf746809e2dc50640abe1b01cc1427b3da2794904fda4f"
+      }
+    },
+    "knownFunctionalScopeLimits": [
+      "DROP TABLE/resource deletion is not implemented; SQLC-DDL/REQ-SQLC-006/AC-SQLC-006 remains open. Entity/row/blob/edge deletion does not qualify resource deletion.",
+      "Current gate links models and uses selected native T-SQL operations, but does not qualify complete unified SQL, cross-partition transactions, failover/restart or multiple tenants.",
+      "Current gate has no server-side QueueToGraph/GraphToQueue roundtrip; existing native composition coverage is being integrated separately."
+    ]
   },
   "NATIVE-FOUNDATION-20261015": {
     "status": "in_progress",
