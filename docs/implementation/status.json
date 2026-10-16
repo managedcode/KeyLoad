@@ -2,7 +2,7 @@
   "RESOURCE-LIFETIME-NATIVE-20261016": {
     "title": "Integrated native resource lifetime command/read and controlled blob outcome checkpoint",
     "status": "in_progress",
-    "implementation": "Canonical native source integrated; full strict Release compiler/analyzers and canonical full formatter passed. Runtime qualification on this integrated source remains pending.",
+    "implementation": "Integrated source passes the full strict Release build; fresh focused native cohort improved from42/60 to49/60. Eleven failures in three groups remain and are being repaired; runtime/public qualification is open.",
     "scope": [
       "D1 canonical resource pairs and mandatory command coverage",
       "Native document/query/ANN source and target authority",
@@ -10,6 +10,30 @@
       "Aspire-owned RF3 fixture image lifetime and exact17 local admission controls"
     ],
     "strictBuild": {
+      "label": "root-r545-runtime-repair-release",
+      "result": "passed",
+      "elapsedSeconds": 748.201546916971,
+      "errors": 0,
+      "warnings": 0,
+      "sourceDrift": 0,
+      "stdoutSha256": "d902546b398feacd6394651b76997e9782a17cfb7554643b3499f76f4b3aaf71",
+      "completionSha256": "d5436d455c3af73c5173fe975de17a3a70a5973d944920f6fbd6bc8c51c27936"
+    },
+    "fullFormatVerify": {
+      "label": "root-r543-token-order-final-format-verify",
+      "result": "passed",
+      "elapsedSeconds": 430.19493220793083,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "completionSha256": "d5ad537e35db482c432e9a8f787dff0b4df518451451b39dfe70eefcaa7f81c4",
+      "scope": "Passed on the pre-runtime-repair source; no fresh full-format result is claimed for the later six-file runtime repair."
+    },
+    "focusedUnit": "FAILED: fresh native TUnit selected60,49passed,11failed,0skipped; seven original remote-document failures repaired. Query phase serialization5, scoped-budget counter oracle4 and overconstrained supporting Move budget2 remain open.",
+    "processRecovery": "R538 passed3/3 before the later six-file runtime repair. Its original source identity remains authoritative; no fresh current-source recovery qualification is claimed.",
+    "publicQualification": "OPEN: actual native RF3 and fresh matched one-node/three-node functional and cold flows required after product changes. Earlier e292 normal and57cea624 cold results retain their own recorded source scope.",
+    "limits": "No full SQL, resource DROP/recreate, Linux, power-loss, endurance, performance or release completion claim. Original105 remain20done85in_progress.",
+    "next": "Complete the three confirmed remaining runtime groups as one repair batch, join independent native D2 source/tests and cold-user extension, then execute focused native/process and actual SDK/MCP ONE/RF3 functional and cold gates. Public DROP/recreate remains open.",
+    "previousStrictBuild": {
       "label": "root-r544-test-bindings-final-release",
       "result": "passed",
       "elapsedSeconds": 364.02593612507917,
@@ -19,19 +43,25 @@
       "stdoutSha256": "dc48573d7b95d83fcddfe5c66332517e8fa29f369160d778e1ea45daae41156d",
       "completionSha256": "39f680eefbe95342d8266d383cc3efc9b9c7679b8fc8e6cf89f09ac978a6509a"
     },
-    "fullFormatVerify": {
-      "label": "root-r543-token-order-final-format-verify",
-      "result": "passed",
-      "elapsedSeconds": 430.19493220793083,
+    "focusedUnitRun": {
+      "label": "root-r546-runtime-repair-unit",
+      "result": "failed",
+      "total": 60,
+      "passed": 49,
+      "failed": 11,
+      "skipped": 0,
+      "elapsedSeconds": 109.84697304177098,
       "sourceDrift": 0,
-      "compiledDrift": 0,
-      "completionSha256": "d5ad537e35db482c432e9a8f787dff0b4df518451451b39dfe70eefcaa7f81c4"
-    },
-    "focusedUnit": "OPEN: selected60 is source prediction only; native TUnit TRX and functional coverage required.",
-    "processRecovery": "OPEN: three selected real process regressions require a fresh native run.",
-    "publicQualification": "OPEN: actual native RF3 and fresh matched one-node/three-node functional and cold flows required after product changes. Earlier e292 normal and57cea624 cold results retain their own recorded source scope.",
-    "limits": "No full SQL, resource DROP/recreate, Linux, power-loss, endurance, performance or release completion claim. Original105 remain20done85in_progress.",
-    "next": "Run selected native unit and recovery flows, then actual SDK/MCP RF3 and matched functional/cold gates; D2 authoritative conservative resource owner inventory is separate prepared-only work until qualified adoption."
+      "consumedImageDrift": 0,
+      "stdoutSha256": "2dc131115abb57d6c6cc4e41e0d55826d6ede1c7803fe1f673419806d6e006ea",
+      "predecessor": {
+        "label": "root-r537-final-lifetime-unit",
+        "passed": 42,
+        "failed": 18
+      },
+      "concurrency": "PredecessorR537 actual overlapping native TRX intervals50; configured native maximum remains50.",
+      "scope": "Full source and consumed image identities frozen; only unrelated nonconsumed IntegrationTests assembly was allowed to finish its separate compile."
+    }
   },
   "FUNCTIONAL-COLD-20261016": {
     "title": "Native all-model same-root cold-reopen functional pair",

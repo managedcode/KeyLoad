@@ -94,8 +94,12 @@ internal sealed class QueryLifetimeNativeTests
                 {
                     Coverage = null!
                 };
-                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Query(captured: missing), ErrorCode.OwnershipLost);
-                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Statistics(missing), ErrorCode.OwnershipLost);
+                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Query(captured: missing), ErrorCode.Corruption);
+                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Statistics(missing), ErrorCode.Corruption);
+                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Query(captured: missing, nativeRoundTrip: false),
+                    ErrorCode.OwnershipLost);
+                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Statistics(missing, nativeRoundTrip: false),
+                    ErrorCode.OwnershipLost);
                 var malformed = original with
                 {
                     Coverage = original.Coverage with

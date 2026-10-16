@@ -9,6 +9,8 @@ namespace KeyLoad.Core.Features.ClusterRouting.Queries;
 
 internal static class PartitionMoveFamilyCapture
 {
+    private const int ControlOwnedPageRecords = 1;
+
     internal static PartitionMoveImageFamily Capture(IKeyValueView view, PartitionMoveSourceFenceRecord fence,
         string family, ReadExecutionBudget work, PartitionMoveCaptureBudget captureBudget, DatabaseLimits limits, int maximumPageBytes,
         long maximumImageBytes, ImmutableArray<PartitionMoveImagePage>.Builder pages, ref long retained)
@@ -24,11 +26,13 @@ internal static class PartitionMoveFamilyCapture
         long count = PartitionMoveProtocol.EmptyCount;
         long rawBytes = PartitionMoveProtocol.EmptyCount;
         ReadOnlyMemory<byte> after = default;
+        var controlOwned = ControlOwned(family);
         while (true)
         {
             work.Check();
             var remaining = maximumImageBytes - retained;
-            var page = PartitionRecordPageReader.Read(view, fence.Partition, family, limits.MaxBatchMutations,
+            var page = PartitionRecordPageReader.Read(view, fence.Partition, family,
+                controlOwned ? ControlOwnedPageRecords : limits.MaxBatchMutations,
                 Math.Min(maximumPageBytes, remaining), limits.MaxQueryReadBytes, captureBudget.Observe,
                 after, work.Cancellation);
             foreach (var record in page.Records)
@@ -43,7 +47,7 @@ internal static class PartitionMoveFamilyCapture
                 count = checked(count + PartitionMoveProtocol.SequenceStep);
                 rawBytes = checked(rawBytes + record.Key.Length + record.Value.Length);
             }
-            if (!ControlOwned(family) && !page.Records.IsEmpty)
+            if (!controlOwned && !page.Records.IsEmpty)
             {
                 var captured = new PartitionMoveImagePage(PartitionMoveProtocol.Version, fence.MoveId,
                     fence.Partition, family, pages.Count, page.Records, PartitionMoveImageDigest.Records(page.Records));

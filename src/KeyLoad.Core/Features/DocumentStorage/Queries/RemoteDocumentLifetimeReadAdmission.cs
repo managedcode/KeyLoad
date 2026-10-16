@@ -66,7 +66,9 @@ public sealed partial class DatabaseEngine
         var directory = PhysicalOwnerDirectorySerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
         var destination = directory.Owners.Single(entry => entry.Owner.PhysicalShardId == placement.PhysicalShardId);
-        var resource = Resource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
+        RequireNoUnpublishedPartitionMoveTarget(view, reference.Partition);
+        // This source cut supplies authorization metadata for the admitted remote data owner.
+        var resource = BindResourceDefinition(view, reference.Partition, reference.Collection, ResourceKind.Collection);
         var coverage = PartitionControlLifetimeCoverage.Capture(view, reference.Partition, [resource], Limits.MaxBatchBytes);
         var route = new RemoteDocumentReadFenceV1(principal.Id, principal.TenantId, principal.PolicyEpoch,
             placement, directory.Revision, destination);

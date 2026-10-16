@@ -58,12 +58,12 @@ internal static class ResourcePairBindingAssertions
             var page = database.ReadStream(Root, stream);
             await EqualAsync(new StreamHead(FirstRevision, FirstRevision, FirstRevision), page.Head);
             await EqualAsync(new EventRecord(stream, FirstRevision, value.Sequence,
-                new(value.Id, EventType, EventJson), value.Time), page.Events.Single());
+                new(value.Id, EventType, StoredEventJson), value.Time), page.Events.Single());
             await EqualAsync(new StreamPage(stream, new(FirstRevision, FirstRevision, FirstRevision),
-                [new(stream, FirstRevision, value.Sequence, new(value.Id, EventType, EventJson), value.Time)],
+                [new(stream, FirstRevision, value.Sequence, new(value.Id, EventType, StoredEventJson), value.Time)],
                 database.Store.Position, false, null, database.Store.Position), page);
             await EqualAsync(new MessageInspection(new(value.Id, MessageState.Ready, Zero, FirstRevision, value.Sequence, null, null),
-                QueueJson, Headers), database.InspectMessage(Root, new(state.Source.Partition, Queue), value.Id)!);
+                StoredQueueJson, Headers), database.InspectMessage(Root, new(state.Source.Partition, Queue), value.Id)!);
         }
         foreach (var row in state.Rows)
         {

@@ -80,7 +80,7 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
     }
 
     internal PartitionQueryLeafResultV1 Query(string path = QueryLifetimeNativeProtocol.Star,
-        PartitionQueryLifetimeMetadata? captured = null, Predicate? filter = null)
+        PartitionQueryLifetimeMetadata? captured = null, Predicate? filter = null, bool nativeRoundTrip = true)
     {
         var metadata = captured ?? Capture();
         var database = fixture.Destination.Database;
@@ -94,14 +94,16 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
         var input = new PartitionQueryOwnedLeafRequestV2(new(plan,
             PhysicalOwnerDirectoryWholeFlow.Destination.Owner, RemoteDocumentNativeFixture.Tenant),
             metadata.Definition, metadata.Coverage, metadata.Principal);
-        var roundTrip = NativeSerialization.Deserialize<PartitionQueryOwnedLeafRequestV2>(NativeSerialization.Serialize(input));
+        var roundTrip = nativeRoundTrip
+            ? NativeSerialization.Deserialize<PartitionQueryOwnedLeafRequestV2>(NativeSerialization.Serialize(input)) : input;
         return PartitionQueryLifetimeLeafExecution.Execute(engine, RemoteDocumentNativeFixture.Reader, roundTrip,
             PhysicalOwnerDirectoryWholeFlow.Destination.Owner, database.EvaluationClock,
             database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), CancellationToken.None);
     }
 
     internal DistributedSearchLeafResultV1 Statistics(PartitionQueryLifetimeMetadata? captured = null,
-        string field = RemoteDocumentNativeFixture.Title, string text = QueryLifetimeNativeProtocol.Text)
+        string field = RemoteDocumentNativeFixture.Title, string text = QueryLifetimeNativeProtocol.Text,
+        bool nativeRoundTrip = true)
     {
         var metadata = captured ?? Capture();
         var database = fixture.Destination.Database;
@@ -112,9 +114,10 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
             PhysicalOwnerDirectoryWholeFlow.Destination.Owner, RemoteDocumentNativeFixture.Tenant,
             database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords,
             QueryResultBudgetPolicy.Resolve(database.Limits, UnitExecutionOptions.QueryExecution().Value)
-                / QueryLifetimeNativeProtocol.GrantDivisor, null, null, null, null, []);
+                / QueryLifetimeNativeProtocol.GrantDivisor, null, null, null, null, default);
         var input = new DistributedSearchOwnedLeafV2(original, metadata.Definition, metadata.Coverage, metadata.Principal);
-        var roundTrip = NativeSerialization.Deserialize<DistributedSearchOwnedLeafV2>(NativeSerialization.Serialize(input));
+        var roundTrip = nativeRoundTrip
+            ? NativeSerialization.Deserialize<DistributedSearchOwnedLeafV2>(NativeSerialization.Serialize(input)) : input;
         return DistributedSearchOwnedLeafExecution.ExecuteV2(database, RemoteDocumentNativeFixture.Reader,
             roundTrip, PhysicalOwnerDirectoryWholeFlow.Destination.Owner, UnitExecutionOptions.QueryExecution(),
             database.EvaluationClock, database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds),
