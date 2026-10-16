@@ -60,7 +60,7 @@ internal static class FunctionalGateColdProtocol
         };
     internal static SqlOperationRequest Insert(PartitionRef partition, int index, EntityRef reference)
         => new(partition, "INSERT INTO [" + Resource("table", index)
-            + "] (id,[value],[reference]) VALUES (@id,37,@reference)", Parameters(reference), QueryDialectVersion: 2, CommandId: Guid.NewGuid());
+            + "] (id,[value],[reference]) VALUES (@id,37,@reference)", Parameters(reference), QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion, CommandId: Guid.NewGuid());
     internal static SqlOperationRequest Select(PartitionRef partition, int index)
         => new(partition, "SELECT TOP (2) [value],[reference] FROM [" + Resource("table", index)
             + "] WHERE id = @id", new(StringComparer.Ordinal)

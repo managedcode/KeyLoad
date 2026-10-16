@@ -137,6 +137,15 @@ under TestResults/stage61-native-join. The new local cold runtime and exact-sour
 Linux qualification remain OPEN until their actual original outcomes. Process-kill proof does not establish power-loss durability, the complete
 105-task plan, production readiness or performance.
 
+The first original single-node R505 run failed before any cold action because the
+new fixture selected query dialect 2 for VALUES INSERT. The native compiler
+requires SqlOperationProtocol.DefaultQueryDialectVersion (1) for this operation.
+The fixture now uses that existing constant; SELECT remains dialect 2, and no
+production parser, supported-version check, request payload or result oracle was
+relaxed. The focused R514 IntegrationTests build passed with zero warnings/errors;
+only its DLL/PDB changed. The original failed report is retained, and a fresh
+single-node cold PASS remains required before RF3 cold execution.
+
 The owning contracts remain ADR-117 native test entry, ADR-125 connection execution
 and ADR-136 physical partition ownership. No new product provider, topology, library,
 resource limit or compatibility fallback is introduced.
