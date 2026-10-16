@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
@@ -27,6 +29,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     private readonly ImmutableArray<System.Net.IPEndPoint> silos;
     private readonly string cluster;
     private readonly int? maximumBatchBytes;
+    private readonly ImmutableArray<string> routingArguments = [];
     internal string AdministratorKey
     {
         get;
@@ -45,12 +48,13 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     }
 
     internal ControlledPartitionMovementNativeHostSettings(ControlledPartitionMovementNativeHostEndpoints endpoints,
-        int? maximumBatchBytes = null)
+        int? maximumBatchBytes = null, IOptions<GrainRoutingOptions>? routingOptions = null)
     {
         if (maximumBatchBytes is { } maximum)
         {
             new DatabaseLimits { MaxBatchBytes = maximum }.Validate();
         }
+        routingArguments = ControlledPartitionMovementNativeRoutingArguments.Capture(routingOptions);
         this.maximumBatchBytes = maximumBatchBytes;
         origins = Enumerable.Range(FirstSource, ControlledPartitionMovementNativeHostEndpoints.OwnerCount)
             .Select(endpoints.Origin).ToImmutableArray();

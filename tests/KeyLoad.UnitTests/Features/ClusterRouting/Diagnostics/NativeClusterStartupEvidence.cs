@@ -94,7 +94,7 @@ internal static class NativeClusterStartupEvidence
         Write(path, bytes);
     }
 
-    private static void Write(string path, byte[] bytes)
+    internal static void Write(string path, byte[] bytes)
     {
         if (bytes.Length > NativeClusterStartupProtocol.MaximumOutputBytes)
         {
@@ -153,7 +153,7 @@ internal static class NativeClusterStartupEvidence
         return files;
     }
 
-    private static IEnumerable<string> ExceptionTypes(Exception failure)
+    internal static IEnumerable<string> ExceptionTypes(Exception failure)
     {
         var current = failure;
         for (var depth = 0; depth < NativeClusterStartupProtocol.MaximumExceptionDepth; depth++)

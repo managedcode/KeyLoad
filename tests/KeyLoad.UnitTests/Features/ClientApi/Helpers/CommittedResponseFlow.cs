@@ -21,7 +21,7 @@ internal static class CommittedResponseFlow
         var command = scenario.Command(CommittedResponseProtocol.Document, CommittedResponseProtocol.OriginalJson,
             CommittedResponseProtocol.AbsentRevision);
         var expected = CommittedResponseAssertions.Expected(scenario, command,
-            scenario.Fixture.Database.Store.Position + CommittedResponseProtocol.CommitAdvance, CommittedResponseProtocol.FirstRevision);
+            checked(scenario.Fixture.Database.ReadJournalCut().LastIndex + CommittedResponseProtocol.CommitAdvance), CommittedResponseProtocol.FirstRevision);
         var endpoint = new CommittedResponseEndpoint(scenario, principal, callerCancellation);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -105,7 +105,7 @@ internal static class CommittedResponseFlow
         await CommittedResponseAssertions.StoredAsync(scenario, CommittedResponseProtocol.FirstRevision, CommittedResponseProtocol.OriginalJson);
         var healthy = scenario.Command(CommittedResponseProtocol.Document, CommittedResponseProtocol.HealthyJson, CommittedResponseProtocol.FirstRevision);
         var expectedHealthy = CommittedResponseAssertions.Expected(scenario, healthy,
-            position + CommittedResponseProtocol.CommitAdvance, CommittedResponseProtocol.SecondRevision);
+            checked(scenario.Fixture.Database.ReadJournalCut().LastIndex + CommittedResponseProtocol.CommitAdvance), CommittedResponseProtocol.SecondRevision);
         var result = await client.CommitAsync(healthy, token);
         await Assert.That(result.IsSuccess).IsTrue();
         await CommittedResponseAssertions.ReceiptAsync(result.Value, expectedHealthy);

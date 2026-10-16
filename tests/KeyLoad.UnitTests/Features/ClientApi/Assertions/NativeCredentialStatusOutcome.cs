@@ -20,7 +20,8 @@ internal static class NativeCredentialStatusOutcome
         await Assert.That(operation.Id).IsEqualTo(id);
         await Assert.That(operation.Kind).IsEqualTo(OperationKind.ConfigureApiKey);
         await Assert.That(operation.PrincipalId).IsEqualTo(principal.Id);
-        await Assert.That(operation.PayloadJson == payload).IsTrue();
+        var native = global::KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<ConfigureApiKeyRequest>(operation);
+        await Assert.That(native).IsEqualTo(new ConfigureApiKeyRequest(credential));
         var fingerprint = JsonData.Fingerprint(new
         {
             Id = id,

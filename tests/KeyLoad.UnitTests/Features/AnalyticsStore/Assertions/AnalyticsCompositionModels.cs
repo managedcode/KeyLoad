@@ -10,10 +10,14 @@ internal static class AnalyticsCompositionModels
 {
     internal static async Task RequireAsync(SafeProjectorOperationDatabase owner,
         IReadOnlyList<AnalyticsCompositionCommit> commits)
+        => await RequireAsync(owner, commits,
+            AnalyticsExpectedResourceCreation.Lifetime(owner.Source, AnalyticsExpectedResourceCreation.Anchor));
+
+    internal static async Task RequireAsync(SafeProjectorOperationDatabase owner,
+        IReadOnlyList<AnalyticsCompositionCommit> commits, ResourceLifetimeV1 anchorLifetime)
     {
         var partition = owner.Source.Partition;
-        var anchor = AnalyticsExpectedResourceCreation.Bind(owner.Source, new(partition, D.AnchorCollection, D.AnchorId),
-            AnalyticsExpectedResourceCreation.Anchor);
+        var anchor = AnalyticsExpectedResourceCreation.Bind(anchorLifetime, new(partition, D.AnchorCollection, D.AnchorId));
         await O.EqualAsync(new DocumentResult(anchor, 1, D.AnchorJson, false, []),
             owner.Database.GetDocument(D.Root, new(partition, D.AnchorCollection, D.AnchorId), cancellationToken: owner.CallerToken));
         foreach (var commit in commits)
@@ -21,7 +25,7 @@ internal static class AnalyticsCompositionModels
             var request = KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(commit.Operation);
             var id = ((PutDocument)request.Mutations[0]).Id;
             var reference = new EntityRef(partition, D.AnchorCollection, id);
-            var expectedReference = AnalyticsExpectedResourceCreation.Bind(owner.Source, reference, AnalyticsExpectedResourceCreation.Anchor);
+            var expectedReference = AnalyticsExpectedResourceCreation.Bind(anchorLifetime, reference);
             await O.EqualAsync(new DocumentResult(expectedReference, 1, P.Json, false, []),
                 owner.Database.GetDocument(D.Root, reference, cancellationToken: owner.CallerToken));
             var graph = owner.Database.Traverse(D.Root, partition, P.Graph, reference, maxDepth: 1, cancellationToken: owner.CallerToken);
@@ -37,8 +41,7 @@ internal static class AnalyticsCompositionModels
         var expected = commits.Select(commit => ((PutDocument)KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(commit.Operation).Mutations[0]).Id)
             .Order(StringComparer.Ordinal).Select(id => D.Event(owner.Source, id, D.Alpha, 7)).ToArray();
         var records = expected.Select(value => new AnalyticsEventRecord(value.Id, value.Timestamp, value.Dimensions,
-            value.Metrics, value.RowAccess, [.. value.Links.Select(link => AnalyticsExpectedResourceCreation.Bind(owner.Source, link,
-                AnalyticsExpectedResourceCreation.Anchor))], 1)).ToImmutableArray();
+            value.Metrics, value.RowAccess, [.. value.Links.Select(link => AnalyticsExpectedResourceCreation.Bind(anchorLifetime, link))], 1)).ToImmutableArray();
         await O.EqualAsync(new AnalyticsEventsPage(records, false, null),
             owner.Database.ReadAnalyticsEvents(D.Root, D.Read(owner.Source), owner.CallerToken));
         var snapshot = owner.Database.CaptureAnalyticsAggregate(D.Root, D.Query(owner.Source), owner.CallerToken);

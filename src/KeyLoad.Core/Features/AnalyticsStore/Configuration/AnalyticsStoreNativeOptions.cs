@@ -9,6 +9,7 @@ internal static class AnalyticsStoreNativeOptions
     internal const string Event = "canonical-event";
     private const int SingleWorker = 1;
     private const int MinimumNativeSegmentItems = 1_000;
+    private const int MinimumNativeDiskSegmentItems = 10_000;
 
     internal static AnalyticsOptions Create(string ownedDirectory, DatabaseLimits limits,
         IReadOnlyCollection<string> dimensions, int metricCount, ZoneTree.Logger.ILogger failures)
@@ -22,7 +23,7 @@ internal static class AnalyticsStoreNativeOptions
         options.Storage.Logger = failures;
         options.Storage.StoreRawEvents = true;
         options.Storage.RawEvents.MutableSegmentMaxItemCount = Math.Max(MinimumNativeSegmentItems, limits.MaxScanRecords);
-        options.Storage.RawEvents.DiskSegmentMaxItemCount = Math.Max(MinimumNativeSegmentItems, limits.MaxScanRecords);
+        options.Storage.RawEvents.DiskSegmentMaxItemCount = Math.Max(MinimumNativeDiskSegmentItems, limits.MaxScanRecords);
         options.Storage.DimensionIndexes.Dimensions.Clear();
         options.Storage.RollupIndexes.Definitions.Clear();
         options.Rollups.Granularities = Granularity.None;

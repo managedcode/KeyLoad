@@ -36,7 +36,7 @@ internal static class RequestCqrsActualTextReplayFlow
 
     internal static async Task OriginalBuildAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest originalBuild, TextIndexMaintenanceRequest current,
-        TextIndexMaintenanceResult completed, CancellationToken token)
+        TextIndexMaintenanceResult completed, ResourceLifetimeV1 lifetime, CancellationToken token)
     {
         var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var refused = await RequestCqrsActualTextMaintenanceFlow.InvokeAsync(fixture, originalBuild,
@@ -45,11 +45,11 @@ internal static class RequestCqrsActualTextReplayFlow
         await Assert.That(refused.Payload.IsEmpty).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
         await ReplayAsync(fixture, current, completed, token);
-        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, changed: true, token);
+        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, lifetime, changed: true, token);
     }
 
     internal static async Task PriorParentAsync(RequestCqrsHostedRuntimeFixture fixture,
-        TextIndexMaintenanceRequest previous, CancellationToken token)
+        TextIndexMaintenanceRequest previous, ResourceLifetimeV1 lifetime, CancellationToken token)
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, fixture.Database.Partition,
@@ -71,7 +71,7 @@ internal static class RequestCqrsActualTextReplayFlow
         await Assert.That(refused.Error).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(refused.Payload.IsEmpty).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
-        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, changed: true, FinalRevision, token);
+        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, lifetime, changed: true, FinalRevision, token);
         var noOp = current with
         {
             CommandId = Guid.NewGuid()
@@ -79,7 +79,7 @@ internal static class RequestCqrsActualTextReplayFlow
         var unchanged = await RequestCqrsActualTextMaintenanceFlow.ExecuteAsync(fixture, noOp, expectNativeWork: false, token);
         await Assert.That(unchanged.Checkpoint).IsNull();
         await ReplayAsync(fixture, noOp, unchanged, token);
-        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, changed: true, FinalRevision, token);
+        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, lifetime, changed: true, FinalRevision, token);
     }
 
     internal static async Task ReleaseAsync(RequestCqrsHostedRuntimeFixture fixture,

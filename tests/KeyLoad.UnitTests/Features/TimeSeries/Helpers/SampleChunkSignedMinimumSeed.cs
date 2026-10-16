@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -9,9 +10,9 @@ internal static class SampleChunkSignedMinimumSeed
     private const int AppendIndex = 1;
     private const string AppendKind = "appendSamples";
 
-    internal static async Task<SampleChunkSignedMinimumState> RunAsync(TestDatabase owner)
+    internal static async Task<SampleChunkSignedMinimumState> RunAsync(ConnectionNativeServerDatabase owner)
     {
-        SampleAggregateTestData.Configure(owner);
+        owner.Configure(SampleAggregateTestData.Set, ResourceKind.TimeSeries);
         var window = Guid.NewGuid();
         Mutation[] mutations =
         [new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
@@ -31,7 +32,7 @@ internal static class SampleChunkSignedMinimumSeed
             var expected = new CommitReceipt(command.CommandId,
                 new(owner.Store.Identity.Incarnation, owner.Partition.AtomicPartitionId, position, InitialEpoch),
                 [new MutationReceipt(kinds[commands.Count], SampleChunkCanonicalFixture.Set,
-                    SampleChunkCanonicalFixture.Series, revisions[commands.Count])], DurabilityProfile.ProcessDurable);
+                    SampleChunkCanonicalFixture.Series, revisions[commands.Count])], DurabilityProfile.QuorumProcessDurable);
             var actual = owner.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
             await SampleChunkExplicitMinimumUnitReads.EqualAsync(expected, actual);
             commands.Add((command, expected));

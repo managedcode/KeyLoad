@@ -25,7 +25,7 @@ internal static class SdkNativeProblemBoundaryOutbox
             entries.Add(new(P.HealthySequence, P.FirstOrdinal, healthy.Token, time,
                 state.Healthy.Mutations[P.FirstOrdinal], healthy.Mutations[P.FirstOrdinal], Before: allowed, After: after));
         }
-        var actual = DocumentCommandOutcomeTestSupport.CaptureOutbox(db);
+        var actual = DocumentCommandOutcomeTestSupport.CaptureOutbox(db.Store, db.Database, db.Partition);
         await Assert.That(actual.EntryBytes.Length).IsEqualTo(entries.Count);
         for (var ordinal = P.FirstOrdinal; ordinal < entries.Count; ordinal++)
         {

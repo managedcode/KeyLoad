@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core.Features.DatabaseComposition;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
@@ -19,7 +20,10 @@ public sealed partial class DatabaseEngine
         {
             NativePayload = NativeSerialization.Serialize(payload)
         };
-        var captured = Store.Read(raw => CaptureResourceEffectAdmission(raw, candidate, fingerprint));
+        var captured = RequiresCompositionEffectCapture(candidate)
+            ? Store.Prepare((transaction, position) => CaptureResourceEffectAdmission(transaction, candidate,
+                fingerprint, preparationPosition: position))
+            : Store.Read(raw => CaptureResourceEffectAdmission(raw, candidate, fingerprint));
         return EncodeResourceEffectAdmission(captured);
     }
 
@@ -38,22 +42,39 @@ public sealed partial class DatabaseEngine
         {
             NativePayload = NativeSerialization.Serialize(payload)
         };
-        var captured = Store.Read(raw => CaptureResourceEffectAdmission(work.CreateView(raw), candidate,
-            fingerprint, preserveBudgetFailure: true));
+        var captured = RequiresCompositionEffectCapture(candidate)
+            ? Store.Prepare((transaction, position) => CaptureResourceEffectAdmission(transaction, candidate,
+                fingerprint, preserveBudgetFailure: true, preparationPosition: position, preparationWork: work))
+            : Store.Read(raw => CaptureResourceEffectAdmission(work.CreateView(raw), candidate,
+                fingerprint, preserveBudgetFailure: true));
         work.Check();
         return EncodeResourceEffectAdmission(captured);
     }
 
     private ResourceEffectAdmissionV1 CaptureResourceEffectAdmission(IKeyValueView raw,
-        ReplicatedOperation operation, string fingerprint, bool preserveBudgetFailure = false)
+        ReplicatedOperation operation, string fingerprint, bool preserveBudgetFailure = false,
+        long? preparationPosition = null, ReadExecutionBudget? preparationWork = null)
     {
         var scope = new ResourceEffectBindingScope(OperationLimitsOptions);
-        var view = new ResourceEffectObservationView(raw, scope);
+        var preparation = preparationPosition is { } position
+            ? new ResourceEffectPreparationTransaction(
+                new KeyLoad.Core.Features.BackupRestore.Execution.AtomicPartitionRosterTransaction(
+                    (IAtomicTransaction)raw, OperationLimitsOptions, position,
+                    KeyLoad.Core.Features.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex), scope,
+                preparationWork ?? new ReadExecutionBudget(OperationLimitsOptions, CompositionTimeProvider.Instance))
+            : null;
+        var view = preparation is null
+            ? new ResourceEffectObservationView(raw, scope) : preparation;
         try
         {
             var principal = Principal(view, operation.PrincipalId, operation.EvaluatedAt);
             AuthorizeOperation(view, principal, operation);
             ObserveAdditionalResourceEffects(view, principal, operation);
+            if (preparation is not null)
+            {
+                ObserveCompositionPrefix(preparation, principal, operation, preparationPosition!.Value,
+                    preserveBudgetFailure);
+            }
             var admission = new ResourceEffectAdmissionV1(ResourceEffectAdmissionProtocol.Version,
                 fingerprint, scope.Capture(), null, null);
             scope.Activate(view, admission);

@@ -8,11 +8,12 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class ConnectionNativeScenario : IAsyncDisposable
 {
     private readonly ConnectionNativeCalls calls = new();
+    private readonly Guid collectionCreation = Guid.NewGuid();
     private bool closed;
     private bool initialized;
     private Guid lastClosedOwnerId;
     private const string ActivationWitness = "ConnectionNativeActivationCount";
-    internal RequestCqrsClusterFixture Fixture
+    internal ConnectionNativeServerRuntime Fixture
     {
         get;
     }
@@ -22,26 +23,25 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
 
     internal ConnectionNativeScenario(GrainRoutingOptions? routing = null,
         IGrainRequestPurposeObserver? purposeObserver = null,
-        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null,
-        bool nativeReplicaAdmission = false)
-        => Fixture = new(routing: routing, observer: phaseObserver?.Invoke(Observation) ?? Observation, purposeObserver: purposeObserver, nativeReplicaAdmission: nativeReplicaAdmission);
+        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null)
+        => Fixture = new(routing, phaseObserver?.Invoke(Observation) ?? Observation, purposeObserver);
 
     internal static async Task RunAsync(Func<ConnectionNativeScenario, Task> execute,
         GrainRoutingOptions? routing = null, IGrainRequestPurposeObserver? purposeObserver = null,
-        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null,
-        bool nativeReplicaAdmission = false)
+        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null)
     {
         var failures = new List<Exception>();
-        RequestCqrsClusterFixture? owner = null;
+        ConnectionNativeServerRuntime? owner = null;
         try
         {
-            await using var scenario = new ConnectionNativeScenario(routing, purposeObserver, phaseObserver, nativeReplicaAdmission);
+            await using var scenario = new ConnectionNativeScenario(routing, purposeObserver, phaseObserver);
             owner = scenario.Fixture;
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => execute(scenario), failures);
             if (failures.Count > ConnectionNativeProtocol.EmptyFailures)
             {
                 KeyLoad.Server.ServerFailureObserver.Observe(
                     () => scenario.WriteTrace(ConnectionNativeProtocol.BodyFailure), failures);
+                owner.RetainRoots();
             }
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
@@ -55,8 +55,7 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         if (owner is not null && failures.Count > ConnectionNativeProtocol.EmptyFailures)
         {
             KeyLoad.Server.ServerFailureObserver.Observe(
-                () => NativeClusterStartupEvidence.SaveOperationFailure(owner.Cluster, nameof(ConnectionNativeScenario),
-                    Path.Combine(Directory.GetCurrentDirectory(), "logs"), owner.IsDisposalJoined, failures), failures);
+                () => owner.ReportFailure(failures), failures);
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -65,7 +64,7 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
     {
         await Fixture.InitializeAsync(cancellationToken);
         initialized = true;
-        Fixture.Database.Configure(ConnectionNativeProtocol.Collection, ResourceKind.Collection);
+        Fixture.Database.Configure(ConnectionNativeProtocol.Collection, ResourceKind.Collection, id: collectionCreation);
         await AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, cancellationToken);
     }
 
@@ -118,16 +117,14 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
     }
 
     internal EntityRef Reference(string documentId)
-        => new(Fixture.Database.Partition, ConnectionNativeProtocol.Collection, documentId);
+        => Fixture.Database.Reference(collectionCreation, ConnectionNativeProtocol.Collection, documentId);
 
     internal DocumentResult? Stored(string documentId)
         => Fixture.Database.Database.GetDocument(ConnectionNativeProtocol.Root, Reference(documentId));
 
     internal async Task AssertActivationCountAsync(int expected, CancellationToken cancellationToken)
     {
-        var management = Fixture.Cluster.Client.GetGrain<IManagementGrain>(0);
-        var actual = await management.GetActiveGrains(GrainType.Create(GrainRoutingProtocol.RequestAlias),
-            cancellationToken);
+        var actual = await Fixture.ActiveConsumersAsync(cancellationToken);
         var failures = new List<Exception>();
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -165,15 +162,14 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
 
     internal async Task CloseOwnerAsync(IConnectionGrain owner, Guid ownerId, CancellationToken cancellationToken)
     {
+        Fixture.RegisterConsumer(ownerId);
         await owner.CloseAsync(Fixture.Codec.CreateConnectionClose(ownerId), cancellationToken);
         lastClosedOwnerId = ownerId;
         if (ownerId == Fixture.ConnectionId)
         {
             closed = true;
         }
-        var management = Fixture.Cluster.Client.GetGrain<IManagementGrain>(0);
-        while ((await management.GetActiveGrains(GrainType.Create(GrainRoutingProtocol.RequestAlias),
-            cancellationToken)).Count != ConnectionNativeProtocol.AbsentActivations)
+        while ((await Fixture.ActiveConsumersAsync(cancellationToken)).Count != ConnectionNativeProtocol.AbsentActivations)
         {
             await Task.Delay(Timing.PollInterval, cancellationToken);
         }
@@ -192,6 +188,10 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         if (!closed && initialized)
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => CloseAsync(timeout.Token), failures);
+        }
+        if (failures.Count > ConnectionNativeProtocol.EmptyFailures)
+        {
+            Fixture.RetainRoots();
         }
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Fixture.DisposeAsync().AsTask(), failures);
         try

@@ -5,6 +5,8 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsHostedDatabase(RequestCqrsHostedNodeResources owner, ReplicaLifecycleFixture journal)
 {
+    private const long FirstRetainedEntry = 1;
+
     internal DatabaseEngine Database => journal.Database;
     internal string Directory => journal.CanonicalDirectoryPath;
     internal ZoneTreeStore Store => (ZoneTreeStore)Database.Store;
@@ -18,6 +20,22 @@ internal sealed class RequestCqrsHostedDatabase(RequestCqrsHostedNodeResources o
     {
         var original = journal.Log.State;
         return (original.LastIndex, original.CommittedIndex, original.Term);
+    }
+
+    internal ReplicatedOperation ReadRetainedOperation(Guid commandId)
+    {
+        var last = journal.Log.State.LastIndex;
+        if (last < FirstRetainedEntry || last > Database.Limits.MaxScanRecords)
+        {
+            throw new InvalidOperationException();
+        }
+        var entries = journal.Log.Read(FirstRetainedEntry, checked((int)last), Database.Limits.MaxBatchBytes);
+        if (entries.Length != last)
+        {
+            throw new InvalidOperationException();
+        }
+        return entries.SingleOrDefault(entry => entry.Operation?.Id == commandId)?.Operation
+            ?? throw new InvalidOperationException();
     }
 
     internal OperationResult Submit<T>(OperationKind kind, T payload, string principal,

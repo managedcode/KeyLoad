@@ -1,29 +1,39 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal static class ControlledPartitionMovementNativeHostFactory
 {
+    private const int FirstOwner = 0;
     internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory, CancellationToken cancellationToken)
-        => CreateAsync(observerFactory, null, null, cancellationToken);
+        => CreateAsync(observerFactory, null, null, null, null, null, null, cancellationToken);
 
     internal static async Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory,
         Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory,
-        Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory, CancellationToken cancellationToken,
-        int? maximumBatchBytes = null)
+        Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory, int? maximumBatchBytes,
+        IOptions<GrainRoutingOptions>? routingOptions, IGrainRequestPurposeObserver? purposeObserver,
+        Action<int, ControlledPartitionMovementNativeHost>? beforeStart, CancellationToken cancellationToken)
     {
         using var endpoints = new ControlledPartitionMovementNativeHostEndpoints();
-        var settings = new ControlledPartitionMovementNativeHostSettings(endpoints, maximumBatchBytes);
+        var settings = new ControlledPartitionMovementNativeHostSettings(endpoints, maximumBatchBytes, routingOptions);
         var retainedRoot = ControlledPartitionMovementNativeFailureRoot.Capture(settings);
         ControlledPartitionMovementNativeHosts? owner = null;
         var failures = new List<Exception>();
         try
         {
-            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory, phaseObserverFactory);
+            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory, phaseObserverFactory, purposeObserver);
             await owner.CreateNodesAsync(cancellationToken).ConfigureAwait(false);
+            if (beforeStart is not null)
+            {
+                for (var index = FirstOwner; index < owner.Nodes.Count; index++)
+                {
+                    beforeStart(index, owner.Nodes[index]);
+                }
+            }
             endpoints.Dispose();
             await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(
                 Task.WhenAll(owner.Nodes.Select(node => node.StartAsync(cancellationToken)))).ConfigureAwait(false);

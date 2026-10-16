@@ -7,9 +7,11 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 internal sealed class ControlledPartitionMovementNativeObservers(
     Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory,
     Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory,
-    Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory)
+    Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory,
+    IGrainRequestPurposeObserver? purposeObserver = null)
 {
     private const int SourceIndex = 0;
+    internal IGrainRequestPurposeObserver? Purpose { get; } = purposeObserver;
     private IGrainPartitionMovementSealedOperationObserver[]? sealedObservers;
     private IDatabaseAuthenticationExecutionObserver[]? authenticationObservers;
     private IGrainRequestPhaseObserver[]? phaseObservers;

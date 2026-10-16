@@ -11,28 +11,37 @@ public sealed partial class DatabaseEngine
         var batch = Payload<CommandRequest>(operation);
         foreach (var request in batch.Mutations.OfType<AdvanceQueueDeadline>())
         {
-            if (request.Kind != QueueDeadlineKind.ExpireLease)
+            if (ReadQueueDeadlineRetryInput(view, batch.Partition, operation.EvaluatedAt, request) is { } input)
             {
-                continue;
+                inputs.Add(input);
             }
-            var lane = new QueueLaneRef(batch.Partition, request.Queue);
-            var resource = Resource(view, batch.Partition, request.Queue, ResourceKind.WorkQueue);
-            if (resource.Paused || DispatchPaused(view) || resource.QueuePolicy.RetryJitter != QueueRetryJitter.Full)
-            {
-                continue;
-            }
-            var metadata = RequireQueueDeadlineState(view, lane, request, operation.EvaluatedAt);
-            if (metadata.ExpiresAt <= operation.EvaluatedAt || metadata.Attempts >= resource.QueuePolicy.MaxAttempts)
-            {
-                continue;
-            }
-            var key = QueueKey(LeasedQueueSpace, lane, request.ExpectedDeadline, metadata.Id);
-            if (view.GetRecord<string>(key) != metadata.Id)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
-            }
-            RequireCurrentQueueDueEntry(lane, metadata, operation.EvaluatedAt, leased: true, key);
-            inputs.Add(new(lane, resource.QueuePolicy, metadata, key));
         }
+    }
+
+    private QueueRetryInput? ReadQueueDeadlineRetryInput(IKeyValueView view,
+        PartitionRef partition, DateTimeOffset evaluatedAt, AdvanceQueueDeadline request)
+    {
+        if (request.Kind != QueueDeadlineKind.ExpireLease)
+        {
+            return null;
+        }
+        var lane = new QueueLaneRef(partition, request.Queue);
+        var resource = Resource(view, partition, request.Queue, ResourceKind.WorkQueue);
+        if (resource.Paused || DispatchPaused(view) || resource.QueuePolicy.RetryJitter != QueueRetryJitter.Full)
+        {
+            return null;
+        }
+        var metadata = RequireQueueDeadlineState(view, lane, request, evaluatedAt);
+        if (metadata.ExpiresAt <= evaluatedAt || metadata.Attempts >= resource.QueuePolicy.MaxAttempts)
+        {
+            return null;
+        }
+        var key = QueueKey(LeasedQueueSpace, lane, request.ExpectedDeadline, metadata.Id);
+        if (view.GetRecord<string>(key) != metadata.Id)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
+        }
+        RequireCurrentQueueDueEntry(lane, metadata, evaluatedAt, leased: true, key);
+        return new(lane, resource.QueuePolicy, metadata, key);
     }
 }

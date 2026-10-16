@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
@@ -27,19 +28,22 @@ internal static class DocumentCommandOutcomeTestSupport
             ?? throw new InvalidOperationException("The command outcome was not persisted.");
 
     internal static OutboxSnapshot CaptureOutbox(TestDatabase database)
+        => CaptureOutbox(database.Store, database.Database, database.Partition);
+
+    internal static OutboxSnapshot CaptureOutbox(IAtomicStore store, DatabaseEngine database, PartitionRef partition)
     {
-        var head = database.Database.GetOutboxStatus(Administrator, database.Partition).Head;
+        var head = database.GetOutboxStatus(Administrator, partition).Head;
         if (head.Tail - head.FirstAvailable + 1 > MaximumOutboxEntries)
         {
             throw new InvalidOperationException("The bounded command fixture produced too many outbox entries.");
         }
-        var headKey = KeySpace.Partition("outbox-head", database.Partition);
-        return database.Store.Read(view =>
+        var headKey = KeySpace.Partition("outbox-head", partition);
+        return store.Read(view =>
         {
             var entries = ImmutableArray.CreateBuilder<byte[]>(MaximumOutboxEntries);
             for (var sequence = head.FirstAvailable; sequence <= head.Tail; sequence++)
             {
-                var bytes = view.ReadOwnedValue(KeySpace.Partition("outbox", database.Partition, sequence))
+                var bytes = view.ReadOwnedValue(KeySpace.Partition("outbox", partition, sequence))
                     ?? throw new InvalidOperationException("A committed outbox entry is missing.");
                 entries.Add(bytes);
             }

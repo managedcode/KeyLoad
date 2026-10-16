@@ -19,7 +19,15 @@ internal static class ZoneTreeStoreCommitExecution
             runtime.Check();
             var tx = new ZoneTreeTransaction(runtime);
             var nextPosition = checked(runtime.Position + NextJournalSequenceIncrement);
-            var result = compile(tx, nextPosition);
+            T result;
+            try
+            {
+                result = compile(tx, nextPosition);
+            }
+            finally
+            {
+                tx.EndPreparationContext();
+            }
             var changes = tx.PrepareChanges();
             if (changes.Length == NoMutations)
             {

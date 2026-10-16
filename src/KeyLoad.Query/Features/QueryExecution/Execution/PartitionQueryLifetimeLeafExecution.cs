@@ -24,7 +24,8 @@ internal static class PartitionQueryLifetimeLeafExecution
     {
         var database = engine.PartitionQueryOwner;
         if (request is null || request.Original is null || request.Definition is null || request.Coverage is null
-            || request.Principal is null || request.Principal.Id != principalId)
+            || request.Principal is null || request.Principal.Id != principalId
+            || request.Principal.TenantId != request.Original.Tenant)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }

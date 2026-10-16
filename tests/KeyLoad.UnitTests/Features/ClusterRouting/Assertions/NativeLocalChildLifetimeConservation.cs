@@ -16,7 +16,7 @@ internal static class NativeLocalChildLifetimeConservation
         }
         var leader = state.Leader;
         var before = ReplicaBarrierDeadlineAssertions.Image(leader);
-        var index = checked(leader.Journal.Log.State.LastIndex + K.NextIndex);
+        var index = leader.Journal.Log.State.LastIndex;
         var term = leader.Journal.Log.State.Term;
         var replay = (await leader.Journal.Consensus.SubmitAsync(state.Write, token)).Get<CommitReceipt>();
         await NativeLocalChildLifetimeAssertions.EqualAsync(state.Receipt, replay);

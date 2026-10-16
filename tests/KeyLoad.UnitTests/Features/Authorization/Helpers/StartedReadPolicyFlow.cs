@@ -24,7 +24,7 @@ internal static class StartedReadPolicyFlow
                 OutcomeStoreOracle.PartitionKey(command.Partition, writer.Id, command.CommandId)))!;
             await HeldAsync(scenario, writer, reader, command, receipt, outcome, variant, token);
             await scenario.CloseAsync(token);
-        }, nativeReplicaAdmission: true);
+        });
 
     private static async Task HeldAsync(ConnectionNativeScenario scenario, PrincipalRecord writer,
         PrincipalRecord reader, CommandRequest command, GrainOperationReply receipt, byte[] outcome,

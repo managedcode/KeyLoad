@@ -14,22 +14,22 @@ internal static class RequestCqrsActualTextMaintenanceFlow
     private const int TrackedRecords = 2;
     private const int EmptyEffects = 0;
 
-    internal static Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, TextIndexMaintenanceMode mode,
-        CancellationToken token) => RunAsync(fixture, mode, null, token);
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, TextIndexMaintenanceMode mode,
+        CancellationToken token)
+    {
+        var lifetime = await RequestCqrsTextResource.ConfigureAsync(fixture.Database, token);
+        var request = await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token);
+        await RunAsync(fixture, mode, request, lifetime, token);
+    }
 
     internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, TextIndexMaintenanceMode mode,
-        TextIndexMaintenanceRequest? prepared, CancellationToken token)
+        TextIndexMaintenanceRequest request, ResourceLifetimeV1 lifetime, CancellationToken token)
     {
-        if (prepared is null)
-        {
-            fixture.Database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
-        }
-        var request = prepared ?? await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token);
         _ = await RequestCqrsHostedMaintenanceData.SeedAsync(fixture.Database, token);
         var built = await ExecuteAsync(fixture, request, token);
         await VerifyResultAsync(fixture, request, built);
         await RequestCqrsActualTextReplayFlow.ReplayAsync(fixture, request, built, token);
-        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, request, changed: false, token);
+        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, request, lifetime, changed: false, token);
         if (mode == TextIndexMaintenanceMode.Restore)
         {
             var id = Guid.NewGuid();
@@ -52,9 +52,9 @@ internal static class RequestCqrsActualTextMaintenanceFlow
             var builtSource = built.Source ?? throw new InvalidOperationException();
             await Assert.That(restoredSource.ThroughSequence).IsGreaterThan(builtSource.ThroughSequence);
             await Assert.That(restored.IndexSha256).IsNotEqualTo(built.IndexSha256);
-            await RequestCqrsActualTextAssertions.VerifyAsync(fixture, restore, changed: true, token);
-            await RequestCqrsActualTextReplayFlow.OriginalBuildAsync(fixture, request, restore, restored, token);
-            await RequestCqrsActualTextReplayFlow.PriorParentAsync(fixture, restore, token);
+            await RequestCqrsActualTextAssertions.VerifyAsync(fixture, restore, lifetime, changed: true, token);
+            await RequestCqrsActualTextReplayFlow.OriginalBuildAsync(fixture, request, restore, restored, lifetime, token);
+            await RequestCqrsActualTextReplayFlow.PriorParentAsync(fixture, restore, lifetime, token);
         }
         await RequestCqrsActualTextReplayFlow.ReleaseAsync(fixture, request, token);
     }

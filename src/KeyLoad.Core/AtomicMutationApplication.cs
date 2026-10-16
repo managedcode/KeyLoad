@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.DatabaseComposition;
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -15,12 +17,16 @@ public sealed partial class DatabaseEngine
     private const string DocumentEpochSpace = "document-epoch";
 
     private ImmutableArray<MutationReceipt> ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations,
-        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false, CommitToken? commitToken = null, ReplicatedOperation? operation = null)
+        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false, CommitToken? commitToken = null,
+        ReplicatedOperation? operation = null, bool preparingComposition = false, ReadExecutionBudget? compositionBudget = null)
     {
         var token = commitToken ?? Token(tx, partition, position);
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
         TopicPurgeReadBudget? purgeBudget = null;
-        foreach (var (mutation, derived) in ExpandCommandMutations(tx, principal, partition, mutations, now))
+        var originalPayload = preparingComposition
+            ? NativeSerialization.Deserialize<NativeCommandPayload>(operation!.NativePayload.Span) : null;
+        List<QueueRetryDecision>? previewChoices = preparingComposition ? [] : null;
+        foreach (var (mutation, derived) in ExpandCommandMutations(tx, principal, partition, mutations, now, compositionBudget))
         {
             var documentId = mutation switch
             {
@@ -43,7 +49,10 @@ public sealed partial class DatabaseEngine
             {
                 purgeBudget ??= new TopicPurgeReadBudget(OperationLimitsOptions);
             }
-            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, purgeBudget, operation);
+            var effectOperation = preparingComposition
+                ? PrepareCompositionQueueRetry(tx, operation!, partition, mutation, originalPayload!, previewChoices!)
+                : operation;
+            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, purgeBudget, effectOperation);
             if (derived)
             {
                 receipt = receipt with
@@ -65,14 +74,16 @@ public sealed partial class DatabaseEngine
             tx.PutRecord(KeySpace.Partition(DocumentEpochSpace, partition, collection), checked(DocumentEpoch(tx, partition, collection) + AtomicMutationApplicationAdjacentElementOffset));
         }
 
+        RequireCompleteCompositionEffects(tx, operation, preparingComposition);
         return receipts.Count == receipts.Capacity ? receipts.MoveToImmutable() : receipts.ToImmutable();
     }
 
     private IEnumerable<(Mutation Effect, bool Derived)> ExpandCommandMutations(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now)
+        PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now,
+        ReadExecutionBudget? compositionBudget = null)
     {
         var count = AtomicMutationApplicationEmptyElementCount;
-        ReadExecutionBudget? budget = null;
+        var budget = compositionBudget;
         foreach (var requested in mutations)
         {
             if (requested is InsertTypedRow insert)

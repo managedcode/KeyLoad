@@ -5,12 +5,16 @@ namespace KeyLoad.Core.Features.ResourceExecution.Execution;
 /// <summary>Executes gate-scoped reads through the same original budget and native observers.</summary>
 internal static class ReadExecutionBudgetStorageReads
 {
+    private static StorageReadObserver? Observer(ReadExecutionBudget budget, IKeyValueView view)
+        => view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, budget)
+            ? null : budget.ChargeNativeReadRecord;
+
     internal static byte[]? Read(ReadExecutionBudget budget, IKeyValueView view, byte[] key)
     {
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         byte[]? value = null;
-        view.ReadValue(key, borrowed => value = borrowed.ToArray(), budget.ChargeNativeReadRecord);
+        view.ReadValue(key, borrowed => value = borrowed.ToArray(), Observer(budget, view));
         budget.Check();
         return value;
     }
@@ -20,7 +24,7 @@ internal static class ReadExecutionBudgetStorageReads
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         T? record = null;
-        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), budget.ChargeNativeReadRecord);
+        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), Observer(budget, view));
         budget.Check();
         return record;
     }
@@ -31,7 +35,7 @@ internal static class ReadExecutionBudgetStorageReads
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         var result = view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey,
-            budget.ChargeNativeReadRecord, budget.Cancellation);
+            Observer(budget, view), budget.Cancellation);
         budget.Check();
         return result;
     }

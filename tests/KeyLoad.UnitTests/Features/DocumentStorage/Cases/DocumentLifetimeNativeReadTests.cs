@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.DocumentStorage;
 using C = KeyLoad.UnitTests.Features.DocumentStorage.RemoteDocumentNativeFixture;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
@@ -26,6 +27,20 @@ internal sealed class DocumentLifetimeNativeReadTests
                 frame = DocumentLifetimeNativeRead.Capture(fixture);
                 await RemoteDocumentNativeAssertions.DocumentAsync(DocumentLifetimeNativeRead.Read(fixture, frame), fixture, position);
                 fixture.Source.Database.ValidateRemoteDocumentReadV2(frame, DocumentLifetimeNativeRead.Work(fixture.Source.Database));
+                var independent = frame with
+                {
+                    Reference = frame.Reference with
+                    {
+                        Lifetime = new(new string(frame.Reference.Lifetime!.Incarnation.ToCharArray()))
+                    }
+                };
+                await Assert.That(ReferenceEquals(independent.Reference.Lifetime!.Incarnation,
+                    frame.Coverage.Lifetimes.Single().Incarnation.Value)).IsFalse();
+                fixture.Source.Database.ValidateRemoteDocumentReadV2(independent, DocumentLifetimeNativeRead.Work(fixture.Source.Database));
+                await RemoteDocumentNativeAssertions.DocumentAsync(DocumentLifetimeNativeRead.Read(fixture, independent), fixture, position);
+                var roundTrip = NativeSerialization.Deserialize<RemoteDocumentReadFrameV2>(NativeSerialization.Serialize(independent));
+                fixture.Source.Database.ValidateRemoteDocumentReadV2(roundTrip, DocumentLifetimeNativeRead.Work(fixture.Source.Database));
+                await RemoteDocumentNativeAssertions.DocumentAsync(DocumentLifetimeNativeRead.Read(fixture, roundTrip), fixture, position);
                 await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(source)).IsTrue();
                 await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(destination)).IsTrue();
                 var replay = fixture.Destination.Database.Apply(fixture.Write).Get<CommitReceipt>();

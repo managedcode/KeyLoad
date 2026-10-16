@@ -9,7 +9,7 @@ internal static class CommittedResponseAssertions
         => new(command.CommandId, new(scenario.Fixture.Database.Store.Identity.Incarnation,
             command.Partition.AtomicPartitionId, position, CommittedResponseProtocol.InitialEpoch),
             [new(CommittedResponseProtocol.MutationKind, ConnectionNativeProtocol.Collection, CommittedResponseProtocol.Document, revision)],
-            scenario.Fixture.Database.Store.Identity.Durability);
+            DurabilityProfile.QuorumProcessDurable);
 
     internal static async Task ReceiptAsync(CommitReceipt? actual, CommitReceipt expected)
     {

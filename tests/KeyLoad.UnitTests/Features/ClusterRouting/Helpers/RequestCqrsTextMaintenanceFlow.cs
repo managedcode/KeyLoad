@@ -12,7 +12,7 @@ internal static class RequestCqrsTextMaintenanceFlow
         RequestCqrsTextFault? fault)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        fixture.Database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
+        var lifetime = await RequestCqrsTextResource.ConfigureAsync(fixture.Database, token);
         var request = (await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token));
         var payload = NativeSerialization.Serialize(false);
         var cut = fixture.Database.Store.Position;
@@ -27,7 +27,7 @@ internal static class RequestCqrsTextMaintenanceFlow
             await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store)
                 .AsSpan().SequenceEqual(bytes)).IsTrue();
         }
-        await RequestCqrsActualTextMaintenanceFlow.RunAsync(fixture, mode, request, token);
+        await RequestCqrsActualTextMaintenanceFlow.RunAsync(fixture, mode, request, lifetime, token);
     }
 
     private static async Task<Observed> ConsumeAsync(RequestCqrsHostedRuntimeFixture fixture,

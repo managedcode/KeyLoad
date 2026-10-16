@@ -32,13 +32,14 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         var frame = request.Frame;
         if (frame is null || frame.Principal is null || frame.Route is null || frame.Reference is null || request.Request is null
             || request.Request.Reference is null || frame.Resource is null || frame.Coverage is null
-            || frame.ExpiresAt != call.ExpiresAt || frame.Reference != request.Request.Reference
+            || frame.ExpiresAt != call.ExpiresAt
             || !PhysicalOwnerEntryValidation.Same(frame.Route.Destination, call.Destination)
             || !PhysicalOwnerEntryValidation.SameOwner(request.Owner, call.Destination.Owner)
             || request.MaximumResultBytes > call.MaximumReplyBytes)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
         }
+        RequireSourceReference(request, options.Core.DatabaseLimits.Value.MaxBatchBytes);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view, frame.Principal.Id, clock.GetUtcNow()));
         var id = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateOwnedDocumentReadV2(id, principal.Id, request);
@@ -52,6 +53,22 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         }
         token.ThrowIfCancellationRequested();
         return Encode(result, call.MaximumReplyBytes);
+    }
+
+    internal static void RequireSourceReference(OwnedDocumentReadRequestV2 request, int maximumBytes)
+    {
+        var frame = request.Frame;
+        PartitionControlLifetimeCoverage.Require(frame.Coverage, frame.Reference.Partition, [frame.Resource], maximumBytes);
+        var lifetime = frame.Coverage.Lifetimes.Single();
+        EntityReferenceLifetime.RequireStored(frame.Reference, lifetime);
+        try
+        {
+            EntityReferenceLifetime.RequireAdmitted(frame.Reference, request.Request.Reference, lifetime);
+        }
+        catch (KeyLoadException error) when (error.Code is ErrorCode.OwnershipLost or ErrorCode.FormatUnsupported or ErrorCode.Validation)
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof, error);
+        }
     }
 
     private async Task<ReadOnlyMemory<byte>> ControlledAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,

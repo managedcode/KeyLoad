@@ -26,7 +26,7 @@ internal static class NativeLocalChildLifetimePayload
                     P.Partition, [resource]);
                 var plan = PartitionQueryPlanFactory.Create(normalized, database.Store.Identity,
                     [P.Partition], database.Limits, engine.Execution).Leaves.Single();
-                return new PartitionQueryOwnedLeafRequestV2(new(plan, state.PhysicalOwner, P.Partition.TenantId),
+                return new PartitionQueryOwnedLeafRequestV2(new(plan, state.PhysicalOwner, principal.TenantId),
                     resource, coverage, principal);
             }, budget);
         return Sign(operation, input, Guid.NewGuid(), P.Root);

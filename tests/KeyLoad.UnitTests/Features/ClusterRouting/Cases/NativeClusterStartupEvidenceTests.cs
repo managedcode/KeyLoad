@@ -8,6 +8,7 @@ internal sealed class NativeClusterStartupEvidenceTests
     private const string KindKey = "kind";
     private const string MissingNativeFilesKey = "missingNativeFiles";
     private const string EventsKey = "events";
+    private const int ExpectedServerFiles = 6;
 
     [Test]
     public async Task OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy()
@@ -43,9 +44,9 @@ internal sealed class NativeClusterStartupEvidenceTests
         {
             await ConnectionNativeScenario.RunAsync(async scenario =>
             {
-                clusterId = scenario.Fixture.Cluster.Options.ClusterId;
                 using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
                 await scenario.InitializeAsync(timeout.Token);
+                clusterId = scenario.Fixture.Evidence.ClusterId;
                 var principal = scenario.Principal();
                 using var cancelled = new CancellationTokenSource();
                 await cancelled.CancelAsync();
@@ -71,7 +72,7 @@ internal sealed class NativeClusterStartupEvidenceTests
         var record = evidence.RootElement;
         await Assert.That(record.GetProperty(KindKey).GetString()).IsEqualTo(NativeClusterStartupProtocol.OperationKind);
         await Assert.That(record.GetProperty(NativeClusterStartupProtocol.CleanupJoined).GetBoolean()).IsTrue();
-        await Assert.That(record.GetProperty(NativeClusterStartupProtocol.Files).GetArrayLength()).IsEqualTo(2);
+        await Assert.That(record.GetProperty(NativeClusterStartupProtocol.Files).GetArrayLength()).IsEqualTo(ExpectedServerFiles);
         await Assert.That(record.GetProperty(MissingNativeFilesKey).GetInt32()).IsEqualTo(0);
         await Assert.That(record.GetProperty(EventsKey).GetArrayLength()).IsGreaterThan(0);
         await Assert.That(record.GetRawText().Contains(ConnectionNativeProtocol.FirstJson, StringComparison.Ordinal)).IsFalse();
@@ -80,13 +81,14 @@ internal sealed class NativeClusterStartupEvidenceTests
     private static async Task HealthyAsync()
     {
         string? clusterId = null;
-        var logRoot = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+        ConnectionNativeServerRuntime? runtime = null;
         await ConnectionNativeScenario.RunAsync(async scenario =>
         {
-            clusterId = scenario.Fixture.Cluster.Options.ClusterId;
             using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
             var token = timeout.Token;
             await scenario.InitializeAsync(token);
+            clusterId = scenario.Fixture.Evidence.ClusterId;
+            runtime = scenario.Fixture;
             var principal = scenario.Principal();
             var command = scenario.Command(Document);
             var original = await scenario.CommandAsync(principal, Guid.NewGuid(), command, token);
@@ -104,17 +106,21 @@ internal sealed class NativeClusterStartupEvidenceTests
             await ConnectionNativeAssertions.StoredAsync(scenario, Document, 1, ConnectionNativeProtocol.FirstJson);
             await scenario.CloseAsync(token);
             await Assert.That(File.Exists(NativeClusterStartupEvidence.OperationPathFor(
-                scenario.Fixture.Cluster.Options.ClusterId))).IsFalse();
+                scenario.Fixture.Evidence.ClusterId))).IsFalse();
             await Assert.That(File.Exists(NativeClusterStartupEvidence.PathFor(
-                scenario.Fixture.Cluster.Options.ClusterId))).IsFalse();
+                scenario.Fixture.Evidence.ClusterId))).IsFalse();
         });
-        var owner = clusterId ?? throw new InvalidOperationException("The original native owner was not created.");
-        var primary = Directory.EnumerateFiles(logRoot, owner + "_*.log")
-            .Single(static path => path.EndsWith("_Primary.log", StringComparison.Ordinal));
+        var owner = runtime ?? throw new InvalidOperationException("The original native owner was not created.");
+        await Assert.That(clusterId).IsEqualTo(owner.Evidence.ClusterId);
+        await Assert.That(owner.IsDisposalJoined).IsTrue();
         var trace = new NativeClusterStartupTrace();
-        var inspected = trace.Read(primary, "Primary");
-        await Assert.That(inspected.InspectedBytes).IsGreaterThan(0);
-        await Assert.That(trace.Events.Any(static item => item.Event == "LogSiloStartingWithGC"
+        var files = owner.Evidence.ReadJoined(owner.IsDisposalJoined, trace);
+        await Assert.That(files.Count).IsEqualTo(ExpectedServerFiles);
+        foreach (var file in files)
+        {
+            await Assert.That(file.InspectedBytes).IsGreaterThan(0);
+        }
+        await Assert.That(trace.Events.Any(item => item.Role == files.First().Role && item.Event == "LogSiloStartingWithGC"
             && item.Category == "Orleans.Runtime.Silo")).IsTrue();
         await Assert.That(JsonSerializer.Serialize(trace.Events).Contains(
             ConnectionNativeProtocol.FirstJson, StringComparison.Ordinal)).IsFalse();

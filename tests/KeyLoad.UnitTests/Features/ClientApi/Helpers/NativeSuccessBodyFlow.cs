@@ -79,7 +79,7 @@ internal sealed class NativeSuccessBodyFlow : IAsyncDisposable
 
     private async Task RunOwnedAsync(string body, bool appendNativePrefix, bool declareLength)
     {
-        scenario = new ConnectionNativeScenario(nativeReplicaAdmission: true);
+        scenario = new ConnectionNativeScenario();
         await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
         using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,

@@ -86,6 +86,12 @@ public interface IKeyValueView
 /// <summary>Stages atomic writes while preserving the same gated read view.</summary>
 public interface IAtomicTransaction : IKeyValueView
 {
+    /// <summary>Runs synchronous discard-only preparation over this transaction's staged image.</summary>
+    /// <typeparam name="T">Independently owned result type.</typeparam>
+    /// <param name="prepare">Callback whose child transaction and borrowed bytes cannot be retained.</param>
+    /// <returns>The owned result; no child mutation is published to the parent or store.</returns>
+    T Prepare<T>(Func<IAtomicTransaction, T> prepare);
+
     /// <summary>Stages a key/value write using provider-owned copies.</summary>
     /// <param name="key">Encoded key to insert or replace.</param>
     /// <param name="value">Logical bytes to persist.</param>
@@ -143,6 +149,13 @@ public interface IAtomicStore : IDisposable
     /// <param name="read">Action that must not retain the view or borrowed bytes.</param>
     /// <returns>The action's independently owned result.</returns>
     T Read<T>(Func<IKeyValueView, T> read);
+    /// <summary>Runs synchronous discard-only preparation under the native store gate.</summary>
+    /// <typeparam name="T">Independently owned result type.</typeparam>
+    /// <param name="prepare">Callback receiving a scoped child transaction and actual next local position.</param>
+    /// <returns>The owned result; no journal, tree, cache publication or durable position is changed.</returns>
+    /// <remarks>Nested store-gate entry is invalid. Inside a transaction callback use that transaction's Prepare.</remarks>
+    T Prepare<T>(Func<IAtomicTransaction, long, T> prepare);
+
     /// <summary>Compiles and durably publishes one atomic set of staged writes.</summary>
     /// <typeparam name="T">Owned committed result type.</typeparam>
     /// <param name="compile">Action receiving the gated transaction and proposed local position.</param>

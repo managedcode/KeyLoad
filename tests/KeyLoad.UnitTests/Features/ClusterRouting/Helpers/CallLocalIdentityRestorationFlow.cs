@@ -14,8 +14,7 @@ internal static class CallLocalIdentityRestorationFlow
     private const string PutKind = "putDocument";
 
     internal static Task RunAsync(bool firstPresentNull, CancellationToken token)
-        => ConnectionNativeScenario.RunAsync(scenario => ExerciseAsync(scenario, firstPresentNull, token),
-            nativeReplicaAdmission: true);
+        => ConnectionNativeScenario.RunAsync(scenario => ExerciseAsync(scenario, firstPresentNull, token));
 
     private static async Task ExerciseAsync(ConnectionNativeScenario scenario, bool firstPresentNull,
         CancellationToken cancellationToken)
@@ -103,7 +102,7 @@ internal static class CallLocalIdentityRestorationFlow
         await Assert.That(reply.Error).IsNull();
         var id = ((PutDocument)command.Mutations.Single()).Id;
         var expected = new CommitReceipt(command.CommandId, token,
-            [new(PutKind, ConnectionNativeProtocol.Collection, id, 1)], DurabilityProfile.ProcessDurable);
+            [new(PutKind, ConnectionNativeProtocol.Collection, id, 1)], DurabilityProfile.QuorumProcessDurable);
         await SafeProjectorOperationSeed.EqualAsync(ConnectionNativeAssertions.Value<CommitReceipt>(reply), expected);
         await SafeProjectorOperationSeed.EqualAsync(scenario.Stored(id),
             new DocumentResult(scenario.Reference(id), 1, json, false, []));

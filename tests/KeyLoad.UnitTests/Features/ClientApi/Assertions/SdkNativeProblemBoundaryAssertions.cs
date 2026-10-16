@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 using P = KeyLoad.UnitTests.Features.ClientApi.SdkNativeProblemBoundaryProtocol;
 
@@ -22,14 +23,14 @@ internal static class SdkNativeProblemBoundaryAssertions
         var operation = entry.Operation ?? throw new InvalidOperationException(P.Failure);
         await Assert.That(operation.Id).IsEqualTo(command.CommandId);
         await Assert.That(operation.PrincipalId).IsEqualTo(root ? P.Root : state.Principal.Id);
-        await EqualAsync(command, JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson));
+        await EqualAsync(command, NativeCommandPayload.Read<CommandRequest>(operation));
         var placement = db.Database.ReadAtomicPartitionPlacement(P.Root, new(P.PlacementVersion, db.Partition));
         MutationReceipt[] mutations = root
             ? [new(P.Put, state.Forbidden.Collection, P.Document, P.FirstRevision), new(P.Put, P.Allowed, P.Document, P.FirstRevision)]
             : [new(P.Put, P.Allowed, P.Document, P.HealthyRevision)];
         var expected = new CommitReceipt(command.CommandId,
             new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.Index, placement.PlacementEpoch),
-            [.. mutations], db.Store.Identity.Durability);
+            [.. mutations], DurabilityProfile.QuorumProcessDurable);
         await EqualAsync(expected, receipt);
         await Assert.That(receipt.Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
     }
@@ -48,7 +49,7 @@ internal static class SdkNativeProblemBoundaryAssertions
         var original = db.ReadRetainedEntry(state.Denied.CommandId).Operation ?? throw new InvalidOperationException(P.Failure);
         await Assert.That(original.Id).IsEqualTo(state.Denied.CommandId);
         await Assert.That(original.PrincipalId).IsEqualTo(state.Principal.Id);
-        await EqualAsync(state.Denied, JsonDefaults.Deserialize<CommandRequest>(original.PayloadJson));
+        await EqualAsync(state.Denied, NativeCommandPayload.Read<CommandRequest>(original));
         var result = OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, state.Principal.Id, state.Denied.CommandId);
         await Assert.That(result is not null).IsTrue();
         await Assert.That(result!.Error).IsEqualTo(ErrorCode.PermissionDenied);
@@ -68,7 +69,7 @@ internal static class SdkNativeProblemBoundaryAssertions
         var failed = db.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(db.Partition,
             state.Principal.Id, state.Denied.CommandId))) ?? throw new InvalidOperationException(P.Failure);
         return new(rows, db.Store.Position, db.ReadJournalCut(), NativeSerialization.Serialize(db.Store.Identity),
-            DocumentCommandOutcomeTestSupport.CaptureOutbox(db), failed);
+            DocumentCommandOutcomeTestSupport.CaptureOutbox(db.Store, db.Database, db.Partition), failed);
     }
     internal static async Task SameAsync(SdkNativeProblemBoundaryScenario state, SdkNativeProblemBoundaryCut expected)
     {

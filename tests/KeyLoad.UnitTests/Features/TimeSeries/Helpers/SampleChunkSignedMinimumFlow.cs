@@ -44,9 +44,9 @@ internal static class SampleChunkSignedMinimumFlow
             () => SampleChunkSignedMinimumAssertions.HealthyAsync(scenario, state, token));
         await SampleChunkSignedMinimumCold.ReplayAsync(owner.Database, owner.Store, state, token);
         var cold = SampleRawIntegrityAssertions.Capture(owner.Store);
+        var coldSource = new ConnectionNativeColdSource(scenario.Fixture.Source);
         await scenario.CloseAsync(token);
-        await scenario.Fixture.Cluster.StopAllSilosAsync(token);
-        owner.JoinOwnedResources();
-        await SampleChunkSignedMinimumCold.RunAsync(owner, state, scenario.Fixture, cold, token);
+        await scenario.Fixture.Hosts.StopAsync(token);
+        await SampleChunkSignedMinimumCold.RunAsync(coldSource, state, cold, token);
     }
 }

@@ -15,6 +15,7 @@ internal static class ConnectionAwaitedSettlementCalls
     internal static async Task<GrainOperationReply> CommandForOwnerAsync(ConnectionNativeScenario scenario,
         PrincipalRecord principal, Guid requestId, CommandRequest command, Guid connectionId, CancellationToken token)
     {
+        scenario.Fixture.RegisterConsumer(connectionId);
         var before = CaptureContext();
         Exception? primary = null;
         try

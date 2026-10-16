@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
@@ -22,11 +23,12 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         NativeLocalhostClusteringOptions localhost,
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory = null,
         Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory = null,
-        Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory = null)
+        Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory = null,
+        IGrainRequestPurposeObserver? purposeObserver = null)
     {
         this.settings = settings;
         this.localhost = localhost;
-        observers = new(observerFactory, authenticationObserverFactory, phaseObserverFactory);
+        observers = new(observerFactory, authenticationObserverFactory, phaseObserverFactory, purposeObserver);
     }
 
     internal ControlledPartitionMovementNativeHost Source => nodes[SourceIndex];
@@ -50,20 +52,31 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         Func<int, IDatabaseAuthenticationExecutionObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, null, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, null, null, null, null, null, cancellationToken);
     }
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithPhaseObserverAsync(
         Func<int, IGrainRequestPhaseObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory, null, null, null, null, cancellationToken);
     }
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithMaximumBatchBytesAsync(
         int maximumBatchBytes, CancellationToken cancellationToken)
     {
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, null, cancellationToken, maximumBatchBytes);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, null, maximumBatchBytes, null, null, null, cancellationToken);
+    }
+
+    internal static Task<ControlledPartitionMovementNativeHosts> CreateWithRoutingAsync(
+        IOptions<GrainRoutingOptions> routingOptions, Func<int, IGrainRequestPhaseObserver> observerFactory,
+        IGrainRequestPurposeObserver? purposeObserver,
+        Action<int, ControlledPartitionMovementNativeHost>? beforeStart, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(routingOptions);
+        ArgumentNullException.ThrowIfNull(observerFactory);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory,
+            null, routingOptions, purposeObserver, beforeStart, cancellationToken);
     }
 
     internal void RetainCreationFailure(Exception original) => creationFailure = original;
@@ -74,7 +87,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         for (var index = SourceIndex; index < ControlledPartitionMovementNativeHostEndpoints.OwnerCount; index++)
         {
             nodes.Add(await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(index), localhost,
-            observers.Sealed(index), observers.Authentication(index), phaseObserver: observers.Phase(index),
+            observers.Sealed(index), observers.Authentication(index), phaseObserver: observers.Phase(index), purposeObserver: observers.Purpose,
                 startupCancellation: startupCancellation).ConfigureAwait(false));
         }
     }

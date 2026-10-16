@@ -19,7 +19,8 @@ internal static class ServerConfiguration
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
         IPartitionMovementNativeObserver? partitionMovementNativeObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
-        IGrainRequestPhaseObserver? phaseObserver = null, CancellationToken startupCancellation = default)
+        IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
+        CancellationToken startupCancellation = default)
     {
         startupCancellation.ThrowIfCancellationRequested();
         var builder = WebApplication.CreateBuilder(args);
@@ -32,22 +33,8 @@ internal static class ServerConfiguration
         ConfigureTransportOptions(builder);
         Register(builder.Services, localhostClustering);
         PostgresNativeComposition.Register(builder.Services, builder.Configuration);
-        if (sealedObserver is not null)
-        {
-            builder.Services.AddSingleton(sealedObserver);
-        }
-        if (authenticationExecutionObserver is not null)
-        {
-            builder.Services.AddSingleton(authenticationExecutionObserver);
-        }
-        if (partitionMovementNativeObserver is not null)
-        {
-            builder.Services.AddSingleton(partitionMovementNativeObserver);
-        }
-        if (phaseObserver is not null)
-        {
-            builder.Services.AddSingleton<IGrainRequestPhaseObserver>(phaseObserver);
-        }
+        RegisterObservers(builder.Services, sealedObserver, authenticationExecutionObserver,
+            partitionMovementNativeObserver, phaseObserver, purposeObserver);
         OrleansSiloConfiguration.Register(builder, node, address, localhostClustering);
         if (lifecycleParticipantFactory is not null)
         {
@@ -72,6 +59,34 @@ internal static class ServerConfiguration
             await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
+        }
+    }
+
+    private static void RegisterObservers(IServiceCollection services,
+        IGrainPartitionMovementSealedOperationObserver? sealedObserver,
+        IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver,
+        IPartitionMovementNativeObserver? partitionMovementNativeObserver,
+        IGrainRequestPhaseObserver? phaseObserver, IGrainRequestPurposeObserver? purposeObserver)
+    {
+        if (sealedObserver is not null)
+        {
+            services.AddSingleton(sealedObserver);
+        }
+        if (authenticationExecutionObserver is not null)
+        {
+            services.AddSingleton(authenticationExecutionObserver);
+        }
+        if (partitionMovementNativeObserver is not null)
+        {
+            services.AddSingleton(partitionMovementNativeObserver);
+        }
+        if (phaseObserver is not null)
+        {
+            services.AddSingleton<IGrainRequestPhaseObserver>(phaseObserver);
+        }
+        if (purposeObserver is not null)
+        {
+            services.AddSingleton<IGrainRequestPurposeObserver>(purposeObserver);
         }
     }
 

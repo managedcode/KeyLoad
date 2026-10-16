@@ -17,11 +17,11 @@ internal static class RequestCqrsActualTextAssertions
     private const double Score = 1d / 61d;
 
     internal static Task VerifyAsync(RequestCqrsHostedRuntimeFixture fixture,
-        TextIndexMaintenanceRequest request, bool changed, CancellationToken token)
-        => VerifyAsync(fixture, request, changed, ChangedRevision, token);
+        TextIndexMaintenanceRequest request, ResourceLifetimeV1 lifetime, bool changed, CancellationToken token)
+        => VerifyAsync(fixture, request, lifetime, changed, ChangedRevision, token);
 
     internal static async Task VerifyAsync(RequestCqrsHostedRuntimeFixture fixture,
-        TextIndexMaintenanceRequest request, bool changed, long changedRevision, CancellationToken token)
+        TextIndexMaintenanceRequest request, ResourceLifetimeV1 lifetime, bool changed, long changedRevision, CancellationToken token)
     {
         var runtime = fixture.NativeMaintenance ?? throw new InvalidOperationException();
         var database = fixture.Database;
@@ -36,7 +36,7 @@ internal static class RequestCqrsActualTextAssertions
             var selection = new TextIndexSelectionV1(request.Consumer, request.IndexGeneration);
             if (changed)
             {
-                await LiteralAsync(search, database.Partition, selection, ChangedQuery,
+                await LiteralAsync(search, database.Partition, selection, lifetime, ChangedQuery,
                     NativeTextBilingualAudit.UkrainianId, ChangedJson, changedRevision, token);
                 await Assert.That(await search.SearchAsync(Principal,
                     NativeTextBilingualAudit.Request(database.Partition, NativeTextBilingualAudit.EnglishQuery)
@@ -53,9 +53,9 @@ internal static class RequestCqrsActualTextAssertions
             }
             else
             {
-                await LiteralAsync(search, database.Partition, selection, UkrainianQuery,
+                await LiteralAsync(search, database.Partition, selection, lifetime, UkrainianQuery,
                     NativeTextBilingualAudit.UkrainianId, NativeTextBilingualAudit.UkrainianJson, OriginalRevision, token);
-                await LiteralAsync(search, database.Partition, selection, NativeTextBilingualAudit.EnglishQuery,
+                await LiteralAsync(search, database.Partition, selection, lifetime, NativeTextBilingualAudit.EnglishQuery,
                     NativeTextBilingualAudit.EnglishId, NativeTextBilingualAudit.EnglishJson, OriginalRevision, token);
             }
         }, failures);
@@ -65,15 +65,18 @@ internal static class RequestCqrsActualTextAssertions
     }
 
     private static async Task LiteralAsync(SearchEngine search, PartitionRef partition,
-        TextIndexSelectionV1 selection, string query, string id, string json, long revision, CancellationToken token)
+        TextIndexSelectionV1 selection, ResourceLifetimeV1 lifetime, string query, string id, string json, long revision, CancellationToken token)
     {
         var actual = await search.SearchAsync(Principal,
             NativeTextBilingualAudit.Request(partition, query) with
             {
                 TextIndex = selection
             }, token);
-        RankedDocument[] expected = [new(new(new(partition, NativeTextBilingualAudit.Collection, id),
-            revision, json, false, []), Score)];
+        var reference = new EntityRef(partition, NativeTextBilingualAudit.Collection, id)
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        };
+        RankedDocument[] expected = [new(new(reference, revision, json, false, []), Score)];
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }

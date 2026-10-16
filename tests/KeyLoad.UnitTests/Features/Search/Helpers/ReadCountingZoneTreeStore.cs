@@ -51,6 +51,8 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         return inner.Read(read);
     }
 
+    public T Prepare<T>(Func<IAtomicTransaction, long, T> prepare) => inner.Prepare(prepare);
+
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile) => inner.Commit(compile);
     public void SetDispatchPaused(bool paused) => inner.SetDispatchPaused(paused);
     public long CreateBackup(string path) => inner.CreateBackup(path);

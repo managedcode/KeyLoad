@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ClusterRouting;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
@@ -43,9 +44,10 @@ internal static class ReplicaRetainedReplayQuorum
         await ReplicaRetainedReplayFlow.SyncAsync(fixture, token);
         foreach (var voter in ReplicaBarrierDeadlineFlow.Voters)
         {
-            var actual = fixture.Node(voter).Journal.Database.GetDocument(P.Root,
-                new(P.Partition, P.Collection, ReplicaRetainedReplayProducer.FollowingDocument), cancellationToken: token);
-            var expected = new DocumentResult(new(P.Partition, P.Collection, ReplicaRetainedReplayProducer.FollowingDocument),
+            var reference = NativeLocalChildLifetimeReferences.Expected(fixture.Node(voter),
+                ReplicaRetainedReplayProducer.FollowingDocument);
+            var actual = fixture.Node(voter).Journal.Database.GetDocument(P.Root, reference, cancellationToken: token);
+            var expected = new DocumentResult(reference,
                 ReplicaRetainedReplayProducer.Single, ReplicaRetainedReplayProducer.FollowingJson, false, []);
             await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(expected), NativeSerialization.Serialize(actual));
         }

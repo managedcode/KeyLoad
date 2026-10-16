@@ -1,0 +1,53 @@
+using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Storage;
+using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
+
+namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+
+internal static class CompositionPrefixPrepareSeed
+{
+    internal static async Task ConfigureAsync(CompositionPrefixPrepareOwner owner)
+    {
+        foreach (var (name, kind) in new[] { (D.From, ResourceKind.Collection), (D.To, ResourceKind.Collection),
+            (D.Graph, ResourceKind.Graph), (D.RoundGraph, ResourceKind.Graph), (D.Queue, ResourceKind.WorkQueue) })
+        {
+            var definition = new ResourceDefinition(name, kind, owner.Source.Partition.TransactionDomainId)
+            {
+                RelationalSchema = kind == ResourceKind.Collection
+                    ? new("id", [new("id", RelationalColumnType.Text)]) : null
+            };
+            var request = new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition);
+            var original = owner.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), D.Root,
+                owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
+            var bytes = NativeSerialization.Serialize(original);
+            await CompositionPrefixPrepareAssertions.EqualAsync(definition, owner.Submit(original).Get<ResourceDefinition>());
+            await Assert.That(NativeSerialization.Serialize(owner.Retained(original)).SequenceEqual(bytes)).IsTrue();
+            owner.Lifetimes.Add(name, lifetime);
+            await CompositionPrefixPrepareAssertions.EqualAsync(lifetime, owner.Store.Read(view =>
+                ResourceLifetimeCatalog.Read(view, request.TenantId, request.DatabaseId, name, definition)));
+        }
+    }
+
+    internal static EntityRef Bound(CompositionPrefixPrepareOwner owner, string collection, string id)
+        => new(owner.Source.Partition, collection, id)
+        {
+            Lifetime = new(owner.Lifetimes[collection].Incarnation.Value)
+        };
+
+    internal static EntityRef Fresh(CompositionPrefixPrepareOwner owner, string collection, string id)
+        => new(owner.Source.Partition, collection, id);
+
+    internal static async Task VerticesAsync(CompositionPrefixPrepareOwner owner, bool first = true)
+    {
+        if (first)
+        {
+            await CompositionPrefixPrepareCommands.CommitAsync(owner,
+                [new PutDocument(D.From, D.First, D.Json, D.Absent)],
+                [new(D.Put, D.From, D.First, D.FirstRevision)]);
+        }
+        await CompositionPrefixPrepareCommands.CommitAsync(owner,
+            [new PutDocument(D.To, D.Second, D.OtherJson, D.Absent)],
+            [new(D.Put, D.To, D.Second, D.FirstRevision)]);
+    }
+}

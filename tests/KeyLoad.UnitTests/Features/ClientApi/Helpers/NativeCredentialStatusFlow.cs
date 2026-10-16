@@ -76,7 +76,7 @@ internal sealed class NativeCredentialStatusFlow : IAsyncDisposable
 
     private async Task RunOwnedAsync()
     {
-        scenario = new ConnectionNativeScenario(nativeReplicaAdmission: true);
+        scenario = new ConnectionNativeScenario();
         using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
             TestContext.Current!.Execution.CancellationToken);

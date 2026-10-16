@@ -31,7 +31,7 @@ internal static class SdkNativeProblemBoundaryFlow
 
         async Task RunOwnedAsync()
         {
-            native = new ConnectionNativeScenario(nativeReplicaAdmission: true);
+            native = new ConnectionNativeScenario();
             var state = new SdkNativeProblemBoundaryScenario(native, tasks);
             await state.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var deadline = new CancellationTokenSource(native.Timing.CompletionTimeout, TimeProvider.System);

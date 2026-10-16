@@ -12,6 +12,8 @@ internal sealed class C1SubmissionJournalInspectionStore(IAtomicStore original,
         lifetime.ThrowIfCancellationRequested();
         return original.Read(view => read(new C1SubmissionJournalInspectionView(view, budget, lifetime)));
     }
+    public T Prepare<T>(Func<IAtomicTransaction, long, T> prepare)
+        => throw C1SubmissionJournalInspectionValidation.Invalid();
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile)
         => throw C1SubmissionJournalInspectionValidation.Invalid();
     public void SetDispatchPaused(bool paused) => throw C1SubmissionJournalInspectionValidation.Invalid();

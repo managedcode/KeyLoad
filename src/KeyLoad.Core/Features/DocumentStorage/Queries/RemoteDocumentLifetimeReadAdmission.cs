@@ -25,12 +25,23 @@ public sealed partial class DatabaseEngine
         work.Check();
         var current = Store.Read(view => CaptureRemoteDocumentLifetimeView(work.CreateView(view), original.Principal.Id,
             original.Reference, original.ExpiresAt, original.QueryId));
-        if (current is null || !NativeSerialization.Serialize(current).AsSpan().SequenceEqual(NativeSerialization.Serialize(original)))
+        if (current is null || !SameRemoteDocumentLifetimeFrame(current, original))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
         }
         work.Check();
     }
+
+    private static bool SameRemoteDocumentLifetimeFrame(RemoteDocumentReadFrameV2 current, RemoteDocumentReadFrameV2 original)
+        // The bound reference can retain an earlier decode's incarnation string. Cross-field
+        // Orleans object aliases are not authority; each complete constituent still is.
+        => current.Version == original.Version && current.QueryId == original.QueryId
+            && current.ExpiresAt == original.ExpiresAt && current.Reference == original.Reference
+            && PartitionControlLifetimeProofValidation.Same(current.Route, original.Route)
+            && PartitionControlLifetimeProofValidation.Same(current.Principal, original.Principal)
+            && PartitionControlLifetimeProofValidation.Same(current.Resource, original.Resource)
+            && current.Coverage.Partition == original.Coverage.Partition
+            && current.Coverage.Lifetimes.SequenceEqual(original.Coverage.Lifetimes);
 
     private RemoteDocumentReadFrameV2? CaptureRemoteDocumentLifetimeView(IKeyValueView view, string principalId,
         EntityRef reference, DateTimeOffset expiry, Guid queryId)

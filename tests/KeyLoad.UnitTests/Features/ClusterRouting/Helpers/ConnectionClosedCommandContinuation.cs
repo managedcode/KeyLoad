@@ -19,7 +19,7 @@ internal static class ConnectionClosedCommandContinuation
         try
         {
             var originalIdentity = scenario.Fixture.Database.Store.Identity;
-            var expectedPosition = scenario.Fixture.Database.Store.Position + NextCommit;
+            var expectedPosition = checked(scenario.Fixture.Database.ReadJournalCut().LastIndex + NextCommit);
             var requestId = Guid.NewGuid();
             var created = await ConnectionAwaitedSettlementCalls.CommandForOwnerAsync(scenario, principal,
                 requestId, command, ownerId, token);
@@ -28,7 +28,7 @@ internal static class ConnectionClosedCommandContinuation
             await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
             var expectedReceipt = new CommitReceipt(command.CommandId,
                 new(originalIdentity.Incarnation, command.Partition.AtomicPartitionId, expectedPosition, InitialOwnershipEpoch),
-                [new("putDocument", ConnectionNativeProtocol.Collection, OriginalDocument, InitialRevision)], originalIdentity.Durability);
+                [new("putDocument", ConnectionNativeProtocol.Collection, OriginalDocument, InitialRevision)], DurabilityProfile.QuorumProcessDurable);
             await Assert.That(JsonDefaults.Serialize(receipt).SequenceEqual(JsonDefaults.Serialize(expectedReceipt))).IsTrue();
             await Assert.That(JsonDefaults.Serialize(receipt.Mutations).SequenceEqual(JsonDefaults.Serialize(
                 new MutationReceipt[] { new("putDocument", ConnectionNativeProtocol.Collection,

@@ -9,10 +9,14 @@ internal static class AnalyticsCompositionOutbox
 {
     internal static async Task RequireAsync(SafeProjectorOperationDatabase owner, AnalyticsCompositionCommit anchor,
         IReadOnlyList<AnalyticsCompositionCommit> commits)
+        => await RequireAsync(owner, anchor, commits,
+            AnalyticsExpectedResourceCreation.Lifetime(owner.Source, AnalyticsExpectedResourceCreation.Anchor));
+
+    internal static async Task RequireAsync(SafeProjectorOperationDatabase owner, AnalyticsCompositionCommit anchor,
+        IReadOnlyList<AnalyticsCompositionCommit> commits, ResourceLifetimeV1 anchorLifetime)
     {
         var partition = owner.Source.Partition;
-        var anchorReference = AnalyticsExpectedResourceCreation.Bind(owner.Source, new(partition, D.AnchorCollection, D.AnchorId),
-            AnalyticsExpectedResourceCreation.Anchor);
+        var anchorReference = AnalyticsExpectedResourceCreation.Bind(anchorLifetime, new(partition, D.AnchorCollection, D.AnchorId));
         var anchorMutation = new PutDocument(D.AnchorCollection, D.AnchorId, D.AnchorJson, 0);
         var time = (owner.Entry(anchor.Operation).Operation ?? throw new InvalidOperationException("The retained test operation is missing.")).EvaluatedAt;
         var expected = new List<OutboxEntry> { new(1, 0, anchor.Receipt.Token, time, anchorMutation,
@@ -26,8 +30,7 @@ internal static class AnalyticsCompositionOutbox
             {
                 var mutation = request.Mutations[ordinal];
                 var document = mutation is PutDocument put
-                    ? new DocumentRecord(AnalyticsExpectedResourceCreation.Bind(owner.Source, new(partition, put.Collection, put.Id),
-                        AnalyticsExpectedResourceCreation.Anchor), 1, P.Json, new(), time) : null;
+                    ? new DocumentRecord(AnalyticsExpectedResourceCreation.Bind(anchorLifetime, new(partition, put.Collection, put.Id)), 1, P.Json, new(), time) : null;
                 expected.Add(new(expected.Count + 1, ordinal, commit.Receipt.Token, time,
                     mutation, commit.Receipt.Mutations[ordinal], After: document));
             }

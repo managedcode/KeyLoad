@@ -47,9 +47,10 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
         IDatabaseAuthenticationExecutionObserver? authenticationObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
-        IGrainRequestPhaseObserver? phaseObserver = null, CancellationToken startupCancellation = default)
+        IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
+        CancellationToken startupCancellation = default)
         => ControlledPartitionMovementNativeApplicationFactory.CreateAsync(arguments, localhostClustering,
-            sealedObserver, authenticationObserver, lifecycleParticipantFactory, phaseObserver, startupCancellation);
+            sealedObserver, authenticationObserver, lifecycleParticipantFactory, phaseObserver, purposeObserver, startupCancellation);
 
     internal WebApplication Application
     {

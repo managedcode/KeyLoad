@@ -78,7 +78,9 @@ internal sealed class DocumentLifetimeTargetBindingTests
             fixture.RequireOriginalResourceBindings();
             var frame = DocumentLifetimeNativeRead.Capture(fixture);
             var position = fixture.Destination.Store.Position;
-            await RemoteDocumentNativeAssertions.DocumentAsync(DocumentLifetimeNativeRead.Read(fixture, frame), fixture, position);
+            var result = DocumentLifetimeNativeRead.Read(fixture, frame);
+            await RemoteDocumentNativeAssertions.DocumentAsync(result, fixture, position);
+            await DocumentLifetimePublicBoundaryAssertions.RequireAsync(fixture, frame, result);
             fixture.Source.Database.ValidateRemoteDocumentReadV2(frame, DocumentLifetimeNativeRead.Work(fixture.Source.Database));
             await RemoteDocumentNativeAssertions.ReceiptAsync(fixture);
             var replay = fixture.Destination.Database.Apply(fixture.Write).Get<CommitReceipt>();

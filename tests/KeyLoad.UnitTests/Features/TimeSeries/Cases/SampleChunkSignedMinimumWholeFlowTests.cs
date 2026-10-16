@@ -12,5 +12,5 @@ internal sealed class SampleChunkSignedMinimumWholeFlowTests
             using var caller = CancellationTokenSource.CreateLinkedTokenSource(
                 TestContext.Current!.Execution.CancellationToken, deadline.Token);
             await SampleChunkSignedMinimumFlow.RunAsync(scenario, caller.Token);
-        }, nativeReplicaAdmission: true);
+        });
 }

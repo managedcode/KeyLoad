@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.BackupRestore.Execution;
 
-internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope, IResourceOwnerInventoryContext, IAtomicCommitCandidateValidation, IResourceEffectObservation
+internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope, IResourceOwnerInventoryContext, IAtomicCommitCandidateValidation, IResourceEffectObservation, IResourceEffectCompletion
 {
     private const int NoCandidates = 0;
     private readonly IAtomicTransaction inner;
@@ -91,6 +91,11 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         retainedKeyBytes = NoRetainedKeyBytes;
         inner.Reset();
     }
+
+    void IResourceEffectCompletion.RequireCompleteResourceEffects() => EffectAdmission.RequireComplete();
+
+    public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
+        => AtomicPartitionRosterPreparation.Prepare(inner, limits, storePosition, appliedIndex, cleanupScope is not null, prepare);
 
     public void ValidateCommit() => inner.ValidateCommit();
 

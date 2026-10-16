@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using C = KeyLoad.UnitTests.Features.DocumentStorage.RemoteDocumentNativeFixture;
@@ -27,11 +28,20 @@ internal static class DocumentLifetimeNativeRead
     {
         fixture.RequireOriginalResourceBindings();
         var limits = fixture.Destination.Database.Limits;
-        var request = new OwnedDocumentReadRequestV2(frame, new(C.Reference, fixture.Receipt.Token),
-            PhysicalOwnerDirectoryWholeFlow.Destination.Owner, limits.MaxQueryReadBytes, limits.MaxScanRecords, limits.MaxBatchBytes);
+        var request = Request(fixture, frame);
+        RemoteDocumentLifetimeReceiver.RequireSourceReference(request, limits.MaxBatchBytes);
         var budget = Work(fixture.Destination.Database, token);
         var grant = budget.CreateReadGrant(request.MaximumReadBytes, request.MaximumExaminedRecords);
-        return fixture.Destination.Database.ReadOwnedDocumentV2(C.Reader, request, budget, grant);
+        var result = fixture.Destination.Database.ReadOwnedDocumentV2(C.Reader, request, budget, grant);
+        OrdinaryDocumentLifetimeSourceRead.RequireResult(result, frame);
+        return result;
+    }
+
+    internal static OwnedDocumentReadRequestV2 Request(RemoteDocumentNativeFixture fixture, RemoteDocumentReadFrameV2 frame)
+    {
+        var limits = fixture.Destination.Database.Limits;
+        return new(frame, new(C.Reference, fixture.Receipt.Token), PhysicalOwnerDirectoryWholeFlow.Destination.Owner,
+            limits.MaxQueryReadBytes, limits.MaxScanRecords, limits.MaxBatchBytes);
     }
 
     internal static ResourceLifetimeV1 TargetLifetime(RemoteDocumentNativeFixture fixture)

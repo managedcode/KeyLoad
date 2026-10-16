@@ -57,6 +57,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         {
             arguments.Add(BatchBytesArgumentPrefix + maximum.ToString(CultureInfo.InvariantCulture));
         }
+        arguments.AddRange(routingArguments);
         return arguments.ToArray();
     }
 }

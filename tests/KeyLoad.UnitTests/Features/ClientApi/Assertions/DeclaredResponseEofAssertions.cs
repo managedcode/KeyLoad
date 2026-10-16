@@ -22,14 +22,14 @@ internal static class DeclaredResponseEofAssertions
         await Assert.That(operation.Id).IsEqualTo(command.CommandId);
         await Assert.That(operation.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.PrincipalId).IsEqualTo(principal.Id);
-        await EqualAsync(command, JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson));
+        await EqualAsync(command, global::KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(operation));
         var expected = new CommitReceipt(command.CommandId,
             new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.Index, placement.PlacementEpoch),
-            [new(PutKind, ConnectionNativeProtocol.Collection, Document, Revision)], database.Store.Identity.Durability);
+            [new(PutKind, ConnectionNativeProtocol.Collection, Document, Revision)], DurabilityProfile.QuorumProcessDurable);
         await EqualAsync(expected, original);
         await Assert.That(original!.Mutations.All(value => value.CompositionReferences.IsEmpty)).IsTrue();
         await DocumentAsync(scenario);
-        var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database);
+        var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database.Store, database.Database, database.Partition);
         await Assert.That(outbox.EntryBytes.Length).IsEqualTo(OneEntry);
         var after = new DocumentRecord(scenario.Reference(Document), Revision, OriginalJson, new RowAccess(), operation.EvaluatedAt);
         var expectedEntry = new OutboxEntry(FirstSequence, OriginalOrdinal, expected.Token, operation.EvaluatedAt,
@@ -52,7 +52,7 @@ internal static class DeclaredResponseEofAssertions
             OutcomeStoreOracle.PartitionKey(command.Partition, principal.Id, command.CommandId)))
             ?? throw new InvalidOperationException(Failure);
         return new(QueueWholeFlowStorage.Bytes(database.Store), database.Store.Position, database.ReadJournalCut(),
-            DocumentCommandOutcomeTestSupport.CaptureOutbox(database), outcome);
+            DocumentCommandOutcomeTestSupport.CaptureOutbox(database.Store, database.Database, database.Partition), outcome);
     }
 
     internal static async Task CurrentAsync(ConnectionNativeScenario scenario, PrincipalRecord principal,

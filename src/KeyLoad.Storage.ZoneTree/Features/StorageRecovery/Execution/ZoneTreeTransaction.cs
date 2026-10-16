@@ -3,7 +3,7 @@ using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomicTransaction, IAtomicCommitCandidateValidation
+internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool preparing = false) : IAtomicTransaction, IAtomicCommitCandidateValidation
 {
     private const int NoValueBytes = 0;
     private const int NoStagedBytes = 0;
@@ -11,17 +11,30 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
     private StorageMutation[]? preparedChanges;
     private byte[]? preparedPayload;
     private long stagedBytes;
+    private readonly int preparationThread = Environment.CurrentManagedThreadId;
+    private bool preparationContextOpen = true;
 
     internal SortedSet<ZoneTreeStagedEntry> Changes { get; } = new(ZoneTreeStagedEntryComparer.Instance);
 
     public int MaximumRangeRecords => runtime.Options.MaximumRangeRecords;
+
+    public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
+    {
+        if (!preparationContextOpen || Environment.CurrentManagedThreadId != preparationThread)
+        {
+            throw new InvalidOperationException(ZoneTreeStorePreparationExecution.OutsideTransactionCallback);
+        }
+        return ZoneTreeStorePreparationExecution.Fork(runtime, Changes, prepare, requireWriteGate: true);
+    }
+
+    internal void EndPreparationContext() => preparationContextOpen = false;
 
     public byte[]? ReadOwnedValue(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
         if (!Changes.TryGetValue(new(key, null), out var entry))
         {
-            return runtime.View.ReadOwnedValue(key);
+            return preparing ? ZoneTreePreparationReads.ReadOwnedValue(runtime, key) : runtime.View.ReadOwnedValue(key);
         }
 
         runtime.ReadCounters.Point(owned: true, (long)key.Length + (entry!.Value?.Length ?? NoValueBytes));
@@ -34,7 +47,8 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
         ArgumentNullException.ThrowIfNull(reader);
         if (!Changes.TryGetValue(new(key, null), out var staged))
         {
-            return runtime.View.ReadValue(key, reader, observer);
+            return preparing ? ZoneTreePreparationReads.ReadValue(runtime, key, reader, observer)
+                : runtime.View.ReadValue(key, reader, observer);
         }
 
         var bytes = (long)key.Length + (staged!.Value?.Length ?? NoValueBytes);
@@ -135,7 +149,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
             return preparedPayload;
         }
 
-        return preparedPayload = ZoneTreeJournalCodec.Serialize(PrepareChanges(), runtime.Options.MaxFrameBytes, runtime.Options.FaultObserver);
+        return preparedPayload = ZoneTreeJournalCodec.Serialize(PrepareChanges(), runtime.Options.MaxFrameBytes, preparing ? null : runtime.Options.FaultObserver);
     }
 
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)

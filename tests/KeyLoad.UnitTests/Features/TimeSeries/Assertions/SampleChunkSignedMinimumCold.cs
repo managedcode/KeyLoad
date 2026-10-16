@@ -12,20 +12,21 @@ internal static class SampleChunkSignedMinimumCold
     private const int FirstWave = 0;
     private const int ColdWaves = 2;
 
-    internal static async Task RunAsync(TestDatabase owner, SampleChunkSignedMinimumState state,
-        RequestCqrsClusterFixture fixture, SampleRawIntegrityCut expected, CancellationToken token)
+    internal static async Task RunAsync(ConnectionNativeColdSource owner, SampleChunkSignedMinimumState state,
+        SampleRawIntegrityCut expected, CancellationToken token)
     {
         for (var wave = FirstWave; wave < ColdWaves; wave++)
         {
             var failures = new List<Exception>();
-            ZoneTreeStore? reopened = null;
+            PartitionStores? stores = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 token.ThrowIfCancellationRequested();
-                reopened = new(new(owner.Directory), owner.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+                stores = owner.OpenStores();
+                var reopened = stores.Canonical;
                 await SampleRawIntegrityAssertions.UnchangedAsync(reopened, expected);
-                var database = owner.CreateConfiguredDatabase(reopened);
-                var codec = new GrainRequestCodec(database, fixture.Clock, fixture.RoutingOptions);
+                var database = owner.CreateDatabase(reopened);
+                var codec = new GrainRequestCodec(database, owner.Clock, owner.RoutingOptions);
                 await SampleChunkSignedMinimumAssertions.ObserveAsync(reopened, () =>
                 {
                     var id = Guid.NewGuid();
@@ -37,7 +38,7 @@ internal static class SampleChunkSignedMinimumCold
                 });
                 await ReplayAsync(database, reopened, state, token);
             }, failures);
-            if (reopened is { } acquired)
+            if (stores is { } acquired)
             {
                 ServerFailureObserver.Observe(acquired.Dispose, failures);
             }

@@ -25,9 +25,13 @@ internal static class ResourceRetirementPreparationValidationBusiness
             DurabilityProfile.ProcessDurable);
         await ResourceRetirementPreparationValidationAssertions.EqualAsync(outcome.Get<CommitReceipt>(), expected);
         var reference = new EntityRef(partition, ControlledPartitionMovementCorpus.Collection, BusinessId);
+        var expectedReference = (await ControlledPartitionMovementExpectedReferences.DocumentAsync(source)) with
+        {
+            Id = BusinessId
+        };
         await ResourceRetirementPreparationValidationAssertions.EqualAsync(source.Database.GetDocument(
             PhysicalShardCatalogFixture.RootPrincipalId, reference, cancellationToken: token),
-            new DocumentResult(reference, One, BusinessJson, false, []));
+            new DocumentResult(expectedReference, One, BusinessJson, false, []));
         var actual = ResourceRetirementPreparationValidationSeed.ReadStatuses(state.Nodes, state.Preparation.Control, token);
         await Assert.That(actual[SourceIndex].Cut.StorePosition).IsGreaterThan(state.Statuses[SourceIndex].Cut.StorePosition);
         await ResourceRetirementPreparationValidationAssertions.EqualAsync(actual[SourceIndex].Reservation,

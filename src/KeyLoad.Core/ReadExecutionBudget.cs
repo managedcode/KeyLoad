@@ -82,7 +82,8 @@ public sealed partial class ReadExecutionBudget
     {
         ArgumentNullException.ThrowIfNull(view);
         Check();
-        return new BudgetedReadView(view, this, readGrants?.Current);
+        return view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, this)
+            ? view : new BudgetedReadView(view, this, readGrants?.Current);
     }
 
     /// <summary>Throws when cancellation or the operation deadline prevents further work.</summary>

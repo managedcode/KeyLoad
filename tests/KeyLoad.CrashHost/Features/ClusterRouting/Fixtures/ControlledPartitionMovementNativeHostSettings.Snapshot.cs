@@ -15,6 +15,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     {
         (origins, silos) = ControlledPartitionMovementNativeHostInputValidation.Read(input, originalRoot);
         maximumBatchBytes = ReadMaximumBatchBytes(input.Arguments[FirstSource]);
+        routingArguments = ControlledPartitionMovementNativeRoutingArguments.Restore(input.Arguments[FirstSource]);
         Root = input.Root;
         signing = Read(input, FirstSource, nameof(NodeOptions.SigningKey));
         controlPeer = Read(input, FirstSource, nameof(NodeOptions.PeerSecret));

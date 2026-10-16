@@ -54,7 +54,7 @@ internal sealed class OrdinaryDocumentLifetimeSourceRead(OrleansNode node, Parti
             NativeSerialization.Serialize(payload), maximumReply);
         var bytes = await client.ReadLifetimeAsync(call, token).ConfigureAwait(false);
         var observed = NativeSerialization.Deserialize<OwnedDocumentReadResultV2>(bytes.Span);
-        RequireResult(observed, frame);
+        RequireResult(observed.Result, frame);
         work.ImportReadGrant(grant, observed.ReadBytes, observed.ExaminedRecords);
         work.CheckResult(observed);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
@@ -62,19 +62,36 @@ internal sealed class OrdinaryDocumentLifetimeSourceRead(OrleansNode node, Parti
         work.Check();
         return (true, observed.Result.Document);
     }
-    private static void RequireResult(OwnedDocumentReadResultV2 observed, RemoteDocumentReadFrameV2 frame)
+    internal static void RequireResult(OwnedDocumentReadResultV1 result, RemoteDocumentReadFrameV2 frame)
     {
         var owner = frame.Route.Destination.Owner;
-        var result = observed.Result;
         if (result is null || result.NodeId == Guid.Empty || result.Incarnation != owner.Incarnation
             || result.ReadGeneration < Empty || result.AppliedPosition < Empty || result.StorePosition < Empty
             || result.Placement is null || result.Placement.PhysicalShardId != owner.PhysicalShardId
             || result.Placement.Incarnation != owner.Incarnation || result.Placement.Partition != frame.Reference.Partition
             || result.Placement.PlacementEpoch != owner.PlacementEpoch
-            || !result.Placement.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal)
-            || result.Document is { } document && document.Reference != frame.Reference)
+            || !result.Placement.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
+        if (result.Document is { } document)
+        {
+            var reference = document.Reference;
+            if (reference is null || reference.Partition != frame.Reference.Partition
+                || reference.Collection != frame.Reference.Collection || reference.Id != frame.Reference.Id)
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+            }
+            // The authenticated target validates its stored binding at the read cut. Its D1
+            // remains distinct from the independently admitted source lifetime in the frame.
+            try
+            {
+                EntityReferenceLifetime.RequireBound(reference);
+            }
+            catch (KeyLoadException error) when (error.Code == ErrorCode.FormatUnsupported)
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable, error);
+            }
         }
     }
 }

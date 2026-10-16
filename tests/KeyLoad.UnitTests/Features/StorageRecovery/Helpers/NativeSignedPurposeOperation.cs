@@ -31,10 +31,10 @@ internal static class NativeSignedPurposeOperation
         await Assert.That(replay.Error).IsNull();
         await Assert.That(healthy.Payload.Span.SequenceEqual(replay.Payload.Span)).IsTrue();
         await NativeSignedPurposeCut.RequireAsync(committed, scenario.Fixture.Database);
+        var coldSource = new ConnectionNativeColdSource(scenario.Fixture.Source);
+        var reference = scenario.Reference(DocumentId);
         await scenario.CloseAsync(token);
-        await scenario.Fixture.Cluster.StopAllSilosAsync(token);
-        scenario.Fixture.Database.Store.Dispose();
-        await NativeSignedPurposeCold.RequireAsync(scenario.Fixture.Database, committed,
-            scenario.Reference(DocumentId), Json, token);
+        await scenario.Fixture.Hosts.StopAsync(token);
+        await NativeSignedPurposeCold.RequireAsync(coldSource, committed, reference, Json, token);
     }
 }

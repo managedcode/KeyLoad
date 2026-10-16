@@ -25,8 +25,10 @@ internal static class AnalyticsExpectedResourceCreation
     }
 
     internal static EntityRef Bind(TestDatabase fixture, EntityRef literal, Guid commandId)
+        => Bind(Lifetime(fixture, commandId), literal);
+
+    internal static EntityRef Bind(ResourceLifetimeV1 lifetime, EntityRef literal)
     {
-        var lifetime = Lifetime(fixture, commandId);
         if (literal.Partition.TenantId != lifetime.TenantId || literal.Partition.DatabaseId != lifetime.DatabaseId
             || literal.Partition.TransactionDomainId != lifetime.TransactionDomainId || literal.Collection != lifetime.ResourceName
             || literal.Lifetime is { } guard && guard.Incarnation != lifetime.Incarnation.Value)

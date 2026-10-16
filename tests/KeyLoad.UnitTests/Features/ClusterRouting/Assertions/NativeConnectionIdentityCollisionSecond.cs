@@ -16,10 +16,10 @@ internal static class NativeConnectionIdentityCollisionSecond
         await Assert.That(operation.Id).IsEqualTo(state.Following.CommandId);
         await Assert.That(operation.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.PrincipalId).IsEqualTo(state.Second.Id);
-        await DeclaredResponseEofAssertions.EqualAsync(state.Following, JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson));
+        await DeclaredResponseEofAssertions.EqualAsync(state.Following, global::KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(operation));
         var expected = new CommitReceipt(state.Following.CommandId,
             new(placement.Incarnation, state.Following.Partition.AtomicPartitionId, entry.Index, placement.PlacementEpoch),
-            [new(D.PutKind, ConnectionNativeProtocol.Collection, P.SecondDocument, P.InitialRevision)], database.Store.Identity.Durability);
+            [new(D.PutKind, ConnectionNativeProtocol.Collection, P.SecondDocument, P.InitialRevision)], DurabilityProfile.QuorumProcessDurable);
         await DeclaredResponseEofAssertions.EqualAsync(expected, actual);
         await Assert.That(actual.Mutations.All(value => value.CompositionReferences.IsEmpty)).IsTrue();
         await DocumentsAsync(state);
@@ -42,7 +42,7 @@ internal static class NativeConnectionIdentityCollisionSecond
                 state.Following.Mutations[P.OriginalOrdinal], second.Mutations[P.OriginalOrdinal], null,
                 new(state.Scenario.Reference(P.SecondDocument), P.InitialRevision, P.SecondJson, new RowAccess(), now))
         ];
-        var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database);
+        var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database.Store, database.Database, database.Partition);
         await Assert.That(outbox.EntryBytes.Length).IsEqualTo(P.Two);
         long bytes = P.Empty;
         for (var ordinal = P.OriginalOrdinal; ordinal < P.Two; ordinal++)

@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class ConnectionCallerFactoryFlow
 {
     internal static Task RunAsync()
-        => ConnectionNativeScenario.RunAsync(ExecuteAsync, nativeReplicaAdmission: true);
+        => ConnectionNativeScenario.RunAsync(ExecuteAsync);
 
     private static async Task ExecuteAsync(ConnectionNativeScenario scenario)
     {

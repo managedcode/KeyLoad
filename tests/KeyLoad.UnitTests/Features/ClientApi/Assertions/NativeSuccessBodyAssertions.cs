@@ -17,10 +17,10 @@ internal static class NativeSuccessBodyAssertions
         await Assert.That(operation.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.PrincipalId).IsEqualTo(state.Principal.Id);
         await DeclaredResponseEofAssertions.EqualAsync(state.Endpoint.Healthy,
-            JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson));
+            global::KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(operation));
         var expected = new CommitReceipt(state.Endpoint.Healthy.CommandId,
             new(placement.Incarnation, state.Endpoint.Healthy.Partition.AtomicPartitionId, entry.Index, placement.PlacementEpoch),
-            [new(D.PutKind, ConnectionNativeProtocol.Collection, D.Document, P.HealthyRevision)], database.Store.Identity.Durability);
+            [new(D.PutKind, ConnectionNativeProtocol.Collection, D.Document, P.HealthyRevision)], DurabilityProfile.QuorumProcessDurable);
         await DeclaredResponseEofAssertions.EqualAsync(expected, state.Endpoint.HealthyReceipt);
         await DeclaredResponseEofAssertions.EqualAsync(expected, sdk);
         await Assert.That((state.Endpoint.HealthyReceipt ?? throw new InvalidOperationException(P.Failure))
@@ -48,7 +48,7 @@ internal static class NativeSuccessBodyAssertions
             new(P.TwoEntries, D.OriginalOrdinal, expected.Token, now,
                 state.Endpoint.Healthy.Mutations[D.OriginalOrdinal], expected.Mutations[D.OriginalOrdinal], before, after)
         ];
-        var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database);
+        var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database.Store, database.Database, database.Partition);
         await Assert.That(outbox.EntryBytes.Length).IsEqualTo(P.TwoEntries);
         long storedBytes = D.Empty;
         for (var index = P.OriginalEntry; index < P.TwoEntries; index++)

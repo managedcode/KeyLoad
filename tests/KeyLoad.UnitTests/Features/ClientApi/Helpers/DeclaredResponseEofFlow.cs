@@ -35,7 +35,7 @@ internal static class DeclaredResponseEofFlow
 
         async Task RunOwnedAsync()
         {
-            scenario = new ConnectionNativeScenario(nativeReplicaAdmission: true);
+            scenario = new ConnectionNativeScenario();
             await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,

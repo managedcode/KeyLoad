@@ -52,7 +52,7 @@ internal static class MultiLaneReceiveNativeFlow
         return lanes;
     }
 
-    internal static QueueLaneRef[] Seed(RequestCqrsClusterFixture fixture, int count)
+    internal static QueueLaneRef[] Seed(ConnectionNativeServerRuntime fixture, int count)
     {
         var prefix = "multi-" + Guid.NewGuid().ToString("N");
         var lanes = new QueueLaneRef[count];

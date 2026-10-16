@@ -33,7 +33,15 @@ public sealed partial class DatabaseEngine
         }
         var observed = new ResourceEffectObservationView(transaction, transaction.EffectAdmission);
         ObserveAdditionalResourceEffects(observed, principal, operation);
-        transaction.EffectAdmission.Activate(observed, admission);
+        if (RequiresCompositionEffectCapture(operation))
+        {
+            transaction.EffectAdmission.ActivateOriginalBindings(CompositionAdmissionView(observed, operation), admission,
+                lifetime => RequireCompositionEndpointPolicy(principal, operation, lifetime));
+        }
+        else
+        {
+            transaction.EffectAdmission.Activate(observed, admission);
+        }
     }
 
     internal void ValidateResourceEffectSubmission(ReplicatedOperation operation, DateTimeOffset admittedAt,
@@ -83,8 +91,26 @@ public sealed partial class DatabaseEngine
                 return true;
             }
             ObserveAdditionalResourceEffects(observed, principal, operation);
-            current.Activate(observed, admission);
-            binding?.Bind(current.Capture());
+            if (RequiresCompositionEffectCapture(operation))
+            {
+                try
+                {
+                    current.ActivateOriginalBindings(CompositionAdmissionView(observed, operation), admission,
+                        lifetime => RequireCompositionEndpointPolicy(principal, operation, lifetime));
+                }
+                catch (KeyLoadException denial) when (denial.Code == ErrorCode.PermissionDenied)
+                {
+                    // Match static current-policy refusals: the actual command retains its
+                    // canonical PermissionDenied outcome without revealing private lifetime state.
+                    return true;
+                }
+                binding?.Bind(admission.Bindings);
+            }
+            else
+            {
+                current.Activate(observed, admission);
+                binding?.Bind(current.Capture());
+            }
             return true;
         });
         work?.Check();

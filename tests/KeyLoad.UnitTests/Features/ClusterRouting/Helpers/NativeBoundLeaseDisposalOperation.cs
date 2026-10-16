@@ -6,6 +6,7 @@ internal static class NativeBoundLeaseDisposalOperation
         NativeLocalChildLifetimeSeeded state, NativeLocalChildLifetimeOperation operation, Exception? original, Exception? cleanup, bool completionFirst)
     {
         var input = NativeLocalChildLifetimePayload.Create(state, operation);
+        await NativeLocalChildLifetimeRefusals.ReceivingTenantAsync(session, state, operation, input);
         var reservation = session.Reserve(operation, state, input);
         var child = NativeLocalChildLifetimeExecution.Consume(state, operation, input);
         var producer = NativeLocalChildLifetimeExecution.HeldProducerAsync(session, state, operation, input, child);

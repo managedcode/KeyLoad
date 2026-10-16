@@ -98,6 +98,10 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
         }
     }
 
+    /// <inheritdoc />
+    public T Prepare<T>(Func<IAtomicTransaction, long, T> prepare)
+        => ZoneTreeStorePreparationExecution.Prepare(runtime, prepare);
+
     /// <summary>Compiles and durably publishes one atomic transaction.</summary>
     /// <typeparam name="T">Owned result returned by the transaction compiler.</typeparam>
     /// <param name="compile">Synchronous compiler receiving the staged transaction and proposed position.</param>

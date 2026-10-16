@@ -7,6 +7,7 @@ internal static class AnalyticsCompositionCold
     internal static async Task RunAsync(SafeProjectorOperationDatabase owner, AnalyticsCompositionCommit anchor,
         IReadOnlyList<AnalyticsCompositionCommit> commits)
     {
+        var anchorLifetime = AnalyticsExpectedResourceCreation.Lifetime(owner.Source, AnalyticsExpectedResourceCreation.Anchor);
         var current = commits.ToList();
         for (var cycle = 0; cycle < 2; cycle++)
         {
@@ -27,14 +28,14 @@ internal static class AnalyticsCompositionCold
                 await AnalyticsCompositionOperations.ReplayAsync(owner, commit);
             }
 
-            await AnalyticsCompositionModels.RequireAsync(owner, current);
-            await AnalyticsCompositionOutbox.RequireAsync(owner, anchor, current);
+            await AnalyticsCompositionModels.RequireAsync(owner, current, anchorLifetime);
+            await AnalyticsCompositionOutbox.RequireAsync(owner, anchor, current, anchorLifetime);
             var id = cycle == 0 ? AnalyticsCompositionData.ColdFirst : AnalyticsCompositionData.ColdSecond;
             var fresh = await AnalyticsCompositionFlow.HealthyAsync(owner, id, current.Count + 1);
             current.Add(fresh);
             await AnalyticsCompositionOperations.ReplayAsync(owner, fresh);
-            await AnalyticsCompositionModels.RequireAsync(owner, current);
-            await AnalyticsCompositionOutbox.RequireAsync(owner, anchor, current);
+            await AnalyticsCompositionModels.RequireAsync(owner, current, anchorLifetime);
+            await AnalyticsCompositionOutbox.RequireAsync(owner, anchor, current, anchorLifetime);
         }
     }
 }

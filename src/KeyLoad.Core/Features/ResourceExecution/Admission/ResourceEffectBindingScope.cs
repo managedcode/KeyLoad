@@ -59,6 +59,49 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
             .ThenBy(value => value.ResourceName, StringComparer.Ordinal)
             .ThenBy(value => value.Incarnation.Value, StringComparer.Ordinal).ToImmutableArray();
 
+    // Composition source selection runs at its original business point after the clock gate.
+    // Every originally signed lifetime is nevertheless checked in the current cut before that gate.
+    internal void ActivateOriginalBindings(IKeyValueView view, ResourceEffectAdmissionV1 value,
+        Action<ResourceLifetimeV1> authorizeUnobservedCollection)
+    {
+        ArgumentNullException.ThrowIfNull(authorizeUnobservedCollection);
+        if (!observed.IsSubsetOf(value.Bindings))
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
+        }
+        // Current static authorization has already resolved its resources. Dynamic endpoint
+        // collections need their own current read grant before any private pair/fence diagnostic.
+        foreach (var lifetime in value.Bindings)
+        {
+            if (lifetime.Kind == ResourceKind.Collection && !observed.Contains(lifetime))
+            {
+                authorizeUnobservedCollection(lifetime);
+            }
+        }
+        foreach (var lifetime in value.Bindings)
+        {
+            var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(
+                lifetime.TenantId, lifetime.DatabaseId, lifetime.ResourceName));
+            var current = ResourceLifetimeCatalog.Read(view, lifetime.TenantId, lifetime.DatabaseId,
+                lifetime.ResourceName, definition);
+            if (current != lifetime)
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
+            }
+            ResourceRetirementStorage.RequireOpen(view, lifetime, limits);
+        }
+        admitted = value;
+    }
+
+    internal void RequireComplete()
+    {
+        if (admitted is not null && !NativeSerialization.Serialize(Capture()).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(admitted.Bindings)))
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
+        }
+    }
+
     internal void Activate(IKeyValueView view, ResourceEffectAdmissionV1 value)
     {
         if (!NativeSerialization.Serialize(Capture()).AsSpan().SequenceEqual(NativeSerialization.Serialize(value.Bindings)))
