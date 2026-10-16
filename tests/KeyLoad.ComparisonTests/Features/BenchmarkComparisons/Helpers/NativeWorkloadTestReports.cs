@@ -2,7 +2,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class NativeWorkloadTestReports
 {
-    private const string ReportsDirectory = "TestResults";
+    private const string ReportsDirectory = "NativeTestResults";
     private const string ReportPattern = "*.trx";
     private const int MaximumReports = 1;
     private const long MaximumReportBytes = 8 * 1024 * 1024;
@@ -10,6 +10,10 @@ internal static class NativeWorkloadTestReports
 
     internal static void Retain(string output, string evidence)
     {
+        if (Path.GetFullPath(output) == Path.GetFullPath(evidence))
+        {
+            return;
+        }
         var source = Path.Combine(output, ReportsDirectory);
         if (!Directory.Exists(source))
         {

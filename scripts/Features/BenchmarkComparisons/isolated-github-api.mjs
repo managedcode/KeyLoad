@@ -2,7 +2,22 @@ import path from 'node:path';
 import { requestNative } from './isolated-github-transport.mjs';
 import { readJson, writeJson } from './isolated-github-files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
-import { flattenPages, validateWorkflowRun } from './isolated-github-validation.mjs';
+import { flattenPages, validateJobIdentity, validateWorkflowRun } from './isolated-github-validation.mjs';
+
+export async function captureKnownCurrentJob(directory, context, name, id) {
+  requireGitHub(Number.isSafeInteger(id) && id > 0);
+  const job = await captureApi(`${GH.api}/jobs/${id}`,
+    path.join(directory, 'current-job-selected.json'), false, context, { currentJobId: id });
+  return validateKnownCurrentJob(job, context.cohort, name, id);
+}
+
+export function validateKnownCurrentJob(job, cohort, name, id) {
+  requireGitHub(Number.isSafeInteger(id) && id > 0);
+  validateJobIdentity(job, cohort, name);
+  // The direct endpoint is not attempt-scoped, unlike discovery's jobs route.
+  requireGitHub(job.id === id && job.run_attempt === cohort.attempt);
+  return job;
+}
 
 export async function captureApi(endpoint, target, paginated, context, requestOptions = {}) {
   requireGitHub(paginated === false);

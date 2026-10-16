@@ -17,7 +17,7 @@ internal sealed class DocumentFunctionalGateTests
     public async Task AcMeth004FunctionalGateRequiresOnePassingOriginalTestAndSameSourceJobArtifactImages()
     {
         var script = Path.Combine(
-            IsolatedAggregateNodeProcess.RepositoryRoot(),
+            SessionNodeProcess.RepositoryRoot(),
             "tests",
             "KeyLoad.ComparisonTests",
             "Features",
@@ -26,7 +26,7 @@ internal sealed class DocumentFunctionalGateTests
             "Fixtures",
             "document-functional-probe.mjs"
         );
-        var result = await IsolatedAggregateNodeProcess.RunAsync([script], TestContext.Current!.Execution.CancellationToken);
+        var result = await SessionNodeProcess.RunAsync([script], TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
         await Assert.That(result.Error).IsEqualTo(string.Empty);
         var value = JsonNode.Parse(result.Output)!.AsObject();

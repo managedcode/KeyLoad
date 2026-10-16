@@ -68,7 +68,7 @@ internal static class SiteIsolatedGitHubArchivePublication
     private static async Task<SiteIsolatedGitHubArchiveFile[]> ExtractAsync(string stage,
         SiteIsolatedGitHubArchiveEntry[] suite, SiteIsolatedGitHubArchiveEntry[] provider, CancellationToken token)
     {
-        var files = new List<SiteIsolatedGitHubArchiveFile>(SiteIsolatedGitHubTokens.FileCount);
+        var files = new List<SiteIsolatedGitHubArchiveFile>(suite.Length + provider.Length);
         foreach (var entry in suite)
         {
             files.Add(await SiteIsolatedGitHubEntryOperations.ExtractAsync(entry, stage,

@@ -5,16 +5,16 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteIsolatedArithmeticTests
 {
     private const long ObservationMaximumBytes = 24_000_000;
-    private static readonly string[] Metrics = ["throughput", "p50", "p95", "p99", "errors", "enqueue", "receive", "ack", "cpu", "alloc", "rss"];
+    private static readonly string[] Metrics = ["throughput", "p50", "p95", "p99", "errors", "enqueue", "receive", "ack", "cpu", "alloc", "rss", "duration"];
 
-    /// <summary>AC-ISO-009: independent C# arithmetic covers all ten scenarios, all nodes and five repetitions.</summary>
+    /// <summary>AC-ISO-009: independent C# arithmetic covers all current cases, both native topologies and original session results.</summary>
     [Test]
     public async Task AC_ISO_009_EveryMetricMatchesItsOwnWorkerWithoutCrossNodePooling()
     {
         var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
         using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(fixture.Projection, token));
-        var selections = Selections(projection.RootElement);
+        var selections = Selections();
         await using var temporary = SiteTempDirectory.Create();
         var output = Path.Combine(temporary.Path, "native-observations.json");
         var response = await SiteIsolatedNodeProcess.RunAsync(fixture.Inputs.Site, new
@@ -39,13 +39,12 @@ internal sealed class SiteIsolatedArithmeticTests
         }
     }
 
-    private static SiteIsolatedSelection[] Selections(JsonElement projection)
+    private static SiteIsolatedSelection[] Selections()
     {
-        var scenarios = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
-            .Select(worker => worker.GetProperty(SiteIsolatedFields.Scenario).GetString()!).Distinct(StringComparer.Ordinal).ToArray();
+        var scenarios = SiteIsolatedOracle.Cases;
         return (from scenario in scenarios
                 from nodes in new[] { 1, 3 }
-                from repetition in new object[] { "all", 0, 1, 2, 3, 4 }
+                from repetition in new object[] { "session" }
                 from metric in Metrics
                 from target in new[] { "all", "KeyLoad", "Neo4j" }
                 select new SiteIsolatedSelection(scenario, nodes, repetition, metric, target)).ToArray();

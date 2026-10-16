@@ -6,7 +6,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedKeyLoadFaultRegressionProvider
 {
-    private const string CellEnvironment = "KEYLOAD_COMPARISON_CELL_ID";
+    private const string CellEnvironment = "KEYLOAD_BENCHMARK_SESSION_ID";
     private const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID";
     private const string WorkflowEnvironment = "GITHUB_WORKFLOW";
     private const string WorkflowRefEnvironment = "GITHUB_WORKFLOW_REF";
@@ -17,18 +17,21 @@ internal static class IsolatedKeyLoadFaultRegressionProvider
 
     internal static IsolatedKeyLoadFaultRegressionEvidence Read(int nodes)
     {
-        var selection = ComparisonWorkerSelection.Read(new ConfigurationBuilder().AddEnvironmentVariables().Build());
+        using var configuration = new ConfigurationManager();
+        configuration.AddEnvironmentVariables();
+        var selected = BenchmarkSessionCallerOptions.Read(configuration).Value;
+        var selection = BenchmarkSessionContract.ResourceSelection(selected.Target, selected.NodeCount);
         var source = Required(ComparisonImageProtocol.ShaEnvironment);
         var cell = Required(CellEnvironment);
         IsolatedKeyLoadFaultRegressionProtocol.Require(selection.Target == "KeyLoad" && selection.NodeCount == nodes
-            && selection.Scenario == Scenario.PointRead && IsolatedKeyLoadFaultRegressionNativeIdentity.Hex(source, 40)
+            && IsolatedKeyLoadFaultRegressionNativeIdentity.Hex(source, 40)
             && Required(ComparisonImageProtocol.RepositoryEnvironment) == Repository
             && Required(ComparisonImageProtocol.RefEnvironment) == Main && Required(WorkflowEnvironment) == Workflow
             && Required(WorkflowRefEnvironment) == WorkflowRef
-            && cell == "keyload-n" + nodes.ToString(CultureInfo.InvariantCulture) + "-point-read");
+            && cell == "keyload-n" + nodes.ToString(CultureInfo.InvariantCulture));
         var attempt = Positive(ComparisonImageProtocol.AttemptEnvironment);
         IsolatedKeyLoadFaultRegressionProtocol.Require(attempt <= int.MaxValue);
-        return new(cell, new(selection.Target, nodes, selection.Scenario, selection.Profile, source,
+        return new(cell, new(selection.Target, nodes, BenchmarkSessionContract.Profile, source,
             Positive(ComparisonImageProtocol.RunEnvironment), checked((int)attempt), Repository, Main, Workflow, Positive(JobEnvironment)));
     }
 

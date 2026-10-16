@@ -31,8 +31,8 @@ internal sealed class IsolatedGitHubHeaderTests
     public async Task AcIso007ControlledHeaderBoundaryPreservesBinaryBodyAcrossChunks(int blockSize)
     {
         using var directory = new ImageBundleTestDirectory();
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
-            ["--input-type=module", "-e", Source, IsolatedAggregateNodeProcess.Module("isolated-github-headers.mjs"),
+        var result = await SessionNodeProcess.RunAsync(
+            ["--input-type=module", "-e", Source, SessionNodeProcess.Module("isolated-github-headers.mjs"),
                 directory.Root, blockSize.ToString(System.Globalization.CultureInfo.InvariantCulture)],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(0);

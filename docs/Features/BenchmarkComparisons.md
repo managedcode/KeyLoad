@@ -13,6 +13,17 @@ website-producing pipeline. Implementation and genuine qualification are pending
 [Live progress repair](BenchmarkComparisons/LiveProgress.md) under ADR-085 owns
 bounded Actions visibility and cancellation diagnostics for native workloads.
 
+## Current shared live benchmark sessions, owner correction 2026-10-17
+
+[SessionExecution](BenchmarkComparisons/SessionExecution.md) and
+[ADR-142](../ADR/ADR-142-shared-live-benchmark-sessions.md) supersede active
+per-scenario job planning: exactly two measurement jobs per database (native one
+and three nodes), many real TUnit cases on one live Aspire-owned topology, a
+measured initial million records, no warmup and no per-case reset. Superseded
+pipeline code and exclusive fixtures are removed; original historical evidence
+retains its identities. Source implementation is in progress; Linux qualification
+and complete model-family coverage remain open.
+
 ## Current complete-cohort publication
 
 ### Owner-selected product illustration and landing style, 2026-10-09

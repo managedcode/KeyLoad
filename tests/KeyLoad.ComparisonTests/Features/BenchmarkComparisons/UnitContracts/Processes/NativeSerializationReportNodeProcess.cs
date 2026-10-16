@@ -52,9 +52,9 @@ internal static class NativeSerializationReportNodeProcess
                 [NativeSerializationReportFields.Nonfinite] = nonfinite
             };
             await File.WriteAllTextAsync(path, input.ToJsonString(), TestContext.Current!.Execution.CancellationToken);
-            var result = await IsolatedAggregateNodeProcess.RunAsync(
-                ["--input-type=module", "-e", ProbeSource, path, IsolatedAggregateNodeProcess.Module(ReportModule),
-                    IsolatedAggregateNodeProcess.Module(CorpusModule)], TestContext.Current!.Execution.CancellationToken);
+            var result = await SessionNodeProcess.RunAsync(
+                ["--input-type=module", "-e", ProbeSource, path, SessionNodeProcess.Module(ReportModule),
+                    SessionNodeProcess.Module(CorpusModule)], TestContext.Current!.Execution.CancellationToken);
             using var response = JsonDocument.Parse(result.Output);
             return new(result.ExitCode, result.Error, response.RootElement.GetProperty(NativeSerializationReportFields.Accepted).GetBoolean(),
                 response.RootElement.GetProperty(NativeSerializationReportFields.Unchanged).GetBoolean(), response.RootElement.GetProperty(NativeSerializationReportFields.Error).GetString()!);

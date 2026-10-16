@@ -43,4 +43,39 @@ internal static class IsolatedCurrentJobNodeProgram
           process.exitCode = 1;
         }
         """;
+
+    internal const string KnownPolicy = """
+        import { readFile } from 'node:fs/promises';
+        import { pathToFileURL } from 'node:url';
+        const [modulePath, fixturePath, corruption] = process.argv.slice(1);
+        const api = await import(pathToFileURL(modulePath));
+        const current = await import(new URL('./isolated-current-job.mjs', pathToFileURL(modulePath)));
+        const original = JSON.parse(await readFile(fixturePath, 'utf8'));
+        const cohort = { sourceRevision: original.head_sha, runId: original.run_id, attempt: original.run_attempt,
+          repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'Benchmarks' };
+        const id = original.id;
+        const name = 'RabbitMQ / 1 node / Document delete';
+        original.name = name;
+        original.status = 'in_progress';
+        function admit(job) {
+          const selected = api.validateKnownCurrentJob(job, cohort, name, id);
+          if (current.classifyCurrentJob(selected, cohort, name, id) !== 'running') throw new Error('not running');
+        }
+        const before = JSON.stringify(original);
+        admit(original);
+        const fresh = structuredClone(original);
+        if (corruption === 'wrong-id') fresh.id++;
+        if (corruption === 'cross-run') fresh.run_id++;
+        if (corruption === 'stale-attempt') fresh.run_attempt++;
+        if (corruption === 'missing-attempt') delete fresh.run_attempt;
+        if (corruption === 'wrong-source') fresh.head_sha = 'c'.repeat(40);
+        if (corruption === 'wrong-name') fresh.name += '-other';
+        if (corruption === 'terminal') { fresh.status = 'completed'; fresh.conclusion = 'success'; }
+        let rejected = false;
+        try { admit(fresh); } catch { rejected = true; }
+        if (rejected !== (corruption !== 'current')) throw new Error('fresh response admitted incorrectly');
+        if (JSON.stringify(original) !== before) throw new Error('original response changed');
+        admit(original);
+        process.stdout.write('accepted-known-policy\n');
+        """;
 }

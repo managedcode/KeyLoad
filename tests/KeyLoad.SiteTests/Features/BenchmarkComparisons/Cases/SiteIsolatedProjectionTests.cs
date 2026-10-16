@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
@@ -26,18 +27,19 @@ internal sealed class SiteIsolatedProjectionTests
                 await Assert.That(JsonNode.DeepEquals(property.Value, worker[property.Key])).IsTrue();
             }
 
-            var raw = Path.Combine(fixture.Inputs.Aggregate, "workers", id, "worker.json");
+            var raw = Path.Combine(fixture.Inputs.Aggregate, SiteIsolatedFields.Workers, id, "session.json");
             var envelope = JsonNode.Parse(await File.ReadAllBytesAsync(raw, token))!.AsObject();
-            var report = envelope[SiteIsolatedFields.Report]?.DeepClone();
-            if (report is not null)
+            await Assert.That(JsonNode.DeepEquals(envelope, worker[SiteIsolatedFields.Session])).IsTrue();
+            foreach (var reference in envelope[SiteIsolatedFields.Cases]!.AsArray())
             {
-                foreach (var item in report[SiteIsolatedFields.Cases]!.AsArray())
-                {
-                    item!.AsObject().Remove(SiteIsolatedFields.Samples);
-                }
-            }
+                await using var stream = File.OpenRead(Path.Combine(fixture.Inputs.Aggregate,
+                    SiteIsolatedFields.Workers, id, reference![SiteIsolatedFields.Path]!.GetValue<string>()));
+                using var document = await JsonDocument.ParseAsync(stream, cancellationToken: token);
+                var report = Compact(document.RootElement);
 
-            await Assert.That(JsonNode.DeepEquals(report, worker[SiteIsolatedFields.Report])).IsTrue();
+                var compact = worker[SiteIsolatedFields.Reports]!.AsArray().Single(item => item![SiteIsolatedFields.CaseId]!.GetValue<string>() == report[SiteIsolatedFields.CaseId]!.GetValue<string>());
+                await Assert.That(JsonNode.DeepEquals(report, compact)).IsTrue();
+            }
         }
     }
 
@@ -55,5 +57,33 @@ internal sealed class SiteIsolatedProjectionTests
         }, TestContext.Current!.Execution.CancellationToken);
         await Assert.That(response.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
         await Assert.That(response.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(SiteIsolatedInventory.ControlWorkers());
+    }
+    private static JsonObject Compact(JsonElement report)
+    {
+        var compact = new JsonObject();
+        foreach (var property in report.EnumerateObject())
+        {
+            compact[property.Name] = property.Name == SiteIsolatedFields.Lanes
+                ? CompactLanes(property.Value) : JsonNode.Parse(property.Value.GetRawText());
+        }
+
+        return compact;
+    }
+
+    private static JsonArray CompactLanes(JsonElement lanes)
+    {
+        var result = new JsonArray();
+        foreach (var lane in lanes.EnumerateArray())
+        {
+            var value = new JsonObject();
+            foreach (var field in lane.EnumerateObject().Where(field => field.Name != SiteIsolatedFields.Samples))
+            {
+                value[field.Name] = JsonNode.Parse(field.Value.GetRawText());
+            }
+
+            result.Add(value);
+        }
+
+        return result;
     }
 }

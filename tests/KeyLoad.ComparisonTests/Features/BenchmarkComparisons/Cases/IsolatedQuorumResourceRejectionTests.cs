@@ -10,27 +10,28 @@ internal sealed class IsolatedQuorumResourceRejectionTests
     [Arguments(T.Qdrant, "zero")]
     [Arguments(T.Qdrant, "four")]
     [Arguments(T.Qdrant, "target")]
-    [Arguments(T.Qdrant, "profile")]
-    [Arguments(T.Qdrant, "scenario")]
     [Arguments(T.Rabbit, "zero")]
     [Arguments(T.Rabbit, "four")]
     [Arguments(T.Rabbit, "target")]
-    [Arguments(T.Rabbit, "profile")]
-    [Arguments(T.Rabbit, "scenario")]
     public async Task AcIso001SelectionMismatchDoesNotAllocateNativeResources(string helper, string corruption)
     {
         using var model = new IsolatedQuorumResourceModel();
-        var selection = new ComparisonWorkerSelection(helper, 2, Scenario.PointRead, T.Profile);
+        var selection = new BenchmarkSessionSelection(helper, 1);
         selection = corruption switch
         {
             "zero" => selection with { NodeCount = 0 },
             "four" => selection with { NodeCount = 4 },
             "target" => selection with { Target = helper == T.Qdrant ? T.Rabbit : T.Qdrant },
-            "profile" => selection with { Profile = "unapproved" },
-            "scenario" => selection with { Scenario = (Scenario)1000 },
             _ => throw new ArgumentOutOfRangeException(nameof(corruption))
         };
-        Assert.ThrowsExactly<InvalidOperationException>(() => model.Add(helper, selection));
+        if (corruption == "target")
+        {
+            Assert.ThrowsExactly<InvalidOperationException>(() => model.Add(helper, selection));
+        }
+        else
+        {
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => model.Add(helper, selection));
+        }
         await Assert.That(model.Builder.Resources.Select(resource => resource.Name)).IsEquivalentTo(new[] { T.Runner });
         await Assert.That(Directory.EnumerateFileSystemEntries(model.Root)).IsEmpty();
     }

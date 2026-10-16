@@ -12,10 +12,10 @@ internal sealed class VectorIndexContractTests
     {
         var profile = VectorComparisonProfile.Parse($"vector-100k-{method}-plain-c16");
         var valid = new VectorIndexReceipt(profile.IndexKind, "native persisted definition", new Dictionary<string, string>(), 1d);
-        VectorComparisonRunner.ValidateIndex(profile, valid, method);
+        VectorIndexValidator.Require(profile, valid, method);
         foreach (var duration in new[] { 0d, -1d, double.NaN, double.PositiveInfinity })
         {
-            await Assert.That(() => VectorComparisonRunner.ValidateIndex(profile, valid with { BuildMilliseconds = duration }, method))
+            await Assert.That(() => VectorIndexValidator.Require(profile, valid with { BuildMilliseconds = duration }, method))
                 .Throws<InvalidDataException>();
         }
     }
@@ -25,11 +25,11 @@ internal sealed class VectorIndexContractTests
     {
         var exact = VectorComparisonProfile.Parse("vector-100k-exact-plain-c16");
         var receipt = new VectorIndexReceipt(VectorIndexKind.Exact, "full scan", new Dictionary<string, string>(), 0d);
-        VectorComparisonRunner.ValidateIndex(exact, receipt, "native full scan");
-        await Assert.That(() => VectorComparisonRunner.ValidateIndex(exact, receipt with { BuildMilliseconds = 1d }, "native full scan"))
+        VectorIndexValidator.Require(exact, receipt, "native full scan");
+        await Assert.That(() => VectorIndexValidator.Require(exact, receipt with { BuildMilliseconds = 1d }, "native full scan"))
             .Throws<InvalidDataException>();
         var hnsw = VectorComparisonProfile.Parse("vector-100k-hnsw-plain-c16");
-        await Assert.That(() => VectorComparisonRunner.ValidateIndex(hnsw,
+        await Assert.That(() => VectorIndexValidator.Require(hnsw,
             receipt with
             {
                 IndexKind = VectorIndexKind.Hnsw,

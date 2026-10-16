@@ -6,11 +6,9 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedGitHubArchiveTests
 {
-    private const int ProviderInputFiles = 60;
-    private const int SuiteInputFiles = 1656;
 
     [Test]
-    public async Task AC_ISO_007_CurrentArchivesContainExact1716SelectedFilesWithOriginalHashes()
+    public async Task AC_ISO_007_CurrentSessionArchivesContainEverySelectedOriginalFileWithOriginalHashes()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
@@ -20,11 +18,11 @@ internal sealed class SiteIsolatedGitHubArchiveTests
         await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
             .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
         var files = receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray();
-        await Assert.That(files.Count).IsEqualTo(SiteIsolatedGitHubTokens.FileCount);
+        await Assert.That(files.Count).IsEqualTo(SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata).Count + SiteIsolatedGitHubArchivePaths.ExpectedProvider().Count);
         await Assert.That(files.Count(file => file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>()
-            .StartsWith("input/provider/", StringComparison.Ordinal))).IsEqualTo(ProviderInputFiles);
+            .StartsWith("input/provider/", StringComparison.Ordinal))).IsEqualTo(SiteIsolatedGitHubArchivePaths.ExpectedProvider().Count);
         await Assert.That(files.Count(file => file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>()
-            .StartsWith("input/aggregate/", StringComparison.Ordinal))).IsEqualTo(SuiteInputFiles);
+            .StartsWith("input/aggregate/", StringComparison.Ordinal))).IsEqualTo(SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata).Count);
     }
 
     [Test]

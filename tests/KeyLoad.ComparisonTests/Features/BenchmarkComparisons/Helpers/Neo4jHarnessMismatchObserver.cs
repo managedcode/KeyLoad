@@ -8,7 +8,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
     Uri endpoint,
     string password,
     string runId,
-    BenchmarkDataset dataset,
+    IComparisonCorpus dataset,
     CancellationToken runToken) : IAsyncDisposable
 {
     private static TimeSpan MutationTimeout => NativeExecutionPolicyFixture.Harness().Value.Neo4jMutationTimeout;
@@ -17,7 +17,6 @@ internal sealed class Neo4jHarnessMismatchObserver(
     private readonly HttpClient client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
     private readonly BenchmarkDocument[] seedDocuments = dataset.Documents.ToArray();
     private readonly string label = Neo4jHarnessConstants.DocumentLabelPrefix + Guid.Parse(runId).ToString("N");
-    private bool restoreRequired;
 
     public bool CorruptedBeforePointRead
     {
@@ -28,22 +27,16 @@ internal sealed class Neo4jHarnessMismatchObserver(
         get; private set;
     }
 
-    public void Observe(string progress)
+    public void CorruptBeforeRead()
     {
-        if (!CorruptedBeforePointRead && progress.StartsWith(Neo4jHarnessConstants.PointReadProgress, StringComparison.Ordinal))
-        {
-            restoreRequired = true;
-            UpdateSeedJson(Neo4jHarnessConstants.MutatedJson, runToken);
-            CorruptedBeforePointRead = true;
-        }
+        UpdateSeedJson(Neo4jHarnessConstants.MutatedJson, runToken);
+        CorruptedBeforePointRead = true;
+    }
 
-        if (restoreRequired && !RestoredBeforeDocumentWrite
-            && progress.StartsWith(Neo4jHarnessConstants.DocumentWriteProgress, StringComparison.Ordinal))
-        {
-            RestoreAndVerify(runToken);
-            restoreRequired = false;
-            RestoredBeforeDocumentWrite = true;
-        }
+    public void RestoreBeforeWrite()
+    {
+        RestoreAndVerify(runToken);
+        RestoredBeforeDocumentWrite = true;
     }
 
     public async ValueTask DisposeAsync()

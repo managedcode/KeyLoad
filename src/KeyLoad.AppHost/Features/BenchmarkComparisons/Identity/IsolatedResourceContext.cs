@@ -4,7 +4,7 @@ using KeyLoad.Comparisons;
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed record IsolatedResourceContext(IDistributedApplicationBuilder Builder,
-    ComparisonWorkerSelection Selection, IResourceBuilder<ContainerResource> Runner, string Root)
+    BenchmarkSessionSelection Selection, IResourceBuilder<ContainerResource> Runner, string Root)
 {
     private const string NativeDirectory = "native";
     private const string NativePrefix = "Benchmarks__Native__";

@@ -44,7 +44,7 @@ internal static class IsolatedPostgresBootstrap
     }
 
     internal static void Configure<T>(IResourceBuilder<T> node, string directory, (string Entry, string Init) scripts,
-        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount, IOptions<BenchmarkDeploymentOptions> deploymentOptions, string primaryName = Primary, bool documentWorkload = false) where T : ContainerResource
+        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount, IOptions<BenchmarkDeploymentOptions> deploymentOptions, string primaryName = Primary) where T : ContainerResource
     {
         var slotRetention = string.Format(CultureInfo.InvariantCulture, SlotRetentionCompositeFormat, deploymentOptions.Value.PostgresSlotWalRetentionMegabytes);
         node.WithBindMount(directory, Data).WithBindMount(scripts.Entry, EntryTarget, isReadOnly: true)
@@ -57,12 +57,9 @@ internal static class IsolatedPostgresBootstrap
                 {
                     arguments.Args.Add(argument);
                 }
-                if (documentWorkload)
-                {
-                    arguments.Args.Add(Configuration);
-                    arguments.Args.Add(MaximumConnectionsPrefix + deploymentOptions.Value.DocumentPostgresMaximumConnections
-                        .ToString(CultureInfo.InvariantCulture));
-                }
+                arguments.Args.Add(Configuration);
+                arguments.Args.Add(MaximumConnectionsPrefix + deploymentOptions.Value.DocumentPostgresMaximumConnections
+                    .ToString(CultureInfo.InvariantCulture));
             });
         if (standby is null)
         {

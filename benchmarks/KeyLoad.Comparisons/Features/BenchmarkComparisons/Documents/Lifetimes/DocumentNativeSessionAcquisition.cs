@@ -31,8 +31,8 @@ internal sealed class DocumentNativeSessionAcquisition<TClient> : IAsyncDisposab
     }
     public async ValueTask DisposeAsync()
     {
-        var sessionFailure = await OpenLoopFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
-        var clientFailure = await OpenLoopFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
+        var sessionFailure = await NativeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
+        var clientFailure = await NativeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
         var cleanup = new List<Exception>();
         if (sessionFailure is not null)
         {
@@ -44,7 +44,7 @@ internal sealed class DocumentNativeSessionAcquisition<TClient> : IAsyncDisposab
             cleanup.Add(clientFailure);
         }
 
-        var combined = OpenLoopFailure.Combine(primaryFailure, [.. cleanup]);
+        var combined = NativeComparisonFailure.Combine(primaryFailure, [.. cleanup]);
         if (cleanup.Count != DocumentMeasurementValues.NoObservedItems && combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

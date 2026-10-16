@@ -4,6 +4,7 @@ using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -38,9 +39,6 @@ internal static class AppHostOptionsRegistration
             builder.Configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
             options => options.IsValid(), NativeCoverageRf3ImageOptions.ValidationMessage);
         var control = AppHostControlOptionsRegistration.Bind(builder.Configuration, execution, coverage);
-        var workload = startup.Value.BenchmarkMode && !control.Value.TargetSelected
-            && string.Equals(startup.Value.BenchmarkProfile.Trim(), global::AppHostConfiguration.GeneralBenchmarkProfile, StringComparison.OrdinalIgnoreCase)
-            ? KeyLoad.Comparisons.ComparisonOptions.Read(builder.Configuration) : null;
         var probeFiles = Bind<RequestProbeFileOptions>(builder.Configuration.GetSection(RequestProbeFileOptions.SectionName), value => value.IsValid(), RequestProbeFileOptions.ValidationMessage);
         var localImage = Bind<LocalImageOptions>(builder.Configuration, _ => true, ContainerImageExecutionOptions.ValidationMessage);
         var images = Bind<ContainerImageOptions>(builder.Configuration, _ => true, ContainerImageExecutionOptions.ValidationMessage);
@@ -52,7 +50,7 @@ internal static class AppHostOptionsRegistration
             builder.Configuration.GetSection(KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.SectionName),
             value => value.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage);
         var runtime = new AppHostRuntimeOptions(execution, startup, resources, provenance, control, images, imageExecution, localImage,
-            cluster, command, http, replay, profile, deployment, relay, workload, probeFiles, isolatedReplay,
+            cluster, command, http, replay, profile, deployment, relay, probeFiles, isolatedReplay,
             isolatedAdmission, coverage, coverageImage);
         Register(builder.Services, runtime);
         return runtime;
@@ -67,10 +65,6 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.Profile);
         services.AddSingleton(runtime.Deployment);
         services.AddSingleton(runtime.BenchmarkRelay);
-        if (runtime.BenchmarkWorkload is { } workload)
-        {
-            services.AddSingleton(workload);
-        }
         services.AddSingleton(runtime.RequestProbeFiles);
         services.AddSingleton(runtime.LocalImage);
         services.AddSingleton(runtime.Images);
@@ -93,8 +87,11 @@ internal static class AppHostOptionsRegistration
         Bind<TestExecutionOptions>(configuration.GetSection(TestExecutionOptions.SectionName),
             options => options.IsValid(), TestExecutionOptions.ValidationMessage);
 
-    internal static IOptions<TestBootstrapOptions> BindTestBootstrap(IConfiguration configuration) =>
-        Bind<TestBootstrapOptions>(configuration, _ => true, TestExecutionOptions.ValidationMessage);
+    internal static IOptions<TestBootstrapOptions> BindTestBootstrap(IConfiguration configuration)
+    {
+        TestSuiteSelectionValidator.RejectRetiredBenchmarkSelection(configuration);
+        return Bind<TestBootstrapOptions>(configuration, _ => true, TestExecutionOptions.ValidationMessage);
+    }
 
     internal static IOptions<NativeCoverageExecutionOptions> BindNativeCoverage(IConfiguration configuration) =>
         Bind<NativeCoverageExecutionOptions>(configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
@@ -155,7 +152,7 @@ internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> Test
     IOptions<ContainerImageExecutionOptions> ImageExecution, IOptions<LocalImageOptions> LocalImage,
     IOptions<ClusterDeploymentOptions> Cluster, IOptions<CommandAdmissionLimits> CommandAdmission,
     IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<KeyLoad.Clustering.ReplicaReplayLimits> ReplayAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
-    IOptions<BenchmarkRelayOptions> BenchmarkRelay, IOptions<KeyLoad.Comparisons.ComparisonOptions>? BenchmarkWorkload, IOptions<RequestProbeFileOptions> RequestProbeFiles,
+    IOptions<BenchmarkRelayOptions> BenchmarkRelay, IOptions<RequestProbeFileOptions> RequestProbeFiles,
     IOptions<KeyLoad.Clustering.ReplicaReplayLimits> IsolatedReplayAdmission,
     IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> IsolatedAdmission,
     IOptions<NativeCoverageExecutionOptions> NativeCoverage,

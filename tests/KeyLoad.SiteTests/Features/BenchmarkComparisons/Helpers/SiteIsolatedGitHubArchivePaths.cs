@@ -1,74 +1,29 @@
-using System.Globalization;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
+/// <summary>Expected original files come from the authenticated current session aggregate.</summary>
 internal static class SiteIsolatedGitHubArchivePaths
 {
-    private const string ProfileField = "profile";
-    private const string PagePattern = "^(jobs|artifacts)-page-([0-9]{2})\\.json$";
-    private const string RequestPattern = "^requests/request-[0-9]{5}\\.(headers|json|body|wait\\.json)$";
+    private const string SuiteFiles = "suiteFiles";
+    private const string EntryPath = "path";
+    private const string RequestPattern = "^github/requests/request-[0-9]{5}\\.(headers|json|body|wait\\.json|native-process\\.json|body\\.native-process\\.json)$";
+    private const string PagePattern = "^github/(jobs|artifacts)-page-[0-9]{2}\\.json$";
     private static readonly string[] ProviderFiles =
     [
-        SiteIsolatedGitHubTokens.Proof,
-        SiteIsolatedGitHubTokens.ImageProof,
-        ImagePath(SiteIsolatedGitHubTokens.Bundle),
-        ImagePath(SiteIsolatedGitHubTokens.ImageReceipt),
-        ImagePath(SiteIsolatedGitHubTokens.ServerManifest),
-        ImagePath(SiteIsolatedGitHubTokens.ComparisonsManifest),
+        "proof.json", "github/workflow.json", "github/run-attempt.json", "github/jobs-pages.json",
+        "github/artifacts-pages.json", "github/image-proof.json", "github/images/image-bundle.json",
+        "github/runtime/benchmark-runtime.json", "github/runtime/benchmark-runtime-files.json",
+        "github/functional/original.trx", "github/functional/images/image-receipt.json",
+        "github/functional/images/server-manifest.json", "github/functional/images/comparisons-manifest.json",
+        "github/images/image-receipt.json", "github/images/server-manifest.json", "github/images/comparisons-manifest.json"
     ];
 
     public static HashSet<string> ExpectedSuite(JsonObject metadata)
-    {
-        var result = new HashSet<string>(StringComparer.Ordinal) { SiteIsolatedGitHubTokens.Manifest, "cohort-receipt.json" };
-        foreach (var profile in Profiles())
-        {
-            result.Add(FamilyRoot(profile) + SiteIsolatedGitHubTokens.Manifest);
-        }
-        foreach (var worker in metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray())
-        {
-            var entry = worker ?? throw new InvalidDataException(SiteIsolatedGitHubTokens.InvalidReceipt);
-            var root = FamilyRoot(entry[ProfileField]!.GetValue<string>());
-            var directory = root + "workers/" + entry[SiteIsolatedGitHubTokens.Id]!.GetValue<string>() + "/";
-            result.Add(directory + SiteIsolatedGitHubTokens.Raw);
-            if (root.Length > 0)
-            {
-                result.Add(directory + "server-resource-evidence.json");
-            }
-        }
+        => new(metadata[SuiteFiles]!.AsArray().Select(file => file![EntryPath]!.GetValue<string>()), StringComparer.Ordinal);
 
-        return result;
-    }
-
-    public static HashSet<string> ExpectedProvider()
-    {
-        var result = new HashSet<string>(ProviderFiles, StringComparer.Ordinal) { "composite-plan.json", "plans/intensive-1k-c16.json" };
-        foreach (var profile in Profiles())
-        {
-            result.Add("plans/" + profile + ".json");
-            result.Add(FamilyRoot(profile) + "proof.json");
-        }
-        return result;
-    }
-
-    private static IEnumerable<string> Profiles()
-    {
-        foreach (var scale in new[] { "100k", "1m" })
-        {
-            yield return "scaled-" + scale + "-c16";
-            foreach (var method in new[] { "exact", "hnsw", "ivfflat", "native" })
-            {
-                foreach (var mode in new[] { "plain", "filtered", "mixed" })
-                {
-                    yield return "vector-" + scale + "-" + method + "-" + mode + "-c16";
-                }
-            }
-        }
-    }
-
-    private static string FamilyRoot(string profile) => profile == "intensive-1k-c16" ? string.Empty
-        : (profile.StartsWith("vector-", StringComparison.Ordinal) ? "vector/" : "scaled/") + profile + "/";
+    public static HashSet<string> ExpectedProvider() => new(ProviderFiles, StringComparer.Ordinal);
 
     public static HashSet<string> ParentDirectories(IEnumerable<string> files)
     {
@@ -91,31 +46,22 @@ internal static class SiteIsolatedGitHubArchivePaths
 
     public static bool IsProviderCapture(string value, IReadOnlySet<string>? cellIds)
     {
-        if (ProviderFiles.Contains(value, StringComparer.Ordinal) ||
-            value is SiteIsolatedGitHubFields.Workflow or SiteIsolatedGitHubFields.NativeRun or
-                SiteIsolatedGitHubFields.Jobs or SiteIsolatedGitHubFields.ArtifactPages or
-                SiteIsolatedGitHubFields.GhHelp or SiteIsolatedGitHubFields.ImageInventory)
+        if (ProviderFiles.Contains(value, StringComparer.Ordinal) || value is "github/gh-api-help.txt" or "github/image-zip-inventory.txt" or "github/runtime-identity-inventory.txt" or "github/functional-inventory.txt")
         {
             return true;
         }
 
-        var page = Regex.Match(value, PagePattern, RegexOptions.CultureInvariant);
-        if (page.Success)
-        {
-            var number = int.Parse(page.Groups[SiteIsolatedGitHubArchiveNumbers.PageGroup].Value, CultureInfo.InvariantCulture);
-            return number is >= SiteIsolatedGitHubTokens.One and <= SiteIsolatedGitHubArchiveNumbers.Pages;
-        }
-
-        return Regex.IsMatch(value, RequestPattern, RegexOptions.CultureInvariant) ||
-               (value.EndsWith(SiteIsolatedGitHubFields.ZipInventorySuffix, StringComparison.Ordinal) &&
-                cellIds?.Contains(value[..^SiteIsolatedGitHubFields.ZipInventorySuffix.Length]) == true);
+        const string prefix = "github/";
+        const string suffix = "-inventory.txt";
+        return Regex.IsMatch(value, RequestPattern, RegexOptions.CultureInvariant)
+            || Regex.IsMatch(value, PagePattern, RegexOptions.CultureInvariant)
+            || (value.StartsWith(prefix, StringComparison.Ordinal) && value.EndsWith(suffix, StringComparison.Ordinal)
+                && cellIds?.Contains(value[prefix.Length..^suffix.Length]) == true);
     }
-
-    private static string ImagePath(string file) => SiteIsolatedGitHubTokens.Images + SiteIsolatedGitHubTokens.Slash + file;
 }
 
 internal static class SiteIsolatedGitHubArchiveNumbers
 {
     public const int PageGroup = 2;
-    public const int Pages = 20;
+    public const int Pages = 40;
 }

@@ -13,11 +13,11 @@ internal sealed class IsolatedGitHubFailureDiagnosticsTests
         using var directory = new ImageBundleTestDirectory();
         try
         {
-            var result = await IsolatedAggregateNodeProcess.RunAsync(
+            var result = await SessionNodeProcess.RunAsync(
                 ["--input-type=module", "-e", IsolatedGitHubFailureDiagnosticsProgram.Source,
-                    IsolatedAggregateNodeProcess.Module("isolated-github-stream.mjs"), directory.Root, failure],
+                    SessionNodeProcess.Module("isolated-github-stream.mjs"), directory.Root, failure],
                 TestContext.Current!.Execution.CancellationToken);
-            await Assert.That(result.ExitCode).IsEqualTo(0);
+            await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
             await Assert.That(result.Output.Trim()).IsEqualTo("accepted-diagnostic");
             await Assert.That(result.Error).IsEmpty();
         }

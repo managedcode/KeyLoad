@@ -36,13 +36,12 @@ export function validateJobIdentity(job, cohort, name) {
   requireGitHub(job !== undefined && positive(job.id) && job.name === name && job.run_id === cohort.runId
     && (!Object.hasOwn(job, 'run_attempt') || job.run_attempt === cohort.attempt) && job.head_sha === cohort.sourceRevision);
   const canonical = canonicalJobUrl(cohort, job.id);
-  const legacy = `https://github.com/${cohort.repository}/runs/${cohort.runId}/jobs/${job.id}`;
-  requireGitHub(job.html_url === canonical || job.html_url === legacy);
+  requireGitHub(job.html_url === canonical);
   timestamp(job.started_at);
   return job;
 }
 
-function validateCompletedJob(job, cohort, name, requiredSteps, conclusions) {
+export function validateCompletedJob(job, cohort, name, requiredSteps, conclusions) {
   validateJobIdentity(job, cohort, name);
   requireGitHub(job.status === 'completed' && conclusions.includes(job.conclusion)
     && timestamp(job.completed_at) >= timestamp(job.started_at) && Array.isArray(job.steps));
@@ -60,10 +59,6 @@ function validateCompletedJob(job, cohort, name, requiredSteps, conclusions) {
 
 export function validateSuccessfulJob(job, cohort, name, requiredSteps) {
   return validateCompletedJob(job, cohort, name, requiredSteps, ['success']);
-}
-
-export function validateWorkerJob(job, cohort, name) {
-  return validateCompletedJob(job, cohort, name, GH.workerSteps, ['success', 'failure']);
 }
 
 export function validateArtifact(artifact, run, job, name, maximumBytes) {
@@ -97,8 +92,3 @@ export function projectArtifact(artifact) {
     digest: artifact.digest, expired: artifact.expired };
 }
 
-export function projectWorkerProof(job, artifact, cell, cohort, workerSha256, serverResource) {
-  requireGitHub(hashPattern.test(workerSha256));
-  const proof = { id: cell.id, job: projectJob(job, cohort, GH.workerSteps), artifact: projectArtifact(artifact), workerSha256 };
-  return serverResource === undefined ? proof : { ...proof, serverResource };
-}

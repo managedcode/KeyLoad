@@ -1,0 +1,49 @@
+name: Native benchmark session setup
+description: Import the common source-bound Docker images and compiled test runtime.
+inputs:
+  image-artifact-id:
+    description: Same-run immutable native image bundle
+    required: true
+  runtime-artifact-id:
+    description: Same-run immutable compiled runner bundle
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Set up .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+      with:
+        global-json-file: global.json
+    - name: Check Docker and kernel settings
+      shell: bash
+      run: |
+        docker version
+        sudo sysctl -w vm.max_map_count=262144
+    - name: Verify this GitHub session job
+      shell: bash
+      run: node scripts/Features/BenchmarkComparisons/session-github-job.mjs
+    - name: Download source-bound Docker images
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      with:
+        artifact-ids: ${{ inputs.image-artifact-id }}
+        path: ${{ runner.temp }}/keyload-image-bundle
+    - name: Import and verify Docker images
+      id: images
+      shell: bash
+      run: node scripts/Features/BenchmarkComparisons/import-images.mjs --bundle="$RUNNER_TEMP/keyload-image-bundle"
+    - name: Configure imported Docker images
+      env:
+        KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
+        KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
+      shell: bash
+      run: |
+        test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
+        printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
+    - name: Download compiled benchmark runtime
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      with:
+        artifact-ids: ${{ inputs.runtime-artifact-id }}
+        path: ${{ runner.temp }}/keyload-compiled-runtime
+    - name: Import and verify compiled benchmark runtime
+      shell: bash
+      run: node scripts/Features/BenchmarkComparisons/compiled-test-bundle.mjs --import="$RUNNER_TEMP/keyload-compiled-runtime"

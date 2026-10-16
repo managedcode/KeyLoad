@@ -4,6 +4,22 @@ internal static class IsolatedGitHubNativeTransportReceipts
 {
     internal const string Source = """
         const recorded = {
+          "partial": {
+            "endpoint": "repos/managedcode/KeyLoad/actions/runs/38811914189/attempts/1/jobs?per_page=100&page=3",
+            "status": 200,
+            "bytes": 219259,
+            "sha256": "60a9c1f9a789f806b83dfaad221d865480b017d423a38b8014d0791a984030c1",
+            "nativeProcess": {
+              "exitCode": 1,
+              "signal": null,
+              "timedOut": false,
+              "exceeded": false,
+              "spawnFailed": false,
+              "cancelled": false,
+              "stderrBytes": 54,
+              "stderrSha256": "e07007b39afb8a93beedec3ecc655222f0615a73ed8316a2a1d0c63699cf7441"
+            }
+          },
           "failure": {
             "endpoint": "repos/managedcode/KeyLoad/actions/runs/38643737058/attempts/1/jobs?per_page=100&page=7",
             "repeat": 0,

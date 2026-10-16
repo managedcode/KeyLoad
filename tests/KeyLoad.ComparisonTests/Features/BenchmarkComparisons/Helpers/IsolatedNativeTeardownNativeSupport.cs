@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedNativeTeardownNativeSupport
 {
-    internal const string WorkerFile = "worker.json";
+    internal const string WorkerFile = "session-state.json";
     internal const string RunnerLog = "runner.log";
     internal const string NodeLog = "progress-native-node.log";
     internal const string ReceiptFile = "teardown.json";
@@ -43,14 +43,14 @@ internal static class IsolatedNativeTeardownNativeSupport
     internal static async Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
     {
         var initiation = StartAsync(operation);
-        var failure = await OpenLoopFailure.ObserveAsync(initiation);
+        var failure = await NativeComparisonFailure.ObserveAsync(initiation);
         if (failure is not null)
         {
             AddOriginalFailures(initiation, failure, failures);
             return;
         }
         var original = await initiation;
-        failure = await OpenLoopFailure.ObserveAsync(original);
+        failure = await NativeComparisonFailure.ObserveAsync(original);
         if (failure is not null)
         {
             AddOriginalFailures(original, failure, failures);

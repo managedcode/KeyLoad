@@ -27,8 +27,8 @@ internal sealed class DocumentNativeTargetAcquisition : IAsyncDisposable
     }
     public async ValueTask DisposeAsync()
     {
-        var targetFailure = await OpenLoopFailure.ObserveAsync(DisposeTargetAsync()).ConfigureAwait(false);
-        var clientFailure = await OpenLoopFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
+        var targetFailure = await NativeComparisonFailure.ObserveAsync(DisposeTargetAsync()).ConfigureAwait(false);
+        var clientFailure = await NativeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
         var cleanup = new List<Exception>();
         if (targetFailure is not null)
         {
@@ -40,7 +40,7 @@ internal sealed class DocumentNativeTargetAcquisition : IAsyncDisposable
             cleanup.Add(clientFailure);
         }
 
-        var combined = OpenLoopFailure.Combine(primary, [.. cleanup]);
+        var combined = NativeComparisonFailure.Combine(primary, [.. cleanup]);
         if (cleanup.Count != EmptyCount && combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

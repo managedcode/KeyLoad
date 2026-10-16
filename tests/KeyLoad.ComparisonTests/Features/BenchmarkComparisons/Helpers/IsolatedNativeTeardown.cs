@@ -17,9 +17,6 @@ internal static class IsolatedNativeTeardown
         var options = work.ExecutionOptions;
         var runnerSettled = await IsolatedNativeOriginalTaskSettlement.RunAsync(
             work.StopRunnerAsync, "native-runner", failures, options);
-        var controlSettled = work.CancellationControl is null
-            || await IsolatedNativeOriginalTaskSettlement.RunAsync(
-                () => work.CancellationControl.DisposeAsync().AsTask(), "open-loop-control", failures, options);
         var collectorSettled = await SettleCollectorAsync(work, failures, options);
         var captureSettled = capture is null || await IsolatedNativeOriginalTaskSettlement.RunAsync(
             capture.StopAsync, "logs-close", failures, options);
@@ -39,7 +36,7 @@ internal static class IsolatedNativeTeardown
         var nativeReportsRetained = stopped && applicationDisposed
             && await IsolatedNativeOriginalTaskSettlement.RunAsync(() => RetainNativeReportsAsync(output, evidence),
                 "native-trx-retain", failures, options);
-        if (runnerSettled && controlSettled && collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed && nativeReportsRetained)
+        if (runnerSettled && collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed && nativeReportsRetained)
         {
             await IsolatedNativeOriginalTaskSettlement.RunAsync(
                 () => IsolatedNativeDataCleanup.DeleteAsync(root, containers), "data", failures, options);
@@ -84,7 +81,18 @@ internal static class IsolatedNativeTeardown
     private static Task CopyRawAsync(string output, string evidence)
     {
         Directory.CreateDirectory(evidence);
-        IsolatedNativeReportAssertions.CopyRawIfPresent(output, evidence);
+        if (Path.GetFullPath(output) == Path.GetFullPath(evidence))
+        {
+            return Task.CompletedTask;
+        }
+        foreach (var name in new[] { "session-state.json", "session.json", "session-resource-evidence.json" })
+        {
+            var source = Path.Combine(output, name);
+            if (File.Exists(source))
+            {
+                File.Copy(source, Path.Combine(evidence, name), overwrite: false);
+            }
+        }
         return Task.CompletedTask;
     }
 

@@ -1,4 +1,4 @@
-import { readFile, mkdir, writeFile, lstat, realpath, rm } from 'node:fs/promises';
+import { readFile, mkdir, writeFile, lstat, realpath, rm, copyFile } from 'node:fs/promises';
 import { resolve, dirname, join } from 'node:path';
 import { CONFIG } from './contracts.mjs';
 import { BUILD, copyAsset, feature, hash, prepareOutputPath, source, verifyAssets, verifyVendor } from './build-site.mjs';
@@ -39,19 +39,17 @@ async function preparePaths(args) {
 }
 
 async function prepareIsolated(args, input) {
-  const [{ produceIsolatedProjection }, { validateIsolatedCatalog, validateIsolatedProjection }, { readBytes },
-    { validateCompositeSiteEvidence }] = await Promise.all([
+  const [{ produceIsolatedProjection }, { validateIsolatedCatalog, validateIsolatedProjection }, { readBytes }] = await Promise.all([
     import('./isolated-projection.mjs'), import('./isolated-loader.mjs'),
-    import('../../../scripts/Features/BenchmarkComparisons/aggregate-files.mjs'),
-    import('../../../scripts/Features/BenchmarkComparisons/composite-site-evidence.mjs')]);
+    import('../../../scripts/Features/BenchmarkComparisons/aggregate-files.mjs')]);
   const manifestPath = join(input, 'aggregate.json');
-  const manifest = await readBytes(manifestPath, 4_194_304);
+  const manifest = await readBytes(manifestPath, 33_554_432);
   const projection = await produceIsolatedProjection({ input });
-  const qualification = await validateCompositeSiteEvidence({ input, provider: join(dirname(input), 'provider') });
-  if (!manifest.equals(await readBytes(manifestPath, 4_194_304))) throw new Error(ERRORS.cohort);
+  const qualification = { schemaVersion: 'session-v1', workers: projection.workers.length };
+  if (!manifest.equals(await readBytes(manifestPath, 33_554_432))) throw new Error(ERRORS.cohort);
   const bytes = Buffer.from(JSON.stringify(projection) + BUILD.newline);
-  if (bytes.length > 4_194_304) throw new Error(ERRORS.budget);
-  const catalog = validateIsolatedCatalog({ schemaVersion: 1, generatedAt: new Date().toISOString(),
+  if (bytes.length > 33_554_432) throw new Error(ERRORS.budget);
+  const catalog = validateIsolatedCatalog({ schemaVersion: 'session-v1', generatedAt: new Date().toISOString(),
     siteSourceRevision: args[BUILD.site], measuredSourceRevision: projection.cohort.sourceRevision,
     evidenceUrl: 'https://github.com/managedcode/KeyLoad/actions/runs/' + projection.cohort.runId,
     cohort: projection.cohort, aggregate: { path: 'isolated/aggregate.json', sha256: hash(manifest) },
@@ -63,11 +61,6 @@ async function prepareIsolated(args, input) {
   return { catalog, bytes, manifest, qualification };
 }
 
-function replaceRequired(html, search, replacement) {
-  if (!html.includes(search)) throw new Error(ERRORS.html);
-  return html.replace(search, replacement);
-}
-
 async function emitHtml(output, siteRevision, isolated) {
   let html = await readFile(join(feature, BUILD.html), BUILD.encoding);
   html = html.replaceAll(BUILD.documentationBlob, `/blob/${siteRevision}/docs`)
@@ -75,10 +68,14 @@ async function emitHtml(output, siteRevision, isolated) {
   if (!html.includes(BUILD.isolatedEvidence)) throw new Error(ERRORS.html);
   const evidence = `<p><a href="./data/isolated/aggregate.json" download>Native comparison aggregate</a> · ` +
     `<a href="${isolated.catalog.evidenceUrl}">GitHub comparison run</a></p>`;
-  const compositeResults = await import('./composite-render.mjs')
-    .then(({ renderCompositeResults }) => renderCompositeResults(isolated.qualification));
-  html = html.replace(BUILD.isolatedEvidence, evidence + compositeResults);
+  html = html.replace(BUILD.isolatedEvidence, evidence);
   await writeFile(join(output, BUILD.html), html);
+}
+
+async function copySessionAsset(output, file) {
+  const directory = join(output, 'scripts', 'Features', 'BenchmarkComparisons');
+  await mkdir(directory, { recursive: true });
+  await copyFile(join(source, '..', 'scripts', 'Features', 'BenchmarkComparisons', file), join(directory, file));
 }
 
 async function emit(output, siteRevision, isolated) {
@@ -88,6 +85,7 @@ async function emit(output, siteRevision, isolated) {
   for (const [asset, target] of BUILD.metadataCopies) await copyAsset(output, `${BUILD.feature}/${asset}`, target);
   for (const asset of BUILD.commonAssets) await copyAsset(output, `${BUILD.feature}/${asset}`);
   for (const asset of BUILD.measuredAssets) await copyAsset(output, `${BUILD.feature}/${asset}`);
+  for (const file of BUILD.sessionAssets) await copySessionAsset(output, file);
   for (const file of [...BUILD.vendorFiles, BUILD.manifest]) await copyAsset(output, `${BUILD.feature}/${BUILD.vendor}/${file}`);
   const directory = join(output, BUILD.data, 'isolated');
   await mkdir(directory, { recursive: true });

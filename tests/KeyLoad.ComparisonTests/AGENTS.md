@@ -6,7 +6,7 @@
 
 ## Purpose and entry points
 - Owns TUnit comparison-harness checks and the CI comparison workload entry point.
-- Main suite: `Features/BenchmarkComparisons/Cases/ComparisonTests.cs`; project: `KeyLoad.ComparisonTests.csproj`.
+- Native session entry: `Features/BenchmarkComparisons/Session/Cases/BenchmarkSessionTests.cs`; project: `KeyLoad.ComparisonTests.csproj`.
 
 ## Ownership and boundaries
 - Tests and comparison artifacts belong to the `BenchmarkComparisons` slice and matching `docs/Features/BenchmarkComparisons.md`.
@@ -16,7 +16,7 @@
 ## Commands and evidence
 - Canonical invoking GitHub Actions commands: `dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release` and `dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml`.
 - Owner clarification 2026-10-03 moves those comparative commands to the separate `.github/workflows/benchmarks.yml` (`Benchmarks`) pipeline, including native TimeSeries image checks. The historical ci.yml evidence remains authentic; new isolated producer guards must bind to the new exact name/path (ADR-062).
-- Workflow runs comparison cases with controlled environment settings and uploads `comparison-suite`; do not run these tests or benchmarks locally. Preserve run URL, SHA and artifact links for any published result.
+- Workflow runs native session cases with controlled environment settings and uploads `comparison-session-suite`; do not run these tests or benchmarks locally. Preserve run URL, SHA and artifact links for any published result.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
@@ -25,7 +25,7 @@
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned test slice: `BenchmarkComparisons`; target path: `Features/BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
-- `Features/BenchmarkComparisons/Cases/ComparisonTests.cs` is the current entry point; keep test scenarios under the same named slice.
+- `Features/BenchmarkComparisons/Session/Cases/BenchmarkSessionTests.cs` is the current entry point; keep test scenarios under the same named slice.
 ## Feature slice responsibility folders
 - Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
 - Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
@@ -38,4 +38,4 @@
 ## Current native comparison topology, owner direction 2026-10-09
 
 - ADR-122 supersedes every active two-node comparison inventory: current benchmark planning, admission, original-file provenance and site projection accept only native one-node or three-node cells. Reject two-node current inputs before acquisition; RF3 majority remains two acknowledgements. Preserve immutable historical original bytes/hashes without a legacy reader or current qualification fallback.
-- The existing control/scale/vector family now has 924 workers and 1,716 original inputs (1,656 suite files and 60 provider files), with the 84-path executed source closure. This current topology contract supersedes earlier active 1,386-worker/2,530-input clauses; new document-family evidence must receive its own exact inventory before publication. All source, authorization, native operation, complete cohort, provenance and coverage gates remain mandatory.
+- Owner correction2026-10-17 and ADR-142 replace the per-cell pipeline with exactly two measurement jobs per database: one native node and three native nodes. The current 11-database inventory has 22 measurement jobs, each with one shared Aspire topology and separate native TUnit workload outcomes. Measure the initial million-record load; do not warm up, reset or reseed between tests. Retire superseded planners, runners, schemas and their exclusive tests together, without a legacy reader. Immutable historical evidence keeps its original identity. Current source is not accepted until its original Linux GitHub results satisfy the required gates.

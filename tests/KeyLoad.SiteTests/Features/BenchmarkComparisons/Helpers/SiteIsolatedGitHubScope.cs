@@ -66,10 +66,9 @@ internal sealed class SiteIsolatedGitHubScope : IAsyncDisposable
     }
 
     public string SelectedJobsPath => Path.Combine(Capture, SiteIsolatedGitHubFields.MetadataDirectory,
-        SiteIsolatedGitHubFields.Attempts, RunValue(SiteIsolatedGitHubTokens.Id),
-        RunValue(SiteIsolatedGitHubTokens.Attempt), SiteIsolatedGitHubFields.Jobs);
+        RunValue(SiteIsolatedGitHubTokens.Id), SiteIsolatedGitHubFields.Jobs);
 
-    public string ArtifactsPath => Path.Combine(Capture, SiteIsolatedGitHubFields.MetadataDirectory,
+    public string ArtifactsPath => Path.Combine(Capture, SiteIsolatedGitHubFields.MetadataDirectory, RunValue(SiteIsolatedGitHubTokens.Id),
         SiteIsolatedGitHubFields.ArtifactPages);
 
     public async Task<JsonElement> SelectAsync(CancellationToken token) => await RunAsync(

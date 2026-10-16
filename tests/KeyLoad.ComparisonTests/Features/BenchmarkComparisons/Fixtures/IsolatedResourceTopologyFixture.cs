@@ -20,7 +20,7 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
     private const string AppHostDirectory = "src/KeyLoad.AppHost";
     private DistributedApplication? application;
 
-    internal IsolatedResourceTopologyFixture(string target, int nodes, string? projectDirectory = null, DocumentComparisonSelection? documents = null)
+    internal IsolatedResourceTopologyFixture(string target, int nodes, string? projectDirectory = null)
     {
         var temporary = IsolatedResourceTopologyApplication.ResolveTemporaryDirectory(new DirectoryInfo(Path.GetTempPath()));
         var root = Path.Combine(temporary, TemporaryPrefix + Guid.NewGuid().ToString("N"));
@@ -30,11 +30,7 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
             ProjectDirectory = projectDirectory ?? Path.Combine(RepositoryRoot(), AppHostDirectory),
             Args = [$"--KeyLoad:ContainerUser={User}", $"--KeyLoad:ContainerImages:Server={ServerImage}"]
         });
-        var selection = new ComparisonWorkerSelection(target, nodes, Scenario.PointRead,
-            documents is null ? IsolatedComparisonContract.Current.Profile : DocumentWorkerSelection.ProfileId(documents))
-        {
-            DocumentWorkload = documents
-        };
+        var selection = new BenchmarkSessionSelection(target, nodes);
         var runner = builder.AddContainer(RunnerName, "model-runner", "model");
         Context = new(builder, selection, runner, root);
     }

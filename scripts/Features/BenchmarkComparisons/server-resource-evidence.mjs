@@ -1,7 +1,6 @@
 import { isDeepStrictEqual } from 'node:util';
 import { hashPattern, requireGitHub } from './isolated-github-contract.mjs';
 
-const schema = 'server-resource-evidence.v1';
 const configuredSchema = 'server-resource-evidence.v2';
 const maximumContainers = 3;
 const maximumSamples = 1680;
@@ -137,8 +136,8 @@ function validCpuMax(value) {
 
 export function validateServerResourceEvidence(value, sidecarSha256, workerSha256, cell, cohort, jobId, supported) {
   const configured = value?.schema === configuredSchema;
-  const expectedFields = configured ? [...rootFields, 'observationPolicy'] : rootFields;
-  requireGitHub(keys(value, expectedFields) && (configured || value.schema === schema) && hashPattern.test(sidecarSha256)
+  const expectedFields = [...rootFields, 'observationPolicy'];
+  requireGitHub(keys(value, expectedFields) && configured && hashPattern.test(sidecarSha256)
     && hashPattern.test(workerSha256) && value.workerSha256 === workerSha256 && value.sourceRevision === cohort.sourceRevision
     && value.workflowRunId === String(cohort.runId) && value.runAttempt === String(cohort.attempt)
     && value.jobId === String(jobId) && value.target === cell.target && value.nodeCount === cell.nodeCount
@@ -210,35 +209,15 @@ function compareStorage(left, right) {
   return ordinalCompare(left.fileSystem, right.fileSystem) || left.capacityBytes - right.capacityBytes;
 }
 
-export function validateScaleResourceProof(value, supported) {
-  requireGitHub(keys(value, ['sha256', 'qualified', 'missingEvidence', 'comparison', 'observedServerMemory'])
-    && hashPattern.test(value.sha256) && typeof value.qualified === 'boolean'
-    && Array.isArray(value.missingEvidence) && value.missingEvidence.every(item => missingKinds.includes(item))
-    && isDeepStrictEqual(value.missingEvidence, [...new Set(value.missingEvidence)].sort())
-    && value.qualified === (value.missingEvidence.length === 0)
-    && (supported ? (value.qualified ? value.comparison !== null : value.comparison === null)
-      : value.comparison === null && !value.qualified && value.missingEvidence.includes('serverCpuRss'))
-    && (value.observedServerMemory === null || keys(value.observedServerMemory, ['bytes', 'sampleCount'])
-      && Number.isSafeInteger(value.observedServerMemory.bytes) && value.observedServerMemory.bytes >= 0
-      && Number.isSafeInteger(value.observedServerMemory.sampleCount) && value.observedServerMemory.sampleCount >= 2)
-    && (supported ? (value.missingEvidence.includes('serverCpuRss') ? value.observedServerMemory === null
-      : value.observedServerMemory !== null) : value.observedServerMemory === null));
-}
-
-export function requireComparableScaleProfiles(profiles) {
+export function requireComparableSessionResources(workers) {
   const groups = new Map();
-  for (const profile of profiles) {
-    requireGitHub(typeof profile.profile === 'string' && profile.profile.length > 0 && Array.isArray(profile.workers));
-    for (const worker of profile.workers) {
-      requireGitHub(['measured', 'failed', 'unsupported', 'unsupportedTopology'].includes(worker.disposition)
-        && typeof worker.serverResourceQualified === 'boolean');
-      if (worker.disposition === 'unsupported' || worker.disposition === 'unsupportedTopology' || !worker.serverResourceQualified) continue;
-      requireGitHub(worker.resourceEquivalence !== null && worker.resourceEquivalence !== undefined);
-      const key = JSON.stringify([profile.profile, worker.nodeCount, worker.scenario]);
-      const previous = groups.get(key);
-      if (previous !== undefined) requireGitHub(isDeepStrictEqual(previous, worker.resourceEquivalence));
-      else groups.set(key, worker.resourceEquivalence);
-    }
+  for (const worker of workers) {
+    requireGitHub([1, 3].includes(worker.nodeCount) && typeof worker.proof?.qualified === 'boolean');
+    if (!worker.proof.qualified) continue;
+    requireGitHub(worker.proof.comparison !== null && worker.proof.comparison !== undefined);
+    const previous = groups.get(worker.nodeCount);
+    if (previous !== undefined) requireGitHub(isDeepStrictEqual(previous,worker.proof.comparison));
+    else groups.set(worker.nodeCount,worker.proof.comparison);
   }
 }
 

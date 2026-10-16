@@ -7,7 +7,6 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class Neo4jHarnessRegression
 {
-    private const string SetupPrefix = "setup:";
     private const string SafeNativePrefix = "Neo4j:";
 
     public static async Task VerifyAsync(string endpoint, string password, string image, CancellationToken cancellationToken)
@@ -75,17 +74,26 @@ internal static class Neo4jHarnessRegression
         var target = new Neo4jTarget(client, fixture.RunId, image, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
         await using (target)
         {
-            var report = await new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions()), NativeExecutionPolicyFixture.Read()).RunAsync([target], "test", cancellationToken);
-
-            await Assert.That(report.Cases.Length == Enum.GetValues<Scenario>().Length).IsTrue();
-            foreach (var item in report.Cases)
+            var session = new BenchmarkSession(target, NativeExecutionPolicyFixture.Read(),
+                new BenchmarkSessionOptions { Records = 600, Operations = 100, Concurrency = 16 }, development: true);
+            var load = await session.LoadAsync(cancellationToken);
+            await Assert.That(load.Status).IsEqualTo("failed");
+            await Assert.That(load.Detail).IsEqualTo(SafeNativePrefix + nativeCode);
+            await Assert.That(load.VerifiedRecords).IsEqualTo(0);
+            await Assert.That(load.Lanes).IsEmpty();
+            foreach (var operation in new Func<CancellationToken, Task<BenchmarkSessionCaseReport>>[]
             {
-                var expectedDetail = SetupPrefix + SafeNativePrefix + nativeCode;
-                await Assert.That(item.Status == "failed" && item.Detail == expectedDetail).IsTrue();
-                await Assert.That(item.Measurement is null && item.Samples.IsEmpty).IsTrue();
-                await Assert.That(!item.Detail!.Contains(nativeMessage, StringComparison.Ordinal)).IsTrue();
-                await Assert.That(!item.Detail.Contains(password, StringComparison.Ordinal)).IsTrue();
-                await Assert.That(!item.Detail.Contains(fixture.RunId, StringComparison.Ordinal)).IsTrue();
+                session.IndexAsync, session.SequentialReadAsync, session.RandomReadAsync,
+                session.SearchAsync, session.MixedAsync, session.VerifyAsync
+            })
+            {
+                var report = await operation(cancellationToken);
+                await Assert.That(report.Status).IsEqualTo("failed");
+                await Assert.That(report.Detail).IsEqualTo("LiveSessionPrerequisiteFailedOrNotExecuted");
+                await Assert.That(report.Lanes).IsEmpty();
+                await Assert.That(report.Detail!.Contains(nativeMessage, StringComparison.Ordinal)).IsFalse();
+                await Assert.That(report.Detail.Contains(password, StringComparison.Ordinal)).IsFalse();
+                await Assert.That(report.Detail.Contains(fixture.RunId, StringComparison.Ordinal)).IsFalse();
             }
         }
 

@@ -16,16 +16,17 @@ internal static class NativeDatabaseClockFlow
         await Assert.That(timeProvider.TimerCreations).IsGreaterThan(timerCreations);
     }
 
-    internal static async Task VerifyCancelledVectorRunnerAsync(IVectorComparisonTarget target,
+    internal static async Task VerifyCancelledNativeVectorReadAsync(IVectorComparisonTarget target,
         VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions,
         NativeDatabaseFlowTimeProvider timeProvider, CancellationToken cancellationToken)
     {
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        var utcNowReads = timeProvider.UtcNowReads;
-        var runner = ComparisonRunner.ForVector(profile, executionOptions, provider: timeProvider);
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => runner.RunAsync(target, null, cancelled.Token));
-        await Assert.That(timeProvider.UtcNowReads).IsGreaterThan(utcNowReads);
+        var timerCreations = timeProvider.TimerCreations;
+        var corpus = new VectorComparisonCorpus(profile, executionOptions);
+        var failure = await Assert.ThrowsAsync<OperationCanceledException>(() => target.ReadAsync(corpus.Create(0).Id, cancelled.Token));
+        await Assert.That(failure).IsNotNull();
+        await Assert.That(timeProvider.TimerCreations).IsGreaterThan(timerCreations);
 
         var rows = 0;
         await foreach (var _ in target.ReadbackAsync(cancellationToken).ConfigureAwait(false))

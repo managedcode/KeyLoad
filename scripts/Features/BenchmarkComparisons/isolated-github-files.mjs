@@ -25,9 +25,9 @@ export async function writeCapture(target, bytes) {
 export const writeJson = (target, value) => writeCapture(target, Buffer.from(`${JSON.stringify(value, null, 2)}\n`));
 export const readJson = async (target, maximumBytes = GH.metadataBytes) => parseBytes(await readBytes(target, maximumBytes));
 
-export async function hashRegularFile(target, maximumBytes) {
+export async function hashRegularFile(target, maximumBytes, allowEmpty = false) {
   const before = await existingPath(target, false);
-  requireGitHub(before.size > 0 && before.size <= maximumBytes);
+  requireGitHub((allowEmpty ? before.size >= 0 : before.size > 0) && before.size <= maximumBytes);
   const hash = createHash('sha256');
   let bytes = 0;
   const stream = createReadStream(target, { flags: constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0), highWaterMark: 65536 });

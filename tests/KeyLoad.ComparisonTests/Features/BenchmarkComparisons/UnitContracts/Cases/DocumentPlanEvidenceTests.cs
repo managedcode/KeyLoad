@@ -89,9 +89,9 @@ internal sealed class DocumentPlanEvidenceTests
 
     private static async Task<JsonObject> ProbeAsync(string operation)
     {
-        var script = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), "tests", "KeyLoad.ComparisonTests", "Features",
+        var script = Path.Combine(SessionNodeProcess.RepositoryRoot(), "tests", "KeyLoad.ComparisonTests", "Features",
             "BenchmarkComparisons", "UnitContracts", "Fixtures", "document-contract-probe.mjs");
-        var result = await IsolatedAggregateNodeProcess.RunAsync([script, operation], TestContext.Current!.Execution.CancellationToken);
+        var result = await SessionNodeProcess.RunAsync([script, operation], TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
         await Assert.That(result.Error).IsEqualTo(string.Empty);
         return JsonNode.Parse(result.Output)!.AsObject();

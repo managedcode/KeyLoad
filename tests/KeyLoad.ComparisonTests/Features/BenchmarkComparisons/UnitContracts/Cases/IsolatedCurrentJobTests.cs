@@ -26,11 +26,11 @@ internal sealed class IsolatedCurrentJobTests
     public async Task AcNgr001FreshCurrentJobPolicyRequiresExactIdentityAndAllowedState(
         string corruption, string expectedOutput, bool accepted)
     {
-        var root = IsolatedAggregateNodeProcess.RepositoryRoot();
-        var module = IsolatedAggregateNodeProcess.Module("isolated-current-job.mjs");
+        var root = SessionNodeProcess.RepositoryRoot();
+        var module = SessionNodeProcess.Module("isolated-current-job.mjs");
         var fixture = Path.Combine(root, "tests", "KeyLoad.ComparisonTests", "Features", "BenchmarkComparisons", "UnitContracts",
             "IsolatedCurrentJobOriginal.json");
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedCurrentJobNodeProgram.Policy, module, fixture, corruption],
             TestContext.Current!.Execution.CancellationToken);
 

@@ -217,6 +217,11 @@ internal static class ComparisonHostLaunchSettings
         }
         foreach (var argument in arguments)
         {
+            if (argument == "--list-tests")
+            {
+                startInfo.ArgumentList.Add(argument);
+                continue;
+            }
             var separator = argument.IndexOf('=', StringComparison.Ordinal);
             if (!argument.StartsWith("--", StringComparison.Ordinal) || separator <= 2)
             {

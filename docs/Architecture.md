@@ -7,6 +7,13 @@ bounded connections and native OpenTelemetry precede broad model expansion;
 comparative measurement, complete audits and release qualification follow it.
 Implementation milestones never replace whole-task acceptance.
 
+[Shared benchmark sessions](Features/BenchmarkComparisons/SessionExecution.md)
+under [ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) replace per-scenario
+workers with one live Aspire topology per database and native node count. Many
+real TUnit cases share that topology, starting with a measured million-record
+load. The current redesign removes the superseded pipeline; implementation,
+complete model-family coverage and exact-source Linux qualification remain open.
+
 [ADR-136](ADR/ADR-136-native-orleans-partition-ownership.md) assigns physical
 ZoneTree opening and joined lifetime to a silo-local Grain Service under one
 native host. Logical partition grains route through Orleans to current physical
@@ -281,12 +288,12 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | tests/KeyLoad.ComparisonTests | Features/BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements, including the separate TimeSeries profile under ADR-050. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public CI claim without CI evidence. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Features/BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; ADR-047 public fixture library for external generated consumer, source joined with a clean enabled host build; real GitHub Dry execution pending. |
-| benchmarks/KeyLoad.Comparisons | Features/BenchmarkComparisons/Contracts/Contracts.cs, Features/BenchmarkComparisons/Corpus/BenchmarkDataset.cs, Features/BenchmarkComparisons/Execution/ComparisonRunner.cs; Features/BenchmarkComparisons/Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
-| benchmarks/KeyLoad.ComparisonHost | Features/BenchmarkComparisons/Cases/NativeClientWorkloadTests.cs and Hosting/ | BenchmarkComparisons; native TUnit C# client workload container under ADR-117, retaining Aspire dependencies and original measurements; runtime qualification pending. |
+| benchmarks/KeyLoad.Comparisons | Features/BenchmarkComparisons/Session/; Features/BenchmarkComparisons/Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
+| benchmarks/KeyLoad.ComparisonHost | Features/BenchmarkComparisons/Session/ | BenchmarkComparisons; native TUnit C# client workload container under ADR-117, retaining Aspire dependencies and original measurements; runtime qualification pending. |
 | site | Features/BenchmarkComparisons/index.html, bootstrap.mjs, measurement-loader.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction, conceptual Three.js RF3 view and public views of qualified GitHub JSON; website workflow is separate from benchmark execution. |
 | tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Features/BenchmarkComparisons/ | BenchmarkComparisons; independently buildable TUnit suite invokes actual Node modules and authentic GitHub report files. |
 | .github/workflows | build-and-tests.yml, benchmarks.yml, release.yml, website.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, release, and website workflows. |
-| scripts/Features/BenchmarkComparisons | github-evidence-contracts/runs/proof.mjs, github-evidence.mjs | BenchmarkComparisons; ADR-040/BC028 authenticated-metadata and same-ZIP proof tooling, implementation pending. |
+| scripts/Features/BenchmarkComparisons | session-plan.mjs, session-github-collect.mjs, session-aggregate-cli.mjs | BenchmarkComparisons; ADR-040/BC028 authenticated-metadata and same-ZIP proof tooling, implementation pending. |
 | docs | design/, implementation/, Features/, ADR/ | Product specification, evidence and canonical slice/decision records. |
 
 [ADR-049](ADR/ADR-049-genuine-neo4j-harness.md) accepts genuine harness regressions

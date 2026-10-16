@@ -53,12 +53,6 @@ internal static class KeyLoadAppHostApplication
         var runtimeOptions = AppHostOptionsRegistration.Get(builder);
         var twoRf3 = runtimeOptions.Control.Value.TwoRf3;
         var tests = runtimeOptions.Control.Value.Tests;
-        var scaleSelected = runtimeOptions.Control.Value.ScaleSelected;
-        if (scaleSelected && (tests is not null
-            || !runtimeOptions.Control.Value.TargetSelected))
-        {
-            throw new InvalidOperationException(KeyLoad.Comparisons.ComparisonWorkerSelection.InvalidSelection);
-        }
         if (tests is not null)
         {
             if (twoRf3)
@@ -74,27 +68,17 @@ internal static class KeyLoadAppHostApplication
             return;
         }
         var configuration = global::AppHostConfiguration.Read(builder);
+        if (configuration.BenchmarkMode)
+        {
+            throw new InvalidOperationException(BenchmarkSessionResourceOptions.Profile);
+        }
         var profile = global::ClusterProfileStore.Open(configuration.DataRoot, AppHostOptionsRegistration.Get(builder).Profile);
         if (twoRf3)
         {
             _ = TwoRf3ClusterResources.Add(builder, profile, configuration.DataRoot);
             return;
         }
-        var nodes = global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral,
+        _ = global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral,
             functionalNodeCount: runtimeOptions.Control.Value.FunctionalNodeCount);
-        if (configuration.BenchmarkMode)
-        {
-            var admin = builder.CreateResourceBuilder(builder.Resources.OfType<ParameterResource>()
-                .Single(resource => resource.Name == global::AppHostConfiguration.AdminParameter));
-            if (string.Equals(configuration.BenchmarkProfile, global::AppHostConfiguration.TimeSeriesBenchmarkProfile,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                TimeSeriesBenchmarkResources.Add(builder, nodes, admin, configuration.BenchmarkRoot);
-            }
-            else
-            {
-                global::BenchmarkResources.Add(builder, nodes, admin, configuration.BenchmarkRoot);
-            }
-        }
     }
 }

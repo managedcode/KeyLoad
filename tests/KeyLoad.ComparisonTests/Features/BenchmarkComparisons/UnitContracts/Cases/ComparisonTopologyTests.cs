@@ -37,13 +37,13 @@ internal sealed class ComparisonTopologyTests
     [Test]
     public async Task AcBct003JsonKeepsSingleAndReplicatedNamesAndTheirNumericValues()
     {
-        await Assert.That(JsonSerializer.Serialize(ComparisonTopology.Standalone, ReportWriter.JsonOptions)).IsEqualTo("\"Single\"");
-        await Assert.That(JsonSerializer.Serialize(ComparisonTopology.Replicated, ReportWriter.JsonOptions)).IsEqualTo("\"Replicated\"");
+        await Assert.That(JsonSerializer.Serialize(ComparisonTopology.Standalone, ComparisonJson.Options)).IsEqualTo("\"Single\"");
+        await Assert.That(JsonSerializer.Serialize(ComparisonTopology.Replicated, ComparisonJson.Options)).IsEqualTo("\"Replicated\"");
         var standalone = Enum.Parse<ComparisonTopology>("Standalone");
         var replicated = Enum.Parse<ComparisonTopology>("Replicated");
         await Assert.That((int)standalone).IsEqualTo(0);
         await Assert.That((int)replicated).IsEqualTo(1);
-        await Assert.That(JsonSerializer.Deserialize<ComparisonTopology>("\"Single\"", ReportWriter.JsonOptions))
+        await Assert.That(JsonSerializer.Deserialize<ComparisonTopology>("\"Single\"", ComparisonJson.Options))
             .IsEqualTo(ComparisonTopology.Standalone);
     }
 

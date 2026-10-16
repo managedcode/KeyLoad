@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCollector(
-    ComparisonWorkerSelection selection, string output,
+    BenchmarkSessionSelection selection, string output,
     IOptions<ScaleServerResourceOptions> executionOptions, IOptions<BenchmarkProvenanceOptions> provenanceOptions,
-    CancellationToken applicationStopping, OpenLoopResourceSelection? openLoop = null, TimeProvider? provider = null) : IAsyncDisposable
+    string sessionId, TimeProvider? provider, CancellationToken applicationStopping) : IAsyncDisposable
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string RunnerName = "comparisons";
@@ -180,14 +180,7 @@ internal sealed class ScaleServerResourceEvidenceCollector(
     private Task WriteAsync(CancellationToken token)
     {
         var observations = CaptureSnapshot();
-        var unsupported = IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
-            item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount));
-        if (openLoop is not null && !unsupported)
-        {
-            return OpenLoopResourceEvidenceWriter.WriteAsync(selection, openLoop, output, observations,
-                executionOptions, provenanceOptions, token);
-        }
-        return ScaleServerResourceEvidenceWriter.WriteAsync(selection, output, observations,
+        return BenchmarkSessionResourceEvidenceWriter.WriteAsync(sessionId, selection, output, observations,
             executionOptions, provenanceOptions, token);
     }
 

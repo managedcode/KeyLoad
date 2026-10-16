@@ -1,0 +1,9 @@
+# SessionContracts
+
+Owns the shared native benchmark preparation checks in `action.yml`. Read the root and workflow policies and ADR-142. Execute only inside Linux Benchmarks; preserve original image, topology, readiness, failure, cancellation and workload assertions. This composite never produces website measurements. Root integrates shared workflow changes.
+
+Every filter must name retained TUnit test classes. The comparison entry requires at least one discovered test; an empty filter is a failure, never a skipped qualification. Shared-session process admission is exercised by `ComparisonHostStartupTests`, `ComparisonHostCleanupTests` and `BenchmarkSessionNativeParserTests`. `BenchmarkSessionProgressTests` uses an explicitly controlled development target to check acknowledgement, cancellation and failed-oracle accounting; it is not native database performance evidence. `DocumentComparisonNativeTests` retains real SurrealDB/HelixDB shared-session correctness and cancellation against small functional corpora.
+
+The native resource-model group retains all current database topology, credential, private-volume and foreign-selection checks. Native shutdown tests retain original primary/cleanup failures and joined resource/log ownership. Keep MongoDB readiness, pinned-image inspection and KeyLoad resource/admission gates independent.
+
+The three removed `IsolatedTimeSeries*ResourceTests` classes belonged exclusively to retired TimeSeries benchmark dispatch. Do not retain their empty filters or substitute pgvector for TimescaleDB. `TimeSeriesIntensivePinnedImageTests`, `TimeSeriesWorkloadTests` and `TimeSeriesPackageVersionTests` remain active. Native Timescale family deployment, `TimeSeriesForeignSchemaCollision` and `TimescaleTimeSeriesIntensiveSchemaAtomicityRegression` remain pending their actual future family integration; pinned image facts do not qualify them.

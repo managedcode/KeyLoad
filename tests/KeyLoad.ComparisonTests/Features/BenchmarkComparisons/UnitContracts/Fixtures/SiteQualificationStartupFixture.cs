@@ -138,7 +138,7 @@ internal sealed class SiteQualificationStartupFixture : IAsyncDisposable
 
     private static string Script()
     {
-        var lines = File.ReadAllLines(Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), ActionPath));
+        var lines = File.ReadAllLines(Path.Combine(SessionNodeProcess.RepositoryRoot(), ActionPath));
         var step = Array.IndexOf(lines, Step);
         if (step < 0 || lines[step + 2] != Run)
         {

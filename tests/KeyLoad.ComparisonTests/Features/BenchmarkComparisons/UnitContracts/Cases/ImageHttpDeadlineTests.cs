@@ -40,9 +40,9 @@ internal sealed class ImageHttpDeadlineTests
         using var promptTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(PromptTimeoutSeconds), TimeProvider.System);
         using var prompt = CancellationTokenSource.CreateLinkedTokenSource(
             TestContext.Current!.Execution.CancellationToken, promptTimeout.Token);
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", ImageHttpDeadlineNodeProgram.Source,
-                IsolatedAggregateNodeProcess.Module("image-manifest.mjs"), scenario], prompt.Token);
+                SessionNodeProcess.Module("image-manifest.mjs"), scenario], prompt.Token);
         await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.Output.Trim()).IsEqualTo(expectedOutput);
         await Assert.That(result.Error).IsEqualTo(ExpectedErrorOutput);

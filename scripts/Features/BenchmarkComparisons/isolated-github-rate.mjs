@@ -19,7 +19,8 @@ function retryAfter(value, nowMs) {
 
 export function isInterruptedMetadataResponse(result, stderr) {
   const native = result?.nativeProcess;
-  if (result?.response?.status !== 200 || result.bytes !== 0 || native?.exitCode !== 1
+  if (result?.response?.status !== 200 || !Number.isSafeInteger(result.bytes)
+    || result.bytes < 0 || result.bytes > GH.metadataBytes || native?.exitCode !== 1
     || native.signal !== null || native.timedOut !== false || native.exceeded !== false
     || native.spawnFailed !== false || native.cancelled !== false
     || !Buffer.isBuffer(stderr) || stderr.length === 0 || stderr.length > GH.stderrBytes

@@ -13,7 +13,7 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
     private const string AdminSetting = "Benchmarks__AdminKey";
     private const string AdminNativeSetting = "KeyLoad__AdminKey";
     private const string HttpPrefix = "KeyLoad__HttpAdmission__";
-    private const string RequestCount = "32";
+    private const string RequestCount = "512";
     private const string ReservedBytes = "2147483648";
 
     /// <summary>AC-ISO-003/004: actual fixed voters share authority and retain independent native data.</summary>

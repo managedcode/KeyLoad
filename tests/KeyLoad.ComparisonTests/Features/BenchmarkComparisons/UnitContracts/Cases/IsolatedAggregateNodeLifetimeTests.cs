@@ -60,7 +60,7 @@ internal sealed class IsolatedAggregateNodeLifetimeTests
     {
         using var timeout = new CancellationTokenSource(TestDeadline, TimeProvider.System);
         using var prompt = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeout.Token);
-        return await IsolatedAggregateNodeProcess.RunAsync(Arguments(scenario), prompt.Token);
+        return await SessionNodeProcess.RunAsync(Arguments(scenario), prompt.Token);
     }
 
     private static string[] Arguments(string scenario)

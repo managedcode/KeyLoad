@@ -11,19 +11,4 @@ internal sealed class TestBootstrapOptions
     {
         get; set;
     }
-    [ConfigurationKeyName(TestSuiteProtocol.VectorProfileSetting)]
-    public string? VectorProfile
-    {
-        get; set;
-    }
-    [ConfigurationKeyName(TestSuiteProtocol.ScaleProfileSetting)]
-    public string? ScaleProfile
-    {
-        get; set;
-    }
-    [ConfigurationKeyName(TestSuiteProtocol.OpenLoopRateSetting)]
-    public string? OpenLoopRate
-    {
-        get; set;
-    }
 }

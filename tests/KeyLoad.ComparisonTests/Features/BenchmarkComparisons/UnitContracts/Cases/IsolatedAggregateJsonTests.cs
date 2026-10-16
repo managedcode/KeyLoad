@@ -1,5 +1,4 @@
 using System.Text.Json;
-using F = KeyLoad.UnitTests.Features.BenchmarkComparisons.IsolatedAggregateFields;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -22,12 +21,12 @@ internal sealed class IsolatedAggregateJsonTests
     public async Task AC_ISO_007_RejectsDuplicateEscapedNestedKeysAndMalformedRawJson()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var response = await IsolatedAggregateNodeProcess.RunAsync(
-            [ModuleMode, EvaluationMode, Probe, IsolatedAggregateNodeProcess.Module(Module)], token);
+        var response = await SessionNodeProcess.RunAsync(
+            [ModuleMode, EvaluationMode, Probe, SessionNodeProcess.Module(Module)], token);
         await Assert.That(response.ExitCode).IsEqualTo(0);
         await Assert.That(response.Error).IsEqualTo(string.Empty);
         using var result = JsonDocument.Parse(response.Output);
-        var accepted = result.RootElement.GetProperty(F.Accepted).EnumerateArray().Select(value => value.GetBoolean()).ToArray();
+        var accepted = result.RootElement.GetProperty("accepted").EnumerateArray().Select(value => value.GetBoolean()).ToArray();
         await Assert.That(accepted.Length).IsEqualTo(4);
         await Assert.That(accepted[0]).IsFalse();
         await Assert.That(accepted[1]).IsFalse();

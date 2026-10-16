@@ -12,13 +12,7 @@ internal static class IsolatedHostConstants
     internal const string ApiKey = "Benchmarks:Native:ApiKey";
     internal const string JobId = "KEYLOAD_COMPARISON_JOB_ID";
     internal const string Failure = "IsolatedComparisonHostFailed";
-    internal const string Cancelled = "IsolatedComparisonHostCancelled";
     internal const string CleanupFailure = "IsolatedComparisonCleanupFailed";
-    internal const string WorkerFile = "worker.json";
-    internal const string PendingPrefix = ".worker-";
-    internal const string PendingSuffix = ".tmp";
-    internal const string Measured = "measured";
-    internal const string UnsupportedTopology = "unsupportedTopology";
     internal const string KeyLoad = "KeyLoad";
     internal const string Postgres = "PostgreSQL + pgvector";
     internal const string Qdrant = "Qdrant";

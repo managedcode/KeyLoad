@@ -21,7 +21,7 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     private const string PasswordParameter = "isolated-surrealdb-password";
     private const string Basic = "Basic";
     private const string User = "root:";
-    private const string ComparisonRunner = "comparisons";
+    private const string NativeRunner = "comparisons";
     private static TimeSpan Deadline => NativeExecutionPolicyFixture.Harness().Value.NativeDatabaseFlowTimeout;
 
     internal static IOptions<NativeComparisonExecutionOptions> ExecutionOptions => NativeExecutionPolicyFixture.Read();
@@ -44,13 +44,13 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     private static async Task<DistributedApplication> BuildNativeApplicationAsync(string target, string root, CancellationToken token)
     {
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-            ["--Benchmarks:Enabled=true", "--" + ComparisonWorkerSelection.TargetSetting + "=" + target,
-                "--" + ComparisonWorkerSelection.NodeCountSetting + "=1", "--" + ComparisonWorkerSelection.ScenarioSetting + "=" + Scenario.PointRead,
-                "--" + ComparisonWorkerSelection.ProfileSetting + "=" + IsolatedComparisonContract.Current.Profile,
+            ["--Benchmarks:Enabled=true", "--" + BenchmarkSessionSelection.TargetSetting + "=" + target,
+                "--" + BenchmarkSessionSelection.NodeCountSetting + "=1", "--Benchmarks:Session=true",
+                "--Benchmarks:SessionId=native-flow", "--Benchmarks:EvidenceProfile=" + BenchmarkSessionContract.Profile,
                 "--Benchmarks:DataRoot=" + root, "--Benchmarks:Output=" + Path.Combine(root, "reports")], token);
         try
         {
-            var runner = builder.Resources.OfType<ContainerResource>().Single(resource => resource.Name == ComparisonRunner);
+            var runner = builder.Resources.OfType<ContainerResource>().Single(resource => resource.Name == NativeRunner);
             builder.Resources.Remove(runner);
             return await builder.BuildAsync(token);
         }
@@ -105,7 +105,7 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
             }
             return Task.CompletedTask;
         }, failures);
-        if (OpenLoopFailure.Combine(primary, failures.ToImmutableArray()) is { } failure)
+        if (NativeComparisonFailure.Combine(primary, failures.ToImmutableArray()) is { } failure)
         {
             ExceptionDispatchInfo.Capture(failure).Throw();
         }

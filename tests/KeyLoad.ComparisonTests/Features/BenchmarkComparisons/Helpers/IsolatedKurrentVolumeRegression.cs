@@ -12,9 +12,15 @@ internal static class IsolatedKurrentVolumeRegression
         var harnessOptions = NativeExecutionPolicyFixture.Harness();
         using var deadlineTimeout = new CancellationTokenSource(harnessOptions.Value.KurrentVolumeTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
-        var selection = new ComparisonWorkerSelection(KurrentConstants.Name, nodeCount, Scenario.StreamAppend,
-            IsolatedQuorumResourceTokens.Profile);
-        var options = selection.Options;
+        var options = new ComparisonOptions
+        {
+            Documents = 4_096,
+            Repetitions = 5,
+            Warmup = 256,
+            Operations = 10_000,
+            Concurrency = 16,
+            Topology = new BenchmarkSessionSelection(KurrentConstants.Name, nodeCount).Topology
+        };
         await IsolatedKurrentVolumeRegressionNative.RequireCanonicalProfileAsync(options);
         var endpoint = await IsolatedKurrentCleanupRegressionGossip.ReadLeaderAsync(app, nodeCount, deadline.Token);
         var fixture = new IsolatedKurrentVolumeRegressionFixture(endpoint, options, harnessOptions);

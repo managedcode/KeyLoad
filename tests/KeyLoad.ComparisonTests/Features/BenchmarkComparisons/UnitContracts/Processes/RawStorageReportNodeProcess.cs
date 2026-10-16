@@ -121,9 +121,9 @@ internal static class RawStorageReportNodeProcess
         }
 
         var encodedRequest = Convert.ToBase64String(request);
-        var response = await IsolatedAggregateNodeProcess.RunAsync(
+        var response = await SessionNodeProcess.RunAsync(
             [ModuleMode, EvaluationMode, ProbeSource, encodedRequest,
-                IsolatedAggregateNodeProcess.Module(ValidatorModule)], cancellationToken);
+                SessionNodeProcess.Module(ValidatorModule)], cancellationToken);
         return ParseResponse(response);
     }
 

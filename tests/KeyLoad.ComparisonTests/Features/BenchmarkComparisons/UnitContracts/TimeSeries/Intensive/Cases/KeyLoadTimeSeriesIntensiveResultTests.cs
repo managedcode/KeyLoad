@@ -62,14 +62,12 @@ internal sealed class KeyLoadTimeSeriesIntensiveResultTests
     [Test]
     public async Task AcTsi005DefaultSuccessWrappersFailButRealEmptyResultsRemainValid()
     {
-        Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
-            KeyLoadTimeSeriesIntensiveResult.Value(Result<SampleAggregateWindowsResult>.Succeed(
-                (SampleAggregateWindowsResult)null!)));
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            Result<SampleAggregateWindowsResult>.Succeed((SampleAggregateWindowsResult)null!));
         Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
             KeyLoadTimeSeriesIntensiveResult.Windows(Result<SampleAggregateWindowsResult>.Succeed(
                 new SampleAggregateWindowsResult(default))));
-        Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
-            KeyLoadTimeSeriesIntensiveResult.Raw(Result<SampleRecord[]>.Succeed((SampleRecord[])null!)));
+        Assert.ThrowsExactly<ArgumentNullException>(() => Result<SampleRecord[]>.Succeed((SampleRecord[])null!));
 
         var raw = KeyLoadTimeSeriesIntensiveResult.Raw(Result<SampleRecord[]>.Succeed(Array.Empty<SampleRecord>()));
         var windows = KeyLoadTimeSeriesIntensiveResult.Windows(

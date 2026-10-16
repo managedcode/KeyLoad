@@ -16,9 +16,9 @@ internal sealed class IsolatedGitHubFileTests
     public async Task AcIso007RealNativeFileStreamAndInventoryRejectChangedOrUnsafeEvidence(string corruption)
     {
         using var directory = new ImageBundleTestDirectory();
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubFileProgram.Source,
-                IsolatedAggregateNodeProcess.Module("isolated-github-stream.mjs"), directory.Root, corruption],
+                SessionNodeProcess.Module("isolated-github-stream.mjs"), directory.Root, corruption],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(corruption == "valid" ? 0 : 1);
         await Assert.That(result.Output.Trim()).IsEqualTo(corruption == "valid" ? "accepted" : "rejected");
@@ -38,9 +38,9 @@ internal sealed class IsolatedGitHubFileTests
         using var directory = new ImageBundleTestDirectory();
         try
         {
-            var result = await IsolatedAggregateNodeProcess.RunAsync(
+            var result = await SessionNodeProcess.RunAsync(
                 ["--input-type=module", "-e", IsolatedGitHubFileProgram.LargeSource,
-                    IsolatedAggregateNodeProcess.Module("isolated-github-stream.mjs"), directory.Root,
+                    SessionNodeProcess.Module("isolated-github-stream.mjs"), directory.Root,
                     length.ToString(System.Globalization.CultureInfo.InvariantCulture), writer],
                 TestContext.Current!.Execution.CancellationToken);
             await Assert.That(result.ExitCode).IsEqualTo(0);

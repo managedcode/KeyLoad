@@ -26,7 +26,7 @@ internal static class ExclusiveOwnerContentionProfile
         if (selected != Enabled || nested || !options.Ephemeral || options.FunctionalNodeCount != ThreeVoters
             || !options.FunctionalColdReopen || !options.ContainerFaults || options.Tests is not null
             || options.TwoRf3 || options.BenchmarksEnabled || options.TargetSelected
-            || options.ComparisonSelectorsPresent || options.ScaleSelected
+            || options.ComparisonSelectorsPresent
             || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.LoggerModelControl
             || options.RequestProbe is not null || options.MovementFrameObservation is not null
             || options.NativeDiscoveryOmission is not null || options.EventVectorReservedProbe

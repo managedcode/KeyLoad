@@ -42,7 +42,7 @@ function renderChart(document, rows, metric) {
 
 function renderEvidence(document, worker, cohort) {
   const cell = element(document, 'td');
-  cell.append(link(document, worker.disposition === ISOLATED.failed ? 'Failed benchmark job' : 'Successful worker job', worker.job.url), element(document, 'br'),
+  cell.append(link(document, worker.job.conclusion === 'failure' ? 'Failed benchmark job' : 'Session worker job', worker.job.url), element(document, 'br'),
     link(document, 'GitHub artifact', artifactUrl(cohort, worker.artifact)), element(document, 'br'),
     element(document, 'small', 'GitHub download/access required; subject to artifact retention.'));
   return cell;
@@ -86,14 +86,16 @@ function renderWorker(document, worker) {
   details.dataset.workerId = worker.id;
   details.append(element(document, 'summary', worker.target + ' · ' + worker.nodeCount + ' native nodes · worker provenance'));
   const fields = [['Worker', worker.id], ['Raw envelope SHA256', worker.rawSha256], ['Artifact ID', worker.artifact.id],
-    ['Artifact name', worker.artifact.name], ['Artifact digest', worker.artifact.digest]];
+    ['Artifact name', worker.artifact.name], ['Artifact digest', worker.artifact.digest], ['Session outcome', worker.session.outcome]];
+  if (worker.session.reason !== null) fields.push(['Session reason', worker.session.reason]);
+  if (worker.reason !== null) fields.push(['Workload result detail', worker.reason]);
   if (worker.report === null) fields.push([worker.disposition === ISOLATED.failed ? 'Benchmark result' : 'Topology limitation', worker.reason]);
   else {
     const report = worker.report;
     const target = report.targets[0];
     fields.push(['Host OS', report.hostOs], ['Architecture', report.architecture], ['Logical processors', report.logicalProcessors],
       ['Runtime', report.runtime], ['Storage', report.storage], ['Load generator image', report.loadGeneratorImage],
-      ['Server version', target.version], ['Server image', target.image], ['Native topology', target.topology],
+      ['Selected native server image', report.nativeServerImage], ['Server version', target.version], ['Observed profile image', target.image], ['Native topology', target.topology],
       ['Data copies', target.cluster.dataCopies], ['Write acknowledgement', target.writeAcknowledgement],
       ['Read contract', target.readContract], ['Transport', target.transport], ['Authorization', target.authorization],
       ['Native observations', target.cluster.observations.join('; ')]);
@@ -109,9 +111,9 @@ export function renderIsolatedView(container, catalog, projection, rows, selecti
   const metric = metrics[selection.metric];
   const fragment = document.createDocumentFragment();
   fragment.append(element(document, 'h3', metric.title + ' · ' + selection.nodeCount + ' native nodes'),
-    element(document, 'p', selection.scenario + ' · ' + (selection.repetition === 'all' ? 'Median of this worker’s five repetitions' :
-      'Repetition ' + selection.repetition) + ' · ' + metric.direction),
-    element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts.'),
+    element(document, 'p', selection.scenario + ' · ' + (selection.repetition === 'session' ? 'Original native test result from the shared session' :
+      'Unrecognized session selection') + ' · ' + metric.direction),
+    element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts. Process CPU, allocation and peak RAM are observed over the selected lane interval, including concurrent lanes; they are not exclusive operation costs and must not be summed. Server resource observations cover the session lifetime.'),
     element(document, 'p', `Profile ${projection.profile}; operations ${projection.options.operations}; concurrency ${projection.options.concurrency}; ` +
       `payload ${projection.options.payloadBytes} bytes; ${projection.datasetSha256 === null ? 'corpus unavailable' : 'corpus SHA256 ' + projection.datasetSha256}.`),
     link(document, 'Measured source ' + catalog.measuredSourceRevision, `https://github.com/${catalog.cohort.repository}/tree/${catalog.measuredSourceRevision}`),

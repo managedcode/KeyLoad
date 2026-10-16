@@ -23,6 +23,8 @@ internal static class SiteIsolatedGitHubArchiveReader
         var providerFiles = await SiteIsolatedGitHubArchivePreflight.InspectAsync(provider,
             SiteIsolatedGitHubArchivePaths.ExpectedProvider(), provider: true, token,
             SiteIsolatedGitHubArchivePaths.CellIds(metadata));
+        await SiteSessionOriginalArchives.VerifyAsync(capture, metadata, suiteFiles, token);
+        await SiteSessionPreparationArchives.VerifyAsync(capture, metadata, providerFiles, token);
         RequireAvailableDisk(capture, suiteFiles, providerFiles);
         return await SiteIsolatedGitHubArchivePublication.PublishAsync(capture, receiptPath, metadata,
             suiteFiles, providerFiles, suiteDigest, providerDigest, token);

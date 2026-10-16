@@ -1,67 +1,62 @@
+using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
+using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
+
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-/// <summary>Exercises the real comparison CLI's configuration boundary in a child process.</summary>
+/// <summary>The native entry discovers shared-session cases and refuses invalid startup cohorts.</summary>
 internal sealed class ComparisonHostStartupTests
 {
-    private const string MissingKeyLoadSetting = "Missing benchmark setting: Benchmarks:KeyLoadEndpoint";
-    private const string MissingQdrantSetting = "Missing benchmark setting: Benchmarks:QdrantEndpoint";
-    private const string InvalidBudgetDetail = "The benchmark configuration exceeds its budgets.";
-    private const string InvalidDimensionsArgument = "--Benchmarks:Dimensions=1";
-    private const string ValidDimensionsArgument = "--Benchmarks:Dimensions=2";
-    private const string DimensionsEnvironmentKey = "Benchmarks__Dimensions";
-    private const string KeyLoadEndpointEnvironmentKey = "Benchmarks__KeyLoadEndpoint";
-    private const string ValidEndpoint = "http://127.0.0.1:1";
-    private const string InvalidDimensions = "1";
-    private const int SuccessExitCode = 0;
-
     [Test]
-    public async Task AcHost003MissingSettingsReportFirstRequiredEndpoint()
+    public async Task NativeSessionDiscoveryListsSevenDistinctMeasuredTestsWithoutOpeningClients()
     {
-        var result = await ComparisonHostProcess.RunAsync([], cancellationToken: TestContext.Current!.Execution.CancellationToken);
-
-        await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsTrue();
-        await Assert.That((result.Stdout + result.Stderr).Contains(MissingQdrantSetting, StringComparison.Ordinal)).IsFalse();
-    }
-
-    [Test]
-    public async Task AcHost003InvalidDimensionsFailBeforeRequiredSettingsOrClients()
-    {
-        var result = await ComparisonHostProcess.RunAsync([InvalidDimensionsArgument],
+        var result = await ComparisonHostProcess.RunAsync(["--list-tests"],
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
-
-        await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That((result.Stdout + result.Stderr).Contains(InvalidBudgetDetail, StringComparison.Ordinal)).IsTrue();
-        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Stdout + result.Stderr);
+        foreach (var name in SessionHostStartupSupport.NativeNames)
+        {
+            await Assert.That(result.Stdout).Contains(name);
+        }
+        await Assert.That(result.Stdout.Contains("NativeClientWorkloadProducesSuccessfulOriginalReports", StringComparison.Ordinal)).IsFalse();
     }
 
     [Test]
-    public async Task AcHost003CommandLineOverridesInvalidEnvironmentDimension()
+    [Arguments("session-disabled")]
+    [Arguments("missing-target")]
+    [Arguments("invalid-nodes")]
+    [Arguments("missing-session")]
+    [Arguments("operation-override")]
+    [Arguments("warmup-override")]
+    public Task NativeSessionRefusesIncompleteOrUnknownStartupBeforeTheMeasuredLoad(string corruption)
     {
-        var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        var settings = SessionHostStartupSupport.ValidSettings();
+        var detail = SessionHostStartupSupport.Invalid;
+        switch (corruption)
         {
-            [DimensionsEnvironmentKey] = InvalidDimensions
-        };
-        var result = await ComparisonHostProcess.RunAsync([ValidDimensionsArgument], environment,
-            TestContext.Current!.Execution.CancellationToken);
-
-        await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsTrue();
-        await Assert.That((result.Stdout + result.Stderr).Contains(InvalidBudgetDetail, StringComparison.Ordinal)).IsFalse();
-    }
-
-    [Test]
-    public async Task AcHost003FirstEndpointAdvancesToSecondRequiredEndpoint()
-    {
-        var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            [KeyLoadEndpointEnvironmentKey] = ValidEndpoint
-        };
-        var result = await ComparisonHostProcess.RunAsync([], environment,
-            TestContext.Current!.Execution.CancellationToken);
-
-        await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That((result.Stdout + result.Stderr).Contains(MissingQdrantSetting, StringComparison.Ordinal)).IsTrue();
-        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsFalse();
+            case "session-disabled":
+                settings[SessionHostStartupSupport.Session] = "false";
+                detail = "session-v1";
+                break;
+            case "missing-target":
+                settings.Remove(SessionHostStartupSupport.Target);
+                break;
+            case "invalid-nodes":
+                settings[SessionHostStartupSupport.Nodes] = "2";
+                detail = nameof(ArgumentOutOfRangeException);
+                break;
+            case "missing-session":
+                settings.Remove(SessionFields.SessionEnvironment);
+                break;
+            case "operation-override":
+                settings[SessionFields.OperationsEnvironment] = "1";
+                detail = "session-v1";
+                break;
+            case "warmup-override":
+                settings[SessionFields.WarmupEnvironment] = "1";
+                detail = "session-v1";
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(corruption));
+        }
+        return SessionHostStartupSupport.AssertRefusedAsync(settings, detail);
     }
 }

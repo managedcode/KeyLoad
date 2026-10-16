@@ -4,9 +4,9 @@ internal static class ScaleServerResourceNodeProgram
 {
     internal const string Source = """
         import { pathToFileURL } from 'node:url';
-        const { validateServerResourceEvidence, requireComparableScaleProfiles } = await import(pathToFileURL(process.argv[1]));
+        const { validateServerResourceEvidence, requireComparableSessionResources } = await import(pathToFileURL(process.argv[1]));
         const scenario = process.argv[2];
-        const cell = { target: 'KeyLoad', nodeCount: 1, scenario: 'DocumentWrite', profile: 'scaled-100k-c16' };
+        const cell = { target: 'KeyLoad', nodeCount: 1, scenario: 'session', profile: 'session-v1' };
         const otherTargetCell = { ...cell, target: 'Redis' };
         const cohort = { sourceRevision: 'c'.repeat(40), runId: 123, attempt: 2 };
         const workerSha = 'a'.repeat(64);
@@ -21,11 +21,14 @@ internal static class ScaleServerResourceNodeProgram
           effectiveCpuQuota: '2', effectiveCpuSet: '0-1', effectiveMemoryLimitBytes: '8192',
           observedCpuUsageUsec: 30, maxObservedCgroupMemoryBytes: 512, maxObservedRssBytes: 256,
           sampleCount: 2, writableMounts: [mount] };
-        const evidence = () => ({ schema: 'server-resource-evidence.v1', sourceRevision: cohort.sourceRevision,
+        const evidence = () => ({ schema: 'server-resource-evidence.v2', sourceRevision: cohort.sourceRevision,
           workflowRunId: String(cohort.runId), runAttempt: String(cohort.attempt), jobId: '456', target: cell.target,
           nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile, workerSha256: workerSha,
           hardware: structuredClone(hardware), appHostEnvelope: structuredClone(envelope),
-          containers: [structuredClone(container)], missingEvidence: [], qualified: true });
+          containers: [structuredClone(container)], missingEvidence: [], qualified: true, observationPolicy: {
+          cadenceMilliseconds:100,maximumObservationMilliseconds:1000,cleanupThresholdMilliseconds:1000,processSettlementMilliseconds:100,
+          maxProcesses:16,maxMounts:2,maxFileBytes:512,minimumCommandBytes:8,maxHardwareBytes:1024,maxSampleMetadataBytes:2048,
+          maxSidecarBytes:8192,maxWorkerBytes:65536,maxSamples:10,maxCgroupAncestors:8,nativeReadBufferBytes:128,maxNativeOutputBytes:256,standardErrorOutputDivisor:4} });
         const configuredEvidence = () => ({ ...evidence(), schema: 'server-resource-evidence.v2', observationPolicy: {
           cadenceMilliseconds: 100, maximumObservationMilliseconds: 1000, cleanupThresholdMilliseconds: 1000,
           processSettlementMilliseconds: 100, maxProcesses: 16, maxMounts: 2, maxFileBytes: 512,
@@ -46,9 +49,9 @@ internal static class ScaleServerResourceNodeProgram
           const value = configuredEvidence(); value.jobId = '457'; value.target = otherTargetCell.target;
           value.observationPolicy.cadenceMilliseconds = 200;
           const right = validateServerResourceEvidence(value, '1'.repeat(64), workerSha, otherTargetCell, cohort, 457, true);
-          try { requireComparableScaleProfiles([{ profile: cell.profile, workers: [
-            { ...cell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: left.comparison },
-            { ...otherTargetCell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: right.comparison }] }]); process.exitCode = 1; }
+          try { requireComparableSessionResources([
+            { ...cell, disposition: 'measured', serverResourceQualified: true, proof: left },
+            { ...otherTargetCell, disposition: 'measured', serverResourceQualified: true, proof: right }]); process.exitCode = 1; }
           catch (error) { if (error.message !== 'Isolated GitHub evidence rejected.') process.exitCode = 1; }
         } else if (scenario === 'valid') validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true);
         else if (scenario === 'missing') {
@@ -76,47 +79,37 @@ internal static class ScaleServerResourceNodeProgram
           rightValue.containers[0].writableMounts[0].availableBytes = 2048;
           rightValue.containers[0].observedCpuUsageUsec = 1000; rightValue.containers[0].maxObservedRssBytes = 1000;
           const right = validateServerResourceEvidence(rightValue, '1'.repeat(64), workerSha, otherTargetCell, cohort, 457, true);
-          requireComparableScaleProfiles([{ profile: cell.profile,
-            workers: [{ ...cell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: left.comparison },
-              { ...otherTargetCell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: right.comparison }] }]);
-        } else if (scenario === 'separate-profiles') {
-          const left = validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true);
-          const otherProfile = { ...cell, profile: 'scaled-1m-c16' };
-          const value = evidence(); value.profile = otherProfile.profile; value.jobId = '457';
-          value.containers[0].effectiveMemoryLimitBytes = '4096';
-          const right = validateServerResourceEvidence(value, '1'.repeat(64), workerSha, otherProfile, cohort, 457, true);
-          requireComparableScaleProfiles([{ profile: cell.profile, workers: [{ ...cell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: left.comparison }] },
-            { profile: otherProfile.profile, workers: [{ ...otherProfile, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: right.comparison }] }]);
+          requireComparableSessionResources([{ ...cell, disposition: 'measured', serverResourceQualified: true, proof: left },
+              { ...otherTargetCell, disposition: 'measured', serverResourceQualified: true, proof: right }]);
         } else if (scenario === 'mismatched') {
           const left = validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true);
           const changed = evidence(); changed.jobId = '457'; changed.target = otherTargetCell.target;
           changed.containers[0].effectiveMemoryLimitBytes = '4096';
           const right = validateServerResourceEvidence(changed, '1'.repeat(64), workerSha, otherTargetCell, cohort, 457, true);
-          try { requireComparableScaleProfiles([{ profile: cell.profile,
-            workers: [{ ...cell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: left.comparison },
-              { ...otherTargetCell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: right.comparison }] }]); process.exitCode = 1; }
+          try { requireComparableSessionResources([{ ...cell, disposition: 'measured', serverResourceQualified: true, proof: left },
+              { ...otherTargetCell, disposition: 'measured', serverResourceQualified: true, proof: right }]); process.exitCode = 1; }
           catch (error) { if (error.message !== 'Isolated GitHub evidence rejected.') process.exitCode = 1; }
         } else if (scenario === 'complete-matched-cohort') {
-          const targets = ['KeyLoad', 'PostgreSQL + pgvector', 'Qdrant', 'RabbitMQ', 'Redis', 'Neo4j', 'MongoDB', 'OpenSearch', 'KurrentDB'];
+          const targets = ['KeyLoad', 'PostgreSQL + pgvector', 'Qdrant', 'RabbitMQ', 'Redis', 'Neo4j', 'MongoDB', 'OpenSearch', 'KurrentDB', 'SurrealDB', 'HelixDB'];
           const comparison = validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true).comparison;
           const workers = targets.map(target => ({ target, nodeCount: 1, scenario: cell.scenario,
-            disposition: 'measured', serverResourceQualified: true, resourceEquivalence: comparison }));
-          requireComparableScaleProfiles([{ profile: cell.profile, workers }]);
+            disposition: 'measured', serverResourceQualified: true, proof: {qualified:true,comparison} }));
+          requireComparableSessionResources([...workers]);
         } else if (scenario === 'failed-workload-mismatch') {
           const left = validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true);
           const changed = evidence(); changed.target = otherTargetCell.target; changed.jobId = '457';
           changed.containers[0].effectiveMemoryLimitBytes = '4096';
           const right = validateServerResourceEvidence(changed, '1'.repeat(64), workerSha, otherTargetCell, cohort, 457, true);
-          try { requireComparableScaleProfiles([{ profile: cell.profile, workers: [
-            { ...cell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: left.comparison },
-            { ...otherTargetCell, disposition: 'failed', serverResourceQualified: true, resourceEquivalence: right.comparison }] }]); process.exitCode = 1; }
+          try { requireComparableSessionResources([
+            { ...cell, disposition: 'measured', serverResourceQualified: true, proof: left },
+            { ...otherTargetCell, disposition: 'failed', serverResourceQualified: true, proof: right }]); process.exitCode = 1; }
           catch (error) { if (error.message !== 'Isolated GitHub evidence rejected.') process.exitCode = 1; }
         } else if (scenario === 'retained-incomplete') {
           const left = validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true);
-          requireComparableScaleProfiles([{ profile: cell.profile, workers: [
-            { ...cell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: left.comparison },
-            { ...otherTargetCell, disposition: 'unsupportedTopology', serverResourceQualified: false, resourceEquivalence: null },
-            { ...otherTargetCell, target: 'MongoDB', disposition: 'failed', serverResourceQualified: false, resourceEquivalence: null }] }]);
+          requireComparableSessionResources([
+            { ...cell, disposition: 'measured', serverResourceQualified: true, proof: left },
+            { ...otherTargetCell, disposition: 'unsupportedTopology', serverResourceQualified: false, proof: {qualified:false,comparison:null} },
+            { ...otherTargetCell, target: 'MongoDB', disposition: 'failed', serverResourceQualified: false, proof: {qualified:false,comparison:null} }]);
         } else if (scenario === 'invalid-cpu-set') {
           const value = evidence(); value.appHostEnvelope.cpuSet = '0-3,2-4'; expectRejected(value);
         } else if (scenario === 'invalid-cpu-membership') {

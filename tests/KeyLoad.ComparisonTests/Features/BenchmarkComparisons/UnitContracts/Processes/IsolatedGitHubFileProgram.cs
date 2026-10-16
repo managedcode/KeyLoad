@@ -23,11 +23,11 @@ internal static class IsolatedGitHubFileProgram
           let selected = file;
           if (corruption === 'symlink') { selected = path.join(root, 'link.zip'); await symlink(file, selected); }
           await api.validateDownloadedArchive(selected, artifact, 1024);
-          let entries = 'worker.json\nlogs/node1.log\n';
-          if (corruption === 'duplicate-entry') entries += 'worker.json\n';
+          let entries = 'session.json\nlogs/node1.log\n';
+          if (corruption === 'duplicate-entry') entries += 'session.json\n';
           if (corruption === 'missing-entry') entries = 'logs/node1.log\n';
           if (corruption === 'unsafe-entry') entries += '../foreign.json\n';
-          inventory.validateZipInventory(entries, ['worker.json']);
+          inventory.validateZipInventory(entries, ['session.json']);
           if (!(await readFile(file)).equals(bytes)) throw new Error('binary changed');
           process.stdout.write('accepted\n');
         } catch {

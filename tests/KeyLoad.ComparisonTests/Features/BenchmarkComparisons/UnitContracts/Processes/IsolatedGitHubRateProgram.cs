@@ -15,7 +15,8 @@ internal static class IsolatedGitHubRateProgram
         + "\n" + IsolatedGitHubNativeTransportReceipts.Source + "\n" +
         """
           const record = input === 'native-recorded-success' ? recorded.recovered
-            : input === 'native-recorded-502' ? recorded.transient : recorded.failure;
+            : input === 'native-recorded-502' ? recorded.transient
+            : input === 'native-recorded-partial' ? recorded.partial : recorded.failure;
           const result = { response: { status: record.status, headers: { 'x-ratelimit-remaining': '3714' } },
             nativeProcess: structuredClone(record.nativeProcess), bytes: record.bytes };
           let stderr = Buffer.from(input === 'native-recorded-success' ? ''
@@ -23,6 +24,9 @@ internal static class IsolatedGitHubRateProgram
             : 'stream error: stream ID 1; CANCEL; received from peer\n');
           if (input === 'native-exit-success') result.nativeProcess.exitCode = 0;
           if (input === 'native-partial-body') result.bytes = 1;
+          if (input === 'native-negative-body') result.bytes = -1;
+          if (input === 'native-oversized-body') result.bytes = 16777217;
+          if (input === 'native-unsafe-body') result.bytes = Number.MAX_SAFE_INTEGER + 1;
           if (input === 'native-auth') result.response.status = 401;
           if (input === 'native-timeout') result.nativeProcess.timedOut = true;
           if (input === 'native-overflow') result.nativeProcess.exceeded = true;

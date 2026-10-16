@@ -16,7 +16,7 @@ internal sealed class NativeTopologyAdmissionTests
         await Assert.That(async () =>
         {
             await model.BuildAsync(KeyLoadTarget, RemovedNodeCount);
-        }).Throws<InvalidOperationException>();
+        }).Throws<Microsoft.Extensions.Options.OptionsValidationException>();
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
         await Assert.That(Directory.Exists(Path.Combine(model.Root, NativeDirectory))).IsFalse();
         await Assert.That(Directory.Exists(model.Output)).IsFalse();

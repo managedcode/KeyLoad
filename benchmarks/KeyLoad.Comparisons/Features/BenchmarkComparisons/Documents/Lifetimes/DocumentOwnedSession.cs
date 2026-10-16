@@ -23,9 +23,9 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
     }
     private async Task DisposeOriginalAsync()
     {
-        var sessionFailure = await OpenLoopFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
-        var clientFailure = await OpenLoopFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
-        var combined = OpenLoopFailure.Combine(sessionFailure, clientFailure is null ? [] : [clientFailure]);
+        var sessionFailure = await NativeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
+        var clientFailure = await NativeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
+        var combined = NativeComparisonFailure.Combine(sessionFailure, clientFailure is null ? [] : [clientFailure]);
         if (combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

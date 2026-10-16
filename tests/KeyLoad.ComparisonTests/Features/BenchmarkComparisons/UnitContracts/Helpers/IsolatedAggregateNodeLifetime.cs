@@ -44,7 +44,7 @@ internal static class IsolatedAggregateNodeLifetime
             () => IsolatedAggregateNodeLifetimeCleanup.CleanupAsync(process, actualExit, wait, output, error,
                 cleanupDeadline, primary, cleanupBound, failures), failures.Add);
         failures.Throw(primary);
-        return result ?? throw new InvalidOperationException(IsolatedAggregateNodeProcess.StartFailure);
+        return result ?? throw new InvalidOperationException(SessionNodeProcess.StartFailure);
     }
 
     private static IsolatedAggregateNodeResult CreateResult(Process process, Task<string> output, Task<string> error)

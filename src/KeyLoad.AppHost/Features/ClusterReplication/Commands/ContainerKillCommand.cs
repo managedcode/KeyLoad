@@ -26,7 +26,7 @@ internal static class ContainerKillCommand
             return;
         }
         if (!ephemeral || benchmarkNodeCount.HasValue || control.BenchmarksEnabled || control.TargetSelected
-            || control.ComparisonSelectorsPresent || control.ScaleSelected)
+            || control.ComparisonSelectorsPresent)
         {
             throw new InvalidOperationException(AppHostControlOptionsRegistration.InvalidContainerFaultSelection);
         }

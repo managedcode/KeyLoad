@@ -12,10 +12,9 @@ export const BUILD = Object.freeze({
   vendor: 'vendor/three/0.186.1', manifest: 'manifest.json', three: 'three', version: '0.186.1',
   license: 'MIT', sourceCommit: '9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8',
   integrity: 'sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==',
-  measuredAssets: ['isolated-contracts.mjs', 'isolated-metadata.mjs', 'isolated-metrics-validation.mjs',
-    'isolated-report-validation.mjs', 'isolated-http.mjs', 'isolated-loader.mjs', 'isolated-measurements.mjs',
-    'isolated-view.mjs', 'isolated-controls.mjs', 'isolated-lab.mjs', 'measurements.mjs', 'measurement-loader.mjs',
-    'composite-render.mjs'],
+  sessionAssets: ['session-contract.mjs', 'session-plan-contract.mjs', 'session-report-validation.mjs', 'session-aggregate-contract.mjs'],
+  measuredAssets: ['isolated-contracts.mjs', 'isolated-http.mjs', 'isolated-loader.mjs', 'isolated-measurements.mjs',
+    'isolated-view.mjs', 'isolated-controls.mjs', 'isolated-lab.mjs', 'measurements.mjs', 'measurement-loader.mjs'],
   commonAssets: ['contracts.mjs', 'bootstrap.mjs', 'cluster-scene.mjs', 'scene-geometry.mjs',
     'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'brand.css', 'tokens.css', 'scene.css',
     'assets/agent-context.png'],
@@ -126,6 +125,11 @@ export async function verifyAssets() {
     if (name.endsWith(BUILD.javascriptExtension)) javascript += gzipSync(bytes).length;
     if (name.endsWith(BUILD.cssExtension)) css += gzipSync(bytes).length;
   }
+  for (const name of BUILD.sessionAssets) {
+    const path = join(source, '..', 'scripts', 'Features', 'BenchmarkComparisons', name);
+    await assertRegular(path);
+    javascript += gzipSync(await readFile(path)).length;
+  }
   await assertRegular(join(source, BUILD.favicon));
   for (const name of BUILD.rootAssets) await assertRegular(join(source, name));
   for (const name of BUILD.metadataAssets) await assertRegular(join(feature, name));
@@ -149,7 +153,7 @@ async function emitContentHtml(output, siteRevision) {
   html = html.replaceAll(BUILD.documentationBlob, `/blob/${siteRevision}/docs`)
     .replaceAll(BUILD.documentationTree, `/tree/${siteRevision}/docs`);
   html = replaceRequired(html, ' data-isolated-catalog="data/isolated-catalog.json"', '');
-  html = replaceRequired(html, '<p class="section-intro">Each engine, node count and scenario has its own Linux runner. Results show five repetitions of the same intensive workload.</p>',
+  html = replaceRequired(html, '<p class="section-intro">Each database and native topology has its own Linux runner. Separate TUnit tests use one live database session; the initial million-record load is measured separately, with no warmup or reset.</p>',
     '<p class="section-intro">Verified native comparison results will appear here after a completed benchmark run.</p>');
   html = replaceRequired(html, '<div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>', '');
   html = replaceRequired(html, '<noscript><p>Enable JavaScript to explore the measurements. The original aggregate and authenticated GitHub run remain available:</p><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>', '');

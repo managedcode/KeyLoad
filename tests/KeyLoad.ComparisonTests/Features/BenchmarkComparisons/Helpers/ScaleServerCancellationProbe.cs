@@ -12,33 +12,31 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class ScaleServerCancellationProbe
 {
-    private static readonly JsonSerializerOptions ResourceJson = new(JsonSerializerDefaults.Web);
     private const string ProbeDirectory = "cancellation-probe";
-    private const string WorkerFile = "worker.json";
-    private const string EvidenceFile = "server-resource-evidence.json";
+    private const string WorkerFile = "session-state.json";
+    private const string EvidenceFile = "session-resource-evidence.json";
     private const string SamplingMissing = "serverCpuRss";
     private const string KeyLoad = "KeyLoad";
-    private const string Profile = "scaled-100k-c16";
-    private const string Scenario = "DocumentWrite";
     private const int AdditionalSampleCount = 1;
 
     internal static async Task VerifyAsync(DistributedApplication app, ContainerResource[] containers,
-        ComparisonWorkerSelection selection, string root, CancellationToken token)
+        BenchmarkSessionSelection selection, string root, string evidenceDirectory, CancellationToken token)
     {
-        if (!OperatingSystem.IsLinux() || selection.Target != KeyLoad || selection.NodeCount != 1
-            || selection.Profile != Profile || selection.Scenario.ToString() != Scenario)
+        if (!OperatingSystem.IsLinux() || selection.Target != KeyLoad || selection.NodeCount != 1)
         {
             return;
         }
 
         var output = Path.Combine(root, ProbeDirectory);
         Directory.CreateDirectory(output);
-        File.Copy(Path.Combine(root, "reports", WorkerFile), Path.Combine(output, WorkerFile));
+        File.Copy(Path.Combine(evidenceDirectory, WorkerFile), Path.Combine(output, WorkerFile));
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
         var collector = new ScaleServerResourceEvidenceCollector(selection, output, applicationStopping: lifetime.ApplicationStopping,
             executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
-            provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
+            provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>(),
+            sessionId: ComparisonImageProtocol.RequiredEnvironment("KEYLOAD_BENCHMARK_SESSION_ID"),
+            provider: app.Services.GetRequiredService<TimeProvider>());
         var failures = new List<Exception>();
         try
         {
@@ -50,14 +48,16 @@ internal static class ScaleServerCancellationProbe
         }
         ThrowFailures(failures);
         await using var stream = File.OpenRead(Path.Combine(output, EvidenceFile));
-        var evidence = await JsonSerializer.DeserializeAsync<ScaleServerResourceEvidence>(stream,
-            ResourceJson, token)
-            ?? throw new InvalidDataException("Canceled native server evidence was malformed.");
-        await Assert.That(evidence.Qualified).IsFalse();
-        await Assert.That(evidence.MissingEvidence).Contains(SamplingMissing);
-        await Assert.That(evidence.Containers.Length).IsEqualTo(selection.NodeCount);
-        await Assert.That(evidence.Containers.All(item => item.SampleCount >= ScaleServerResourceBounds.MinimumSamples)).IsTrue();
-        await VerifyFailedWriteMemoizationAsync(app, containers, selection, root, token);
+        using var evidence = await JsonDocument.ParseAsync(stream, cancellationToken: token);
+        var observations = evidence.RootElement.GetProperty("observations");
+        await Assert.That(observations.GetProperty("qualified").GetBoolean()).IsFalse();
+        await Assert.That(observations.GetProperty("missingEvidence").EnumerateArray()
+            .Select(item => item.GetString())).Contains(SamplingMissing);
+        var recorded = observations.GetProperty("containers").EnumerateArray().ToArray();
+        await Assert.That(recorded.Length).IsEqualTo(selection.NodeCount);
+        await Assert.That(recorded.All(item => item.GetProperty("sampleCount").GetInt32()
+            >= ScaleServerResourceBounds.MinimumSamples)).IsTrue();
+        await VerifyFailedWriteMemoizationAsync(app, containers, selection, root, evidenceDirectory, token);
     }
 
     private static async Task SettleFailureAsync(Exception primary, CancellationTokenSource caller,
@@ -89,17 +89,19 @@ internal static class ScaleServerCancellationProbe
     }
 
     private static async Task VerifyFailedWriteMemoizationAsync(DistributedApplication app,
-        ContainerResource[] containers, ComparisonWorkerSelection selection, string root, CancellationToken token)
+        ContainerResource[] containers, BenchmarkSessionSelection selection, string root, string evidenceDirectory, CancellationToken token)
     {
         var output = Path.Combine(root, "failed-write-probe");
         Directory.CreateDirectory(output);
-        File.Copy(Path.Combine(root, "reports", WorkerFile), Path.Combine(output, WorkerFile));
+        File.Copy(Path.Combine(evidenceDirectory, WorkerFile), Path.Combine(output, WorkerFile));
         Directory.CreateDirectory(Path.Combine(output, EvidenceFile));
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         var collector = new ScaleServerResourceEvidenceCollector(selection, output,
             applicationStopping: app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
             executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
-            provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
+            provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>(),
+            sessionId: ComparisonImageProtocol.RequiredEnvironment("KEYLOAD_BENCHMARK_SESSION_ID"),
+            provider: app.Services.GetRequiredService<TimeProvider>());
         var failures = new List<Exception>();
         Exception? expected = null;
         try

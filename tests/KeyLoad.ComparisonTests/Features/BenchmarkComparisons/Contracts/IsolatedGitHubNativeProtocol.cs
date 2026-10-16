@@ -4,9 +4,9 @@ internal static class IsolatedGitHubNativeProtocol
 {
     internal const string EnvironmentFile = "GITHUB_ENV";
     internal const string RunnerTemp = "RUNNER_TEMP";
-    internal const string Capture = "keyload-cell-github";
+    internal const string Capture = "keyload-session-github";
     internal const string Job = "job.json";
-    internal const string Entry = "isolated-github-job.mjs";
+    internal const string Entry = "session-github-job.mjs";
     internal const string Id = "id";
     internal const string Name = "name";
     internal const string Source = "head_sha";

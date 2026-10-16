@@ -10,8 +10,6 @@ internal sealed class DocumentResourceBudgetTests
 {
     private const string KeyLoadTarget = "KeyLoad";
     private const string PostgresTarget = "PostgreSQL + pgvector";
-    private const int MillionRecords = 1_000_000;
-    private const int IngestionClients = 500;
     private const string MaximumConnections = "max_connections=512";
     private const string ConnectionsEvidence = "Benchmarks__Deployment__DocumentPostgresMaximumConnections";
     private const string ScanRecords = "KeyLoad__DatabaseLimits__MaxScanRecords";
@@ -36,8 +34,7 @@ internal sealed class DocumentResourceBudgetTests
     [Arguments(3)]
     public async Task PostgreSqlDocumentClientsHaveNativeConnectionHeadroom(int nodes)
     {
-        await using var fixture = new IsolatedResourceTopologyFixture(PostgresTarget, nodes,
-            documents: new(DocumentComparisonScenario.Ingest, MillionRecords, IngestionClients));
+        await using var fixture = new IsolatedResourceTopologyFixture(PostgresTarget, nodes);
         IsolatedPostgresResources.Add(fixture.Context);
         var resources = fixture.Build();
         foreach (var node in resources.Where(resource => resource != fixture.Context.Runner.Resource))
@@ -54,8 +51,7 @@ internal sealed class DocumentResourceBudgetTests
     [Arguments(3)]
     public async Task KeyLoadDocumentBoundsCoverMillionPlusCreateAndRetainSnapshotPolicy(int nodes)
     {
-        await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, nodes,
-            documents: new(DocumentComparisonScenario.Create, MillionRecords, DocumentComparisonContract.Current.Clients));
+        await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, nodes);
         IsolatedKeyLoadResources.Add(fixture.Context);
         var resources = fixture.Build();
         foreach (var node in resources.Where(resource => resource != fixture.Context.Runner.Resource))
@@ -88,21 +84,6 @@ internal sealed class DocumentResourceBudgetTests
     }
 
     [Test]
-    public async Task OrdinaryKeyLoadControlDoesNotReceiveDocumentBudgets()
-    {
-        await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, 3);
-        IsolatedKeyLoadResources.Add(fixture.Context);
-        foreach (var node in fixture.Build().Where(resource => resource != fixture.Context.Runner.Resource))
-        {
-            var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
-            await Assert.That(environment[AdmissionPrefix + nameof(HttpAdmissionLimits.MaxRequests)]).IsEqualTo("32");
-            await Assert.That(environment.ContainsKey(ScanRecords)).IsFalse();
-            await Assert.That(environment.ContainsKey(QueryReadBytes)).IsFalse();
-            await Assert.That(environment[SnapshotThreshold]).IsNotEqualTo(ExpectedSnapshot);
-        }
-    }
-
-    [Test]
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentPostgresMaximumConnections), "500")]
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadRequestsPerScope), "500")]
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadMaximumScanRecords), "1000000")]
@@ -110,8 +91,7 @@ internal sealed class DocumentResourceBudgetTests
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadSnapshotThreshold), "1024")]
     public async Task InsufficientDocumentBoundsRejectBeforeNativeDirectories(string option, string value)
     {
-        await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, 3,
-            documents: new(DocumentComparisonScenario.Ingest, MillionRecords, IngestionClients));
+        await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, 3);
         fixture.Context.Builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             [DeploymentPrefix + option] = value

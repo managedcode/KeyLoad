@@ -28,7 +28,7 @@ internal static class ProtectedMovementProbeProfile
             || options.NativeBlobWireProbe is not null || options.MovementFrameObservation is not null
             || options.Tests is not null || options.BenchmarksEnabled || options.ProtocolCohortEnabled
             || options.ProtocolCohortConfigured || options.TargetSelected
-            || options.ComparisonSelectorsPresent || options.ScaleSelected
+            || options.ComparisonSelectorsPresent
             || configuration[Registration] != Enabled)
         {
             throw new InvalidOperationException(Invalid);

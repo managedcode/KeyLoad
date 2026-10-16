@@ -44,7 +44,7 @@ internal sealed class IsolatedDocumentResourcePostgresTests
             var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
             await Assert.That(configuration.Arguments.Select(argument => argument.Value).SequenceEqual(
                 new[] { EntryScript, T.Postgres, T.PostgresConfiguration, T.Fsync, T.PostgresConfiguration, T.Commit,
-                    T.PostgresConfiguration, SlotRetention }, StringComparer.Ordinal)).IsTrue();
+                    T.PostgresConfiguration, SlotRetention, T.PostgresConfiguration, "max_connections=512" }, StringComparer.Ordinal)).IsTrue();
             await Assert.That(configuration.EnvironmentVariables.ToDictionary()[T.PgDataEnvironment]).IsEqualTo(T.PgData);
         }
         await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(primary, InitScript);

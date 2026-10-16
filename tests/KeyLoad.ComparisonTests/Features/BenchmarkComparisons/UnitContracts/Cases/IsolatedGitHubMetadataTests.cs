@@ -32,11 +32,11 @@ internal sealed class IsolatedGitHubMetadataTests
     [Arguments("duplicate-json")]
     public async Task AcIso007StrictMetadataProjectionRejectsForeignOrPartialEvidence(string corruption)
     {
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubNodeProgram.Metadata,
-                IsolatedAggregateNodeProcess.Module("isolated-github-validation.mjs"), corruption],
+                SessionNodeProcess.Module("isolated-github-validation.mjs"), corruption],
             TestContext.Current!.Execution.CancellationToken);
-        var accepted = corruption.StartsWith("valid", StringComparison.Ordinal);
+        var accepted = corruption is "valid" or "valid-native-no-attempt";
         await Assert.That(result.ExitCode).IsEqualTo(accepted ? 0 : 1);
         await Assert.That(result.Output.Trim()).IsEqualTo(accepted ? "accepted" : "rejected");
         await Assert.That(result.Error).IsEmpty();

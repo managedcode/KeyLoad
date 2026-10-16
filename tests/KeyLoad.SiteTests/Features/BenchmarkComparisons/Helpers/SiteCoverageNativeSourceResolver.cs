@@ -44,8 +44,7 @@ internal static class SiteCoverageNativeSourceResolver
         var portablePath = fullPath.Replace(Path.DirectorySeparatorChar, SiteCoverageTokens.RelativeSeparator);
         if ((IsWithin(fullPath, siteRoot) && !portablePath.Contains(SiteCoverageTokens.VendorSourcePrefix,
                 StringComparison.Ordinal)) ||
-            (IsWithin(fullPath, evidenceRoot) && Path.GetFileName(fullPath).StartsWith(
-                SitePublicationTokens.IsolatedEvidenceModulePrefix, StringComparison.Ordinal)))
+            (IsWithin(fullPath, evidenceRoot) && SiteCoverageSourceInventory.IsTrackedEvidenceModule(portablePath)))
         {
             throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.UnexpectedProductionScriptFailure);
         }
@@ -62,7 +61,8 @@ internal static class SiteCoverageNativeSourceResolver
         }
 
         var path = uri.AbsolutePath;
-        if (!path.StartsWith(SiteCoverageTokens.FeatureUrlPrefix, StringComparison.Ordinal))
+        var shared = path.StartsWith("/scripts/Features/BenchmarkComparisons/", StringComparison.Ordinal);
+        if (!shared && !path.StartsWith(SiteCoverageTokens.FeatureUrlPrefix, StringComparison.Ordinal))
         {
             return null;
         }
@@ -80,7 +80,7 @@ internal static class SiteCoverageNativeSourceResolver
             throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidUrlFailure);
         }
 
-        var sourcePath = SiteCoverageTokens.FeatureSourcePrefix + path[SiteCoverageTokens.FeatureUrlPrefix.Length..];
+        var sourcePath = shared ? path[1..] : SiteCoverageTokens.FeatureSourcePrefix + path[SiteCoverageTokens.FeatureUrlPrefix.Length..];
         if (sources.ContainsKey(sourcePath))
         {
             return sourcePath;

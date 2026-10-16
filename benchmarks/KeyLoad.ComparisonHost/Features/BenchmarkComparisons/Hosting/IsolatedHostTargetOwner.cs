@@ -10,21 +10,32 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <summary>Owns only one native target and tracks partial HTTP construction until ownership transfers.</summary>
 internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions,
     IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
-    IOptions<NativeComparisonSerializationOptions> serializationOptions,
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null) : IAsyncDisposable
 {
     internal TimeProvider Clock { get; } = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
     private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
-    private readonly IOptions<NativeComparisonSerializationOptions> serialization = NativeComparisonSerializationOptions.Require(serializationOptions);
     private NativeComparisonExecutionOptions Policy => execution.Value;
     internal IOptions<NativeComparisonExecutionOptions> ExecutionOptions => execution;
     private readonly List<HttpClient> unownedClients = [];
     private IComparisonTarget? target;
-    private IVectorComparisonTarget? vectorTarget;
+
+    internal TargetProfile? ObservedProfile => target?.Profile;
 
     internal IComparisonTarget Create(IsolatedHostSettings settings)
+    {
+        InitializeTarget(settings);
+        return target!;
+    }
+
+    internal BenchmarkSession CreateSession(IsolatedHostSettings settings, Action<DocumentComparisonProgress> progress)
+    {
+        InitializeTarget(settings);
+        return new(target!, execution, new BenchmarkSessionOptions(), Clock, progress);
+    }
+
+    private void InitializeTarget(IsolatedHostSettings settings)
     {
         const int PrimaryEndpointIndex = 0;
 
@@ -33,7 +44,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
             throw new InvalidOperationException(IsolatedHostConstants.Failure);
         }
         var native = settings.Native ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
-        var topology = settings.Selection.Options.Topology;
+        var topology = settings.Selection.Topology;
         target = settings.Selection.Target switch
         {
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, native),
@@ -50,37 +61,6 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
-        return target;
-    }
-
-    internal IComparisonTarget TransferTarget()
-    {
-        var owned = target ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
-        target = null;
-        return owned;
-    }
-
-    internal IVectorComparisonTarget CreateVector(IsolatedHostSettings settings)
-    {
-        const int PrimaryEndpointIndex = 0;
-
-        if (target is not null || vectorTarget is not null)
-        {
-            throw new InvalidOperationException(IsolatedHostConstants.Failure);
-        }
-
-        var native = settings.Native ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
-        vectorTarget = settings.Selection.Target switch
-        {
-            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image, settings.Selection.Options.Topology, executionOptions, serialization, lifecycleOptions, provider: Clock),
-            IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, lifecycleOptions,
-                settings.Selection.Options.Topology, CreateClients(native), provider: Clock),
-            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions, serialization, provider: Clock),
-            IsolatedHostConstants.HelixDb => new HelixDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions, provider: Clock),
-            _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
-        };
-        unownedClients.Clear();
-        return vectorTarget;
     }
 
     private KeyLoadTarget CreateKeyLoad(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
@@ -99,7 +79,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(native);
-        return new(clients[ClientsFirstIndex], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Options.Topology, clients, provider: Clock);
+        return new(clients[ClientsFirstIndex], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Topology, clients, provider: Clock);
     }
 
     private HttpClient[] CreateClients(IsolatedHostNativeSettings native)
@@ -134,19 +114,12 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
     public async ValueTask DisposeAsync()
     {
         var ownedTarget = target;
-        var ownedVectorTarget = vectorTarget;
         target = null;
-        vectorTarget = null;
         try
         {
             if (ownedTarget is not null)
             {
                 await DisposeTargetAsync(ownedTarget);
-            }
-            if (ownedVectorTarget is not null)
-            {
-                var cleanup = ownedVectorTarget.DisposeAsync().AsTask();
-                await cleanup.WaitAsync(Policy.CleanupTimeout, Clock);
             }
         }
         finally
@@ -166,7 +139,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         {
             await cleanup.WaitAsync(Policy.CleanupTimeout, Clock);
         }
-        catch (Exception)
+        catch (TimeoutException)
         {
             _ = cleanup.ContinueWith(static completed => _ = completed.Exception, CancellationToken.None,
                 TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);

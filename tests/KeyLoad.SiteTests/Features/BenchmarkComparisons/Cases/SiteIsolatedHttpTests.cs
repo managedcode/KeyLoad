@@ -72,7 +72,7 @@ internal sealed class SiteIsolatedHttpTests
                 await File.WriteAllBytesAsync(catalog, new byte[65_537], token);
                 break;
             case "projectionSize":
-                await File.WriteAllBytesAsync(projection, new byte[4_194_305], token);
+                await File.WriteAllBytesAsync(projection, new byte[33_554_433], token);
                 break;
             case "missing":
                 File.Delete(projection);

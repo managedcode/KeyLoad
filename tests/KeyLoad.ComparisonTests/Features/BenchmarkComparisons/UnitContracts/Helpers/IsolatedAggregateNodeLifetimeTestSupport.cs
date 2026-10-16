@@ -63,7 +63,7 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
         Action<Task> registerCancellation, List<Exception> cancellationFailures)
     {
         Directory.CreateDirectory(directory);
-        var started = IsolatedAggregateNodeProcess.RunAsync(
+        var started = SessionNodeProcess.RunAsync(
             ["-e", IsolatedAggregateNodeLifetimeProgram.Source,
                 IsolatedAggregateNodeLifetimeProgram.CancellationTree, receipt], prompt.Token);
         registerOriginal(started);

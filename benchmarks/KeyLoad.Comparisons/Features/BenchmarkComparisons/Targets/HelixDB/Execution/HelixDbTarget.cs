@@ -80,6 +80,11 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
                 {
                     await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenId, range: false), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
                 }
+                if (ownsSessionNumberEqualityIndex)
+                {
+                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenNumber, range: false),
+                        Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
+                }
                 if (ownsRangeIndex)
                 {
                     await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);

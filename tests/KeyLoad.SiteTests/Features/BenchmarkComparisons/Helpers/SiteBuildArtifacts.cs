@@ -7,14 +7,16 @@ internal static class SiteBuildArtifacts
 {
     private static readonly string[] FeatureAssets =
     [
-        "isolated-contracts.mjs", "isolated-metadata.mjs", "isolated-metrics-validation.mjs",
-        "isolated-report-validation.mjs", "isolated-http.mjs", "isolated-loader.mjs", "isolated-measurements.mjs",
+        "isolated-contracts.mjs", "isolated-http.mjs", "isolated-loader.mjs", "isolated-measurements.mjs",
         "isolated-view.mjs", "isolated-controls.mjs", "isolated-lab.mjs", SiteAssetTokens.ContractsModule,
         SiteAssetTokens.BootstrapModule, SiteAssetTokens.MeasurementModule, SiteAssetTokens.LoaderModule,
         SiteAssetTokens.SceneModule, SiteAssetTokens.GeometryModule, SiteAssetTokens.LifecycleModule,
         SiteAssetTokens.ObserversModule, SiteAssetTokens.Stylesheet, SiteAssetTokens.BrandStylesheet,
         SiteAssetTokens.TokenStylesheet, SiteAssetTokens.SceneStylesheet, SiteAssetTokens.PosterAsset,
     ];
+    private const string SharedPrefix = "scripts/Features/BenchmarkComparisons";
+    private static readonly string[] SharedAssets = ["session-contract.mjs", "session-plan-contract.mjs",
+        "session-report-validation.mjs", "session-aggregate-contract.mjs"];
     private static readonly string[] VendorFiles = [SiteAssetTokens.WebGpuVendorModule, SiteAssetTokens.CoreVendorModule,
         SiteAssetTokens.VendorLicense, SiteAssetTokens.ThreeManifestFile];
     private static readonly string[] GeneratedFiles = [SiteAssetTokens.NoJekyllFile, SiteAssetTokens.CnameFile,
@@ -44,6 +46,7 @@ internal static class SiteBuildArtifacts
             await Assert.That(emittedBytes.SequenceEqual(sourceBytes)).IsTrue();
         }
 
+        await CompareSharedAssets(inputs, output, token);
         var sourceFavicon = Path.Combine(inputs.Repository, SiteAssetTokens.FaviconSourcePath);
         var emittedFavicon = await File.ReadAllBytesAsync(Path.Combine(output, SiteAssetTokens.FaviconSvg), token);
         var originalFavicon = await File.ReadAllBytesAsync(sourceFavicon, token);
@@ -51,6 +54,19 @@ internal static class SiteBuildArtifacts
         foreach (var file in GeneratedFiles)
         {
             await Assert.That(File.Exists(Path.Combine(output, file))).IsTrue();
+        }
+    }
+
+    private static async Task CompareSharedAssets(SiteTestInputs inputs, string output, CancellationToken token)
+    {
+        foreach (var relative in SharedAssets)
+        {
+            var source = Path.Combine(inputs.Repository, SharedPrefix, relative);
+            var emitted = Path.Combine(output, SharedPrefix, relative);
+            await Assert.That(File.Exists(emitted)).IsTrue();
+            var emittedBytes = await File.ReadAllBytesAsync(emitted, token);
+            var sourceBytes = await File.ReadAllBytesAsync(source, token);
+            await Assert.That(emittedBytes.SequenceEqual(sourceBytes)).IsTrue();
         }
     }
 

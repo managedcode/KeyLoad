@@ -15,15 +15,14 @@ internal sealed class SiteIsolatedBrowserTests
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
         await AssertAccessibilityAsync(browser.Chrome.Cdp, token);
         await SiteIsolatedBrowserKeyboardAssertions.AssertNativeNodeSelectionAsync(browser.Chrome.Cdp, projection.RootElement, token);
-        var workers = projection.RootElement.GetProperty(SiteIsolatedFields.Workers).EnumerateArray().ToArray();
-        foreach (var scenario in workers.Select(worker => worker.GetProperty(SiteIsolatedFields.Scenario).GetString()!).Distinct(StringComparer.Ordinal))
+        foreach (var scenario in SiteIsolatedOracle.Cases)
         {
             await SiteIsolatedBrowserAssertions.SelectAsync(browser.Chrome.Cdp, "scenario", scenario, token);
             foreach (var nodes in new[] { 1, 3 })
             {
                 await SiteIsolatedBrowserAssertions.SelectAsync(browser.Chrome.Cdp, "node-count", nodes, token);
                 await SiteIsolatedBrowserAssertions.AssertRowsAsync(browser.Chrome.Cdp, projection.RootElement,
-                    new(scenario, nodes, "all", "throughput", "all"), token);
+                    new(scenario, nodes, "session", "throughput", "all"), token);
             }
         }
         await AssertIndividualSelectionsAsync(browser.Chrome.Cdp, projection.RootElement, token);
@@ -33,24 +32,24 @@ internal sealed class SiteIsolatedBrowserTests
 
     private static async Task AssertIndividualSelectionsAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
     {
-        await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "scenario", "QueueCycle", token);
+        await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "scenario", "mixed/search", token);
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "node-count", 3, token);
-        foreach (var repetition in new object[] { "all", 0, 1, 2, 3, 4 })
+        foreach (var repetition in new object[] { "session" })
         {
             await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "repetition", repetition, token);
-            foreach (var metric in new[] { "throughput", "p50", "p95", "p99", "errors", "enqueue", "receive", "ack", "cpu", "alloc", "rss" })
+            foreach (var metric in new[] { "throughput", "p50", "p95", "p99", "errors", "cpu", "alloc", "rss", "duration" })
             {
                 await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "metric", metric, token);
-                await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("QueueCycle", 3, repetition, metric, "all"), token);
+                await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("mixed/search", 3, repetition, metric, "all"), token);
             }
         }
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "metric", "throughput", token);
-        await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "repetition", "all", token);
+        await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "repetition", "session", token);
         foreach (var target in projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
             .Select(worker => worker.GetProperty(SiteIsolatedFields.Target).GetString()!).Distinct(StringComparer.Ordinal))
         {
             await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "target", target, token);
-            await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("QueueCycle", 3, "all", "throughput", target), token);
+            await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("mixed/search", 3, "session", "throughput", target), token);
         }
     }
 
@@ -70,7 +69,7 @@ internal sealed class SiteIsolatedBrowserTests
         await Assert.That(value.GetProperty(SiteIsolatedFields.Status).GetString()).IsEqualTo("polite");
         await Assert.That(value.GetProperty(SiteIsolatedFields.Alert).GetString()).IsEqualTo("alert");
         await Assert.That(value.GetProperty(SiteIsolatedFields.Caption).GetBoolean()).IsTrue();
-        await Assert.That(value.GetProperty(SiteIsolatedFields.Provenance).GetInt32()).IsEqualTo(9);
+        await Assert.That(value.GetProperty(SiteIsolatedFields.Provenance).GetInt32()).IsEqualTo(11);
         await Assert.That(value.GetProperty(SiteIsolatedFields.Samples).GetInt32()).IsEqualTo(0);
     }
 }

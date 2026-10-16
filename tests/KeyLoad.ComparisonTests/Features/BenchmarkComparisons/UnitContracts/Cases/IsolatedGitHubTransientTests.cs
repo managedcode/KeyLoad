@@ -29,10 +29,10 @@ internal sealed class IsolatedGitHubTransientTests
     [Arguments("fractional-repeat", false)]
     public async Task AcBcFail005RetriesOriginalTransientGetFailuresWithinBudgets(string input, bool accepted)
     {
-        var module = IsolatedAggregateNodeProcess.Module("isolated-github-rate.mjs");
-        var original = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), "tests", "KeyLoad.ComparisonTests",
+        var module = SessionNodeProcess.Module("isolated-github-rate.mjs");
+        var original = Path.Combine(SessionNodeProcess.RepositoryRoot(), "tests", "KeyLoad.ComparisonTests",
             "Features", "BenchmarkComparisons", "UnitContracts", "IsolatedGitHubTransientOriginal.headers");
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubTransientProgram.Source, module, input, original],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(accepted ? 0 : 1);

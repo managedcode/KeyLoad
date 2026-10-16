@@ -38,9 +38,9 @@ internal static class NativeSerializationGitHubStepNodeProcess
         {
             var path = Path.Combine(root, "controlled-step-contract.json");
             await File.WriteAllTextAsync(path, input.ToJsonString(), TestContext.Current!.Execution.CancellationToken);
-            var result = await IsolatedAggregateNodeProcess.RunAsync(
-                ["--input-type=module", "-e", ProbeSource, path, IsolatedAggregateNodeProcess.Module(GitHubModule),
-                    IsolatedAggregateNodeProcess.Module(ReadinessModule)], TestContext.Current!.Execution.CancellationToken);
+            var result = await SessionNodeProcess.RunAsync(
+                ["--input-type=module", "-e", ProbeSource, path, SessionNodeProcess.Module(GitHubModule),
+                    SessionNodeProcess.Module(ReadinessModule)], TestContext.Current!.Execution.CancellationToken);
             using var response = JsonDocument.Parse(result.Output);
             var value = response.RootElement;
             return new(result.ExitCode, result.Error, value.GetProperty(NativeSerializationGitHubStepFields.Accepted).GetBoolean(),

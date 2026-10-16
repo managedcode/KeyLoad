@@ -9,7 +9,8 @@ internal sealed class LargeStreamCleanupPermissionTrial
     private const string HealthyCapture = "healthy.bin";
     private const string Accepted = "accepted-large";
     private static readonly string[] OriginalFiles =
-        ["complete.bin", "complete.pid", "one-over.bin", "one-over.pid", "healthy.bin", "healthy.pid"];
+        ["complete.bin", "complete.pid", "one-over.bin", "one-over.pid", "one-over.bin.native-process.json",
+            "healthy.bin", "healthy.pid"];
     private const UnixFileMode OwnedMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     private const UnixFileMode RefusalMode = UnixFileMode.UserRead | UnixFileMode.UserExecute;
 
@@ -92,9 +93,9 @@ internal sealed class LargeStreamCleanupPermissionTrial
         string root, CancellationToken token)
     {
         await Assert.That(File.GetUnixFileMode(root)).IsEqualTo(OwnedMode);
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubFileProgram.LargeSource,
-                IsolatedAggregateNodeProcess.Module("isolated-github-stream.mjs"), root, "219259", "async"],
+                SessionNodeProcess.Module("isolated-github-stream.mjs"), root, "219259", "async"],
             token).ConfigureAwait(false);
         await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.Output.Trim()).IsEqualTo(Accepted);

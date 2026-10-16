@@ -134,8 +134,8 @@ internal static class RequestCqrsProbeProfileSettingsReader
         var timeSeries = configuration.GetSection(TimeSeriesBenchmarkSection);
         return ReadBenchmark(configuration)
             || configuration[BenchmarkProfileSetting] is not null
-            || configuration[Comparisons.ComparisonWorkerSelection.TargetSetting] is not null
-            || configuration[Comparisons.ComparisonWorkerSelection.NodeCountSetting] is not null
+            || configuration[Comparisons.BenchmarkSessionSelection.TargetSetting] is not null
+            || configuration[Comparisons.BenchmarkSessionSelection.NodeCountSetting] is not null
             || timeSeries.Value is not null || timeSeries.GetChildren().Take(CountValue).Any();
     }
 

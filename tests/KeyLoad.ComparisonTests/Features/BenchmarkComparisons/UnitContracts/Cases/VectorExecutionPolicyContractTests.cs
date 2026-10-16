@@ -8,18 +8,6 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class VectorExecutionPolicyContractTests
 {
     [Test]
-    public async Task RequiredSourcePolicyKeepsTheFrozenThirtySecondVectorDeadline()
-    {
-        var execution = SourcePolicy();
-        var profile = VectorComparisonProfile.Parse("vector-100k-exact-plain-c16");
-        await Assert.That(execution.OperationTimeout.TotalSeconds).IsEqualTo((double)profile.TimeoutSeconds);
-        var runner = new VectorComparisonRunner(profile, Options.Create(execution));
-        await Assert.That(runner).IsNotNull();
-        execution.OperationTimeout = TimeSpan.ParseExact("00:00:00.0100000", "c", CultureInfo.InvariantCulture);
-        await Assert.That(() => new VectorComparisonRunner(profile, Options.Create(execution))).Throws<ArgumentException>();
-    }
-
-    [Test]
     public async Task NativeDeadlineCancelsAnAwaitedOperationAndPreservesCallerCancellation()
     {
         var execution = SourcePolicy();
@@ -42,7 +30,7 @@ internal sealed class VectorExecutionPolicyContractTests
     [ConfigurationBinding]
     private static NativeComparisonExecutionOptions SourcePolicy()
     {
-        var path = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), "benchmarks", "KeyLoad.ComparisonHost",
+        var path = Path.Combine(SessionNodeProcess.RepositoryRoot(), "benchmarks", "KeyLoad.ComparisonHost",
             "Features", "BenchmarkComparisons", "Configuration", "native-execution.json");
         var configuration = new ConfigurationBuilder().AddJsonFile(path).Build();
         var policy = configuration.GetRequiredSection(NativeComparisonExecutionOptions.SectionName)

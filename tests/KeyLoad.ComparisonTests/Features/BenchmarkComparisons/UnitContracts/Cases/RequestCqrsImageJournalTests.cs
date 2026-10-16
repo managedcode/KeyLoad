@@ -60,7 +60,7 @@ internal sealed class RequestCqrsImageJournalTests
 
     private static async Task<JsonDocument> RunAsync(string mode)
     {
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             [NodeArgumentsMode, NodeArgumentsEval, RequestCqrsImageJournalNodeProgram.Source,
                 ProcessModulePath(), EvidenceModulePath(), ContractModulePath(), mode],
             TestContext.Current!.Execution.CancellationToken);
@@ -70,13 +70,13 @@ internal sealed class RequestCqrsImageJournalTests
     }
 
     private static string ProcessModulePath()
-        => Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), ScriptsDirectory, FeaturesDirectory, BenchmarkComparisonsDirectory, ProcessModule);
+        => Path.Combine(SessionNodeProcess.RepositoryRoot(), ScriptsDirectory, FeaturesDirectory, BenchmarkComparisonsDirectory, ProcessModule);
 
     private static string EvidenceModulePath()
-        => Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), ScriptsDirectory, FeaturesDirectory, BenchmarkComparisonsDirectory, EvidenceModule);
+        => Path.Combine(SessionNodeProcess.RepositoryRoot(), ScriptsDirectory, FeaturesDirectory, BenchmarkComparisonsDirectory, EvidenceModule);
 
     private static string ContractModulePath()
-        => Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), ScriptsDirectory, FeaturesDirectory, BenchmarkComparisonsDirectory, ContractModule);
+        => Path.Combine(SessionNodeProcess.RepositoryRoot(), ScriptsDirectory, FeaturesDirectory, BenchmarkComparisonsDirectory, ContractModule);
 }
 
 internal static class RequestCqrsImageJournalNodeProgram

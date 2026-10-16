@@ -22,24 +22,20 @@ internal static class IsolatedNativeRegressions
     private const string Neo4jNode = "neo4j";
     private const string Http = "http";
 
-    internal static async Task VerifyAsync(DistributedApplication app, ComparisonWorkerSelection selection,
+    internal static async Task VerifyAsync(DistributedApplication app, BenchmarkSessionSelection selection, string evidence,
         CancellationToken cancellationToken)
     {
-        if (selection.Target == Kurrent && selection.Scenario == Scenario.StreamAppend)
+        if (selection.Target == Kurrent)
         {
             await IsolatedKurrentCleanupRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
             await IsolatedKurrentOwnershipRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
             await IsolatedKurrentVolumeRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
         }
-        if (selection.Scenario != Scenario.PointRead)
-        {
-            return;
-        }
         var resources = app.Services.GetRequiredService<DistributedApplicationModel>().Resources;
         switch (selection.Target)
         {
             case KeyLoad:
-                await VerifyKeyLoadAsync(app, resources, selection.NodeCount, cancellationToken);
+                await VerifyKeyLoadAsync(app, resources, selection.NodeCount, evidence, cancellationToken);
                 break;
             case Postgres:
                 await VerifyPostgresAsync(app, resources, selection.NodeCount, cancellationToken);
@@ -66,7 +62,7 @@ internal static class IsolatedNativeRegressions
     }
 
     private static async Task VerifyKeyLoadAsync(DistributedApplication app, IEnumerable<IResource> resources,
-        int nodeCount, CancellationToken token)
+        int nodeCount, string evidence, CancellationToken token)
     {
         var admin = await ParameterAsync(resources, Admin, token);
         await KeyLoadStreamPublicRegression.VerifyAsync(app, admin, token, nodeCount);
@@ -77,7 +73,7 @@ internal static class IsolatedNativeRegressions
             await TimeSeries.NativeConfiguredTimeSeriesReadRegression.VerifyAsync(app, admin, token);
         }
         await IsolatedKeyLoadFaultRegression.VerifyAsync(app, nodeCount,
-            IsolatedNativeReportAssertions.EvidenceDirectory(), token);
+            evidence, token);
     }
 
     private static async Task VerifyPostgresAsync(DistributedApplication app, IEnumerable<IResource> resources,

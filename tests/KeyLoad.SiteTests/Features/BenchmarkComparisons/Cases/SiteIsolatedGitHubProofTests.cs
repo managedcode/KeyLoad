@@ -3,7 +3,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubProofTests
 {
     [Test]
-    public async Task AC_ISO_007_Current1716FilesBindFresh924JobsAndCommonNativeImages()
+    public async Task AC_ISO_007_CurrentSessionFilesBindAll22WorkersAndCommonNativeImages()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
@@ -22,6 +22,6 @@ internal sealed class SiteIsolatedGitHubProofTests
         await Assert.That(result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Workers).GetInt32())
             .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
         await Assert.That(result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Files).GetInt32())
-            .IsEqualTo(SiteIsolatedGitHubTokens.FileCount);
+            .IsEqualTo(inputs.Metadata[SiteIsolatedFields.SuiteFiles]!.AsArray().Count + SiteIsolatedGitHubArchivePaths.ExpectedProvider().Count);
     }
 }

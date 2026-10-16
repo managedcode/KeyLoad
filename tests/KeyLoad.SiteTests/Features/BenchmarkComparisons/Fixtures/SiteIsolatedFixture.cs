@@ -46,7 +46,7 @@ internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Roo
     private static object CreateCatalog(SiteIsolatedInputs inputs, JsonObject manifest, byte[] aggregate, byte[] projection)
         => new
         {
-            schemaVersion = 1,
+            schemaVersion = "session-v1",
             generatedAt = TimeProvider.System.GetUtcNow().ToString("O"),
             siteSourceRevision = inputs.Site.SiteRevision,
             measuredSourceRevision = manifest[SiteIsolatedFields.Cohort]![SiteIsolatedFields.SourceRevision]!.GetValue<string>(),

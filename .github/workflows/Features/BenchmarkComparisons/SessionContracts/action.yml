@@ -1,0 +1,96 @@
+name: Native benchmark preparation contracts
+description: Run the complete native preparation checks once before database sessions.
+runs:
+  using: composite
+  steps:
+    - name: Check native KurrentDB discovery settings
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentDiscoverySettingsTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-discovery
+    - name: Check exact OpenSearch vector query contract
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/OpenSearchVectorQueryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/opensearch-query
+    - name: Check exact OpenSearch vector response contract
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/OpenSearchVectorResponseTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/opensearch-response
+    - name: Check TimescaleDB Docker image and startup tools
+      env:
+        KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY: ${{ runner.temp }}/keyload-timeseries-image-facts
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesIntensivePinnedImageTests/*' --KeyLoadTests:ResultsDirectory=TestResults/timeseries-image
+    - name: Save TimescaleDB image checks
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: timeseries-native-pinned-image-facts
+        path: |
+          ${{ runner.temp }}/keyload-timeseries-image-facts/**
+          **/TestResults/**
+          artifacts/code-quality/**
+        if-no-files-found: error
+        retention-days: 90
+    - name: Test database cluster resource models
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/Isolated*Resource*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/resource-models
+    - name: Test native session shutdown and original failure retention
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(IsolatedNativeTeardownSuccessTests|IsolatedNativeTeardownFailureTests|IsolatedNativeLogCaptureConcurrentDisposeTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/session-shutdown --KeyLoadTests:ReportTrx=true
+    - name: Test MongoDB readiness configuration
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-resource
+    - name: Test MongoDB node identity
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessIdentityTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-identity
+    - name: Test MongoDB startup failure handling
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessTaskFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-task-failure
+    - name: Test KurrentDB storage failure handling
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentVolumeRegressionFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-volume-failure
+    - name: Test KeyLoad request admission
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/keyload-admission
+    - name: Test bounded database log buffers
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonResourceLogBufferTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/log-buffer
+    - name: Test live benchmark progress capture
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-progress
+    - name: Test shared native session entry and safe failures
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(ComparisonHostStartupTests|ComparisonHostCleanupTests|BenchmarkSessionNativeParserTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-entry
+    - name: Test shared session live acknowledgement and cancellation counters
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/BenchmarkSessionProgressTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-counters
+    - name: Test document resource budgets and current native topology
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(DocumentResourceBudgetTests|NativeTopologyAdmissionTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/document-admission --KeyLoadTests:ReportTrx=true
+    - name: Test controlled native shared-session operations and cancellation
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/DocumentComparisonNativeTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/document-native --KeyLoadTests:ReportTrx=true
+    - name: Test KeyLoad replay admission
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-admission
+    - name: Test Redis replica error reporting
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/RedisReplicaDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/redis-diagnostics
+    - name: Test MongoDB startup error reporting
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoBootstrapDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-diagnostics
+    - name: Test KurrentDB cleanup error reporting
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentCleanupDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-diagnostics
+    - name: Test KurrentDB stream ownership
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentStreamOwnershipTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-stream-ownership
+    - name: Test database replay logs
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticLogTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-log
+    - name: Test database replay log retention
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticRetentionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-retention
+    - name: Test time-series workload correctness
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesWorkloadTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-workload
+    - name: Check published time-series package version
+      shell: bash
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesPackageVersionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-package

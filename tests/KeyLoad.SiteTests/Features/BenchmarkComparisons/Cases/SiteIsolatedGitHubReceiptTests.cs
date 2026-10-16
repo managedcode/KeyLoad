@@ -50,7 +50,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         var copy = inputs.Metadata.DeepClone().AsObject();
         await Assert.That(await ProbeAsync(copy, token)).IsTrue();
         var steps = copy[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubFields.Steps]!.AsArray();
-        await Assert.That(steps.Count).IsEqualTo(6);
+        await Assert.That(steps.Count).IsEqualTo(3);
         steps.Insert(3, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage one", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
         steps.Insert(4, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage two", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
         await Assert.That(await ProbeAsync(copy, token)).IsFalse();
@@ -86,16 +86,16 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         switch (corruption)
         {
             case "successConclusion":
-                job[SiteIsolatedFields.Conclusion] = SiteIsolatedFailureFixture.Success;
+                job[SiteIsolatedFields.Conclusion] = "success";
                 break;
             case "successWorkload":
             case "failedUpload":
-                var name = corruption == "successWorkload" ? SiteIsolatedFailureFixture.WorkloadStep : SiteIsolatedFailureFixture.UploadStep;
+                var name = corruption == "successWorkload" ? "Run database workload" : "Save benchmark results";
                 var step = job[SiteIsolatedFields.Steps]!.AsArray().Single(item => item![SiteIsolatedFields.Name]!.GetValue<string>() == name)!;
-                step[SiteIsolatedFields.Conclusion] = corruption == "successWorkload" ? SiteIsolatedFailureFixture.Success : SiteIsolatedFailureFixture.Failure;
+                step[SiteIsolatedFields.Conclusion] = corruption == "successWorkload" ? "success" : "failure";
                 break;
             case "failedImage":
-                copy[SiteIsolatedGitHubFields.Image]![SiteIsolatedGitHubFields.Job]![SiteIsolatedFields.Conclusion] = SiteIsolatedFailureFixture.Failure;
+                copy[SiteIsolatedGitHubFields.Image]![SiteIsolatedGitHubFields.Job]![SiteIsolatedFields.Conclusion] = "failure";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(corruption));
@@ -107,11 +107,11 @@ internal sealed class SiteIsolatedGitHubReceiptTests
     {
         var copy = original.DeepClone().AsObject();
         var job = copy[SiteIsolatedGitHubTokens.Workers]![SiteIsolatedGitHubTokens.Zero]![SiteIsolatedGitHubFields.Job]!;
-        job[SiteIsolatedFields.Conclusion] = SiteIsolatedFailureFixture.Failure;
+        job[SiteIsolatedFields.Conclusion] = "failure";
         foreach (var step in job[SiteIsolatedFields.Steps]!.AsArray())
         {
-            step![SiteIsolatedFields.Conclusion] = step[SiteIsolatedFields.Name]!.GetValue<string>() == SiteIsolatedFailureFixture.WorkloadStep
-                ? SiteIsolatedFailureFixture.Failure : SiteIsolatedFailureFixture.Success;
+            step![SiteIsolatedFields.Conclusion] = step[SiteIsolatedFields.Name]!.GetValue<string>() == "Run database workload"
+                ? "failure" : "success";
         }
         return copy;
     }

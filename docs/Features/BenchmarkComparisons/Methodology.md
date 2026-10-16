@@ -1,85 +1,141 @@
 # Comparable native database benchmark methodology
 
-Status: accepted implementation contract, 2026-10-09. Canonical slice: BenchmarkComparisons. [ADR-122](../../ADR/ADR-122-native-benchmark-methodology.md) owns execution and topology changes. This specification supersedes every active two-node comparison inventory; immutable original measurements keep their historical identity.
+Status: owner-selected session contract, 2026-10-17; implementation and exact-source
+Linux qualification remain open. [ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md)
+and [SessionExecution](SessionExecution.md) supersede the previous active
+per-scenario workers, warmup namespaces and fresh repetition resets. Native
+one-node/three-node topology and the fairness/correctness requirements of
+[ADR-122](../../ADR/ADR-122-native-benchmark-methodology.md) remain applicable.
+Original historical reports retain their actual settings and are never relabelled.
 
-## Sources and interpretation
+## Execution unit and timing
 
-[BenchmarkDotNet execution](https://benchmarkdotnet.org/articles/guides/how-it-works.html) separates setup, warmup and measurement; [good practices](https://benchmarkdotnet.org/articles/guides/good-practices.html) require Release execution and avoidance of competing work. Record count is independent of iteration count. BDN remains the tool for isolated SIMD, serialization and allocation controls; distributed database measurements use the existing native TUnit client runner and Aspire-owned topology.
-
-The original [YCSB paper](https://doi.org/10.1145/1807128.1807152) and [canonical workloads](https://github.com/brianfrankcooper/YCSB/wiki/Core-Workloads) motivate read/update ratios 50/50 and 95/5. Our deterministic CRUD/delete schedule is a KeyLoad workload, not a claim of YCSB conformance. [Redis benchmarking](https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/benchmarks/) explains why independent client connections and pipelining must be declared separately.
-
-[PostgreSQL pgbench](https://www.postgresql.org/docs/current/pgbench.html) motivates independent repetitions, sufficiently long runs, explicit client bottleneck checks and scheduled-arrival latency. [HdrHistogram](https://github.com/HdrHistogram/HdrHistogram) documents coordinated omission: closed-loop throughput cannot establish offered-load tail behavior. [PostgreSQL WAL settings](https://www.postgresql.org/docs/current/runtime-config-wal.html) distinguish local commit, remote durable flush and remote apply. Equal node count alone does not establish equal durability.
-
-[BDN diagnosers](https://benchmarkdotnet.org/articles/configs/diagnosers.html) explain separate diagnostic runs; managed client allocations cannot stand in for server RAM. [GitHub artifact API](https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28) supplies original artifact digests and workflow/source identity. The policy choices below (three repetitions, exact schedules and bounds) are KeyLoad decisions informed by these sources, not guarantees attributed to the sources.
-
-## One cell and its ownership
+Each database has two isolated Linux measurement jobs: native one node and native
+three nodes. Different databases/topologies never share a runner, containers,
+volumes or measurement session. One Aspire-owned deployment lives for the entire
+job. Many separate real native TUnit tests share its fixture; only one workload
+test executes at a time, with the declared concurrent clients inside that test.
+The common preparation builds the runner and images once; each worker imports
+and verifies the same-source binaries, native tools and image identities.
 
 ```mermaid
 flowchart LR
-    plan[Canonical workload and native 1 or 3 nodes] --> ready[Aspire readiness and observed membership]
-    ready --> warmup[Excluded warmup in its owned namespace]
-    warmup --> setup[Fresh measured namespace, deterministic corpus and full verification]
-    setup --> measure[One scenario, bounded real clients and exact accounting]
-    measure --> verify[Complete native readback and expected-state digest]
-    verify --> cleanup[Join original calls and dispose all owned resources]
-    cleanup --> original[Original source/run/job-bound JSON]
-    original --> aggregate[Authenticate complete cohort before comparison]
+    Ready[Aspire readiness and actual membership] --> Load[Measure initial million writes]
+    Load --> Index[Measure native index construction]
+    Index --> Operations[Separate read search and query tests]
+    Operations --> Mixed[Concurrent create delete update read search]
+    Mixed --> Verify[Full final content and native replica verification]
+    Verify --> Original[Original per-test reports samples and TRX]
+    Original --> Aggregate[Authenticate all database and topology jobs]
 ```
 
-Every database/scenario/profile/native-node-count cell owns one Linux runner, genuine native topology, storage volumes and load generator. Only one native TUnit test executes in that runner. Native selection uses the documented [TUnit tree filters](https://tunit.dev/docs/execution/test-filters/) and explicitly excludes the HeavyLoad category from the ordinary RF3 suite. Independent jobs may overlap. Ordinary functional concurrency remains 20, up to 50 only with evidence. Heavy functional ingestion plus concurrent reads runs exclusively and contributes neither published timings nor coverage totals. The document cohort waits for that case and validates its authenticated job, original artifact/archive, native TRX result and source-bound image receipts before qualification; a failed, missing, skipped or changed result fails the new cohort. Existing historical/control publication contracts remain separately explicit.
+The initial 1,000,000-record load is a measured native test. Setup contains no
+hidden corpus insertion. There is no warmup and no per-case reset, cleanup,
+reseed or restart. The state of the runtime, cache, storage and indexes evolves
+naturally during the declared operation order; this does not claim cold-cache
+measurements. Native index construction and settlement have their own measured
+result where the database exposes an equivalent operation. Intrinsic index
+maintenance remains in measured writes. Missing native capabilities are explicit
+unavailable results with no numeric substitute.
 
-Heavy-load admission requires the explicit enabled setting, the exact native class filter and one-test parallelism, with coverage disabled. An ordinary explicit broad filter which includes the heavy class must fail before its RF3 resources are acquired. Preserve supplied filter identities for task acceptance; a caller marker alone cannot authorize the native heavy test. Negative admission controls cover missing/false enabled settings, broad or duplicate filters, parallel execution and coverage.
+Initial load, operation lanes and the wall time of a concurrent mixed test are
+separate measurements. Readiness and full correctness/replica verification are
+outside operation latency. Actual caller-native acknowledgement defines write
+completion. No extra read is silently included in a measured write. A native
+batch acknowledgement records its real batch size and duration; it cannot be
+expanded into invented per-record latency samples.
 
-Only native one-node and three-node configurations are accepted before acquisition. RF3 remains the KeyLoad production topology; the benchmark one-node arm is explicitly RF1. Unsupported community topology or native operation remains an explicit unavailable cell with null numeric output. A shared list of scenarios is dispatched to every database; adapters do not substitute cheaper operations. Specialized vector, graph, queue, stream, time-series, range/index and complex-query families retain their independent capability and accuracy contracts. Missing native equivalents stay unavailable, never counted as zero latency.
+## Shared live document schedule
 
-## Document family and deterministic schedules
+The deterministic corpus, seed, payload, key groups, query predicates, requested
+counts and client limits are identical across applicable adapters. The initial
+corpus has 1,000,000 records. The production session uses 16 bounded clients;
+operation tests perform at least 100,000 original requests per applicable lane.
+One client has one outstanding original call unless an explicitly equivalent
+native batching/pipelining contract is part of the shared case.
 
-The new `document-v1` family extends the existing native adapters and execution owner. Its sole machine inventory is `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/document-contract.json`, embedded in C# and consumed by CI. The website's exact 84-path source closure includes this inventory; QualifySite admits that exact regular path alongside the existing isolated contract while retaining all source comparisons, realpath checks and hashes. Active initial datasets are exactly 100,000 and 1,000,000 records; each ordinary scenario performs exactly 100,000 measured operations and three complete repetitions with fresh isolated logical namespaces on the cell's native servers. Server journals and maintenance history may persist across repetitions; this is not a physical-storage reset or a cold-cache claim. Records are lazily regenerated from seed 1729 with the existing 1,024-byte corpus contract. Work is closed-loop, one outstanding original request per actual independently owned client, no pipelining or batching. Ordinary cells use 16 clients; ingestion cells use 1, 10 or 500 clients.
+| Test | Measured work and correctness contract |
+|---|---|
+| Initial load | 1,000,000 distinct actual writes, followed by independent complete identity/body verification. |
+| Index | Actual native build/settlement on the retained corpus; unavailable when no equivalent native lifecycle exists. |
+| Sequential read | 100,000 stable-group keys in identity order, validating returned content. |
+| Random read | 100,000 seed-bound stable-group keys in deterministic order, validating returned content. |
+| Search/query | 100,000 equivalent native predicates with bounded results and exact content oracles. Range/complex-query expansion remains separately tracked. |
+| Mixed | Concurrent lanes: 100,000 creates, 100,000 deletes, 100,000 updates, 100,000 reads and 100,000 search requests. Each lane retains its actual outcomes and timestamps. |
+| Final verification | Exactly 900,000 retained original keys plus 100,000 new keys; correct replacements and absence of deleted keys, with actual native replica proofs. |
 
-| Scenario | Exact measured schedule | Expected state |
-|---|---|---|
-| SequentialRead | 100,000 reads in identity order, wrapping only after N | unchanged exact corpus |
-| RandomRead | deterministic seed-bound permutation reads | unchanged exact corpus |
-| Create | 100,000 distinct identities above initial N | initial N plus 100,000 |
-| Update | replace first 100,000 initial identities once | N, exact replacement content |
-| Delete | delete first 100,000 initial identities once | N minus 100,000 |
-| ReadUpdate50 | exact 50% reads, 50% unique updates | N; reads and updates use disjoint identity lanes |
-| ReadUpdate95 | exact 95% reads, 5% unique updates | N; reads and updates use disjoint identity lanes |
-| MixedCrud | exact 25% each read/create/update/delete | N; four disjoint lanes, each mutation identity used once |
-| Ingest | empty configured document namespace; exactly 1,000,000 distinct creates | exactly 1,000,000 stored records |
+Delete, update and stable-read key groups are disjoint. Creates use new keys.
+The mixed test starts admitted native clients through a common barrier and proves
+observed overlap from original timestamps; it does not serialize the lanes and
+label them concurrent. The final cardinality remains 1,000,000. Count alone is
+insufficient: complete bounded readback verifies identities, bodies and mutation
+results. A million payload objects or 100,000 pending tasks must not be retained
+merely to schedule the work.
 
-Mutation warmup uses disjoint identities and restores/removes them before initial-state verification; it cannot consume measured IDs or leak extra rows. No selected operation verifies itself by issuing extra hidden reads inside the measured duration: write success is the actual native acknowledgement, reads validate the returned content, and final mutation verification is excluded from timings. Existing adapter ACK validation stays required. Per-operation latency describes the stated end-to-end public operation; any retained verification read is explicitly declared and cannot compare to a single-operation cell.
+## Other required families and functional load
 
-For ingestion each client owns a disjoint range: 1,000,000 / 100,000 / 2,000 records respectively at 1 / 10 / 500 clients. A common start barrier follows actual native-client admission; the report records requested and opened clients, peak original in-flight requests, attempts, acknowledged, failed, canceled and unfinished counts. It must not infer connections from wrapper count. Exact full readback independently enumerates actual stored IDs, detects extras/missing/duplicate records, checks every canonical body and computes the expected and actual digest. No retained million-element payload/task table is permitted.
+The full product comparison still requires native vectors/search accuracy,
+graphs, queues, event streams, time series, ordered/range and complex queries,
+plus ingestion at 1/10/500 clients. These run as additional real cases on the same
+database/topology infrastructure. A seven-case document session does not qualify
+that complete inventory. Unsupported native functionality is distinguished from
+an unimplemented adapter or failed prerequisite; implementation gaps must not be
+reported as native absence.
 
-For mixed workloads the initial corpus, added records, deleted records and final live cardinality are separate fields. Reads use stable identities so mutations cannot introduce schedule-dependent expected content. This revision-1 contract does not claim hot-key read-modify-write or transactional conflict behavior.
+Every family uses the same canonical scenario, corpus/seed, operation order,
+counts, metric/filter, accuracy target, resource limits and effective durability
+contract across applicable databases. Vector indexes retain exact/HNSW/IVFFlat,
+filtered/concurrent-update and recall requirements where natively supported.
+Native batching, index build and accuracy are declared explicitly. Closed-loop
+request timings do not prove scheduled-arrival/open-loop or endurance behavior.
 
-## Timing, statistics and resource bounds
+The existing exclusive functional RF3 million-record ingestion gate remains
+mandatory and separate from numerical benchmark publication. Its actual .NET
+SDK and official MCP callers operate while ingestion is active. Heavy-load
+admission still requires explicit enabled settings, the exact native class
+filter, one-test parallelism and disabled coverage; missing/false/broad/duplicate
+filters, coverage or wrong parallelism fail before resources are acquired.
+Normal functional concurrency and all process-recovery/RF3 gates are unchanged.
 
-Record setup/readiness, corpus load, index-build/settlement, warmup, measured duration, final verification and cleanup independently. Preserve all three repetitions; never pick a best run. Aggregate throughput with run counts and variation, not by averaging percentile values. Report p50/p95/p99/max and a bounded full-count histogram with its resolution and overflow policy; a bounded diagnostic sample alone does not establish exact tails. Original operation outcomes form the denominator, including errors. A failed correctness/readback, admission, timeout, unfinished call or cleanup makes that repetition unqualified.
+## Original results, resources and failure
 
-Load and explicit native index creation/settlement are timed within excluded setup. When a document adapter has no separate index-build operation, `indexBuildApplicable=false` and the known N/A duration is zero; intrinsic index maintenance during insertion remains part of native load/write cost. Missing instrumentation is null and blocks qualification. Final replica settlement occurs after the complete primary oracle and is excluded from measured time. Client resources are recorded for each repetition; the source-bound server sidecar retains per-node and aggregate observations for the entire cell.
+Retain attempted, completed, successful, failed, cancelled and unfinished counts,
+actual timestamps, useful completed throughput and per-operation p50/p95/p99.
+Counts and latency distributions must be reproducible from bounded original
+full-count samples, including failures; do not average percentiles or choose a
+best repetition. The mixed wall time is not the sum of concurrent lane times.
+Client CPU/allocations/working set and server per-node CPU/RAM observations stay
+separate. Missing instrumentation is explicit and cannot become a zero result.
 
-Document deployment explicitly admits 500 clients with bounded native PostgreSQL connections and KeyLoad HTTP admission of 512. The PostgreSQL source pool reserves one additional connection for excluded final WAL/replica verification, so 500 held workload connections cannot block the proof. KeyLoad full readback permits 1,100,000 records and 2 GiB of query reads, with snapshot threshold 2,000,000 declared for this document family. Effective CPU/RAM and native ACK contracts retain their existing source-bound resource evidence. KeyLoad's public API has no namespace-drop operation: excluded cleanup uses bounded acknowledged delete batches with a 20-minute deadline, then Aspire removes the owned servers and volumes at cell shutdown. Cleanup timeout remains a failed qualification; retained journal history cannot be presented as reclaimed physical storage.
+Record exact source/run/attempt/job/artifact identities, Linux/runtime/CPU,
+DLL/PDB hashes, native images, observed membership/data copies, resource limits,
+filesystem, transport, read consistency, index settings and effective ACK/durability.
+A node count alone does not establish equivalent guarantees. RF3 majority remains
+two acknowledgements. The one-node KeyLoad arm is explicitly RF1; production RF3
+is unchanged. Unequal contracts prohibit a performance-winner claim.
 
-The existing fixed-rate open-loop family records scheduled time, actual start and completion, admission rejections and unfinished calls under its frozen drain horizon. The new document family does not claim open-loop qualification from a closed-loop run. Sustained multi-minute/endurance and fault results remain distinct gates; 100,000 operations alone does not prove long-run stability.
+Cancellation stops admission, cancels and joins original calls, then disposes
+native clients and the Aspire deployment. Preserve the primary and shutdown
+failures and completed original reports. A failed load poisons dependent tests;
+they retain real failed prerequisite outcomes rather than invented measurements.
+No automatic measurement retry repairs the statistics. No skipped, missing,
+corrupt or mixed-cohort original is accepted as a complete session.
 
-Declare server and client CPU/RAM limits, actual machine and Linux image, disk/filesystem, network, native image/version, caches, background maintenance, index settings, read consistency and effective ACK/durability. Observe actual membership and data copies. Record per-node and aggregate server resource use separately from client CPU, allocation and working set. Unequal ACK or resource settings prohibit a winner comparison even if each cell succeeds. Three-node majority remains two acknowledgements; removing two-node topology does not change quorum arithmetic.
+Aggregation authenticates all 22 database/topology jobs, their exact planned
+native cases, original reports and TRX, same-source images, compiled-runtime
+identity/import receipts and statistics. Actual failed cases retain null metrics
+and original provenance. Website independently qualifies its source, archives,
+real browser and coverage before rendering these results; content-only publication
+contains no fabricated measurements when no eligible cohort exists.
 
-Cancellation stops admission, cancels original operations, joins their completion and only then disposes native clients/target resources. Preserve the first failure and any cleanup failure. After workload settlement the host uses a fresh bounded evidence-write token to retain the failed original; it does not resume canceled work. A timeout wrapper may not abandon actual operations. All machine bounds are named and operational values use the existing typed options.
+## Acceptance and evidence
 
-## Requirements, acceptance and task traceability
-
-| Requirement | Acceptance and automated evidence | Task |
-|---|---|---|
-| REQ-METH-001: primary-source methodology, common native 1/3 inventory | AC-METH-001: C#/JS selectors reject 2 before resource acquisition; all pure/mixed scenarios are dispatched unchanged to all targets; exact planner/cohort tests verify completeness and unsupported dispositions | TASK-METH-TOPOLOGY |
-| REQ-METH-002: pure and mixed actual-scale execution | AC-METH-002: native runner performs the exact schedules above, real calls and three fresh repetitions; literal oracle, native mutation/readback and cancellation tests reject wrong content, missing/extra IDs and incorrect ratios | TASK-METH-DOCUMENTS |
-| REQ-METH-003: one million real creates at 1/10/500 clients | AC-METH-003: configure-only native admission, independent client ownership, common start and joined shutdown; actual native load asserts exactly one million acknowledged and stored records per repetition; no upfront seeding is counted | TASK-METH-INGESTION |
-| REQ-METH-004: honest original statistics and qualification | AC-METH-004: full-count bounded histogram, phase/count/client evidence and complete readback in original JSON; validation rejects failed or unjoined runs; source/run/attempt/job identity and all outputs retained by CI; qualification also requires the successful same-source exclusive RF3 load job, its original native passed-test TRX and matching authenticated image receipts | TASK-METH-EVIDENCE |
-| REQ-METH-005: exclusive functional load while operating | AC-METH-005: `HeavyDocumentLoadAdmissionTests` checks 14 missing/disabled/broad/parallel/covered and healthy native admissions before resource acquisition; `HeavyDocumentLoadRf3Tests` runs Aspire RF3 native SDK plus official MCP ingestion alongside reads/queries, verifies acknowledged final state, joins originals and shuts down every resource; separate exclusive CI case has no publication/coverage attribution | TASK-METH-STRESS |
-
-Public product API and persisted storage format: N/A, existing public operations unchanged. SDK/MCP product schemas and native RF3 durability are unchanged. Frontend: current authenticated families retain their gates; new document-family measurements need exact admission before rendering. Dependencies: N/A, no package changes. Native unsupported operation/topology is an explicit automatic test disposition, not a skip in a required qualification suite.
-
-Owner correction on 2026-10-09 requires all further benchmark-stage builds, checks, tests and workloads in GitHub Actions. Earlier local development failures remain history; they cannot qualify the delivered source. Authentic exact-source Linux workflow outputs close database qualification. This document is not execution evidence. Implementation and delivery status live in `docs/implementation/status.json` and README; no measured performance winner, power-loss or production-readiness claim follows from authored tests.
-
-Native adapter regression mapping: `DocumentComparisonNativeTests` selects 22 real database cases: nine schedules per SurrealDB/HelixDB, one acknowledged cancellation plus healthy follow-up per database, and one extra/missing/body corruption plus corrected readback per database. The two development-partition rejection cases remain in `DocumentWorkerSelectionTests`, inside the contract suite. The native fixture selects the existing isolated target/profile through AppHost, removes only the comparison workload container and lets Aspire own native database readiness and shutdown; it must not select and then remove a test-suite runner. Startup and cleanup failures remain joined and failed. Original `0c0378e6` run37921138255 invoked all22 native cases but failed before database operations because that obsolete suite runner was missing; those originals provide no native correctness or scale qualification.
+REQ/AC-BSESSION-001..008 in [SessionExecution](SessionExecution.md) own matrix,
+fixture, measured load, mixed work, shared build, no warmup/reset, authenticated
+accounting and exact-source Linux completion. Authored source, controlled
+rejection inputs, an upstream benchmark or a local build closes none of the
+performance gates. All benchmark-stage builds, checks, tests and workloads run
+in Linux GitHub Actions. Full model-family completion, actual native execution,
+fault/endurance, resource fairness and website qualification remain open until
+their original evidence exists. No power-loss or production-readiness claim
+follows from process-kill tests or this redesign.

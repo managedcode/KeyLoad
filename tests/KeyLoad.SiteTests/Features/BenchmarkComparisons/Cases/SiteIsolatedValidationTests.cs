@@ -9,15 +9,12 @@ internal sealed class SiteIsolatedValidationTests
     [Arguments("missing")]
     [Arguments("duplicate")]
     [Arguments("foreign")]
-    [Arguments("cohort")]
+    [Arguments(SiteIsolatedFields.Cohort)]
     [Arguments("options")]
-    [Arguments("artifact")]
-    [Arguments("job")]
+    [Arguments(SiteIsolatedFields.Artifact)]
+    [Arguments(SiteIsolatedFields.Job)]
     [Arguments("copies")]
     [Arguments("failed")]
-    [Arguments("percentiles")]
-    [Arguments("throughput")]
-    [Arguments("samples")]
     public async Task AC_ISO_008_BrowserRejectsIncompleteOrInconsistentProjection(string corruption)
     {
         var fixture = await SiteIsolatedFixture.ReadAsync();
@@ -39,8 +36,8 @@ internal sealed class SiteIsolatedValidationTests
 
     /// <summary>AC-ISO-008: catalog cannot redirect measurements or conflate website and measured source.</summary>
     [Test]
-    [Arguments("source")]
-    [Arguments("path")]
+    [Arguments(SiteIsolatedFields.Source)]
+    [Arguments(SiteIsolatedFields.Path)]
     [Arguments("origin")]
     [Arguments("hash")]
     [Arguments("rawLocation")]
@@ -52,10 +49,10 @@ internal sealed class SiteIsolatedValidationTests
         var value = JsonNode.Parse(await File.ReadAllBytesAsync(fixture.Catalog, token))!.AsObject();
         switch (corruption)
         {
-            case "source":
+            case SiteIsolatedFields.Source:
                 value[SiteIsolatedFields.MeasuredSourceRevision] = new string('0', 40);
                 break;
-            case "path":
+            case SiteIsolatedFields.Path:
                 value[SiteIsolatedFields.Projection]![SiteIsolatedFields.Path] = "../projection.json";
                 break;
             case "origin":
@@ -89,20 +86,12 @@ internal sealed class SiteIsolatedValidationTests
     private static void CorruptProjection(JsonObject value, string corruption)
     {
         var workers = value[SiteIsolatedFields.Workers]!.AsArray();
-        var worker = SiteIsolatedFailureFixture.TryMeasuredWorker(workers) ?? workers[0]!;
-        var report = worker[SiteIsolatedFields.Report];
-        if (report is null && corruption is "copies" or "failed" or "percentiles" or "throughput" or "samples")
-        {
-            // Retain unavailable-only rejection: no failed/unsupported worker may carry any report shape.
-            worker[SiteIsolatedFields.Report] = new JsonObject();
-            return;
-        }
-        CorruptWorker(value, workers, worker, report, corruption);
+        var worker = workers[0]!;
+        CorruptWorker(value, workers, worker, corruption);
     }
 
-    private static void CorruptWorker(JsonObject value, JsonArray workers, JsonNode worker, JsonNode? report, string corruption)
+    private static void CorruptWorker(JsonObject value, JsonArray workers, JsonNode worker, string corruption)
     {
-        var item = report?[SiteIsolatedFields.Cases]?[0];
         switch (corruption)
         {
             case "missing":
@@ -114,34 +103,23 @@ internal sealed class SiteIsolatedValidationTests
             case "foreign":
                 worker[SiteIsolatedFields.Target] = "foreign";
                 break;
-            case "cohort":
-                (report?[SiteIsolatedFields.Provenance] ?? value[SiteIsolatedFields.Cohort])![SiteIsolatedFields.Attempt] = 999999;
+            case SiteIsolatedFields.Cohort:
+                worker[SiteIsolatedFields.Session]![SiteIsolatedFields.Attempt] = 999999;
                 break;
             case "options":
                 value[SiteIsolatedFields.Options]![SiteIsolatedFields.Operations] = 1;
                 break;
-            case "artifact":
+            case SiteIsolatedFields.Artifact:
                 worker[SiteIsolatedFields.Artifact]![SiteIsolatedFields.Expired] = true;
                 break;
-            case "job":
-                var job = worker[SiteIsolatedFields.Job]!;
-                job[SiteIsolatedFields.Conclusion] = job[SiteIsolatedFields.Conclusion]!.GetValue<string>() == SiteIsolatedFailureFixture.Failure
-                    ? SiteIsolatedFailureFixture.Success : SiteIsolatedFailureFixture.Failure;
+            case SiteIsolatedFields.Job:
+                worker[SiteIsolatedFields.Job]![SiteIsolatedFields.Conclusion] = "cancelled";
                 break;
             case "copies":
-                report![SiteIsolatedFields.Targets]![0]![SiteIsolatedFields.Cluster]![SiteIsolatedFields.DataCopies] = 99;
+                worker[SiteIsolatedFields.Session]![SiteIsolatedFields.TargetProfile] = new JsonObject();
                 break;
             case "failed":
-                item![SiteIsolatedFields.Status] = "failed";
-                break;
-            case "percentiles":
-                item![SiteIsolatedFields.Measurement]![SiteIsolatedFields.Latency]![SiteIsolatedFields.P99Ms] = -1;
-                break;
-            case "throughput":
-                item![SiteIsolatedFields.Measurement]![SiteIsolatedFields.UsefulOperationsPerSecond] = 0;
-                break;
-            case "samples":
-                item![SiteIsolatedFields.Samples] = new JsonArray();
+                worker[SiteIsolatedFields.Session]![SiteIsolatedFields.Outcome] = "invalid";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(corruption));

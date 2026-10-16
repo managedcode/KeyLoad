@@ -41,9 +41,9 @@ internal sealed class ServerOnlyImagePreparationTests
     [Test]
     public async Task ServerOnlySelectionExcludesLoadGeneratorAndRejectsAmbiguousModes()
     {
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
-            ["--input-type=module", "-e", Probe, IsolatedAggregateNodeProcess.Module("prepare-images.mjs"),
-                IsolatedAggregateNodeProcess.Module("image-evidence.mjs")],
+        var result = await SessionNodeProcess.RunAsync(
+            ["--input-type=module", "-e", Probe, SessionNodeProcess.Module("prepare-images.mjs"),
+                SessionNodeProcess.Module("image-evidence.mjs")],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
         using var report = JsonDocument.Parse(result.Output);

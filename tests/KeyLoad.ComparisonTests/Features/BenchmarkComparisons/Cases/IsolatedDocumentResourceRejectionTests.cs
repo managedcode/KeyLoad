@@ -19,7 +19,7 @@ internal sealed class IsolatedDocumentResourceRejectionTests
     public async Task InvalidCountAndForeignTargetAllocateNothing(string target)
     {
         await using var invalid = new IsolatedResourceTopologyFixture(target, 4);
-        Assert.ThrowsExactly<InvalidOperationException>(() => Add(target, invalid.Context));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Add(target, invalid.Context));
         await Assert.That(invalid.Context.Builder.Resources.Count).IsEqualTo(1);
         await Assert.That(Directory.Exists(invalid.Context.Root)).IsFalse();
         await using var foreign = new IsolatedResourceTopologyFixture("Redis", 1);

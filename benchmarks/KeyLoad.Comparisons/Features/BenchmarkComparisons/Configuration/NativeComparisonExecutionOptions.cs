@@ -88,7 +88,6 @@ public sealed partial class NativeComparisonExecutionOptions
 
         NativeComparisonAdapterOptionsValidator.Validate(this);
         ValidateMongoPolicy();
-        ValidateReportPolicy();
         ValidateVectorPolicy();
         NativeDocumentPolicy.Validate(this);
         NativeComparisonSeedExecutionOptionsValidator.ValidateRequired(this);

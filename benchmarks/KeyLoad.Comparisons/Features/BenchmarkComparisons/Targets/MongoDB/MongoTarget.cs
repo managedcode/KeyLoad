@@ -166,46 +166,11 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
         await edgeCollection.Indexes.CreateOneAsync(sourceIndex, cancellationToken: cancellationToken);
     }
 
-    private async Task VerifySingleNodeAsync(CancellationToken cancellationToken)
-    {
-        const int FirstElementIndex = 0;
+    private Task VerifySingleNodeAsync(CancellationToken cancellationToken)
+        => MongoServerVerification.VerifySingleNodeAsync(primaryClient, cancellationToken);
 
-        var admin = primaryClient!.GetDatabase(MongoSchema.AdminDatabase);
-        var hello = await admin.RunCommandAsync<BsonDocument>(
-            new BsonDocument(MongoSchema.HelloCommand, MongoSchema.CommandEnabledValue),
-            ReadPreference.Primary, cancellationToken);
-        if (!hello.GetValue(MongoSchema.WritablePrimaryField, false).ToBoolean()
-            || hello.GetValue(MongoSchema.RouterMessageField, BsonNull.Value) == MongoSchema.RouterMessage)
-        {
-            throw new ComparisonFailureException(MongoSchema.FailureUnsupportedTopology);
-        }
-        if (!hello.Contains(MongoSchema.ReplicaSetNameField))
-        {
-            return;
-        }
-        var status = await admin.RunCommandAsync<BsonDocument>(
-            new BsonDocument(MongoSchema.ReplicaSetStatusCommand, MongoSchema.CommandEnabledValue),
-            ReadPreference.Primary, cancellationToken);
-        var members = status.GetValue(MongoSchema.MembersField).AsBsonArray;
-        if (members.Count != MongoSchema.SingleNodeCount
-            || members[FirstElementIndex].AsBsonDocument.GetValue(MongoSchema.MemberStateField).AsString != MongoSchema.PrimaryState
-            || members[FirstElementIndex].AsBsonDocument.GetValue(MongoSchema.MemberHealthField).ToInt32() != MongoSchema.HealthyMemberValue)
-        {
-            throw new ComparisonFailureException(MongoSchema.FailureUnsupportedTopology);
-        }
-    }
-
-    private async Task<string> ReadPrimaryVersionAsync(CancellationToken cancellationToken)
-    {
-        var result = await Require(database).RunCommandAsync<BsonDocument>(
-            new BsonDocument(MongoSchema.BuildInfoCommand, MongoSchema.CommandEnabledValue),
-            ReadPreference.Primary, cancellationToken);
-        if (!result.TryGetValue(MongoSchema.VersionField, out var version) || !version.IsString)
-        {
-            throw new ComparisonFailureException(MongoSchema.FailureVersionUnavailable);
-        }
-        return version.AsString;
-    }
+    private Task<string> ReadPrimaryVersionAsync(CancellationToken cancellationToken)
+        => MongoServerVerification.ReadPrimaryVersionAsync(database, cancellationToken);
 
     private async Task VerifyUniqueStreamInsertionAsync(CancellationToken cancellationToken)
     {

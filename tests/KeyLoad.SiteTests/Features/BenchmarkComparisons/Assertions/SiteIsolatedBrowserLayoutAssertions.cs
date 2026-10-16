@@ -46,7 +46,7 @@ internal static class SiteIsolatedBrowserLayoutAssertions
             }
             await Assert.That(snapshot.GetProperty(SiteIsolatedFields.Rows).GetInt32()).IsEqualTo(9);
             await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection,
-                new("PointRead", 3, "all", "throughput", "all"), token);
+                new("sequential-read", 3, "session", "throughput", "all"), token);
             if (width <= SiteBrowserUiTokens.ViewportMobileWidth)
             {
                 await Assert.That(snapshot.GetProperty(ScrollableField).GetBoolean()).IsTrue();

@@ -5,6 +5,9 @@ using NpgsqlTypes;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
+/// <summary>Preserves the actual native Timescale ownership regression for future family integration.</summary>
+/// <remarks>Pending: the retired TimeSeries Aspire benchmark caller no longer invokes this helper.
+/// The session-v1 PostgreSQL image is pgvector, so it cannot qualify this Timescale-only behavior.</remarks>
 internal static class TimescaleTimeSeriesIntensiveSchemaAtomicityRegression
 {
     private const string SchemaExistsSql = "SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_namespace WHERE nspname = $1)";

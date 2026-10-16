@@ -1,6 +1,5 @@
 using System.Globalization;
 using KeyLoad.Comparisons;
-using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
@@ -27,66 +26,17 @@ internal sealed record ComparisonExecutionIdentity(
     private const string GitHubRefSetting = "GITHUB_REF";
     private const string WorkflowSetting = "GITHUB_WORKFLOW";
     private const string GitHubShaSetting = "GITHUB_SHA";
-    private const string TimeSeriesEvidenceProfile = "timeseries";
-    private const string SingleSuffix = "-single";
-    private const string ReplicatedSuffix = "-replicated";
+    private const string CanonicalRepository = "managedcode/KeyLoad";
+    private const string CanonicalRef = "refs/heads/main";
+    private const string CanonicalWorkflow = "Benchmarks";
     private const int RevisionLength = 40;
 
-    private static readonly string[] EvidenceProfiles =
-    [
-        ComparisonExecutionIdentityValues.SmokeSingle,
-        ComparisonExecutionIdentityValues.Json1kC8Single,
-        ComparisonExecutionIdentityValues.Json16kC4Single,
-        ComparisonExecutionIdentityValues.SmokeReplicated,
-        ComparisonExecutionIdentityValues.Json1kC8Replicated,
-        ComparisonExecutionIdentityValues.Json16kC4Replicated
-    ];
-
-    /// <summary>Reads and validates container provenance after ordinary host settings have been validated.</summary>
-    /// <param name="configuration">The comparison host configuration.</param>
-    /// <param name="sourceRevision">The revision read through the established host setting.</param>
-    /// <param name="topology">The validated comparison topology.</param>
-    /// <returns>Null for direct non-container execution, otherwise the complete validated identity.</returns>
-    internal static ComparisonExecutionIdentity? Read(IConfiguration configuration, string? sourceRevision,
+    /// <summary>Requires authenticated image and source identity for the shared native session.</summary>
+    internal static ComparisonExecutionIdentity ReadSession(IConfiguration configuration, string sourceRevision,
         ComparisonTopology topology)
-        => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false);
-
-    /// <summary>Reads the shared image/source identity with the isolated TimeSeries profile contract.</summary>
-    /// <param name="configuration">The comparison host configuration.</param>
-    /// <param name="sourceRevision">The revision read through the existing TimeSeries setting.</param>
-    /// <returns>Null for non-container execution, otherwise the validated TimeSeries identity.</returns>
-    internal static ComparisonExecutionIdentity? ReadTimeSeries(IConfiguration configuration, string sourceRevision)
-        => ReadIdentity(configuration, sourceRevision, topology: null, isTimeSeries: true);
-
-    /// <summary>Validates the same native image/source provenance for an isolated intensive worker.</summary>
-    /// <param name="configuration">The native container execution settings.</param>
-    /// <param name="sourceRevision">The measured source revision.</param>
-    /// <param name="topology">The selected native topology.</param>
-    /// <param name="scaledProfileId">The exact scaled profile identity, or null for the existing control.</param>
-    /// <param name="vectorProfileId">The exact native vector profile identity, or null.</param>
-    /// <param name="documentProfileId">The exact document family profile admitted by its canonical selection.</param>
-    /// <returns>The validated native image and GitHub provenance.</returns>
-    internal static ComparisonExecutionIdentity? ReadIsolated(IConfiguration configuration, string sourceRevision,
-        ComparisonTopology topology, string? scaledProfileId = null, string? vectorProfileId = null, string? documentProfileId = null)
-        => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false, isIsolated: true,
-            isolatedScaleProfileId: scaledProfileId, isolatedVectorProfileId: vectorProfileId, isolatedDocumentProfileId: documentProfileId);
-
-    /// <summary>Requires the separate intensive TimeSeries family identity.</summary>
-    internal static ComparisonExecutionIdentity ReadTimeSeriesIntensive(IConfiguration configuration, string sourceRevision)
-        => ReadIdentity(configuration, sourceRevision, topology: null, isTimeSeries: false, isIntensiveTimeSeries: true)
-            ?? throw InvalidIdentity();
-
-    private static ComparisonExecutionIdentity? ReadIdentity(IConfiguration configuration, string? sourceRevision,
-        ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false, bool isIntensiveTimeSeries = false,
-        string? isolatedScaleProfileId = null, string? isolatedVectorProfileId = null, string? isolatedDocumentProfileId = null)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        var loadGeneratorImage = configuration[LoadGeneratorImageSetting];
-        if (loadGeneratorImage is null)
-        {
-            return null;
-        }
-
+        var loadGeneratorImage = Required(configuration, LoadGeneratorImageSetting);
         var keyLoadImage = Required(configuration, KeyLoadImageSetting);
         var runId = PositiveInt64(Required(configuration, RunIdSetting));
         var runAttempt = PositiveInt32(Required(configuration, RunAttemptSetting));
@@ -95,86 +45,19 @@ internal sealed record ComparisonExecutionIdentity(
         var workflow = Nonempty(Required(configuration, WorkflowSetting));
         var gitHubSha = Required(configuration, GitHubShaSetting);
         var configuredRevision = Required(configuration, SourceRevisionSetting);
-        var profile = Required(configuration, isIntensiveTimeSeries
-            ? TimeSeriesIntensiveSelection.EvidenceProfileSetting : EvidenceProfileSetting);
-
+        var profile = Required(configuration, EvidenceProfileSetting);
         var hostExecution = NativeComparisonExecutionRegistration.ReadHost(configuration);
         if (!ComparisonExecutionIdentityImageReference.IsValid(keyLoadImage, hostExecution)
             || !ComparisonExecutionIdentityImageReference.IsValid(loadGeneratorImage, hostExecution)
-            || !IsRevision(sourceRevision)
-            || !string.Equals(sourceRevision, configuredRevision, StringComparison.Ordinal)
-            || !IsRevision(gitHubSha)
-            || !string.Equals(sourceRevision, gitHubSha, StringComparison.Ordinal)
-            || (isIsolated && isolatedScaleProfileId is not null
-                && !string.Equals(configuration[ComparisonWorkerSelection.ScaleProfileSetting], isolatedScaleProfileId,
-                    StringComparison.Ordinal))
-            || (isIsolated && isolatedVectorProfileId is not null
-                && !string.Equals(configuration[ComparisonWorkerSelection.VectorProfileSetting], isolatedVectorProfileId,
-                    StringComparison.Ordinal))
-            || !IsAcceptedExecutionProfile(profile, topology, isTimeSeries, isIsolated, isIntensiveTimeSeries,
-                isolatedScaleProfileId, isolatedVectorProfileId, isolatedDocumentProfileId))
+            || !IsRevision(sourceRevision) || sourceRevision != configuredRevision
+            || !IsRevision(gitHubSha) || sourceRevision != gitHubSha
+            || !Enum.IsDefined(topology) || profile != BenchmarkSessionContract.Profile
+            || repository != CanonicalRepository || gitHubRef != CanonicalRef || workflow != CanonicalWorkflow)
         {
             throw InvalidIdentity();
         }
-
         return new(new GitHubProvenance(runId, runAttempt, repository, gitHubRef, workflow, profile),
             keyLoadImage, loadGeneratorImage);
-    }
-
-    private static bool IsAcceptedExecutionProfile(string profile, ComparisonTopology? topology,
-        bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries, string? isolatedScaleProfileId,
-        string? isolatedVectorProfileId, string? isolatedDocumentProfileId)
-    {
-        if (isIntensiveTimeSeries)
-        {
-            return profile == TimeSeriesIntensiveFamilyContract.Current.EvidenceProfile;
-        }
-        if (!isIsolated)
-        {
-            return IsAcceptedProfile(profile, topology, isTimeSeries);
-        }
-        if (topology is not { } selected || !Enum.IsDefined(selected)
-            || (isolatedScaleProfileId is not null && isolatedVectorProfileId is not null))
-        {
-            return false;
-        }
-        if (isolatedDocumentProfileId is not null)
-        {
-            return isolatedScaleProfileId is null && isolatedVectorProfileId is null && profile == isolatedDocumentProfileId;
-        }
-        if (isolatedScaleProfileId is not null)
-        {
-            return profile == isolatedScaleProfileId && IsExactScaledProfile(isolatedScaleProfileId);
-        }
-        if (isolatedVectorProfileId is not null)
-        {
-            return profile == isolatedVectorProfileId && IsExactVectorProfile(isolatedVectorProfileId);
-        }
-        return profile == IsolatedComparisonContract.Current.Profile;
-    }
-
-    private static bool IsExactVectorProfile(string profile)
-    {
-        try
-        {
-            return VectorComparisonProfile.Parse(profile).Id == profile;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return false;
-        }
-    }
-
-    private static bool IsExactScaledProfile(string profile)
-    {
-        try
-        {
-            return ScaledComparisonProfileParser.Parse(profile).Id == profile;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return false;
-        }
     }
 
     private static string Required(IConfiguration configuration, string key)
@@ -196,15 +79,6 @@ internal sealed record ComparisonExecutionIdentity(
     private static bool IsRevision(string? value)
         => value is { Length: RevisionLength }
             && value.All(static character => character is >= ComparisonExecutionIdentityValues.FirstDecimalDigit and <= ComparisonExecutionIdentityValues.LastDecimalDigit or >= ComparisonExecutionIdentityValues.ACharacter and <= ComparisonExecutionIdentityValues.FCharacter);
-
-    private static bool IsAcceptedProfile(string profile, ComparisonTopology? topology, bool isTimeSeries)
-        => isTimeSeries
-            ? string.Equals(profile, TimeSeriesEvidenceProfile, StringComparison.Ordinal)
-            : EvidenceProfiles.Contains(profile, StringComparer.Ordinal)
-                && (topology == ComparisonTopology.Standalone
-                ? profile.EndsWith(SingleSuffix, StringComparison.Ordinal)
-                : topology == ComparisonTopology.Replicated
-                    && profile.EndsWith(ReplicatedSuffix, StringComparison.Ordinal));
 
     private static InvalidOperationException InvalidIdentity() => new(InvalidIdentityCode);
 }

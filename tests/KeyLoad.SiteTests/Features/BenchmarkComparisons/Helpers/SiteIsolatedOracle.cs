@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
@@ -6,64 +7,91 @@ internal sealed record SiteIsolatedSelection(string Scenario, int NodeCount, obj
 internal sealed record SiteIsolatedExpectedRow(string Name, string Status, double? Value, int NodeCount,
     string WorkerId, long JobId, long ArtifactId);
 
+/// <summary>Independent native arithmetic for a single original case or concurrent lane, without repetition pooling.</summary>
 internal static class SiteIsolatedOracle
 {
+    private const string Images = "images";
+    private const string Server = "server";
+    internal static readonly string[] Cases = ["load-million", "index", "sequential-read", "random-read", "search", "mixed", "verify-final",
+        "mixed/create", "mixed/delete", "mixed/update", "mixed/read", "mixed/search"];
+
     public static SiteIsolatedExpectedRow[] Rows(JsonElement projection, SiteIsolatedSelection selection)
     {
-        var rows = new List<SiteIsolatedExpectedRow>();
-        foreach (var worker in projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray())
-        {
-            var target = worker.GetProperty(SiteIsolatedFields.Target).GetString()!;
-            if (worker.GetProperty(SiteIsolatedFields.Scenario).GetString() != selection.Scenario ||
-                worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() != selection.NodeCount ||
-                selection.Target != "all" && selection.Target != target)
-            {
-                continue;
-            }
-            var report = worker.GetProperty(SiteIsolatedFields.Report);
-            var cases = report.ValueKind == JsonValueKind.Null ? [] : report.GetProperty(SiteIsolatedFields.Cases).EnumerateArray()
-                .Where(item => selection.Repetition is string || item.GetProperty(SiteIsolatedFields.Repetition).GetInt32() == (int)selection.Repetition).ToArray();
-            var measured = cases.Where(item => item.GetProperty(SiteIsolatedFields.Measurement).ValueKind != JsonValueKind.Null)
-                .Select(item => item.GetProperty(SiteIsolatedFields.Measurement)).ToArray();
-            var status = report.ValueKind == JsonValueKind.Null
-                ? worker.GetProperty(SiteIsolatedFields.Disposition).GetString()!
-                : measured.Length == 0 ? "unsupported" : "measured";
-            var value = Median(measured.Select(item => Metric(item, selection.Metric))
-                .Where(item => item is not null).Select(item => item!.Value).ToArray());
-            rows.Add(new(target, status, value, selection.NodeCount, worker.GetProperty(SiteIsolatedFields.Id).GetString()!,
-                worker.GetProperty(SiteIsolatedFields.Job).GetProperty(SiteIsolatedFields.Id).GetInt64(), worker.GetProperty(SiteIsolatedFields.Artifact).GetProperty(SiteIsolatedFields.Id).GetInt64()));
-        }
-        return selection.Metric == "throughput"
-            ? rows.OrderBy(row => row.Value is null).ThenByDescending(row => row.Value).ToArray()
+        var rows = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+            .Where(worker => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == selection.NodeCount
+                && (selection.Target == "all" || selection.Target == worker.GetProperty(SiteIsolatedFields.Target).GetString()))
+            .Select(worker => Row(worker, selection));
+        return selection.Metric == "throughput" ? rows.OrderBy(row => row.Value is null).ThenByDescending(row => row.Value).ToArray()
             : rows.OrderBy(row => row.Value is null).ThenBy(row => row.Value).ToArray();
     }
 
-    private static double? Metric(JsonElement measurement, string metric) => metric switch
+    private static SiteIsolatedExpectedRow Row(JsonElement worker, SiteIsolatedSelection selection)
     {
-        "throughput" => measurement.GetProperty(SiteIsolatedFields.UsefulOperationsPerSecond).GetDouble(),
-        "p50" => measurement.GetProperty(SiteIsolatedFields.Latency).GetProperty(SiteIsolatedFields.P50Ms).GetDouble(),
-        "p95" => measurement.GetProperty(SiteIsolatedFields.Latency).GetProperty(SiteIsolatedFields.P95Ms).GetDouble(),
-        "p99" => measurement.GetProperty(SiteIsolatedFields.Latency).GetProperty(SiteIsolatedFields.P99Ms).GetDouble(),
-        "errors" => measurement.GetProperty(SiteIsolatedFields.Failures).GetDouble() / measurement.GetProperty(SiteIsolatedFields.Attempts).GetDouble() * 100,
-        "enqueue" or "receive" or "ack" => measurement.GetProperty(metric).ValueKind == JsonValueKind.Null ? null :
-            measurement.GetProperty(metric).GetProperty(SiteIsolatedFields.P99Ms).GetDouble(),
-        "cpu" => measurement.GetProperty(SiteIsolatedFields.ClientResources).GetProperty(SiteIsolatedFields.CpuSeconds).GetDouble() * 1000 /
-            measurement.GetProperty(SiteIsolatedFields.Attempts).GetDouble(),
-        "alloc" => measurement.GetProperty(SiteIsolatedFields.ClientResources).GetProperty(SiteIsolatedFields.AllocatedBytes).GetDouble() / 1024 /
-            measurement.GetProperty(SiteIsolatedFields.Attempts).GetDouble(),
-        "rss" => measurement.GetProperty(SiteIsolatedFields.ClientResources).GetProperty(SiteIsolatedFields.PeakObservedWorkingSetBytes).GetDouble() / 1048576,
-        _ => throw new ArgumentOutOfRangeException(nameof(metric)),
-    };
+        var parts = selection.Scenario.Split('/');
+        var report = worker.GetProperty(SiteIsolatedFields.Reports).EnumerateArray()
+            .Single(item => item.GetProperty(SiteIsolatedFields.CaseId).GetString() == parts[0]);
+        var status = report.GetProperty(SiteIsolatedFields.Status).GetString()!;
+        var profile = worker.GetProperty(SiteIsolatedFields.Session).GetProperty(SiteIsolatedFields.TargetProfile);
+        var qualified = Qualified(worker, profile);
+        var lane = SelectedLane(report, parts);
+        var value = Value(report, lane, status, qualified, selection.Metric);
+        var displayedStatus = status == "notQualified" || status == "measured" && !qualified ? "failed"
+            : status == "unavailable" ? TopologyUnavailable(worker) ? "unsupportedTopology" : "unsupported" : status;
+        return new(worker.GetProperty(SiteIsolatedFields.Target).GetString()!, displayedStatus, value,
+            selection.NodeCount, worker.GetProperty(SiteIsolatedFields.Id).GetString()!,
+            worker.GetProperty(SiteIsolatedFields.Job).GetProperty(SiteIsolatedFields.Id).GetInt64(),
+            worker.GetProperty(SiteIsolatedFields.Artifact).GetProperty(SiteIsolatedFields.Id).GetInt64());
+    }
 
-    private static double? Median(double[] values)
+    private static bool TopologyUnavailable(JsonElement worker)
+        => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3
+            && new[] { "Neo4j", "SurrealDB", "HelixDB" }.Contains(worker.GetProperty(SiteIsolatedFields.Target).GetString(), StringComparer.Ordinal)
+            && worker.GetProperty(SiteIsolatedFields.Session).GetProperty(Images).GetProperty(Server).ValueKind == JsonValueKind.Null;
+
+    private static bool Qualified(JsonElement worker, JsonElement profile)
+        => worker.GetProperty(SiteIsolatedFields.ResourceQualified).GetBoolean()
+            && worker.GetProperty(SiteIsolatedFields.Qualification).GetProperty(SiteIsolatedFields.Status).GetString() != "failed"
+            && profile.ValueKind != JsonValueKind.Null
+            && !new[] { profile.GetProperty(SiteIsolatedFields.Version).GetString()!,
+                profile.GetProperty(SiteIsolatedFields.Topology).GetString()!,
+                profile.GetProperty(SiteIsolatedFields.Cluster).GetProperty(SiteIsolatedFields.State).GetString()! }
+                .Any(value => Regex.IsMatch(value, "unverified|unobserved|unknown|not recorded", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+
+    private static JsonElement? SelectedLane(JsonElement report, string[] parts)
     {
-        if (values.Length == 0)
+        var lanes = report.GetProperty(SiteIsolatedFields.Lanes).EnumerateArray().ToArray();
+        return parts.Length == 2 ? lanes.Cast<JsonElement?>()
+            .SingleOrDefault(item => item!.Value.GetProperty(SiteIsolatedFields.Id).GetString() == parts[1])
+            : lanes.Length == 1 ? lanes[0] : null;
+    }
+
+    private static double? Value(JsonElement report, JsonElement? lane, string status, bool qualified, string metric)
+    {
+        if (status != "measured" || !qualified)
         {
             return null;
         }
 
-        Array.Sort(values);
-        var middle = values.Length / 2;
-        return values.Length % 2 == 0 ? (values[middle - 1] + values[middle]) / 2 : values[middle];
+        return metric == "duration"
+            ? lane?.GetProperty(SiteIsolatedFields.Measurement).GetProperty(SiteIsolatedFields.ElapsedSeconds).GetDouble()
+                ?? report.GetProperty(SiteIsolatedFields.ElapsedSeconds).GetDouble()
+            : lane is null ? null : Metric(lane.Value.GetProperty(SiteIsolatedFields.Measurement), metric);
+    }
+
+    private static double? Metric(JsonElement measurement, string metric)
+    {
+        var resources = measurement.GetProperty(SiteIsolatedFields.ClientResources);
+        var attempts = measurement.GetProperty(SiteIsolatedFields.Attempts).GetDouble();
+        return metric switch
+        {
+            "throughput" => measurement.GetProperty(SiteIsolatedFields.UsefulOperationsPerSecond).GetDouble(),
+            "p50" or "p95" or "p99" => measurement.GetProperty(SiteIsolatedFields.Latency).GetProperty(metric + SiteIsolatedFields.Ms).GetDouble(),
+            "errors" => attempts == 0 ? 0 : measurement.GetProperty(SiteIsolatedFields.Failures).GetDouble() / attempts * 100,
+            "enqueue" or "receive" or "ack" => measurement.GetProperty(metric).ValueKind == JsonValueKind.Null ? null : measurement.GetProperty(metric).GetProperty(SiteIsolatedFields.P99Ms).GetDouble(),
+            "cpu" => resources.ValueKind == JsonValueKind.Null || attempts == 0 ? null : resources.GetProperty(SiteIsolatedFields.CpuSeconds).GetDouble() * 1000 / attempts,
+            "alloc" => resources.ValueKind == JsonValueKind.Null || attempts == 0 ? null : resources.GetProperty(SiteIsolatedFields.AllocatedBytes).GetDouble() / 1024 / attempts,
+            "rss" => resources.ValueKind == JsonValueKind.Null ? null : resources.GetProperty(SiteIsolatedFields.PeakObservedWorkingSetBytes).GetDouble() / 1048576,
+            _ => throw new ArgumentOutOfRangeException(nameof(metric)),
+        };
     }
 }

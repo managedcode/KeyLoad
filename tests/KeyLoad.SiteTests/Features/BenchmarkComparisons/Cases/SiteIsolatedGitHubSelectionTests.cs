@@ -29,8 +29,7 @@ internal sealed class SiteIsolatedGitHubSelectionTests
             var job = pages.SelectMany(page => page![SiteIsolatedGitHubSelectionFields.Jobs]!.AsArray())
                 .Single(value => value![SiteIsolatedGitHubTokens.Id]!.GetValue<long>() == id)!;
             var steps = job[SiteIsolatedGitHubFields.Steps]!.AsArray();
-            var required = scope.Inputs.Metadata[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubFields.Steps]![SiteIsolatedGitHubTokens.Zero]!
-                [SiteIsolatedGitHubFields.Name]!.GetValue<string>();
+            var required = "Check complete session accounting";
             steps.Remove(steps.Single(step => step![SiteIsolatedGitHubFields.Name]!.GetValue<string>() == required));
         }, token);
         await Assert.That((await scope.SelectAsync(token)).GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();

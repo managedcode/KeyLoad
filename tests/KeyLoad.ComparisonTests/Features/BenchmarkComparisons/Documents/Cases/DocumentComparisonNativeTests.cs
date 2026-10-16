@@ -7,20 +7,12 @@ internal sealed class DocumentComparisonNativeTests
 {
     private const long NoObservedOperations = 0;
     private const long CancellationAcknowledgements = 20;
-    private const long MeasuredOperations = 100;
     private const int FirstRecord = 0;
     private const int SingleClient = 1;
-    private const int ConcurrentClients = 10;
     private const int OrdinaryClients = 16;
     private const int CancellationThreshold = 20;
     private const int SmallCorpusRecords = 100;
     private const int MaximumIdentityExclusive = 101;
-    private const int InitialRecords = 200;
-    private const int CreatedFinalRecords = 300;
-    private const int CancellationOperations = 1000;
-    private const int CanonicalRecords = 100_000;
-    private const int CanonicalIngestionRecords = 1_000_000;
-    private const string DevelopmentFamily = "document-v1-development";
     private const string MeasuredStatus = "measured";
     private const string FailedStatus = "failed";
     private const string SurrealTarget = "SurrealDB";
@@ -28,86 +20,73 @@ internal sealed class DocumentComparisonNativeTests
     private const string SurrealBuildVersion = "surrealdb-3.2.4+20260803.93ab219";
 
     [Test]
-    [Arguments("SurrealDB", DocumentComparisonScenario.SequentialRead)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.RandomRead)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.Create)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.Update)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.Delete)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.ReadUpdate50)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.ReadUpdate95)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.MixedCrud)]
-    [Arguments("SurrealDB", DocumentComparisonScenario.Ingest)]
-    [Arguments("HelixDB", DocumentComparisonScenario.SequentialRead)]
-    [Arguments("HelixDB", DocumentComparisonScenario.RandomRead)]
-    [Arguments("HelixDB", DocumentComparisonScenario.Create)]
-    [Arguments("HelixDB", DocumentComparisonScenario.Update)]
-    [Arguments("HelixDB", DocumentComparisonScenario.Delete)]
-    [Arguments("HelixDB", DocumentComparisonScenario.ReadUpdate50)]
-    [Arguments("HelixDB", DocumentComparisonScenario.ReadUpdate95)]
-    [Arguments("HelixDB", DocumentComparisonScenario.MixedCrud)]
-    [Arguments("HelixDB", DocumentComparisonScenario.Ingest)]
-    public async Task RealNativeSharedScheduleVerifiesCompleteFinalState(string name, DocumentComparisonScenario scenario)
+    [Arguments("SurrealDB")]
+    [Arguments("HelixDB")]
+    public async Task ControlledNativeSessionRetainsOneCorpusAcrossLoadReadsSearchAndConcurrentMutations(string name)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var fixture = await NativeDatabaseFlowFixture.CreateAsync(name, token);
-        var clients = scenario == DocumentComparisonScenario.Ingest ? ConcurrentClients : OrdinaryClients;
-        var selected = new DocumentComparisonSelection(scenario, scenario == DocumentComparisonScenario.Ingest ? CanonicalIngestionRecords : CanonicalRecords, clients);
-        var runner = new DocumentComparisonRunner(NativeDatabaseFlowFixture.ExecutionOptions);
-        var report = await runner.RunDevelopmentAsync((_, cancellation) => OpenTargetAsync(fixture, name, cancellation), selected,
-            records: InitialRecords, operations: SmallCorpusRecords, token);
-        var repetition = report.Repetitions.Single();
-        await Assert.That(report.Family).IsEqualTo(DevelopmentFamily);
-        await Assert.That(report.Qualified).IsFalse();
-        await Assert.That(repetition.Status).IsEqualTo(MeasuredStatus);
-        await Assert.That(repetition.Errors).IsEmpty();
-        await Assert.That(repetition.OpenedClients).IsEqualTo(clients);
-        await Assert.That(repetition.Attempts).IsEqualTo(MeasuredOperations);
-        await Assert.That(repetition.Acknowledged).IsEqualTo(MeasuredOperations);
-        await Assert.That(repetition.Failed + repetition.Canceled + repetition.Unfinished).IsEqualTo(NoObservedOperations);
-        await Assert.That(repetition.Histogram.Count).IsEqualTo(MeasuredOperations);
-        await Assert.That(repetition.Histogram.BucketCounts.Sum()).IsEqualTo(MeasuredOperations);
-        await Assert.That(repetition.Histogram.OverflowCount).IsEqualTo(NoObservedOperations);
-        await Assert.That(repetition.ActualFinalRecords).IsEqualTo(scenario switch
+        await using var target = await OpenTargetAsync(fixture, name, token);
+        var options = new BenchmarkSessionOptions { Records = 600, Operations = 100, Concurrency = OrdinaryClients };
+        var session = new BenchmarkSession(target, NativeDatabaseFlowFixture.ExecutionOptions, options, development: true);
+        var load = await session.LoadAsync(token);
+        await Assert.That(load.Status).IsEqualTo(MeasuredStatus);
+        await Assert.That(load.VerifiedRecords).IsEqualTo(options.Records);
+        await Assert.That(load.Lanes.Single().Measurement.Attempts).IsEqualTo(options.Records);
+        var index = await session.IndexAsync(token);
+        await Assert.That(index.Status is MeasuredStatus or "unavailable").IsTrue().Because(index.Detail ?? index.CaseId);
+        foreach (var read in new[] { await session.SequentialReadAsync(token), await session.RandomReadAsync(token) })
         {
-            DocumentComparisonScenario.Ingest => SmallCorpusRecords,
-            DocumentComparisonScenario.Create => CreatedFinalRecords,
-            DocumentComparisonScenario.Delete => SmallCorpusRecords,
-            _ => InitialRecords
-        });
-        await Assert.That(repetition.ActualSha256).IsEqualTo(repetition.ExpectedSha256);
+            await Assert.That(read.Status).IsEqualTo(MeasuredStatus).Because(read.Detail ?? read.CaseId);
+            await Assert.That(read.Lanes.Single().Measurement.Successes).IsEqualTo(options.Operations);
+            await Assert.That(read.Lanes.Single().Samples.All(sample => sample.Success)).IsTrue();
+        }
+        var search = await session.SearchAsync(token);
+        await Assert.That(search.Status is MeasuredStatus or "unavailable").IsTrue().Because(search.Detail ?? search.CaseId);
+        var mixed = await session.MixedAsync(token);
+        await Assert.That(mixed.Status).IsEqualTo(MeasuredStatus).Because(mixed.Detail ?? mixed.CaseId);
+        await Assert.That(mixed.Lanes.Select(lane => lane.Id)).Contains("create");
+        await Assert.That(mixed.Lanes.Select(lane => lane.Id)).Contains("delete");
+        await Assert.That(mixed.Lanes.All(lane => lane.Measurement.Successes == options.Operations)).IsTrue();
+        var final = await session.VerifyAsync(token);
+        await Assert.That(final.Status).IsEqualTo(MeasuredStatus).Because(final.Detail ?? final.CaseId);
+        await Assert.That(final.VerifiedRecords).IsEqualTo(options.Records);
     }
 
     [Test]
     [Arguments("SurrealDB")]
     [Arguments("HelixDB")]
-    public async Task CancellationAfterActualAcknowledgementsSettlesClientsThenHealthyNativeFollowup(string name)
+    public async Task CancellationRetainsActualAcknowledgementsAndPoisonedSessionWhileNewNativeScopeRemainsHealthy(string name)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var fixture = await NativeDatabaseFlowFixture.CreateAsync(name, token);
+        await using var target = await OpenTargetAsync(fixture, name, token);
         using var canceled = CancellationTokenSource.CreateLinkedTokenSource(token);
         var observed = NoObservedOperations;
-        var runner = new DocumentComparisonRunner(NativeDatabaseFlowFixture.ExecutionOptions, nativeProgress: progress =>
-        {
-            Interlocked.Exchange(ref observed, progress.Acknowledged);
-            if (progress.Acknowledged >= CancellationThreshold)
+        var options = new BenchmarkSessionOptions { Records = 6000, Operations = 1000, Concurrency = OrdinaryClients };
+        var session = new BenchmarkSession(target, NativeDatabaseFlowFixture.ExecutionOptions, options, development: true,
+            progress: progress =>
             {
-                canceled.Cancel();
-            }
-        });
-        var selection = new DocumentComparisonSelection(DocumentComparisonScenario.Ingest, CanonicalIngestionRecords, ConcurrentClients);
-        var failed = await runner.RunDevelopmentAsync((_, cancellation) => OpenTargetAsync(fixture, name, cancellation),
-            selection, records: CancellationOperations, operations: CancellationOperations, canceled.Token);
+                Interlocked.Exchange(ref observed, progress.Acknowledged);
+                if (progress.Acknowledged >= CancellationThreshold)
+                {
+                    canceled.Cancel();
+                }
+            });
+        var failed = await session.LoadAsync(canceled.Token);
         await Assert.That(observed).IsGreaterThanOrEqualTo(CancellationAcknowledgements);
         await Assert.That(failed.Status).IsEqualTo(FailedStatus);
-        await Assert.That(failed.Qualified).IsFalse();
-        var actual = failed.Repetitions.Single();
-        await Assert.That(actual.Attempts).IsEqualTo(actual.Acknowledged + actual.Failed + actual.Canceled);
-        await Assert.That(actual.Histogram.Count).IsEqualTo(actual.Attempts);
-        var healthy = await new DocumentComparisonRunner(NativeDatabaseFlowFixture.ExecutionOptions)
-            .RunDevelopmentAsync((_, cancellation) => OpenTargetAsync(fixture, name, cancellation), selection,
-                records: InitialRecords, operations: SmallCorpusRecords, token);
-        await Assert.That(healthy.Repetitions.Single().Status).IsEqualTo(MeasuredStatus);
-        await Assert.That(healthy.Repetitions.Single().ActualFinalRecords).IsEqualTo(SmallCorpusRecords);
+        var actual = failed.Lanes.Single().Measurement;
+        await Assert.That(actual.Attempts).IsEqualTo(actual.Successes + actual.Failures);
+        await Assert.That(actual.Successes).IsGreaterThanOrEqualTo(CancellationAcknowledgements);
+        await Assert.That((long)failed.Lanes.Single().Samples.Length).IsEqualTo(actual.Attempts);
+        await Assert.That((await session.SequentialReadAsync(token)).Status).IsEqualTo(FailedStatus);
+        await using var healthyTarget = await OpenTargetAsync(fixture, name, token);
+        var healthy = new BenchmarkSession(healthyTarget, NativeDatabaseFlowFixture.ExecutionOptions,
+            new BenchmarkSessionOptions { Records = 600, Operations = 100, Concurrency = OrdinaryClients }, development: true);
+        var next = await healthy.LoadAsync(token);
+        await Assert.That(next.Status).IsEqualTo(MeasuredStatus).Because(next.Detail ?? next.CaseId);
+        await Assert.That(next.VerifiedRecords).IsEqualTo(600);
     }
 
     [Test]

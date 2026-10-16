@@ -49,7 +49,7 @@ internal static class ProtocolCohortImages
         if (!configuration.GetValue<bool>(EphemeralSetting)
             || !string.IsNullOrWhiteSpace(configuration[TestSuiteSettings.SuiteSetting])
             || configuration.GetValue<bool>(BenchmarkSetting)
-            || configuration[Comparisons.ComparisonWorkerSelection.TargetSetting] is not null
+            || configuration[Comparisons.BenchmarkSessionSelection.TargetSetting] is not null
             || selected.Length != Voters.Length
             || selected.Any(child => !Voters.Contains(child.Key, StringComparer.Ordinal)
                 || child.Value is null || child.GetChildren().Any()))

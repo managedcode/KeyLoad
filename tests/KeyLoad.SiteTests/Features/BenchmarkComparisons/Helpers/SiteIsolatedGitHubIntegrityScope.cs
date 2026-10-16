@@ -35,7 +35,7 @@ internal sealed class SiteIsolatedGitHubIntegrityScope : IAsyncDisposable
                 }, token);
             if (!result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean() ||
                 result.GetProperty(SiteIsolatedGitHubFields.Result).GetProperty(SiteIsolatedGitHubTokens.FileCountField).GetInt32() !=
-                    SiteIsolatedGitHubTokens.FileCount)
+                    original.Files.Length)
             {
                 throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
             }

@@ -81,14 +81,14 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
         {
             return await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(async () =>
             {
-                var repository = IsolatedAggregateNodeProcess.RepositoryRoot();
+                var repository = SessionNodeProcess.RepositoryRoot();
                 var arguments = new[]
                 {
                     "--input-type=module", "-e", SetupProgram,
-                    IsolatedAggregateNodeProcess.Module("image-process.mjs"),
+                    SessionNodeProcess.Module("image-process.mjs"),
                     Path.Combine(repository, ".gitignore"), root
                 };
-                var result = await IsolatedAggregateNodeProcess.RunAsync(arguments, token);
+                var result = await SessionNodeProcess.RunAsync(arguments, token);
                 if (result.ExitCode != 0 || result.Error.Length != 0)
                 {
                     throw new InvalidOperationException("Actual temporary Git checkout setup failed.");
@@ -117,9 +117,9 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
 
     internal async Task<SourceCheckoutResult> VerifySourceCheckoutAsync(CancellationToken token)
     {
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", VerifyProgram,
-                IsolatedAggregateNodeProcess.Module("prepare-images.mjs"), root, head], token);
+                SessionNodeProcess.Module("prepare-images.mjs"), root, head], token);
         if (result.ExitCode != 0 || result.Error.Length != 0)
         {
             throw new InvalidOperationException("Production source checkout validation did not settle successfully.");

@@ -34,7 +34,7 @@ internal sealed class NativeDatabaseVectorFlowTests
 
         await Assert.That(readback.Count).IsEqualTo(256);
         await Assert.That(readback.All(row => row.Dimensions == profile.Dimensions && row.VectorSha256 == VectorComparisonCorpus.HashVector(corpus.Create(row.Number).Embedding.Span))).IsTrue();
-        await NativeDatabaseClockFlow.VerifyCancelledVectorRunnerAsync(target, profile,
+        await NativeDatabaseClockFlow.VerifyCancelledNativeVectorReadAsync(target, profile,
             NativeDatabaseFlowFixture.ExecutionOptions, timeProvider, token);
         foreach (var mode in new[] { VectorQueryMode.Plain, VectorQueryMode.Filtered, VectorQueryMode.Mixed })
         {

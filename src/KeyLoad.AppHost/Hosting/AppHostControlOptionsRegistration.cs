@@ -17,12 +17,7 @@ internal static class AppHostControlOptionsRegistration
 {
     internal const string InvalidContainerFaultSelection = "Container fault commands require an explicit ephemeral RF3 test profile.";
     private const string ProtocolSection = "KeyLoadTests:ProtocolCohort";
-    private const string BenchmarkEnabled = "Benchmarks:Enabled";
-    private const string BenchmarkScale = "Benchmarks:ScaleProfile";
-    private const string BenchmarkScenario = "Benchmarks:Scenario";
-    private const string BenchmarkProfile = "Benchmarks:Profile";
-    private const string BenchmarkNodes = "Benchmarks:NodeCount";
-    private const string BenchmarkTimeSeries = "Benchmarks:TimeSeries";
+    private const string BenchmarkSection = "Benchmarks";
     private const string LoggerModelControlSetting = "KeyLoadTests:LoggerModelControl";
     private const string LoggerModelControlEnabledValue = "true";
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
@@ -60,12 +55,9 @@ internal static class AppHostControlOptionsRegistration
                 value.ProtocolCohortEnabled = configuration.GetValue<bool>(ProtocolCohortImages.EnabledSetting);
                 value.Ephemeral = configuration.GetValue<bool>(TwoRf3ProfileProtocol.EphemeralSetting);
                 value.BenchmarksEnabled = configuration.GetValue<bool>(TwoRf3ProfileProtocol.BenchmarksEnabledSetting);
-                value.TargetSelected = configuration[ComparisonWorkerSelection.TargetSetting] is not null;
+                value.TargetSelected = configuration[BenchmarkSessionSelection.TargetSetting] is not null;
                 value.ProtocolCohortConfigured = configuration.GetSection(ProtocolSection).GetChildren().Take(SectionPresenceCount).Any();
-                value.ComparisonSelectorsPresent = HasValue(configuration, BenchmarkEnabled)
-                    || HasValue(configuration, ComparisonWorkerSelection.TargetSetting) || HasValue(configuration, BenchmarkNodes)
-                    || HasValue(configuration, BenchmarkScenario) || HasValue(configuration, BenchmarkProfile) || HasValue(configuration, BenchmarkScale);
-                value.ScaleSelected = configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null;
+                value.ComparisonSelectorsPresent = HasSection(configuration, BenchmarkSection);
                 value.ContainerFaults = ReadContainerFaults(configuration, value);
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
                 value.MovementFrameObservation = MovementFrameObservationSettingsReader.Read(configuration, value);
@@ -94,17 +86,13 @@ internal static class AppHostControlOptionsRegistration
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting])
             || !Path.IsPathFullyQualified(configuration[DataRootSetting]!)
             || options.Tests is not null || options.TwoRf3 || options.BenchmarksEnabled
-            || options.TargetSelected || options.ComparisonSelectorsPresent || options.ScaleSelected
+            || options.TargetSelected || options.ComparisonSelectorsPresent
             || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured
             || options.ContainerFaults && !options.FunctionalColdReopen
             || options.LoggerModelControl || options.RequestProbe is not null
             || options.MovementFrameObservation is not null || options.NativeDiscoveryOmission is not null
             || options.EventVectorReservedProbe || options.NativeBlobWireProbe is not null || options.ProtectedMovementProbe
-            || HasSection(configuration, BenchmarkTimeSeries)
-            || configuration[ComparisonWorkerSelection.OpenLoopRateSetting] is not null
-            || configuration[ComparisonWorkerSelection.VectorProfileSetting] is not null
-            || configuration[TestSuiteSelectionValidator.OpenLoopRateSetting] is not null
-            || configuration[TestSuiteSelectionValidator.OpenLoopCancellationProofSetting] is not null)
+            || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration))
         {
             throw new InvalidOperationException(InvalidFunctionalTopology);
         }
@@ -115,7 +103,7 @@ internal static class AppHostControlOptionsRegistration
     {
         var enabled = configuration.GetValue<bool>(ContainerFaultCommandProtocol.EnabledSetting);
         if (enabled && (!options.Ephemeral || options.BenchmarksEnabled || options.TargetSelected
-            || options.ComparisonSelectorsPresent || options.ScaleSelected))
+            || options.ComparisonSelectorsPresent))
         {
             throw new InvalidOperationException(InvalidContainerFaultSelection);
         }
@@ -156,12 +144,8 @@ internal static class AppHostControlOptionsRegistration
             || hasNestedSelection
             || options.Tests is not null || options.RequestProbe is not null || options.TwoRf3
             || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.BenchmarksEnabled
-            || options.TargetSelected || options.ComparisonSelectorsPresent || options.ScaleSelected
-            || configuration[ComparisonWorkerSelection.OpenLoopRateSetting] is not null
-            || configuration[ComparisonWorkerSelection.VectorProfileSetting] is not null
-            || configuration[TestSuiteSelectionValidator.OpenLoopRateSetting] is not null
-            || configuration[TestSuiteSelectionValidator.OpenLoopCancellationProofSetting] is not null
-            || HasSection(configuration, BenchmarkTimeSeries)
+            || options.TargetSelected || options.ComparisonSelectorsPresent
+            || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration)
             || configuration[LocalRf3ImageRequest.EnabledSetting] == LoggerModelControlEnabledValue
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting]))
@@ -177,6 +161,4 @@ internal static class AppHostControlOptionsRegistration
         var section = configuration.GetSection(key);
         return section.Value is not null || section.GetChildren().Take(SectionPresenceCount).Any();
     }
-
-    private static bool HasValue(IConfiguration configuration, string key) => !string.IsNullOrWhiteSpace(configuration[key]);
 }

@@ -25,10 +25,10 @@ internal sealed class ImageRegistryReadinessTests
     public async Task AcBcFail006ReadinessPreservesActualHttpBudgetsAndPrivateEvidence(string scenario)
     {
         using var directory = new ImageBundleTestDirectory();
-        var fixture = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), TestsDirectory, ProjectDirectory,
+        var fixture = Path.Combine(SessionNodeProcess.RepositoryRoot(), TestsDirectory, ProjectDirectory,
             FeaturesDirectory, SliceDirectory, "UnitContracts", "Processes", FixtureName);
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
-            [fixture, IsolatedAggregateNodeProcess.Module(ModuleName), scenario, directory.Root],
+        var result = await SessionNodeProcess.RunAsync(
+            [fixture, SessionNodeProcess.Module(ModuleName), scenario, directory.Root],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.Error).IsEmpty();
         await Assert.That(result.ExitCode).IsEqualTo(0);

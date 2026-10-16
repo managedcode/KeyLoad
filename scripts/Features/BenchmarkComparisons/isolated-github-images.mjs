@@ -46,10 +46,3 @@ export async function collectImageEvidence(input, selected, context) {
     images: { server: prepared.receipt.images.server.reference, loadGenerator: prepared.receipt.images.comparisons.reference } };
 }
 
-export function requireWorkerImages(envelope, images) {
-  if (envelope.report === null) return;
-  requireGitHub(envelope.report.loadGeneratorImage === images.loadGenerator);
-  if (envelope.worker.target === 'KeyLoad') {
-    requireGitHub(envelope.report.targets.length === 1 && envelope.report.targets[0].image === images.server);
-  }
-}

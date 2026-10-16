@@ -19,8 +19,8 @@ export const FUNCTIONAL = Object.freeze({
   archive: 'archives/keyload-functional-heavy-load.zip',
   className: 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadRf3Tests',
   methodName: 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads',
-  files: Object.freeze(['functional/original.trx', 'functional/images/image-receipt.json',
-    'functional/images/server-manifest.json', 'functional/images/comparisons-manifest.json']),
+  files: Object.freeze(['github/functional/original.trx', 'github/functional/images/image-receipt.json',
+    'github/functional/images/server-manifest.json', 'github/functional/images/comparisons-manifest.json']),
   maximumBytes: 33554432,
 });
 
@@ -91,8 +91,8 @@ export async function collectDocumentFunctionalGate(output, capture, context, se
   await downloadArtifact(selected.artifact, archive, GH.workerZipBytes, context);
   await validateDownloadedArchive(archive, selected.artifact, GH.workerZipBytes);
   const entries = originalEntries(await inspectNativeZip(archive, [], path.join(output, 'github/functional-inventory.txt'), context));
-  await createDirectory(path.join(output, 'functional'));
-  await createDirectory(path.join(output, 'functional/images'));
+  await createDirectory(path.join(output, 'github/functional'));
+  await createDirectory(path.join(output, 'github/functional/images'));
   const files = [];
   for (const [index, entry] of entries.entries()) {
     const raw = await extractNativeEntry(archive, entry, path.join(output, FUNCTIONAL.files[index]), FUNCTIONAL.maximumBytes, context);
@@ -106,7 +106,7 @@ export async function collectDocumentFunctionalGate(output, capture, context, se
   return proof;
 }
 
-export async function verifyDocumentFunctionalGate(input, supplied, capture, cohort, server, workspace = input) {
+export async function verifyDocumentFunctionalGate(input, supplied, capture, cohort, server, workspace = input, filesRoot = input) {
   const proof = validateDocumentFunctionalProof(supplied, cohort);
   const selected = selectDocumentFunctionalGate(capture, cohort);
   requireGitHub(isDeepStrictEqual(proof.job, projectJob(selected.job, cohort, FUNCTIONAL.steps))
@@ -120,13 +120,13 @@ export async function verifyDocumentFunctionalGate(input, supplied, capture, coh
     const entries = originalEntries(await inspectNativeZip(archive, [], path.join(temporary, 'inventory.txt'), context));
     for (const [index, file] of proof.files.entries()) {
       requireGitHub(file.entry === entries[index]);
-      const actual = await hashRegularFile(path.join(input, file.path), FUNCTIONAL.maximumBytes);
+      const actual = await hashRegularFile(path.join(filesRoot, file.path), FUNCTIONAL.maximumBytes);
       const original = await extractNativeEntry(archive, file.entry, path.join(temporary, String(index)), FUNCTIONAL.maximumBytes, context);
       requireGitHub(actual.bytes === file.bytes && actual.sha256 === file.sha256
         && original.bytes === actual.bytes && original.sha256 === actual.sha256);
     }
-    requireGitHub(isDeepStrictEqual(proof.test, await parseDocumentFunctionalTrx(path.join(input, FUNCTIONAL.files[0]), workspace)));
-    const images = await readPreparedImages(path.join(input, 'functional/images'), { sourceSha: cohort.sourceRevision,
+    requireGitHub(isDeepStrictEqual(proof.test, await parseDocumentFunctionalTrx(path.join(filesRoot, FUNCTIONAL.files[0]), workspace)));
+    const images = await readPreparedImages(path.join(filesRoot, 'github/functional/images'), { sourceSha: cohort.sourceRevision,
       runId: String(cohort.runId), runAttempt: String(cohort.attempt), repository: cohort.repository, ref: cohort.ref });
     requireGitHub(images.receipt.images.server.reference === server);
   } finally { await rm(temporary, { recursive: true, force: true }); }

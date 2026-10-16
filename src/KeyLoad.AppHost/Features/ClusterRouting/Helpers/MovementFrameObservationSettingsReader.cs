@@ -45,7 +45,7 @@ internal static class MovementFrameObservationSettingsReader
             || !control.Ephemeral || !control.TwoRf3 || !control.ProtectedDocumentMovement
             || !control.RemoteDocumentReads || !control.RemotePartitionQueries || control.MovementMaxFrameBytes is null
             || control.Tests is not null || control.BenchmarksEnabled || control.ComparisonSelectorsPresent
-            || control.TargetSelected || control.ScaleSelected || control.ProtocolCohortEnabled
+            || control.TargetSelected || control.ProtocolCohortEnabled
             || control.ProtocolCohortConfigured || control.LoggerModelControl)
         {
             throw Invalid();

@@ -1,0 +1,30 @@
+name: Native benchmark session shutdown
+description: Clean only the session-owned image registry and retain real native qualification evidence.
+inputs:
+  setup-outcome:
+    description: Actual setup step outcome
+    required: true
+  artifact-name:
+    description: Exact unique qualification artifact name
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Clean up this job's Docker registry
+      if: ${{ always() && (inputs.setup-outcome == 'success' || inputs.setup-outcome == 'failure' || inputs.setup-outcome == 'cancelled') }}
+      shell: bash
+      run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
+    - name: Save container logs and test results
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ runner.temp }}/keyload-images/**
+          ${{ runner.temp }}/keyload-cell-github/**
+          ${{ runner.temp }}/keyload-session-github/**
+          **/TestResults/**
+          artifacts/code-quality/**
+          artifacts/comparisons/sessions/failures/**
+        if-no-files-found: error
+        retention-days: 90

@@ -25,12 +25,12 @@ internal sealed class VectorProfileTests
     public async Task ProfileRoundTripPreservesExactSettingsAndRejectsModifiedCorpusSize()
     {
         var profile = VectorComparisonProfile.Parse("vector-100k-hnsw-filtered-c16");
-        var json = JsonSerializer.Serialize(profile, ReportWriter.JsonOptions);
-        var restored = JsonSerializer.Deserialize<VectorComparisonProfile>(json, ReportWriter.JsonOptions)!;
+        var json = JsonSerializer.Serialize(profile, ComparisonJson.Options);
+        var restored = JsonSerializer.Deserialize<VectorComparisonProfile>(json, ComparisonJson.Options)!;
         await Assert.That(restored).IsEqualTo(profile);
         using var document = JsonDocument.Parse(json.Replace("100000", "5000000", StringComparison.Ordinal));
         await Assert.That(() => JsonSerializer.Deserialize<VectorComparisonProfile>(document.RootElement.GetRawText(),
-            ReportWriter.JsonOptions)).Throws<JsonException>();
+            ComparisonJson.Options)).Throws<JsonException>();
     }
 
     [Test]

@@ -23,10 +23,6 @@ internal sealed class IsolatedNativeOwnedWork
     {
         get; private set;
     }
-    internal OpenLoopNativeCancellationControl? CancellationControl
-    {
-        get; set;
-    }
     private readonly System.Threading.Lock stopGate = new();
     private CancellationTokenSource? runnerLifetime;
     private Task<int>? runnerCompletion;
@@ -48,18 +44,6 @@ internal sealed class IsolatedNativeOwnedWork
     {
         runnerLifetime = CancellationTokenSource.CreateLinkedTokenSource(token);
         runnerCompletion = AspireResourceCompletion.RunToExitAsync(app, resourceName, runnerLifetime.Token);
-        if (CancellationControl is { } control)
-        {
-            var first = await Task.WhenAny(runnerCompletion, control.Completion);
-            if (ReferenceEquals(first, control.Completion))
-            {
-                await control.Completion;
-            }
-            var exit = await runnerCompletion;
-            control.RequirePublishedRequest();
-            await control.Completion;
-            return exit;
-        }
         return await runnerCompletion;
     }
 

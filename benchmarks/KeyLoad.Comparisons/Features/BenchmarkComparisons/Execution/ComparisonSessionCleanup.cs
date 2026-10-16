@@ -54,7 +54,7 @@ internal static class ComparisonSessionCleanup
             }
         }
         var failures = await JoinOriginalsAsync(closeTasks).ConfigureAwait(false);
-        _ = await OpenLoopFailure.ObserveAsync(joined).ConfigureAwait(false);
+        _ = await NativeComparisonFailure.ObserveAsync(joined).ConfigureAwait(false);
         return new(thresholdExpired, failures);
     }
 
@@ -76,7 +76,7 @@ internal static class ComparisonSessionCleanup
         var failures = ImmutableArray.CreateBuilder<Exception>();
         foreach (var task in tasks)
         {
-            if (await OpenLoopFailure.ObserveAsync(task).ConfigureAwait(false) is { } failure)
+            if (await NativeComparisonFailure.ObserveAsync(task).ConfigureAwait(false) is { } failure)
             {
                 failures.Add(failure);
             }
@@ -88,7 +88,7 @@ internal static class ComparisonSessionCleanup
     {
         if (failures.Any(failure => CqrsRuntimeFailures.FindFatal(failure) is not null))
         {
-            var combined = OpenLoopFailure.Combine(null, failures)!;
+            var combined = NativeComparisonFailure.Combine(null, failures)!;
             ExceptionDispatchInfo.Capture(combined).Throw();
         }
     }

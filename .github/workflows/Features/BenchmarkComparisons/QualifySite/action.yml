@@ -82,12 +82,12 @@ runs:
         git -C control rev-parse HEAD > "$EVIDENCE_DIR/control-revision.txt"
         closure="scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt"
         cmp "control/$closure" "website/$closure"
-        [[ "$(wc -l < "control/$closure")" == 84 ]]
+        node control/scripts/Features/BenchmarkComparisons/session-source-closure.mjs --verify="control/$closure" > "$EVIDENCE_DIR/session-source-closure.json"
         LC_ALL=C sort -u "control/$closure" > "$EVIDENCE_DIR/isolated-dependencies.txt"
         cmp "control/$closure" "$EVIDENCE_DIR/isolated-dependencies.txt"
         sha256sum "website/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
         while IFS= read -r relative; do
-          [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/[^/]+\.mjs|site/Features/BenchmarkComparisons/[^/]+\.mjs|site/scripts/build\.mjs|benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/(isolated-contract|Documents/document-contract)\.json)$ ]]
+          [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/[^/]+\.(mjs|ps1)|scripts/Features/CodeQuality/functional-coverage\.(shared|parse|native-merge\.trx)\.ps1|site/Features/BenchmarkComparisons/[^/]+\.mjs|site/scripts/build\.mjs)$ ]]
           for root in control website; do
             [[ -f "$root/$relative" && ! -L "$root/$relative" ]]
             [[ "$(realpath -e "$root/$relative")" == "$GITHUB_WORKSPACE/$root/$relative" ]]
@@ -125,7 +125,7 @@ runs:
         dotnet build src/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release
         dotnet build tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-restore --configuration Release
         node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
-        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteOptionalBenchmarkSelectionTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
+        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SessionCohortContractTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
         dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release
         mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"

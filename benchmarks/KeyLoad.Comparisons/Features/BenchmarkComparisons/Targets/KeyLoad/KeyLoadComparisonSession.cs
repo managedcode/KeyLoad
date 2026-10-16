@@ -9,31 +9,11 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
     IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null)
-    : IComparisonSession, IOpenLoopCancellationHealthSession, IOpenLoopComparisonSession
+    : IComparisonSession
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
-
-    public async Task<OpenLoopSessionResult> ExecuteOpenLoopAsync(Scenario scenario,
-        BenchmarkDocument document, CancellationToken cancellationToken)
-    {
-        if (scenario == Scenario.PointRead)
-        {
-            var response = await client.GetAsync(new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), cancellationToken)
-                .ConfigureAwait(false);
-            if (response.IsFailed)
-            {
-                return KeyLoadOpenLoopResults.RejectOrThrow(response.Problem.ErrorCode);
-            }
-            var found = response.Value.Document;
-            var result = found is null ? null : new FoundDocument(found.Reference.Id, found.Json);
-            return new(OpenLoopSessionDisposition.Succeeded, new(Document: result));
-        }
-
-        return await KeyLoadDocumentOperations.ExecuteOpenLoopAsync(client, partition, scenario,
-            document, cancellationToken).ConfigureAwait(false);
-    }
 
     internal Task<OperationResult> ExecuteDocumentOperationAsync(Scenario operation, BenchmarkDocument document, CancellationToken token)
         => operation == Scenario.PointRead ? ExecuteAsync(operation, document, token)
@@ -75,7 +55,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         do
         {
             var query = KeyLoadQuery.From<CorpusQueryMarker>(partition,
-                OpenLoopProtocolIdentities.DocumentsCollection, translationOptions)
+                NativeComparisonIdentities.DocumentsCollection, translationOptions)
                 .OrderBy(row => QueryFunctions.DocumentId(row))
                 .Take(execution.ReadbackBatchCapacity);
             var page = KeyLoadClientResults.Success(await client.QueryAsync(query, allowFullScan: true,
@@ -103,17 +83,6 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         }
     }
 
-    async Task<OpenLoopCancellationHealthRead> IOpenLoopCancellationHealthSession.ReadActualAsync(
-        BenchmarkDocument document, CancellationToken cancellationToken)
-    {
-        var requested = new EntityRef(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id);
-        var actual = KeyLoadClientResults.Success(await client.GetAsync(requested, cancellationToken)
-            .ConfigureAwait(false), OpenLoopProtocolIdentities.CancellationHealthyReadOperation).Document;
-        return actual is null
-            ? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthyReadMissing)
-            : new(requested, actual);
-    }
-
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     private sealed record CorpusQueryMarker;
@@ -121,7 +90,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var found = KeyLoadClientResults.Success(await client.GetAsync(
-            new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), cancellationToken)).Document;
+            new(partition, NativeComparisonIdentities.DocumentsCollection, document.Id), cancellationToken)).Document;
         return found is null ? null : new(found.Reference.Id, found.Json);
     }
 
@@ -131,7 +100,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     private async Task<OperationResult> SearchVectorAsync(BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
-        var request = new SearchRequest(partition, OpenLoopProtocolIdentities.DocumentsCollection,
+        var request = new SearchRequest(partition, NativeComparisonIdentities.DocumentsCollection,
             VectorField: KeyLoadWorkloadIdentities.VectorEmbeddingField, Vector: document.Vector,
             Space: space, Limit: topK);
         var neighbors = KeyLoadClientResults.Success(await client.SearchAsync(request, cancellationToken));
@@ -143,7 +112,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         CancellationToken cancellationToken)
     {
         var request = new TraverseRequest(partition, KeyLoadWorkloadIdentities.GraphName,
-            new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id),
+            new(partition, NativeComparisonIdentities.DocumentsCollection, document.Id),
             scenario == Scenario.GraphNeighbors ? KeyLoadWorkloadIdentities.NeighborTraversalDepth : graphDepth,
             graphVertices, graphEdges, [KeyLoadWorkloadIdentities.GraphName]);
         var graph = KeyLoadClientResults.Success(await client.TraverseAsync(request, cancellationToken));

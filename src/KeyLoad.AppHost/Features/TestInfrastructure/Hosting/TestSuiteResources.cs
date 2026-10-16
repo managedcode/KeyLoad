@@ -10,9 +10,6 @@ internal static class TestSuiteResources
 {
     private const string GithubRevisionEnvironment = "GITHUB_SHA";
     private const string GithubActionsEnvironment = "GITHUB_ACTIONS";
-    private const string BenchmarkTargetEnvironment = "Benchmarks__Target";
-    private const string BenchmarkScaleEnvironment = "Benchmarks__ScaleProfile";
-    private const string BenchmarkVectorEnvironment = "Benchmarks__VectorProfile";
     private const string NoBuildArgument = "--no-build";
     private const string NoRestoreArgument = "--no-restore";
     private const string ConfigurationArgument = "--configuration";
@@ -47,23 +44,6 @@ internal static class TestSuiteResources
         {
             ConfigureLocalImage(builder, runner, root);
         }
-        if (settings.Suite == TestSuiteProtocol.ComparisonSuite && settings.ComparisonTarget is not null)
-        {
-            runner.WithEnvironment(BenchmarkTargetEnvironment, settings.ComparisonTarget);
-        }
-        if (settings.ScaleProfile is not null)
-        {
-            runner.WithEnvironment(BenchmarkScaleEnvironment, settings.ScaleProfile.Id);
-        }
-        if (settings.VectorProfile is not null)
-        {
-            runner.WithEnvironment(BenchmarkVectorEnvironment, settings.VectorProfile.Id);
-        }
-        if (settings.OpenLoopRate is { } rate)
-        {
-            runner.WithEnvironment(TestSuiteSelectionValidator.OpenLoopNativeRateEnvironment,
-                rate.ToString(CultureInfo.InvariantCulture));
-        }
     }
 
     private static IResourceBuilder<ExecutableResource> CreateRunner(IDistributedApplicationBuilder builder,
@@ -71,10 +51,7 @@ internal static class TestSuiteResources
     {
         const string Command = "dotnet";
         return builder.AddExecutable(name, Command, root, arguments)
-            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, string.Empty)
-            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, string.Empty)
-            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, string.Empty)
-            .WithEnvironment(TestSuiteSelectionValidator.OpenLoopRateEnvironment, string.Empty);
+            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, string.Empty);
     }
 
     private static void ConfigureLocalImage(IDistributedApplicationBuilder builder,

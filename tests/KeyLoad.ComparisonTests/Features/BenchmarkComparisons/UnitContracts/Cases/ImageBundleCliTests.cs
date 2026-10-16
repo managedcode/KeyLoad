@@ -9,8 +9,8 @@ internal sealed class ImageBundleCliTests
     [Arguments("import-images.mjs", "--bundle=")]
     public async Task AcIso007CliRejectsInvalidOptionsBeforeNativeAllocation(string module, string argument)
     {
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
-            [IsolatedAggregateNodeProcess.Module(module), argument], TestContext.Current!.Execution.CancellationToken);
+        var result = await SessionNodeProcess.RunAsync(
+            [SessionNodeProcess.Module(module), argument], TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.Output).IsEmpty();
         await Assert.That(result.Error.Trim()).IsEqualTo(
@@ -26,8 +26,8 @@ internal sealed class ImageBundleCliTests
     [Arguments("import-images.mjs")]
     public async Task AcIso007CliRejectsMissingTrustedContextOrRequiredBundle(string module)
     {
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
-            [IsolatedAggregateNodeProcess.Module(module)], TestContext.Current!.Execution.CancellationToken);
+        var result = await SessionNodeProcess.RunAsync(
+            [SessionNodeProcess.Module(module)], TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.Output).IsEmpty();
         await Assert.That(result.Error.Trim()).IsEqualTo(module == "import-images.mjs"

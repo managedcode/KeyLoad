@@ -87,10 +87,6 @@ internal sealed class AppHostControlOptions
     {
         get; set;
     }
-    internal bool ScaleSelected
-    {
-        get; set;
-    }
     internal bool ContainerFaults
     {
         get; set;

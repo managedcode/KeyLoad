@@ -1,10 +1,10 @@
+using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies digest-backed normal-host provenance failures through the real CLI process.</summary>
 internal sealed class ComparisonExecutionIdentityTests
 {
     private const string SingleProfile = "smoke-single";
-    private const string ReplicatedProfile = "smoke-replicated";
 
     [Test]
     public async Task AcImage005MissingEvidenceProfileNamesOnlyItsSetting()
@@ -110,27 +110,37 @@ internal sealed class ComparisonExecutionIdentityTests
     }
 
     [Test]
-    public async Task AcImage005SingleEvidenceProfileCannotDescribeReplicatedTopology()
+    public async Task AcImage005SupersededSingleCellProfileCannotDescribeSharedSession()
     {
         var settings = ComparisonExecutionIdentitySupport.ValidSettings(SingleProfile);
-        settings[ComparisonExecutionIdentitySupport.Topology] = "Replicated";
         var result = await ComparisonExecutionIdentitySupport.RunAsync(settings);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode, ReplicatedProfile);
+            ComparisonExecutionIdentitySupport.InvalidCode, SingleProfile);
     }
 
     [Test]
-    public async Task AcImage005ExistingNormalSettingFailurePrecedesIdentityFailure()
+    public async Task AcImage005IdentityIsValidatedBeforeNativeClientEndpoints()
     {
         var settings = ComparisonExecutionIdentitySupport.ValidSettings();
-        settings.Remove(ComparisonHostBindingsSupport.QdrantEndpoint);
-        settings[ComparisonExecutionIdentitySupport.LoadGeneratorImage] =
-            "registry.invalid/private-path?token=" + ComparisonExecutionIdentitySupport.PrivateCanary;
+        settings.Remove(ComparisonExecutionIdentitySupport.LoadGeneratorImage);
+        settings[SessionFields.FirstEndpointEnvironment] = ComparisonExecutionIdentitySupport.PrivateCanary;
         var result = await ComparisonExecutionIdentitySupport.RunAsync(settings);
-
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonHostBindingsSupport.MissingSettingPrefix + "Benchmarks:QdrantEndpoint",
+            ComparisonExecutionIdentitySupport.MissingKeyPrefix + "Benchmarks:LoadGeneratorImage",
             ComparisonExecutionIdentitySupport.PrivateCanary);
     }
+    [Test]
+    [Arguments(ComparisonExecutionIdentitySupport.Repository, "external/fork")]
+    [Arguments(ComparisonExecutionIdentitySupport.GitHubRef, "refs/heads/other")]
+    [Arguments(ComparisonExecutionIdentitySupport.Workflow, "Other workflow")]
+    public async Task SessionRequiresCanonicalRepositoryMainAndWorkflow(string key, string value)
+    {
+        var settings = ComparisonExecutionIdentitySupport.ValidSettings();
+        settings[key] = value;
+        var result = await ComparisonExecutionIdentitySupport.RunAsync(settings);
+        await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
+            ComparisonExecutionIdentitySupport.InvalidCode);
+    }
+
 }

@@ -33,8 +33,7 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
     }
 
     internal async Task<ContainerResource[]> BuildAsync(string? target, int count,
-        string? invalidSetting = null, string? invalidValue = null, string? scaleProfile = null,
-        string? evidenceProfile = null, string? appHostProfile = null)
+        string? invalidSetting = null, string? invalidValue = null)
     {
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         var arguments = new List<string>
@@ -44,7 +43,8 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
             $"--KeyLoad:ContainerImages:Server={IsolatedResourceTopologyFixture.ServerImage}",
             $"--Benchmarks:ContainerImages:LoadGenerator={RunnerImage}",
             $"--Benchmarks:DataRoot={Root}", $"--Benchmarks:Output={Output}",
-            "--Benchmarks:Profile=" + (appHostProfile ?? (scaleProfile is null ? "timeseries" : "general"))
+            "--Benchmarks:Session=true", "--Benchmarks:SessionId=resource-model",
+            "--Benchmarks:EvidenceProfile=" + BenchmarkSessionContract.Profile
         };
         if (target is null)
         {
@@ -52,15 +52,11 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
         }
         else
         {
-            AddSelection(arguments, target, count, scaleProfile, evidenceProfile);
+            AddSelection(arguments, target, count);
         }
         if (invalidSetting is not null)
         {
             arguments.Add("--" + invalidSetting + "=" + invalidValue);
-        }
-        if (target is null && scaleProfile is not null)
-        {
-            arguments.Add("--" + ComparisonWorkerSelection.ScaleProfileSetting + "=" + scaleProfile);
         }
         _ = Source;
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
@@ -79,18 +75,10 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
         Directory.Delete(Root, recursive: true);
     }
 
-    private static void AddSelection(List<string> arguments, string target, int count, string? scaleProfile,
-        string? evidenceProfile)
+    private static void AddSelection(List<string> arguments, string target, int count)
     {
         arguments.Add("--Benchmarks:Enabled=true");
-        arguments.Add("--" + ComparisonWorkerSelection.TargetSetting + "=" + target);
-        arguments.Add("--" + ComparisonWorkerSelection.NodeCountSetting + "=" + count.ToString(CultureInfo.InvariantCulture));
-        arguments.Add("--" + ComparisonWorkerSelection.ScenarioSetting + "=" + Scenario.PointRead);
-        arguments.Add("--" + ComparisonWorkerSelection.ProfileSetting + "=" + (evidenceProfile
-            ?? scaleProfile ?? IsolatedComparisonContract.Current.Profile));
-        if (scaleProfile is not null)
-        {
-            arguments.Add("--" + ComparisonWorkerSelection.ScaleProfileSetting + "=" + scaleProfile);
-        }
+        arguments.Add("--" + BenchmarkSessionSelection.TargetSetting + "=" + target);
+        arguments.Add("--" + BenchmarkSessionSelection.NodeCountSetting + "=" + count.ToString(CultureInfo.InvariantCulture));
     }
 }

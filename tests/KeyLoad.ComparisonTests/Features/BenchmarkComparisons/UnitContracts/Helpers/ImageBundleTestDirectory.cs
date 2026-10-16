@@ -4,7 +4,20 @@ internal sealed class ImageBundleTestDirectory : IDisposable
 {
     private const string Prefix = "keyload-image-bundle-test-";
     private bool retainFailureEvidence;
-    internal string Root { get; } = Resolve(Directory.CreateTempSubdirectory(Prefix));
+    internal string Root { get; } = CreateOwnedDirectory();
+
+    private static string CreateOwnedDirectory()
+    {
+        var path = Path.Combine(SessionNodeProcess.RepositoryRoot(), "artifacts", "qualification",
+            "comparison-contract-fixtures", Prefix + Guid.NewGuid().ToString("N"));
+        var directory = Directory.CreateDirectory(path);
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(directory.FullName,
+                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
+        return Resolve(directory);
+    }
 
     private static string Resolve(DirectoryInfo directory)
     {

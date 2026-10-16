@@ -32,7 +32,7 @@ internal sealed class BoundedEvidenceStream(Stream output, int maximumBytes) : S
 
         if (count < NoItems || written > maximumBytes - count)
         {
-            throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopEvidenceByteLimitExceeded);
+            throw new ComparisonFailureException(ComparisonEvidenceFailureCodes.ComparisonEvidenceByteLimitExceeded);
         }
         written = checked(written + count);
     }

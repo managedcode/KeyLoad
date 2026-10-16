@@ -28,9 +28,9 @@ internal sealed class IsolatedQuorumResourceModel : IDisposable
     }
 
     internal void Add(string engine, int nodes)
-        => Add(engine, new ComparisonWorkerSelection(engine, nodes, Scenario.PointRead, T.Profile));
+        => Add(engine, new BenchmarkSessionSelection(engine, nodes));
 
-    internal void Add(string helper, ComparisonWorkerSelection selection)
+    internal void Add(string helper, BenchmarkSessionSelection selection)
     {
         var context = new IsolatedResourceContext(Builder, selection, Runner, Root);
         if (helper == T.Qdrant)

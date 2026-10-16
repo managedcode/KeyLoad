@@ -23,7 +23,7 @@ internal static class ComparisonExecutionIdentitySupport
     internal const string LoadGeneratorImageValue = "127.0.0.1:5000/keyload/comparisons:0123456789ab-37070000000-1@sha256:" + ImageDigest;
     internal const string PrivateCanary = "private-provenance-canary-6af143";
 
-    internal static Dictionary<string, string> ValidSettings(string profile = "smoke-single")
+    internal static Dictionary<string, string> ValidSettings(string profile = "session-v1")
     {
         var settings = ComparisonHostBindingsSupport.ValidSettings();
         settings[LoadGeneratorImage] = LoadGeneratorImageValue;
@@ -34,7 +34,7 @@ internal static class ComparisonExecutionIdentitySupport
         settings[RunAttempt] = "1";
         settings[Repository] = "managedcode/KeyLoad";
         settings[GitHubRef] = "refs/heads/main";
-        settings[Workflow] = "CI";
+        settings[Workflow] = "Benchmarks";
         settings[GitHubSha] = Revision;
         return settings;
     }

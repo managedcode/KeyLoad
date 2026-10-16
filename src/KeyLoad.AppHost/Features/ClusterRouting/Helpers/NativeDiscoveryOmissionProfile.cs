@@ -40,7 +40,7 @@ internal sealed class NativeDiscoveryOmissionProfile
             || !control.ProtectedDocumentMovement || !control.RemoteDocumentReads || !control.RemotePartitionQueries
             || control.RequestProbe is null || control.Tests is not null || control.ProtocolCohortEnabled
             || control.ProtocolCohortConfigured || control.BenchmarksEnabled || control.ComparisonSelectorsPresent
-            || control.TargetSelected || control.ScaleSelected || control.LoggerModelControl)
+            || control.TargetSelected || control.LoggerModelControl)
         {
             throw Invalid();
         }

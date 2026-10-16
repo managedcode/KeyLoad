@@ -9,7 +9,6 @@ internal sealed class ScaleServerResourceEvidenceParserTests
     [Arguments("missing")]
     [Arguments("unsupported")]
     [Arguments("equivalent-targets")]
-    [Arguments("separate-profiles")]
     [Arguments("complete-matched-cohort")]
     [Arguments("retained-incomplete")]
     [Arguments("configured-policy")]
@@ -36,9 +35,9 @@ internal sealed class ScaleServerResourceEvidenceParserTests
     private static async Task AssertScenarioAsync(string scenario)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var response = await IsolatedAggregateNodeProcess.RunAsync(
+        var response = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", ScaleServerResourceNodeProgram.Source,
-                IsolatedAggregateNodeProcess.Module(ModuleName), scenario], token);
+                SessionNodeProcess.Module(ModuleName), scenario], token);
         await Assert.That(response.ExitCode).IsEqualTo(0);
         await Assert.That(response.Error).IsEqualTo(string.Empty);
     }

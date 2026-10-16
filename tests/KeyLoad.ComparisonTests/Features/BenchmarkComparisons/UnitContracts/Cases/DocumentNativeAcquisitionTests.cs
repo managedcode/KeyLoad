@@ -10,7 +10,7 @@ internal sealed class DocumentNativeAcquisitionTests
     [Arguments(true)]
     public async Task AcMeth004NativeAdmissionRetainsPrimaryAndJoinedCleanup(bool cleanupFails)
     {
-        var primary = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
+        var primary = NativeRuntimeFailureFixture.RuntimeOversizeFailure();
         var cleanup = cleanupFails ? new InvalidOperationException() : null;
         await using var client = new AdmissionClient(cleanup);
         Exception? observed = null;

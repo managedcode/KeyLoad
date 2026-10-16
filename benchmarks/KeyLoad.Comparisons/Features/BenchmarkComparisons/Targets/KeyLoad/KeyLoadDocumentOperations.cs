@@ -7,11 +7,11 @@ internal static class KeyLoadDocumentOperations
 
     internal static Mutation CreateMutation(Scenario scenario, BenchmarkDocument document) => scenario switch
     {
-        Scenario.DocumentWrite => new PutDocument(OpenLoopProtocolIdentities.DocumentsCollection,
+        Scenario.DocumentWrite => new PutDocument(NativeComparisonIdentities.DocumentsCollection,
             document.Id, document.Json, KeyLoadWorkloadIdentities.InitialDocumentRevision),
-        Scenario.DocumentUpdate => new PutDocument(OpenLoopProtocolIdentities.DocumentsCollection,
+        Scenario.DocumentUpdate => new PutDocument(NativeComparisonIdentities.DocumentsCollection,
             document.Id, document.Json, KeyLoadWorkloadIdentities.CreatedDocumentRevision, ExplicitReplacement: true),
-        Scenario.DocumentDelete => new DeleteDocument(OpenLoopProtocolIdentities.DocumentsCollection,
+        Scenario.DocumentDelete => new DeleteDocument(NativeComparisonIdentities.DocumentsCollection,
             document.Id, KeyLoadWorkloadIdentities.CreatedDocumentRevision),
         _ => throw new ArgumentOutOfRangeException(nameof(scenario))
     };
@@ -30,7 +30,7 @@ internal static class KeyLoadDocumentOperations
             if (classifyMissingUpdate && scenario == Scenario.DocumentUpdate && code == nameof(ErrorCode.RevisionConflict))
             {
                 var observed = await client.GetAsync(
-                    new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), token);
+                    new(partition, NativeComparisonIdentities.DocumentsCollection, document.Id), token);
                 if (observed.IsSuccess && observed.Value is null)
                 {
                     throw new ComparisonFailureException(ComparisonMutationFailures.UpdateMissing);
@@ -47,19 +47,6 @@ internal static class KeyLoadDocumentOperations
         return new();
     }
 
-    internal static async Task<OpenLoopSessionResult> ExecuteOpenLoopAsync(KeyLoadClient client,
-        PartitionRef partition, Scenario scenario, BenchmarkDocument document, CancellationToken token)
-    {
-        var response = await client.CommitAsync(new(Guid.NewGuid(), partition,
-            [CreateMutation(scenario, document)]), token).ConfigureAwait(false);
-        if (!response.IsSuccess)
-        {
-            return KeyLoadOpenLoopResults.RejectOrThrow(response.Problem?.ErrorCode);
-        }
-        ValidateReceipt(response.Value!, scenario, document);
-        return new(OpenLoopSessionDisposition.Succeeded, new());
-    }
-
     private static void ValidateReceipt(CommitReceipt receipt, Scenario scenario, BenchmarkDocument document)
     {
         const int SingleItemCount = 1;
@@ -72,7 +59,7 @@ internal static class KeyLoadDocumentOperations
         {
             throw new ComparisonFailureException(KeyLoadEventOperations.WrongWriteProfile);
         }
-        if (receipt.Mutations.Length != SingleItemCount || receipt.Mutations[FirstElementIndex].Resource != OpenLoopProtocolIdentities.DocumentsCollection
+        if (receipt.Mutations.Length != SingleItemCount || receipt.Mutations[FirstElementIndex].Resource != NativeComparisonIdentities.DocumentsCollection
             || receipt.Mutations[FirstElementIndex].Id != document.Id || receipt.Mutations[FirstElementIndex].Revision != expectedRevision)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);

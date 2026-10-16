@@ -11,8 +11,8 @@ internal static class SiteIsolatedGitHubInputCorruption
         {
             Relative(SiteIsolatedGitHubTokens.Aggregate, SiteIsolatedGitHubTokens.Manifest),
             Relative(SiteIsolatedGitHubTokens.ProviderDirectory, SiteIsolatedGitHubTokens.Proof),
-            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, SiteIsolatedGitHubTokens.ImageProof),
-            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, SiteIsolatedGitHubTokens.Images +
+            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, "github/" + SiteIsolatedGitHubTokens.ImageProof),
+            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, "github/" + SiteIsolatedGitHubTokens.Images +
                 SiteIsolatedGitHubTokens.Slash + SiteIsolatedGitHubTokens.ServerManifest),
             receipt.Files.First(file => file.Path.EndsWith(SiteIsolatedGitHubTokens.Slash +
                 SiteIsolatedGitHubTokens.Raw, StringComparison.Ordinal)).Path,

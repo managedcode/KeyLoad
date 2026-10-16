@@ -1,5 +1,6 @@
 import { metrics } from './measurements.mjs';
-import { DOM, ISOLATED, assertIsolated } from './isolated-contracts.mjs';
+import { DOM, assertIsolated } from './isolated-contracts.mjs';
+import { SESSION, SESSION_TARGETS } from '../../../scripts/Features/BenchmarkComparisons/session-contract.mjs';
 
 export function isolatedElements(root) {
   const elements = Object.fromEntries(Object.entries(DOM).map(([key, id]) => [key, root.querySelector('#' + id)]));
@@ -20,12 +21,12 @@ function options(select, entries, initial) {
 }
 
 export function initializeIsolatedControls(elements) {
-  options(elements.scenario, [...ISOLATED.crud, ...ISOLATED.specialized].map(value => [value, value]), 'PointRead');
-  options(elements.nodes, ISOLATED.nodes.map(value => [value, value + ' native nodes']), 3);
-  options(elements.target, [['all', 'All engines'], ...ISOLATED.targets.map(value => [value, value])], 'all');
-  options(elements.metric, Object.entries(metrics).map(([value, metric]) => [value, metric.title]), 'throughput');
-  options(elements.repetition, [['all', 'Median of five repetitions'], ...Array.from({ length: ISOLATED.options.repetitions },
-    (_, value) => [value, 'Repetition ' + value])], 'all');
+  options(elements.scenario, [...SESSION.caseIds, ...['create', 'delete', 'update', 'read', 'search'].map(lane => 'mixed/' + lane)]
+    .map(value => [value, value]), 'sequential-read');
+  options(elements.nodes, SESSION.nodes.map(value => [value, value + ' native nodes']), 3);
+  options(elements.target, [['all', 'All engines'], ...SESSION_TARGETS.map(value => [value.name, value.name])], 'all');
+  options(elements.metric, Object.entries(metrics).filter(([, metric]) => !metric.queue).map(([value, metric]) => [value, metric.title]), 'throughput');
+  options(elements.repetition, [['session', 'Original session result']], 'session');
   elements.announcement.setAttribute('role', 'status');
   elements.announcement.setAttribute('aria-live', 'polite');
   elements.error.setAttribute('role', 'alert');
@@ -33,12 +34,8 @@ export function initializeIsolatedControls(elements) {
 }
 
 export function readIsolatedSelection(elements) {
-  for (const option of elements.metric.options) {
-    option.disabled = Boolean(metrics[option.value]?.queue) && elements.scenario.value !== 'QueueCycle';
-  }
-  if (elements.metric.selectedOptions[0].disabled) elements.metric.value = 'throughput';
   return { scenario: elements.scenario.value, nodeCount: Number(elements.nodes.value), target: elements.target.value,
-    metric: elements.metric.value, repetition: elements.repetition.value === 'all' ? 'all' : Number(elements.repetition.value) };
+    metric: elements.metric.value, repetition: elements.repetition.value };
 }
 
 export const controlElements = elements => [elements.scenario, elements.nodes, elements.target, elements.metric, elements.repetition];

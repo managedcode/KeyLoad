@@ -22,7 +22,7 @@ internal sealed class IsolatedAggregateNodePipeFailureOwner : IAsyncDisposable
     {
         this.testToken = testToken;
         deadlineOwner = new IsolatedAggregateNodeDeadlineOwner(failures);
-        var startInfo = IsolatedAggregateNodeProcess.StartInfo(
+        var startInfo = SessionNodeProcess.StartInfo(
             ["-e", IsolatedAggregateNodeLifetimeProgram.Source, IsolatedAggregateNodeLifetimeProgram.BothOutputLimits]);
         process = new Process { StartInfo = startInfo };
     }
@@ -93,7 +93,7 @@ internal sealed class IsolatedAggregateNodePipeFailureOwner : IAsyncDisposable
     {
         if (!process!.Start())
         {
-            throw new InvalidOperationException(IsolatedAggregateNodeProcess.StartFailure);
+            throw new InvalidOperationException(SessionNodeProcess.StartFailure);
         }
         started = true;
     }
@@ -103,7 +103,7 @@ internal sealed class IsolatedAggregateNodePipeFailureOwner : IAsyncDisposable
         actualExit = IsolatedAggregateNodePipeFailureOwnerEvidence.InvokeNative(
             () => process!.WaitForExitAsync(CancellationToken.None));
         var runToken = deadlineOwner.Start(
-            TimeSpan.FromSeconds(IsolatedAggregateNodeProcess.TimeoutSeconds), testToken);
+            TimeSpan.FromSeconds(SessionNodeProcess.TimeoutSeconds), testToken);
         var activeOutput = IsolatedAggregateNodePipeFailureOwnerEvidence.InvokeNative(
             () => IsolatedAggregateNodeOutput.ReadAsync(process!.StandardOutput, runToken));
         output = activeOutput;
@@ -122,7 +122,7 @@ internal sealed class IsolatedAggregateNodePipeFailureOwner : IAsyncDisposable
             await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
                 () => IsolatedAggregateNodeLifetimeCleanup.CleanupAsync(process!, actualExit, wait,
                     output, error, deadlineOwner.TransferToCleanup(), primary,
-                    TimeSpan.FromSeconds(IsolatedAggregateNodeProcess.CleanupSeconds), failures), failures.Add);
+                    TimeSpan.FromSeconds(SessionNodeProcess.CleanupSeconds), failures), failures.Add);
         }
         finally
         {

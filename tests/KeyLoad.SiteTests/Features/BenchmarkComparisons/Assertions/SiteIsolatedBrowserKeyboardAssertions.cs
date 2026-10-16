@@ -22,20 +22,20 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         await Assert.That((await cdp.EvaluateAsync(focus, false, token)).GetBoolean()).IsTrue();
         var arrowUp = await KeyAsync(cdp, ArrowUpKey, 38, token);
         KeyboardObservation? popupArrowUp = null;
-        if (!arrowUp.Active && arrowUp.Value == "3" && arrowUp.Index == 2)
+        if (!arrowUp.Active && arrowUp.Value == "3" && arrowUp.Index == 1)
         {
             // Linux Chrome opens the native select popup before moving its highlighted option.
             popupArrowUp = await KeyAsync(cdp, ArrowUpKey, 38, token);
         }
         var enter = await KeyAsync(cdp, EnterKey, 13, token);
-        const string selected = "document.querySelector('#isolated-node-count').value==='2'";
+        const string selected = "document.querySelector('#isolated-node-count').value==='1'";
         var selectedExpectedValue = await cdp.WaitForExpressionAsync(selected, token);
         if (!selectedExpectedValue)
         {
             TestContext.Current!.Output.WriteLine(FailureEvidence(arrowUp, enter, popupArrowUp));
         }
         await Assert.That(selectedExpectedValue).IsTrue();
-        await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("PointRead", 2, "all", "throughput", "all"), token);
+        await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("sequential-read", 1, "session", "throughput", "all"), token);
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "node-count", 3, token);
     }
 
@@ -64,7 +64,7 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         KeyboardObservation? popupArrowUp)
     {
         var popup = popupArrowUp is null ? string.Empty : $"; popup:{Format(popupArrowUp)}";
-        var detail = $"Native keyboard select failed; expected=2; {Format(arrowUp)}{popup}; {Format(enter)}";
+        var detail = $"Native keyboard select failed; expected=1; {Format(arrowUp)}{popup}; {Format(enter)}";
         return detail[..Math.Min(detail.Length, MaximumFailureEvidenceCharacters)];
     }
 

@@ -1,26 +1,26 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { absolutePath } from './aggregate-files.mjs';
-import { SITE_GH, requireSite } from './site-isolated-github-contract.mjs';
-import { parseSiteIsolatedArguments } from './site-isolated-github-context.mjs';
-import { captureSiteIsolatedEvidence, captureSiteIsolatedMetadata } from './site-isolated-github-capture.mjs';
-import { validateSiteIsolatedInputs } from './site-isolated-github-proof.mjs';
-import { verifySiteIsolatedFreshness } from './site-isolated-github-fresh.mjs';
+import { SESSION, requireSession } from './session-contract.mjs';
+import { parseSessionSiteArguments } from './site-session-context.mjs';
+import { captureSessionSite } from './site-session-github.mjs';
+import { verifySessionSiteInputs, verifySessionSiteFreshness } from './site-session-proof.mjs';
 
+// This remains the single Website intake entry point; historical per-cell schemas are not admitted.
 export async function runSiteIsolatedGitHub(argv, environment = process.env) {
   const [command, ...args] = argv;
-  if (command === 'capture') return captureSiteIsolatedEvidence({ environment, args });
-  if (command === 'capture-metadata') return captureSiteIsolatedMetadata({ environment, args });
+  if (command === 'capture' || command === 'capture-metadata')
+    return captureSessionSite({ environment, args, download: command === 'capture' });
   if (command === 'verify-inputs') {
-    const values = parseSiteIsolatedArguments(args, new Set(['input', 'receipt']), ['input', 'receipt']);
-    return validateSiteIsolatedInputs({ input: absolutePath(values.input), receipt: absolutePath(values.receipt) });
+    const values = parseSessionSiteArguments(args, ['input', 'receipt'], ['input', 'receipt']);
+    requireSession(path.isAbsolute(values.input) && path.isAbsolute(values.receipt));
+    return verifySessionSiteInputs({ input: path.resolve(values.input), receipt: path.resolve(values.receipt) });
   }
-  requireSite(command === 'fresh');
-  const values = parseSiteIsolatedArguments(args, new Set(['before', 'after']), ['before', 'after']);
-  return verifySiteIsolatedFreshness({ before: absolutePath(values.before), after: absolutePath(values.after) });
+  requireSession(command === 'fresh');
+  const values = parseSessionSiteArguments(args, ['before', 'after'], ['before', 'after']);
+  requireSession(path.isAbsolute(values.before) && path.isAbsolute(values.after));
+  return verifySessionSiteFreshness({ before: path.resolve(values.before), after: path.resolve(values.after) });
 }
-
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   try { process.stdout.write(JSON.stringify({ ok: true, result: await runSiteIsolatedGitHub(process.argv.slice(2)) }) + '\n'); }
-  catch { process.stdout.write(JSON.stringify({ ok: false, error: SITE_GH.failure }) + '\n'); process.exitCode = 1; }
+  catch { process.stdout.write(JSON.stringify({ ok: false, error: SESSION.failure }) + '\n'); process.exitCode = 1; }
 }

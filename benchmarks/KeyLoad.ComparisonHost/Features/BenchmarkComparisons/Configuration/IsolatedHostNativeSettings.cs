@@ -12,7 +12,7 @@ internal sealed record IsolatedHostNativeSettings(string Image, string? Connecti
 {
     private const char CarriageReturnCharacter = '\r';
     private const char LineFeedCharacter = '\n';
-    internal static IsolatedHostNativeSettings Read(IConfiguration configuration, ComparisonWorkerSelection selection, string image)
+    internal static IsolatedHostNativeSettings Read(IConfiguration configuration, BenchmarkSessionSelection selection, string image)
     {
         const int PrimaryReplicaCount = 1;
 

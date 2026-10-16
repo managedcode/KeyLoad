@@ -36,17 +36,13 @@ internal static class IsolatedKeyLoadResources
             .Single(parameter => parameter.Name == AdminParameter));
         context.Runner.WithEnvironment(AdminEnvironment, admin);
         context.BindImage(image.Reference);
-        var selectedAdmission = context.Selection.DocumentWorkload is null ? runtime.IsolatedAdmission
-            : KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.BindDocumentAdmission(runtime.IsolatedAdmission, runtime.Deployment);
+        var selectedAdmission = KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.BindDocumentAdmission(runtime.IsolatedAdmission, runtime.Deployment);
         var admission = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(selectedAdmission);
         IsolatedKeyLoadAdmission.ForwardSelection(context.Runner, selectedAdmission);
         for (var index = IndexInitialValue; index < nodes.Length; index++)
         {
             IsolatedKeyLoadAdmission.Apply(nodes[index], admission, runtime.IsolatedReplayAdmission);
-            if (context.Selection.DocumentWorkload is not null)
-            {
-                DocumentResourceBounds.ApplyKeyLoad(nodes[index], context.Runner, runtime.Deployment.Value);
-            }
+            DocumentResourceBounds.ApplyKeyLoad(nodes[index], context.Runner, runtime.Deployment.Value);
             context.BindEndpoint(index, nodes[index], HttpEndpoint);
         }
     }

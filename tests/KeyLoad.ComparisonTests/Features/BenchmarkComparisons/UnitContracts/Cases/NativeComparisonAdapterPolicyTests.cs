@@ -16,10 +16,6 @@ internal sealed class NativeComparisonAdapterPolicyTests
     [Arguments(nameof(NativeComparisonExecutionOptions.OpenSearchHealthWaitTimeoutSeconds), 60)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleCancellationTimeoutMilliseconds), 2000)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleMaximumPoolSize), 16)]
-    [Arguments(nameof(NativeComparisonExecutionOptions.ReportWriterBufferCharacters), 16_384)]
-    [Arguments(nameof(NativeComparisonExecutionOptions.OpenLoopEvidenceBufferBytes), 16_384)]
-    [Arguments(nameof(NativeComparisonExecutionOptions.OpenLoopProofBufferBytes), 8192)]
-    [Arguments(nameof(NativeComparisonExecutionOptions.OpenLoopControlFileBufferBytes), 11)]
     [Arguments(nameof(NativeComparisonExecutionOptions.VectorCancellationCheckInterval), 4096)]
     [Arguments(nameof(NativeComparisonExecutionOptions.VectorYieldBatchSize), 256)]
     [Arguments(nameof(NativeComparisonExecutionOptions.MongoSeedBatchSize), 256)]
@@ -176,18 +172,6 @@ internal sealed class NativeComparisonAdapterPolicyTests
     {
         switch (property)
         {
-            case nameof(NativeComparisonExecutionOptions.ReportWriterBufferCharacters):
-                options.ReportWriterBufferCharacters = value;
-                break;
-            case nameof(NativeComparisonExecutionOptions.OpenLoopEvidenceBufferBytes):
-                options.OpenLoopEvidenceBufferBytes = value;
-                break;
-            case nameof(NativeComparisonExecutionOptions.OpenLoopProofBufferBytes):
-                options.OpenLoopProofBufferBytes = value;
-                break;
-            case nameof(NativeComparisonExecutionOptions.OpenLoopControlFileBufferBytes):
-                options.OpenLoopControlFileBufferBytes = value;
-                break;
             case nameof(NativeComparisonExecutionOptions.VectorCancellationCheckInterval):
                 options.VectorCancellationCheckInterval = value;
                 break;

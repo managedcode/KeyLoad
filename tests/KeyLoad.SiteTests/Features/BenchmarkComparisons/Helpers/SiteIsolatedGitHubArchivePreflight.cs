@@ -12,7 +12,7 @@ internal static class SiteIsolatedGitHubArchivePreflight
         var directories = SiteIsolatedGitHubArchivePaths.ParentDirectories(expected);
         if (provider)
         {
-            directories.Add(SiteIsolatedGitHubFields.RequestsDirectory + SiteIsolatedGitHubTokens.Slash);
+            directories.Add("github/requests/");
         }
 
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -54,7 +54,7 @@ internal static class SiteIsolatedGitHubArchivePreflight
         return [.. selected];
     }
 
-    private static void ValidatePath(string path, HashSet<string> seen)
+    internal static void ValidatePath(string path, HashSet<string> seen)
     {
         if (string.IsNullOrEmpty(path) || path.Contains(SiteIsolatedGitHubTokens.Backslash, StringComparison.Ordinal) ||
             Path.IsPathRooted(path) || path.Split(SiteIsolatedGitHubTokens.Slash).Any(part =>
@@ -69,7 +69,7 @@ internal static class SiteIsolatedGitHubArchivePreflight
         }
     }
 
-    private static void ValidateType(ZipArchiveEntry entry, bool directory)
+    internal static void ValidateType(ZipArchiveEntry entry, bool directory)
     {
         var unix = (entry.ExternalAttributes >> SiteIsolatedGitHubTokens.UnixShift) & SiteIsolatedGitHubTokens.UnixMask;
         var allowed = directory ? SiteIsolatedGitHubTokens.UnixDirectory : SiteIsolatedGitHubTokens.UnixRegular;
@@ -108,7 +108,12 @@ internal static class SiteIsolatedGitHubArchivePreflight
             return SiteIsolatedGitHubTokens.Zero;
         }
 
-        if (name.EndsWith(SiteIsolatedGitHubTokens.Slash + SiteIsolatedGitHubTokens.Raw, StringComparison.Ordinal))
+        if (name == "github/runtime/benchmark-runtime-files.json")
+        {
+            return 67_108_864;
+        }
+
+        if (name.Contains("/reports/", StringComparison.Ordinal))
         {
             return SiteIsolatedGitHubTokens.RawBytes;
         }
@@ -130,7 +135,7 @@ internal static class SiteIsolatedGitHubArchivePreflight
     private static void RequireRawTotal(IEnumerable<SiteIsolatedGitHubArchiveEntry> selected)
     {
         var total = selected.Where(entry => entry.File.Path.EndsWith(
-            SiteIsolatedGitHubTokens.Slash + SiteIsolatedGitHubTokens.Raw, StringComparison.Ordinal))
+            ".json", StringComparison.Ordinal))
             .Sum(entry => entry.File.Bytes);
         if (total > SiteIsolatedGitHubTokens.TotalRawBytes)
         {

@@ -33,7 +33,7 @@ internal sealed class IsolatedResourceTopologySelectionTests
     public async Task HelpersRejectOutOfContractNativeCountsBeforeAllocation(string helper, int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(helper, count);
-        await Assert.That(() => Add(helper, fixture.Context)).Throws<InvalidOperationException>();
+        await Assert.That(() => Add(helper, fixture.Context)).Throws<ArgumentOutOfRangeException>();
         await VerifyUnallocatedAsync(fixture);
     }
 

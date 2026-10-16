@@ -56,11 +56,11 @@ internal sealed class IsolatedAggregateNodeStartOwner : IDisposable
             ownershipEnded = true;
             return activeProcess;
         }
-        primary ??= new InvalidOperationException(IsolatedAggregateNodeProcess.StartFailure);
+        primary ??= new InvalidOperationException(SessionNodeProcess.StartFailure);
         DisposeOwnedProcess();
         ownershipEnded = true;
         failures.Throw(primary);
-        throw new InvalidOperationException(IsolatedAggregateNodeProcess.StartFailure);
+        throw new InvalidOperationException(SessionNodeProcess.StartFailure);
     }
 
     public void Dispose()

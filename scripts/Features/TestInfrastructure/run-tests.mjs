@@ -96,16 +96,28 @@ const mapped = new Map([
   ['CoverageSettings', '--coverage-settings'], ['CoverageOutput', '--coverage-output'],
   ['CoverageFormat', '--coverage-output-format'], ['Execution:MaximumParallelTests', '--maximum-parallel-tests']
 ]);
+const retiredBenchmarkSelector = /^(?:ScaleProfile|VectorProfile|OpenLoopRate|OpenLoopCancellationProof)$/iu;
+
+function rejectRetiredBenchmarkSelection(input, inherited) {
+  for (const argument of input) {
+    const match = /^--KeyLoadTests:([^=]+)(?:=|$)/iu.exec(argument);
+    if (match && retiredBenchmarkSelector.test(match[1])) throw new Error('Retired benchmark selection is not supported.');
+    if (/^--Benchmarks:/iu.test(argument)) throw new Error('Benchmark workloads use their native session entry.');
+  }
+  for (const key of Object.keys(inherited)) {
+    const match = /^(?:KeyLoadTests|Benchmarks)(?:__|:)([^:]+)$/iu.exec(key);
+    if (match && retiredBenchmarkSelector.test(match[1])) throw new Error('Retired benchmark selection is not supported.');
+  }
+}
 
 // Selection only: workloads and Aspire resource lifetimes belong to the C# TUnit tests.
 export function nativeSelection(input, inherited = process.env) {
+  rejectRetiredBenchmarkSelection(input, inherited);
   if (nativeSimdOptions.some(key => inherited[key] !== undefined && inherited[key] !== '' && inherited[key] !== '1')) {
     throw new Error('Native SIMD must remain enabled.');
   }
   const values = new Map();
-  const workload = [];
   for (const argument of input) {
-    if (argument.startsWith('--Benchmarks:')) { workload.push(argument); continue; }
     const match = /^--KeyLoadTests:([^=]+)=(.+)$/u.exec(argument);
     if (!match || values.has(match[1])) throw new Error('Invalid or duplicate native test selection.');
     if (match[2].length > 4096) throw new Error('Native test argument exceeds its bound.');
@@ -162,8 +174,7 @@ export function nativeSelection(input, inherited = process.env) {
       }
     }
   }
-  for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__ScaleProfile', 'KeyLoadTests__VectorProfile',
-    'KeyLoadTests__OpenLoopRate', 'KeyLoadTests__LocalRf3Image__Enabled', 'KeyLoadTests__HeavyLoad__Enabled',
+  for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__LocalRf3Image__Enabled', 'KeyLoadTests__HeavyLoad__Enabled',
     'KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS',
     localImageArgumentsEnvironment]) delete environment[key];
   if (localImageSelected) {
@@ -176,6 +187,7 @@ export function nativeSelection(input, inherited = process.env) {
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
   args.push('--timeout', `${values.get('TimeoutMinutes') ?? (['rf3', 'comparison'].includes(suite) ? 60 : 30)}m`);
+  if (suite === 'comparison') args.push('--minimum-expected-tests', '1');
   const preparation = [];
   for (const [key, value] of values) {
     if (['Suite', 'ResultsDirectory', 'Execution:MaximumParallelTests'].includes(key)) continue;
@@ -192,9 +204,6 @@ export function nativeSelection(input, inherited = process.env) {
       continue;
     } else if (mapped.has(key)) {
       args.push(mapped.get(key), key.startsWith('Coverage') && key !== 'CoverageFormat' ? path.resolve(root, value) : value);
-    } else if (['ScaleProfile', 'VectorProfile', 'OpenLoopRate'].includes(key)) {
-      if (suite !== 'comparison') throw new Error('Benchmark selection requires ComparisonTests.');
-      environment[key === 'OpenLoopRate' ? 'Benchmarks__OpenLoopRate' : `Benchmarks__${key}`] = value;
     } else if (key === heavyLoadEnabledOption) {
       environment.KeyLoadTests__HeavyLoad__Enabled = value;
     } else if (key === 'LocalRf3Image:Enabled') {
@@ -215,12 +224,6 @@ export function nativeSelection(input, inherited = process.env) {
       if (values.has(key)) preparation.push(`--KeyLoadTests:${key}=${values.get(key)}`);
     }
     environment.KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS = JSON.stringify(preparation);
-  }
-  for (const argument of workload) {
-    if (suite !== 'comparison') throw new Error('Workload settings require ComparisonTests.');
-    const match = /^--Benchmarks:([^=]+)=(.+)$/u.exec(argument);
-    if (!match) throw new Error('Invalid workload setting.');
-    environment[`Benchmarks__${match[1].replaceAll(':', '__')}`] = match[2];
   }
   return { args, environment };
 }

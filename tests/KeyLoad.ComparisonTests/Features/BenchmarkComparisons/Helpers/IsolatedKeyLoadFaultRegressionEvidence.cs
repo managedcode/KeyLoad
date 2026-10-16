@@ -4,11 +4,11 @@ using KeyLoad.Comparisons;
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Owned atomic no-overwrite evidence exports only safe provider, native and public membership facts.</summary>
-internal sealed class IsolatedKeyLoadFaultRegressionEvidence(string cell, IsolatedComparisonWorker worker)
+internal sealed class IsolatedKeyLoadFaultRegressionEvidence(string cell, BenchmarkSessionFaultWorker worker)
 {
     public int SchemaVersion { get; } = 1;
     public string Cell { get; } = cell;
-    public IsolatedComparisonWorker Worker { get; } = worker;
+    public BenchmarkSessionFaultWorker Worker { get; } = worker;
     public DateTimeOffset StartedAt { get; } = TimeProvider.System.GetUtcNow();
     public DateTimeOffset? CompletedAt
     {
@@ -30,7 +30,8 @@ internal sealed class IsolatedKeyLoadFaultRegressionEvidence(string cell, Isolat
         Status = failureCategory is null ? "passed" : "failed";
         CompletedAt = TimeProvider.System.GetUtcNow();
         IsolatedKeyLoadFaultRegressionProtocol.Require(Path.GetFullPath(directory)
-            == Path.GetFullPath(IsolatedNativeReportAssertions.EvidenceDirectory()));
+            == Path.GetFullPath(Path.GetFullPath(Environment.GetEnvironmentVariable("KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY")
+            ?? throw new InvalidOperationException("BenchmarkSessionEvidenceDirectoryMissing"))));
         Directory.CreateDirectory(directory);
         var pending = Path.Combine(directory, ".fault-" + Guid.NewGuid().ToString("N") + ".pending");
         var bytes = JsonSerializer.SerializeToUtf8Bytes(this, JsonDefaults.Options);
@@ -83,3 +84,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionPhaseReceipt(int phase, int 
         get; internal set;
     }
 }
+
+/// <summary>Fault-regression identity bound to the authentic shared database session.</summary>
+internal sealed record BenchmarkSessionFaultWorker(string Target, int NodeCount, string Profile, string SourceRevision,
+    long RunId, int Attempt, string Repository, string Ref, string Workflow, long JobId);

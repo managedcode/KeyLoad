@@ -29,7 +29,7 @@ internal sealed class SiteIsolatedBuildTests
         await Assert.That(catalog.RootElement.GetProperty(SiteIsolatedFields.Aggregate).GetProperty(SiteIsolatedFields.Sha256).GetString()).IsEqualTo(Hash(manifest));
         await Assert.That(catalog.RootElement.GetProperty(SiteIsolatedFields.Projection).GetProperty(SiteIsolatedFields.Sha256).GetString()).IsEqualTo(Hash(projection));
         var files = Directory.GetFiles(temporary.Output, "*", SearchOption.AllDirectories);
-        await Assert.That(files.All(path => Path.GetFileName(path) is not ("worker.json" or "samples.csv"))).IsTrue();
+        await Assert.That(files.All(path => Path.GetFileName(path) is not ("session.json" or "samples.csv" or "runtime-import.json"))).IsTrue();
         await Assert.That(Directory.Exists(Path.Combine(temporary.Output, "data", "runs"))).IsFalse();
         await Assert.That(File.Exists(Path.Combine(temporary.Output, "data", "catalog.json"))).IsFalse();
         var html = await File.ReadAllTextAsync(Path.Combine(temporary.Output, SiteAssetTokens.IndexHtml), token);

@@ -36,8 +36,7 @@ internal static class ReplicaIsolationCommand
         var runtime = AppHostOptionsRegistration.Get(builder);
         if (!runtime.Control.Value.ContainerFaults
             || !runtime.Control.Value.Ephemeral || runtime.Control.Value.BenchmarksEnabled
-            || runtime.Control.Value.TargetSelected || runtime.Control.Value.ComparisonSelectorsPresent
-            || runtime.Control.Value.ScaleSelected)
+            || runtime.Control.Value.TargetSelected || runtime.Control.Value.ComparisonSelectorsPresent)
         {
             throw new InvalidOperationException(ReplicaIsolationCommandProtocol.Refused);
         }

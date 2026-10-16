@@ -23,11 +23,21 @@ internal static class SiteIsolatedGitHubNativeArchiveAssertions
     {
         var actual = JsonNode.Parse(await File.ReadAllBytesAsync(
             Path.Combine(capture, SiteIsolatedGitHubTokens.Metadata), token))!.AsObject();
+        if (actual[SiteIsolatedFields.State]!.GetValue<string>() == "selection_verified")
+        {
+            await Assert.That(JsonNode.DeepEquals(original[SiteIsolatedFields.Cohort], actual[SiteIsolatedFields.Cohort])).IsTrue();
+            await Assert.That(JsonNode.DeepEquals(original[SiteIsolatedFields.Source], actual[SiteIsolatedFields.Source])).IsTrue();
+            await Assert.That(actual[SiteIsolatedFields.AggregateJobId]!.GetValue<long>()).IsEqualTo(original[SiteIsolatedFields.AggregateJob]![SiteIsolatedFields.Id]!.GetValue<long>());
+            await Assert.That(actual[SiteIsolatedFields.Workers]!.AsArray().Count).IsEqualTo(22);
+            return;
+        }
+
         string[] fields =
         [
             SiteIsolatedGitHubTokens.Source, SiteIsolatedGitHubFields.Repository, SiteIsolatedGitHubFields.WorkflowKey,
             SiteIsolatedGitHubTokens.Run, SiteIsolatedGitHubTokens.Cohort, SiteIsolatedGitHubTokens.AggregateJob,
             SiteIsolatedGitHubTokens.Artifacts, SiteIsolatedGitHubTokens.Workers, SiteIsolatedGitHubFields.Image,
+            SiteIsolatedFields.RuntimeIdentity, SiteIsolatedFields.Functional,
         ];
         foreach (var field in fields)
         {

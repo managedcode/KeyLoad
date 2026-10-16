@@ -114,7 +114,7 @@ internal static class TwoRf3Profile
         if (selected != TwoRf3ProfileProtocol.Profile || !configuration.GetValue<bool>(TwoRf3ProfileProtocol.EphemeralSetting)
             || !string.IsNullOrWhiteSpace(configuration[TestSuiteSettings.SuiteSetting])
             || configuration.GetValue<bool>(TwoRf3ProfileProtocol.BenchmarksEnabledSetting)
-            || configuration[Comparisons.ComparisonWorkerSelection.TargetSetting] is not null)
+            || configuration[Comparisons.BenchmarkSessionSelection.TargetSetting] is not null)
         {
             throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid);
         }

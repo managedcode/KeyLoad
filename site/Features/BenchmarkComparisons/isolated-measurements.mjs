@@ -1,28 +1,47 @@
-import { metrics, selectedRows } from './measurements.mjs';
-import { ISOLATED, assertIsolated } from './isolated-contracts.mjs';
+import { metrics } from './measurements.mjs';
+import { SESSION, SESSION_TARGETS, requireSession, sessionUnavailableTopology } from '../../../scripts/Features/BenchmarkComparisons/session-contract.mjs';
 
-function unavailable(worker) {
-  const count = worker.disposition === ISOLATED.failed ? null : 0;
-  return { name: worker.target, status: worker.disposition, value: null, min: null, max: null, attempts: count,
-    successes: count, failures: count, throughput: null, p50: null, p95: null, p99: null, detail: worker.reason,
-    nodeCount: worker.nodeCount, worker };
+function qualified(worker) {
+  const profile = worker.session.targetProfile;
+  return worker.resourceQualified && worker.qualification.status !== 'failed' && profile !== null
+    && [profile.version,profile.topology,profile.cluster.state].every(value => !/unverified|unobserved|unknown|not recorded/i.test(value));
 }
-
+const topologyUnavailable = worker => worker.session.images.server === null && sessionUnavailableTopology(worker.session);
+const notRecorded = 'Not recorded in session manifest';
+function viewWorker(worker, report) {
+  const profile = worker.session.targetProfile;
+  const runtime = worker.session.runtime;
+  const target = profile ?? { name: worker.target, version: notRecorded, image: notRecorded,
+    topology: topologyUnavailable(worker) ? 'Native topology unavailable' : 'Native profile not observed for this workload', cluster: { dataCopies: notRecorded, observations: [] },
+    writeAcknowledgement: notRecorded, readContract: notRecorded, transport: notRecorded, authorization: notRecorded };
+  const unqualified = report.status === 'measured' && !qualified(worker);
+  return { ...worker, rawSha256: worker.sessionSha256, disposition: report.status === 'notQualified' || unqualified ? 'failed'
+    : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status, reason: unqualified ? worker.qualification.status === 'failed' ? worker.session.reason : 'Native profile or session resource qualification incomplete.' : report.detail,
+    report: { hostOs: runtime.operatingSystem, architecture: runtime.architecture, logicalProcessors: runtime.logicalProcessors,
+      runtime: runtime.framework, storage: runtime.storage, loadGeneratorImage: worker.session.images.runner,
+      nativeServerImage: worker.session.images.server ?? notRecorded, targets: [target] } };
+}
 export function selectedIsolatedRows(projection, scenario, nodeCount, repetition, metric, target) {
-  assertIsolated([...ISOLATED.crud, ...ISOLATED.specialized].includes(scenario) && ISOLATED.nodes.includes(nodeCount) &&
-    Object.hasOwn(metrics, metric) && (target === 'all' || ISOLATED.targets.includes(target)) &&
-    (repetition === 'all' || Number.isSafeInteger(repetition) && repetition >= 0 && repetition < ISOLATED.options.repetitions));
-  const workers = projection.workers.filter(worker => worker.scenario === scenario && worker.nodeCount === nodeCount &&
-    (target === 'all' || worker.target === target));
-  const rows = workers.map(worker => {
-    if (worker.disposition === 'unsupportedTopology' || worker.disposition === ISOLATED.failed) return unavailable(worker);
-    const row = selectedRows(worker.report, scenario, repetition === 'all' ? 'median' : repetition, metric)[0];
-    return { ...row, nodeCount, worker };
-  });
-  // Each original report contains exactly one engine and one node count; its median is never a pooled cohort.
-  return rows.sort((left, right) => {
-    if (left.value === null) return right.value === null ? 0 : 1;
-    if (right.value === null) return -1;
-    return metrics[metric].higher ? right.value - left.value : left.value - right.value;
-  });
+  const [caseId, laneId] = scenario.split('/');
+  requireSession(SESSION.caseIds.includes(caseId) && (laneId === undefined || caseId === 'mixed' && ['create', 'delete', 'update', 'read', 'search'].includes(laneId)) && SESSION.nodes.includes(nodeCount) && Object.hasOwn(metrics, metric)
+    && (target === 'all' || SESSION_TARGETS.some(item => item.name === target)) && repetition === 'session');
+  return projection.workers.filter(worker => worker.nodeCount === nodeCount && (target === 'all' || worker.target === target))
+    .map(worker => {
+      const report = worker.reports.find(item => item.caseId === caseId);
+      requireSession(report !== undefined);
+      const selected = laneId === undefined ? report.lanes.length === 1 ? report.lanes[0] : null
+        : report.lanes.find(lane => lane.id === laneId);
+      const measurement = report.status === 'measured' && qualified(worker) ? selected?.measurement ?? null : null;
+      // Concurrent mixed lanes are separate streams, never averaged into a fictitious request distribution.
+      const value = report.status !== 'measured' || !qualified(worker) ? null : metric === 'duration'
+        ? selected?.measurement.elapsedSeconds ?? report.elapsedSeconds : measurement ? metrics[metric].read(measurement) : null;
+      return { name: worker.target, status: report.status === 'notQualified' || report.status === 'measured' && !qualified(worker) ? 'failed' : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status,
+        value: Number.isFinite(value) ? value : null, min: Number.isFinite(value) ? value : null,
+        max: Number.isFinite(value) ? value : null, attempts: measurement?.attempts ?? null,
+        successes: measurement?.successes ?? null, failures: measurement?.failures ?? null,
+        throughput: measurement?.usefulOperationsPerSecond ?? null, p50: measurement?.latency.p50Ms ?? null,
+        p95: measurement?.latency.p95Ms ?? null, p99: measurement?.latency.p99Ms ?? null,
+        detail: report.detail, nodeCount, worker: viewWorker(worker, report) };
+    }).sort((left, right) => left.value === null ? right.value === null ? 0 : 1 : right.value === null ? -1
+      : metrics[metric].higher ? right.value - left.value : left.value - right.value);
 }

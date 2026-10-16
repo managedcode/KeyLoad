@@ -1,0 +1,47 @@
+// Current session cohort only. Physical isolation is database × native topology.
+export const SESSION = Object.freeze({
+  schema: 'session-v1', profile: 'session-v1', repository: 'managedcode/KeyLoad',
+  ref: 'refs/heads/main', workflow: 'Benchmarks', workers: 22,
+  records: 1_000_000, operations: 100_000, concurrency: 16, warmup: 0,
+  caseIds: Object.freeze(['load-million', 'index', 'sequential-read', 'random-read', 'search', 'mixed', 'verify-final']),
+  nodes: Object.freeze([1, 3]), artifactPrefix: 'comparison-session-', aggregateArtifact: 'comparison-session-suite',
+  aggregateJob: 'Combine benchmark results', prepareJob: 'Build Docker images',
+  workerSteps: Object.freeze(['Run database workload', 'Save benchmark results']),
+  reportBytes: 268_435_456, nativeBytes: 16_777_216, sessionBytes: 4_194_304,
+  aggregateBytes: 33_554_432, archiveBytes: 536_870_912, allArchiveBytes: 11_811_160_064,
+  capabilitiesUnavailable: 'NativeSessionCapabilitiesUnavailable', topologyUnavailable: 'NativeTopologyUnavailable',
+  unavailableTopologyTargets: Object.freeze(['Neo4j','SurrealDB','HelixDB']),
+  failure: 'Benchmark session evidence rejected.',
+});
+export const SESSION_TARGETS = Object.freeze([
+  ['keyload', 'KeyLoad'], ['postgresql', 'PostgreSQL + pgvector'], ['qdrant', 'Qdrant'],
+  ['rabbitmq', 'RabbitMQ'], ['redis', 'Redis'], ['neo4j', 'Neo4j'], ['mongodb', 'MongoDB'],
+  ['opensearch', 'OpenSearch'], ['kurrentdb', 'KurrentDB'], ['surrealdb', 'SurrealDB'], ['helixdb', 'HelixDB'],
+].map(([key, name]) => Object.freeze({ key, name })));
+export const requireSession = condition => { if (!condition) throw new Error(SESSION.failure); };
+export const exactSession = (value, keys) => value !== null && typeof value === 'object' && !Array.isArray(value)
+  && Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
+export const sessionHash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+export const sessionPositive = value => Number.isSafeInteger(value) && value > 0;
+export const sessionCount = value => Number.isSafeInteger(value) && value >= 0;
+export const sessionPath = value => typeof value === 'string' && value.length <= 512
+  && /^[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/.test(value)
+  && !value.split('/').some(part => part === '.' || part === '..');
+export const sessionText = value => typeof value === 'string' && value.length > 0 && value.length <= 1024
+  && !/[\u0000-\u001f\u007f]/.test(value);
+export const sessionUnavailableTopology = row => row.nodeCount === 3 && SESSION.unavailableTopologyTargets.includes(row.target);
+export const sessionJobName = row => `${row.target} / Session / ${row.nodeCount} node${row.nodeCount === 1 ? '' : 's'}`;
+export function sessionRows() {
+  return SESSION_TARGETS.flatMap(target => SESSION.nodes.map(nodeCount => {
+    const id = `${target.key}-n${nodeCount}`;
+    const row = { id, target: target.name, nodeCount, artifactName: SESSION.artifactPrefix + id };
+    return { ...row, jobName: sessionJobName(row) };
+  }));
+}
+export function validateSessionCohort(cohort) {
+  requireSession(exactSession(cohort, ['sourceRevision', 'runId', 'attempt', 'repository', 'ref', 'workflow', 'profile'])
+    && /^[a-f0-9]{40}$/.test(cohort.sourceRevision ?? '') && sessionPositive(cohort.runId)
+    && sessionPositive(cohort.attempt) && cohort.repository === SESSION.repository && cohort.ref === SESSION.ref
+    && cohort.workflow === SESSION.workflow && cohort.profile === SESSION.profile);
+  return cohort;
+}

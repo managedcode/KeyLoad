@@ -33,9 +33,9 @@ internal sealed class ImageBundleFileTests
     public async Task AcIso006BundleValidationRejectsChangedOrUnsafeEvidence(string corruption)
     {
         using var directory = new ImageBundleTestDirectory();
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", ImageBundleNodeProgram.Source,
-                IsolatedAggregateNodeProcess.Module("image-bundle-read.mjs"), directory.Root, corruption],
+                SessionNodeProcess.Module("image-bundle-read.mjs"), directory.Root, corruption],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(corruption == "valid" ? 0 : 1);
         await Assert.That(result.Error).IsEmpty();
@@ -46,9 +46,9 @@ internal sealed class ImageBundleFileTests
     public async Task AcIso007ExclusiveOutputPreservesExistingFileBytes()
     {
         using var directory = new ImageBundleTestDirectory();
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
+        var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", ImageBundleNodeProgram.Exclusive,
-                IsolatedAggregateNodeProcess.Module("image-bundle-files.mjs"), directory.Root],
+                SessionNodeProcess.Module("image-bundle-files.mjs"), directory.Root],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.Output.Trim()).IsEqualTo("preserved");

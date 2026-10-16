@@ -2,7 +2,6 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteAssetTokens
 {
-    public const string ProbeRelativePath = "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Processes/node-probe.mjs";
     public const string MedianOperation = "median";
     public const string BuilderRelativePath = "site/scripts/build.mjs";
     public const string SiteRootDirectory = "site";

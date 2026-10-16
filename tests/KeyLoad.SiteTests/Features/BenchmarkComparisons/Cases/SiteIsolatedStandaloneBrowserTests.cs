@@ -4,7 +4,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedStandaloneBrowserTests
 {
-    /// <summary>AC-ISO-008/009: actual standalone Chrome publication fetches 220-control evidence without raw worker preload.</summary>
+    /// <summary>AC-ISO-008/009: actual standalone Chrome publication fetches 22-session evidence without raw worker preload.</summary>
     [Test]
     public async Task AC_ISO_009_StandaloneChromeLoadsOnlyCompactIsolatedEvidence()
     {
@@ -14,7 +14,7 @@ internal sealed class SiteIsolatedStandaloneBrowserTests
         await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
         await SiteIsolatedBrowserAssertions.AssertRowsAsync(browser.Chrome.Cdp, projection.RootElement,
-            new("PointRead", 3, "all", "throughput", "all"), token);
+            new("sequential-read", 3, "session", "throughput", "all"), token);
         await SiteIsolatedBrowserLayoutAssertions.AssertAsync(browser.Chrome.Cdp, projection.RootElement, token);
         var hidden = await browser.Chrome.Cdp.EvaluateAsync("document.querySelector('#benchmarks').hidden", false, token);
         await Assert.That(hidden.GetBoolean()).IsFalse();

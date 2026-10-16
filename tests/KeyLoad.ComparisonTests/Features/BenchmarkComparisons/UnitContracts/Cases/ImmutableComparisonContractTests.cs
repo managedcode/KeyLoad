@@ -86,7 +86,7 @@ internal sealed class ImmutableComparisonContractTests
             "linux", "x64", 4, ".NET 10", "disk", null, ImmutableArray<TargetProfile>.Empty,
             ImmutableArray<ComparisonCase>.Empty);
 
-        var actual = JsonSerializer.Serialize(expected, ReportWriter.JsonOptions);
+        var actual = JsonSerializer.Serialize(expected, ComparisonJson.Options);
         await Assert.That(actual).IsEqualTo(FormattedRequiredArraysJson);
         using var document = JsonDocument.Parse(actual);
         await Assert.That(document.RootElement.GetProperty(SchemaVersionProperty).GetInt32()).IsEqualTo(3);
@@ -101,15 +101,15 @@ internal sealed class ImmutableComparisonContractTests
     public void AcBct002RequiredReportArraysRejectMissingNullAndDefaultValues()
     {
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, omit: "cases"), ReportWriter.JsonOptions));
+            RewriteRequiredArrays(RequiredArraysJson, omit: "cases"), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, nullValue: "targets"), ReportWriter.JsonOptions));
+            RewriteRequiredArrays(RequiredArraysJson, nullValue: "targets"), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, omit: "targets"), ReportWriter.JsonOptions));
+            RewriteRequiredArrays(RequiredArraysJson, omit: "targets"), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, nullValue: "cases"), ReportWriter.JsonOptions));
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(ReportWithDefaultTargets(), ReportWriter.JsonOptions));
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(ReportWithDefaultCases(), ReportWriter.JsonOptions));
+            RewriteRequiredArrays(RequiredArraysJson, nullValue: "cases"), ComparisonJson.Options));
+        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(ReportWithDefaultTargets(), ComparisonJson.Options));
+        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(ReportWithDefaultCases(), ComparisonJson.Options));
     }
 
     [Test]
@@ -120,23 +120,23 @@ internal sealed class ImmutableComparisonContractTests
         const string caseJson = "{\"target\":\"node\",\"scenario\":\"PointRead\",\"repetition\":0,\"status\":\"ok\",\"detail\":null,\"measurement\":null,\"samples\":[]}";
 
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<BenchmarkDocument>(
-            documentJson.Replace(",\"vector\":[]", string.Empty, StringComparison.Ordinal), ReportWriter.JsonOptions));
+            documentJson.Replace(",\"vector\":[]", string.Empty, StringComparison.Ordinal), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<BenchmarkDocument>(
-            documentJson.Replace("\"vector\":[]", "\"vector\":null", StringComparison.Ordinal), ReportWriter.JsonOptions));
+            documentJson.Replace("\"vector\":[]", "\"vector\":null", StringComparison.Ordinal), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(
-            new BenchmarkDocument(0, "d000000000", "{}", default), ReportWriter.JsonOptions));
+            new BenchmarkDocument(0, "d000000000", "{}", default), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ClusterEvidence>(
-            evidenceJson.Replace(",\"observations\":[]", string.Empty, StringComparison.Ordinal), ReportWriter.JsonOptions));
+            evidenceJson.Replace(",\"observations\":[]", string.Empty, StringComparison.Ordinal), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ClusterEvidence>(
-            evidenceJson.Replace("\"observations\":[]", "\"observations\":null", StringComparison.Ordinal), ReportWriter.JsonOptions));
+            evidenceJson.Replace("\"observations\":[]", "\"observations\":null", StringComparison.Ordinal), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(
-            new ClusterEvidence(1, 1, "ready", default), ReportWriter.JsonOptions));
+            new ClusterEvidence(1, 1, "ready", default), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonCase>(
-            caseJson.Replace(",\"samples\":[]", string.Empty, StringComparison.Ordinal), ReportWriter.JsonOptions));
+            caseJson.Replace(",\"samples\":[]", string.Empty, StringComparison.Ordinal), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonCase>(
-            caseJson.Replace("\"samples\":[]", "\"samples\":null", StringComparison.Ordinal), ReportWriter.JsonOptions));
+            caseJson.Replace("\"samples\":[]", "\"samples\":null", StringComparison.Ordinal), ComparisonJson.Options));
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(
-            new ComparisonCase("node", Scenario.PointRead, 0, "ok", null, null, default), ReportWriter.JsonOptions));
+            new ComparisonCase("node", Scenario.PointRead, 0, "ok", null, null, default), ComparisonJson.Options));
     }
 
     [Test]
@@ -144,8 +144,8 @@ internal sealed class ImmutableComparisonContractTests
     {
         const string absent = "{}";
         const string presentEmpty = "{\"neighbors\":[],\"vertices\":[]}";
-        var noOptionalResults = JsonSerializer.Deserialize<ComparisonOperationResult>(absent, ReportWriter.JsonOptions)!;
-        var emptyOptionalResults = JsonSerializer.Deserialize<ComparisonOperationResult>(presentEmpty, ReportWriter.JsonOptions)!;
+        var noOptionalResults = JsonSerializer.Deserialize<ComparisonOperationResult>(absent, ComparisonJson.Options)!;
+        var emptyOptionalResults = JsonSerializer.Deserialize<ComparisonOperationResult>(presentEmpty, ComparisonJson.Options)!;
 
         await Assert.That(noOptionalResults.Neighbors).IsNull();
         await Assert.That(noOptionalResults.Vertices).IsNull();
@@ -153,12 +153,12 @@ internal sealed class ImmutableComparisonContractTests
         await Assert.That(emptyOptionalResults.Neighbors!.Value.IsEmpty).IsTrue();
         await Assert.That(emptyOptionalResults.Vertices).IsNotNull();
         await Assert.That(emptyOptionalResults.Vertices!.Value.IsEmpty).IsTrue();
-        var explicitNull = JsonSerializer.Deserialize<ComparisonOperationResult>("{\"neighbors\":null,\"vertices\":[]}", ReportWriter.JsonOptions)!;
+        var explicitNull = JsonSerializer.Deserialize<ComparisonOperationResult>("{\"neighbors\":null,\"vertices\":[]}", ComparisonJson.Options)!;
         await Assert.That(explicitNull.Neighbors).IsNull();
-        await Assert.That(JsonSerializer.Deserialize<ComparisonOperationResult>("{\"neighbors\":[],\"vertices\":null}", ReportWriter.JsonOptions)!.Vertices).IsNull();
+        await Assert.That(JsonSerializer.Deserialize<ComparisonOperationResult>("{\"neighbors\":[],\"vertices\":null}", ComparisonJson.Options)!.Vertices).IsNull();
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(
-            new ComparisonOperationResult(Neighbors: default(ImmutableArray<FoundDocument>)), ReportWriter.JsonOptions));
-        await Assert.That(JsonSerializer.Serialize(emptyOptionalResults, ReportWriter.JsonOptions))
+            new ComparisonOperationResult(Neighbors: default(ImmutableArray<FoundDocument>)), ComparisonJson.Options));
+        await Assert.That(JsonSerializer.Serialize(emptyOptionalResults, ComparisonJson.Options))
             .IsEqualTo("""
                 {
                   "document": null,
