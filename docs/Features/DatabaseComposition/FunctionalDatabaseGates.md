@@ -107,6 +107,41 @@ defects while the other modules continue.
 
 ## Current local execution evidence
 
+Both corrected native cases passed on commit
+`e292c1c1585bc0bc402d3be4f97165ca6b29ac25`:
+
+| Gate | Genuine nodes | Successful SDK operations | Successful MCP operations | Total | Native result |
+| --- | --- | --- | --- | --- | --- |
+| R477 single instance | 1 | 5,315 | 4,987 | 10,302 | 1 passed, 0 failed, 0 skipped |
+| R478 RF3 | 3 | 5,317 | 4,989 | 10,306 | 1 passed, 0 failed, 0 skipped |
+
+Each completed 41 joined waves with the corrected independent resource index,
+covering all three event, queue/topic and blob resources. Both retained eight
+workload users, one queue operator, actual selected T-SQL composition and full
+SDK/MCP result, replay and authorization oracles. Original native cleanup passed
+before terminal acceptance. Source, executable and image-input cohort bindings
+match exactly; drift is zero. Elapsed owned-runner times were 228.364 seconds
+and 385.538 seconds, respectively; these are functional test durations, not
+comparable performance measurements.
+
+Original terminal evaluators under `TestResults/stage61-native-join/` are
+`root-r477-gate1-terminal-evaluation.original.json`, SHA-256
+`d3f05f6737201980432ba493351a0617bd9d0c7622b6239e2c7baa35c5c744c1`,
+and `root-r478-gate2-terminal-evaluation.original.json`, SHA-256
+`8e4e942842e91440c289e18a806baadd51950e9f606bb47949dbac1499e093dd`.
+They bind original TRX, stdout, joined runner, native fixture lifecycle and exact
+image identity checks. The complete identities are recorded in
+`docs/implementation/status.json`. This local proof does not qualify complete
+SQL, DROP, Linux, endurance, power-loss durability or release readiness.
+
+The associated strict full solution build passed with zero warnings/errors;
+all 39 selected native whole-operation tests and all three selected recovery
+cases passed. The separate real SDK/MCP persisted-authorization RF3 case also
+passed through all-three-node same-root cold restart. Production sources and
+binaries were unchanged between that cold proof and this corrected pair.
+
+## Previous local execution evidence
+
 Both original native cases passed on commit
 `86834e8a68d54c8c749221a373bb38b94b5d8436`:
 
@@ -138,11 +173,11 @@ four new deadline flows; R467 passed all three selected process/native recovery
 cases. At that historical R465/R466 checkpoint, the default fixture correction
 changed one nullable-key expression only; product and public functional-test
 source remained unchanged from the recorded local pair. The later resource-index
-correction below changes the functional scenario and requires a fresh matched
-Gate1/Gate2 pair, which remains open. R466 collected production coverage for its
+correction below changed the functional scenario; its fresh matched R477/R478
+pair now passes as recorded above. R466 collected production coverage for its
 nine cases only, not a full-product coverage result.
 
-## Current source coverage limitation
+## Resource rotation correction
 
 Source inspection found that the wave scheduler and iteration-based resource
 selection correlate: `model = (wave + worker) % 9` and
@@ -156,9 +191,9 @@ requires at least 27 complete waves before the successful-operation threshold ca
 end execution. In the unchanged four-worker schedule this schedules four full
 visits to each model/resource combination. A failed original visit still fails
 the gate; scheduled visits do not increment successful-operation counters. The
-corrected scenario requires a fresh matched gate pair. Original recorded PASS
-reports and operation counts remain historical facts; they do not prove complete
-lifecycle coverage of all three resources for these models.
+corrected scenario passed the fresh matched R477/R478 gate pair above. Original
+recorded PASS reports and operation counts remain historical facts with their
+narrower scenario; the corrected pair supplies all-three-resource lifecycle proof.
 
 ## Historical repair evidence
 
