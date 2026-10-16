@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterReplication;
@@ -62,7 +61,7 @@ internal static class NativeLocalChildLifetimeAssertions
         await Assert.That(reservation.Parent).IsSameReferenceAs(operation.Parent);
         await Assert.That(reservation.Child.ResultRetention).IsSameReferenceAs(operation.Ledger);
         await Assert.That(reservation.Child.Dependencies.SetEquals([lifetime])).IsTrue();
-        await Assert.That(reservation.Settlement).IsSameReferenceAs(reservation.Child.Settlement);
+        await Assert.That<object>(reservation.Settlement).IsSameReferenceAs(reservation.Child.Settlement);
     }
 
     internal static async Task RefusedAsync(Func<NativeRequestWorkLease> action)

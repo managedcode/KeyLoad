@@ -12,7 +12,6 @@ internal sealed class RemoteDocumentWorkOwner : IAsyncDisposable
     private readonly SemaphoreSlim? admissions;
     private Task? disposal;
     private int joined;
-    private const int NotJoined = 0;
     private const int Joined = 1;
 
     internal RemoteDocumentWorkOwner(IOptions<NodeOptions> nodeOptions, IOptions<RemoteDocumentExecutionOptions> options)
@@ -75,8 +74,30 @@ internal sealed class RemoteDocumentWorkOwner : IAsyncDisposable
     {
         await Task.Yield();
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(StopAsync, failures).ConfigureAwait(false);
-        ServerFailureObserver.Observe(stopping.Dispose, failures);
+        try
+        {
+            await lifetime.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        try
+        {
+            stopping.Dispose();
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.Observe(() => admissions?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

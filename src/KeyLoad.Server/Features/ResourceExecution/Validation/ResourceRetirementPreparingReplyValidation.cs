@@ -4,12 +4,14 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementPreparingReplyValidation
 {
+    private const long NoAppliedPosition = 0;
+
     internal static void Require(ResourceRetirementPhaseCommandV1 phase, ResourceRetirementPhaseResultV1 result,
         DatabaseLimits limits)
     {
         if (result is null || result.State is not null || result.Fence is not null || result.PreparedOperation is not null
             || result.Receipt is not { } receipt || receipt.Version != ResourceRetirementNativeProtocol.Version
-            || receipt.RetirementId != phase.RetirementId || receipt.Phase != phase.Phase || receipt.AppliedPosition <= 0)
+            || receipt.RetirementId != phase.RetirementId || receipt.Phase != phase.Phase || receipt.AppliedPosition <= NoAppliedPosition)
         {
             throw Invalid();
         }

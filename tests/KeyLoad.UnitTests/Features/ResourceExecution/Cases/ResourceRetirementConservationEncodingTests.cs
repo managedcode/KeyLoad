@@ -4,7 +4,7 @@ using KeyLoad.Storage;
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 /// <summary>Encoding and algebra regressions only; these do not simulate a successful phase23 or an RF3 receipt.</summary>
-public sealed class ResourceRetirementConservationEncodingTests
+internal sealed class ResourceRetirementConservationEncodingTests
 {
     [Test]
     public async Task ExactAuthorityRowsCommuteWhileChangedBytesAndDuplicateCountRemainVisible()

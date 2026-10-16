@@ -1,15 +1,17 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementAttemptValidation
 {
+    private const int MinimumOrdinal = 0;
+    private const long MinimumPolicyEpoch = 0;
+
     internal static void Require(ResourceRetirementAttemptV1 attempt, ResourceRetirementControlV1 control,
         PhysicalShardRecord source)
     {
-        if (attempt.AttemptId == Guid.Empty || attempt.Ordinal <= 0 || !Enum.IsDefined(attempt.Stage)
-            || string.IsNullOrEmpty(attempt.PrincipalId) || attempt.PolicyEpoch < 0
+        if (attempt.AttemptId == Guid.Empty || attempt.Ordinal <= MinimumOrdinal || !Enum.IsDefined(attempt.Stage)
+            || string.IsNullOrEmpty(attempt.PrincipalId) || attempt.PolicyEpoch < MinimumPolicyEpoch
             || attempt.ExpiresAt == default || attempt.OriginalCommandId != ResourceRetirementIdentity.AttemptCommandId(
                 control.Request, ResourceRetirementPhase.SealBarrier, attempt.AttemptId, source.PhysicalShardId))
         {

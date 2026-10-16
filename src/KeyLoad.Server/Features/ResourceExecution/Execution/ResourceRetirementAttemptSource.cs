@@ -9,6 +9,8 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 internal sealed class ResourceRetirementAttemptSource(ResourceRetirementPhaseExecution phases,
     ResourceRetirementPreparedOperationProof proof, IOptions<DatabaseLimits> limits)
 {
+    private const int NoPreviousAttemptOrdinal = 0;
+    private const int AttemptOrdinalStep = 1;
     internal async Task<ResourceRetirementAttemptV1> PrepareAsync(ResourceRetirementAttemptContextV1 context,
         ResourceRetirementAttemptV1? previous, ResourceRetirementPreparedOperationV1? closed,
         RegisteredPhysicalOwnerV1 source, string principalId, long epoch, DateTimeOffset expiry,
@@ -21,7 +23,7 @@ internal sealed class ResourceRetirementAttemptSource(ResourceRetirementPhaseExe
                 ResourceRetirementNativeProtocol.Unavailable), context, previous);
         }
         var attemptId = Guid.NewGuid();
-        var body = new ResourceRetirementPrepareAttemptBodyV1(context, attemptId, previous?.Ordinal ?? 0, expiry)
+        var body = new ResourceRetirementPrepareAttemptBodyV1(context, attemptId, previous?.Ordinal ?? NoPreviousAttemptOrdinal, expiry)
         {
             PreviousClosed = closed
         };
@@ -31,7 +33,7 @@ internal sealed class ResourceRetirementAttemptSource(ResourceRetirementPhaseExe
             principalId, epoch, expiry, work, metadata, token, attemptId).ConfigureAwait(false);
         var attempt = ReadResult(result, context, attemptId, source);
         CoreAttempt.Witness(attempt, context, limits.Value);
-        if (attempt.AttemptId != attemptId || attempt.Ordinal != checked((previous?.Ordinal ?? 0) + 1)
+        if (attempt.AttemptId != attemptId || attempt.Ordinal != checked((previous?.Ordinal ?? NoPreviousAttemptOrdinal) + AttemptOrdinalStep)
             || attempt.ExpiresAt != expiry || attempt.PrincipalId != principalId || attempt.PolicyEpoch != epoch
             || !ResourceRetirementReceiptValidation.Same(attempt.PrepareReceipt, result.Receipt))
         {

@@ -1,5 +1,3 @@
-using KeyLoad.Clustering;
-
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class NativeBoundLeaseDisposalOperation
@@ -20,7 +18,7 @@ internal static class NativeBoundLeaseDisposalOperation
         parent.PrepareDisposal(new InvalidOperationException(nameof(ExecuteAsync)), new IOException(nameof(ExecuteAsync)));
         await Assert.That(parent.DisposeAsync().AsTask()).IsSameReferenceAs(disposal);
         var completion = parent.CompleteAsync(new InvalidOperationException(nameof(NativeBoundLeaseDisposalOperation)), null);
-        await Assert.That(completion).IsSameReferenceAs(parent.Settlement);
+        await Assert.That<object>(completion).IsSameReferenceAs(parent.Settlement);
         await Assert.That(disposal).IsSameReferenceAs(parent.Settlement);
         await NativeRequestWorkKernelAssertions.AssertBothRunningAsync(disposal, producer);
         session.ReleaseProducer.TrySetResult();
@@ -35,7 +33,7 @@ internal static class NativeBoundLeaseDisposalOperation
         var dispatch = reservation.CompleteDispatchAsync(null, []);
         var report = await dispatch.WaitAsync(operation.Token);
         await Assert.That(report.ChildOutcome).IsSameReferenceAs(await child.Settlement);
-        await Assert.That(reservation.CompleteDispatchAsync(null, [])).IsSameReferenceAs(dispatch);
+        await Assert.That<object>(reservation.CompleteDispatchAsync(null, [])).IsSameReferenceAs(dispatch);
         await Assert.That(report.CleanupFailures.IsEmpty).IsTrue();
         await disposal.WaitAsync(operation.Token);
         var outcome = await parent.Settlement;

@@ -135,8 +135,30 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
     {
         await Task.Yield();
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(lifetime.StopAsync, failures).ConfigureAwait(false);
-        ServerFailureObserver.Observe(stopping.Dispose, failures);
+        try
+        {
+            await lifetime.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        try
+        {
+            stopping.Dispose();
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
 
@@ -6,6 +5,9 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementPreparationProof
 {
+    private const int MinimumOrdinal = 0;
+    private const long NoAppliedPosition = 0;
+
     internal static void RequireControl(ResourceRetirementPreparationControlV1 control,
         ResourceRetirementRequestV1 request, RegisteredPhysicalOwnerV1 source)
     {
@@ -29,7 +31,7 @@ internal static class ResourceRetirementPreparationProof
         if (!ResourceRetirementReceiptValidation.Same(reservation.Control, control)
             || !ResourceRetirementReceiptValidation.Same(reservation.Receiver, receiver)
             || reservation.LocalAcceptedMoves.IsDefault || reservation.Attempt is not { } attempt
-            || attempt.AttemptId == Guid.Empty || attempt.Ordinal <= 0 || string.IsNullOrEmpty(reservation.OriginalFingerprint)
+            || attempt.AttemptId == Guid.Empty || attempt.Ordinal <= MinimumOrdinal || string.IsNullOrEmpty(reservation.OriginalFingerprint)
             || attempt.Stage != ResourceRetirementAttemptStage.Prepared
             || attempt.Error is not null || attempt.SafeDetail is not null
             || attempt.TerminalReceipt is not null || attempt.OriginalFingerprint is not null)
@@ -55,7 +57,7 @@ internal static class ResourceRetirementPreparationProof
         if (receipt.Version != ResourceRetirementNativeProtocol.Version || receipt.RetirementId != control.Request.RetirementId
             || receipt.Phase != phase || receipt.CommandId != commandId || receipt.Lifetime != control.Lifetime
             || receipt.IntentDigest != control.IntentDigest || string.IsNullOrEmpty(receipt.IntentDigest)
-            || receipt.AppliedPosition <= 0 || !PhysicalOwnerEntryValidation.SameOwner(receipt.PhysicalOwner, receiver))
+            || receipt.AppliedPosition <= NoAppliedPosition || !PhysicalOwnerEntryValidation.SameOwner(receipt.PhysicalOwner, receiver))
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementNativeProtocol.Unavailable);
         }

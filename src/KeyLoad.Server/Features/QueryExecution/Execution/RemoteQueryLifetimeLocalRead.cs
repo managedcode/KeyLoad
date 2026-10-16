@@ -5,7 +5,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.DocumentStorage;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Server.Features.QueryExecution;
 

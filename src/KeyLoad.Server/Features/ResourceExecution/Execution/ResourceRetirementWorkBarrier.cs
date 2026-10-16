@@ -25,7 +25,7 @@ internal sealed class ResourceRetirementWorkBarrier(ResourceOwnerInventoryNative
         ResourceRetirementWorkBarrierReceiptV1? receipt = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            receipt = await ExecuteCoreAsync(state, source, principalId, epoch, expiry, work, metadata, token, originals).ConfigureAwait(false);
+            receipt = await ExecuteCoreAsync(state, source, principalId, epoch, expiry, work, metadata, originals, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (failures.Count != NoRecords)
         {
@@ -38,7 +38,7 @@ internal sealed class ResourceRetirementWorkBarrier(ResourceOwnerInventoryNative
 
     private async Task<ResourceRetirementWorkBarrierReceiptV1> ExecuteCoreAsync(ResourceRetirementStateV1 state,
         RegisteredPhysicalOwnerV1 source, string principalId, long epoch, DateTimeOffset expiry,
-        ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token, ImmutableArray<Exception>.Builder originals)
+        ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, ImmutableArray<Exception>.Builder originals, CancellationToken token)
     {
         ResourceRetirementStateValidation.State(state, limits.Value);
         var current = await new ResourceRetirementReads(client).ExecuteAsync(ResourceRetirementReadOperation.State,
@@ -65,7 +65,7 @@ internal sealed class ResourceRetirementWorkBarrier(ResourceOwnerInventoryNative
         }
         foreach (var item in captures)
         {
-            state = await RecordAsync(state, sealedState, source, item, capture, principalId, epoch, expiry, work, metadata, token, originals).ConfigureAwait(false);
+            state = await RecordAsync(state, sealedState, source, item, capture, principalId, epoch, expiry, work, metadata, originals, token).ConfigureAwait(false);
         }
         foreach (var owner in state.WorkOwnerReceipts)
         {
@@ -81,7 +81,7 @@ internal sealed class ResourceRetirementWorkBarrier(ResourceOwnerInventoryNative
     private async Task<ResourceRetirementStateV1> RecordAsync(ResourceRetirementStateV1 state,
         ResourceRetirementStateV1 sealedState, RegisteredPhysicalOwnerV1 source, ResourceRetirementWorkCaptureResult item,
         ResourceRetirementWorkCapture capture, string principalId, long epoch, DateTimeOffset expiry,
-        ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token, ImmutableArray<Exception>.Builder originals)
+        ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, ImmutableArray<Exception>.Builder originals, CancellationToken token)
     {
         var existing = state.WorkOwnerReceipts.SingleOrDefault(receipt =>
             receipt.Receiver.Owner.PhysicalShardId == item.Owner.Owner.PhysicalShardId);
@@ -160,7 +160,7 @@ internal sealed class ResourceRetirementWorkBarrier(ResourceOwnerInventoryNative
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 _ = await workReads.ExecuteAsync(owner.Fence, owner.Receiver, voter, owner,
-                    principalId, epoch, expiry, work, metadata, token, allocation).ConfigureAwait(false);
+                    principalId, epoch, expiry, work, metadata, allocation, token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);

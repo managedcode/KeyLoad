@@ -104,7 +104,7 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             }
             using var targetMac = RemoteGraphNativeMac.Create(options, partition, request.DestinationOwner);
             return await RemoteGraphNativeWorkExecution.ExecuteAsync(requestWork(), partition.Database, request,
-                linked.Token, (binding, token) => ExecuteBoundAsync(request, targetMac, binding, token)).ConfigureAwait(false);
+                (binding, token) => ExecuteBoundAsync(request, targetMac, binding, token), linked.Token).ConfigureAwait(false);
         }
         finally
         {

@@ -2,6 +2,30 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextOnlineOwnerShutdown
 {
+    internal static async Task CleanupSessionAsync(NativeTextOnlineSession session,
+        NativeTextOnlineRoot root, NativeTextOnlineSessions sessions)
+    {
+        await session.CloseCommandAdmissionAndJoinAsync().ConfigureAwait(false);
+        if (session.Publication.CapturedOriginal() is not null && !session.CatalogCommitted)
+        {
+            throw NativeTextErrors.Ownership();
+        }
+        session.DisposeWithJoinedNativeCleanup(() =>
+        {
+            if (session.CatalogCommitted)
+            {
+                return;
+            }
+            if (session.Leaf is { } leaf && session.Scope is { } scope)
+            {
+                root.DeleteAfterJoinedOwnership(leaf, scope);
+            }
+            session.GenerationReservation?.CompleteAfterJoinedCleanup();
+            session.GenerationReservation = null;
+        });
+        sessions.RemoveAfterJoinedCleanup(session);
+    }
+
     internal static async Task CompleteAsync(NativeTextOnlineSession[] originals, Task originalReaders, NativeTextOnlineCatalogOwner catalog,
         CancellationTokenSource shutdown, Func<NativeTextOnlineSession, Task> CleanupSessionAsync, List<Exception> failures)
     {

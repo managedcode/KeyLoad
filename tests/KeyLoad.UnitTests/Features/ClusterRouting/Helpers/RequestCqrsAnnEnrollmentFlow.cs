@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

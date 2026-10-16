@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementQuiescenceData;
 

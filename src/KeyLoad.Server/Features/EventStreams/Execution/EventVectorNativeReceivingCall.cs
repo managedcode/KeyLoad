@@ -21,7 +21,7 @@ internal sealed class EventVectorNativeReceivingCall(OrleansNode node, Partition
         var signed = node.CatalogRequestCodec().CreateEventVectorRead(requestId, actualPrincipal.Id,
             kind, payload, originalCall.ExpiresAt);
         var result = await NativeLifetimeReadChildExecution.ExecuteAsync<object>(node, actualPrincipal,
-            requestId, signed, null, originalCancellationToken, work.RequireAttachedResourceLifetimeBinding(), reply =>
+            requestId, signed, null, work.RequireAttachedResourceLifetimeBinding(), originalCancellationToken, reply =>
             {
                 authority.Require(originalCall, originalCancellationToken);
                 if (reply.Error is { } failure)

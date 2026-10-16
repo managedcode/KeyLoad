@@ -10,8 +10,8 @@ internal static class RemoteGraphNativeWorkExecution
     private const int NoFailures = 0;
 
     internal static async Task<RemoteGraphNativeReplyV1> ExecuteAsync(NativeRequestWorkOwner owner,
-        DatabaseEngine database, RemoteGraphNativeRequestV1 request, CancellationToken token,
-        Func<IResourceLifetimeWorkBinding, CancellationToken, Task<RemoteGraphNativeReplyV1>> execute)
+        DatabaseEngine database, RemoteGraphNativeRequestV1 request,
+        Func<IResourceLifetimeWorkBinding, CancellationToken, Task<RemoteGraphNativeReplyV1>> execute, CancellationToken token)
     {
         var failures = new List<Exception>();
         NativeRequestWorkLease? lease = null;

@@ -23,6 +23,7 @@ internal static class AnalyticsStoreNativePrivacyFlow
         await O.RowsAsync(db, D.Reader, rows, [1, 1, 1], true, token);
         var before = db.Database.GetOutboxStatus(D.Root, db.Partition);
         var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.FromResult(db.Database.CaptureAnalyticsAggregate(D.Reader, D.Query(db), token)));
+        ArgumentNullException.ThrowIfNull(denied);
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.Message).IsEqualTo(FieldDenied);
         await O.EqualAsync(before, db.Database.GetOutboxStatus(D.Root, db.Partition));
@@ -37,6 +38,7 @@ internal static class AnalyticsStoreNativePrivacyFlow
             db.Database.ValidateAnalyticsAggregatePublication(oldPolicy);
             return Task.CompletedTask;
         });
+        ArgumentNullException.ThrowIfNull(stale);
         await Assert.That(stale.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await O.RowsAsync(db, D.Reader, rows, [1, 1, 1], false, token);
         await ConfigureAsync(db, 4, [D.UseGrant, D.ReadGrant]);

@@ -17,7 +17,7 @@ internal static class NativeQueueRetryPlanningBudgetFlow
             var error = Assert.ThrowsExactly<KeyLoadException>(() => owner.Database.Database.PrepareQueueRetryOperation(seed.Operation, work));
             await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             using var cancelled = new CancellationTokenSource();
-            cancelled.Cancel();
+            await cancelled.CancelAsync();
             var original = A.Work(owner.Database, cancelled.Token);
             Assert.ThrowsExactly<OperationCanceledException>(() => owner.Database.Database.PrepareQueueRetryOperation(seed.Operation, original));
         });

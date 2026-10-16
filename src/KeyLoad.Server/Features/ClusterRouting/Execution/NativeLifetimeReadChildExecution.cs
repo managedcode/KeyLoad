@@ -4,7 +4,6 @@ using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -21,7 +20,7 @@ internal static class NativeLifetimeReadChildExecution
         var cleanup = new List<Exception>();
         NativeRequestWorkChildReservation? reservation = null;
         CancellationTokenSource? cancellation = null;
-        IDisposable? identity = null;
+        GrainRequestIdentityScope? identity = null;
         TResult? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {

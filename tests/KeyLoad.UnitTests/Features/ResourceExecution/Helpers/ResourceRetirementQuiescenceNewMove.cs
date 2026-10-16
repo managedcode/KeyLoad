@@ -19,7 +19,7 @@ internal static class ResourceRetirementQuiescenceNewMove
         };
         var body = NativeSerialization.Serialize(new PartitionMovePrepareBody(Root,
             new(NewMoveId, OtherPartition, state.Target.PhysicalOwner.PhysicalShardId, Zero, PartitionMoveMode.Transfer)));
-        var envelope = new PartitionMovePeerEnvelope(Version, NewMoveId, OtherPartition, state.Corpus.Control.Owner,
+        var envelope = new PartitionMovePeerEnvelope(ResourceRetirementQuiescenceData.Version, NewMoveId, OtherPartition, state.Corpus.Control.Owner,
             placement, state.Corpus.Destination.Owner, Convert.ToHexStringLower(SHA256.HashData(body)),
             PartitionMovePeerStage.ControlPrepare, Zero, state.ExpiresAt, Guid.NewGuid(), body);
         var request = new PartitionMovementTransportRequest(NewMoveCommandId, envelope, null,

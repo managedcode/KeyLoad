@@ -78,7 +78,7 @@ internal static class ReplicaSnapshotInstallFencingFlow
                 source.Snapshots.ReadChunk(image.TransferId, offset, node.Configuration.SnapshotChunkBytes));
         }
         await Assert.That(offset).IsEqualTo(image.Length);
-        await Assert.That(node.Snapshots.Complete(image.TransferId)).IsEqualTo(image);
+        await Assert.That(node.Snapshots.Complete(image.TransferId, token)).IsEqualTo(image);
         await ReplicaPrefixGcReceiptAssertions.DocumentAsync(node, ReplicaSnapshotInstallFencingProtocol.SnapshotCut);
         await ReplicaPrefixGcReceiptAssertions.AllOriginalAsync(node, ReplicaSnapshotInstallFencingProtocol.SnapshotCut);
     }

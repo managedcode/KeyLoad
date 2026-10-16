@@ -46,7 +46,7 @@ internal static class ResourceRetirementOriginal8RecoveryFlow
     private static async Task<ResourceRetirementOriginal8Expectation> PersistAsync(ControlledPartitionMovementNode target,
         ResourceRetirementAttemptContextV1 context, ResourceRetirementAttemptV1 attempt, CancellationToken token)
     {
-        var phase = new ResourceRetirementPhaseCommandV1(Version, context.Preparation!.Request.RetirementId,
+        var phase = new ResourceRetirementPhaseCommandV1(ResourceRetirementPreparationValidationData.Version, context.Preparation!.Request.RetirementId,
             ResourceRetirementPhase.ReserveOwner, NativeSerialization.Serialize(new ResourceRetirementReserveOwnerBodyV1(context, attempt)));
         var original = target.Database.CreateResourceRetirementOperation(attempt.OriginalCommandId,
             PhysicalShardCatalogFixture.RootPrincipalId, target.Database.EvaluationClock.GetUtcNow(), phase);
@@ -74,7 +74,7 @@ internal static class ResourceRetirementOriginal8RecoveryFlow
         var request = context.Preparation!.Request;
         var id = ResourceRetirementIdentity.AttemptCommandId(request, ResourceRetirementPhase.RecordReservation,
             reservation.Attempt!.AttemptId, reservation.Receiver.Owner.PhysicalShardId);
-        var phase = new ResourceRetirementPhaseCommandV1(Version, request.RetirementId,
+        var phase = new ResourceRetirementPhaseCommandV1(ResourceRetirementPreparationValidationData.Version, request.RetirementId,
             ResourceRetirementPhase.RecordReservation, NativeSerialization.Serialize(
                 new ResourceRetirementRecordReservationBodyV1(context.Preparation, reservation)));
         var original = source.Database.CreateResourceRetirementOperation(id, PhysicalShardCatalogFixture.RootPrincipalId,

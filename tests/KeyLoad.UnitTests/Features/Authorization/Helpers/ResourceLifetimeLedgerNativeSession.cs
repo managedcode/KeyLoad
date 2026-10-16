@@ -3,7 +3,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using P = KeyLoad.UnitTests.Features.Authorization.SafeProjectorOperationProtocol;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -44,7 +43,7 @@ internal static class ResourceLifetimeLedgerNativeSession
             {
                 var original = failures.FirstOrDefault();
                 var completion = parent.CompleteAsync(original, null);
-                await Assert.That(completion).IsSameReferenceAs(parent.Settlement);
+                await Assert.That(ReferenceEquals(completion, parent.Settlement)).IsTrue();
                 var settled = await completion;
                 await Assert.That(await parent.Settlement).IsSameReferenceAs(settled);
                 if (original is null)

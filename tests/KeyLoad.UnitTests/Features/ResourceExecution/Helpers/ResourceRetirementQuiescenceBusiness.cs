@@ -22,7 +22,7 @@ internal static class ResourceRetirementQuiescenceBusiness
             var id = NewDocument + pass.ToString(System.Globalization.CultureInfo.InvariantCulture) + collection;
             var commandId = Guid.NewGuid();
             var original = Issue(state.Source, OperationKind.Batch, commandId,
-                new CommandRequest(commandId, OtherPartition, [new PutDocument(collection, id, Json)]));
+                new CommandRequest(commandId, OtherPartition, [new PutDocument(collection, id, ResourceRetirementQuiescenceData.Json)]));
             var index = state.Source.Journal.Log.State.LastIndex + One;
             var result = state.Source.Journal.Submit(original, token);
             await Assert.That(result.Error).IsNull();
@@ -30,7 +30,7 @@ internal static class ResourceRetirementQuiescenceBusiness
                 new(state.Source.PhysicalOwner.Incarnation, OtherPartition.AtomicPartitionId, index, One),
                 [new(PutDocumentKind, collection, id, One)], state.Source.Database.Durability), result.Get<CommitReceipt>());
             await ResourceRetirementQuiescenceAssertions.EqualAsync(new DocumentResult(new(OtherPartition, collection, id),
-                One, Json, false, []), state.Source.Database.GetDocument(Root, new(OtherPartition, collection, id))!);
+                One, ResourceRetirementQuiescenceData.Json, false, []), state.Source.Database.GetDocument(Root, new(OtherPartition, collection, id), cancellationToken: token)!);
             state.Originals.Add((state.Source, original, result));
         }
     }

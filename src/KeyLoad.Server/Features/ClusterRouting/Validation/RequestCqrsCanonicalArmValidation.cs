@@ -27,13 +27,7 @@ internal static class RequestCqrsCanonicalArmValidation
         }
         if (arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged)
         {
-            return arm.Action == RequestCqrsProbeAction.ThrowOrdinary && arm.ReadKind is null
-                && arm.CommandId != Guid.Empty && arm.SourceRequestId is { } logRequest && logRequest != Guid.Empty
-                && arm.SourceArmId is { } logSource && logSource != Guid.Empty && logSource != arm.ArmId
-                && arm.TargetVoter is { } logTarget && RequestCqrsProbeActivationTargetValidation.Valid(logTarget)
-                && arm.Partition is { } logPartition && !string.IsNullOrWhiteSpace(logPartition.TenantId)
-                && !string.IsNullOrWhiteSpace(logPartition.DatabaseId)
-                && !string.IsNullOrWhiteSpace(logPartition.TransactionDomainId) && !string.IsNullOrWhiteSpace(logPartition.PartitionKey);
+            return ValidReplicaEntryAcknowledgement(arm);
         }
         if (arm.Phase is RequestCqrsProbePhase.EventVectorFirstCapturesReady
             or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
@@ -80,5 +74,16 @@ internal static class RequestCqrsCanonicalArmValidation
             && !string.IsNullOrWhiteSpace(arm.TargetVoter) && arm.Partition is { } partition
             && !string.IsNullOrWhiteSpace(partition.TenantId) && !string.IsNullOrWhiteSpace(partition.DatabaseId)
             && !string.IsNullOrWhiteSpace(partition.TransactionDomainId) && !string.IsNullOrWhiteSpace(partition.PartitionKey);
+    }
+
+    private static bool ValidReplicaEntryAcknowledgement(RequestCqrsProbeArmRecord arm)
+    {
+        return arm.Action == RequestCqrsProbeAction.ThrowOrdinary && arm.ReadKind is null
+            && arm.CommandId != Guid.Empty && arm.SourceRequestId is { } logRequest && logRequest != Guid.Empty
+            && arm.SourceArmId is { } logSource && logSource != Guid.Empty && logSource != arm.ArmId
+            && arm.TargetVoter is { } logTarget && RequestCqrsProbeActivationTargetValidation.Valid(logTarget)
+            && arm.Partition is { } logPartition && !string.IsNullOrWhiteSpace(logPartition.TenantId)
+            && !string.IsNullOrWhiteSpace(logPartition.DatabaseId)
+            && !string.IsNullOrWhiteSpace(logPartition.TransactionDomainId) && !string.IsNullOrWhiteSpace(logPartition.PartitionKey);
     }
 }

@@ -11,7 +11,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<ControlledPartitionMove
 {
     internal DatabaseEngine Database => source().Database;
     internal ZoneTreeStore Store => (ZoneTreeStore)source().Store;
-    internal PartitionRef Partition => P.Partition;
+    internal PartitionRef Partition { get; } = P.Partition;
     internal ICommitCoordinator Coordinator => source().Partition.Coordinator;
 
     internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()

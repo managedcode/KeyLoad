@@ -10,13 +10,15 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class CompositionLinkLifetimeJsonSeed
 {
+    private const string IdColumn = "id";
+
     internal static async Task<CompositionLinkLifetimeJsonState> CreateAsync(SafeProjectorOperationDatabase owner, CancellationToken token)
     {
         foreach (var name in new[] { P.From, P.To })
         {
             var definition = new ResourceDefinition(name, ResourceKind.Collection, owner.Source.Partition.TransactionDomainId)
             {
-                RelationalSchema = new("id", [new("id", RelationalColumnType.Text), new("name", RelationalColumnType.Text)])
+                RelationalSchema = new(IdColumn, [new(IdColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)])
             };
             await A.EqualAsync(definition, owner.Source.Submit(OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition))

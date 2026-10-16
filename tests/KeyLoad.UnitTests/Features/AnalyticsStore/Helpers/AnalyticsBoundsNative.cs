@@ -61,6 +61,7 @@ internal static class AnalyticsBoundsNative
     {
         AnalyticsAggregateResult? published = null;
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => { published = await query(); });
+        ArgumentNullException.ThrowIfNull(error);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(published).IsNull();
         return error;

@@ -34,7 +34,7 @@ internal sealed class ResourceRetirementWorkCapture(ResourceRetirementWorkReads 
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     evidence.Add(await workReads.ExecuteAsync(fence, owner, voter, null, principalId, epoch,
-                        expiry, work, metadata, token, allocation).ConfigureAwait(false));
+                        expiry, work, metadata, allocation, token).ConfigureAwait(false));
                 }, failures).ConfigureAwait(false);
             }
             captured.Add(new(owner, evidence.ToImmutable(), null));
@@ -55,7 +55,7 @@ internal sealed class ResourceRetirementWorkCapture(ResourceRetirementWorkReads 
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 evidence.Add(await workReads.ExecuteAsync(owner.Fence, owner.Receiver, voter, null,
-                    principalId, epoch, expiry, work, metadata, token, allocation).ConfigureAwait(false));
+                    principalId, epoch, expiry, work, metadata, allocation, token).ConfigureAwait(false));
             }, failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);

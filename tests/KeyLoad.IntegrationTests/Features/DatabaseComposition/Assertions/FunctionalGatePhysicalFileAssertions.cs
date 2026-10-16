@@ -57,13 +57,13 @@ internal static class FunctionalGatePhysicalFileAssertions
         using var json = JsonDocument.Parse(result.StandardOutput);
         var root = json.RootElement;
         if (!root.GetProperty(Running).GetBoolean()
-            || root.GetProperty(DataDirectory).GetString() != ContainerDirectory)
+            || root.GetProperty(DataDirectory).GetString() != FunctionalGatePhysicalFileProtocol.ContainerDirectory)
         {
             throw new InvalidOperationException(Failure);
         }
         var mounts = root.GetProperty(Mounts).EnumerateArray()
-            .Where(row => row.GetProperty(Destination).GetString() == ContainerDirectory).ToArray();
-        if (mounts.Length != RequiredDataMounts || mounts[0].GetProperty(Type).GetString() != Bind
+            .Where(row => row.GetProperty(Destination).GetString() == FunctionalGatePhysicalFileProtocol.ContainerDirectory).ToArray();
+        if (mounts.Length != RequiredDataMounts || mounts[0].GetProperty(FunctionalGatePhysicalFileProtocol.Type).GetString() != Bind
             || !mounts[0].GetProperty(Writable).GetBoolean())
         {
             throw new InvalidOperationException(Failure);

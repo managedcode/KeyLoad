@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterReplication;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
@@ -31,7 +32,18 @@ internal static class NativeBoundLeaseDisposalFlow
         }, errors);
         scenario.Release();
         await NativeBoundLeaseDisposalCleanup.JoinAsync(session, cleanup, errors);
-        await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), errors);
+        try
+        {
+            await fixture.DisposeAsync();
+        }
+        catch (Exception disposalFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(disposalFailure))
+        {
+            errors.Add(disposalFailure);
+        }
+        catch (Exception disposalFailure) when (!NativeCqrsBoundaryErrors.IsNonFatal(disposalFailure))
+        {
+            errors.Add(disposalFailure);
+        }
         ServerFailureObserver.ThrowIfAny(errors);
     }
 }

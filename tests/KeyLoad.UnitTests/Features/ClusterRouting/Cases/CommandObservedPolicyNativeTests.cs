@@ -6,5 +6,5 @@ internal sealed class CommandObservedPolicyNativeTests
     [Arguments(false)]
     [Arguments(true)]
     public Task HeldOriginalReceiveUsesCurrentFieldOrHeaderPolicyThenExactReplayAndHealthyNewCommand(bool header)
-        => CommandObservedPolicyFlow.RunAsync(header, TestContext.Current!.CancellationToken);
+        => CommandObservedPolicyFlow.RunAsync(header, TestContext.Current!.Execution.CancellationToken);
 }

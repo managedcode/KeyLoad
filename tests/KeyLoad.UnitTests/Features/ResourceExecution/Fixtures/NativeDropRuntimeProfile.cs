@@ -3,7 +3,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,16 +20,21 @@ internal sealed class NativeDropRuntimeProfile : IAsyncDisposable
     {
         get;
     }
-    internal NativeDropCommandPhaseObserver Observer { get; } = new();
+    internal NativeDropCommandPhaseObserver Observer { get; }
     internal ControlledPartitionMovementNativeHost Source => Hosts.Source;
     internal ResourceOwnerInventoryNativeClient Client => Source.Silo.ResourceInventoryRuntime!.Client;
 
-    private NativeDropRuntimeProfile(ControlledPartitionMovementNativeHosts hosts) => Hosts = hosts;
+    private NativeDropRuntimeProfile(ControlledPartitionMovementNativeHosts hosts, NativeDropCommandPhaseObserver observer)
+    {
+        Hosts = hosts;
+        Observer = observer;
+    }
 
     internal static async Task<NativeDropRuntimeProfile> CreateAsync(CancellationToken token)
     {
-        var hosts = await ControlledPartitionMovementNativeHosts.CreateAsync(token).ConfigureAwait(false);
-        var profile = new NativeDropRuntimeProfile(hosts);
+        var observer = new NativeDropCommandPhaseObserver();
+        var hosts = await ControlledPartitionMovementNativeHosts.CreateWithPhaseObserverAsync(_ => observer, token).ConfigureAwait(false);
+        var profile = new NativeDropRuntimeProfile(hosts, observer);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() =>
         {
@@ -52,12 +56,10 @@ internal sealed class NativeDropRuntimeProfile : IAsyncDisposable
         foreach (var node in Hosts.Nodes)
         {
             var codec = node.Silo.CatalogRequestCodec();
-            if (codec.PhaseObserver is not null && !ReferenceEquals(codec.PhaseObserver, Observer))
+            if (!ReferenceEquals(codec.PhaseObserver, Observer))
             {
                 throw new InvalidOperationException(NativeDropRuntimeProtocol.ObserverAlreadyOwned);
             }
-
-            codec.PhaseObserver = Observer;
         }
     }
 

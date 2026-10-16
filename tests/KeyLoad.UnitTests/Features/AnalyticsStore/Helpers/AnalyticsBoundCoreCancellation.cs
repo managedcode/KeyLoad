@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -15,7 +14,7 @@ internal static class AnalyticsBoundCoreCancellation
             await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
                 await AnalyticsBoundsNative.UnchangedAsync(fixture, async () =>
                 {
-                    caller.Cancel();
+                    await caller.CancelAsync();
                     var error = Assert.ThrowsExactly<OperationCanceledException>(() =>
                         fixture.Database.CaptureAnalyticsAggregateBound(D.Root, D.Query(fixture), work, lease));
                     await Assert.That(error.CancellationToken).IsEqualTo(caller.Token);

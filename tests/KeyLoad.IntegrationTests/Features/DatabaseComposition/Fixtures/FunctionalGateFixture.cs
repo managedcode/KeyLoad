@@ -1,10 +1,8 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;

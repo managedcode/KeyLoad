@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.UnitTests.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

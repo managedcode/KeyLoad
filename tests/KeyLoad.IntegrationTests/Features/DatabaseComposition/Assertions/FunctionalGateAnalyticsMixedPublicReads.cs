@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using A = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateAnalyticsMixedPublicProtocol;
@@ -63,7 +62,7 @@ internal static class FunctionalGateAnalyticsMixedPublicReads
         foreach (var actual in await FunctionalGateAnalyticsMixedPublicCalls.ReadAsync(context, AnalyticsStoreProtocol.AggregateTool,
             aggregate, context.Reader.Sdk.AggregateAnalyticsAsync(aggregate, token), token))
         {
-            await FunctionalGateUserAnalyticsAssertions.EqualAsync(actual, state.Aggregate(present));
+            await FunctionalGateUserAnalyticsAssertions.EqualAsync(actual, FunctionalGateAnalyticsMixedPublicState.Aggregate(present));
         }
     }
 }

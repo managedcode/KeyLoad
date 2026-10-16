@@ -7,10 +7,12 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementDurableReadValidation
 {
+    private const int NoPageSize = 0;
+
     internal static void RequireRequest(ResourceRetirementNativeRequest outer, ResourceRetirementReadRequestV1 query,
         DatabaseLimits limits)
     {
-        if (query.Control is not null || query.Preparation is not null || query.InventoryId != Guid.Empty || query.PageSize != 0
+        if (query.Control is not null || query.Preparation is not null || query.InventoryId != Guid.Empty || query.PageSize != NoPageSize
             || query.Context is not { } context)
         {
             throw Invalid();

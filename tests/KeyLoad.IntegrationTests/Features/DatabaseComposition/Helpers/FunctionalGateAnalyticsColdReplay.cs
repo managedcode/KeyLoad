@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using E = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateAnalyticsColdExpected;

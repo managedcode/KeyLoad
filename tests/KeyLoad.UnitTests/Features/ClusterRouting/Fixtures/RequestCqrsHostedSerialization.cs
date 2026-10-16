@@ -3,7 +3,6 @@ using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Extensions;
 using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Identity.Core.Serializations;
-using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;

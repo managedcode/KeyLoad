@@ -12,7 +12,7 @@ internal static class ResourceRetirementCleanupNativeSeed
         var definition = new ResourceDefinition(Table, ResourceKind.Collection, fixture.Partition.TransactionDomainId)
         {
             RelationalSchema = new(Id, [new(Id, RelationalColumnType.Text), new(Name, RelationalColumnType.Text)]),
-            Indexes = [new(Index, [NamePath], Unique: true)]
+            Indexes = [new(ResourceRetirementCleanupNativeData.Index, [NamePath], Unique: true)]
         };
         fixture.Submit(OperationKind.CreateTable, new CreateTableRequest(fixture.Partition.TenantId,
             fixture.Partition.DatabaseId, definition)).Get<ResourceDefinition>();

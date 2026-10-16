@@ -31,7 +31,7 @@ internal static class ResourceRetirementQuiescenceAttempt
     internal static ReplicatedOperation Issue(ControlledPartitionMovementNode owner,
         ResourceRetirementAttemptContextV1 context, ResourceRetirementAttemptV1 attempt, string principal)
         => owner.Database.CreateResourceRetirementOperation(attempt.OriginalCommandId, principal,
-            owner.Database.EvaluationClock.GetUtcNow(), new(Version, context.Preparation!.Request.RetirementId,
+            owner.Database.EvaluationClock.GetUtcNow(), new(ResourceRetirementQuiescenceData.Version, context.Preparation!.Request.RetirementId,
                 ResourceRetirementPhase.ReserveOwner, NativeSerialization.Serialize(new ResourceRetirementReserveOwnerBodyV1(context, attempt))));
 
     internal static async Task UnknownAsync(ResourceRetirementQuiescenceState state, ControlledPartitionMovementNode owner,
@@ -54,7 +54,7 @@ internal static class ResourceRetirementQuiescenceAttempt
         var body = new ResourceRetirementPrepareAttemptBodyV1(context, next, attempt.Ordinal, attempt.ExpiresAt);
         var operation = state.Source.Database.CreateResourceRetirementOperation(
             ResourceRetirementIdentity.AttemptCommandId(context, ResourceRetirementPhase.PrepareAttempt, next), Root,
-            state.Source.Database.EvaluationClock.GetUtcNow(), new(Version, state.Request.RetirementId,
+            state.Source.Database.EvaluationClock.GetUtcNow(), new(ResourceRetirementQuiescenceData.Version, state.Request.RetirementId,
                 ResourceRetirementPhase.PrepareAttempt, NativeSerialization.Serialize(body)));
         var result = await ResourceRetirementQuiescenceReservationFailures.SubmitAsync(state, state.Source, operation,
             ErrorCode.Conflict, ResourceRetirementProtocol.Changed, token);

@@ -72,7 +72,7 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
         }
         if (request.Kind == OnlineTextCapabilityKind.ResolveOriginal)
         {
-            var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, token, originalBudget).ConfigureAwait(false);
+            var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, originalBudget, token).ConfigureAwait(false);
             if (resolved is not null)
             {
                 return resolved;

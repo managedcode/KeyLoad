@@ -12,7 +12,7 @@ internal static class ResourceRetirementQuiescenceReservationAssertions
     {
         var reservation = result.Get<ResourceRetirementPhaseResultV1>().OwnerReservation ?? throw new InvalidOperationException(Invalid);
         var original = state.Originals.Last().Original;
-        var receipt = new ResourceRetirementPhaseReceiptV1(Version, state.Request.RetirementId,
+        var receipt = new ResourceRetirementPhaseReceiptV1(ResourceRetirementQuiescenceData.Version, state.Request.RetirementId,
             ResourceRetirementPhase.ReserveOwner, original.Id, state.Control.Lifetime, owner.PhysicalOwner,
             owner.Journal.Log.State.LastIndex, state.Control.IntentDigest);
         await ResourceRetirementQuiescenceAssertions.EqualAsync(receipt, reservation.Receipt);

@@ -33,6 +33,7 @@ internal static class FunctionalGateFileOwnershipProtocol
     internal const string WritableProperty = "RW";
     internal const string SourceProperty = "Source";
     internal const string LogLineEnding = "\n";
+    internal const char LogLineEndingCharacter = '\n';
     internal const string LogEvidenceKey = "KeyLoad.FileOwnership.OriginalLogPrefix";
     internal const string Incomplete = "The original native file-ownership refusal evidence is incomplete.";
     internal static readonly TimeSpan ProbeTimeout = TimeSpan.FromMinutes(2);

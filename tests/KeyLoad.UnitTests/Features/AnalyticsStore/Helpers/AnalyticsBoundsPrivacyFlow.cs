@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 using N = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsNative;
 using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
@@ -33,6 +32,7 @@ internal static class AnalyticsBoundsPrivacyFlow
         {
             var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.FromResult(
                 db.Database.CaptureAnalyticsAggregate(D.Reader, query, token)));
+            ArgumentNullException.ThrowIfNull(denied);
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Assert.That(denied.Message).IsEqualTo(UseDenied);
             await RawAsync(db, events, token);
@@ -56,6 +56,7 @@ internal static class AnalyticsBoundsPrivacyFlow
                     db.Database.ValidateAnalyticsAggregatePublication(previous);
                     return Task.CompletedTask;
                 });
+            ArgumentNullException.ThrowIfNull(denied);
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         });
         await PolicyAsync(db, 4, [D.ReadGrant, D.UseGrant]);

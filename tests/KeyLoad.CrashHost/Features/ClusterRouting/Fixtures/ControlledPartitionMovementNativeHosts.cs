@@ -14,22 +14,19 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
     private Task? restart;
     private Task? stopped;
     private bool retainRoots;
-    private readonly Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory;
-    private IGrainPartitionMovementSealedOperationObserver[]? sealedObservers;
+    private readonly ControlledPartitionMovementNativeObservers observers;
     private Task? shutdown;
     private Exception? creationFailure;
-    private readonly Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory;
-    private IDatabaseAuthenticationExecutionObserver[]? authenticationObservers;
 
     internal ControlledPartitionMovementNativeHosts(ControlledPartitionMovementNativeHostSettings settings,
         NativeLocalhostClusteringOptions localhost,
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory = null,
-        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory = null)
+        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory = null,
+        Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory = null)
     {
         this.settings = settings;
         this.localhost = localhost;
-        this.observerFactory = observerFactory;
-        this.authenticationObserverFactory = authenticationObserverFactory;
+        observers = new(observerFactory, authenticationObserverFactory, phaseObserverFactory);
     }
 
     internal ControlledPartitionMovementNativeHost Source => nodes[SourceIndex];
@@ -53,39 +50,32 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         Func<int, IDatabaseAuthenticationExecutionObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, null, cancellationToken);
+    }
+
+    internal static Task<ControlledPartitionMovementNativeHosts> CreateWithPhaseObserverAsync(
+        Func<int, IGrainRequestPhaseObserver> observerFactory, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(observerFactory);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory, cancellationToken);
     }
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithMaximumBatchBytesAsync(
         int maximumBatchBytes, CancellationToken cancellationToken)
     {
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, cancellationToken, maximumBatchBytes);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, null, cancellationToken, maximumBatchBytes);
     }
 
     internal void RetainCreationFailure(Exception original) => creationFailure = original;
 
     internal async Task CreateNodesAsync(CancellationToken startupCancellation)
     {
-        if (observerFactory is not null && sealedObservers is null)
-        {
-            sealedObservers = new IGrainPartitionMovementSealedOperationObserver[ControlledPartitionMovementNativeHostEndpoints.OwnerCount];
-            for (var index = SourceIndex; index < sealedObservers.Length; index++)
-            {
-                sealedObservers[index] = observerFactory(index) ?? throw new InvalidOperationException(nameof(observerFactory));
-            }
-        }
-        if (authenticationObserverFactory is not null && authenticationObservers is null)
-        {
-            authenticationObservers = new IDatabaseAuthenticationExecutionObserver[ControlledPartitionMovementNativeHostEndpoints.OwnerCount];
-            for (var index = SourceIndex; index < authenticationObservers.Length; index++)
-            {
-                authenticationObservers[index] = authenticationObserverFactory(index) ?? throw new InvalidOperationException(nameof(authenticationObserverFactory));
-            }
-        }
+        observers.Prepare();
         for (var index = SourceIndex; index < ControlledPartitionMovementNativeHostEndpoints.OwnerCount; index++)
         {
             nodes.Add(await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(index), localhost,
-            sealedObservers?[index], authenticationObservers?[index], startupCancellation: startupCancellation).ConfigureAwait(false));
+            observers.Sealed(index), observers.Authentication(index), phaseObserver: observers.Phase(index),
+                startupCancellation: startupCancellation).ConfigureAwait(false));
         }
     }
 

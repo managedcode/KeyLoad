@@ -58,12 +58,12 @@ internal sealed class ResourceRetirementSignedReads(OrleansNode node, PartitionH
             => execution.IssueOperationAsync(id, request, sourcePrincipalId, sourcePolicyEpoch, technicalPrincipal, work, token);
         if (query.Operation == ResourceRetirementReadOperation.IssueCleanupPage)
         {
-            return await ResourceRetirementCleanupIssue.ExecuteAsync(query, principal, limits, work, Issue, token).ConfigureAwait(false);
+            return await ResourceRetirementCleanupIssue.ExecuteAsync(query, principal, limits, work, Issue).ConfigureAwait(false);
         }
 
         if (query.Operation == ResourceRetirementReadOperation.IssueSourceSeal)
         {
-            return await ResourceRetirementSourceSealIssue.ExecuteAsync(partition, query, principal, limits, work, Issue, token)
+            return await ResourceRetirementSourceSealIssue.ExecuteAsync(partition, query, principal, limits, work, Issue)
                 .ConfigureAwait(false);
         }
 

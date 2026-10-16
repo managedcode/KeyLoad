@@ -24,19 +24,7 @@ internal static class NativeImmutableDictionaryFixture
             writer.WriteFieldHeader(0, typeof(NativePayload), typeof(NativePayload), WireType.TagDelimited);
             UInt32Codec.WriteField(ref writer, 0, NativePayloadVersion.Current);
             writer.WriteFieldHeader(1, typeof(object), type, WireType.TagDelimited);
-            if (fault == NativeImmutableDictionaryFault.NullValues)
-            {
-                writer.WriteFieldHeaderExpected(0, WireType.Reference);
-                writer.WriteVarUInt32(0);
-            }
-            else if (fault != NativeImmutableDictionaryFault.MissingValues)
-            {
-                Values(ref writer, fault);
-                if (fault == NativeImmutableDictionaryFault.DuplicateValues)
-                {
-                    Values(ref writer, fault);
-                }
-            }
+            WriteValuesField(ref writer, fault);
             if (fault == NativeImmutableDictionaryFault.AlienMember)
             {
                 UInt32Codec.WriteField(ref writer, 2, 1);
@@ -70,6 +58,24 @@ internal static class NativeImmutableDictionaryFixture
         finally
         {
             writer.Dispose();
+        }
+    }
+
+    private static void WriteValuesField<TBuffer>(ref Writer<TBuffer> writer, NativeImmutableDictionaryFault fault)
+        where TBuffer : System.Buffers.IBufferWriter<byte>
+    {
+        if (fault == NativeImmutableDictionaryFault.NullValues)
+        {
+            writer.WriteFieldHeaderExpected(0, WireType.Reference);
+            writer.WriteVarUInt32(0);
+        }
+        else if (fault != NativeImmutableDictionaryFault.MissingValues)
+        {
+            Values(ref writer, fault);
+            if (fault == NativeImmutableDictionaryFault.DuplicateValues)
+            {
+                Values(ref writer, fault);
+            }
         }
     }
 

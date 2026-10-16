@@ -1,8 +1,8 @@
-using System.Collections.Immutable;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server;
+using static KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserPolicies;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
@@ -14,24 +14,10 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
     private const int ReaderStart = 4;
     private const int AllowedCount = UserCount;
     private const int DeniedIndex = ReaderStart;
-    private const int Resources = 3;
     private const long FirstRevision = 1;
     private const string AuthId = "auth-grant-probe";
     private const string AuthJson = "{\"gate\":\"persisted-auth\",\"value\":31}";
     private const string EpochFence = "The principal policy changed since this command was evaluated.";
-    private const Capability ReadCapabilities = Capability.DocumentsRead | Capability.Query | Capability.EventsRead | Capability.EventsReplay
-        | Capability.QueueInspect | Capability.DeadLettersRead | Capability.GraphRead | Capability.SeriesRead
-        | Capability.VectorSearch | Capability.VectorRaw | Capability.TopicsRead | Capability.ChangesRead | Capability.BlobRead
-        | Capability.AnalyticsRead;
-    private const Capability WriteCapabilities = ReadCapabilities | Capability.DocumentsWrite | Capability.EventsAppend
-        | Capability.QueuePublish | Capability.QueueConsume | Capability.QueueAck | Capability.QueueRenew
-        | Capability.DeadLettersRedrive | Capability.SubscriptionsManage | Capability.GraphWrite | Capability.SeriesAppend
-        | Capability.TopicsPublish | Capability.SubscriptionsConsume | Capability.SubscriptionsAck | Capability.BlobWrite
-        | Capability.BlobDelete | Capability.BlobManage | Capability.SeriesManage
-        | Capability.EventsSnapshotsManage | Capability.SchedulerManage | Capability.QueueCancel | Capability.InboxWrite
-        | Capability.AnalyticsWrite;
-    private static readonly string[] ResourcePrefixes = ["gate_docs_", "gate_sql_", "gate_events_", "gate_queue_",
-        "gate_topic_", "gate_blobs_", "gate_graph_", "gate_vectors_", "gate_text_", "gate_series_"];
     private readonly List<RequestCqrsRf3Callers> callers = [];
     private readonly List<McpPersistedIdentity> identities = [];
     private RequestCqrsRf3Callers? queueAdministrator;
@@ -188,12 +174,6 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
             Principal = actual
         };
     }
-
-    private static ImmutableArray<ScopeGrant> Grants(string database, Capability capabilities, string analyticsOwner)
-        => [.. ResourcePrefixes.SelectMany(prefix => Enumerable.Range(0, Resources)
-                .Select(index => new ScopeGrant(database, prefix + index, capabilities))),
-            .. Enumerable.Range(0, Resources).Select(index => new ScopeGrant(database,
-                FunctionalGateUserAnalyticsState.StoreName(analyticsOwner, index), capabilities))];
 
     public async ValueTask DisposeAsync()
     {

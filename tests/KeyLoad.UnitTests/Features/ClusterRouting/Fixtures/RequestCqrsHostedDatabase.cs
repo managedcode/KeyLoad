@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ClusterReplication;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -20,7 +19,6 @@ internal sealed class RequestCqrsHostedDatabase(RequestCqrsHostedNodeResources o
         var original = journal.Log.State;
         return (original.LastIndex, original.CommittedIndex, original.Term);
     }
-
 
     internal OperationResult Submit<T>(OperationKind kind, T payload, string principal = RequestCqrsHostedProfile.Root,
         Guid? id = null, DateTimeOffset? time = null)

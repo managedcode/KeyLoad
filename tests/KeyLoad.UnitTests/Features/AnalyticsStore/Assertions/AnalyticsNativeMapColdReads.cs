@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using KeyLoad.UnitTests.Features.InternalSerialization;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
@@ -48,7 +47,7 @@ internal static class AnalyticsNativeMapColdReads
             await N.RefusedAsync(() => N.QueryAsync(owner.Database, D.Query(owner.Source), token, resultBytes: 1));
             await VerifyAsync(owner, events, token);
             using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
-            cancelled.Cancel();
+            await cancelled.CancelAsync();
             var cancelledFailure = Assert.ThrowsExactly<OperationCanceledException>(() => published = owner.Database.ReadAnalyticsEvents(
                 D.Root, D.Read(owner.Source), cancelled.Token));
             await Assert.That(cancelledFailure.CancellationToken).IsEqualTo(cancelled.Token);
@@ -56,6 +55,7 @@ internal static class AnalyticsNativeMapColdReads
             AnalyticsAggregateResult? cancelledAggregate = null;
             var aggregateFailure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
                 cancelledAggregate = await N.QueryAsync(owner.Database, D.Query(owner.Source), cancelled.Token));
+            ArgumentNullException.ThrowIfNull(aggregateFailure);
             await Assert.That(aggregateFailure.CancellationToken).IsEqualTo(cancelled.Token);
             await Assert.That(cancelledAggregate).IsNull();
             token.ThrowIfCancellationRequested();

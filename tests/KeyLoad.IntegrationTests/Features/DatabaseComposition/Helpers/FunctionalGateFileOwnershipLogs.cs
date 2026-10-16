@@ -49,7 +49,7 @@ internal static class FunctionalGateFileOwnershipLogs
                 failure.Data[P.LogEvidenceKey] = output.ToString();
                 throw failure;
             }
-            output.Append(text).Append(P.LogLineEnding);
+            output.Append(text).Append(P.LogLineEndingCharacter);
             if (FunctionalGateFileOwnershipAssertions.HasOriginalRefusal(output.ToString()))
             {
                 return output.ToString();

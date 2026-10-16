@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using K = KeyLoad.UnitTests.Features.Search.TextMaintenanceLifetimeNativeProtocol;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
@@ -18,7 +17,7 @@ internal static class TextMaintenanceLifetimeNativeSeed
         var consumer = new ProjectionConsumerRef(P.Partition, K.Consumer);
         var configureId = Guid.NewGuid();
         _ = await SubmitAsync(state, OperationKind.ConfigureProjectionConsumer, configureId,
-            new ConfigureProjectionConsumerRequest(configureId, consumer, new(K.Generation, [collection], K.Mutations)), token);
+            new ConfigureProjectionConsumerRequest(configureId, consumer, new(K.Generation, [collection], [.. K.Mutations])), token);
         var command = new CommandRequest(Guid.NewGuid(), P.Partition,
             [new PutDocument(collection, NativeTextBilingualAudit.UkrainianId, NativeTextBilingualAudit.UkrainianJson),
                 new PutDocument(collection, NativeTextBilingualAudit.EnglishId, NativeTextBilingualAudit.EnglishJson)]);

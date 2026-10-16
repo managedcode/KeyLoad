@@ -21,7 +21,7 @@ internal static class ResourceRetirementOriginal8RecoverySeed
             ?? throw new InvalidOperationException(Invalid);
         var lifetime = source.Store.Read(view => ResourceLifetimeCatalog.Read(view, partition.TenantId,
             partition.DatabaseId, definition.Name, definition)) ?? throw new InvalidOperationException(Invalid);
-        var request = new ResourceRetirementRequestV1(Version, Guid.NewGuid(), partition.TenantId,
+        var request = new ResourceRetirementRequestV1(ResourceRetirementPreparationValidationData.Version, Guid.NewGuid(), partition.TenantId,
             partition.DatabaseId, definition.Name, lifetime.Incarnation);
         ResourceRetirementPreparationStateV1? preparation = null;
         for (var index = Zero; index < Voters; index++)

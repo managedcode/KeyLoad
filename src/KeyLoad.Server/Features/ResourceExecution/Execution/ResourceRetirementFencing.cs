@@ -7,6 +7,7 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal sealed class ResourceRetirementFencing(ResourceRetirementReads reads, ResourceRetirementPhaseExecution phases)
 {
+    private const int NoPageSize = 0;
     internal async Task<ResourceRetirementStateV1> ExecuteAsync(ResourceRetirementStateV1 state,
         RegisteredPhysicalOwnerV1 source, string principalId, long epoch, DateTimeOffset expiry,
         ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
@@ -60,7 +61,7 @@ internal sealed class ResourceRetirementFencing(ResourceRetirementReads reads, R
     private async Task<ResourceRetirementOwnerFenceV1?> ReadFenceAsync(ResourceRetirementControlV1 control,
         RegisteredPhysicalOwnerV1 owner, string principalId, long epoch, DateTimeOffset expiry,
         ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
-        => (await reads.ExecuteAsync(ResourceRetirementReadOperation.Fence, control.Request, control, owner, Guid.Empty, 0,
+        => (await reads.ExecuteAsync(ResourceRetirementReadOperation.Fence, control.Request, control, owner, Guid.Empty, NoPageSize,
             expiry, principalId, epoch, work, metadata, token).ConfigureAwait(false)).Fence;
 
 }

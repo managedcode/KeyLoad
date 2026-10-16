@@ -16,28 +16,8 @@ internal sealed partial class NativeTextOnlineMaintenanceService
         }).ConfigureAwait(false);
     }
 
-    private async Task CleanupSessionAsync(NativeTextOnlineSession session)
-    {
-        await session.CloseCommandAdmissionAndJoinAsync().ConfigureAwait(false);
-        if (session.Publication.CapturedOriginal() is not null && !session.CatalogCommitted)
-        {
-            throw NativeTextErrors.Ownership();
-        }
-        session.DisposeWithJoinedNativeCleanup(() =>
-        {
-            if (session.CatalogCommitted)
-            {
-                return;
-            }
-            if (session.Leaf is { } leaf && session.Scope is { } scope)
-            {
-                root.DeleteAfterJoinedOwnership(leaf, scope);
-            }
-            session.GenerationReservation?.CompleteAfterJoinedCleanup();
-            session.GenerationReservation = null;
-        });
-        sessions.RemoveAfterJoinedCleanup(session);
-    }
+    private Task CleanupSessionAsync(NativeTextOnlineSession session)
+        => NativeTextOnlineOwnerShutdown.CleanupSessionAsync(session, root, sessions);
 
     private async Task DisposeCoreAsync()
     {

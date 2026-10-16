@@ -19,7 +19,18 @@ internal static class CommandObservedPolicyCalls
         {
             reply = await source.Silo.ExecuteAsync(requestId, signed, command: true, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        ServerFailureObserver.Observe(identity.Dispose, failures);
+        try
+        {
+            identity.Dispose();
+        }
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return reply ?? throw new InvalidOperationException(P.WrongReply);
     }

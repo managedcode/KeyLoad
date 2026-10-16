@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -10,7 +10,8 @@ internal static class CommandObservationNativeMac
 {
     private static readonly byte[] RequestDomain = Encoding.ASCII.GetBytes(CommandObservationNativeProtocol.RequestPurpose);
     private static readonly byte[] ReplyDomain = Encoding.ASCII.GetBytes(CommandObservationNativeProtocol.ReplyPurpose);
-    private static readonly string SignatureWidth = new('0', ReplicaTransportProtocol.HashHexCharacters);
+    private const char SignaturePadding = '0';
+    private static readonly string SignatureWidth = new(SignaturePadding, ReplicaTransportProtocol.HashHexCharacters);
 
     internal static PartitionMovementMac Create(NodeOptions options, PartitionHost partition)
     {

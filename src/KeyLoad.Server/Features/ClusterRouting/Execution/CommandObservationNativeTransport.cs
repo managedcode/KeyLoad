@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using Microsoft.Extensions.Options;
 
@@ -46,11 +45,8 @@ internal sealed class CommandObservationNativeTransport(PartitionHost partition,
         {
             Signature = CommandObservationNativeMac.Sign(mac, request)
         };
-        var reply = await movement.ExecuteOriginalCommandObservationPacketAsync(address, request, token).ConfigureAwait(false);
-        if (reply is null)
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, CommandObservationNativeProtocol.Invalid);
-        }
+        var reply = await movement.ExecuteOriginalCommandObservationPacketAsync(address, request, token).ConfigureAwait(false)
+            ?? throw Errors.Fail(ErrorCode.Unauthenticated, CommandObservationNativeProtocol.Invalid);
         CommandObservationNativeMac.RequireSize(reply, partition);
         if (reply.Nonce != request.Nonce || reply.RequestSignature != request.Signature
             || reply.Result is null || !CommandObservationNativeMac.Verify(mac, reply))

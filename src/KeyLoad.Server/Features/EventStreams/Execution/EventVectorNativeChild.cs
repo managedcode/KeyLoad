@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server.Features.DocumentStorage;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
@@ -17,7 +16,7 @@ internal static class EventVectorNativeChild
         var cleanup = new List<Exception>();
         NativeRequestWorkChildReservation? reservation = null;
         CancellationTokenSource? cancellation = null;
-        IDisposable? identity = null;
+        GrainRequestIdentityScope? identity = null;
         GrainOperationReply? reply = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {

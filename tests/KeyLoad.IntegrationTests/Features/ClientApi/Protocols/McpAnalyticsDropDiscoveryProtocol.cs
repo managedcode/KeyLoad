@@ -16,6 +16,11 @@ internal static class McpAnalyticsDropDiscoveryProtocol
     internal const string Kind = "kind";
     internal const string Alpha = "alpha";
     internal const string Value = "value";
+    internal const string Count = "count";
+    internal const string Sum = "sum";
+    internal const string Average = "average";
+    internal const string Minimum = "minimum";
+    internal const string Maximum = "maximum";
     internal const string DropTool = "keyload_tables_drop";
     internal const string AnchorJson = "{\"anchor\":true}";
     internal const string OldJson = "{\"id\":\"old-row\",\"value\":11}";
@@ -25,9 +30,9 @@ internal static class McpAnalyticsDropDiscoveryProtocol
     internal static DateTimeOffset Until => From.AddMinutes(1);
     internal static ReadAnalyticsEventsRequest Read(PartitionRef partition) => new(partition, Store, From, Until, 2, null);
     internal static AggregateAnalyticsRequest Query(PartitionRef partition) => new(partition, Store, From, Until,
-        [Kind], [new("count", string.Empty, AnalyticsAggregateKind.Count), new("sum", Value, AnalyticsAggregateKind.Sum),
-            new("average", Value, AnalyticsAggregateKind.Average), new("minimum", Value, AnalyticsAggregateKind.Min),
-            new("maximum", Value, AnalyticsAggregateKind.Max)], 1);
+        [Kind], [new(Count, string.Empty, AnalyticsAggregateKind.Count), new(Sum, Value, AnalyticsAggregateKind.Sum),
+            new(Average, Value, AnalyticsAggregateKind.Average), new(Minimum, Value, AnalyticsAggregateKind.Min),
+            new(Maximum, Value, AnalyticsAggregateKind.Max)], 1);
     internal static AnalyticsEventData Event(string id, double value, EntityRef anchor) => new(id, From,
         ImmutableDictionary<string, string>.Empty.Add(Kind, Alpha),
         ImmutableDictionary<string, double>.Empty.Add(Value, value), null, [anchor]);
@@ -40,6 +45,6 @@ internal static class McpAnalyticsDropDiscoveryProtocol
     }
     internal static AnalyticsAggregateResult Aggregate => new([new(
         ImmutableDictionary<string, string>.Empty.Add(Kind, Alpha),
-        ImmutableDictionary<string, double>.Empty.Add("count", 2).Add("sum", 8).Add("average", 4)
-            .Add("minimum", 2).Add("maximum", 6))], 2);
+        ImmutableDictionary<string, double>.Empty.Add(Count, 2).Add(Sum, 8).Add(Average, 4)
+            .Add(Minimum, 2).Add(Maximum, 6))], 2);
 }

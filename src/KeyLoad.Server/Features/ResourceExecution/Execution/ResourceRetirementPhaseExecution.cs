@@ -32,8 +32,7 @@ internal sealed class ResourceRetirementPhaseExecution(ResourceOwnerInventoryNat
         return result;
     }
 
-    internal async Task<ReplicatedOperation> IssueSealAsync(ResourceRetirementControlV1 control,
-        ResourceRetirementAttemptV1 attempt, ResourceRetirementSealBodyV1 body, RegisteredPhysicalOwnerV1 source,
+    internal async Task<ReplicatedOperation> IssueSealAsync(ResourceRetirementAttemptV1 attempt, ResourceRetirementSealBodyV1 body, RegisteredPhysicalOwnerV1 source,
         string principalId, long policyEpoch, DateTimeOffset expiry, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
     {
         var operation = await ResourceRetirementSourceSealReads.ExecuteAsync(client, body, source,
@@ -55,14 +54,14 @@ internal sealed class ResourceRetirementPhaseExecution(ResourceOwnerInventoryNat
         work.MeasureResult(body);
         RequireNativeSize(body, work);
         var bytes = NativeSerialization.Serialize(body);
-        if (bytes.Length > work.MaximumResultBytes || metadata.RemainingBytes <= 0 || metadata.RemainingRecords <= 0)
+        if (bytes.Length > work.MaximumResultBytes || metadata.RemainingBytes <= ResourceRetirementReadContract.NoReadBytes || metadata.RemainingRecords <= ResourceRetirementReadContract.NoRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceRetirementNativeProtocol.Unavailable);
         }
         var command = new ResourceRetirementPhaseCommandV1(ResourceRetirementNativeProtocol.Version,
             request.RetirementId, phase, bytes);
         var query = new ResourceRetirementNativePhaseRequestV1(ResourceRetirementNativeProtocol.Version, command,
-            destination, string.Empty, string.Empty, 0, expiry, metadata.RemainingBytes,
+            destination, string.Empty, string.Empty, ResourceRetirementReadContract.MinimumPolicyEpoch, expiry, metadata.RemainingBytes,
             metadata.RemainingRecords, work.MaximumResultBytes);
         RequireNativeSize(query, work);
         work.MeasureResult(query);
@@ -92,7 +91,7 @@ internal sealed class ResourceRetirementPhaseExecution(ResourceOwnerInventoryNat
         var original = prepared.Original ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);
         var command = NativeCommandPayload.Read<ResourceRetirementPhaseCommandV1>(original);
         var query = new ResourceRetirementNativePhaseRequestV1(ResourceRetirementNativeProtocol.Version, command,
-            destination, string.Empty, string.Empty, 0, expiry, metadata.RemainingBytes,
+            destination, string.Empty, string.Empty, ResourceRetirementReadContract.MinimumPolicyEpoch, expiry, metadata.RemainingBytes,
             metadata.RemainingRecords, work.MaximumResultBytes)
         {
             OriginalOperation = original

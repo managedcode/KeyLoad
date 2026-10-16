@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Replication;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaForwardUncertainProtocol;
 

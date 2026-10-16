@@ -71,7 +71,7 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
             }, Depth, Vertices, Edges, cancellationToken: token));
         await CorruptionAsync(traversal);
         var path = Assert.ThrowsExactly<KeyLoadException>(() => profile.Source.Database.ShortestPath(
-            PartitionStoreProtocol.AdministratorId, new(Version, NativeDropRuntimeProtocol.Partition, graph,
+            PartitionStoreProtocol.AdministratorId, new(GraphReferenceLifetimeNativeProtocol.Version, NativeDropRuntimeProtocol.Partition, graph,
                 anchor with
                 {
                     Lifetime = null

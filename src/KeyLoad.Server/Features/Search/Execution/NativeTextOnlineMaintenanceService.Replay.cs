@@ -6,6 +6,6 @@ namespace KeyLoad.Server.Features.Search;
 internal sealed partial class NativeTextOnlineMaintenanceService
 {
     private Task<OnlineTextCapabilityResult?> ResolveCommittedOriginalAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token, ReadExecutionBudget? originalBudget)
+        OnlineTextCapabilityRequest request, DateTimeOffset expiry, ReadExecutionBudget? originalBudget, CancellationToken token)
         => replay.ExecuteAsync(principal, request, expiry, token, originalBudget);
 }

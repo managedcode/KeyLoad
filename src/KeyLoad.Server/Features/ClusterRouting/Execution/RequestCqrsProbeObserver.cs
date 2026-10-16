@@ -129,24 +129,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         => ProducerDisposal.CompleteAsync(identity, connectionId, context);
 
     public ValueTask DisposeAsync()
-    {
-        TaskCompletionSource start;
-        Task completion;
-        lock (disposeSync)
-        {
-            if (shutdown is not null)
-            {
-                return new ValueTask(shutdown);
-            }
-            // OrleansNode drains admitted work before silo stop; this joins callbacks before disposing observer state.
-            var join = lifecycle.StopAdmissionAndJoin();
-            start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            shutdown = DisposeAfterJoinAsync(start.Task, join);
-            completion = shutdown;
-        }
-        start.SetResult();
-        return new ValueTask(completion);
-    }
+        => RequestCqrsProbeObserverShutdown.DisposeAsync(ref shutdown, disposeSync, lifecycle, stopping, connections);
 
     private async Task ObserveCoreAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase, IGrainContext? context,
         CancellationToken requestCancellation)
@@ -239,8 +222,4 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     private static void ThrowPrivateProbeStackCanary(IOException error) => throw error;
-
-    private Task DisposeAfterJoinAsync(Task start, Task join)
-        => RequestCqrsProbeObserverShutdown.JoinAsync(start, join, stopping, connections);
-
 }

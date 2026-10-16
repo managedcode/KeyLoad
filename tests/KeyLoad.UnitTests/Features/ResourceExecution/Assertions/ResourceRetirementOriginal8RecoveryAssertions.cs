@@ -49,7 +49,7 @@ internal static class ResourceRetirementOriginal8RecoveryAssertions
         ResourceRetirementOriginal8Expectation expected, long index, ResourceRetirementPhaseResultV1 result)
     {
         var reservation = result.OwnerReservation ?? throw new InvalidOperationException(Invalid);
-        var receipt = new ResourceRetirementPhaseReceiptV1(Version, context.Preparation!.Request.RetirementId,
+        var receipt = new ResourceRetirementPhaseReceiptV1(ResourceRetirementPreparationValidationData.Version, context.Preparation!.Request.RetirementId,
             ResourceRetirementPhase.ReserveOwner, expected.CommandId, context.Preparation.Lifetime,
             Target.Owner, index, context.Preparation.IntentDigest);
         await ResourceRetirementPreparationValidationAssertions.EqualAsync(result.Receipt, receipt);

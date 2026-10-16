@@ -28,7 +28,7 @@ internal static class AnalyticsCompositionModels
             var page = owner.Database.ReadStream(D.Root, stream, cancellationToken: owner.CallerToken);
             var sequence = commits.ToList().IndexOf(commit) + 1;
             await O.EqualAsync(new StreamPage(stream, new(1, 1, 1),
-                [new(stream, 1, sequence, new(id, P.Created, P.EmptyJson), owner.Entry(commit.Operation).Operation.EvaluatedAt)],
+                [new(stream, 1, sequence, new(id, P.Created, P.EmptyJson), (owner.Entry(commit.Operation).Operation ?? throw new InvalidOperationException("The retained test operation is missing.")).EvaluatedAt)],
                 owner.Store.Position, false, null, owner.Store.Position), page);
         }
         var expected = commits.Select(commit => ((PutDocument)KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(commit.Operation).Mutations[0]).Id)

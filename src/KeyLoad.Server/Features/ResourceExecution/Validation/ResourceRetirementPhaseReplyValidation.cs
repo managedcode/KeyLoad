@@ -4,6 +4,8 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementPhaseReplyValidation
 {
+    private const long NoAppliedPosition = 0;
+
     internal static void Require(ResourceRetirementPhaseCommandV1 phase, ResourceRetirementPhaseResultV1 result, DatabaseLimits limits)
     {
         if (ResourceRetirementCompletionPhase.Handles(phase.Phase))
@@ -38,7 +40,7 @@ internal static class ResourceRetirementPhaseReplyValidation
         }
         var control = result.State?.Control ?? result.Fence?.Control ?? throw Invalid();
         ResourceRetirementValidation.Control(control, limits);
-        if (result.Receipt.Version != ResourceRetirementNativeProtocol.Version || result.Receipt.AppliedPosition <= 0
+        if (result.Receipt.Version != ResourceRetirementNativeProtocol.Version || result.Receipt.AppliedPosition <= NoAppliedPosition
             || result.Receipt.IntentDigest != control.IntentDigest
             || !ResourceRetirementValidation.Same(result.Receipt.Lifetime, control.Lifetime))
         {

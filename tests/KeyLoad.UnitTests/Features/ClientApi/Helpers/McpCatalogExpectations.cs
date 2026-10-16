@@ -42,17 +42,11 @@ internal static class McpCatalogExpectations
     internal const string AdminPartitionPlacementRead = "keyload_admin_partition_placement_read";
     private const string AdminPartitionPlacementReadRoute = "/v1/admin/partition-placement/read";
     internal const string SeriesRead = "keyload_series_read";
-    private const string SeriesReadRoute = "/v1/series/read";
     internal const string SeriesLatest = "keyload_series_latest";
-    private const string SeriesLatestRoute = "/v1/series/latest";
     internal const string SeriesAggregate = "keyload_series_aggregate";
-    private const string SeriesAggregateRoute = "/v1/series/aggregate";
     internal const string SeriesWindows = "keyload_series_windows";
-    private const string SeriesWindowsRoute = "/v1/series/windows";
     internal const string SeriesRollup = "keyload_series_read_rollup";
-    private const string SeriesRollupRoute = "/v1/series/rollups/read";
     internal const string SeriesRetention = "keyload_series_retention";
-    private const string SeriesRetentionRoute = "/v1/series/retention";
     internal const string QueryExecute = "keyload_query_execute";
     private const string QueryExecuteRoute = "/v1/query";
     internal const string QuerySearch = "keyload_query_search";
@@ -154,13 +148,7 @@ internal static class McpCatalogExpectations
         (McpMovementCatalogProtocol.Name, McpMovementCatalogProtocol.Route, null, OperationKind.MovePartition),
         (AdminPartitionPlacementBind, AdminPartitionPlacementBindRoute, null, OperationKind.BindAtomicPartitionPlacement),
         (AdminPartitionPlacementRead, AdminPartitionPlacementReadRoute, GrainReadKind.AtomicPartitionPlacement, null),
-        (SeriesRead, SeriesReadRoute, GrainReadKind.Samples, null),
-        (SeriesLatest, SeriesLatestRoute, GrainReadKind.LatestSample, null),
-        (SeriesAggregate, SeriesAggregateRoute, GrainReadKind.AggregateSamples, null),
-        (SeriesWindows, SeriesWindowsRoute, GrainReadKind.AggregateSampleWindows, null),
-        (SeriesRollup, SeriesRollupRoute, GrainReadKind.SampleRollup, null),
-        (SeriesRetention, SeriesRetentionRoute, GrainReadKind.SampleRetention, null),
-        ("keyload_series_chunk_window", "/v1/series/chunks/window", GrainReadKind.SampleChunkWindow, null),
+        .. McpSeriesCatalogExpectations.Entries,
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
         (QuerySearch, QuerySearchRoute, GrainReadKind.SqlGraphSearch, null),
         (QueryAst, QueryAstRoute, GrainReadKind.AstQuery, null),

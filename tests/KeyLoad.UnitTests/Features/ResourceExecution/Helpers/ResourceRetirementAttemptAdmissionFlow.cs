@@ -14,7 +14,7 @@ internal static class ResourceRetirementAttemptAdmissionFlow
         var control = await RetiringAsync(state, token);
         var context = new ResourceRetirementAttemptContextV1(ResourceRetirementAttemptPurpose.SealBarrier,
             control, null, null);
-        var denied = new PrincipalRecord(ResourceRetirementBarrierData.Denied, control.Request.TenantId, [], []);
+        var denied = new PrincipalRecord(ResourceRetirementAttemptAdmissionProtocol.Denied, control.Request.TenantId, [], []);
         var deniedOperation = source.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), Root,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(denied)));
         await Assert.That(source.Journal.Submit(deniedOperation, token).Error).IsNull();
@@ -27,7 +27,7 @@ internal static class ResourceRetirementAttemptAdmissionFlow
         var result = source.Journal.Submit(original, token);
         await Assert.That(result.Error).IsNull();
         var prepared = result.Get<ResourceRetirementPhaseResultV1>();
-        await ResourceRetirementPreparationValidationAssertions.EqualAsync(new ResourceRetirementPhaseReceiptV1(Version,
+        await ResourceRetirementPreparationValidationAssertions.EqualAsync(new ResourceRetirementPhaseReceiptV1(ResourceRetirementPreparationValidationData.Version,
             control.Request.RetirementId, ResourceRetirementPhase.PrepareAttempt, original.Id, control.Lifetime,
             source.PhysicalOwner, expectedPosition, control.IntentDigest), prepared.Receipt);
         var expected = new ResourceRetirementAttemptV1(attemptId, One, body.ExpiresAt, prepared.Receipt,
@@ -96,7 +96,7 @@ internal static class ResourceRetirementAttemptAdmissionFlow
         ResourceRetirementPrepareAttemptBodyV1 body, DateTimeOffset now)
     {
         var id = ResourceRetirementIdentity.AttemptCommandId(body.Context, ResourceRetirementPhase.PrepareAttempt, body.AttemptId);
-        var phase = new ResourceRetirementPhaseCommandV1(Version, body.Context.Retirement!.Request.RetirementId,
+        var phase = new ResourceRetirementPhaseCommandV1(ResourceRetirementPreparationValidationData.Version, body.Context.Retirement!.Request.RetirementId,
             ResourceRetirementPhase.PrepareAttempt, NativeSerialization.Serialize(body));
         return source.Database.CreateResourceRetirementOperation(id, Root, now, phase);
     }

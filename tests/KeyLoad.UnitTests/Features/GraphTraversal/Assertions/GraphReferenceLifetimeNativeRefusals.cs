@@ -18,7 +18,7 @@ internal static class GraphReferenceLifetimeNativeRefusals
             }, Depth, Vertices,
             Edges, cancellationToken: token));
         await ReadAsync(profile, () => database.ShortestPath(PartitionStoreProtocol.AdministratorId,
-            new(Version, NativeDropRuntimeProtocol.Partition, OriginalGraph, anchor with
+            new(GraphReferenceLifetimeNativeProtocol.Version, NativeDropRuntimeProtocol.Partition, OriginalGraph, anchor with
             {
                 Lifetime = null
             },
@@ -27,7 +27,7 @@ internal static class GraphReferenceLifetimeNativeRefusals
                     Lifetime = null
                 }, Depth, Vertices, Edges), cancellationToken: token));
         await ReadAsync(profile, () => database.ReadIncomingGraphEdges(PartitionStoreProtocol.AdministratorId,
-            new(Version, freshTarget with
+            new(GraphReferenceLifetimeNativeProtocol.Version, freshTarget with
             {
                 Lifetime = null
             }, OriginalGraph, Edges), cancellationToken: token));
@@ -52,6 +52,7 @@ internal static class GraphReferenceLifetimeNativeRefusals
         var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
         var position = profile.Source.Store.Position;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => _ = read());
+        ArgumentNullException.ThrowIfNull(error);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await SameAsync(profile, image, position);
     }
@@ -61,6 +62,7 @@ internal static class GraphReferenceLifetimeNativeRefusals
         var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
         var position = profile.Source.Store.Position;
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => _ = await read());
+        ArgumentNullException.ThrowIfNull(error);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await SameAsync(profile, image, position);
     }

@@ -2,7 +2,6 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Replication;
-using KeyLoad.UnitTests.Features.ClusterReplication;
 using KeyLoad.UnitTests.Features.Search;
 using Microsoft.Extensions.Options;
 
@@ -12,7 +11,7 @@ internal sealed class RequestCqrsHostedNodeResources : IAsyncDisposable
 {
     private readonly Lock gate = new();
     private Task? disposal;
-    private ClusterCoordinator? coordinator;
+    private readonly ClusterCoordinator? coordinator;
     internal NativeRequestWorkOwner Work
     {
         get;
@@ -118,7 +117,18 @@ internal sealed class RequestCqrsHostedNodeResources : IAsyncDisposable
         }
         if (coordinator is not null)
         {
-            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => coordinator.DisposeAsync().AsTask(), failures);
+            try
+            {
+                await coordinator.DisposeAsync();
+            }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
         }
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Work.DisposeAsync().AsTask(), failures);
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

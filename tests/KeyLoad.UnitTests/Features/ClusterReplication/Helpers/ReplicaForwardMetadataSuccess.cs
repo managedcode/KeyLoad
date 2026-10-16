@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaForwardMetadataProtocol;
 using W = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaForwardedOriginalWorkProtocol;
 
@@ -8,8 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
 internal static class ReplicaForwardMetadataSuccess
 {
-    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture,
-        RequestCqrsCohortNativeNode[] nodes, RequestCqrsCohortNativeNode leader,
+    internal static async Task RunAsync(RequestCqrsCohortNativeNode[] nodes, RequestCqrsCohortNativeNode leader,
         RequestCqrsCohortNativeNode follower, ReplicatedOperation original, CommandRequest command, EntityRef expectedReference,
         ReadExecutionBudget work, ReplicaForwardMetadataObservation observation, CancellationToken token)
     {

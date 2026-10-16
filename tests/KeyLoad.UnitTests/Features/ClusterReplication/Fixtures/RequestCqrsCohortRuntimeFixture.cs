@@ -29,7 +29,6 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly string ownerId = Guid.NewGuid().ToString("N");
     private readonly byte[] secret = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
     private readonly ConcurrentDictionary<string, RequestCqrsCohortNativeNode> nodes = new(StringComparer.Ordinal);
-    private TestCluster cluster;
     private readonly RequestCqrsCohortCheckpointScenario? checkpoints;
     private readonly ReplicaBarrierDeadlineScenario? barrierDeadline;
     private readonly byte[]? canonicalKey;
@@ -37,7 +36,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     {
         get;
     }
-    internal TestCluster Cluster => cluster;
+    internal TestCluster Cluster { get; private set; }
     internal bool HasBarrierDeadline => barrierDeadline is not null;
     private readonly Lock lifecycle = new();
     private Task? disposal;
@@ -67,22 +66,15 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         try
         {
             RequestCqrsCohortOwners.Register(ownerId, this);
-            cluster = CreateCluster();
+            Cluster = CreateCluster();
         }
-        catch (Exception) { ReleaseIdentity(); throw; }
-    }
-    private TestCluster CreateCluster()
-    {
-        var builder = new TestClusterBuilder(3);
-        builder.Options.ConnectionTransport = ConnectionTransportType.TcpSocket;
-        builder.Properties[RequestCqrsCohortOwners.Key] = ownerId;
-        builder.AddSiloBuilderConfigurator<RequestCqrsCohortNativeConfigurator>();
-        if (Hosted is not null)
+        catch (Exception)
         {
-            builder.AddClientBuilderConfigurator<global::KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsHostedClientConfigurator>();
+            ReleaseIdentity();
+            throw;
         }
-        return builder.Build();
     }
+    private TestCluster CreateCluster() => RequestCqrsCohortClusterFactory.Create(ownerId, Hosted is not null);
     internal RequestCqrsCohortNativeNode CreateNode(string voter, ILocalSiloDetails local, IServiceProvider services)
     {
         if (!Voters.Contains(voter, StringComparer.Ordinal))
@@ -112,8 +104,8 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         try
         {
-            await cluster.DeployAsync(startup.Token);
-            var silos = cluster.Silos.OfType<InProcessSiloHandle>().ToArray();
+            await Cluster.DeployAsync(startup.Token);
+            var silos = Cluster.Silos.OfType<InProcessSiloHandle>().ToArray();
             if (silos.Length != Voters.Length)
             {
                 throw new InvalidOperationException("The native cluster must own exactly three silos.");
@@ -131,7 +123,10 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
             {
                 await DisposeAsync();
             }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
+            catch (Exception cleanup)
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }
@@ -145,14 +140,14 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
 
         await StopClusterAsync();
         nodes.Clear();
-        cluster = CreateCluster();
+        Cluster = CreateCluster();
         await InitializeAsync();
     }
     internal async Task RestartVoterAsync(string voter, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var old = Node(voter);
-        var handle = cluster.Silos.OfType<InProcessSiloHandle>().Single(silo =>
+        var handle = Cluster.Silos.OfType<InProcessSiloHandle>().Single(silo =>
             silo.ServiceProvider.GetRequiredService<ILocalSiloDetails>().Name == voter);
         var previous = old.Discovery.RuntimeAddress;
         old.Observation.ReleaseAll();
@@ -174,15 +169,21 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
                 }
                 else
                 {
-                    await ServerFailureObserver.ObserveAsync(() => cluster.RestartSiloAsync(handle), failures);
+                    await ServerFailureObserver.ObserveAsync(() => Cluster.RestartSiloAsync(handle), failures);
                 }
             }
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         token.ThrowIfCancellationRequested();
-        await cluster.WaitForLivenessToStabilizeAsync();
+        await Cluster.WaitForLivenessToStabilizeAsync();
         token.ThrowIfCancellationRequested();
         RuntimeAddresses = Voters.Select(value => Node(value).Discovery.RuntimeAddress).ToArray();
         if (Node(voter).Discovery.RuntimeAddress == previous)
@@ -191,7 +192,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         }
     }
     private Task StopClusterAsync()
-        => RequestCqrsCohortShutdown.StopAsync(cluster, nodes.Values, () =>
+        => RequestCqrsCohortShutdown.StopAsync(Cluster, nodes.Values, () =>
         {
             checkpoints?.Release();
             barrierDeadline?.Release();
@@ -205,15 +206,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         }
     }
 
-    private void ReleaseIdentity()
-    {
-        RequestCqrsCohortOwners.Release(ownerId);
-        CryptographicOperations.ZeroMemory(secret);
-        if (canonicalKey is not null)
-        {
-            CryptographicOperations.ZeroMemory(canonicalKey);
-        }
-    }
+    private void ReleaseIdentity() => RequestCqrsCohortIdentity.Release(ownerId, secret, canonicalKey);
 
     private async Task DisposeCoreAsync()
     {

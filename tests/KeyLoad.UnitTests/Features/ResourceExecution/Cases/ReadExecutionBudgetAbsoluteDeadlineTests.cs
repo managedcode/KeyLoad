@@ -54,7 +54,7 @@ internal sealed class ReadExecutionBudgetAbsoluteDeadlineTests
     {
         using var cancellation = new CancellationTokenSource();
         var work = Create(new ControlledReadClock(Epoch), cancellation.Token);
-        cancellation.Cancel();
+        await cancellation.CancelAsync();
         var canceled = Assert.ThrowsExactly<OperationCanceledException>(() => { _ = work.ExpiresAt; });
         await Assert.That(canceled.CancellationToken).IsEqualTo(cancellation.Token);
         var original = Errors.Fail(ErrorCode.UnknownWriteOutcome, OriginalFailure);

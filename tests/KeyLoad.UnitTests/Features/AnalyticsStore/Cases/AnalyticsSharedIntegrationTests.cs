@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -24,7 +23,10 @@ internal sealed class AnalyticsSharedIntegrationTests
             AnalyticsSchema = new([P.Dimension], [P.Metric, P.OtherMetric])
         };
         var actual = fixture.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(
-            fixture.Partition.TenantId, fixture.Partition.DatabaseId, replacement, before.SchemaVersion));
+            fixture.Partition.TenantId, fixture.Partition.DatabaseId, replacement)
+        {
+            ExpectedSchemaVersion = before.SchemaVersion
+        });
         await Assert.That(actual.Error).IsEqualTo(ErrorCode.UnsupportedCapability);
         await AnalyticsSharedAssertions.SameAsync(before,
             fixture.Store.Read(view => fixture.Database.Resource(view, fixture.Partition, P.Store)));

@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 using CoreAttempt = KeyLoad.Core.Features.ResourceExecution.ResourceRetirementAttemptValidation;
 
@@ -11,12 +12,14 @@ internal sealed class ResourceRetirementOwnerReservations(ResourceRetirementPrep
     ResourceRetirementPhaseExecution phases, ResourceRetirementPreparedOperationProof proof,
     IOptions<DatabaseLimits> limits, TimeProvider clock)
 {
+    private const int FirstVoter = 0;
+
     internal async Task<ResourceRetirementOwnerReservationV1> EnsureAsync(ResourceRetirementPreparationStateV1 state,
         RegisteredPhysicalOwnerV1 source, RegisteredPhysicalOwnerV1 receiver, string principalId, long epoch,
-        DateTimeOffset expiry, ReadExecutionBudget work, CancellationToken token)
+        DateTimeOffset expiry, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
     {
-        var status = await preparationReads.StatusAsync(state.Control, receiver, receiver.Owner.VoterIds[0],
-            principalId, epoch, expiry, work, token).ConfigureAwait(false);
+        var status = await preparationReads.StatusAsync(state.Control, receiver, receiver.Owner.VoterIds[FirstVoter],
+            principalId, epoch, expiry, work, metadata, token).ConfigureAwait(false);
         if (status is not null)
         {
             ResourceRetirementPreparationProof.RequireReservation(status.Reservation, state.Control, receiver);
@@ -29,24 +32,24 @@ internal sealed class ResourceRetirementOwnerReservations(ResourceRetirementPrep
         var context = CoreAttempt.Owner(state.Control, receiver);
         var previous = state.OwnerAttempts.SingleOrDefault(value => ResourceRetirementAttemptPointers.Belongs(value, state.Control, receiver));
         var (attempt, prepared, fresh) = await ResumeAsync(context, previous, source, receiver, principalId, epoch,
-            expiry, work, token).ConfigureAwait(false);
+            expiry, work, metadata, token).ConfigureAwait(false);
         if (fresh)
         {
             // This invocation just received the actual source5 ACK for a fresh GUID; issue9 exactly once.
             var original = await reads.IssueOwnerAsync(context, attempt, receiver, principalId, epoch,
-                expiry, work, token).ConfigureAwait(false);
+                expiry, work, metadata, token).ConfigureAwait(false);
             prepared = await operations.PersistAsync(context, attempt, original, receiver, principalId, epoch,
-                expiry, work, token).ConfigureAwait(false);
+                expiry, work, metadata, token).ConfigureAwait(false);
         }
         return await SubmitAsync(prepared ?? throw Errors.Fail(ErrorCode.RecoveryRequired,
             ResourceRetirementNativeProtocol.Unavailable), context, attempt, receiver, principalId, epoch,
-            expiry, work, token).ConfigureAwait(false);
+            expiry, work, metadata, token).ConfigureAwait(false);
     }
 
     private async Task<(ResourceRetirementAttemptV1 Attempt, ResourceRetirementPreparedOperationV1? Prepared, bool Fresh)>
         ResumeAsync(ResourceRetirementAttemptContextV1 context, ResourceRetirementAttemptV1? previous,
             RegisteredPhysicalOwnerV1 source, RegisteredPhysicalOwnerV1 receiver, string principalId, long epoch,
-            DateTimeOffset expiry, ReadExecutionBudget work, CancellationToken token)
+            DateTimeOffset expiry, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
     {
         ResourceRetirementPreparedOperationV1? closed = null;
         if (previous is not null)
@@ -57,7 +60,7 @@ internal sealed class ResourceRetirementOwnerReservations(ResourceRetirementPrep
                 throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);
             }
             var prepared = await recovery.ReadAsync(context, previous, source, receiver, principalId, epoch,
-                expiry, work, token).ConfigureAwait(false);
+                expiry, work, metadata, token).ConfigureAwait(false);
             if (prepared?.Stage == ResourceRetirementPreparedOperationStage.Closed)
             {
                 closed = prepared;
@@ -65,30 +68,26 @@ internal sealed class ResourceRetirementOwnerReservations(ResourceRetirementPrep
             else if (previous.ExpiresAt <= clock.GetUtcNow())
             {
                 closed = await operations.CloseAsync(context, previous, receiver, principalId, epoch,
-                    expiry, work, token).ConfigureAwait(false);
-            }
-            else if (prepared is not null && previous.Stage == ResourceRetirementAttemptStage.Prepared)
-            {
-                return (previous, prepared, false);
+                    expiry, work, metadata, token).ConfigureAwait(false);
             }
             else
             {
-                throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);
+                return (previous, RequireResumable(prepared, previous), false);
             }
         }
         var attempt = await attempts.PrepareAsync(context, previous, closed, source, principalId, epoch,
-            expiry, work, token).ConfigureAwait(false);
+            expiry, work, metadata, token).ConfigureAwait(false);
         return (attempt, null, true);
     }
 
     private async Task<ResourceRetirementOwnerReservationV1> SubmitAsync(ResourceRetirementPreparedOperationV1 prepared,
         ResourceRetirementAttemptContextV1 context, ResourceRetirementAttemptV1 attempt, RegisteredPhysicalOwnerV1 receiver,
-        string principalId, long epoch, DateTimeOffset expiry, ReadExecutionBudget work, CancellationToken token)
+        string principalId, long epoch, DateTimeOffset expiry, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
     {
         proof.RequirePersisted(prepared, context, attempt);
         expiry = expiry <= attempt.ExpiresAt ? expiry : attempt.ExpiresAt;
         work.ConstrainLifetime(expiry);
-        var result = await phases.SubmitOriginalAsync(prepared, receiver, principalId, epoch, expiry, work, token)
+        var result = await phases.SubmitOriginalAsync(prepared, receiver, principalId, epoch, expiry, work, metadata, token)
             .ConfigureAwait(false);
         var reservation = result.OwnerReservation ?? throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementNativeProtocol.Unavailable);
         ResourceRetirementPreparationProof.RequireReservation(reservation, context.Preparation!, receiver);
@@ -101,4 +100,14 @@ internal sealed class ResourceRetirementOwnerReservations(ResourceRetirementPrep
         }
         return reservation;
     }
+    private static ResourceRetirementPreparedOperationV1 RequireResumable(
+        ResourceRetirementPreparedOperationV1? prepared, ResourceRetirementAttemptV1 attempt)
+    {
+        if (prepared is null || attempt.Stage != ResourceRetirementAttemptStage.Prepared)
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);
+        }
+        return prepared;
+    }
+
 }

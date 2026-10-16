@@ -10,8 +10,7 @@ internal sealed class ResourceRetirementWorkReads(ResourceOwnerInventoryNativeCl
 
     internal async Task<ResourceRetirementWorkJoinEvidenceV1> ExecuteAsync(ResourceRetirementOwnerFenceV1 fence,
         RegisteredPhysicalOwnerV1 owner, string voter, ResourceRetirementWorkOwnerReceiptV1? acknowledged,
-        string principalId, long epoch, DateTimeOffset expiry, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token,
-        int remainingVoters)
+        string principalId, long epoch, DateTimeOffset expiry, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, int remainingVoters, CancellationToken token)
     {
         work.Check();
         await client.RequireRetirementSourceAsync(principalId, epoch, work, metadata, token).ConfigureAwait(false);

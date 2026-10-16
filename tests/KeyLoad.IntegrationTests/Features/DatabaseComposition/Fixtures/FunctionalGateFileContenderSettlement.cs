@@ -19,7 +19,7 @@ internal sealed class FunctionalGateFileContenderSettlement(bool enabled)
         }
     }
 
-    internal async Task<bool> JoinAsync(CancellationToken token, List<Exception> failures)
+    internal async Task<bool> JoinAsync(List<Exception> failures, CancellationToken token)
     {
         if (Volatile.Read(ref settlement) is not { } original)
         {

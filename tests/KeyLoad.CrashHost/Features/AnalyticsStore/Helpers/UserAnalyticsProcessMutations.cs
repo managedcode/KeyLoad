@@ -9,10 +9,10 @@ internal static class UserAnalyticsProcessMutations
 {
     internal static void Bootstrap(string root, PartitionHost host, CancellationToken token)
     {
-        var bootstrap = new BootstrapPhysicalShardCatalogRequest(P.CatalogVersion, P.Absent, P.Options(root).PhysicalShardId,
+        var bootstrap = new BootstrapPhysicalShardCatalogRequest(P.CatalogVersion, P.Absent, UserAnalyticsProcessOptions.Create(root).Value.PhysicalShardId,
             host.Configuration.Incarnation, host.Configuration.VoterIds);
         var original = Issue(host, OperationKind.BootstrapPhysicalShardCatalog, bootstrap,
-            PhysicalShardCatalogIdentity.CreateBootstrapCommandId(P.Options(root).PhysicalShardId), token);
+            PhysicalShardCatalogIdentity.CreateBootstrapCommandId(UserAnalyticsProcessOptions.Create(root).Value.PhysicalShardId), token);
         UserAnalyticsProcessState.Equal(true, host.Database.ApplyEmbedded(original, token).Get<bool>());
         var definition = new ResourceDefinition(P.Store, ResourceKind.AnalyticsStore, P.Domain)
         {

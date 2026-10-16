@@ -40,7 +40,11 @@ internal static class D3PrivateRetirementPolicyFlow
                 work.RemainingReadGrantRecords / MetadataShareDivisor);
             await ExecuteAsync(runtime, work, metadata, expiry, token);
         }
-        catch (Exception original)
+        catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))
+        {
+            failures.Add(original);
+        }
+        catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original))
         {
             failures.Add(original);
         }
@@ -57,7 +61,18 @@ internal static class D3PrivateRetirementPolicyFlow
                 runtime.RetainRoots();
             }
 
-            await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures);
+            try
+            {
+                await runtime.DisposeAsync();
+            }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

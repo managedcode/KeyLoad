@@ -8,7 +8,7 @@ internal static class ResourceRetirementCleanupIssue
 {
     internal static async Task<ResourceRetirementReadReplyV1> ExecuteAsync(ResourceRetirementReadRequestV1 query,
         PrincipalRecord principal, IOptions<DatabaseLimits> limits, ReadExecutionBudget work,
-        Func<Guid, ResourceRetirementNativePhaseRequestV1, Task<ReplicatedOperation>> issue, CancellationToken token)
+        Func<Guid, ResourceRetirementNativePhaseRequestV1, Task<ReplicatedOperation>> issue)
     {
         ResourceRetirementCleanupIssueShape.Require(query, limits.Value);
         work.Check();

@@ -8,6 +8,8 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class CompositionBoundReferenceNativeFlow
 {
+    private const string IdColumn = "id";
+
     internal static Task RunAsync(bool typed, CancellationToken token) => SafeProjectorOperationDatabase.RunAsync(async owner =>
     {
         await ConfigureAsync(owner, typed);
@@ -48,7 +50,7 @@ internal static class CompositionBoundReferenceNativeFlow
         {
             var definition = new ResourceDefinition(name, ResourceKind.Collection, owner.Source.Partition.TransactionDomainId)
             {
-                RelationalSchema = typed ? new("id", [new("id", RelationalColumnType.Text), new("name", RelationalColumnType.Text)]) : null
+                RelationalSchema = typed ? new(IdColumn, [new(IdColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)]) : null
             };
             await A.EqualAsync(definition, owner.Source.Submit(OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition))

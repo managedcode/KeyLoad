@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using P = KeyLoad.CrashHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
@@ -29,21 +30,30 @@ internal static class UserAnalyticsProcessScenario
         using var admission = host.Database.AdmitQuery(token);
         var snapshot = host.Database.CaptureAnalyticsAggregate(PartitionStoreProtocol.AdministratorId, P.Query(), token);
         var directory = UserAnalyticsGenerationPaths.Create(host, snapshot);
-        var generation = new AnalyticsStoreNativeGeneration(snapshot, directory);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        try
         {
-            UserAnalyticsProcessState.Equal(P.Expected(updated: false), await generation.QueryAsync(token));
-            UserAnalyticsProcessState.Require(host, cut);
-            if (generation.HasJoinedEngine || !Directory.Exists(directory) || !Directory.EnumerateFileSystemEntries(directory).Any())
+            await using var generation = new AnalyticsStoreNativeGeneration(snapshot, directory);
+            await ServerFailureObserver.ObserveAsync(async () =>
             {
-                throw new InvalidOperationException(P.Invalid);
-            }
-
-            await CrashHostPause.WaitForKillAsync();
-            GC.KeepAlive(generation);
-        }, failures);
-        await ServerFailureObserver.ObserveAsync(() => generation.DisposeAsync().AsTask(), failures);
+                UserAnalyticsProcessState.Equal(P.Expected(updated: false), await generation.QueryAsync(token));
+                UserAnalyticsProcessState.Require(host, cut);
+                if (generation.HasJoinedEngine || !Directory.Exists(directory) || !Directory.EnumerateFileSystemEntries(directory).Any())
+                {
+                    throw new InvalidOperationException(P.Invalid);
+                }
+                await CrashHostPause.WaitForKillAsync();
+                GC.KeepAlive(generation);
+            }, failures);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -51,24 +61,39 @@ internal static class UserAnalyticsProcessScenario
     {
         var cut = await UserAnalyticsProcessState.ReadAsync(root, token);
         UserAnalyticsProcessState.Require(host, cut);
-        var runtime = new UserAnalyticsRuntime(options.Core.DatabaseLimits);
+        UserAnalyticsRuntime? runtime = null;
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        try
         {
-            runtime.Open(host);
-            await using var work = await UserAnalyticsProcessBoundWork.OpenAsync(host, options.GrainRouting, token);
-            RequireEmpty(host, runtime);
-            token.ThrowIfCancellationRequested();
-            var replay = host.Database.Apply(cut.Operation).Get<CommitReceipt>();
-            UserAnalyticsProcessState.Equal(cut.Receipt, replay);
-            UserAnalyticsProcessMutations.RequirePrivateEmpty(replay);
-            UserAnalyticsProcessState.Require(host, cut);
-            await AggregateAsync(host, runtime, work, cut, updated: false, token);
-            _ = UserAnalyticsProcessMutations.Write(host, update: true, token);
-            await AggregateAsync(host, runtime, work, cut, updated: true, token);
-        }, failures);
-        await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures);
-        ServerFailureObserver.Observe(() => RequireEmpty(host, runtime), failures);
+            await using var ownedRuntime = new UserAnalyticsRuntime(options.Core.DatabaseLimits);
+            runtime = ownedRuntime;
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                ownedRuntime.Open(host);
+                await using var work = await UserAnalyticsProcessBoundWork.OpenAsync(host, options.GrainRouting, token);
+                RequireEmpty(host, ownedRuntime);
+                token.ThrowIfCancellationRequested();
+                var replay = host.Database.Apply(cut.Operation).Get<CommitReceipt>();
+                UserAnalyticsProcessState.Equal(cut.Receipt, replay);
+                UserAnalyticsProcessMutations.RequirePrivateEmpty(replay);
+                UserAnalyticsProcessState.Require(host, cut);
+                await AggregateAsync(host, ownedRuntime, work, cut, updated: false, token);
+                _ = UserAnalyticsProcessMutations.Write(host, update: true, token);
+                await AggregateAsync(host, ownedRuntime, work, cut, updated: true, token);
+            }, failures);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        if (runtime is not null)
+        {
+            ServerFailureObserver.Observe(() => RequireEmpty(host, runtime), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

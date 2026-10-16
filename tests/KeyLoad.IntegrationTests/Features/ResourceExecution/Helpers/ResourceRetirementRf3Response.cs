@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Server;
 using KeyLoad.Server.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 

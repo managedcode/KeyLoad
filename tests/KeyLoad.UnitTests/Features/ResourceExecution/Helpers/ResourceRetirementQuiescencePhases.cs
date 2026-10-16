@@ -20,14 +20,14 @@ internal static class ResourceRetirementQuiescencePhases
         ControlledPartitionMovementNode owner, ResourceRetirementPhase phase, Guid id, T body, CancellationToken token)
     {
         var index = owner.Journal.Log.State.LastIndex + One;
-        var command = new ResourceRetirementPhaseCommandV1(Version, state.Request.RetirementId, phase,
+        var command = new ResourceRetirementPhaseCommandV1(ResourceRetirementQuiescenceData.Version, state.Request.RetirementId, phase,
             NativeSerialization.Serialize(body));
         var original = owner.Database.CreateResourceRetirementOperation(id, Root,
             owner.Database.EvaluationClock.GetUtcNow(), command);
         var outcome = owner.Journal.Submit(original, token);
         await Assert.That(outcome.Error).IsNull();
         var actual = outcome.Get<ResourceRetirementPhaseResultV1>();
-        await ResourceRetirementQuiescenceAssertions.EqualAsync(new ResourceRetirementPhaseReceiptV1(Version,
+        await ResourceRetirementQuiescenceAssertions.EqualAsync(new ResourceRetirementPhaseReceiptV1(ResourceRetirementQuiescenceData.Version,
             state.Request.RetirementId, phase, id, state.Control?.Lifetime ?? ReadLifetime(owner),
             owner.PhysicalOwner, index, state.Control is null ? NativeOperationFingerprint.Compute(original) : state.Control.IntentDigest), actual.Receipt);
         state.Originals.Add((owner, original, outcome));

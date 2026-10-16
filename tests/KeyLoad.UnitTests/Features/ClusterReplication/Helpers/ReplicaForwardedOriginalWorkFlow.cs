@@ -1,4 +1,4 @@
-using KeyLoad.Core;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaForwardedOriginalWorkProtocol;
@@ -47,7 +47,18 @@ internal static class ReplicaForwardedOriginalWorkFlow
             await ServerFailureObserver.ObserveAsync(async () =>
                 await original.ConfigureAwait(false), failures);
         }
-        await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures);
+        try
+        {
+            await fixture.DisposeAsync();
+        }
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
         ServerFailureObserver.Observe(() => selected?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

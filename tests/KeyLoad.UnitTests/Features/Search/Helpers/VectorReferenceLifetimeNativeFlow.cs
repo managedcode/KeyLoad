@@ -61,6 +61,7 @@ internal static class VectorReferenceLifetimeNativeFlow
         var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
         var position = profile.Source.Store.Position;
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => VectorReferenceLifetimeNativeCalls.SearchAsync(profile, token));
+        ArgumentNullException.ThrowIfNull(error);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(profile.Source.Store.Position).IsEqualTo(position);
         await Assert.That(ControlledPartitionMovementRawImage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();

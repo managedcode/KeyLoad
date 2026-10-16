@@ -28,31 +28,33 @@ internal static class CommandObservedReturnEdgeFlow
             var gate = scenario.Observation.Hold(requestId, phase, fail: true);
             original = CommandObservedPolicyCalls.ReceiveAsync(scenario, requestId, request, operation.Token);
             await gate.Arrived.Task.WaitAsync(operation.Token);
-            var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => { _ = await original; });
+            var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
+            {
+                _ = await original;
+            });
             observed = true;
-            await Assert.That(refused.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
+            await Assert.That((refused ?? throw new InvalidOperationException(nameof(refused))).Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
             await Assert.That(refused.Message).IsEqualTo(business
                 ? CommandObservedReturnEdgeProtocol.Unknown : CommandObservedReturnEdgeProtocol.ClaimUnavailable);
             await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(operation.Token);
             await operation.CancelAsync();
             await VerifyAndRetryAsync(scenario, request, business, before, lifetime.Token);
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        await CloseAsync(scenario, original, observed, failures);
-        if (operation is not null)
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            ServerFailureObserver.Observe(operation.Dispose, failures);
+            failures.Add(error);
         }
-        if (lifetime is not null)
+        finally
         {
-            ServerFailureObserver.Observe(lifetime.Dispose, failures);
-        }
-        if (deadline is not null)
-        {
-            ServerFailureObserver.Observe(deadline.Dispose, failures);
+            await ServerFailureObserver.ObserveAsync(() =>
+                CloseAsync(scenario, original, observed, failures), failures);
+            DisposeCancellation(operation, failures);
+            DisposeCancellation(lifetime, failures);
+            DisposeCancellation(deadline, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -89,7 +91,10 @@ internal static class CommandObservedReturnEdgeFlow
         scenario.Observation.ReleaseAll();
         if (original is not null && !observed)
         {
-            await ServerFailureObserver.ObserveAsync(async () => { _ = await original; }, failures);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                _ = await original;
+            }, failures);
         }
         if (scenario.Fixture is not null)
         {
@@ -104,6 +109,22 @@ internal static class CommandObservedReturnEdgeFlow
                 await Assert.That(source.IsJoined).IsTrue();
                 await Assert.That(source.Silo.HasJoinedRequestWork).IsTrue();
             }, failures);
+        }
+    }
+
+    private static void DisposeCancellation(CancellationTokenSource? owner, List<Exception> failures)
+    {
+        try
+        {
+            owner?.Dispose();
+        }
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
         }
     }
 }

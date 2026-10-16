@@ -46,14 +46,7 @@ internal static class ResourceRetirementNativePhaseValidation
         switch (phase.Phase)
         {
             case ResourceRetirementPhase.Begin:
-                var begin = NativeSerialization.Deserialize<ResourceRetirementBeginBodyV1>(phase.Body.Span);
-                if (begin?.Request is null || begin.Request.RetirementId != phase.RetirementId
-                    || outer.CommandId != phase.RetirementId)
-                {
-                    throw Invalid();
-                }
-                ResourceRetirementPreparingPhaseValidation.RequireBegin(outer, begin, limits);
-                RequireSource(outer);
+                RequireBegin(outer, phase, limits);
                 break;
             case ResourceRetirementPhase.FenceOwner:
                 var fence = NativeSerialization.Deserialize<ResourceRetirementFenceBodyV1>(phase.Body.Span);
@@ -97,6 +90,18 @@ internal static class ResourceRetirementNativePhaseValidation
             default:
                 throw Invalid();
         }
+    }
+
+    private static void RequireBegin(ResourceRetirementNativeRequest outer, ResourceRetirementPhaseCommandV1 phase, DatabaseLimits limits)
+    {
+        var begin = NativeSerialization.Deserialize<ResourceRetirementBeginBodyV1>(phase.Body.Span);
+        if (begin?.Request is null || begin.Request.RetirementId != phase.RetirementId
+            || outer.CommandId != phase.RetirementId)
+        {
+            throw Invalid();
+        }
+        ResourceRetirementPreparingPhaseValidation.RequireBegin(outer, begin, limits);
+        RequireSource(outer);
     }
 
     private static void RequireSeal(ResourceRetirementNativeRequest outer, ResourceRetirementPhaseCommandV1 phase, DatabaseLimits limits)

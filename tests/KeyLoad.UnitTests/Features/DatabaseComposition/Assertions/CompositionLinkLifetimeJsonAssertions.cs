@@ -37,7 +37,7 @@ internal static class CompositionLinkLifetimeJsonAssertions
         var edge = new EdgeRecord(P.Edge, state.From, state.To, P.Label, P.EmptyJson, 1);
         await EqualAsync(healthy ? edge : null, owner.Store.Read(view => view.GetRecord<EdgeRecord>(
             KeySpace.Partition("edge", owner.Source.Partition, P.Graph, P.Edge))));
-        await EqualAsync(new GraphTraversal(healthy ? [state.From, state.To] : [state.From], healthy ? [edge] : []),
+        await EqualAsync(new global::KeyLoad.GraphTraversal(healthy ? [state.From, state.To] : [state.From], healthy ? [edge] : []),
             owner.Database.Traverse(P.Root, owner.Source.Partition, P.Graph, state.From, cancellationToken: token));
         await MessageAsync(owner, P.Queue, badPayload);
         await MessageAsync(owner, P.HealthyQueue, healthy ? P.Payload(state.From, state.To) : null);

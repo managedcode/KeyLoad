@@ -72,7 +72,7 @@ internal static class ResourceRetirementCleanupCandidateNative
         await Assert.That(staged).IsEquivalentTo(initial, CollectionOrdering.Matching);
         await Assert.That(unstaged).IsNull();
         var expected = ZoneTreeJournalCodec.Serialize([new(key, initial)], int.MaxValue);
-        await Assert.That(File.ReadAllBytes(path).AsSpan(WalHeaderBytes).ToArray()).IsEquivalentTo(expected, CollectionOrdering.Matching);
+        await Assert.That((await File.ReadAllBytesAsync(path)).AsSpan(WalHeaderBytes).ToArray()).IsEquivalentTo(expected, CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo((long)One);
         var position = store.Position;
         var image = ResourceRetirementCleanupNativeImages.Read(store);
@@ -93,7 +93,7 @@ internal static class ResourceRetirementCleanupCandidateNative
         await ResourceRetirementCleanupNativeImages.SameAsync(store, image, position + One);
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsEquivalentTo(proposed[FirstIndex].Value!.Value.ToArray(), CollectionOrdering.Matching);
         await Assert.That(store.Read(view => view.ReadOwnedValue(other))).IsNull();
-        var bytes = File.ReadAllBytes(path);
+        var bytes = await File.ReadAllBytesAsync(path);
         await Assert.That(bytes.AsSpan(expected.Length + WalHeaderBytes + WalHeaderBytes).ToArray())
             .IsEquivalentTo(payload, CollectionOrdering.Matching);
     }

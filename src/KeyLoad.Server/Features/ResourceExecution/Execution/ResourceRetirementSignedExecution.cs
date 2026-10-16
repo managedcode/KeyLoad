@@ -11,6 +11,7 @@ internal sealed class ResourceRetirementSignedExecution(OrleansNode node, Partit
     PhysicalOwnerStartupRequests authentication, IOptions<DatabaseLimits> limits, TimeProvider clock,
     ResourceRetirementWorkAdmission workAdmission)
 {
+    private const int NoResultBytes = 0;
     internal async Task RequireSourceAsync(string sourcePrincipalId, long sourcePolicyEpoch,
         ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
     {
@@ -40,7 +41,7 @@ internal sealed class ResourceRetirementSignedExecution(OrleansNode node, Partit
         ResourceRetirementFrameReadBudget.RequireAvailable(work);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         var principal = await ReadAdministratorAsync(sourcePrincipalId, sourcePolicyEpoch, technicalPrincipal, work, request.ExpiresAt, token).ConfigureAwait(false);
-        if (technicalPrincipal && request?.Phase?.Phase is (ResourceRetirementPhase.PersistDropParent
+        if (technicalPrincipal && request.Phase?.Phase is (ResourceRetirementPhase.PersistDropParent
             or ResourceRetirementPhase.CompleteDropParent))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ResourceRetirementNativeProtocol.InvalidProof);
@@ -48,7 +49,7 @@ internal sealed class ResourceRetirementSignedExecution(OrleansNode node, Partit
         RequireLocal(request, principal, work, token);
         var operation = ResourceRetirementNativePreparedOperations.Issue(partition.Database, principal, commandId, request, clock, work);
         principal = await ReadAdministratorAsync(sourcePrincipalId, sourcePolicyEpoch, technicalPrincipal, work, request.ExpiresAt, token).ConfigureAwait(false);
-        if (technicalPrincipal && request?.Phase?.Phase is (ResourceRetirementPhase.PersistDropParent
+        if (technicalPrincipal && request.Phase?.Phase is (ResourceRetirementPhase.PersistDropParent
             or ResourceRetirementPhase.CompleteDropParent))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ResourceRetirementNativeProtocol.InvalidProof);
@@ -64,7 +65,7 @@ internal sealed class ResourceRetirementSignedExecution(OrleansNode node, Partit
         ResourceRetirementFrameReadBudget.RequireAvailable(work);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         var principal = await ReadAdministratorAsync(sourcePrincipalId, sourcePolicyEpoch, technicalPrincipal, work, request.ExpiresAt, token).ConfigureAwait(false);
-        if (technicalPrincipal && request?.Phase?.Phase is (ResourceRetirementPhase.PersistDropParent
+        if (technicalPrincipal && request.Phase?.Phase is (ResourceRetirementPhase.PersistDropParent
             or ResourceRetirementPhase.CompleteDropParent))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ResourceRetirementNativeProtocol.InvalidProof);
@@ -103,14 +104,14 @@ internal sealed class ResourceRetirementSignedExecution(OrleansNode node, Partit
         if (request is null || request.Version != ResourceRetirementNativeProtocol.Version || request.Phase is null
             || request.Phase.Version != ResourceRetirementNativeProtocol.Version || request.Phase.RetirementId == Guid.Empty
             || !Enum.IsDefined(request.Phase.Phase) || request.Phase.Body.IsEmpty || request.Phase.Body.Length > limits.Value.MaxBatchBytes
-            || request.MaximumReadBytes <= 0 || request.MaximumReadBytes > limits.Value.MaxQueryReadBytes
-            || request.MaximumExaminedRecords <= 0 || request.MaximumExaminedRecords > limits.Value.MaxScanRecords
-            || request.MaximumResultBytes <= 0 || request.MaximumResultBytes > limits.Value.MaxBatchBytes
-            || request.OriginalPolicyEpoch < 0 || !PhysicalOwnerEntryValidation.Valid(request.ObservedOwner))
+            || request.MaximumReadBytes <= ResourceRetirementReadContract.NoReadBytes || request.MaximumReadBytes > limits.Value.MaxQueryReadBytes
+            || request.MaximumExaminedRecords <= ResourceRetirementReadContract.NoRecords || request.MaximumExaminedRecords > limits.Value.MaxScanRecords
+            || request.MaximumResultBytes <= NoResultBytes || request.MaximumResultBytes > limits.Value.MaxBatchBytes
+            || request.OriginalPolicyEpoch < ResourceRetirementReadContract.MinimumPolicyEpoch || !PhysicalOwnerEntryValidation.Valid(request.ObservedOwner))
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceRetirementNativeProtocol.InvalidProof);
         }
-        if (request.OriginalPolicyEpoch != 0 && request.OriginalPolicyEpoch != principal.PolicyEpoch)
+        if (request.OriginalPolicyEpoch != ResourceRetirementReadContract.MinimumPolicyEpoch && request.OriginalPolicyEpoch != principal.PolicyEpoch)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceRetirementNativeProtocol.InvalidProof);
         }

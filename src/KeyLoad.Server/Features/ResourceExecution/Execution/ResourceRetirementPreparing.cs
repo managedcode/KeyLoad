@@ -9,6 +9,7 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal sealed class ResourceRetirementPreparing
 {
+    private const int NoPageSize = 0;
     private readonly ResourceRetirementReads reads;
     private readonly ResourceRetirementPhaseExecution phases;
     private readonly IOptions<DatabaseLimits> limits;
@@ -74,7 +75,7 @@ internal sealed class ResourceRetirementPreparing
     {
         var request = preparation.Control.Request;
         var existing = (await reads.ExecuteAsync(ResourceRetirementReadOperation.State, request, null, source,
-            Guid.Empty, 0, expiry, principalId, epoch, work, metadata, token).ConfigureAwait(false)).State
+            Guid.Empty, NoPageSize, expiry, principalId, epoch, work, metadata, token).ConfigureAwait(false)).State
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);
         ResourceRetirementReceiptValidation.RequireState(existing, request, source);
         if (!ResourceRetirementReceiptValidation.Same(existing.Control, preparation.BegunControl))

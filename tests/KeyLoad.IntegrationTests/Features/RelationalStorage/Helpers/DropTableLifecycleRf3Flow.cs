@@ -1,5 +1,4 @@
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;

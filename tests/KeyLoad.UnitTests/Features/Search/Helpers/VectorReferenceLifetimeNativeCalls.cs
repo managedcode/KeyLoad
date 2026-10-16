@@ -21,7 +21,7 @@ internal static class VectorReferenceLifetimeNativeCalls
 
     internal static async Task EventAsync(NativeDropRuntimeProfile profile, bool fresh, CancellationToken token)
         => _ = await CommitAsync(profile, new(Guid.NewGuid(), NativeDropRuntimeProtocol.Partition,
-            [new AppendEvents(StreamSet, StreamId, [new(fresh ? FreshEvent : FirstEvent, EventType, EventJson)],
+            [new AppendEvents(StreamSet, VectorReferenceLifetimeNativeProtocol.StreamId, [new(fresh ? FreshEvent : FirstEvent, EventType, EventJson)],
                 fresh ? ExpectedStreamRevision.Exact(FirstRevision) : ExpectedStreamRevision.NoStream)]), token);
 
     internal static async Task<CommitReceipt> CommitAsync(NativeDropRuntimeProfile profile,

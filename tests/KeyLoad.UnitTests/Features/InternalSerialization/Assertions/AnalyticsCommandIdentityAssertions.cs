@@ -12,25 +12,34 @@ namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal static class AnalyticsCommandIdentityAssertions
 {
+    private const string MutationsKey = "mutations";
+    private const string KindKey = "kind";
+    private const string JsonKey = "json";
+    private const string ExpectedRevisionsKey = "expectedRevisions";
+    private const string EventsKey = "events";
+    private const string IdKey = "id";
+    private const string DimensionsKey = "dimensions";
+    private const string MetricsKey = "metrics";
+
     internal static async Task OrderAsync(ReplicatedOperation operation, bool delete)
     {
         using var document = JsonDocument.Parse(operation.PayloadJson);
-        var mutations = document.RootElement.GetProperty("mutations");
-        await Assert.That(mutations[0].GetProperty("kind").GetString()).IsEqualTo("putDocument");
-        await Assert.That(mutations[0].GetProperty("json").GetString()).IsEqualTo(D.Json);
+        var mutations = document.RootElement.GetProperty(MutationsKey);
+        await Assert.That(mutations[0].GetProperty(KindKey).GetString()).IsEqualTo("putDocument");
+        await Assert.That(mutations[0].GetProperty(JsonKey).GetString()).IsEqualTo(D.Json);
         var analytics = mutations[1];
-        await Assert.That(analytics.GetProperty("kind").GetString()).IsEqualTo(delete
+        await Assert.That(analytics.GetProperty(KindKey).GetString()).IsEqualTo(delete
             ? AnalyticsStoreProtocol.DeleteKind : AnalyticsStoreProtocol.UpsertKind);
-        await KeysAsync(analytics.GetProperty("expectedRevisions"));
+        await KeysAsync(analytics.GetProperty(ExpectedRevisionsKey));
         if (!delete)
         {
-            var events = analytics.GetProperty("events");
-            await Assert.That(events[0].GetProperty("id").GetString()).IsEqualTo(D.First);
-            await Assert.That(events[1].GetProperty("id").GetString()).IsEqualTo(D.Last);
+            var events = analytics.GetProperty(EventsKey);
+            await Assert.That(events[0].GetProperty(IdKey).GetString()).IsEqualTo(D.First);
+            await Assert.That(events[1].GetProperty(IdKey).GetString()).IsEqualTo(D.Last);
             foreach (var value in events.EnumerateArray())
             {
-                await KeysAsync(value.GetProperty("dimensions"));
-                await KeysAsync(value.GetProperty("metrics"));
+                await KeysAsync(value.GetProperty(DimensionsKey));
+                await KeysAsync(value.GetProperty(MetricsKey));
             }
         }
     }

@@ -25,7 +25,7 @@ internal static class ResourceRetirementOriginal8RecoveryFixture
             {
                 await exercise(nodes, TestContext.Current!.Execution.CancellationToken);
             }
-            catch
+            catch (Exception)
             {
                 foreach (var node in nodes)
                 {

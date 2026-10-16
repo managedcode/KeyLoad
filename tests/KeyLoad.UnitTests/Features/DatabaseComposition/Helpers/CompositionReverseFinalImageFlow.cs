@@ -39,6 +39,7 @@ internal static class CompositionReverseFinalImageFlow
                 _ = owner.Database.ResolveSubmissionOutcome(original, work);
                 return Task.CompletedTask;
             });
+            ArgumentNullException.ThrowIfNull(denied);
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.NotFound);
             await Assert.That(denied.Message).IsEqualTo(D.Unavailable);
         });

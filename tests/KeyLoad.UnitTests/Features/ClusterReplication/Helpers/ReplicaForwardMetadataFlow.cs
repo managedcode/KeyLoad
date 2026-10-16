@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Replication;
@@ -15,58 +16,73 @@ internal static class ReplicaForwardMetadataFlow
         var observation = new ReplicaForwardMetadataObservation();
         var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            await fixture.InitializeAsync(token);
-            var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
-            var definition = fixture.Database.Configure(W.Collection, ResourceKind.Collection);
-            var partition = fixture.Database.Partition;
-            var lifetime = fixture.Database.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
-                partition.TenantId, partition.DatabaseId, W.Collection, definition))
-                ?? throw new InvalidOperationException(P.Missing);
-            var expectedReference = new EntityRef(partition, W.Collection, W.Healthy)
-            {
-                Lifetime = new EntityRefLifetimeV1(lifetime.Incarnation.Value)
-            };
-            fixture.Database.Commit(new PutDocument(W.Collection, W.Anchor, W.AnchorJson, P.NewDocument));
-            var writer = new PrincipalRecord(P.Writer, fixture.Database.Partition.TenantId,
-                [new ScopeGrant(fixture.Database.Partition.DatabaseId, W.Collection, Capability.DocumentsWrite)], []);
-            Configure(fixture, writer);
-            await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
-            var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
-            var follower = nodes.First(node => !ReferenceEquals(node, leader));
-            var work = CreateBudget(follower, fixture.Clock, token);
-            var command = new CommandRequest(Guid.NewGuid(), fixture.Database.Partition,
-                [new PutDocument(W.Collection, W.Healthy, W.HealthyJson, P.NewDocument)]);
-            var original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
-                writer.Id, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command), work);
-            if (removeGrant)
-            {
-                await RefusedAsync(fixture, nodes, follower, writer, original, work, observation, token);
-                command = command with
-                {
-                    CommandId = Guid.NewGuid()
-                };
-                original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
-                    writer.Id, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command), work);
-            }
-            if (exhaustReceiver)
-            {
-                await BudgetRefusedAsync(fixture, nodes, follower, original, work, observation, token);
-                work = CreateBudget(follower, fixture.Clock, token);
-                command = command with
-                {
-                    CommandId = Guid.NewGuid()
-                };
-                original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
-                    writer.Id, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command), work);
-            }
-            await ReplicaForwardMetadataSuccess.RunAsync(fixture, nodes, leader, follower,
-                original, command, expectedReference, work, observation, token);
-        }, failures);
+        await ServerFailureObserver.ObserveAsync(() =>
+            ExecuteAsync(fixture, observation, removeGrant, exhaustReceiver, token), failures);
         observation.End();
-        await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures);
+        try
+        {
+            await fixture.DisposeAsync();
+        }
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task ExecuteAsync(RequestCqrsHostedRuntimeFixture fixture,
+        ReplicaForwardMetadataObservation observation, bool removeGrant, bool exhaustReceiver, CancellationToken token)
+    {
+        await fixture.InitializeAsync(token);
+        var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
+        var definition = fixture.Database.Configure(W.Collection, ResourceKind.Collection);
+        var partition = fixture.Database.Partition;
+        var lifetime = fixture.Database.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
+            partition.TenantId, partition.DatabaseId, W.Collection, definition))
+            ?? throw new InvalidOperationException(P.Missing);
+        var expectedReference = new EntityRef(partition, W.Collection, W.Healthy)
+        {
+            Lifetime = new EntityRefLifetimeV1(lifetime.Incarnation.Value)
+        };
+        fixture.Database.Commit(new PutDocument(W.Collection, W.Anchor, W.AnchorJson, P.NewDocument));
+        var writer = new PrincipalRecord(P.Writer, fixture.Database.Partition.TenantId,
+            [new ScopeGrant(fixture.Database.Partition.DatabaseId, W.Collection, Capability.DocumentsWrite)], []);
+        Configure(fixture, writer);
+        await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
+        var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
+        var follower = nodes.First(node => !ReferenceEquals(node, leader));
+        var work = CreateBudget(follower, fixture.Clock, token);
+        var command = new CommandRequest(Guid.NewGuid(), fixture.Database.Partition,
+            [new PutDocument(W.Collection, W.Healthy, W.HealthyJson, P.NewDocument)]);
+        var original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
+            writer.Id, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command), work);
+        if (removeGrant)
+        {
+            await RefusedAsync(fixture, nodes, follower, writer, original, work, observation, token);
+            command = command with
+            {
+                CommandId = Guid.NewGuid()
+            };
+            original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
+                writer.Id, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command), work);
+        }
+        if (exhaustReceiver)
+        {
+            await BudgetRefusedAsync(fixture, nodes, follower, original, work, observation, token);
+            work = CreateBudget(follower, fixture.Clock, token);
+            command = command with
+            {
+                CommandId = Guid.NewGuid()
+            };
+            original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
+                writer.Id, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command), work);
+        }
+        await ReplicaForwardMetadataSuccess.RunAsync(nodes, leader, follower,
+            original, command, expectedReference, work, observation, token);
     }
 
     private static ReadExecutionBudget CreateBudget(RequestCqrsCohortNativeNode follower,

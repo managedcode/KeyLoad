@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -79,7 +78,7 @@ internal static class ResourceLifetimeGrantAdmissionDenial
         ControlledPartitionMovementExpiryOwnerState before, ReplicatedOperation operation, long index, OperationResult result)
     {
         var partition = state.Context.Control.Partition;
-        var expected = before.Image.ToDictionary(row => row[..row.IndexOf(':')], row => row[(row.IndexOf(':') + OneEntry)..],
+        var expected = before.Image.ToDictionary(row => row[..row.IndexOf(':', StringComparison.Ordinal)], row => row[(row.IndexOf(':', StringComparison.Ordinal) + OneEntry)..],
             StringComparer.Ordinal);
         var principal = state.Source.Store.Read(view => state.Source.Database.Principal(view, Administrator, operation.EvaluatedAt));
         var outcome = new StoredOutcome(NativeOperationFingerprint.Compute(operation), state.Source.Store.Identity.Incarnation,

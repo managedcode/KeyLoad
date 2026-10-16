@@ -38,34 +38,27 @@ internal static class PostgresPreparedDecoder
         global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(syntax,
             positionalParameterCount, token.ThrowIfCancellationRequested, token);
         var rows = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.HasQueryRows(syntax);
-        if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table)
+        switch (syntax)
         {
-            if (positionalParameterCount != PostgresProtocol.AllRows)
-            {
-                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
-            }
-            _ = ScriptDomCreateTableSyntax.Read(table, limitsOptions, token.ThrowIfCancellationRequested, token);
-        }
-        else if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.DropTableStatement drop)
-        {
-            if (positionalParameterCount != PostgresProtocol.AllRows)
-            {
-                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
-            }
-            _ = ScriptDomDropTableSyntax.Read(drop, limitsOptions, token.ThrowIfCancellationRequested, token);
-        }
-        else if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
-        {
-            if (positionalParameterCount != PostgresProtocol.AllRows)
-            {
-                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
-            }
-            _ = ScriptDomContextIdentity.Read(control, token.ThrowIfCancellationRequested, token);
-        }
-        else if (!rows && syntax is not (global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement
-            or global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement))
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+            case global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table:
+                RequireNoPositionalParameters(positionalParameterCount);
+                _ = ScriptDomCreateTableSyntax.Read(table, limitsOptions, token.ThrowIfCancellationRequested, token);
+                break;
+            case global::Microsoft.SqlServer.TransactSql.ScriptDom.DropTableStatement drop:
+                RequireNoPositionalParameters(positionalParameterCount);
+                _ = ScriptDomDropTableSyntax.Read(drop, limitsOptions, token.ThrowIfCancellationRequested, token);
+                break;
+            case global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control:
+                RequireNoPositionalParameters(positionalParameterCount);
+                _ = ScriptDomContextIdentity.Read(control, token.ThrowIfCancellationRequested, token);
+                break;
+            default:
+                if (!rows && syntax is not (global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement
+                    or global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement))
+                {
+                    throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+                }
+                break;
         }
         var joinedInsert = syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement
         {
@@ -76,6 +69,14 @@ internal static class PostgresPreparedDecoder
             }
         };
         return (rows, joinedInsert);
+    }
+
+    private static void RequireNoPositionalParameters(int count)
+    {
+        if (count != PostgresProtocol.AllRows)
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
     }
 
     internal static (string Name, PostgresBoundPortal Portal) Bind(ReadOnlySpan<byte> payload,

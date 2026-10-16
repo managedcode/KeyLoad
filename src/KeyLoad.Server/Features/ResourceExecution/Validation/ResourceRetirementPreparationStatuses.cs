@@ -1,11 +1,12 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 
 namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementPreparationStatuses
 {
+    private const long EmptyCut = 0;
+
     internal static void RequireState(ResourceRetirementPreparationStateV1 state,
         ResourceRetirementRequestV1 request, RegisteredPhysicalOwnerV1 source)
     {
@@ -42,8 +43,8 @@ internal static class ResourceRetirementPreparationStatuses
                 PhysicalOwnerEntryValidation.SameOwner(value.Receiver.Owner, status.Reservation.Receiver.Owner));
             if (retained is null || !ResourceRetirementReceiptValidation.Same(status.Reservation, retained)
                 || status.Cut.NodeId == Guid.Empty || !nodes.Add(status.Cut.NodeId)
-                || status.Cut.StoreIncarnation == Guid.Empty || status.Cut.ReadGeneration < 0
-                || status.Cut.StorePosition < 0 || status.Cut.AppliedIndex < 0 || status.Cut.CatalogRevision < 0
+                || status.Cut.StoreIncarnation == Guid.Empty || status.Cut.ReadGeneration < EmptyCut
+                || status.Cut.StorePosition < EmptyCut || status.Cut.AppliedIndex < EmptyCut || status.Cut.CatalogRevision < EmptyCut
                 || status.Remaining.IsDefault || !status.Remaining.IsEmpty)
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);

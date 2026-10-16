@@ -7,11 +7,12 @@ internal static class ControlledPartitionMovementNativeHostFactory
 {
     internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory, CancellationToken cancellationToken)
-        => CreateAsync(observerFactory, null, cancellationToken);
+        => CreateAsync(observerFactory, null, null, cancellationToken);
 
     internal static async Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory,
-        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory, CancellationToken cancellationToken,
+        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory,
+        Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory, CancellationToken cancellationToken,
         int? maximumBatchBytes = null)
     {
         using var endpoints = new ControlledPartitionMovementNativeHostEndpoints();
@@ -21,7 +22,7 @@ internal static class ControlledPartitionMovementNativeHostFactory
         var failures = new List<Exception>();
         try
         {
-            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory);
+            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory, phaseObserverFactory);
             await owner.CreateNodesAsync(cancellationToken).ConfigureAwait(false);
             endpoints.Dispose();
             await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(

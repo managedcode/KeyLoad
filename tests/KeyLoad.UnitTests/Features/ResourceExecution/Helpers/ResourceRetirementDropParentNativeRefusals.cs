@@ -13,7 +13,7 @@ internal static class ResourceRetirementDropParentNativeRefusals
         var image = ResourceRetirementDropParentNativeImages.Read(fixture.Store);
         var position = fixture.Store.Position;
         var id = ResourceRetirementDropParentIdentity.CommandId(state.Lookup, ResourceRetirementPhase.CompleteDropParent);
-        var phase = new ResourceRetirementPhaseCommandV1(Version, state.Lookup.CommandId,
+        var phase = new ResourceRetirementPhaseCommandV1(ResourceRetirementDropParentNativeData.Version, state.Lookup.CommandId,
             ResourceRetirementPhase.CompleteDropParent, NativeSerialization.Serialize(new ResourceRetirementCompleteDropParentBodyV1(state.Lookup)));
         var original = state.Database.CreateResourceRetirementOperation(id, Root, state.Database.EvaluationClock.GetUtcNow(), phase);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => state.Database.Apply(original));

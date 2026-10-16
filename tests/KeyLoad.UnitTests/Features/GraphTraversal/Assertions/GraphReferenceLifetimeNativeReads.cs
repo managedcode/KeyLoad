@@ -25,11 +25,11 @@ internal static class GraphReferenceLifetimeNativeReads
             graph, from, Depth, Vertices, Edges, cancellationToken: token);
         await NativeDropRuntimeAssertions.SameAsync(new global::KeyLoad.GraphTraversal([anchor, target], [edge]), traversal);
         var path = database.ShortestPath(PartitionStoreProtocol.AdministratorId,
-            new(Version, NativeDropRuntimeProtocol.Partition, graph, from, to, Depth, Vertices, Edges), cancellationToken: token);
-        await NativeDropRuntimeAssertions.SameAsync(new GraphShortestPathResult(Version, true, Depth, [anchor, target], [edge], cut), path);
+            new(GraphReferenceLifetimeNativeProtocol.Version, NativeDropRuntimeProtocol.Partition, graph, from, to, Depth, Vertices, Edges), cancellationToken: token);
+        await NativeDropRuntimeAssertions.SameAsync(new GraphShortestPathResult(GraphReferenceLifetimeNativeProtocol.Version, true, Depth, [anchor, target], [edge], cut), path);
         var incoming = database.ReadIncomingGraphEdges(PartitionStoreProtocol.AdministratorId,
-            new(Version, to, graph, Edges), cancellationToken: token);
-        await NativeDropRuntimeAssertions.SameAsync(new GraphIncomingEdgesPageV1(Version, [new(edge, LocalDelivery)], cut, Projection), incoming);
+            new(GraphReferenceLifetimeNativeProtocol.Version, to, graph, Edges), cancellationToken: token);
+        await NativeDropRuntimeAssertions.SameAsync(new GraphIncomingEdgesPageV1(GraphReferenceLifetimeNativeProtocol.Version, [new(edge, LocalDelivery)], cut, Projection), incoming);
         var result = await SearchAsync(profile, graph, from, token);
         await Assert.That(result.Hits.Length).IsEqualTo(Edges);
         await NativeDropRuntimeAssertions.SameAsync(new DocumentResult(target, Revision,
@@ -41,7 +41,7 @@ internal static class GraphReferenceLifetimeNativeReads
     internal static Task<GraphSearchResult> SearchAsync(NativeDropRuntimeProfile profile, string graph,
         EntityRef anchor, CancellationToken token)
         => new SearchEngine(profile.Source.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
-            PartitionStoreProtocol.AdministratorId, new(Version,
+            PartitionStoreProtocol.AdministratorId, new(GraphReferenceLifetimeNativeProtocol.Version,
                 new(NativeDropRuntimeProtocol.Partition, NativeDropRuntimeProtocol.Table, FusionConstant: FusionConstant),
                 Retriever: new(new(graph, [anchor], Depth, Vertices, Edges))), token);
 }

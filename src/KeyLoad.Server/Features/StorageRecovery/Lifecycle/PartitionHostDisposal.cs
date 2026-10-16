@@ -2,6 +2,14 @@ namespace KeyLoad.Server;
 
 internal static class PartitionHostDisposal
 {
+    internal static void RequireTransferVerifierClosed(Features.Messaging.RemoteTransferPeerVerificationOwner? verification)
+    {
+        if (verification is { IsDisposed: false })
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, Core.Features.Messaging.RemoteTransferPeerProtocol.Unavailable);
+        }
+    }
+
     internal static async Task RunAsync(PartitionHost host, Func<Task, Task> closeLog,
         Func<Task, Task> closeStores, Action<List<Exception>> disposeVisibility)
     {

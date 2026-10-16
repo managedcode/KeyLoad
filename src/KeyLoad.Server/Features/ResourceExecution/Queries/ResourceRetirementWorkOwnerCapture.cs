@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
@@ -23,7 +22,7 @@ internal static class ResourceRetirementWorkOwnerCapture
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 evidence.Add(await reads.ExecuteAsync(fence, owner, voter, null, principalId, epoch,
-                    expiry, work, metadata, token, allocation).ConfigureAwait(false));
+                    expiry, work, metadata, allocation, token).ConfigureAwait(false));
             }, failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);

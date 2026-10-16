@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 

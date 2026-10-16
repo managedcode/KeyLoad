@@ -28,7 +28,6 @@ internal static class FunctionalGateResourceLogs
         }
     }
 
-
     internal static void Save(ClusterFixtureDiagnostics logs, string[] nodeNames, string[] diagnosticSecrets,
         string root, Action<string> saveStartupEvidence)
     {

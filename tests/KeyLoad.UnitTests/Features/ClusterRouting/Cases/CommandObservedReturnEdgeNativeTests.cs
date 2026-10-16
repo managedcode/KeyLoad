@@ -7,5 +7,5 @@ internal sealed class CommandObservedReturnEdgeNativeTests
     [Arguments(false)]
     [Arguments(true)]
     public Task LostActualClaimOrBusinessReturnPreservesOriginalEffectsAndReplayThenJoinsAllNativeOwners(bool business)
-        => CommandObservedReturnEdgeFlow.RunAsync(business, TestContext.Current!.CancellationToken);
+        => CommandObservedReturnEdgeFlow.RunAsync(business, TestContext.Current!.Execution.CancellationToken);
 }

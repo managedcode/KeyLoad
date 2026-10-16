@@ -13,7 +13,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
     private const int ReleasedRecords = 0;
     private readonly DatabaseEngine database;
     private readonly NativeTextResourceOwnership? resources;
-    private readonly Dictionary<string, NativeTextResourceReservation> generationReservations = new(StringComparer.Ordinal);
+    private readonly NativeTextIncrementalGenerationReservations generations = new();
     private readonly ServerRuntimeOptions configured;
     private readonly TimeProvider clock;
     private readonly string root;
@@ -83,7 +83,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             var budget = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
             using var stage = budget.EnterStageCancellation(token);
             NativeTextIncrementalRelease.Execute(database, principal.Id, request.Maintenance,
-                root, sessions, budget, configured.NativeText, resources, ReleaseGeneration);
+                root, sessions, budget, configured.NativeText, resources, generations.ReleaseGeneration);
             var released = new TextMaintenanceCapabilityResult(request.SessionId, null,
                 ReleasedSequence, ReleasedSequence, ReleasedRecords, null, null, ReleasedSequence);
             budget.CheckResult(released);
@@ -94,7 +94,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             var budget = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
             using var stage = budget.EnterStageCancellation(token);
             var actual = NativeTextIncrementalBegin.Capture(database, root, request.SessionId, principal, request.Maintenance,
-                budget, limits.MaxScanRecords, limits.MaxScanRecords, configured.NativeText, faultObserver, resources, RetainGeneration);
+                budget, limits.MaxScanRecords, limits.MaxScanRecords, configured.NativeText, faultObserver, resources, generations.RetainGeneration);
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => sessions.Add(actual), failures);
             if (failures.Count != EmptyFailures)
@@ -201,24 +201,6 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             selectedWork[request.TextIndex!] = slot;
         }
         return (slot, selected.Manifest);
-    }
-
-    private void RetainGeneration(string leaf, NativeTextResourceReservation original)
-    {
-        // The worker owns this registry; every entry corresponds to prospective or actual retained files.
-        if (!generationReservations.TryAdd(leaf, original))
-        {
-            throw NativeTextErrors.Ownership();
-        }
-    }
-
-    private void ReleaseGeneration(string leaf)
-    {
-        if (generationReservations.TryGetValue(leaf, out var original))
-        {
-            original.CompleteAfterJoinedCleanup();
-            generationReservations.Remove(leaf);
-        }
     }
 
     public ValueTask DisposeAsync()

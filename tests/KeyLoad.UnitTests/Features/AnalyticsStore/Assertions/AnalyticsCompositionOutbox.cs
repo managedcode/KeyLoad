@@ -12,14 +12,14 @@ internal static class AnalyticsCompositionOutbox
     {
         var partition = owner.Source.Partition;
         var anchorMutation = new PutDocument(D.AnchorCollection, D.AnchorId, D.AnchorJson, 0);
-        var time = owner.Entry(anchor.Operation).Operation.EvaluatedAt;
+        var time = (owner.Entry(anchor.Operation).Operation ?? throw new InvalidOperationException("The retained test operation is missing.")).EvaluatedAt;
         var expected = new List<OutboxEntry> { new(1, 0, anchor.Receipt.Token, time, anchorMutation,
             new(P.Put, D.AnchorCollection, D.AnchorId, 1),
             After: new(new(partition, D.AnchorCollection, D.AnchorId), 1, D.AnchorJson, new(), time)) };
         foreach (var commit in commits)
         {
             var request = KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(commit.Operation);
-            time = owner.Entry(commit.Operation).Operation.EvaluatedAt;
+            time = (owner.Entry(commit.Operation).Operation ?? throw new InvalidOperationException("The retained test operation is missing.")).EvaluatedAt;
             for (var ordinal = 0; ordinal < request.Mutations.Length; ordinal++)
             {
                 var mutation = request.Mutations[ordinal];

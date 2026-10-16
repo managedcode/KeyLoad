@@ -21,7 +21,7 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     internal bool NativeText { get; } = nativeText;
     internal bool NativeAnn { get; } = nativeAnn;
     internal NativeRuntimeTestOptions Timing { get; } = new();
-    private IServiceProvider? localServices;
+    private IServiceProvider? LocalServiceProvider { get; set; }
 
     internal DatabaseEngine CreateDatabase(ZoneTreeStore store, ReplicaConfiguration configuration)
     {
@@ -36,8 +36,8 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
         return create(store, owner);
     }
 
-    internal void BindLocalServices(IServiceProvider actual) => localServices = actual;
-    internal IServiceProvider LocalServices => localServices
+    internal void BindLocalServices(IServiceProvider actual) => LocalServiceProvider = actual;
+    internal IServiceProvider LocalServices => LocalServiceProvider
         ?? throw new InvalidOperationException(RequestCqrsHostedProtocol.LocalNotInitialized);
     internal IPhysicalRequestPlacement Placement => LocalServices.GetRequiredService<IPhysicalRequestPlacement>();
     internal void Register(ISiloBuilder silo) => RequestCqrsHostedRegistration.Register(silo, this);

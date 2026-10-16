@@ -22,7 +22,7 @@ internal static class SnapshotManifestEntryInstall
             offset = target.Snapshots.Append(state.Snapshot.TransferId, offset,
                 source.Snapshots.ReadChunk(state.Snapshot.TransferId, offset, target.Configuration.SnapshotChunkBytes));
         }
-        await Assert.That(target.Snapshots.Complete(state.Snapshot.TransferId)).IsEqualTo(state.Snapshot);
+        await Assert.That(target.Snapshots.Complete(state.Snapshot.TransferId, token)).IsEqualTo(state.Snapshot);
         await SnapshotManifestEntryAssertions.DocumentAsync(target, P.SnapshotCut);
         await SnapshotManifestEntryAssertions.ReceiptAsync(target, ReplicaCrashModel.Operation(P.SnapshotCut), P.SnapshotCut);
         await Assert.That(target.HasObsoleteRecord()).IsFalse();

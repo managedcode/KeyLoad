@@ -29,19 +29,7 @@ internal static class ResourceRetirementProgressReply
         }
         else if (query.CleanupPartition is { } partition)
         {
-            if (reply.OwnerCleanup is not null || reply.OwnerRelease is not null)
-            {
-                throw Invalid();
-            }
-            if (reply.CleanupCheckpoint is { } checkpoint)
-            {
-                ResourceRetirementCleanupCheckpointValidation.Require(checkpoint, limits);
-                Require(checkpoint.Control, checkpoint.Receiver, query);
-                if (checkpoint.Partition != partition)
-                {
-                    throw Invalid();
-                }
-            }
+            RequireCheckpoint(query, reply, partition, limits);
         }
         else
         {
@@ -55,6 +43,24 @@ internal static class ResourceRetirementProgressReply
             }
         }
         ResourceRetirementValidation.Bound(reply, limits);
+    }
+
+    private static void RequireCheckpoint(ResourceRetirementReadRequestV1 query, ResourceRetirementReadReplyV1 reply,
+        PartitionRef partition, DatabaseLimits limits)
+    {
+        if (reply.OwnerCleanup is not null || reply.OwnerRelease is not null)
+        {
+            throw Invalid();
+        }
+        if (reply.CleanupCheckpoint is { } checkpoint)
+        {
+            ResourceRetirementCleanupCheckpointValidation.Require(checkpoint, limits);
+            Require(checkpoint.Control, checkpoint.Receiver, query);
+            if (checkpoint.Partition != partition)
+            {
+                throw Invalid();
+            }
+        }
     }
 
     private static void Require(ResourceRetirementControlV1 control, RegisteredPhysicalOwnerV1 receiver,

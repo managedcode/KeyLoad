@@ -29,7 +29,10 @@ internal static class NativeBoundLeaseDisposalReports
         }
         finally
         {
-            unexpected?.Dispose();
+            if (unexpected is not null)
+            {
+                await unexpected.DisposeAsync();
+            }
         }
     }
 
@@ -40,7 +43,7 @@ internal static class NativeBoundLeaseDisposalReports
             await Assert.That(outcome.CleanupFailures.IsEmpty).IsTrue();
             return;
         }
-        await Assert.That(outcome.CleanupFailures.Count()).IsEqualTo(1);
+        await Assert.That(outcome.CleanupFailures.Length).IsEqualTo(1);
         await Assert.That(outcome.CleanupFailures.Single()).IsSameReferenceAs(expected);
     }
 }

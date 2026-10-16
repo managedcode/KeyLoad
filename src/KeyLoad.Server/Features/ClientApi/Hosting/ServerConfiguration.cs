@@ -19,7 +19,7 @@ internal static class ServerConfiguration
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
         IPartitionMovementNativeObserver? partitionMovementNativeObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
-        CancellationToken startupCancellation = default)
+        IGrainRequestPhaseObserver? phaseObserver = null, CancellationToken startupCancellation = default)
     {
         startupCancellation.ThrowIfCancellationRequested();
         var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +43,10 @@ internal static class ServerConfiguration
         if (partitionMovementNativeObserver is not null)
         {
             builder.Services.AddSingleton(partitionMovementNativeObserver);
+        }
+        if (phaseObserver is not null)
+        {
+            builder.Services.AddSingleton<IGrainRequestPhaseObserver>(phaseObserver);
         }
         OrleansSiloConfiguration.Register(builder, node, address, localhostClustering);
         if (lifecycleParticipantFactory is not null)

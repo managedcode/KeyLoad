@@ -8,6 +8,9 @@ namespace KeyLoad.Server;
 /// <summary>Borrows the caller's original numeric read grant through the same native request-grain entry.</summary>
 internal static class NativeAdministratorAuthenticationRequests
 {
+    private const long NoReadBytes = 0L;
+    private const int NoExaminedRecords = 0;
+    private const int NoResultBytes = 0;
     internal static Task<PrincipalRecord> StartupAsync(OrleansNode node, string secret,
         IOptions<McpExecutionOptions> options, CancellationToken token)
     {
@@ -26,7 +29,7 @@ internal static class NativeAdministratorAuthenticationRequests
         work.Check();
         var bytes = work.RemainingReadGrantBytes;
         var records = work.RemainingReadGrantRecords;
-        if (bytes <= 0 || records <= 0 || work.MaximumResultBytes <= 0)
+        if (bytes <= NoReadBytes || records <= NoExaminedRecords || work.MaximumResultBytes <= NoResultBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAdministratorAuthenticationProtocol.BudgetExceeded);
         }
@@ -56,7 +59,7 @@ internal static class NativeAdministratorAuthenticationRequests
         var bytes = metadataGrant.RemainingBytes;
         var records = metadataGrant.RemainingRecords;
         var resultBytes = work.MaximumResultBytes;
-        if (bytes <= 0 || records <= 0 || resultBytes <= 0)
+        if (bytes <= NoReadBytes || records <= NoExaminedRecords || resultBytes <= NoResultBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAdministratorAuthenticationProtocol.BudgetExceeded);
         }
@@ -111,7 +114,7 @@ internal static class NativeAdministratorAuthenticationRequests
 
     private static void Require(NativeAdministratorAuthenticationResultV1 value, int maximumDetailCharacters)
     {
-        if (value.ReadBytes < 0 || value.ExaminedRecords < 0
+        if (value.ReadBytes < NoReadBytes || value.ExaminedRecords < NoExaminedRecords
             || value.Error is { } error && (!Enum.IsDefined(error) || !value.PrincipalPayload.IsEmpty
                 || string.IsNullOrEmpty(value.SafeDetail) || value.SafeDetail.Length > maximumDetailCharacters)
             || value.Error is null && (value.PrincipalPayload.IsEmpty || value.SafeDetail is not null))

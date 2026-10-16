@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementQuiescenceData;
 
@@ -23,7 +24,7 @@ internal static class ResourceRetirementQuiescenceSeed
                 var accepted = await ControlledPartitionMovementFenceSettlementFlow.ExecuteAsync(source, sourceRuntime,
                     sourceAdmission, corpus, prepared.Prepared, fenced.Authorization, fenced.Fence, caller, prepared.ExpiresAt, token);
                 var lifetime = ResourceRetirementQuiescencePhases.ReadLifetime(source);
-                var request = new ResourceRetirementRequestV1(Version, RetirementId, Partition.TenantId,
+                var request = new ResourceRetirementRequestV1(ResourceRetirementQuiescenceData.Version, RetirementId, Partition.TenantId,
                     Partition.DatabaseId, lifetime.ResourceName, lifetime.Incarnation);
                 state = new(source, target, listeners, corpus, accepted, prepared.ExpiresAt, request,
                     seeded.Receipt, seeded.Blob, seeded.RecordedAt, seeded.Authority);

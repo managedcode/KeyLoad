@@ -8,6 +8,11 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class QueueGraphIdentityAssertions
 {
+    private const string CollectionKey = "collection";
+    private const string IdKey = "id";
+    private const string LifetimeKey = "lifetime";
+    private const string PartitionKey = "partition";
+
     internal static async Task RefusesAsync(QueueGraphIdentityState state, DatabaseEngine engine, ZoneTreeStore store)
     {
         var before = QueueWholeFlowStorage.Bytes(store);
@@ -94,19 +99,19 @@ internal static class QueueGraphIdentityAssertions
         to = Reference(link.To)
     }, JsonDefaults.Options);
 
-    private static object Reference(EntityRef reference)
+    private static Dictionary<string, object> Reference(EntityRef reference)
     {
         var result = new Dictionary<string, object>(StringComparer.Ordinal)
         {
-            ["collection"] = reference.Collection,
-            ["id"] = reference.Id
+            [CollectionKey] = reference.Collection,
+            [IdKey] = reference.Id
         };
         if (reference.Lifetime is { } lifetime)
         {
-            result.Add("lifetime", lifetime);
+            result.Add(LifetimeKey, lifetime);
         }
 
-        result.Add("partition", new
+        result.Add(PartitionKey, new
         {
             atomicPartitionId = reference.Partition.AtomicPartitionId,
             databaseId = reference.Partition.DatabaseId,

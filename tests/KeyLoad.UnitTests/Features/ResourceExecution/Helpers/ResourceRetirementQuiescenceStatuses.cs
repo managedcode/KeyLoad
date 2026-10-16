@@ -38,7 +38,7 @@ internal static class ResourceRetirementQuiescenceStatuses
             Preparation = state.Control,
             OwnerStatuses = [.. statuses]
         };
-        var phase = new ResourceRetirementPhaseCommandV1(Version, state.Request.RetirementId,
+        var phase = new ResourceRetirementPhaseCommandV1(ResourceRetirementQuiescenceData.Version, state.Request.RetirementId,
             ResourceRetirementPhase.Begin, NativeSerialization.Serialize(body));
         var error = Assert.ThrowsExactly<KeyLoadException>(() => state.Source.Database.CreateResourceRetirementOperation(
             state.Request.RetirementId, Root, state.Source.Database.EvaluationClock.GetUtcNow(), phase));

@@ -29,7 +29,7 @@ internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable
     internal static async Task<CommandObservedPolicyRuntime> CreateAsync(ConnectionOperationObservation observation,
         CancellationToken token)
     {
-        var hosts = await ControlledPartitionMovementNativeHosts.CreateAsync(token).ConfigureAwait(false);
+        var hosts = await ControlledPartitionMovementNativeHosts.CreateWithPhaseObserverAsync(_ => observation, token).ConfigureAwait(false);
         var profile = new CommandObservedPolicyRuntime(hosts, observation);
         try
         {
@@ -51,11 +51,10 @@ internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable
         foreach (var node in hosts.Nodes)
         {
             var codec = node.Silo.CatalogRequestCodec();
-            if (codec.PhaseObserver is not null && !ReferenceEquals(codec.PhaseObserver, observation))
+            if (!ReferenceEquals(codec.PhaseObserver, observation))
             {
                 throw new InvalidOperationException(P.ObserverOwned);
             }
-            codec.PhaseObserver = observation;
         }
     }
 

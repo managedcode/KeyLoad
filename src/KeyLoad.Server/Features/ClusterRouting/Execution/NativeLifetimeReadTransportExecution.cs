@@ -17,8 +17,9 @@ internal static class NativeLifetimeReadTransportExecution
             or RemoteModelNativeChannel.EventVector;
 
     internal static async Task<RemoteModelNativeReply> ExecuteAsync(NativeRequestWorkOwner owner,
-        DatabaseEngine database, RemoteModelNativeRequest request, CancellationToken caller, CancellationToken shutdown,
-        Func<IResourceLifetimeWorkBinding, CancellationToken, Task<RemoteModelNativeReply>> execute)
+        DatabaseEngine database, RemoteModelNativeRequest request,
+        Func<IResourceLifetimeWorkBinding, CancellationToken, Task<RemoteModelNativeReply>> execute,
+        CancellationToken caller, CancellationToken shutdown)
     {
         var failures = new List<Exception>();
         NativeRequestWorkLease? lease = null;

@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 using CoreAttempt = KeyLoad.Core.Features.ResourceExecution.ResourceRetirementAttemptValidation;
@@ -37,13 +36,10 @@ internal sealed class ResourceRetirementFinalization(ResourceRetirementReads rea
                 closed = await operations.CloseAsync(context, previous, source, principalId, epoch,
                     expiry, work, metadata, token).ConfigureAwait(false);
             }
-            else if (retained is not null && previous.Stage == ResourceRetirementAttemptStage.Prepared)
-            {
-                return await SubmitAsync(retained, previous, source, expiry, principalId, epoch, work, metadata, token).ConfigureAwait(false);
-            }
             else
             {
-                throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);
+                return await SubmitAsync(RequireResumable(retained, previous), previous, source, expiry,
+                    principalId, epoch, work, metadata, token).ConfigureAwait(false);
             }
         }
         var attempt = await new ResourceRetirementAttemptSource(phases, proof, limits).PrepareAsync(context,
@@ -63,7 +59,7 @@ internal sealed class ResourceRetirementFinalization(ResourceRetirementReads rea
         var finalInventory = await inventory.ExecuteRetiringAsync(principalId, epoch, control,
             attempt, captured.InventoryControl!, work, token).ConfigureAwait(false);
         var body = new ResourceRetirementSealBodyV1(control, finalInventory) { Attempt = attempt };
-        var original = await phases.IssueSealAsync(control, attempt, body, source, principalId, epoch,
+        var original = await phases.IssueSealAsync(attempt, body, source, principalId, epoch,
             expiry, work, metadata, token).ConfigureAwait(false);
         var prepared = await operations.PersistAsync(CoreAttempt.Seal(control), attempt, original, source,
             principalId, epoch, expiry, work, metadata, token).ConfigureAwait(false);
@@ -97,4 +93,14 @@ internal sealed class ResourceRetirementFinalization(ResourceRetirementReads rea
         work.CheckResult(completed);
         return completed;
     }
+    private static ResourceRetirementPreparedOperationV1 RequireResumable(
+        ResourceRetirementPreparedOperationV1? prepared, ResourceRetirementAttemptV1 attempt)
+    {
+        if (prepared is null || attempt.Stage != ResourceRetirementAttemptStage.Prepared)
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceRetirementNativeProtocol.Unavailable);
+        }
+        return prepared;
+    }
+
 }

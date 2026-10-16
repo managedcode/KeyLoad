@@ -4,12 +4,15 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class RequestCqrsHostedDataSourceAttribute(bool nativeTextMaintenance = false,
     bool nativeAnnMaintenance = false) : DataSourceGeneratorAttribute<RequestCqrsHostedRuntimeFixture>
 {
+    public bool NativeTextMaintenance { get; } = nativeTextMaintenance;
+    public bool NativeAnnMaintenance { get; } = nativeAnnMaintenance;
+
     protected override IEnumerable<Func<RequestCqrsHostedRuntimeFixture>> GenerateDataSources(DataGeneratorMetadata metadata)
     {
-        if (nativeTextMaintenance || nativeAnnMaintenance)
+        if (NativeTextMaintenance || NativeAnnMaintenance)
         {
-            yield return () => new RequestCqrsHostedRuntimeFixture(nativeTextMaintenance: nativeTextMaintenance,
-                nativeAnnMaintenance: nativeAnnMaintenance);
+            yield return () => new RequestCqrsHostedRuntimeFixture(nativeTextMaintenance: NativeTextMaintenance,
+                nativeAnnMaintenance: NativeAnnMaintenance);
             yield break;
         }
         yield return () => SharedDataSources.GetOrCreate<RequestCqrsHostedRuntimeFixture>(

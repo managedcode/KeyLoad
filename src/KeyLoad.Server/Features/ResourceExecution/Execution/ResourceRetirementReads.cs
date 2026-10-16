@@ -18,12 +18,12 @@ internal sealed class ResourceRetirementReads(ResourceOwnerInventoryNativeClient
         await client.RequireRetirementSourceAsync(principalId, policyEpoch, work, metadata, token).ConfigureAwait(false);
         var maximumBytes = metadata.RemainingBytes;
         var maximumRecords = metadata.RemainingRecords;
-        if (maximumBytes <= 0 || maximumRecords <= 0)
+        if (maximumBytes <= ResourceRetirementReadContract.NoReadBytes || maximumRecords <= ResourceRetirementReadContract.NoRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceRetirementNativeProtocol.Unavailable);
         }
         var query = new ResourceRetirementReadRequestV1(ResourceRetirementNativeProtocol.Version, operation,
-            request, control, inventoryId, pageSize, expiry, owner, string.Empty, string.Empty, 0,
+            request, control, inventoryId, pageSize, expiry, owner, string.Empty, string.Empty, ResourceRetirementReadContract.MinimumPolicyEpoch,
             maximumBytes, maximumRecords, work.MaximumResultBytes)
         {
             Attempt = attempt,
@@ -42,7 +42,7 @@ internal sealed class ResourceRetirementReads(ResourceOwnerInventoryNativeClient
             : voter is null ? client.ReadRetirementAsync(owner, query, principalId, policyEpoch, work, metadata, token)
                 : client.ReadRetirementToVoterAsync(owner, voter, query, principalId, policyEpoch, work, metadata, token);
         var reply = await call.ConfigureAwait(false);
-        if (reply.ReadBytes < 0 || reply.ExaminedRecords < 0 || !HasExpectedShape(operation, reply, attemptId, context))
+        if (reply.ReadBytes < ResourceRetirementReadContract.NoReadBytes || reply.ExaminedRecords < ResourceRetirementReadContract.NoRecords || !HasExpectedShape(operation, reply, attemptId, context))
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementNativeProtocol.Unavailable);
         }

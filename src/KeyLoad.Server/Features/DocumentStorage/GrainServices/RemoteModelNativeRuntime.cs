@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -89,8 +88,9 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             if (NativeLifetimeReadTransportExecution.Handles(request.Channel))
             {
                 return await NativeLifetimeReadTransportExecution.ExecuteAsync(requestWork(), partition.Database,
-                    request, caller, operation.ShutdownToken, (binding, boundToken) =>
-                        ExecuteAdmittedAsync(request, targetMac, binding, boundToken, operation.ShutdownToken))
+                    request, (binding, boundToken) =>
+                        ExecuteAdmittedAsync(request, targetMac, binding, boundToken, operation.ShutdownToken),
+                    caller, operation.ShutdownToken)
                     .ConfigureAwait(false);
             }
             return await ExecuteAdmittedAsync(request, targetMac, null, caller, operation.ShutdownToken).ConfigureAwait(false);
@@ -163,19 +163,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     }
 
     private void RequireCurrent(RemoteModelNativeRequest request)
-    {
-        var expected = PhysicalOwnerConfiguredTuples.Local(options, partition);
-        RemoteModelNativeIdentity.RequireOwner(options, partition, request.SourceOwner);
-        if (!PhysicalOwnerEntryValidation.SameOwner(request.DestinationOwner, expected.Owner)
-            || request.DestinationVoter != partition.Configuration.LocalId
-            || !request.SourceOwner.VoterIds.Contains(request.CallerVoter, StringComparer.Ordinal)
-            || !local.Read().TransportReady || request.DestinationSiloAddress != local.RuntimeAddress
-            || !membership.IsCurrent(request.CallerVoter, SiloAddress.FromParsableString(request.CallerSiloAddress))
-            || !membership.IsCurrent(request.DestinationVoter, SiloAddress.FromParsableString(request.DestinationSiloAddress)))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
-        }
-    }
+        => RemoteModelNativeCurrentIdentity.Require(options, partition, local, membership, request);
 
     private static RemoteModelNativeReply Failure(RemoteModelNativeRequest request, ErrorCode error)
         => new(ReadOnlyMemory<byte>.Empty, string.Empty, error, RemoteModelNativeProtocol.Unavailable, request.Nonce, string.Empty);

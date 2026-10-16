@@ -29,42 +29,73 @@ internal static class ConfigureResourceOriginalLifetimeOwner
         Func<NativeRequestWorkLease, ReadExecutionBudget, Task> body, CancellationToken token)
     {
         var failures = new List<Exception>();
-        var ledger = new ResourceLifetimeWorkResultRetention(fixture.Database.OperationLimitsOptions);
-        var lease = owner.Acquire(requestId, NativeRequestWorkKind.CommandCapability);
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            lease.AttachResultRetention(ledger);
-            var work = fixture.CreateReadWork(token);
-            work.AttachResourceLifetimeBinding(lease);
-            await body(lease, work);
-        }, failures);
-        var primary = failures.FirstOrDefault();
         var cleanup = new List<Exception>();
+        ResourceLifetimeWorkResultRetention? ledger = null;
+        NativeRequestWorkLease? lease = null;
         var prepared = false;
-        await ServerFailureObserver.ObserveAsync(async () =>
+        try
         {
-            await lease.PrepareCompletionAsync();
-            prepared = true;
-        }, cleanup);
-        if (prepared)
-        {
-            ServerFailureObserver.Observe(ledger.Dispose, cleanup);
-            var combined = cleanup.Count switch
-            {
-                0 => null,
-                1 => cleanup[0],
-                _ => new AggregateException(cleanup)
-            };
+            ledger = new ResourceLifetimeWorkResultRetention(fixture.Database.OperationLimitsOptions);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var settled = await lease.CompleteAsync(primary, combined);
-                if (settled.CleanupOrJoinFailure is { } failure && !cleanup.Contains(failure))
+                lease = owner.Acquire(requestId, NativeRequestWorkKind.CommandCapability);
+                lease.AttachResultRetention(ledger);
+                var work = fixture.CreateReadWork(token);
+                work.AttachResourceLifetimeBinding(lease);
+                await body(lease, work);
+            }, failures);
+            if (lease is not null)
+            {
+                await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    throw failure;
-                }
-            }, cleanup);
+                    await lease.PrepareCompletionAsync();
+                    prepared = true;
+                }, cleanup);
+            }
         }
+        finally
+        {
+            if (lease is null || prepared)
+            {
+                try
+                {
+                    ledger?.Dispose();
+                }
+                catch (Exception disposalFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(disposalFailure))
+                {
+                    cleanup.Add(disposalFailure);
+                }
+                catch (Exception disposalFailure) when (!NativeCqrsBoundaryErrors.IsNonFatal(disposalFailure))
+                {
+                    cleanup.Add(disposalFailure);
+                }
+            }
+        }
+        await CompleteAsync(lease, prepared, failures, cleanup);
         failures.AddRange(cleanup);
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task CompleteAsync(NativeRequestWorkLease? lease, bool prepared,
+        List<Exception> failures, List<Exception> cleanup)
+    {
+        if (lease is null || !prepared)
+        {
+            return;
+        }
+        var combined = cleanup.Count switch
+        {
+            0 => null,
+            1 => cleanup[0],
+            _ => new AggregateException(cleanup)
+        };
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            var settled = await lease.CompleteAsync(failures.FirstOrDefault(), combined);
+            if (settled.CleanupOrJoinFailure is { } failure && !cleanup.Contains(failure))
+            {
+                throw failure;
+            }
+        }, cleanup);
     }
 }

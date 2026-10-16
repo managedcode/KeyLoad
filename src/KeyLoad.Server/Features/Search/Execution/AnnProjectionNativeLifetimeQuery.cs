@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Server.Features.Search;

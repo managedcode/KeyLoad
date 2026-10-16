@@ -25,7 +25,7 @@ internal sealed partial class FunctionalGateFixture
             ?? new CancellationTokenSource(App is null ? TimeSpan.FromSeconds(30)
                 : App.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.ApplicationCleanupTimeout,
                 TimeProvider.System);
-        var contendersReleased = await fileContenders.JoinAsync(cleanup.Token, failures).ConfigureAwait(false);
+        var contendersReleased = await fileContenders.JoinAsync(failures, cleanup.Token).ConfigureAwait(false);
         if (contendersReleased && App is { } application)
         {
             await ServerFailureObserver.ObserveAsync(async () =>

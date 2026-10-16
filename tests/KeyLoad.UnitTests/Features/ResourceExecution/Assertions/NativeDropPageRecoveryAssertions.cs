@@ -8,7 +8,7 @@ internal static class NativeDropPageRecoveryAssertions
 {
     internal static async Task<KeyLoadException> RefusedAsync(Func<Task> action, ErrorCode code)
     {
-        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(action).ConfigureAwait(false);
+        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(action);
         await Assert.That(error!.Code).IsEqualTo(code);
         return error;
     }

@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -12,6 +11,7 @@ internal sealed class ResourceRetirementAuthority(PartitionHost partition, Resou
     ResourceOwnerInventoryAuthority inventory, IOptions<NodeOptions> nodeOptions, IOptions<DatabaseLimits> limits,
     TimeProvider clock)
 {
+    private const int NoPageSize = 0;
     private readonly ResourceRetirementReads reads = new(client);
     private readonly ResourceRetirementPhaseExecution phases = new(client);
 
@@ -22,7 +22,7 @@ internal sealed class ResourceRetirementAuthority(PartitionHost partition, Resou
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(work);
         token.ThrowIfCancellationRequested();
-        if (pageSize <= 0 || pageSize > limits.Value.MaxResults)
+        if (pageSize <= NoPageSize || pageSize > limits.Value.MaxResults)
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceRetirementNativeProtocol.InvalidProof);
         }
@@ -77,7 +77,7 @@ internal sealed class ResourceRetirementAuthority(PartitionHost partition, Resou
     private async Task<ResourceRetirementStateV1?> ReadStateAsync(ResourceRetirementRequestV1 request,
         RegisteredPhysicalOwnerV1 source, string principalId, long epoch, DateTimeOffset expiry,
         ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
-        => (await reads.ExecuteAsync(ResourceRetirementReadOperation.State, request, null, source, Guid.Empty, 0,
+        => (await reads.ExecuteAsync(ResourceRetirementReadOperation.State, request, null, source, Guid.Empty, NoPageSize,
             expiry, principalId, epoch, work, metadata, token).ConfigureAwait(false)).State;
 
 }

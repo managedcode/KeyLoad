@@ -11,7 +11,7 @@ internal static class ResourceRetirementPreparationValidationPersist
     {
         var request = context.Preparation!.Request;
         var body = new ResourceRetirementReserveOwnerBodyV1(context, attempt);
-        var command = new ResourceRetirementPhaseCommandV1(Version, request.RetirementId,
+        var command = new ResourceRetirementPhaseCommandV1(ResourceRetirementPreparationValidationData.Version, request.RetirementId,
             ResourceRetirementPhase.ReserveOwner, NativeSerialization.Serialize(body));
         var original = node.Database.CreateResourceRetirementOperation(attempt.OriginalCommandId,
             PhysicalShardCatalogFixture.RootPrincipalId, node.Database.EvaluationClock.GetUtcNow(), command);

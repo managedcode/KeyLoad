@@ -22,6 +22,7 @@ internal static class AnalyticsStoreNativeCutFlow
             db.Database.ValidateAnalyticsAggregatePublication(snapshot);
             return Task.CompletedTask;
         });
+        ArgumentNullException.ThrowIfNull(stale);
         await Assert.That(stale.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await P.AggregateAsync(db, D.Root, new([D.Row(D.Alpha, 1, 10, 10, 10, 10)], 1), token);
         var before = db.Database.GetOutboxStatus(D.Root, db.Partition);
@@ -30,6 +31,7 @@ internal static class AnalyticsStoreNativeCutFlow
             Metrics = [new(D.Sum, null!, AnalyticsAggregateKind.Sum)]
         };
         var rejected = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.FromResult(db.Database.CaptureAnalyticsAggregate(D.Root, malformed, token)));
+        ArgumentNullException.ThrowIfNull(rejected);
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Validation);
         await O.EqualAsync(before, db.Database.GetOutboxStatus(D.Root, db.Partition));
         await O.RowsAsync(db, D.Root, [changed], [2], false, token);

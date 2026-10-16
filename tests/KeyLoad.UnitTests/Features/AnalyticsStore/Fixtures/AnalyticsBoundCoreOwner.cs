@@ -32,21 +32,55 @@ internal static class AnalyticsBoundCoreOwner
         CancellationToken token)
     {
         var failures = new List<Exception>();
-        var ledger = new ResourceLifetimeWorkResultRetention(fixture.Database.OperationLimitsOptions);
-        var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
-        await ServerFailureObserver.ObserveAsync(async () =>
+        ResourceLifetimeWorkResultRetention? pending = new(fixture.Database.OperationLimitsOptions);
+        try
         {
-            lease.AttachResultRetention(ledger);
-            var work = new ReadExecutionBudget(fixture.Database.OperationLimitsOptions, fixture.Database.EvaluationClock, token);
-            work.AttachResourceLifetimeBinding(lease);
-            await body(lease, ledger, work);
-        }, failures);
-        await FinishAsync(lease, ledger, failures);
+            var ledger = pending;
+            var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
+            ServerFailureObserver.Observe(() =>
+            {
+                lease.AttachResultRetention(ledger);
+                pending = null;
+            }, failures);
+            if (pending is null)
+            {
+                await ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    var work = new ReadExecutionBudget(fixture.Database.OperationLimitsOptions, fixture.Database.EvaluationClock, token);
+                    work.AttachResourceLifetimeBinding(lease);
+                    await body(lease, ledger, work);
+                }, failures);
+            }
+            await FinishAsync(lease, pending is null ? ledger : null, failures);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        finally
+        {
+            try
+            {
+                pending?.Dispose();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task FinishAsync(NativeRequestWorkLease lease,
-        ResourceLifetimeWorkResultRetention ledger, List<Exception> failures)
+        ResourceLifetimeWorkResultRetention? ledger, List<Exception> failures)
     {
         var primary = failures.FirstOrDefault();
         var cleanup = new List<Exception>();
@@ -58,7 +92,7 @@ internal static class AnalyticsBoundCoreOwner
         }, cleanup);
         if (prepared)
         {
-            ServerFailureObserver.Observe(ledger.Dispose, cleanup);
+            ServerFailureObserver.Observe(() => ledger?.Dispose(), cleanup);
             var cleanupFailure = cleanup.Count switch
             {
                 0 => null,

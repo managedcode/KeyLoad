@@ -25,7 +25,7 @@ internal static class NativeDocumentAdmissionBudgetFlow
                 owner.Database.Database.ValidateSubmissionAdmission(changed, changedRequest, bounded));
             await Assert.That(budget.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             using var cancelled = new CancellationTokenSource();
-            cancelled.Cancel();
+            await cancelled.CancelAsync();
             var original = A.Work(owner.Database, cancelled.Token);
             Assert.ThrowsExactly<OperationCanceledException>(() =>
                 owner.Database.Database.ValidateSubmissionAdmission(changed, changedRequest, original));

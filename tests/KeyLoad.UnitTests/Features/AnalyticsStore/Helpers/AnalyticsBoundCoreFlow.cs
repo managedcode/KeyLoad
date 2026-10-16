@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
@@ -9,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 internal static class AnalyticsBoundCoreFlow
 {
     internal static Task HealthyAsync(CancellationToken token)
-        => AnalyticsBoundCoreOwner.RunAsync((fixture, owner, original) => HealthyAsync(fixture, owner, original), token);
+        => AnalyticsBoundCoreOwner.RunAsync(HealthyAsync, token);
 
     internal static Task HealthyAsync(TestDatabase fixture, NativeRequestWorkOwner owner, CancellationToken token)
         => AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>

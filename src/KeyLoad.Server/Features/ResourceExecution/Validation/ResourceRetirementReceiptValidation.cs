@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
 
@@ -6,6 +5,8 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementReceiptValidation
 {
+    private const long NoAppliedPosition = 0;
+
     internal static void RequireControl(ResourceRetirementControlV1 control, ResourceRetirementRequestV1 request,
         PhysicalShardRecord source)
     {
@@ -30,7 +31,7 @@ internal static class ResourceRetirementReceiptValidation
             : ResourceRetirementIdentity.PhaseCommandId(control.Request, phase, identityOwner);
         if (receipt.Version != ResourceRetirementNativeProtocol.Version || receipt.RetirementId != control.Request.RetirementId
             || receipt.Phase != phase || receipt.CommandId != commandId
-            || receipt.Lifetime != control.Lifetime || receipt.AppliedPosition <= 0 || receipt.IntentDigest != control.IntentDigest
+            || receipt.Lifetime != control.Lifetime || receipt.AppliedPosition <= NoAppliedPosition || receipt.IntentDigest != control.IntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(receipt.PhysicalOwner, owner))
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementNativeProtocol.Unavailable);

@@ -21,6 +21,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
                     fixture.Database.CreateReadWork(token));
                 return Task.CompletedTask;
             });
+            ArgumentNullException.ThrowIfNull(failure);
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Assert.That(failure.Message).IsEqualTo(P.Refusal);
             await Assert.That(published).IsNull();
@@ -51,6 +52,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, exhausted);
                 return Task.CompletedTask;
             });
+            ArgumentNullException.ThrowIfNull(denied);
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(published).IsNull();
         });
@@ -65,6 +67,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, work);
                 return Task.CompletedTask;
             });
+            ArgumentNullException.ThrowIfNull(cancelled);
             await Assert.That(cancelled.CancellationToken).IsEqualTo(cancellation.Token);
             await Assert.That(published).IsNull();
             await Assert.That(token.IsCancellationRequested).IsFalse();
@@ -86,6 +89,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, work);
                 return Task.CompletedTask;
             });
+            ArgumentNullException.ThrowIfNull(denied);
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(published).IsNull();
             await Assert.That(work.ReadBytes).IsGreaterThan(0);
@@ -111,6 +115,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, work);
                 return Task.CompletedTask;
             });
+            ArgumentNullException.ThrowIfNull(expired);
             await Assert.That(expired.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(published).IsNull();
             await Assert.That(token.IsCancellationRequested).IsFalse();

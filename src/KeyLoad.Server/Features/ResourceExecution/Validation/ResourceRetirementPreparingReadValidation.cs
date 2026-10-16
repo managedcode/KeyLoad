@@ -6,11 +6,13 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementPreparingReadValidation
 {
+    private const int NoPageSize = 0;
+
     internal static void RequireRequest(ResourceRetirementNativeRequest outer, ResourceRetirementReadRequestV1 query,
         DatabaseLimits limits)
     {
         if (query.Control is not null || query.Attempt is not null || query.AttemptId != Guid.Empty
-            || query.InventoryId != Guid.Empty || query.PageSize != 0)
+            || query.InventoryId != Guid.Empty || query.PageSize != NoPageSize)
         {
             throw Invalid();
         }

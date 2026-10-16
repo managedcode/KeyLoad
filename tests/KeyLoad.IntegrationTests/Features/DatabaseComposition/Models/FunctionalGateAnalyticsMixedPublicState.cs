@@ -46,7 +46,7 @@ internal sealed record FunctionalGateAnalyticsMixedPublicState(string Store, Ent
         new(P.AppendKind, Stream.StreamSet, Stream.StreamId, P.Created)
     ];
 
-    internal AnalyticsAggregateResult Aggregate(bool present)
+    internal static AnalyticsAggregateResult Aggregate(bool present)
         => present ? new([new(ImmutableDictionary<string, string>.Empty.Add(A.Kind, A.Alpha),
             ImmutableDictionary<string, double>.Empty.Add(A.Count, P.Created).Add(A.Sum, P.Value)
                 .Add(A.Average, P.Value).Add(A.Minimum, P.Value).Add(A.Maximum, P.Value))], P.Created) : new([], P.Empty);

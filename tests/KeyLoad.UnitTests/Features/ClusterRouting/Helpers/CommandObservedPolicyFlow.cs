@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Server;
 using P = KeyLoad.UnitTests.Features.ClusterRouting.CommandObservedPolicyProtocol;
 
@@ -34,30 +33,35 @@ internal static class CommandObservedPolicyFlow
             var payloadBytes = CommandObservedPolicyAssertions.NativePayloadBytes(scenario, initial);
             await CommandObservedPolicyAssertions.LiteralAsync(scenario, request, initial, P.First);
             await scenario.PolicyAsync(repaired: false, token);
-            await CommandObservedPolicyAssertions.UnchangedAsync(scenario, request.RequestId, token, async () =>
+            await CommandObservedPolicyAssertions.UnchangedAsync(scenario, request.RequestId, async () =>
             {
                 gate.Release.TrySetResult();
-                var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => { _ = await original; });
+                var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
+                {
+                    _ = await original;
+                });
                 observed = true;
-                await Assert.That(refused.Code).IsEqualTo(ErrorCode.PermissionDenied);
+                await Assert.That((refused ?? throw new InvalidOperationException(nameof(refused))).Code).IsEqualTo(ErrorCode.PermissionDenied);
                 await Assert.That(refused.Message).IsEqualTo(P.Refusal);
-            });
+            }, token);
             await scenario.PolicyAsync(repaired: true, token);
             await RepairedAsync(scenario, request, initial, token);
             await ConservedAsync(scenario, request, initial, retainedBytes, payloadBytes);
         }
-        catch (Exception failure)
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        await CleanupAsync(scenario, original, observed, failures);
-        if (operation is not null)
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
-            ServerFailureObserver.Observe(operation.Dispose, failures);
+            failures.Add(failure);
         }
-        if (timeout is not null)
+        finally
         {
-            ServerFailureObserver.Observe(timeout.Dispose, failures);
+            await ServerFailureObserver.ObserveAsync(() =>
+                CleanupAsync(scenario, original, observed, failures), failures);
+            DisposeCancellation(operation, failures);
+            DisposeCancellation(timeout, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -92,7 +96,10 @@ internal static class CommandObservedPolicyFlow
         scenario.Observation.ReleaseAll();
         if (original is not null && !observed)
         {
-            await ServerFailureObserver.ObserveAsync(async () => { _ = await original; }, failures);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                _ = await original;
+            }, failures);
         }
         if (scenario.Fixture is not null)
         {
@@ -101,6 +108,22 @@ internal static class CommandObservedPolicyFlow
                 scenario.Fixture.RetainRoots();
             }
             await ServerFailureObserver.ObserveAsync(() => scenario.Fixture.DisposeAsync().AsTask(), failures);
+        }
+    }
+
+    private static void DisposeCancellation(CancellationTokenSource? owner, List<Exception> failures)
+    {
+        try
+        {
+            owner?.Dispose();
+        }
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
         }
     }
 }

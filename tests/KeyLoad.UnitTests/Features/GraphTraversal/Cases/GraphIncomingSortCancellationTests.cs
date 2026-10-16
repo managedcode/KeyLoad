@@ -121,8 +121,8 @@ internal sealed class GraphIncomingSortCancellationTests
                 database.Database.Limits.MaxScanRecords);
             var principal = GraphIncomingReadScope.ReadPrincipal(view, grant,
                 GraphCrossPartitionTestSupport.Root, TimeProvider.System.GetUtcNow());
-            var graph = GraphIncomingReadScope.ReadGraphResource(view, grant, partition,
-                GraphCrossPartitionTestSupport.Graph);
+            var graph = GraphIncomingReadScope.ReadGraphResource(database.Database, view, grant, partition,
+                GraphCrossPartitionTestSupport.Graph, budget);
             return (principal, graph);
         });
 

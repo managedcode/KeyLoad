@@ -3,7 +3,7 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "The complete R666 strict solution attempt completed in 62.51 seconds with two remaining Clustering diagnostics. Both now have reviewed source repairs: native readonly code fix and a value-type preparation owner retaining exact conditional ownership transfer and joined disposal. Genuine generic async lease disposal, original first-context settlement semantics and four new whole-operation regressions are adopted. Native Ready27/27 inspection additionally exposed 433 downstream errors on its recorded earlier source snapshot; this partial semantic inventory is being collected and split into disjoint source repair batches before another strict build. No current complete solution or new runtime acceptance pass.",
+    "implementation": "All 432 errors in the complete recorded Ready27/27 semantic catalogue now have one combined reviewed source repair batch adopted across 264 guarded source entries. Independent review rejected and corrected early retention release, cleanup-error masking and duplicate disposal before adoption. Actual current native semantic verification is running; complete strict SDK build and new runtime gates remain open. Latest strict R666 remains failed with two Clustering diagnostics on its original earlier source. Original 105 task acceptance states unchanged.",
     "strictBuild": {
       "label": "root-r619-hosted-cold-full-release",
       "result": "passed",
@@ -489,6 +489,28 @@
       },
       "focusedRuntimeSelection": "TestResults/root-r667-related-foundation-selection-r1/combined-related-native-r2.config.prepared.json",
       "runtimeStatus": "not_run_pending_current_complete_strict_solution"
+    },
+    "coherentDownstreamRepairR668": {
+      "state": "source_adopted_current_semantic_running_strict_and_runtime_open",
+      "originalSemanticErrors": 432,
+      "sourceEntries": 264,
+      "allSelectedPostHashesVerified": true,
+      "evidence": "TestResults/stage61-native-join/root-r668-source-integration-complete.original.json",
+      "sourceEvidence": [
+        "TestResults/stage61-native-join/root-r668-server-native-operation7.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-server-cluster-doc-graph17.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-server-resource-search60.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-unit-resource-auth46.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-unit-models42-r2.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-unit-routing52-r2.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-native-test-projects40-r2.adoption.original.json"
+      ],
+      "semanticCatalogue": "TestResults/stage61-native-join/root-r668-native-diagnostics-complete.original.json",
+      "nativeSemanticStatus": "running",
+      "strictCompilerStatus": "not_run_on_selected264",
+      "runtimeStatus": "not_run_on_selected264",
+      "focusedSelection": "TestResults/root-r667-related-foundation-selection-r1/combined-related-native-r2.config.prepared.json",
+      "scope": "Source checkpoint only. Existing required format, full strict SDK, native whole-operation/recovery, real Aspire SDK/MCP ONE/RF3, Linux/fault/endurance/coverage/release gates remain mandatory."
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {

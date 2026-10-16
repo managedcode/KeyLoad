@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -14,7 +13,6 @@ internal sealed class ResourceRetirementNativeExchange(PartitionMovementGrainSer
     PartitionHost partition, IOptions<NodeOptions> options, IOptions<DatabaseLimits> limits,
     IOptions<GrainRoutingOptions> routing, ReplicaSiloDiscoveryState local, TimeProvider clock)
 {
-    private const int SelectedVoter = 0;
     private const long UnassignedPolicyEpoch = 0;
 
     internal Task RequireSourceAsync(string principalId, long policyEpoch, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
@@ -24,7 +22,7 @@ internal sealed class ResourceRetirementNativeExchange(PartitionMovementGrainSer
         Guid commandId, ResourceRetirementNativePhaseRequestV1 request, string sourcePrincipalId,
         long sourcePolicyEpoch, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token)
     {
-        var (voter, address) = await ResolveAsync(destination, token).ConfigureAwait(false);
+        var (voter, address) = await ResourceRetirementNativeDestination.ResolveAsync(authority, options, partition, destination, token).ConfigureAwait(false);
         request = request with
         {
             DestinationVoter = voter,
@@ -96,8 +94,8 @@ internal sealed class ResourceRetirementNativeExchange(PartitionMovementGrainSer
         Action<ResourceRetirementNativeRequest, ResourceRetirementNativeReply>? capture = null)
     {
         var (voter, address) = requestedVoter is null
-            ? await ResolveAsync(destination, token).ConfigureAwait(false)
-            : await ResolveAsync(destination, requestedVoter, token).ConfigureAwait(false);
+            ? await ResourceRetirementNativeDestination.ResolveAsync(authority, options, partition, destination, token).ConfigureAwait(false)
+            : await ResourceRetirementNativeDestination.ResolveAsync(authority, options, partition, destination, requestedVoter, token).ConfigureAwait(false);
         query = query with
         {
             DestinationVoter = voter,
@@ -124,29 +122,6 @@ internal sealed class ResourceRetirementNativeExchange(PartitionMovementGrainSer
         }
     }
 
-    private async Task<(string Voter, SiloAddress Address)> ResolveAsync(RegisteredPhysicalOwnerV1 destination,
-        CancellationToken token)
-    {
-        if (!PhysicalOwnerEntryValidation.Valid(destination))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, ResourceRetirementNativeProtocol.InvalidProof);
-        }
-        return await ResolveAsync(destination, destination.Owner.VoterIds[SelectedVoter], token).ConfigureAwait(false);
-    }
-
-    private async Task<(string Voter, SiloAddress Address)> ResolveAsync(RegisteredPhysicalOwnerV1 destination,
-        string voter, CancellationToken token)
-    {
-        if (!PhysicalOwnerEntryValidation.Valid(destination)
-            || !destination.Owner.VoterIds.Contains(voter, StringComparer.Ordinal))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, ResourceRetirementNativeProtocol.InvalidProof);
-        }
-        var control = PhysicalOwnerConfiguredTuples.Control(options.Value, partition.Configuration);
-        var address = await authority.ResolveAsync(control, destination, voter, token).ConfigureAwait(false);
-        return (voter, address);
-    }
-
     private async Task<T> SendAsync<T>(ResourceRetirementNativeRequest request, ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token,
         Action<ResourceRetirementNativeRequest, ResourceRetirementNativeReply>? capture = null) where T : class
     {
@@ -167,7 +142,7 @@ internal sealed class ResourceRetirementNativeExchange(PartitionMovementGrainSer
                 Signature = ResourceRetirementMac.SignRequest(mac, request, limits)
             };
             ResourceRetirementEnvelopeValidation.RequireRequest(mac, request, limits, routing, clock);
-            return await SendAdmittedAsync<T>(mac, request, work, metadata, token, capture).ConfigureAwait(false);
+            return await SendAdmittedAsync<T>(mac, request, work, metadata, capture, token).ConfigureAwait(false);
         }
         finally
         {
@@ -179,8 +154,8 @@ internal sealed class ResourceRetirementNativeExchange(PartitionMovementGrainSer
     }
 
     private async Task<T> SendAdmittedAsync<T>(PartitionMovementMac mac, ResourceRetirementNativeRequest request,
-        ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata, CancellationToken token,
-        Action<ResourceRetirementNativeRequest, ResourceRetirementNativeReply>? capture) where T : class
+        ReadExecutionBudget work, ReadExecutionBudgetReadGrant metadata,
+        Action<ResourceRetirementNativeRequest, ResourceRetirementNativeReply>? capture, CancellationToken token) where T : class
     {
         var address = SiloAddress.FromParsableString(request.DestinationSiloAddress);
         token.ThrowIfCancellationRequested();

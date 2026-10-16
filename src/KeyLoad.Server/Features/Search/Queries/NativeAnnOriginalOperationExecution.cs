@@ -26,7 +26,7 @@ internal static class NativeAnnOriginalOperationExecution
                 NativeAnnMaintenanceAdmission.Request(request, request.CommandId, database.Store.Identity.NodeId);
                 var owner = owningRoot();
                 result = await owner.RunAsync(stages => Run(database, principal, request, originalConfigure,
-                    originalResult, configured, clock, owner, stages, originalSession, token, originalBudget)).ConfigureAwait(false);
+                    originalResult, configured, clock, owner, stages, originalSession, originalBudget, token)).ConfigureAwait(false);
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -40,7 +40,7 @@ internal static class NativeAnnOriginalOperationExecution
     private static (AnnMaintenanceResult? Result, CommitProjectionBatchRequest? Intent) Run(DatabaseEngine database, PrincipalRecord principal,
         AnnMaintenanceRequest request, ProjectionConsumerInfo? originalConfigure, AnnMaintenanceResult? originalResult,
         ServerRuntimeOptions configured, TimeProvider clock, NativeAnnGenerationOwner owner,
-        NativeAnnStageStore stages, NativeAnnMaintenanceSession? originalSession, CancellationToken token, ReadExecutionBudget? originalBudget)
+        NativeAnnStageStore stages, NativeAnnMaintenanceSession? originalSession, ReadExecutionBudget? originalBudget, CancellationToken token)
     {
         var failures = new List<Exception>();
         AnnMaintenanceResult? result = null;

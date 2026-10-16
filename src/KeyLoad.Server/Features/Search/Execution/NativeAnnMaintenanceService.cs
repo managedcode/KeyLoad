@@ -71,7 +71,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
 
     public Task<AnnMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, CancellationToken cancellationToken)
-        => ExecuteCoreAsync(principal, request, cancellationToken, null);
+        => ExecuteCoreAsync(principal, request, null, cancellationToken);
 
     public async Task<AnnMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, DateTimeOffset requestExpiry,
@@ -86,13 +86,13 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         var work = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, original.Cancellation);
         work.ConstrainLifetime(requestExpiry);
         work.AttachResourceLifetimeBinding(original);
-        var result = await ExecuteCoreAsync(principal, request, cancellationToken, work).ConfigureAwait(false);
+        var result = await ExecuteCoreAsync(principal, request, work, cancellationToken).ConfigureAwait(false);
         work.CheckResult(result);
         return result;
     }
 
     private async Task<AnnMaintenanceCapabilityResult> ExecuteCoreAsync(PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget)
+        AnnMaintenanceCapabilityRequest request, ReadExecutionBudget? originalBudget, CancellationToken token)
     {
         NativeAnnOriginalCapabilityExecution.Require(request);
         if (request.Kind is AnnMaintenanceCapabilityKind.AdmitOriginal or AnnMaintenanceCapabilityKind.SettleOriginalResult)
@@ -113,7 +113,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         }
         if (request.Kind == AnnMaintenanceCapabilityKind.Begin)
         {
-            return await state.BeginAsync(database, principal, request, configured, clock, token, originalBudget).ConfigureAwait(false);
+            return await state.BeginAsync(database, principal, request, configured, clock, originalBudget, token).ConfigureAwait(false);
         }
         var stage = state.RequireStage(principal.Id, request);
         return await stage.Owner.RunAsync(stages => NativeAnnMaintenanceStage.Execute(database, stage.Owner,

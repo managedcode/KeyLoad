@@ -1,7 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
 using P = KeyLoad.UnitTests.Features.ClusterRouting.CommandObservedPolicyProtocol;
 
@@ -68,7 +67,7 @@ internal static class CommandObservedPolicyAssertions
             ?? throw new InvalidOperationException(P.Missing);
 
     internal static async Task UnchangedAsync(CommandObservedPolicyScenario scenario,
-        Guid commandId, CancellationToken token, Func<Task> execute)
+        Guid commandId, Func<Task> execute, CancellationToken token)
     {
         var fixture = scenario.Fixture;
         await fixture.Database.Coordinator.ReadBarrierAsync(token);

@@ -39,7 +39,7 @@ internal static class ResourceLifetimeLedgerNativeChild
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var completion = lease.CompleteAsync(original, null);
-            await Assert.That(completion).IsSameReferenceAs(lease.Settlement);
+            await Assert.That(ReferenceEquals(completion, lease.Settlement)).IsTrue();
             var report = await completion;
             await Assert.That(await lease.Settlement).IsSameReferenceAs(report);
             if (original is null)

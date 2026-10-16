@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.AnalyticsStore;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
@@ -104,10 +103,7 @@ internal static class UserAnalyticsDerivedProcessTrial
                     () => StoragePublicationRecoveryTests.DeleteTrialAsync(root, deadline.Token), failures);
             }
         }
-        if (primary is not null)
-        {
-            primary.Data[RetainedRoot] = root;
-        }
+        primary?.Data[RetainedRoot] = root;
 
         foreach (var failure in failures)
         {

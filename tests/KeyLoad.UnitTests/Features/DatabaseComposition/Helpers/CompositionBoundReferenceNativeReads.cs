@@ -34,10 +34,10 @@ internal static class CompositionBoundReferenceNativeReads
             var expected = new EdgeRecord(id, state.From, state.To, D.Label, D.Attributes, 1);
             var raw = owner.Store.Read(view => view.GetRecord<EdgeRecord>(KeySpace.Partition("edge", owner.Source.Partition, graph, id)));
             await A.EqualAsync(expected, raw);
-            await A.EqualAsync(new GraphTraversal([state.From, state.To], [expected]),
+            await A.EqualAsync(new global::KeyLoad.GraphTraversal([state.From, state.To], [expected]),
                 owner.Database.Traverse(D.Root, owner.Source.Partition, graph, state.From, cancellationToken: token));
         }
-        await A.EqualAsync(new GraphTraversal([state.From], []),
+        await A.EqualAsync(new global::KeyLoad.GraphTraversal([state.From], []),
             owner.Database.Traverse(D.Root, owner.Source.Partition, D.EmptyGraph, state.From, cancellationToken: token));
         var plainFrom = state.From with
         {

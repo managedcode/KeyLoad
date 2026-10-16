@@ -78,7 +78,7 @@ internal static class NativeRequestWorkOwnerCases
             }
             finally
             {
-                lease.Dispose();
+                await lease.DisposeAsync();
             }
         }, () => FinishDrainAsync(owner, firstDrain, cancellationRegistration));
 
@@ -120,7 +120,7 @@ internal static class NativeRequestWorkOwnerCases
             }
             finally
             {
-                lease.Dispose();
+                await lease.DisposeAsync();
             }
         }, () => FinishCallbackFailureAsync(
             owner, drain, disposal, registration, drainFailures, disposalFailures));

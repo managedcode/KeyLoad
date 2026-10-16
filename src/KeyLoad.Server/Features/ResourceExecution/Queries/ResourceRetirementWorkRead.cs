@@ -10,7 +10,8 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 /// <summary>Joins only the original fence-owned work, outside all storage and replication gates.</summary>
 internal static class ResourceRetirementWorkRead
 {
-    private static readonly byte[] SnapshotDomain = Encoding.ASCII.GetBytes("keyload.retirement.work-snapshot.v1\0");
+    private const string SnapshotDomainPurpose = "keyload.retirement.work-snapshot.v1\0";
+    private static readonly byte[] SnapshotDomain = Encoding.ASCII.GetBytes(SnapshotDomainPurpose);
     private const int Empty = 0;
 
     internal static Task<ResourceRetirementReadReplyV1> ExecuteAsync(OrleansNode node, PartitionHost partition,

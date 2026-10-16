@@ -67,8 +67,7 @@ internal static class McpToolDescriptions
     private const string AdminPartitionPlacementBind = "Bind one atomic partition to the current physical shard using the expected placement directory revision; requires persisted cluster administrator authority.";
     private const string AdminPartitionPlacementRead = "Read one atomic partition placement and the committed default-shard identity from one authorized view; requires persisted cluster administrator authority.";
 
-    internal static string For(string name) => AnalyticsStoreMcpDescriptions.Find(name) ?? TenantPlacementMcpDescriptions.Find(name) ?? McpEventFeedDescriptions.Find(name)
-        ?? global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphMcpDescriptions.Find(name) ?? name switch
+    internal static string For(string name) => ModelDescription(name) ?? name switch
         {
             McpToolNames.DocumentsGet => DocumentsGet,
             McpToolNames.DocumentsReadFollower => DocumentsReadFollower,
@@ -132,6 +131,10 @@ internal static class McpToolDescriptions
                 => AdminDashboardMcpCatalog.Description(name),
             _ => BlobMcpDescriptions.For(name)
         };
+
+    private static string? ModelDescription(string name)
+        => AnalyticsStoreMcpDescriptions.Find(name) ?? TenantPlacementMcpDescriptions.Find(name) ?? McpEventFeedDescriptions.Find(name)
+            ?? global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphMcpDescriptions.Find(name);
 
     private static string AdminDescription(string name) => name switch
     {

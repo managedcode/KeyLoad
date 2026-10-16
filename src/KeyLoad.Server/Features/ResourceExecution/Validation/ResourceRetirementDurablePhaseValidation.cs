@@ -5,11 +5,13 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceRetirementDurablePhaseValidation
 {
+    private const int InitialOrdinal = 0;
+
     internal static void RequirePrepare(ResourceRetirementNativeRequest outer, ResourceRetirementPhaseCommandV1 phase,
         DatabaseLimits limits)
     {
         var body = NativeSerialization.Deserialize<ResourceRetirementPrepareAttemptBodyV1>(phase.Body.Span);
-        if (body?.Context is null || body.AttemptId == Guid.Empty || body.ExpectedOrdinal < 0)
+        if (body?.Context is null || body.AttemptId == Guid.Empty || body.ExpectedOrdinal < InitialOrdinal)
         {
             throw Invalid();
         }

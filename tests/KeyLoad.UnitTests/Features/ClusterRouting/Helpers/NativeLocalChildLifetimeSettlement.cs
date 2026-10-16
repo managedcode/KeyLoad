@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -20,7 +19,7 @@ internal static class NativeLocalChildLifetimeSettlement
         await NativeLocalChildLifetimeExecution.AwaitReadyAsync(session, producer, operation.Token);
         var preparing = operation.Parent.PrepareCompletionAsync();
         var completion = operation.Parent.CompleteAsync(null, null);
-        await Assert.That(completion).IsSameReferenceAs(operation.Parent.Settlement);
+        await Assert.That<object>(completion).IsSameReferenceAs(operation.Parent.Settlement);
         await Assert.That(preparing.IsCompleted).IsFalse();
         await Assert.That(completion.IsCompleted).IsFalse();
         await Assert.That(producer.IsCompleted).IsFalse();
@@ -30,11 +29,11 @@ internal static class NativeLocalChildLifetimeSettlement
         await Assert.That(completion.IsCompleted).IsFalse();
         await Assert.That(child.Settlement.IsCompleted).IsFalse();
         var childOutcome = await child.CompleteAsync(null, null);
-        await Assert.That(child.Settlement).IsSameReferenceAs(reservation.Settlement);
+        await Assert.That<object>(child.Settlement).IsSameReferenceAs(reservation.Settlement);
         await Assert.That(completion.IsCompleted).IsFalse();
         var dispatch = reservation.CompleteDispatchAsync(null, []);
         var report = await dispatch;
-        await Assert.That(reservation.CompleteDispatchAsync(null, [])).IsSameReferenceAs(dispatch);
+        await Assert.That<object>(reservation.CompleteDispatchAsync(null, [])).IsSameReferenceAs(dispatch);
         await Assert.That(report.ChildOutcome).IsSameReferenceAs(childOutcome);
         await Assert.That(report.OriginalFailure).IsNull();
         await Assert.That(report.CleanupFailures.IsEmpty).IsTrue();

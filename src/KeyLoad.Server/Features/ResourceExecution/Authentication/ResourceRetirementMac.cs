@@ -8,9 +8,10 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 /// <summary>Borrows the existing native peer MAC owner under retirement-only request and reply domains.</summary>
 internal static class ResourceRetirementMac
 {
+    private const char SignaturePlaceholderCharacter = '0';
     private static readonly byte[] RequestDomain = Encoding.ASCII.GetBytes(ResourceRetirementNativeProtocol.RequestPurpose);
     private static readonly byte[] ReplyDomain = Encoding.ASCII.GetBytes(ResourceRetirementNativeProtocol.ReplyPurpose);
-    private static readonly string SignatureWidth = new('0', ReplicaTransportProtocol.HashHexCharacters);
+    private static readonly string SignatureWidth = new(SignaturePlaceholderCharacter, ReplicaTransportProtocol.HashHexCharacters);
 
     internal static string SignRequest(PartitionMovementMac mac, ResourceRetirementNativeRequest request,
         IOptions<DatabaseLimits> limits)

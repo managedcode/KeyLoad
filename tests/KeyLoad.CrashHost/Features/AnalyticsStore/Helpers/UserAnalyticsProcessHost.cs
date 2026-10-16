@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Replication;
 using KeyLoad.Security;
@@ -13,16 +14,43 @@ internal static class UserAnalyticsProcessHost
 {
     internal static async Task RunAsync(string root, Func<PartitionHost, ServerRuntimeOptions, Task> body)
     {
-        var options = P.Options(root);
-        options.Validate();
         var registrations = new ServiceCollection().AddRuntimeOptions(new ConfigurationBuilder().Build());
-        registrations.AddSingleton(CrashExecutionOptions.Node(options));
-        var services = registrations.BuildServiceProvider();
-        var logging = LoggerFactory.Create(_ => { });
+        registrations.AddSingleton(UserAnalyticsProcessOptions.Create(root));
+        var failures = new List<Exception>();
+        try
+        {
+            using var logging = LoggerFactory.Create(_ => { });
+            try
+            {
+                using var services = registrations.BuildServiceProvider();
+                await ServerFailureObserver.ObserveAsync(() => RunHostAsync(services, logging, body, failures), failures);
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task RunHostAsync(IServiceProvider services, ILoggerFactory logging,
+        Func<PartitionHost, ServerRuntimeOptions, Task> body, List<Exception> failures)
+    {
         var runtime = services.GetRequiredService<ServerRuntimeOptions>();
         var ownership = new PartitionHostOwnership();
         PartitionHost? host = null;
-        var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             host = await PartitionHost.OpenAsync(runtime, new AuthorizationPolicy(),
@@ -34,14 +62,9 @@ internal static class UserAnalyticsProcessHost
         {
             await ServerFailureObserver.ObserveAsync(() => host.DisposeAsync().AsTask(), failures);
         }
-
         if (!ownership.CanReleaseRoot)
         {
             failures.Add(new IOException(P.Invalid));
         }
-
-        ServerFailureObserver.Observe(services.Dispose, failures);
-        ServerFailureObserver.Observe(logging.Dispose, failures);
-        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

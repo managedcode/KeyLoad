@@ -27,12 +27,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     } = null!;
 
     private void RequireTransferVerifierClosed()
-    {
-        if (TransferVerification is { IsDisposed: false })
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, Core.Features.Messaging.RemoteTransferPeerProtocol.Unavailable);
-        }
-    }
+        => PartitionHostDisposal.RequireTransferVerifierClosed(TransferVerification);
 
     private PartitionHost(PartitionHostOwnership ownership) => this.ownership = ownership;
 

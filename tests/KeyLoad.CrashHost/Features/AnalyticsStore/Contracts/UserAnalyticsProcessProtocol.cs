@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Server;
 
 namespace KeyLoad.CrashHost.Features.AnalyticsStore;
 
@@ -28,13 +27,6 @@ internal static class UserAnalyticsProcessProtocol
     internal const int ArgumentCount = 2;
     internal const int RootArgument = 0;
     internal const int ModeArgument = 1;
-    private const string FirstVoter = "https://127.0.0.1:5511";
-    private const string SecondVoter = "https://127.0.0.1:5512";
-    private const string ThirdVoter = "https://127.0.0.1:5513";
-    private const int TestSecretBytes = 32;
-    private const byte TestKeyByte = 42;
-    private const string IncarnationText = "b48b95ce-971b-4de0-bbca-4823deec6db3";
-    private const string ShardText = "6088f23d-d45f-4d7b-8a5b-3e201a979ec9";
     internal const int CatalogVersion = 1;
     internal const long Absent = 0;
     internal const long Created = 1;
@@ -51,22 +43,8 @@ internal static class UserAnalyticsProcessProtocol
     private const double InitialAverage = 15d;
     private const double UpdatedSum = 60d;
     private const double UpdatedAverage = 30d;
-    private static readonly Guid Incarnation = new(IncarnationText);
-    private static readonly Guid Shard = new(ShardText);
     internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, First);
     internal static readonly DateTimeOffset Epoch = DateTimeOffset.UnixEpoch.AddDays(BusinessEpochDays);
-
-    internal static NodeOptions Options(string root) => new()
-    {
-        DataDirectory = Path.Combine(root, PhysicalDirectory),
-        PublicEndpoint = FirstVoter,
-        Peers = [FirstVoter, SecondVoter, ThirdVoter],
-        Incarnation = Incarnation,
-        PhysicalShardId = Shard,
-        SigningKey = Convert.ToBase64String(Enumerable.Repeat(TestKeyByte, TestSecretBytes).ToArray()),
-        PeerSecret = Convert.ToBase64String(Enumerable.Repeat(TestKeyByte, TestSecretBytes).ToArray()),
-        AdminKey = CrashFixtureValues.Credential
-    };
 
     internal static AnalyticsEventData Event(string id, double amount)
         => new(id, Epoch, ImmutableDictionary<string, string>.Empty.Add(Region, North),

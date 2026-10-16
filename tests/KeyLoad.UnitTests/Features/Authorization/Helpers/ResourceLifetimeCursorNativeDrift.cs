@@ -1,7 +1,6 @@
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 

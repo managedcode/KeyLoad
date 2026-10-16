@@ -43,5 +43,5 @@ internal static class NativeDropPageFailureImages
     }
 
     private static string[] Filter(string[] rows, HashSet<string> excluded)
-        => rows.Where(row => !excluded.Contains(row[..row.IndexOf(':')])).ToArray();
+        => rows.Where(row => !excluded.Contains(row[..row.IndexOf(':', StringComparison.Ordinal)])).ToArray();
 }

@@ -1,6 +1,6 @@
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.UnitTests.Features.ClusterRouting;
-using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementBarrierData;
+using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementAttemptAdmissionProtocol;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 

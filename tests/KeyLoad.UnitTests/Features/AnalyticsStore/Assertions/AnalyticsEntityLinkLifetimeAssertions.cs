@@ -2,7 +2,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.AnalyticsStore;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;

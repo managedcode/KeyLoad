@@ -10,13 +10,13 @@ internal static class ControlledPartitionMovementNativeApplicationFactory
         NativeLocalhostClusteringOptions localhostClustering, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
         IDatabaseAuthenticationExecutionObserver? authenticationObserver,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory,
-        CancellationToken startupCancellation)
+        IGrainRequestPhaseObserver? phaseObserver, CancellationToken startupCancellation)
     {
         var nativeObservation = new ControlledPartitionMovementNativeObservationWitness();
         var application = await ServerConfiguration.BuildAsync(arguments, sealedObserver: sealedObserver,
             localhostClustering: localhostClustering, authenticationExecutionObserver: authenticationObserver,
             partitionMovementNativeObserver: nativeObservation, lifecycleParticipantFactory: lifecycleParticipantFactory,
-            startupCancellation: startupCancellation).ConfigureAwait(false);
+            phaseObserver: phaseObserver, startupCancellation: startupCancellation).ConfigureAwait(false);
         try
         {
             return new(application, nativeObservation);

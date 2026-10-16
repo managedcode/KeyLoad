@@ -53,7 +53,7 @@ internal static class NativeDropPageRecoverySetup
             NativeSerialization.Serialize(request), token).ConfigureAwait(false);
         await Assert.That(NativeDropRuntimeAssertions.Value<CommitReceipt>(result).CommandId).IsEqualTo(id);
         var row = state.Profile.Source.Database.GetDocument(PartitionStoreProtocol.AdministratorId,
-            new(NativeDropRuntimeProtocol.Partition, NativeDropPageRecoveryData.OtherTable, NativeDropPageRecoveryData.OtherRow));
+            new(NativeDropRuntimeProtocol.Partition, NativeDropPageRecoveryData.OtherTable, NativeDropPageRecoveryData.OtherRow), cancellationToken: token);
         await Assert.That(row!.Json).IsEqualTo(NativeDropPageRecoveryData.OtherJson);
     }
 }

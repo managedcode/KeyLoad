@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Core;
 using KeyLoad.Server;
 using P = KeyLoad.CrashHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
 
@@ -7,7 +6,7 @@ namespace KeyLoad.CrashHost.Features.AnalyticsStore;
 
 internal static class UserAnalyticsProcessState
 {
-    private const long EmptyLength = 0;
+    private const int EmptyLength = 0;
     private const int MaximumRecords = 256;
     private const int MaximumEvidenceBytes = 1_048_576;
     private const string Separator = ":";

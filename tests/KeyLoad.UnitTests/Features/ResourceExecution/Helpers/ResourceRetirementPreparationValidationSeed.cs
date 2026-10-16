@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ResourceExecution;
 using KeyLoad.Storage;
@@ -24,7 +25,7 @@ internal static class ResourceRetirementPreparationValidationSeed
             ?? throw new InvalidOperationException(Invalid);
         var lifetime = source.Store.Read(view => ResourceLifetimeCatalog.Read(view, partition.TenantId,
             partition.DatabaseId, definition.Name, definition)) ?? throw new InvalidOperationException(Invalid);
-        var request = new ResourceRetirementRequestV1(Version, RetirementId, partition.TenantId,
+        var request = new ResourceRetirementRequestV1(ResourceRetirementPreparationValidationData.Version, RetirementId, partition.TenantId,
             partition.DatabaseId, definition.Name, lifetime.Incarnation);
         ResourceRetirementPreparationStateV1? preparation = null;
         for (var index = Zero; index < Voters; index++)
@@ -65,7 +66,7 @@ internal static class ResourceRetirementPreparationValidationSeed
         ReplicatedOperation? originalOperation = null)
     {
         var index = node.Journal.Log.State.LastIndex + One;
-        var command = new ResourceRetirementPhaseCommandV1(Version, request.RetirementId, phase, NativeSerialization.Serialize(body));
+        var command = new ResourceRetirementPhaseCommandV1(ResourceRetirementPreparationValidationData.Version, request.RetirementId, phase, NativeSerialization.Serialize(body));
         var original = originalOperation ?? node.Database.CreateResourceRetirementOperation(commandId, PhysicalShardCatalogFixture.RootPrincipalId,
             node.Database.EvaluationClock.GetUtcNow(), command);
         var outcome = node.Journal.Submit(original, token);

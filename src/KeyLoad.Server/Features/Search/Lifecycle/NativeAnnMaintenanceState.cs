@@ -79,7 +79,7 @@ internal sealed class NativeAnnMaintenanceState(Func<NativeAnnGenerationOwner> c
 
     internal async Task<AnnMaintenanceCapabilityResult> BeginAsync(DatabaseEngine database, PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock,
-        CancellationToken token, ReadExecutionBudget? originalBudget)
+        ReadExecutionBudget? originalBudget, CancellationToken token)
     {
         lock (gate)
         {
@@ -171,10 +171,7 @@ internal sealed class NativeAnnMaintenanceState(Func<NativeAnnGenerationOwner> c
 
     private void RequireOpen()
     {
-        if (closed)
-        {
-            throw new ObjectDisposedException(typeof(NativeAnnMaintenanceService).FullName);
-        }
+        ObjectDisposedException.ThrowIf(closed, typeof(NativeAnnMaintenanceService));
     }
 
     private void ClearSession()
