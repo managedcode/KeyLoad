@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using KeyLoad.Clustering;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
@@ -19,6 +20,7 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
     private readonly RequestCqrsLifecycleEvidence lifecycle = new();
     private RequestCqrsProbeFixture? controls;
     private RequestCqrsRf3Wave? wave;
+    private LocalRf3ImageTestSession? localImageSession;
     private RequestCqrsRf3Callers? administrator;
     private RequestCqrsRf3Callers? caller;
     private RequestCqrsPhaseFaultIdentity? identity;
@@ -52,7 +54,8 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
         await RequestCqrsPhaseFaultCleanup.RunAsync(scenario.root, scenario.rootOwned, scenario.controls,
             scenario.wave, scenario.waveStartupAttempted, scenario.caller, scenario.administrator, scenario.discovery,
             scenario.callerCancellation, scenario.scenarioDeadline, scenario.sdkCall, scenario.mcpCall,
-            scenario.armId, scenario.failures)
+            scenario.armId, scenario.failures, localImageSession: scenario.localImageSession,
+            localImageDataRoot: scenario.dataRoot)
             .ConfigureAwait(false);
         scenario.lifecycle.RecordTerminal();
         scenario.lifecycle.ThrowWithContext(scenario.failures);
@@ -77,11 +80,13 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
         lifecycle.SetStage(RequestCqrsLifecycleStage.FaultProfile);
         var profile = (await NodeEpochRf3Profile.CreatePriorAsync(dataRoot, cancellationToken).ConfigureAwait(false)).Profile;
         lifecycle.SetStage(RequestCqrsLifecycleStage.FaultImages);
-        var images = await RequestCqrsRf3ImageProof.ReadAsync(cancellationToken).ConfigureAwait(false);
+        localImageSession = await LocalRf3ImageTestSession.StartIfSelectedAsync(cancellationToken).ConfigureAwait(false);
+        var images = await RequestCqrsRf3ImageProof.ReadAsync(cancellationToken, localImageSession?.Selection).ConfigureAwait(false);
         controls = RequestCqrsProbeFixture.Create(dataRoot, Guid.NewGuid());
         waveStartupAttempted = true;
         wave = await RequestCqrsRf3Wave.StartProbedAsync(dataRoot,
-            RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current), controls, cancellationToken, lifecycle)
+            RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current), controls, cancellationToken, lifecycle,
+            selection: localImageSession?.Selection)
             .ConfigureAwait(false);
         lifecycle.SetWaveToken(cancellationToken);
         var activeWave = wave ?? throw new InvalidOperationException(MissingWave);

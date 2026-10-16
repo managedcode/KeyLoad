@@ -1,6 +1,6 @@
 using KeyLoad.Query;
-using P = KeyLoad.UnitTests.Features.QueryExecution.SchemaVisibleProjectionNativeProtocol;
 using J = KeyLoad.UnitTests.Features.QueryExecution.SqlEventReferenceJoinFixture;
+using P = KeyLoad.UnitTests.Features.QueryExecution.SchemaVisibleProjectionNativeProtocol;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

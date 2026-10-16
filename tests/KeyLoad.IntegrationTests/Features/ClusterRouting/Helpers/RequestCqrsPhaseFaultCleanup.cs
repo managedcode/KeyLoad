@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -12,7 +13,8 @@ internal static class RequestCqrsPhaseFaultCleanup
         RequestCqrsRf3Callers? administrator,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, CancellationTokenSource? callerCancellation,
         CancellationTokenSource? scenarioDeadline, Task? sdkCall,
-        Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, List<Exception> failures, IReadOnlyList<Guid>? additionalArms = null)
+        Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, List<Exception> failures, IReadOnlyList<Guid>? additionalArms = null,
+        LocalRf3ImageTestSession? localImageSession = null, string localImageDataRoot = "")
     {
         var cleanup = new List<Exception>();
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
@@ -33,6 +35,11 @@ internal static class RequestCqrsPhaseFaultCleanup
         await DisposeControlsAsync(controls, waveStopped, cleanup).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => callerCancellation?.Dispose(), cleanup);
         ServerFailureObserver.Observe(() => scenarioDeadline?.Dispose(), cleanup);
+        if (localImageSession is not null)
+        {
+            await ClusterFixtureLocalImageLifecycle.JoinAsync(localImageSession, localImageDataRoot,
+                waveStopped, !waveStartupAttempted, cleanup).ConfigureAwait(false);
+        }
         if (rootOwned && waveStopped && cleanup.Count == 0)
         {
             ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup);

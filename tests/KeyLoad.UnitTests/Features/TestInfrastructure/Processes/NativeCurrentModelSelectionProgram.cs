@@ -17,7 +17,8 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
               "/*/*/RemotePartitionQueryRf3Tests/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart",
               "/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands",
-              "/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands"
+              "/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands",
+              "/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -25,6 +26,17 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              currentModelFilters[14] + ' ',
+              currentModelFilters[14] + '*',
+              currentModelFilters[14].replace('PhysicalOwnerRegistrationRf3Tests|', 'PhysicalOwnerRegistrationRf3Tests*|'),
+              currentModelFilters[14].replace('PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests',
+                'RemotePartitionQueryRf3Tests|PhysicalOwnerRegistrationRf3Tests'),
+              currentModelFilters[14].replace('PhysicalOwnerRegistrationRf3Tests|', ''),
+              currentModelFilters[14].replace(')/*', '|OtherCase)/*'),
+              currentModelFilters[14].replace(')/*', ')/OtherMethod'),
+              '/*/*/PhysicalOwnerRegistrationRf3Tests/*',
+              '/*/*/RequestCqrsPhaseFaultTests/*',
+              '/*/*/RequestCqrsRf3FollowerRestartTests/*',
               '/*/*/FunctionalDatabaseColdReopenTests/*',
               '/*/*/FunctionalDatabaseColdReopenTests*/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands',
               currentModelFilters[12] + '*',

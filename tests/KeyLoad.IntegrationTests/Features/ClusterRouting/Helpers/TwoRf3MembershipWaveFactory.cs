@@ -61,7 +61,15 @@ internal static class TwoRf3MembershipWaveFactory
     internal static Task<TwoRf3MembershipWave> StartRemoteQueriesAsync(CancellationToken cancellationToken)
         => TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true), cancellationToken);
 
-    internal static Task<TwoRf3MembershipWave> StartProbedRemoteQueriesAsync(CancellationToken token)
-        => TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true), token);
+    internal static async Task<TwoRf3MembershipWave> StartProbedRemoteQueriesAsync(CancellationToken token)
+    {
+        var preparation = await LocalRf3ImageTestSession.StartIfSelectedAsync(token).ConfigureAwait(false);
+        var selection = preparation?.Selection ?? LocalRf3ImageSelection.Read();
+        var wave = new TwoRf3MembershipWave(selection, register: true, remote: true, query: true, probe: true)
+        {
+            localImagePreparation = preparation
+        };
+        return await TwoRf3MembershipWave.StartOwnedAsync(wave, token).ConfigureAwait(false);
+    }
 
 }

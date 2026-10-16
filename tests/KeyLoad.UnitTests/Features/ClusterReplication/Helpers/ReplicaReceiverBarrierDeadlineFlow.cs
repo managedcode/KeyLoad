@@ -2,8 +2,8 @@ using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
 using A = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineAssertions;
+using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
 using R = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaReceiverBarrierDeadlineAssertions;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;

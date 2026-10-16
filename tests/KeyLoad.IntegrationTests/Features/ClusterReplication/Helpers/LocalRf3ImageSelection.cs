@@ -83,6 +83,7 @@ internal static class LocalRf3ImageSelection
     private const string RemotePartitionQueryFilterArgument = "--KeyLoadTests:Filter=/*/*/RemotePartitionQueryRf3Tests/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart";
     private const string FunctionalSingleColdFilterArgument = "--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands";
     private const string FunctionalClusterColdFilterArgument = "--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands";
+    private const string NativeImageEnrollmentFilterArgument = "--KeyLoadTests:Filter=/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -138,7 +139,7 @@ internal static class LocalRf3ImageSelection
                 or AspireFaultFilterArgument or AcceptedRestartCancellationFilterArgument or OriginalRetireAspireFilterArgument
                 or FunctionalSingleFilterArgument or FunctionalClusterFilterArgument or PartitionQueryValidationFilterArgument
                 or CrossTenantWholeFlowFilterArgument
-                or RemotePartitionQueryFilterArgument or FunctionalSingleColdFilterArgument or FunctionalClusterColdFilterArgument
+                or RemotePartitionQueryFilterArgument or FunctionalSingleColdFilterArgument or FunctionalClusterColdFilterArgument or NativeImageEnrollmentFilterArgument
                 or CurrentGraphSearchPathPolicyFilterArgument or CurrentSampleChunkCorrectionFilterArgument or CurrentSqlGraphPublicFilterArgument or CurrentSqlGraphSamplePublicFilterArgument or CurrentGraphSamplePublicFilterArgument or CurrentFoundationRf3FilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()

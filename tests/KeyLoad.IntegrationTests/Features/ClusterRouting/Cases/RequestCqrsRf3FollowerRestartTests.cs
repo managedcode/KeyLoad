@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -13,16 +14,30 @@ internal sealed class RequestCqrsRf3FollowerRestartTests
         using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var dataRoot = CreatePrivateRoot();
-        var (profile, _) = await NodeEpochRf3Profile.CreatePriorAsync(dataRoot, deadline.Token).ConfigureAwait(false);
-        var images = await RequestCqrsRf3ImageProof.ReadAsync(deadline.Token).ConfigureAwait(false);
-        var currentReference = new Dictionary<string, string>(StringComparer.Ordinal)
+        var failures = new List<Exception>();
+        LocalRf3ImageTestSession? localImageSession = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            [RequestCqrsRf3Protocol.Node1] = images.Current,
-            [RequestCqrsRf3Protocol.Node2] = images.Current,
-            [RequestCqrsRf3Protocol.Node3] = images.Current
-        };
-        var run = new RequestCqrsRf3FollowerRun(dataRoot, profile, deadline.Token);
-        await run.ExecuteAsync(currentReference).ConfigureAwait(false);
+            var (profile, _) = await NodeEpochRf3Profile.CreatePriorAsync(dataRoot, deadline.Token).ConfigureAwait(false);
+            localImageSession = await LocalRf3ImageTestSession.StartIfSelectedAsync(deadline.Token).ConfigureAwait(false);
+            var images = await RequestCqrsRf3ImageProof.ReadAsync(deadline.Token, localImageSession?.Selection).ConfigureAwait(false);
+            var currentReference = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                [RequestCqrsRf3Protocol.Node1] = images.Current,
+                [RequestCqrsRf3Protocol.Node2] = images.Current,
+                [RequestCqrsRf3Protocol.Node3] = images.Current
+            };
+            var run = new RequestCqrsRf3FollowerRun(dataRoot, profile, deadline.Token);
+            var preparation = localImageSession;
+            localImageSession = null;
+            await run.ExecuteAsync(currentReference, preparation).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        if (localImageSession is { } preparationBeforeTransfer)
+        {
+            await ClusterFixtureLocalImageLifecycle.JoinAsync(preparationBeforeTransfer, dataRoot,
+                stopped: false, neverBuilt: true, failures).ConfigureAwait(false);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
         Directory.Delete(dataRoot, recursive: true);
     }
 
@@ -42,9 +57,9 @@ internal sealed class RequestCqrsRf3FollowerRestartTests
 internal sealed class RequestCqrsRf3FollowerRun(string dataRoot, NodeEpochRf3Profile profile,
     CancellationToken cancellationToken)
 {
-    internal Task ExecuteAsync(IReadOnlyDictionary<string, string> images)
+    internal Task ExecuteAsync(IReadOnlyDictionary<string, string> images, LocalRf3ImageTestSession? localImageSession)
         => RequestCqrsRf3Epoch7WaveRunner.RunAsync(dataRoot, images, false, true,
-            RunInWaveAsync, cancellationToken);
+            RunInWaveAsync, cancellationToken, localImageSession: localImageSession);
 
     private async Task RunInWaveAsync(RequestCqrsRf3Wave wave)
     {

@@ -43,3 +43,48 @@ REQ/AC-RF3-CURRENT-001 preserves every preceding selector and additionally admit
 `/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests)/*`
 
 The same Node selector, fixture environment restoration and preparation-model lifecycle controls cover every new selection. They retain the original six classes and combined filter. New combined-order refusal swaps its actual first two classes; no UID is authored or inferred. AppHost model controls preserve the native nonempty-filter boundary and test mixed-identity refusal before resources, unique image prerequisite, runner dependency, native50 and joined model disposal. Actual native case census, rebuilt DLL/PDB identities, source-bound image creation, SDK/MCP RF3 operations, cold recovery and original cleanup remain OPEN until genuine Root execution; Comparison checks run only in Linux GitHub Actions. Functional coverage remains the original closed eleven-case cohort; these selectors add no coverage contributors or performance qualification.
+
+
+## Native image ownership for four foundation fixtures
+
+REQ/AC-RF3-IMAGE-OWNERSHIP-001 requires PhysicalOwnerRegistrationRf3Tests,
+RemotePartitionQueryRf3Tests, RequestCqrsPhaseFaultTests and
+RequestCqrsRf3FollowerRestartTests to use the existing
+LocalRf3ImageTestSession before their original image proof and native startup.
+The same verified Selection and original preparation owner flow into each
+existing wave. Unselected GitHub receipt admission stays strict. Mixed identity,
+unknown image or failed preparation cannot acquire database resources.
+
+REQ/AC-RF3-IMAGE-OWNERSHIP-002 requires original caller/producer settlement,
+joined AppHost shutdown and storage-lock checks before local image disposal.
+Transfer ownership once; join a preparation which fails before transfer through
+the existing never-built cleanup. Preserve original primary and cleanup failures,
+all physical groups, roots and unknown-ownership retention. The existing restart,
+cancellation, persisted permissions, state and complete receipt assertions remain.
+
+REQ/AC-RF3-IMAGE-OWNERSHIP-003 admits one additional exact combined filter:
+
+`/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*`
+
+Node and native fixture gates must agree. The current model selection inventory
+grows from fourteen to fifteen by appending that single literal; all previous
+filters remain. Native Node operation controls also reject expanded/reordered/
+partial/whitespace variants and unapproved individual class filters, conserve
+inputs and prove the exact healthy selection afterward. Existing
+NativeTUnitSelectionTests supplies four native cases for these controls.
+
+The RF3 source declarations predict eight cases: one physical-owner operation,
+two SDK/MCP remote-query argument instances, four request-phase fault operations
+and one follower-restart operation. Original rebuilt native TRX and exact method/
+argument identities must prove eight passed, zero failed and zero skipped.
+Parameterless NotInParallel remains on all four classes and native parallelism50
+is unchanged. No production code, deadline, assertion, coverage contributor or
+UID changes. Source counts and reviews do not prove runtime success.
+
+ADR-117 and the existing image ownership contracts remain sufficient: no new
+product/trust/persistence/topology boundary is introduced. Root integrates the
+coherent six fixture files and four selector/control files, formats them, builds
+the strict solution, passes the four selection cases, then executes the eight
+original RF3 operations. Local and exact-source Linux qualification are OPEN
+until their own original results exist. No migration or persisted rollout is
+needed; rollback reverts this coherent test-only enrollment.

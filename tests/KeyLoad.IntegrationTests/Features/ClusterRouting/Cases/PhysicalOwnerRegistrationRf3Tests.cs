@@ -1,3 +1,4 @@
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -19,8 +20,13 @@ internal sealed class PhysicalOwnerRegistrationRf3Tests
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             evidence.Enter(PhysicalOwnerRegistrationRf3Phase.WaveStart);
+            var preparation = await LocalRf3ImageTestSession.StartIfSelectedAsync(deadline.Token).ConfigureAwait(false);
+            var selection = preparation?.Selection ?? LocalRf3ImageSelection.Read();
             wave = await TwoRf3MembershipWave.StartOwnedAsync(
-                new TwoRf3MembershipWave(null, register: true, nativeMembershipDiagnostics: true), deadline.Token).ConfigureAwait(false);
+                new TwoRf3MembershipWave(selection, register: true, nativeMembershipDiagnostics: true)
+                {
+                    localImagePreparation = preparation
+                }, deadline.Token).ConfigureAwait(false);
             await PhysicalOwnerRegistrationRf3Observation.WaitAsync(wave.Application, evidence, deadline.Token).ConfigureAwait(false);
             evidence.Enter(PhysicalOwnerRegistrationRf3Phase.Fingerprint);
             await TwoRf3MembershipFingerprintOracle.VerifyAsync(wave.Application, wave.Profile, deadline.Token).ConfigureAwait(false);
