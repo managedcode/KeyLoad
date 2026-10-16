@@ -10,16 +10,71 @@ internal static class CommandObservedPolicyFlow
     {
         var scenario = new CommandObservedPolicyScenario(header);
         var failures = new List<Exception>();
-        Task<GrainOperationReply>? original = null;
-        var observed = false;
-        CancellationTokenSource? timeout = null;
-        CancellationTokenSource? operation = null;
-        try
+        var initialized = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
             await scenario.InitializeAsync(runner);
-            timeout = new CancellationTokenSource(scenario.Fixture.Timing.CompletionTimeout, TimeProvider.System);
-            operation = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, runner);
-            var token = operation.Token;
+            initialized = true;
+        }, failures);
+        if (initialized)
+        {
+            await RunTimeoutAsync(scenario, failures, runner);
+        }
+        else
+        {
+            await ServerFailureObserver.ObserveAsync(() => CleanupAsync(scenario, null, false, failures), failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task RunTimeoutAsync(CommandObservedPolicyScenario scenario,
+        List<Exception> failures, CancellationToken runner)
+    {
+        var acquired = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var timeout = new CancellationTokenSource(scenario.Fixture.Timing.CompletionTimeout, TimeProvider.System);
+            acquired = true;
+            await RunOperationAsync(scenario, failures, timeout.Token, runner);
+        }, failures);
+        if (!acquired)
+        {
+            await ServerFailureObserver.ObserveAsync(() => CleanupAsync(scenario, null, false, failures), failures);
+        }
+    }
+
+    private static async Task RunOperationAsync(CommandObservedPolicyScenario scenario,
+        List<Exception> failures, CancellationToken timeout, CancellationToken runner)
+    {
+        var acquired = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var operation = CancellationTokenSource.CreateLinkedTokenSource(timeout, runner);
+            acquired = true;
+            Task<GrainOperationReply>? original = null;
+            var observed = false;
+            try
+            {
+                (original, observed) = await ExecuteAsync(scenario, failures, operation.Token);
+            }
+            finally
+            {
+                await ServerFailureObserver.ObserveAsync(() => CleanupAsync(scenario, original, observed, failures), failures);
+            }
+        }, failures);
+        if (!acquired)
+        {
+            await ServerFailureObserver.ObserveAsync(() => CleanupAsync(scenario, null, false, failures), failures);
+        }
+    }
+
+    private static async Task<(Task<GrainOperationReply>? Original, bool Observed)> ExecuteAsync(
+        CommandObservedPolicyScenario scenario, List<Exception> failures, CancellationToken token)
+    {
+        Task<GrainOperationReply>? original = null;
+        var observed = false;
+        try
+        {
             var request = scenario.Receive();
             var requestId = Guid.NewGuid();
             var gate = scenario.Observation.Hold(requestId, GrainRequestPhase.SubmitReturned);
@@ -56,14 +111,7 @@ internal static class CommandObservedPolicyFlow
         {
             failures.Add(failure);
         }
-        finally
-        {
-            await ServerFailureObserver.ObserveAsync(() =>
-                CleanupAsync(scenario, original, observed, failures), failures);
-            DisposeCancellation(operation, failures);
-            DisposeCancellation(timeout, failures);
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
+        return (original, observed);
     }
 
     private static async Task RepairedAsync(CommandObservedPolicyScenario scenario, ReceiveRequest request,
@@ -111,19 +159,4 @@ internal static class CommandObservedPolicyFlow
         }
     }
 
-    private static void DisposeCancellation(CancellationTokenSource? owner, List<Exception> failures)
-    {
-        try
-        {
-            owner?.Dispose();
-        }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-    }
 }

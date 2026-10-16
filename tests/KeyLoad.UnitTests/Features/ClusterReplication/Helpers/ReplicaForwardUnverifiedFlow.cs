@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Replication;
@@ -13,55 +12,46 @@ internal static class ReplicaForwardUnverifiedFlow
     internal static async Task RunAsync(CancellationToken token)
     {
         var observation = new ReplicaForwardUnverifiedObservation();
-        var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await fixture.InitializeAsync(token);
-            var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
-            var definition = fixture.Database.Configure(P.Collection, ResourceKind.Collection);
-            var partition = fixture.Database.Partition;
-            var lifetime = fixture.Database.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
-                partition.TenantId, partition.DatabaseId, P.Collection, definition)) ?? throw new InvalidOperationException(P.Missing);
-            fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(P.Writer,
-                partition.TenantId, [new ScopeGrant(partition.DatabaseId, P.Collection, Capability.DocumentsWrite)], []))).Get<PrincipalRecord>();
-            await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
-            var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
-            var follower = nodes.First(node => !ReferenceEquals(node, leader));
-            var work = CreateWork(follower, fixture.Clock, token);
-            var request = new CommandRequest(Guid.NewGuid(), partition,
-                [new PutDocument(P.Collection, P.OriginalDocument, P.OriginalJson, P.NewRecord)]);
-            var original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId,
-                P.Writer, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(request), work);
-            var expectedIndex = checked(leader.Journal.Log.State.LastIndex + P.One);
-            var expiry = work.ExpiresAt;
-            var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-                SubmitAsync(follower, original, work, observation, corrupt: true, token)) ?? throw new InvalidOperationException(P.Missing);
-            // Actual ReplicaEnvelopeAuthenticator.VerifyReply rejects the changed signed payload with this cause.
-            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
-            var sample = observation.Sample(work, original.Id);
-            await ReplicaForwardUnverifiedAssertions.TerminalAsync(work, failure, sample, observation, original.Id, expiry, token);
-            await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
-            var expected = Receipt(original.Id, leader, partition, expectedIndex, P.OriginalDocument);
-            await ReplicaForwardUnverifiedAssertions.StateAsync(nodes, original, lifetime, expected,
-                P.OriginalDocument, P.OriginalJson, P.One, token);
-            await SameParentAsync(nodes, follower, original, work, failure, observation, token);
-            await ReplicaForwardUnverifiedContinuation.RunAsync(fixture, nodes, leader, follower,
-                original, lifetime, expected, observation, token);
+            await using var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await fixture.InitializeAsync(token);
+                var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
+                var definition = fixture.Database.Configure(P.Collection, ResourceKind.Collection);
+                var partition = fixture.Database.Partition;
+                var lifetime = fixture.Database.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
+                    partition.TenantId, partition.DatabaseId, P.Collection, definition)) ?? throw new InvalidOperationException(P.Missing);
+                fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(P.Writer,
+                    partition.TenantId, [new ScopeGrant(partition.DatabaseId, P.Collection, Capability.DocumentsWrite)], []))).Get<PrincipalRecord>();
+                await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
+                var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
+                var follower = nodes.First(node => !ReferenceEquals(node, leader));
+                var work = CreateWork(follower, fixture.Clock, token);
+                var request = new CommandRequest(Guid.NewGuid(), partition,
+                    [new PutDocument(P.Collection, P.OriginalDocument, P.OriginalJson, P.NewRecord)]);
+                var original = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId,
+                    P.Writer, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(request), work);
+                var expectedIndex = checked(leader.Journal.Log.State.LastIndex + P.One);
+                var expiry = work.ExpiresAt;
+                var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
+                    SubmitAsync(follower, original, work, observation, corrupt: true, token)) ?? throw new InvalidOperationException(P.Missing);
+                // Actual ReplicaEnvelopeAuthenticator.VerifyReply rejects the changed signed payload with this cause.
+                await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
+                var sample = observation.Sample(work, original.Id);
+                await ReplicaForwardUnverifiedAssertions.TerminalAsync(work, failure, sample, observation, original.Id, expiry, token);
+                await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
+                var expected = Receipt(original.Id, leader, partition, expectedIndex, P.OriginalDocument);
+                await ReplicaForwardUnverifiedAssertions.StateAsync(nodes, original, lifetime, expected,
+                    P.OriginalDocument, P.OriginalJson, P.One, token);
+                await SameParentAsync(nodes, follower, original, work, failure, observation, token);
+                await ReplicaForwardUnverifiedContinuation.RunAsync(fixture, nodes, leader, follower,
+                    original, lifetime, expected, observation, token);
+            }, failures);
+            observation.End();
         }, failures);
-        observation.End();
-        try
-        {
-            await fixture.DisposeAsync();
-        }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

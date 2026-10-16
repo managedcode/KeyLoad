@@ -2,6 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 
@@ -72,45 +73,54 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         CancellationToken token, bool cancelBeforeNative = false)
     {
         var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
-        ResourceLifetimeWorkResultRetention? pending = null;
         ResourceLifetimeWorkResultRetention? attached = null;
         Exception? original = null;
         Exception? cleanup = null;
         var failures = new List<Exception>();
+        var acquired = false;
         try
         {
-            pending = new ResourceLifetimeWorkResultRetention(host.Database.OperationLimitsOptions);
-            lease.AttachResultRetention(pending);
-            attached = pending;
-            pending = null;
-            await ExecuteNativeAsync(host, runtime, request, consume, lease, cancelBeforeNative, token);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            original = error;
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            original = error;
-            failures.Add(error);
-        }
-        finally
-        {
+            using var pending = new PendingResultRetention(host.Database.OperationLimitsOptions);
+            acquired = true;
             try
             {
-                pending?.Dispose();
+                attached = pending.TransferTo(lease);
+                await ExecuteNativeAsync(host, runtime, request, consume, lease, cancelBeforeNative, token);
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
-                cleanup = error;
+                original = error;
                 failures.Add(error);
             }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
-                cleanup = error;
+                original = error;
                 failures.Add(error);
             }
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (acquired)
+            {
+                cleanup = error;
+            }
+            else
+            {
+                original = error;
+            }
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (acquired)
+            {
+                cleanup = error;
+            }
+            else
+            {
+                original = error;
+            }
+            failures.Add(error);
         }
         var preparation = await PrepareAsync(lease, failures);
         if (preparation is null)

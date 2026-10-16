@@ -26,54 +26,31 @@ internal static class D3PrivateRetirementPolicyFlow
     internal static async Task RunAsync(CancellationToken token)
     {
         var failures = new List<Exception>();
-        CommandObservedPolicyRuntime? runtime = null;
-        ReadExecutionBudget? work = null;
-        ReadExecutionBudgetReadGrant? metadata = null;
-        try
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            runtime = await CommandObservedPolicyRuntime.CreateAsync(new ConnectionOperationObservation(), token);
-            var source = runtime.Source;
-            work = new(source.Database.OperationLimitsOptions, source.Clock, token);
-            var expiry = source.Clock.GetUtcNow() + source.Silo.CatalogRequestCodec().ExecutionOptions.Value.RequestLifetime;
-            work.ConstrainLifetime(expiry);
-            metadata = work.CreateReadGrant(work.RemainingReadGrantBytes / MetadataShareDivisor,
-                work.RemainingReadGrantRecords / MetadataShareDivisor);
-            await ExecuteAsync(runtime, work, metadata, expiry, token);
-        }
-        catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))
-        {
-            failures.Add(original);
-        }
-        catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original))
-        {
-            failures.Add(original);
-        }
-        // Every owned native call and its request-context disposal is awaited inline before this settlement.
-        if (work is not null && metadata is not null)
-        {
-            ServerFailureObserver.Observe(() => work.CompleteSettledReadGrant(metadata), failures);
-        }
-
-        if (runtime is not null)
-        {
+            await using var runtime = await CommandObservedPolicyRuntime.CreateAsync(new ConnectionOperationObservation(), token);
+            ReadExecutionBudget? work = null;
+            ReadExecutionBudgetReadGrant? metadata = null;
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                var source = runtime.Source;
+                work = new(source.Database.OperationLimitsOptions, source.Clock, token);
+                var expiry = source.Clock.GetUtcNow() + source.Silo.CatalogRequestCodec().ExecutionOptions.Value.RequestLifetime;
+                work.ConstrainLifetime(expiry);
+                metadata = work.CreateReadGrant(work.RemainingReadGrantBytes / MetadataShareDivisor,
+                    work.RemainingReadGrantRecords / MetadataShareDivisor);
+                await ExecuteAsync(runtime, work, metadata, expiry, token);
+            }, failures);
+            // Every owned native call and its request-context disposal is awaited inline before this settlement.
+            if (work is not null && metadata is not null)
+            {
+                ServerFailureObserver.Observe(() => work.CompleteSettledReadGrant(metadata), failures);
+            }
             if (failures.Count != NoFailures)
             {
                 runtime.RetainRoots();
             }
-
-            try
-            {
-                await runtime.DisposeAsync();
-            }
-            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            {
-                failures.Add(cleanup);
-            }
-            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            {
-                failures.Add(cleanup);
-            }
-        }
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

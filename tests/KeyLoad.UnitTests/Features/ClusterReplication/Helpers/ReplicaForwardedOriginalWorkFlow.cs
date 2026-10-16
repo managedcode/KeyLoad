@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaForwardedOriginalWorkProtocol;
@@ -10,55 +9,46 @@ internal static class ReplicaForwardedOriginalWorkFlow
     internal static async Task RunAsync(CancellationToken token)
     {
         var observation = new ReplicaForwardedOriginalWorkObservation();
-        var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
         var failures = new List<Exception>();
         Task? original = null;
         CancellationTokenSource? selected = null;
         var originalObserved = false;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await fixture.InitializeAsync(token);
-            var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
-            var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
-            var follower = nodes.First(node => !ReferenceEquals(node, leader));
-            var definition = fixture.Database.Configure(P.Collection, ResourceKind.Collection);
-            fixture.Database.Commit(new PutDocument(P.Collection, P.Anchor, P.AnchorJson, P.NewRecordVersion));
-            await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
-            var requestCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
-            selected = requestCancellation;
-            var command = new CommandRequest(Guid.NewGuid(), fixture.Database.Partition,
-                [new PutDocument(P.Collection, P.Cancelled, P.HealthyJson, P.NewRecordVersion)]);
-            observation.HeldCommand = command.CommandId;
-            var operation = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
-                P.Root, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command));
-            var submitted = follower.Journal.Consensus.SubmitAsync(operation, requestCancellation.Token);
-            original = submitted;
-            await CancelAsync(nodes, observation, submitted, requestCancellation, token);
-            originalObserved = true;
-            await HealthyAsync(fixture, nodes, leader, follower, definition, observation, token);
-        }, failures);
-        observation.Release();
-        if (selected is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(selected.CancelAsync, failures);
-        }
-        if (original is not null && !originalObserved)
-        {
+            await using var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
             await ServerFailureObserver.ObserveAsync(async () =>
-                await original.ConfigureAwait(false), failures);
-        }
-        try
-        {
-            await fixture.DisposeAsync();
-        }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
+            {
+                await fixture.InitializeAsync(token);
+                var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
+                var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
+                var follower = nodes.First(node => !ReferenceEquals(node, leader));
+                var definition = fixture.Database.Configure(P.Collection, ResourceKind.Collection);
+                fixture.Database.Commit(new PutDocument(P.Collection, P.Anchor, P.AnchorJson, P.NewRecordVersion));
+                await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
+                var requestCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+                selected = requestCancellation;
+                var command = new CommandRequest(Guid.NewGuid(), fixture.Database.Partition,
+                    [new PutDocument(P.Collection, P.Cancelled, P.HealthyJson, P.NewRecordVersion)]);
+                observation.HeldCommand = command.CommandId;
+                var operation = follower.Journal.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
+                    P.Root, fixture.Clock.GetUtcNow(), NativeSerialization.Serialize(command));
+                var submitted = follower.Journal.Consensus.SubmitAsync(operation, requestCancellation.Token);
+                original = submitted;
+                await CancelAsync(nodes, observation, submitted, requestCancellation, token);
+                originalObserved = true;
+                await HealthyAsync(fixture, nodes, leader, follower, definition, observation, token);
+            }, failures);
+            observation.Release();
+            if (selected is not null)
+            {
+                await ServerFailureObserver.ObserveAsync(selected.CancelAsync, failures);
+            }
+            if (original is not null && !originalObserved)
+            {
+                await ServerFailureObserver.ObserveAsync(async () =>
+                    await original.ConfigureAwait(false), failures);
+            }
+        }, failures);
         ServerFailureObserver.Observe(() => selected?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

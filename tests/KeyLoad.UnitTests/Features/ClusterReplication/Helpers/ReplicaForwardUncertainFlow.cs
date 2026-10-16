@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Replication;
@@ -13,26 +12,17 @@ internal static class ReplicaForwardUncertainFlow
     internal static async Task RunAsync(bool timeout, CancellationToken token)
     {
         var observation = new ReplicaForwardUncertainObservation(timeout);
-        var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await fixture.InitializeAsync(token);
-            await ExecuteAsync(fixture, observation, token);
+            await using var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await fixture.InitializeAsync(token);
+                await ExecuteAsync(fixture, observation, token);
+            }, failures);
+            observation.End();
         }, failures);
-        observation.End();
-        try
-        {
-            await fixture.DisposeAsync();
-        }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -2,58 +2,73 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 /// <summary>Actual physical-host work ownership for native component reads; no quorum claim.</summary>
-internal sealed class UserAnalyticsHostBoundWork(NativeRequestWorkOwner owner) : IAsyncDisposable
+internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
 {
     private const int NoCleanupFailures = 0;
     private const int OneCleanupFailure = 1;
     private const int FirstCleanupFailure = 0;
     private const string MissingCatalog = "The native Analytics fixture requires its committed physical catalog.";
 
+    private readonly NativeRequestWorkOwner owner;
+
+    private UserAnalyticsHostBoundWork(IOptions<GrainRoutingOptions> routing)
+        => owner = new NativeRequestWorkOwner(routing);
+
     internal static async Task<UserAnalyticsHostBoundWork> OpenAsync(PartitionHost host,
         IOptions<GrainRoutingOptions> routing, CancellationToken token)
     {
-        NativeRequestWorkOwner? pending = new(routing);
-        var failures = new List<Exception>();
+        var work = new UserAnalyticsHostBoundWork(routing);
         try
         {
             var catalog = host.Database.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view))
                 ?? throw new InvalidOperationException(MissingCatalog);
             var state = await host.Consensus.StateAsync(token);
-            pending.BindPhysicalOwner(catalog.DefaultShard);
-            pending.AttachResourceLifetimeWorkFence(host.Database, state.LastIndex);
-            var result = new UserAnalyticsHostBoundWork(pending);
-            pending = null;
-            return result;
+            work.owner.BindPhysicalOwner(catalog.DefaultShard);
+            work.owner.AttachResourceLifetimeWorkFence(host.Database, state.LastIndex);
+            return work;
         }
-        catch (Exception original)
+        catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))
         {
-            failures.Add(original);
+            var failures = new List<Exception> { original };
+            try
+            {
+                await work.DisposeAsync();
+            }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
-        finally
+        catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original))
         {
-            if (pending is not null)
+            var failures = new List<Exception> { original };
+            try
             {
-                try
-                {
-                    await pending.DisposeAsync();
-                }
-                catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-                {
-                    failures.Add(error);
-                }
-                catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-                {
-                    failures.Add(error);
-                }
-                ServerFailureObserver.ThrowIfAny(failures);
+                await work.DisposeAsync();
             }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
         }
     }
 
@@ -62,60 +77,78 @@ internal sealed class UserAnalyticsHostBoundWork(NativeRequestWorkOwner owner) :
         CancellationToken token, bool cancelBeforeNative = false)
     {
         var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
-        ResourceLifetimeWorkResultRetention? pending = null;
         ResourceLifetimeWorkResultRetention? retention = null;
         Exception? original = null;
         var failures = new List<Exception>();
+        var cleanupFailures = new List<Exception>();
+        var acquired = false;
         try
         {
-            pending = new ResourceLifetimeWorkResultRetention(host.Database.OperationLimitsOptions);
-            lease.AttachResultRetention(pending);
-            retention = pending;
-            pending = null;
-            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
-            var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions,
-                host.Database.EvaluationClock, cancellation.Token);
-            using var admission = host.Database.AdmitQuery(cancellation.Token);
-            var snapshot = host.Database.CaptureAnalyticsAggregateBound(PartitionStoreProtocol.AdministratorId,
-                request, work, lease);
-            if (cancelBeforeNative)
-            {
-                await cancellation.CancelAsync();
-            }
-
-            using var result = await runtime.AggregateAsync(snapshot, lease, cancellation.Token);
-            host.Database.ValidateAnalyticsAggregatePublication(snapshot);
-            work.CheckResult(result.Result);
-            await consume(result.Result);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            original = error;
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            original = error;
-            failures.Add(error);
-        }
-        finally
-        {
-            var cleanupFailures = new List<Exception>();
+            using var pending = new PendingResultRetention(host.Database.OperationLimitsOptions);
+            acquired = true;
             try
             {
-                pending?.Dispose();
+                retention = pending.TransferTo(lease);
+                await ExecuteNativeAsync(host, runtime, request, consume, lease, cancelBeforeNative, token);
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
-                cleanupFailures.Add(error);
+                original = error;
+                failures.Add(error);
             }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
+                original = error;
+                failures.Add(error);
+            }
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (acquired)
+            {
                 cleanupFailures.Add(error);
             }
-            await FinishAsync(lease, retention, original, cleanupFailures, failures);
+            else
+            {
+                original = error;
+                failures.Add(error);
+            }
         }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (acquired)
+            {
+                cleanupFailures.Add(error);
+            }
+            else
+            {
+                original = error;
+                failures.Add(error);
+            }
+        }
+        await FinishAsync(lease, retention, original, cleanupFailures, failures);
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task ExecuteNativeAsync(PartitionHost host, UserAnalyticsRuntime runtime,
+        AggregateAnalyticsRequest request, Func<AnalyticsAggregateResult, Task> consume,
+        NativeRequestWorkLease lease, bool cancelBeforeNative, CancellationToken token)
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
+        var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions,
+            host.Database.EvaluationClock, cancellation.Token);
+        using var admission = host.Database.AdmitQuery(cancellation.Token);
+        var snapshot = host.Database.CaptureAnalyticsAggregateBound(PartitionStoreProtocol.AdministratorId,
+            request, work, lease);
+        if (cancelBeforeNative)
+        {
+            await cancellation.CancelAsync();
+        }
+
+        using var result = await runtime.AggregateAsync(snapshot, lease, cancellation.Token);
+        host.Database.ValidateAnalyticsAggregatePublication(snapshot);
+        work.CheckResult(result.Result);
+        await consume(result.Result);
     }
 
     private static async Task FinishAsync(NativeRequestWorkLease lease,

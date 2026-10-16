@@ -21,7 +21,10 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     internal bool NativeText { get; } = nativeText;
     internal bool NativeAnn { get; } = nativeAnn;
     internal NativeRuntimeTestOptions Timing { get; } = new();
-    private IServiceProvider? LocalServiceProvider { get; set; }
+    private IServiceProvider? LocalServiceProvider
+    {
+        get; set;
+    }
 
     internal DatabaseEngine CreateDatabase(ZoneTreeStore store, ReplicaConfiguration configuration)
     {

@@ -11,13 +11,13 @@ internal static class NativeLocalChildLifetimeFlow
     internal static async Task ExecuteAsync(CancellationToken token)
     {
         var scenario = new P();
-        var fixture = new RequestCqrsCohortRuntimeFixture(barrierDeadline: scenario);
         var session = new NativeLocalChildLifetimeSession();
         var failures = new List<Exception>();
         CancellationTokenSource? bound = null;
         CancellationTokenSource? linked = null;
-        try
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
+            await using var fixture = new RequestCqrsCohortRuntimeFixture(barrierDeadline: scenario);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 bound = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.StartupBound, TimeProvider.System);
@@ -28,27 +28,12 @@ internal static class NativeLocalChildLifetimeFlow
                 await ExerciseAsync(session, seeded, operation);
                 await NativeLocalChildLifetimeConservation.VerifyAsync(fixture, seeded, linked.Token);
             }, failures);
-        }
-        finally
-        {
             scenario.Release();
             await ServerFailureObserver.ObserveAsync(() =>
                 NativeLocalChildLifetimeCleanup.JoinAsync(session, failures), failures);
-            try
-            {
-                await fixture.DisposeAsync();
-            }
-            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            {
-                failures.Add(cleanup);
-            }
-            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            {
-                failures.Add(cleanup);
-            }
-            DisposeCancellation(linked, failures);
-            DisposeCancellation(bound, failures);
-        }
+        }, failures);
+        ServerFailureObserver.Observe(() => linked?.Dispose(), failures);
+        ServerFailureObserver.Observe(() => bound?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -97,19 +82,4 @@ internal static class NativeLocalChildLifetimeFlow
         await NativeLocalChildLifetimeAssertions.RetentionAsync(operation, original.Request.Coverage.Lifetimes.Single());
     }
 
-    private static void DisposeCancellation(CancellationTokenSource? owner, List<Exception> failures)
-    {
-        try
-        {
-            owner?.Dispose();
-        }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-    }
 }

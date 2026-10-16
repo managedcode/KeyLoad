@@ -2,6 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -30,16 +31,18 @@ internal static class ConfigureResourceOriginalLifetimeOwner
     {
         var failures = new List<Exception>();
         var cleanup = new List<Exception>();
+        var constructed = false;
         ResourceLifetimeWorkResultRetention? ledger = null;
         NativeRequestWorkLease? lease = null;
         var prepared = false;
         try
         {
-            ledger = new ResourceLifetimeWorkResultRetention(fixture.Database.OperationLimitsOptions);
+            using var pending = new PendingResultRetention(fixture.Database.OperationLimitsOptions);
+            constructed = true;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 lease = owner.Acquire(requestId, NativeRequestWorkKind.CommandCapability);
-                lease.AttachResultRetention(ledger);
+                ledger = pending.TransferTo(lease);
                 var work = fixture.CreateReadWork(token);
                 work.AttachResourceLifetimeBinding(lease);
                 await body(lease, work);
@@ -53,22 +56,27 @@ internal static class ConfigureResourceOriginalLifetimeOwner
                 }, cleanup);
             }
         }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (!constructed)
+            {
+                throw;
+            }
+            cleanup.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (!constructed)
+            {
+                throw;
+            }
+            cleanup.Add(error);
+        }
         finally
         {
-            if (lease is null || prepared)
+            if (prepared)
             {
-                try
-                {
-                    ledger?.Dispose();
-                }
-                catch (Exception disposalFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(disposalFailure))
-                {
-                    cleanup.Add(disposalFailure);
-                }
-                catch (Exception disposalFailure) when (!NativeCqrsBoundaryErrors.IsNonFatal(disposalFailure))
-                {
-                    cleanup.Add(disposalFailure);
-                }
+                ServerFailureObserver.Observe(() => ledger?.Dispose(), cleanup);
             }
         }
         await CompleteAsync(lease, prepared, failures, cleanup);

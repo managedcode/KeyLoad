@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Replication;
@@ -14,23 +13,14 @@ internal static class ReplicaForwardMetadataFlow
     internal static async Task RunAsync(bool removeGrant, bool exhaustReceiver, CancellationToken token)
     {
         var observation = new ReplicaForwardMetadataObservation();
-        var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() =>
-            ExecuteAsync(fixture, observation, removeGrant, exhaustReceiver, token), failures);
-        observation.End();
-        try
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await fixture.DisposeAsync();
-        }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
+            await using var fixture = new RequestCqrsHostedRuntimeFixture(observer: observation);
+            await ServerFailureObserver.ObserveAsync(() =>
+                ExecuteAsync(fixture, observation, removeGrant, exhaustReceiver, token), failures);
+            observation.End();
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

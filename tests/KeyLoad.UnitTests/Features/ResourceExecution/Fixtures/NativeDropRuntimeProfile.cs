@@ -20,7 +20,10 @@ internal sealed class NativeDropRuntimeProfile : IAsyncDisposable
     {
         get;
     }
-    internal NativeDropCommandPhaseObserver Observer { get; }
+    internal NativeDropCommandPhaseObserver Observer
+    {
+        get;
+    }
     internal ControlledPartitionMovementNativeHost Source => Hosts.Source;
     internal ResourceOwnerInventoryNativeClient Client => Source.Silo.ResourceInventoryRuntime!.Client;
 

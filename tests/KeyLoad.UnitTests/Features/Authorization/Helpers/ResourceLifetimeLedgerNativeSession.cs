@@ -13,7 +13,7 @@ internal static class ResourceLifetimeLedgerNativeSession
         NativeRequestWorkLease parent)
         => new QueryEngine(owner.Database, UnitExecutionOptions.QueryExecution()).ExecuteBound(P.Reader,
             ResourceLifetimeLedgerNativeData.Request(owner, P.Collection), budget,
-            owner.Database.EvaluationClock, budget.Cancellation, parent);
+            owner.Database.EvaluationClock, parent, budget.Cancellation);
 
     internal static async Task<ResourceLifetimeWorkResultRetention> RunAsync(SafeProjectorOperationDatabase owner,
         Func<NativeRequestWorkOwner, ResourceLifetimeWorkResultRetention, NativeRequestWorkLease,

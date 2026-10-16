@@ -2,6 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.Server;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 
@@ -32,40 +33,27 @@ internal static class AnalyticsBoundCoreOwner
         CancellationToken token)
     {
         var failures = new List<Exception>();
-        ResourceLifetimeWorkResultRetention? pending = new(fixture.Database.OperationLimitsOptions);
+        ResourceLifetimeWorkResultRetention? ledger = null;
         try
         {
-            var ledger = pending;
-            var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
-            ServerFailureObserver.Observe(() =>
-            {
-                lease.AttachResultRetention(ledger);
-                pending = null;
-            }, failures);
-            if (pending is null)
-            {
-                await ServerFailureObserver.ObserveAsync(async () =>
-                {
-                    var work = new ReadExecutionBudget(fixture.Database.OperationLimitsOptions, fixture.Database.EvaluationClock, token);
-                    work.AttachResourceLifetimeBinding(lease);
-                    await body(lease, ledger, work);
-                }, failures);
-            }
-            await FinishAsync(lease, pending is null ? ledger : null, failures);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        finally
-        {
+            using var pending = new PendingResultRetention(fixture.Database.OperationLimitsOptions);
             try
             {
-                pending?.Dispose();
+                var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
+                ServerFailureObserver.Observe(() =>
+                {
+                    ledger = pending.TransferTo(lease);
+                }, failures);
+                if (ledger is not null)
+                {
+                    await ServerFailureObserver.ObserveAsync(async () =>
+                    {
+                        var work = new ReadExecutionBudget(fixture.Database.OperationLimitsOptions, fixture.Database.EvaluationClock, token);
+                        work.AttachResourceLifetimeBinding(lease);
+                        await body(lease, ledger, work);
+                    }, failures);
+                }
+                await FinishAsync(lease, ledger, failures);
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
@@ -75,6 +63,14 @@ internal static class AnalyticsBoundCoreOwner
             {
                 failures.Add(error);
             }
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

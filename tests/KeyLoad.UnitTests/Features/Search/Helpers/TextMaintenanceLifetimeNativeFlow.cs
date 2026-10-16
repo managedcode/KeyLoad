@@ -12,58 +12,49 @@ internal static class TextMaintenanceLifetimeNativeFlow
 {
     internal static async Task RunAsync(CancellationToken token)
     {
-        var fixture = new RequestCqrsCohortRuntimeFixture(barrierDeadline: new ReplicaBarrierDeadlineScenario());
-        var session = new NativeLocalChildLifetimeSession();
-        TextMaintenanceLifetimeNativeRuntime? runtime = null;
         var failures = new List<Exception>();
-        try
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                await fixture.InitializeAsync();
-                var state = await NativeLocalChildLifetimeSeed.CreateAsync(fixture, token);
-                var seeded = await TextMaintenanceLifetimeNativeSeed.CreateAsync(state, token);
-                var operation = session.Initialize(state, token);
-                runtime = new(state);
-                var complete = await FinishAsync(session, operation, state, runtime, seeded.Request);
-                await Assert.That(complete.TrackedRecords).IsEqualTo(K.RowCount);
-                await Assert.That(operation.Ledger.RetainedEntries).IsEqualTo(K.LifetimeCount);
-                await Assert.That(operation.Parent.Dependencies.Single().ResourceName).IsEqualTo(seeded.Request.Collection);
-                await Assert.That(operation.Ledger.RetainedEncodedBytes)
-                    .IsEqualTo(NativeSerialization.Measure(operation.Parent.Dependencies.Single()));
-                await LiteralAsync(state, runtime, seeded.Request, operation.Token);
-                var replay = (await state.Leader.Journal.Consensus.SubmitAsync(seeded.Write, token)).Get<CommitReceipt>();
-                await NativeLocalChildLifetimeAssertions.EqualAsync(seeded.Receipt, replay);
-                foreach (var voter in NativeLocalChildLifetimeProtocol.Voters)
-                {
-                    await fixture.Node(voter).Journal.Consensus.ReadBarrierAsync(token);
-                    await NativeLocalChildLifetimeAssertions.RowsAsync(fixture.Node(voter), token);
-                }
-                NativeRequestWorkSettlement.Rethrow(await operation.Parent.CancelAsync());
-                await CancelledAsync(session, operation, state, runtime, seeded.Request);
-                await TextMaintenanceLifetimeNativeConservation.HealthyAfterCancellationAsync(fixture, state, token);
-            }, failures);
-        }
-        finally
-        {
-            if (runtime is not null)
-            {
-                await ServerFailureObserver.ObserveAsync(() => runtime.CloseAsync(failures), failures);
-            }
-            await ServerFailureObserver.ObserveAsync(() => NativeLocalChildLifetimeCleanup.JoinAsync(session, failures), failures);
+            await using var fixture = new RequestCqrsCohortRuntimeFixture(barrierDeadline: new ReplicaBarrierDeadlineScenario());
+            var session = new NativeLocalChildLifetimeSession();
+            TextMaintenanceLifetimeNativeRuntime? runtime = null;
             try
             {
-                await fixture.DisposeAsync();
+                await ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    await fixture.InitializeAsync();
+                    var state = await NativeLocalChildLifetimeSeed.CreateAsync(fixture, token);
+                    var seeded = await TextMaintenanceLifetimeNativeSeed.CreateAsync(state, token);
+                    var operation = session.Initialize(state, token);
+                    runtime = new(state);
+                    var complete = await FinishAsync(session, operation, state, runtime, seeded.Request);
+                    await Assert.That(complete.TrackedRecords).IsEqualTo(K.RowCount);
+                    await Assert.That(operation.Ledger.RetainedEntries).IsEqualTo(K.LifetimeCount);
+                    await Assert.That(operation.Parent.Dependencies.Single().ResourceName).IsEqualTo(seeded.Request.Collection);
+                    await Assert.That(operation.Ledger.RetainedEncodedBytes)
+                        .IsEqualTo(NativeSerialization.Measure(operation.Parent.Dependencies.Single()));
+                    await LiteralAsync(state, runtime, seeded.Request, operation.Token);
+                    var replay = (await state.Leader.Journal.Consensus.SubmitAsync(seeded.Write, token)).Get<CommitReceipt>();
+                    await NativeLocalChildLifetimeAssertions.EqualAsync(seeded.Receipt, replay);
+                    foreach (var voter in NativeLocalChildLifetimeProtocol.Voters)
+                    {
+                        await fixture.Node(voter).Journal.Consensus.ReadBarrierAsync(token);
+                        await NativeLocalChildLifetimeAssertions.RowsAsync(fixture.Node(voter), token);
+                    }
+                    NativeRequestWorkSettlement.Rethrow(await operation.Parent.CancelAsync());
+                    await CancelledAsync(session, operation, state, runtime, seeded.Request);
+                    await TextMaintenanceLifetimeNativeConservation.HealthyAfterCancellationAsync(fixture, state, token);
+                }, failures);
             }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            finally
             {
-                failures.Add(error);
+                if (runtime is not null)
+                {
+                    await ServerFailureObserver.ObserveAsync(() => runtime.CloseAsync(failures), failures);
+                }
+                await ServerFailureObserver.ObserveAsync(() => NativeLocalChildLifetimeCleanup.JoinAsync(session, failures), failures);
             }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-        }
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

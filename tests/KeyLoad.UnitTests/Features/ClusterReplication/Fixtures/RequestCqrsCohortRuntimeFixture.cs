@@ -36,7 +36,10 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     {
         get;
     }
-    internal TestCluster Cluster { get; private set; }
+    internal TestCluster Cluster
+    {
+        get; private set;
+    }
     internal bool HasBarrierDeadline => barrierDeadline is not null;
     private readonly Lock lifecycle = new();
     private Task? disposal;

@@ -3,17 +3,22 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "All 432 errors in the complete recorded Ready27/27 semantic catalogue now have one combined reviewed source repair batch adopted across 264 guarded source entries. Independent review rejected and corrected early retention release, cleanup-error masking and duplicate disposal before adoption. Actual current native semantic verification is running; complete strict SDK build and new runtime gates remain open. Latest strict R666 remains failed with two Clustering diagnostics on its original earlier source. Original 105 task acceptance states unchanged.",
+    "implementation": "The current complete strict Release solution passed R677 with zero warnings/errors in 391.182072 seconds, source drift zero and all native processes/readers joined. The combined264 source checkpoint c32fa153e and its residual29-source ownership/compiler/format repairs are included. Native semantic residuals progressed 103 to8 to4; the final four pending-ledger acquisitions now have genuine lexical disposal while preserving each original Prepare/cleanup/settlement boundary. Current scoped Crash native diagnostics are zero. Related TUnit/recovery R679 and refreshed public ONE/RF3 remain pending; original105 acceptance states unchanged.",
     "strictBuild": {
-      "label": "root-r619-hosted-cold-full-release",
+      "label": "root-r677-lexical-retention-full-release",
       "result": "passed",
+      "exitCode": 0,
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 463.07599595887586,
+      "elapsedSeconds": 391.1820720001124,
       "sourceDrift": 0,
-      "stdoutSha256": "5410ac4fc837158886a38b26a6c656f0f1226a84bf741c76d9ec46fec78540ce",
-      "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold-full-release.completion.original.json",
-      "scope": "Complete strict Release after R609 native35, R617 hosted/cold21 and R620 structured wave join. All original processes/readers joined, source drift zero; rebuilt DLL changes expected. New runtime selections remain pending."
+      "compiledDriftCount": 140,
+      "compiledDriftClassification": "Expected rebuilt Release DLL/PDB outputs, not runtime drift.",
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "61ad08404b3ae90e7321478146ac7dd790a16108c9bf758d36531ad044788424",
+      "evidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.completion.original.json",
+      "cohortEvidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.cohort-after.original.json",
+      "scope": "Complete current Release solution under SDK10.0.401, all configured analyzers enforced. No new runtime, public functional, Linux, durability, performance, coverage or task-acceptance pass inferred."
     },
     "format": "Native R641scope1509whitespaceapply child0/306intentionalchanges/noDLLdrift; matchingR641vverifyPASS13.2867s source/DLL0. R64727fileapply/verifybothPASSwithsource/DLL0. OptionaladditionalPowerShell native-tokenproof exited2 atparserload andremainsOPEN; no tokenequality claim. Fullrepo canonicalall-analyzergate remainsOPEN.",
     "focusedRuntime": {
@@ -260,19 +265,20 @@
       }
     },
     "latestCompilerAttempt": {
-      "label": "root-r666-genuine-disposal-filecases-full-release",
-      "result": "failed",
-      "errors": 2,
+      "label": "root-r677-lexical-retention-full-release",
+      "result": "passed",
+      "exitCode": 0,
       "warnings": 0,
-      "elapsedSeconds": 62.50799858290702,
+      "errors": 0,
+      "elapsedSeconds": 391.1820720001124,
       "sourceDrift": 0,
-      "compiledDrift": 88,
-      "compiledDriftClassification": "Expected rebuilt Release outputs during full compilation; not runtime execution.",
+      "compiledDriftCount": 140,
+      "compiledDriftClassification": "Expected rebuilt Release DLL/PDB outputs, not runtime drift.",
       "allProcessesAndReadersJoined": true,
-      "stdoutSha256": "9766170b91a3891f2e9a870acc5506d8a8bf21961c2d61d8f555919276918bd4",
-      "evidence": "TestResults/stage61-native-join/root-r666-genuine-disposal-filecases-full-release.completion.original.json",
-      "diagnostics": "TestResults/stage61-native-join/root-r666-compiler-diagnostics.prepared.json",
-      "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
+      "stdoutSha256": "61ad08404b3ae90e7321478146ac7dd790a16108c9bf758d36531ad044788424",
+      "evidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.completion.original.json",
+      "cohortEvidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.cohort-after.original.json",
+      "scope": "Complete current Release solution under SDK10.0.401, all configured analyzers enforced. No new runtime, public functional, Linux, durability, performance, coverage or task-acceptance pass inferred."
     },
     "latestPublicFunctionalAttempt": {
       "label": "R600 ONE then R602 RF3 normal public pair",
@@ -281,19 +287,15 @@
       "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
     },
     "previousCompilerAttempt": {
-      "label": "root-r662-combined-clustering-filecases-full-release",
+      "label": "root-r673-combined-residual-full-release",
       "result": "failed",
-      "errors": 27,
+      "errors": 1,
       "warnings": 0,
-      "elapsedSeconds": 55.59655975014903,
-      "sourceDrift": 0,
-      "compiledDrift": 88,
-      "compiledDriftClassification": "Expected rebuilt Release outputs during full compilation; not runtime execution.",
-      "allProcessesAndReadersJoined": true,
-      "stdoutSha256": "e87c60946d4bdf469c47e22786262a406eceecf7278b9e2b9091665f64a4ae33",
-      "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-filecases-full-release.completion.original.json",
-      "diagnostics": "TestResults/stage61-native-join/root-r662-compiler-diagnostics.prepared.json",
-      "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
+      "elapsedSeconds": 208.15607533301227,
+      "sourceDrift": 15,
+      "sourceDriftScope": "Concurrent unrelated benchmark workflow/source/test/doc work; original all-file drift remains recorded.",
+      "evidence": "TestResults/stage61-native-join/root-r673-combined-residual-full-release.completion.original.json",
+      "scope": "One unique CrashHost CA2000; downstream Unit not compiled on that attempt. All four same-shape pending-owner acquisitions repaired together after complete R674 native4 catalogue."
     },
     "latestFocusedRuntime": {
       "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
@@ -348,13 +350,16 @@
       "scope": "Complete Release original R609 source. KLD0031 partial test helper201>200 and IDE0005 unused import. All product projects compiled, but no complete build/runtime acceptance."
     },
     "formatVerification": {
-      "label": "root-r662-combined-clustering-whitespace-verify",
-      "result": "passed",
-      "changedCSharpScope": 47,
-      "sourceDrift": 0,
+      "label": "root-r676-lexical-retention-whitespace-verify",
+      "result": "passed_selected29_files",
+      "childExitCode": 0,
+      "selectedCSharpFiles": 29,
       "compiledDrift": 0,
-      "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-whitespace-verify.completion.original.json",
-      "scope": "Native whitespace only; not a complete formatting, compiler or runtime qualification."
+      "sourceDrift": [
+        "docs/implementation/benchmark-redesign-proposal.uk.md"
+      ],
+      "scope": "Native formatter reported no changes in selected current29 C# files. One unrelated proposal document changed during the wrapper; this is not a whole-repository frozen-source proof. R677 subsequently passed with full source drift zero.",
+      "evidence": "TestResults/stage61-native-join/root-r676-lexical-retention-whitespace-verify.completion.original.json"
     },
     "focusedRawCoverage": {
       "linesCovered": 25140,
@@ -491,7 +496,7 @@
       "runtimeStatus": "not_run_pending_current_complete_strict_solution"
     },
     "coherentDownstreamRepairR668": {
-      "state": "source_adopted_current_semantic_running_strict_and_runtime_open",
+      "state": "source_adopted_current_full_strict_passed_related_runtime_pending",
       "originalSemanticErrors": 432,
       "sourceEntries": 264,
       "allSelectedPostHashesVerified": true,
@@ -506,11 +511,97 @@
         "TestResults/stage61-native-join/root-r668-native-test-projects40-r2.adoption.original.json"
       ],
       "semanticCatalogue": "TestResults/stage61-native-join/root-r668-native-diagnostics-complete.original.json",
-      "nativeSemanticStatus": "running",
-      "strictCompilerStatus": "not_run_on_selected264",
-      "runtimeStatus": "not_run_on_selected264",
-      "focusedSelection": "TestResults/root-r667-related-foundation-selection-r1/combined-related-native-r2.config.prepared.json",
+      "nativeSemanticStatus": "R674 complete catalogue4 before final lexical fixes; current R678 Crash file0, no global native-zero claim",
+      "strictCompilerStatus": "passed_current_combined_R677",
+      "runtimeStatus": "not_run_current_R679_pending",
+      "focusedSelection": "TestResults/root-r679-related-foundation-selection-r1/combined-related-native.config.prepared.json",
       "scope": "Source checkpoint only. Existing required format, full strict SDK, native whole-operation/recovery, real Aspire SDK/MCP ONE/RF3, Linux/fault/endurance/coverage/release gates remain mandatory."
+    },
+    "previousStrictBuild": {
+      "label": "root-r619-hosted-cold-full-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 463.07599595887586,
+      "sourceDrift": 0,
+      "stdoutSha256": "5410ac4fc837158886a38b26a6c656f0f1226a84bf741c76d9ec46fec78540ce",
+      "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold-full-release.completion.original.json",
+      "scope": "Complete strict Release after R609 native35, R617 hosted/cold21 and R620 structured wave join. All original processes/readers joined, source drift zero; rebuilt DLL changes expected. New runtime selections remain pending."
+    },
+    "earlierCompilerAttemptR666": {
+      "label": "root-r666-genuine-disposal-filecases-full-release",
+      "result": "failed",
+      "errors": 2,
+      "warnings": 0,
+      "elapsedSeconds": 62.50799858290702,
+      "sourceDrift": 0,
+      "compiledDrift": 88,
+      "compiledDriftClassification": "Expected rebuilt Release outputs during full compilation; not runtime execution.",
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "9766170b91a3891f2e9a870acc5506d8a8bf21961c2d61d8f555919276918bd4",
+      "evidence": "TestResults/stage61-native-join/root-r666-genuine-disposal-filecases-full-release.completion.original.json",
+      "diagnostics": "TestResults/stage61-native-join/root-r666-compiler-diagnostics.prepared.json",
+      "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
+    },
+    "previousFormatVerification": {
+      "label": "root-r662-combined-clustering-whitespace-verify",
+      "result": "passed",
+      "changedCSharpScope": 47,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-whitespace-verify.completion.original.json",
+      "scope": "Native whitespace only; not a complete formatting, compiler or runtime qualification."
+    },
+    "residualOwnershipRepairR669R675": {
+      "state": "source_reviewed_adopted_full_strict_passed_runtime_pending",
+      "sourceFiles": 29,
+      "nativeCatalogues": [
+        {
+          "errors": 103,
+          "evidence": "TestResults/stage61-native-join/root-r669-all264-native-diagnostics.original.json"
+        },
+        {
+          "errors": 8,
+          "evidence": "TestResults/stage61-native-join/root-r671-residual29-native-diagnostics.original.json"
+        },
+        {
+          "errors": 4,
+          "evidence": "TestResults/stage61-native-join/root-r674-complete-current-native-diagnostics.original.json"
+        }
+      ],
+      "adoptionEvidence": [
+        "TestResults/stage61-native-join/root-r669-native-residual6.adoption.original.json",
+        "TestResults/stage61-native-join/root-r669-unit-models5.adoption.original.json",
+        "TestResults/stage61-native-join/root-r669-unit-lifetimes12.adoption.original.json",
+        "TestResults/stage61-native-join/root-r671-lexical-lifetimes3.adoption.original.json",
+        "TestResults/stage61-native-join/root-r671-reference-retention5.adoption.original.json",
+        "TestResults/stage61-native-join/root-r675-lexical-retention4.adoption.original.json"
+      ],
+      "currentScopedNative": {
+        "project": "KeyLoad.CrashHost",
+        "file": "UserAnalyticsProcessBoundWork.cs",
+        "errors": 0,
+        "warnings": 0,
+        "evidence": "TestResults/stage61-native-join/root-r678-crash-lexical-native-diagnostics.original.json"
+      },
+      "ownership": "Single reference-owned pending ledger transfers only after actual lease Attach. Each original successful/failed Prepare, cleanup-before-settlement and original/cleanup failure identity remains preserved. Actual lexical CTS/request-scope disposal retains original native tasks and join ordering. No suppression, duplicate Dispose, provider replacement or current runtime claim.",
+      "runtimeSelection": "TestResults/root-r679-related-foundation-selection-r1/combined-related-native.config.prepared.json",
+      "scope": "Original105 task statuses unchanged. Public DROP/AnalyticsStore/eight-user cold and both physical file requirements remain separately unqualified."
+    },
+    "earlierCompilerAttemptR662": {
+      "label": "root-r662-combined-clustering-filecases-full-release",
+      "result": "failed",
+      "errors": 27,
+      "warnings": 0,
+      "elapsedSeconds": 55.59655975014903,
+      "sourceDrift": 0,
+      "compiledDrift": 88,
+      "compiledDriftClassification": "Expected rebuilt Release outputs during full compilation; not runtime execution.",
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "e87c60946d4bdf469c47e22786262a406eceecf7278b9e2b9091665f64a4ae33",
+      "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-filecases-full-release.completion.original.json",
+      "diagnostics": "TestResults/stage61-native-join/root-r662-compiler-diagnostics.prepared.json",
+      "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {

@@ -10,17 +10,85 @@ internal static class CommandObservedReturnEdgeFlow
     {
         var scenario = new CommandObservedPolicyScenario(header: false);
         var failures = new List<Exception>();
+        var executionEntered = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await scenario.InitializeAsync(runner);
+            executionEntered = true;
+            await RunDeadlineAsync(scenario, business, failures, runner);
+        }, failures);
+        if (!executionEntered)
+        {
+            await ServerFailureObserver.ObserveAsync(() => CloseAsync(scenario, null, false, failures), failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task RunDeadlineAsync(CommandObservedPolicyScenario scenario, bool business,
+        List<Exception> failures, CancellationToken runner)
+    {
+        var acquired = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var deadline = new CancellationTokenSource(scenario.Fixture.Timing.CompletionTimeout, TimeProvider.System);
+            acquired = true;
+            await RunOwnedAsync(scenario, business, failures, runner, deadline.Token);
+        }, failures);
+        if (!acquired)
+        {
+            await ServerFailureObserver.ObserveAsync(() => CloseAsync(scenario, null, false, failures), failures);
+        }
+    }
+
+    private static async Task RunOwnedAsync(CommandObservedPolicyScenario scenario, bool business,
+        List<Exception> failures, CancellationToken runner, CancellationToken deadline)
+    {
+        var acquired = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(runner, deadline);
+            acquired = true;
+            await RunOperationAsync(scenario, business, failures, lifetime.Token);
+        }, failures);
+        if (!acquired)
+        {
+            await ServerFailureObserver.ObserveAsync(() => CloseAsync(scenario, null, false, failures), failures);
+        }
+    }
+
+    private static async Task RunOperationAsync(CommandObservedPolicyScenario scenario, bool business,
+        List<Exception> failures, CancellationToken lifetime)
+    {
         Task<GrainOperationReply>? original = null;
-        CancellationTokenSource? deadline = null;
-        CancellationTokenSource? operation = null;
-        CancellationTokenSource? lifetime = null;
+        var observed = false;
+        var acquired = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime);
+            acquired = true;
+            try
+            {
+                (original, observed) = await ExecuteAsync(scenario, business, operation, failures, lifetime);
+            }
+            finally
+            {
+                await ServerFailureObserver.ObserveAsync(() => CloseAsync(scenario, original, observed, failures), failures);
+            }
+        }, failures);
+        if (!acquired)
+        {
+            await ServerFailureObserver.ObserveAsync(() => CloseAsync(scenario, null, false, failures), failures);
+        }
+    }
+
+    private static async Task<(Task<GrainOperationReply>? Original, bool Observed)> ExecuteAsync(
+        CommandObservedPolicyScenario scenario, bool business, CancellationTokenSource operation,
+        List<Exception> failures, CancellationToken token)
+    {
+        Task<GrainOperationReply>? original = null;
         var observed = false;
         try
         {
-            await scenario.InitializeAsync(runner);
-            deadline = new(scenario.Fixture.Timing.CompletionTimeout, TimeProvider.System);
-            lifetime = CancellationTokenSource.CreateLinkedTokenSource(runner, deadline.Token);
-            operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
             var before = await CommandObservedReturnEdgeSnapshot.CaptureAsync(scenario, operation.Token);
             var request = scenario.Receive();
             var requestId = Guid.NewGuid();
@@ -38,7 +106,7 @@ internal static class CommandObservedReturnEdgeFlow
                 ? CommandObservedReturnEdgeProtocol.Unknown : CommandObservedReturnEdgeProtocol.ClaimUnavailable);
             await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(operation.Token);
             await operation.CancelAsync();
-            await VerifyAndRetryAsync(scenario, request, business, before, lifetime.Token);
+            await VerifyAndRetryAsync(scenario, request, business, before, token);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -48,15 +116,7 @@ internal static class CommandObservedReturnEdgeFlow
         {
             failures.Add(error);
         }
-        finally
-        {
-            await ServerFailureObserver.ObserveAsync(() =>
-                CloseAsync(scenario, original, observed, failures), failures);
-            DisposeCancellation(operation, failures);
-            DisposeCancellation(lifetime, failures);
-            DisposeCancellation(deadline, failures);
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
+        return (original, observed);
     }
 
     private static async Task VerifyAndRetryAsync(CommandObservedPolicyScenario scenario, ReceiveRequest request,
@@ -112,19 +172,4 @@ internal static class CommandObservedReturnEdgeFlow
         }
     }
 
-    private static void DisposeCancellation(CancellationTokenSource? owner, List<Exception> failures)
-    {
-        try
-        {
-            owner?.Dispose();
-        }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        {
-            failures.Add(cleanup);
-        }
-    }
 }

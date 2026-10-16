@@ -32,7 +32,7 @@ internal static class ResourceLifetimeLedgerNativeChild
             }
             result = new QueryEngine(owner.Database, UnitExecutionOptions.QueryExecution()).ExecuteBound(
                 P.Reader, ResourceLifetimeLedgerNativeData.Request(owner, resource), budget,
-                owner.Database.EvaluationClock, linked.Token, lease);
+                owner.Database.EvaluationClock, lease, linked.Token);
         }, failures);
         var original = failures.FirstOrDefault();
         var settlementFailures = new List<Exception>();

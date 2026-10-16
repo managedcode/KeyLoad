@@ -75,13 +75,14 @@ internal sealed class ResourceRetirementSignedExecution(OrleansNode node, Partit
         var value = await new ResourceRetirementCommandFrame(node, this).ExecuteAsync(principal, commandId,
             operation, request.ExpiresAt, work, token).ConfigureAwait(false);
         if (value.Receipt is not { } receipt || receipt.CommandId != commandId
-            || receipt.RetirementId != request.Phase.RetirementId || receipt.Phase != request.Phase.Phase
+            || request.Phase is not { } phase
+            || receipt.RetirementId != phase.RetirementId || receipt.Phase != phase.Phase
             || receipt.PhysicalOwner is null
             || !PhysicalOwnerEntryValidation.SameOwner(receipt.PhysicalOwner, request.ObservedOwner.Owner))
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementNativeProtocol.InvalidProof);
         }
-        ResourceRetirementPhaseReplyValidation.Require(request.Phase, value, limits.Value);
+        ResourceRetirementPhaseReplyValidation.Require(phase, value, limits.Value);
         return value;
     }
 
