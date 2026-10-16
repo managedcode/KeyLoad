@@ -4,6 +4,7 @@ internal static class SharedDomainCrashProtocol
 {
     internal const string Mode = "kl081-shared-domain-producer-crash";
     internal const string OperationFile = "kl081-original-operation.bin";
+    internal const string ResourceCreationsFile = "kl081-original-resource-creations.bin";
     internal const string SeedOperationsFile = "kl081-acknowledged-seed-operations.bin";
     internal const string SeedResultsFile = "kl081-acknowledged-seed-results.bin";
     internal const string SeedImageFile = "kl081-before-original-image.bin";

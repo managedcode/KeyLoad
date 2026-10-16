@@ -13,6 +13,7 @@ internal static class NativeLocalChildLifetimeSeed
         RequestCqrsCohortRuntimeFixture fixture, CancellationToken token)
     {
         var leader = await LeaderAsync(fixture, token);
+        await NativeLocalChildLifetimeReferences.CatalogsAsync(fixture, token);
         var principal = new PrincipalRecord(K.OtherSubject, P.Partition.TenantId,
             [new(P.Partition.DatabaseId, P.Collection, Capability.Query | Capability.DocumentsRead)], []);
         _ = (await SubmitAsync(leader, OperationKind.ConfigurePrincipal, Guid.NewGuid(),

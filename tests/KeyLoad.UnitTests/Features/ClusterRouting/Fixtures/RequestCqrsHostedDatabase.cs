@@ -20,15 +20,18 @@ internal sealed class RequestCqrsHostedDatabase(RequestCqrsHostedNodeResources o
         return (original.LastIndex, original.CommittedIndex, original.Term);
     }
 
-    internal OperationResult Submit<T>(OperationKind kind, T payload, string principal = RequestCqrsHostedProfile.Root,
-        Guid? id = null, DateTimeOffset? time = null)
+    internal OperationResult Submit<T>(OperationKind kind, T payload, string principal,
+        Guid? id, DateTimeOffset? time, CancellationToken cancellationToken)
     {
         if (time is not null)
         {
             throw new ArgumentException(RequestCqrsHostedProtocol.LeaderEvaluationTime, nameof(time));
         }
-        return owner.Coordinator.SubmitNativeAsync(kind, id ?? Guid.NewGuid(), principal,
-            NativeSerialization.Serialize(payload)).GetAwaiter().GetResult();
+        owner.Coordinator.ReadBarrierAsync(cancellationToken).GetAwaiter().GetResult();
+        var result = owner.Coordinator.SubmitNativeAsync(kind, id ?? Guid.NewGuid(), principal,
+            NativeSerialization.Serialize(payload), cancellationToken: cancellationToken).GetAwaiter().GetResult();
+        owner.Coordinator.ReadBarrierAsync(cancellationToken).GetAwaiter().GetResult();
+        return result;
     }
 
     internal ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null,
@@ -41,12 +44,14 @@ internal sealed class RequestCqrsHostedDatabase(RequestCqrsHostedNodeResources o
             QueuePolicy = queuePolicy ?? new()
         };
         return Submit(OperationKind.ConfigureResource,
-            new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, resource)).Get<ResourceDefinition>();
+            new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, resource),
+            RequestCqrsHostedProfile.Root, null, null, TestContext.Current!.Execution.CancellationToken).Get<ResourceDefinition>();
     }
 
     internal CommitReceipt Commit(params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
-        return Submit(OperationKind.Batch, new CommandRequest(id, Partition, [.. mutations]), id: id).Get<CommitReceipt>();
+        return Submit(OperationKind.Batch, new CommandRequest(id, Partition, [.. mutations]),
+            RequestCqrsHostedProfile.Root, id, null, TestContext.Current!.Execution.CancellationToken).Get<CommitReceipt>();
     }
 }

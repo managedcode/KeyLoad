@@ -7,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
     IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null,
     IGrainPartitionMovementSealedOperationObserver? sealedObserver = null, INativeOnlineTextMaintenance? onlineText = null,
-    IPlacementIntentPersistence? placementPersistence = null, INativeDropTableExecution? dropTable = null)
+    IPlacementIntentPersistence? placementPersistence = null, Func<INativeDropTableExecution>? borrowDropTable = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
@@ -81,7 +81,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     {
         return kind switch
         {
-            OperationKind.DropTable => await (dropTable
+            OperationKind.DropTable => await (borrowDropTable?.Invoke()
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))
                 .ExecuteAsync(request.Envelope.RequestId, request.Envelope.CommandId, principal.Id,
                     GrainNativePayload.Read<DropTableRequest>(request.Payload), request.Envelope.ExpiresAt, operationToken).ConfigureAwait(true),

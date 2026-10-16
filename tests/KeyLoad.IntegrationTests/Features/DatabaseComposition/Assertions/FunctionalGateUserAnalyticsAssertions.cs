@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
@@ -13,6 +14,10 @@ internal static class FunctionalGateUserAnalyticsAssertions
         // Map member order is not public state. Every value/member and array position remains compared.
         await Assert.That(JsonElement.DeepEquals(observed, required)).IsTrue()
             .Because($"actual={Bounded(observed)} expected={Bounded(required)}");
+        if (actual is CommitReceipt actualReceipt && expected is CommitReceipt expectedReceipt)
+        {
+            await NativeSubmissionColdAssertions.ReceiptAsync(actualReceipt, expectedReceipt);
+        }
     }
 
     private static string Bounded(JsonElement value)

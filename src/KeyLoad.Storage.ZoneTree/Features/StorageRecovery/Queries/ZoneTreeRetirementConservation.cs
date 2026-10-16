@@ -3,7 +3,7 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Verifies a bounded original source view before any fresh archive identity rewrite.</summary>
 internal static class ZoneTreeRetirementConservation
 {
-    private const string Exhausted = "The native retirement source proof exceeds its original range budget.";
+    private const int EmptyPage = 0;
 
     internal static ZoneTreeRetirementConservationProof Capture(IKeyValueView view,
         ZoneTreeStoreOptions options, TimeProvider clock,
@@ -15,16 +15,27 @@ internal static class ZoneTreeRetirementConservation
             .Append(ResourceRetirementConservationKeys.ReleasePrefix());
         foreach (var prefix in prefixes)
         {
-            var page = capture.View.VisitRange(prefix, options.MaximumReadCutRecords, (key, value) =>
-            {
-                capture.Observe(key, value);
-                return true;
-            }, cancellationToken: token);
-            if (page.HasMore)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted);
-            }
+            CapturePrefix(capture, prefix, capture.View.MaximumRangeRecords, token);
         }
         return capture.Complete();
+    }
+
+    private static void CapturePrefix(ZoneTreeCheckpointSourceProof capture, byte[] prefix,
+        int maximumRecords, CancellationToken token)
+    {
+        byte[]? afterKey = null;
+        StorageScanResult page;
+        do
+        {
+            var delivered = EmptyPage;
+            page = capture.View.VisitRange(prefix, maximumRecords, (key, value) =>
+            {
+                capture.Observe(key, value);
+                afterKey = key.ToArray();
+                delivered++;
+                return delivered < maximumRecords;
+            }, afterKey, cancellationToken: token);
+        }
+        while (page.StoppedByVisitor);
     }
 }

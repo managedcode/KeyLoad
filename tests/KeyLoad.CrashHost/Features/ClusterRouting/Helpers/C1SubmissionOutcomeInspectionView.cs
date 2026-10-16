@@ -5,6 +5,9 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 internal sealed class C1SubmissionOutcomeInspectionView(IKeyValueView original) : IKeyValueView
 {
     private const int NoBytes = 0;
+    private const int NoRangeRecords = 0;
+    /// <summary>Range operations are unsupported by this point-only inspection view.</summary>
+    public int MaximumRangeRecords => NoRangeRecords;
     private long examined;
     public byte[]? ReadOwnedValue(byte[] key)
     {

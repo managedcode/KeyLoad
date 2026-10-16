@@ -76,6 +76,9 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
         this.runtime = runtime;
     }
 
+    /// <inheritdoc />
+    public int MaximumRangeRecords => runtime.Options.MaximumRangeRecords;
+
     /// <summary>Runs a read callback while the consistent provider gate is held.</summary>
     /// <typeparam name="T">Owned result returned by the callback.</typeparam>
     /// <param name="read">Synchronous callback that cannot retain the view.</param>

@@ -14,6 +14,8 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
 
     internal SortedSet<ZoneTreeStagedEntry> Changes { get; } = new(ZoneTreeStagedEntryComparer.Instance);
 
+    public int MaximumRangeRecords => runtime.Options.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);

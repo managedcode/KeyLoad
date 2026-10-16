@@ -31,9 +31,9 @@ internal static class UserAnalyticsHostProtocol
          new(Maximum, Amount, AnalyticsAggregateKind.Max)], 10);
     internal static AnalyticsAggregateResult Expected(bool updated)
     {
-        var values = ImmutableDictionary<string, double>.Empty.Add(Count, updated ? 1d : 2d)
+        var values = ImmutableDictionary.Create<string, double>(StringComparer.Ordinal).Add(Count, updated ? 1d : 2d)
             .Add(Sum, updated ? 40d : 30d).Add(Average, updated ? 40d : 15d)
             .Add(Minimum, updated ? 40d : 10d).Add(Maximum, updated ? 40d : 20d);
-        return new([new(ImmutableDictionary<string, string>.Empty.Add(Region, North), values)], updated ? 1L : 2L);
+        return new([new(ImmutableDictionary.Create<string, string>(StringComparer.Ordinal).Add(Region, North), values)], updated ? 1L : 2L);
     }
 }

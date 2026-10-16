@@ -13,7 +13,7 @@ internal static class SharedDomainCrashScenario
         progress.Record(SharedDomainChildProgressPhase.DatabaseBootstrap);
         var database = CrashDatabase.Create(store);
         progress.Record(SharedDomainChildProgressPhase.ResourceConfiguration);
-        SharedDomainCrashOperations.Configure(database);
+        var creations = SharedDomainCrashOperations.Configure(database);
         var scopes = SharedDomainCorpus.Create(Tenant, Database);
         var time = TimeProvider.System.GetUtcNow();
         List<ReplicatedOperation> operations = [];
@@ -45,7 +45,7 @@ internal static class SharedDomainCrashScenario
         results.Add(acknowledged);
         var original = SharedDomainCorpus.Producer(scopes[FirstIndex], CommandId, Item);
         var originalOperation = SharedDomainCrashOperations.Create(OperationKind.Batch, original.CommandId, original, time);
-        await SaveAsync(directory, store, progress, originalOperation, operations.ToArray(), results.ToArray());
+        await SaveAsync(directory, store, progress, originalOperation, operations.ToArray(), results.ToArray(), creations);
         progress.Record(SharedDomainChildProgressPhase.ArmingOriginalBoundary);
         boundary.Position = store.Position + FirstRevision;
         boundary.Armed = true;
@@ -55,8 +55,9 @@ internal static class SharedDomainCrashScenario
 
     private static async Task SaveAsync(string directory, ZoneTreeStore store, SharedDomainChildProgress progress,
         ReplicatedOperation original,
-        ReplicatedOperation[] operations, OperationResult[] results)
+        ReplicatedOperation[] operations, OperationResult[] results, ReplicatedOperation[] creations)
     {
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.ResourceCreationsFile, creations);
         progress.Record(SharedDomainChildProgressPhase.SaveOriginalOperation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.OperationFile, original);
         progress.Record(SharedDomainChildProgressPhase.SaveSeedOperations);

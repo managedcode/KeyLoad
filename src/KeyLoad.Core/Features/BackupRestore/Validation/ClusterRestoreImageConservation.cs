@@ -17,7 +17,7 @@ internal static class ClusterRestoreImageConservation
         var retained = reconciled.SourceOrigin ?? throw Errors.Fail(ErrorCode.Corruption, Invalid);
         var expected = ResourceRetirementConservationOriginImport.SourceCapture(state.Source,
             state.Local.Source, sourceIdentity, state.Original.StorePosition, state.Original.AppliedIndex,
-            state.Local.Target, policy.MaxScanRecords, policy.MaxBatchBytes, state.Work.Cancellation);
+            state.Local.Target, policy.MaxScanRecords, state.Source.MaximumRangeRecords, policy.MaxBatchBytes, state.Work.Cancellation);
         var sourceFloor = expected.SourceFloor;
         var sourceSummary = new ResourceRetirementAuthoritySummary(expected.SourceAuthorityRecordCount, expected.SourceAuthorityDigest);
         var expectedBytes = NativeSerialization.Serialize(expected);

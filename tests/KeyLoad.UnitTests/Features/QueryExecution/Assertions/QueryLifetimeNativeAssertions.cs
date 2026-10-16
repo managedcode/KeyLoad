@@ -7,12 +7,13 @@ internal static class QueryLifetimeNativeAssertions
 {
     internal static async Task HealthyAsync(QueryLifetimeNativeFlow flow)
     {
-        var result = flow.Query();
-        await Assert.That(result.Candidates.Length).IsEqualTo(QueryLifetimeNativeProtocol.Limit);
+        flow.Fixture.RequireOriginalResourceBindings();
         var expected = new PartitionQueryCandidateV1(QueryLifetimeNativeProtocol.Version,
-            RemoteDocumentNativeFixture.Reference, new(RemoteDocumentNativeFixture.DocumentId,
+            flow.Fixture.ExpectedDestinationReference, new(RemoteDocumentNativeFixture.DocumentId,
                 RemoteDocumentNativeFixture.First, RemoteDocumentNativeFixture.ProjectedJson, true,
                 [RemoteDocumentNativeFixture.Secret]), []);
+        var result = flow.Query();
+        await Assert.That(result.Candidates.Length).IsEqualTo(QueryLifetimeNativeProtocol.Limit);
         await Assert.That(JsonDefaults.Serialize(result.Candidates.Single()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         var statistics = flow.Statistics().Witness.Statistics;

@@ -25,7 +25,10 @@ internal static class D2ImportReceipts
         string partition, string json)
     {
         var reference = new EntityRef(D2ImportCrashProtocol.LocalPartition(partition),
-            D2ImportCrashProtocol.LocalCollection, D2ImportCrashProtocol.DocumentId);
+            D2ImportCrashProtocol.LocalCollection, D2ImportCrashProtocol.DocumentId)
+        {
+            Lifetime = new(session.Lifetimes.Local.Incarnation.Value)
+        };
         var actual = session.Target.Database.GetDocument(D2ImportCrashProtocol.Principal, reference);
         await Assert.That(actual).IsNotNull();
         await Assert.That(actual!.Reference).IsEqualTo(reference);
@@ -41,7 +44,10 @@ internal static class D2ImportReceipts
     internal static async Task ImportedAsync(D2ImportSession session, D2ImportImage image)
     {
         var partition = image.Captured.Control!.Partition;
-        var reference = new EntityRef(partition, D2ImportCrashProtocol.Collection, D2ImportCrashProtocol.DocumentId);
+        var reference = new EntityRef(partition, D2ImportCrashProtocol.Collection, D2ImportCrashProtocol.DocumentId)
+        {
+            Lifetime = new(session.Lifetimes.Source.Incarnation.Value)
+        };
         var seedIndex = partition.PartitionKey == D2ImportCrashProtocol.FirstPartition
             ? D2ImportCrashProtocol.Empty : D2ImportCrashProtocol.Single;
         var original = session.SourceSeeds[seedIndex].Original;

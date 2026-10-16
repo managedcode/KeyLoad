@@ -1,3 +1,5 @@
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.Core.Features.ResourceExecution;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaForwardedOriginalWorkProtocol;
 
@@ -35,25 +37,64 @@ internal static class ReplicaForwardedOriginalWorkAssertions
     }
 
     internal static async Task DocumentsAsync(RequestCqrsCohortNativeNode[] nodes, PartitionRef partition,
-        CancellationToken token)
+        ReplicatedOperation creation, CancellationToken token)
     {
         foreach (var node in nodes)
         {
             var database = node.Journal.Database;
-            await EqualAsync<DocumentResult?>(new DocumentResult(new(partition, P.Collection, P.Anchor), P.InitialRevision, P.AnchorJson, false, []),
+            await EqualAsync<DocumentResult?>(new DocumentResult(Reference(creation, partition, P.Collection, P.Anchor), P.InitialRevision, P.AnchorJson, false, []),
                 database.GetDocument(P.Root, new(partition, P.Collection, P.Anchor), cancellationToken: token));
-            await EqualAsync<DocumentResult?>(new DocumentResult(new(partition, P.Collection, P.Healthy), P.InitialRevision, P.HealthyJson, false, []),
+            await EqualAsync<DocumentResult?>(new DocumentResult(Reference(creation, partition, P.Collection, P.Healthy), P.InitialRevision, P.HealthyJson, false, []),
                 database.GetDocument(P.Root, new(partition, P.Collection, P.Healthy), cancellationToken: token));
             await Assert.That(database.GetDocument(P.Root, new(partition, P.Collection, P.Cancelled), cancellationToken: token)).IsNull();
         }
     }
 
-    internal static async Task DependencyAsync(ReplicaForwardedOriginalWorkObserved observed,
-        RequestCqrsCohortNativeNode leader, PartitionRef partition, ResourceDefinition definition)
+    internal static async Task<ReplicatedOperation> ConfigureAsync(RequestCqrsHostedRuntimeFixture fixture,
+        RequestCqrsCohortNativeNode[] nodes, string collection, CancellationToken token)
     {
-        var lifetime = leader.Journal.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
-            partition.TenantId, partition.DatabaseId, P.Collection, definition));
-        await Assert.That(lifetime).IsNotNull();
+        var partition = fixture.Database.Partition;
+        var expected = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId,
+            new(collection, ResourceKind.Collection, partition.TransactionDomainId));
+        var id = Guid.NewGuid();
+        var configured = fixture.Database.Submit(OperationKind.ConfigureResource, expected, P.Root, id, null, token).Get<ResourceDefinition>();
+        await EqualAsync(expected.Definition, configured);
+        await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
+        var index = fixture.Database.ReadJournalCut().LastIndex;
+        var original = nodes.First().Journal.Log.ReadEntry(index)?.Operation
+            ?? throw new InvalidOperationException(P.MissingObservation);
+        await Assert.That(original.Id).IsEqualTo(id);
+        await Assert.That(original.Kind).IsEqualTo(OperationKind.ConfigureResource);
+        await Assert.That(original.PrincipalId).IsEqualTo(P.Root);
+        await EqualAsync(expected, NativeCommandPayload.Read<ConfigureResourceRequest>(original));
+        var lifetime = ResourceLifetimeIdentity.Create(original, expected.TenantId, expected.DatabaseId, expected.Definition);
+        foreach (var node in nodes)
+        {
+            var actual = node.Journal.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
+                expected.TenantId, expected.DatabaseId, collection, expected.Definition));
+            await EqualAsync<ResourceLifetimeV1?>(lifetime, actual);
+        }
+        return original;
+    }
+
+    internal static EntityRef Reference(ReplicatedOperation creation, PartitionRef partition, string collection, string id)
+    {
+        var request = NativeCommandPayload.Read<ConfigureResourceRequest>(creation);
+        var lifetime = ResourceLifetimeIdentity.Create(creation, request.TenantId, request.DatabaseId, request.Definition);
+        return new(partition, collection, id)
+        {
+            Lifetime = new EntityRefLifetimeV1(lifetime.Incarnation.Value)
+        };
+    }
+
+    internal static async Task DependencyAsync(ReplicaForwardedOriginalWorkObserved observed,
+        RequestCqrsCohortNativeNode leader, PartitionRef partition, ReplicatedOperation creation)
+    {
+        var request = NativeCommandPayload.Read<ConfigureResourceRequest>(creation);
+        var lifetime = ResourceLifetimeIdentity.Create(creation, request.TenantId, request.DatabaseId, request.Definition);
+        var actual = leader.Journal.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
+            partition.TenantId, partition.DatabaseId, P.Collection, request.Definition));
+        await EqualAsync<ResourceLifetimeV1?>(lifetime, actual);
         await Assert.That(observed.Lease.Dependencies.Count).IsEqualTo(P.SingleDependency);
         await Assert.That((ResourceLifetimeV1?)observed.Lease.Dependencies.Single()).IsEqualTo(lifetime);
     }

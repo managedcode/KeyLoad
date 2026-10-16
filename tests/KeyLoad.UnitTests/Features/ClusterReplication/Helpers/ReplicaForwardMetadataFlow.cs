@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterRouting;
@@ -29,20 +28,14 @@ internal static class ReplicaForwardMetadataFlow
     {
         await fixture.InitializeAsync(token);
         var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
-        var definition = fixture.Database.Configure(W.Collection, ResourceKind.Collection);
+        var creation = await ReplicaForwardedOriginalWorkAssertions.ConfigureAsync(fixture, nodes, W.Collection, token);
         var partition = fixture.Database.Partition;
-        var lifetime = fixture.Database.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
-            partition.TenantId, partition.DatabaseId, W.Collection, definition))
-            ?? throw new InvalidOperationException(P.Missing);
-        var expectedReference = new EntityRef(partition, W.Collection, W.Healthy)
-        {
-            Lifetime = new EntityRefLifetimeV1(lifetime.Incarnation.Value)
-        };
         fixture.Database.Commit(new PutDocument(W.Collection, W.Anchor, W.AnchorJson, P.NewDocument));
         var writer = new PrincipalRecord(P.Writer, fixture.Database.Partition.TenantId,
             [new ScopeGrant(fixture.Database.Partition.DatabaseId, W.Collection, Capability.DocumentsWrite)], []);
-        Configure(fixture, writer);
+        Configure(fixture, writer, token);
         await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
+        var expectedReference = ReplicaForwardedOriginalWorkAssertions.Reference(creation, partition, W.Collection, W.Healthy);
         var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
         var follower = nodes.First(node => !ReferenceEquals(node, leader));
         var work = CreateBudget(follower, fixture.Clock, token);
@@ -117,7 +110,7 @@ internal static class ReplicaForwardMetadataFlow
             Grants = [],
             PolicyEpoch = writer.PolicyEpoch + P.SingleStep
         };
-        Configure(fixture, removed);
+        Configure(fixture, removed, token);
         await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
         var positions = nodes.Select(node => node.Journal.Database.Store.Position).ToArray();
         var cuts = nodes.Select(node => (node.Journal.Log.State.LastIndex, node.Journal.Log.State.CommittedIndex)).ToArray();
@@ -130,13 +123,19 @@ internal static class ReplicaForwardMetadataFlow
         {
             Grants = writer.Grants,
             PolicyEpoch = removed.PolicyEpoch + P.SingleStep
-        });
+        }, token);
         await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
         var images = nodes.Select(ReplicaBarrierDeadlineAssertions.Image).ToArray();
         cuts = nodes.Select(node => (node.Journal.Log.State.LastIndex, node.Journal.Log.State.CommittedIndex)).ToArray();
-        var replay = await SubmitAsync(follower, original, work, observation, token);
+        var replayFailure = await Assert.ThrowsAsync<KeyLoadException>(() =>
+            SubmitAsync(follower, original, work, observation, token));
+        await Assert.That((replayFailure ?? throw new InvalidOperationException(P.Missing)).Code).IsEqualTo(ErrorCode.PermissionDenied);
         await ReplicaForwardMetadataAssertions.ImportedAsync(observation.For(work, original.Id), work, token);
-        await ReplicaForwardedOriginalWorkAssertions.EqualAsync(refused, replay);
+        foreach (var node in nodes)
+        {
+            await ReplicaForwardedOriginalWorkAssertions.EqualAsync(refused,
+                OutcomeStoreOracle.ReadPartition(node.Journal.Database.Store, fixture.Database.Partition, P.Writer, original.Id));
+        }
         await ReplicaForwardMetadataAssertions.UnchangedAsync(nodes, images, cuts);
         work.Check();
     }
@@ -157,6 +156,7 @@ internal static class ReplicaForwardMetadataFlow
         }
     }
 
-    private static void Configure(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord writer)
-        => fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(writer)).Get<PrincipalRecord>();
+    private static void Configure(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord writer, CancellationToken token)
+        => fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(writer),
+            W.Root, null, null, token).Get<PrincipalRecord>();
 }

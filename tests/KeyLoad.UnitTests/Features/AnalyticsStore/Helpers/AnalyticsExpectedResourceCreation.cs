@@ -1,0 +1,41 @@
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ResourceExecution;
+
+namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+
+/// <summary>Builds complete expected references from original creation commands, independently of stored rows and read outputs.</summary>
+internal static class AnalyticsExpectedResourceCreation
+{
+    internal static readonly Guid Anchor = Guid.Parse("1abec060-95a4-42ce-a770-0841285b10aa");
+    internal static readonly Guid SharedDocuments = Guid.Parse("1abec060-95a4-42ce-a770-0841285b10ab");
+    internal static readonly Guid SharedStore = Guid.Parse("1abec060-95a4-42ce-a770-0841285b10ac");
+    internal static readonly Guid Unrelated = Guid.Parse("1abec060-95a4-42ce-a770-0841285b10ad");
+
+    internal static ResourceDefinition Configure(TestDatabase fixture, ResourceDefinition definition, Guid commandId)
+        => fixture.Submit(OperationKind.ConfigureResource,
+            new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition),
+            id: commandId).Get<ResourceDefinition>();
+
+    internal static ResourceLifetimeV1 Lifetime(TestDatabase fixture, Guid commandId)
+    {
+        var original = fixture.ReadRetainedEntry(commandId).Operation
+            ?? throw new InvalidOperationException("The original analytics fixture resource creation is missing.");
+        var request = NativeCommandPayload.Read<ConfigureResourceRequest>(original);
+        return ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
+    }
+
+    internal static EntityRef Bind(TestDatabase fixture, EntityRef literal, Guid commandId)
+    {
+        var lifetime = Lifetime(fixture, commandId);
+        if (literal.Partition.TenantId != lifetime.TenantId || literal.Partition.DatabaseId != lifetime.DatabaseId
+            || literal.Partition.TransactionDomainId != lifetime.TransactionDomainId || literal.Collection != lifetime.ResourceName
+            || literal.Lifetime is { } guard && guard.Incarnation != lifetime.Incarnation.Value)
+        {
+            throw new InvalidOperationException("The expected reference does not belong to its original creation command.");
+        }
+        return literal with
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        };
+    }
+}

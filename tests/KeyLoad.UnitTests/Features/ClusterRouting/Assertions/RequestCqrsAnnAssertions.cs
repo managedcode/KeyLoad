@@ -20,9 +20,10 @@ internal static class RequestCqrsAnnAssertions
     {
         var placement = database.Database.ReadAtomicPartitionPlacement(RequestCqrsAnnTestData.Principal,
             new(RequestCqrsAnnTestData.Version, database.Partition));
-        await EqualAsync(new CommitReceipt(command.CommandId,
+        var expected = new CommitReceipt(command.CommandId,
             new(database.Store.Identity.Incarnation, database.Partition.AtomicPartitionId, position, placement.PlacementEpoch),
-            [.. mutations], database.Store.Identity.Durability), receipt);
+            [.. mutations], database.Database.Durability);
+        await EqualAsync(expected, receipt);
     }
 
     internal static async Task FramesAsync(List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> frames,

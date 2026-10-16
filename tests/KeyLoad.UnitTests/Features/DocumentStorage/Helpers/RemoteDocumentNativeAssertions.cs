@@ -31,10 +31,12 @@ internal static class RemoteDocumentNativeAssertions
     }
 
     internal static async Task DocumentAsync(OwnedDocumentReadResultV1 actual,
-        PhysicalShardCatalogFixture destination, long position)
+        RemoteDocumentNativeFixture fixture, long position)
     {
+        fixture.RequireOriginalResourceBindings();
+        var destination = fixture.Destination;
         var owner = PhysicalOwnerDirectoryWholeFlow.Destination.Owner;
-        var expected = new OwnedDocumentReadResultV1(new(RemoteDocumentNativeFixture.Reference,
+        var expected = new OwnedDocumentReadResultV1(new(fixture.ExpectedDestinationReference,
             RemoteDocumentNativeFixture.First, RemoteDocumentNativeFixture.ProjectedJson, true,
             [RemoteDocumentNativeFixture.Secret]), destination.Store.Identity.NodeId, owner.Incarnation,
             destination.Store.Identity.ReadGeneration,

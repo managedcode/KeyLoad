@@ -51,7 +51,10 @@ public sealed partial class DatabaseEngine
                 ValidateDocumentSessionToken(charged, frame.Reference.Partition, request.Request.MinimumToken);
             }
             var record = charged.GetRecord<DocumentRecord>(DocumentKey(frame.Reference.Partition, frame.Reference.Collection, frame.Reference.Id));
-            EntityReferenceLifetime.RequireDocument(record, sourceLifetime);
+            if (record is not null)
+            {
+                EntityReferenceLifetime.RequireStored(charged, record.Reference, targetResource);
+            }
             var document = record is null || record.Deleted || !Authorization.CanReadRow(principal, record.Access)
                 || !Authorization.CanReadRow(frame.Principal, record.Access) ? null
                 : ProjectWithAuthorityIntersection(frame.Principal, frame.Resource, principal, targetResource, record).Value;

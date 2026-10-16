@@ -25,7 +25,10 @@ internal static class ResourceRetirementCleanupCheckpointShape
         var begin = new ResourceRetirementPhaseReceiptV1(One, request.RetirementId, ResourceRetirementPhase.Begin,
             request.RetirementId, state.Lifetime, catalog.DefaultShard, Generation, Intent);
         var control = new ResourceRetirementControlV1(request, definition, state.Lifetime, catalog, directory,
-            Zero, Principal, Generation, begin, Intent);
+            Zero, Principal, Generation, begin, Intent)
+        {
+            WorkOrigins = []
+        };
         var partition = state.Partitions[FirstIndex];
         var attemptId = Guid.NewGuid(); // Structural validator input only; no source attempt is issued.
         var pageId = ResourceRetirementCleanupPageIdentity.For(control, receiver, partition, Generation, attemptId);

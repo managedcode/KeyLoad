@@ -9,7 +9,7 @@ internal static class ReplicaSnapshotInstallFencingHealthy
     internal static async Task RunAsync(ReplicaCrashNode node, ReplicaMaterializer materializer, CancellationToken token)
     {
         var id = Guid.NewGuid();
-        var reference = ReplicaCrashModel.Document;
+        var reference = ReplicaPrefixGcReceiptAssertions.ExpectedDocument();
         var request = new CommandRequest(id, reference.Partition,
             [new PutDocument(reference.Collection, reference.Id, ReplicaSnapshotInstallFencingProtocol.HealthyJson,
                 ReplicaSnapshotInstallFencingProtocol.PreviousRevision)]);

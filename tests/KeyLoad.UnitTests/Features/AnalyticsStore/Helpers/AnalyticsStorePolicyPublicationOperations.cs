@@ -41,7 +41,8 @@ internal static class AnalyticsStorePolicyPublicationOperations
         db.Database.ValidateAnalyticsAggregatePublication(original);
         await cut.AssertUnchangedAsync(db);
         var actual = db.Database.GetDocument(D.Root, new(db.Partition, S.OtherCollection, S.OtherId), cancellationToken: token);
-        await O.EqualAsync(new DocumentResult(new(db.Partition, S.OtherCollection, S.OtherId),
+        await O.EqualAsync(new DocumentResult(AnalyticsExpectedResourceCreation.Bind(db, new(db.Partition, S.OtherCollection, S.OtherId),
+            AnalyticsExpectedResourceCreation.Unrelated),
             S.Revision, S.OtherJson, false, []), actual);
         await cut.AssertUnchangedAsync(db);
     }

@@ -36,11 +36,17 @@ public sealed partial class DatabaseEngine
                 OriginalFingerprint = body.Reservation.OriginalFingerprint,
                 TerminalReceipt = body.Reservation.Receipt
             };
+            var selected = state.OwnerAttempts.SingleOrDefault(value => value.AttemptId == attempt.AttemptId
+                && ResourceRetirementAttemptPointers.Belongs(value, body.Control, body.Reservation.Receiver));
+            if (selected is null || !ResourceRetirementValidation.Same(selected, attempt))
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementProtocol.Malformed);
+            }
             ResourceRetirementAttemptStorage.Write(transaction, context, completed, Limits);
             state = state with
             {
                 Reservations = state.Reservations.Add(body.Reservation),
-                OwnerAttempts = state.OwnerAttempts.Replace(attempt, completed)
+                OwnerAttempts = state.OwnerAttempts.SetItem(state.OwnerAttempts.IndexOf(selected), completed)
             };
         }
         var result = new ResourceRetirementPhaseResultV1(

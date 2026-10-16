@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -86,22 +87,26 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         Database = CreateDatabase(Store);
     }
 
-    internal void ConfigureGraph()
+    internal ResourceLifetimeV1 ConfigureGraph()
     {
         var collection = new ResourceDefinition(Collection, ResourceKind.Collection, Source.TransactionDomainId);
         var graph = new ResourceDefinition(Graph, ResourceKind.Graph, Source.TransactionDomainId);
-        RequireConfigured(collection);
+        var lifetime = RequireConfigured(collection);
         RequireConfigured(graph);
+        return lifetime;
     }
 
-    private void RequireConfigured(ResourceDefinition definition)
+    private ResourceLifetimeV1 RequireConfigured(ResourceDefinition definition)
     {
-        var result = Submit(OperationKind.ConfigureResource,
-            new ConfigureResourceRequest(Source.TenantId, Source.DatabaseId, definition));
+        var request = new ConfigureResourceRequest(Source.TenantId, Source.DatabaseId, definition);
+        var original = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, RootPrincipalId,
+            Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var result = Database.Apply(original);
         if (result.Error is not null)
         {
             throw new InvalidOperationException(result.SafeDetail ?? ConfigurationFailure);
         }
+        return ResourceLifetimeIdentity.Create(original, Source.TenantId, Source.DatabaseId, definition);
     }
 
     private void OpenStore()

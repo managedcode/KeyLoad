@@ -2,6 +2,7 @@ using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
@@ -56,7 +57,7 @@ internal static class ReplicaRetainedReplayAssertions
             await OriginalOutcomesAsync(node, seed, originalPolicyCurrent);
             var document = node.Journal.Database.GetDocument(P.Root,
                 new(P.Partition, P.Collection, P.DocumentId), cancellationToken: token);
-            var expected = new DocumentResult(new(P.Partition, P.Collection, P.DocumentId),
+            var expected = new DocumentResult(NativeLocalChildLifetimeReferences.Expected(node, P.DocumentId),
                 ReplicaRetainedReplayProducer.Single, P.Json, false, []);
             await Assert.That(document).IsNotNull();
             await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(expected),

@@ -12,13 +12,13 @@ internal static class ResourceRetirementConservationOriginImport
 
     internal static ResourceRetirementConservationSourceOriginV1 SourceCapture(IKeyValueView view,
         PhysicalShardRecord sourceOwner, StoreIdentity sourceIdentity, long sourcePosition, long sourceApplied,
-        PhysicalShardRecord targetOwner, int maximumRecords, int maximumRecordBytes, CancellationToken cancellationToken)
+        PhysicalShardRecord targetOwner, int maximumRecords, int maximumPageRecords, int maximumRecordBytes, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sourceIdentity);
         cancellationToken.ThrowIfCancellationRequested();
         var floor = ResourceRetirementConservationRead.ReadFloor(view, maximumRecordBytes);
         var summary = ResourceRetirementAuthorityCapture.Capture(view, maximumRecords,
-            maximumRecordBytes, cancellationToken);
+            maximumPageRecords, maximumRecordBytes, cancellationToken);
         var origin = new ResourceRetirementConservationSourceOriginV1(Version, sourceOwner,
             sourceIdentity.NodeId, sourceIdentity.Incarnation, sourcePosition, sourceApplied, floor,
             summary.Records, summary.Digest.ToArray(), targetOwner);
@@ -29,7 +29,7 @@ internal static class ResourceRetirementConservationOriginImport
 
     internal static void StageFresh(IAtomicTransaction transaction,
         ResourceRetirementConservationSourceOriginV1 origin, PhysicalShardRecord targetOwner,
-        StoreIdentity targetIdentity, int maximumRecords, int maximumRecordBytes, CancellationToken cancellationToken)
+        StoreIdentity targetIdentity, int maximumRecords, int maximumPageRecords, int maximumRecordBytes, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(transaction);
         ArgumentNullException.ThrowIfNull(targetIdentity);
@@ -46,7 +46,7 @@ internal static class ResourceRetirementConservationOriginImport
         var currentFloor = ResourceRetirementConservationRead.ReadFloor(transaction, maximumRecordBytes);
         var sourceSummary = ResourceRetirementConservationOriginValidation.Summary(origin);
         var currentSummary = ResourceRetirementAuthorityCapture.Capture(transaction, maximumRecords,
-            maximumRecordBytes, cancellationToken);
+            maximumPageRecords, maximumRecordBytes, cancellationToken);
         if (!SameFloor(origin.SourceFloor, currentFloor) || !sourceSummary.Same(currentSummary))
         {
             throw Errors.Fail(ErrorCode.Corruption, Invalid);

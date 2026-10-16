@@ -16,7 +16,8 @@ internal static class AnalyticsStoreNativeTestOperations
         };
         await EqualAsync(definition, db.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(db.Partition.TenantId, db.Partition.DatabaseId, definition)).Get<ResourceDefinition>());
-        db.Configure(D.AnchorCollection, ResourceKind.Collection);
+        var anchor = new ResourceDefinition(D.AnchorCollection, ResourceKind.Collection, db.Partition.TransactionDomainId);
+        await EqualAsync(anchor, AnalyticsExpectedResourceCreation.Configure(db, anchor, AnalyticsExpectedResourceCreation.Anchor));
         db.Commit(new PutDocument(D.AnchorCollection, D.AnchorId, D.AnchorJson, 0, Access: new(OwnerId: D.Owner)));
     }
 
@@ -59,7 +60,8 @@ internal static class AnalyticsStoreNativeTestOperations
     {
         var records = expected.Select((value, index) => new AnalyticsEventRecord(value.Id, value.Timestamp,
             value.Dimensions, hideMetrics ? ImmutableDictionary<string, double>.Empty : value.Metrics,
-            value.RowAccess, value.Links, revisions[index])).ToImmutableArray();
+            value.RowAccess, [.. value.Links.Select(link => AnalyticsExpectedResourceCreation.Bind(db, link,
+                AnalyticsExpectedResourceCreation.Anchor))], revisions[index])).ToImmutableArray();
         await EqualAsync(new AnalyticsEventsPage(records, false, null), db.Database.ReadAnalyticsEvents(principal, D.Read(db), token));
     }
 

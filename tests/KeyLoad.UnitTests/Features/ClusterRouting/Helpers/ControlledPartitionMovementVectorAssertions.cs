@@ -11,7 +11,7 @@ internal static class ControlledPartitionMovementVectorAssertions
     private const string VectorKeyFamily = "vector";
     private const double SingleRank = 1.0 / 61.0;
 
-    internal static async Task ReadAsync(ControlledPartitionMovementNode node, CancellationToken cancellationToken)
+    internal static async Task ReadAsync(ControlledPartitionMovementNode node, EntityRef reference, CancellationToken cancellationToken)
     {
         var partition = ControlledPartitionMovementCorpus.Partition;
         var vector = node.Store.Read(view => view.GetRecord<VectorRecord>(KeySpace.Partition(VectorKeyFamily,
@@ -26,8 +26,7 @@ internal static class ControlledPartitionMovementVectorAssertions
             PhysicalShardCatalogFixture.RootPrincipalId, new(partition, ControlledPartitionMovementCorpus.Collection,
                 VectorField: ControlledPartitionMovementCorpus.VectorField, Vector: [1f, 0f],
                 Space: ControlledPartitionMovementCorpus.Space), cancellationToken);
-        var document = new DocumentResult(new(partition, ControlledPartitionMovementCorpus.Collection,
-            ControlledPartitionMovementCorpus.DocumentId), ControlledPartitionMovementCorpus.InitialRevision,
+        var document = new DocumentResult(reference, ControlledPartitionMovementCorpus.InitialRevision,
             ControlledPartitionMovementCorpus.OriginalJson, false, []);
         var literal = new[] { new RankedDocument(document, SingleRank) };
         await Assert.That(JsonSerializer.SerializeToUtf8Bytes(rows.ToArray(), JsonDefaults.Options)

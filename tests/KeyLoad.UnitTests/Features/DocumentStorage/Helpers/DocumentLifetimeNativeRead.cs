@@ -11,6 +11,7 @@ internal static class DocumentLifetimeNativeRead
 {
     internal static RemoteDocumentReadFrameV2 Capture(RemoteDocumentNativeFixture fixture)
     {
+        fixture.RequireOriginalResourceBindings();
         var budget = Work(fixture.Source.Database);
         return fixture.Source.Database.CaptureRemoteDocumentReadV2(C.Reader, C.Reference,
             fixture.Source.Database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(fixture.Source.Database.Limits.QueryDeadlineSeconds), budget)
@@ -24,6 +25,7 @@ internal static class DocumentLifetimeNativeRead
     internal static OwnedDocumentReadResultV1 Read(RemoteDocumentNativeFixture fixture,
         RemoteDocumentReadFrameV2 frame, CancellationToken token = default)
     {
+        fixture.RequireOriginalResourceBindings();
         var limits = fixture.Destination.Database.Limits;
         var request = new OwnedDocumentReadRequestV2(frame, new(C.Reference, fixture.Receipt.Token),
             PhysicalOwnerDirectoryWholeFlow.Destination.Owner, limits.MaxQueryReadBytes, limits.MaxScanRecords, limits.MaxBatchBytes);

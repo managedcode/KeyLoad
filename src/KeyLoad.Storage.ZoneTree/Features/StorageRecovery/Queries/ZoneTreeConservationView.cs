@@ -6,6 +6,7 @@ namespace KeyLoad.Storage.ZoneTree;
 internal sealed class ZoneTreeConservationView(IKeyValueView source, ZoneTreeConservationBudget budget) : IKeyValueView
 {
     internal ZoneTreeConservationBudget Budget => budget;
+    public int MaximumRangeRecords => source.MaximumRangeRecords;
     public byte[]? ReadOwnedValue(byte[] key)
     {
         byte[]? value = null;

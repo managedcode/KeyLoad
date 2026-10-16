@@ -115,14 +115,17 @@ internal sealed class AtomicPartitionRosterBudgetTests
     public async Task AcBackup004ResetDiscardsOldCandidatesAndRegistersOnlyRetainedWrites()
     {
         using var fixture = new AtomicPartitionRosterFixture();
-        fixture.ConfigureGraph();
+        var lifetime = fixture.ConfigureGraph();
         var limits = new DatabaseLimits();
         limits.Validate();
         var limitOptions = Options.Create(limits);
         var first = AtomicPartitionRosterFixture.Source;
         var second = AtomicPartitionRosterFixture.Destination;
         var secondRecord = new DocumentRecord(new(second, AtomicPartitionRosterFixture.Collection,
-            CandidateDocumentId), FirstRevision, SeedJson, new RowAccess(), fixture.Database.EvaluationClock.GetUtcNow());
+            CandidateDocumentId)
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        }, FirstRevision, SeedJson, new RowAccess(), fixture.Database.EvaluationClock.GetUtcNow());
         fixture.Store.Commit((transaction, position) =>
         {
             var bounded = new AtomicPartitionRosterTransaction(transaction, limitOptions, position, NoAppliedIndex);

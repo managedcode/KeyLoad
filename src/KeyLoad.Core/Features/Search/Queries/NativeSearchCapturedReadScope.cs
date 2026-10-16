@@ -36,6 +36,8 @@ internal sealed class NativeSearchCapturedReadScope : IKeyValueView, IPartitionM
     bool IPartitionMovementReadScope.CanReuseCommittedMovementAbsence => false;
     bool IPartitionMovementReadScope.CanPublishCommittedMovementAbsence => false;
 
+    public int MaximumRangeRecords => captured.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key) => captured.ReadOwnedValue(key);
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)

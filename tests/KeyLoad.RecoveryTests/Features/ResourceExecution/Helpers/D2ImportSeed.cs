@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.CrashHost.Features.ResourceExecution;
 
@@ -25,8 +26,8 @@ internal static class D2ImportSeed
             new RegisterPhysicalOwnerV1(D2ImportCrashProtocol.Version, D2ImportCrashProtocol.Empty, session.Owners.Control, session.Owners.Destination), token);
         Submit(session.Target, OperationKind.RegisterPhysicalOwner,
             new RegisterPhysicalOwnerV1(D2ImportCrashProtocol.Version, 0, session.Owners.Destination, session.Owners.Control), token);
-        Configure(session.Source, D2ImportCrashProtocol.Collection, D2ImportCrashProtocol.Domain, token);
-        Configure(session.Target, D2ImportCrashProtocol.LocalCollection, D2ImportCrashProtocol.LocalDomain, token);
+        session.Lifetimes.Source = Configure(session.Source, D2ImportCrashProtocol.Collection, D2ImportCrashProtocol.Domain, token);
+        session.Lifetimes.Local = Configure(session.Target, D2ImportCrashProtocol.LocalCollection, D2ImportCrashProtocol.LocalDomain, token);
         foreach (var key in new[] { D2ImportCrashProtocol.FirstPartition, D2ImportCrashProtocol.SecondPartition })
         {
             var original = Write(session.Source, D2ImportCrashProtocol.Partition(key),
@@ -57,14 +58,20 @@ internal static class D2ImportSeed
             D2ImportCrashProtocol.Version, 0, owner.PhysicalShardId, owner.Incarnation, owner.VoterIds), token);
     }
 
-    private static void Configure(ControlledPartitionMovementNativeNode node, string name, string domain, CancellationToken token)
-        => Submit(node, OperationKind.ConfigureResource, new ConfigureResourceRequest(D2ImportCrashProtocol.Tenant,
-            D2ImportCrashProtocol.Database, new(name, ResourceKind.Collection, domain)), token);
+    private static ResourceLifetimeV1 Configure(ControlledPartitionMovementNativeNode node, string name, string domain,
+        CancellationToken token)
+    {
+        var definition = new ResourceDefinition(name, ResourceKind.Collection, domain);
+        var original = Submit(node, OperationKind.ConfigureResource, new ConfigureResourceRequest(D2ImportCrashProtocol.Tenant,
+            D2ImportCrashProtocol.Database, definition), token);
+        return ResourceLifetimeIdentity.Create(original, D2ImportCrashProtocol.Tenant, D2ImportCrashProtocol.Database, definition);
+    }
 
-    private static void Submit<T>(ControlledPartitionMovementNativeNode node, OperationKind kind, T body, CancellationToken token)
+    private static ReplicatedOperation Submit<T>(ControlledPartitionMovementNativeNode node, OperationKind kind, T body, CancellationToken token)
     {
         var operation = node.Database.CreateNativeOperation(kind, Guid.NewGuid(), D2ImportCrashProtocol.Principal,
             node.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(body));
         ControlledPartitionMovementProcessSetup.Require(node.Journal.Submit(operation, token));
+        return operation;
     }
 }

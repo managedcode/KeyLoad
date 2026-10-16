@@ -2,6 +2,7 @@ using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -22,6 +23,12 @@ public sealed partial class DatabaseEngine
         var admission = ResourceEffectAdmissionValidation.Read(operation, Limits);
         if (admission.Error is { } error)
         {
+            var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+            if (payload.Error == error && payload.SafeDetail == admission.SafeDetail)
+            {
+                // The authenticated decode marker belongs to the original domain call after the clock check.
+                return;
+            }
             throw Errors.Fail(error, admission.SafeDetail!);
         }
         var observed = new ResourceEffectObservationView(transaction, transaction.EffectAdmission);

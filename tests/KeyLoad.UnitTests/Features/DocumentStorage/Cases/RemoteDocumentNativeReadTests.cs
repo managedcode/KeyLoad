@@ -22,14 +22,14 @@ internal sealed class RemoteDocumentNativeReadTests
             fixture.GrantDestination();
             before = RemoteDocumentNativeAssertions.Image(fixture.Destination);
             position = fixture.Destination.Store.Position;
-            await RemoteDocumentNativeAssertions.DocumentAsync(Read(fixture, default), fixture.Destination, position);
+            await RemoteDocumentNativeAssertions.DocumentAsync(Read(fixture, default), fixture, position);
             var replay = fixture.Destination.Database.Apply(fixture.Write);
             await Assert.That(NativeSerialization.Serialize(replay.Get<CommitReceipt>())
                 .SequenceEqual(NativeSerialization.Serialize(fixture.Receipt))).IsTrue();
             await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(before)).IsTrue();
             await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
             fixture.Destination.Reopen();
-            await RemoteDocumentNativeAssertions.DocumentAsync(Read(fixture, default), fixture.Destination, position);
+            await RemoteDocumentNativeAssertions.DocumentAsync(Read(fixture, default), fixture, position);
             await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(before)).IsTrue();
             await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
         });
@@ -50,7 +50,7 @@ internal sealed class RemoteDocumentNativeReadTests
             await Assert.That(result).IsNull();
             await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(before)).IsTrue();
             await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
-            await RemoteDocumentNativeAssertions.DocumentAsync(Read(fixture, default), fixture.Destination, position);
+            await RemoteDocumentNativeAssertions.DocumentAsync(Read(fixture, default), fixture, position);
             await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(before)).IsTrue();
             await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
         });

@@ -24,7 +24,7 @@ internal sealed class DocumentLifetimeNativeReadTests
                 var destination = RemoteDocumentNativeAssertions.Image(fixture.Destination);
                 var position = fixture.Destination.Store.Position;
                 frame = DocumentLifetimeNativeRead.Capture(fixture);
-                await RemoteDocumentNativeAssertions.DocumentAsync(DocumentLifetimeNativeRead.Read(fixture, frame), fixture.Destination, position);
+                await RemoteDocumentNativeAssertions.DocumentAsync(DocumentLifetimeNativeRead.Read(fixture, frame), fixture, position);
                 fixture.Source.Database.ValidateRemoteDocumentReadV2(frame, DocumentLifetimeNativeRead.Work(fixture.Source.Database));
                 await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(source)).IsTrue();
                 await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(destination)).IsTrue();
@@ -76,8 +76,8 @@ internal sealed class DocumentLifetimeNativeReadTests
             fixture.Source.AddPrincipal(DocumentLifetimeNativeRead.Definition(C.Second, raw: false));
             fixture.Source.AddPrincipal(DocumentLifetimeNativeRead.Definition(Third, raw: false));
             fixture.Destination.AddPrincipal(DocumentLifetimeNativeRead.Definition(Third, raw: true));
+            var expected = new DocumentResult(fixture.ExpectedDestinationReference, C.First, C.ProjectedJson, true, [C.Secret]);
             var first = DocumentLifetimeNativeRead.Read(fixture, DocumentLifetimeNativeRead.Capture(fixture));
-            var expected = new DocumentResult(C.Reference, C.First, C.ProjectedJson, true, [C.Secret]);
             await Assert.That(JsonDefaults.Serialize(first.Document).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             fixture.Source.AddPrincipal(DocumentLifetimeNativeRead.Definition(Fourth, raw: true));
             fixture.Destination.AddPrincipal(DocumentLifetimeNativeRead.Definition(Fourth, raw: false));

@@ -8,6 +8,8 @@ internal sealed class ResourceEffectObservationView(IKeyValueView inner, Resourc
 {
     public void ObserveLifetime(ResourceLifetimeV1 lifetime) => scope.ObserveLifetime(lifetime);
     public void ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime) => scope.Observe(partition, lifetime);
+    public int MaximumRangeRecords => inner.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key)
     {
         byte[]? result = null;

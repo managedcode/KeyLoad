@@ -32,7 +32,7 @@ internal sealed class ZoneTreeRestoreSlotConservation(ZoneTreeStoreOptions optio
         if (reconciled.SourceOrigin is { } origin)
         {
             ResourceRetirementConservationOriginImport.StageFresh(transaction, origin, origin.TargetOwner,
-                identity, options.MaximumReadCutRecords, options.MaxFrameBytes, token);
+                identity, options.MaximumReadCutRecords, options.MaximumRangeRecords, options.MaxFrameBytes, token);
         }
     }
 

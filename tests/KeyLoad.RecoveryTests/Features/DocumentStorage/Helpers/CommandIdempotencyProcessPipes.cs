@@ -99,6 +99,10 @@ internal sealed class CommandIdempotencyProcessPipes
         {
             CommandIdempotencyProcessFailureHandling.AddDistinct(failures, joinStartupFailure);
         }
+        if (ReadersSettled && standardError is { IsCompleted: true })
+        {
+            global::KeyLoad.Server.ServerFailureObserver.Observe(() => errorReader?.ReportRetainedOutput(), failures);
+        }
         CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);
     }
 
@@ -127,7 +131,7 @@ internal sealed class CommandIdempotencyProcessPipes
         try
         {
             errorReader = new CommandIdempotencyProcessOutputReader(maximumCharacters,
-                expectedSignal: null, pipeFailure);
+                expectedSignal: null, pipeFailure, retainOutput: true);
             standardError = errorReader.ReadAsync(error);
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))

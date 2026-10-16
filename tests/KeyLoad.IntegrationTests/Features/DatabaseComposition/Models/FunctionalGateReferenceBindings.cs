@@ -23,12 +23,15 @@ internal sealed class FunctionalGateReferenceBindings
         }
     }
 
-    internal void Capture(EntityRef actual)
+    internal void Capture(EntityRef actual) => Retain(Key(actual), RequireLifetime(actual));
+
+    internal void ExpectCreation(PartitionRef partition, string collection, EntityRefLifetimeV1 expected)
+        => Retain((partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, collection), expected);
+
+    private void Retain((string Tenant, string Database, string Domain, string Collection) key, EntityRefLifetimeV1 lifetime)
     {
         lock (gate)
         {
-            var lifetime = RequireLifetime(actual);
-            var key = Key(actual);
             if (bindings.TryGetValue(key, out var existing))
             {
                 if (existing != lifetime)

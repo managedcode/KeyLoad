@@ -5,6 +5,8 @@ namespace KeyLoad.CrashHost.Features.ClusterReplication;
 internal sealed class C1SubmissionJournalInspectionView(IKeyValueView original,
     C1SubmissionJournalInspectionReadBudget budget, CancellationToken lifetime) : IKeyValueView
 {
+    public int MaximumRangeRecords => original.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key)
     {
         byte[]? value = null;

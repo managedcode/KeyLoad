@@ -22,12 +22,12 @@ internal static class D2ArchiveAssertions
 
     internal static async Task DataAsync(DatabaseEngine database, D2ArchiveSource source, bool healthy)
     {
-        await DocumentAsync(database, source.Partition, source.DocumentsLifetime.ResourceName, D2ArchiveData.SeedId, D2ArchiveData.SeedJson);
-        await DocumentAsync(database, source.Partition, source.UnrelatedLifetime.ResourceName, D2ArchiveData.UnrelatedId,
+        await DocumentAsync(database, source.Partition, source.DocumentsLifetime, D2ArchiveData.SeedId, D2ArchiveData.SeedJson);
+        await DocumentAsync(database, source.Partition, source.UnrelatedLifetime, D2ArchiveData.UnrelatedId,
             D2ArchiveData.UnrelatedJson);
         if (healthy)
         {
-            await DocumentAsync(database, source.Partition, source.DocumentsLifetime.ResourceName,
+            await DocumentAsync(database, source.Partition, source.DocumentsLifetime,
                 D2ArchiveData.HealthyId, D2ArchiveData.HealthyJson);
         }
         else
@@ -62,9 +62,13 @@ internal static class D2ArchiveAssertions
         await Assert.That(actual!.AsSpan().SequenceEqual(expected)).IsTrue();
     }
 
-    private static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition, string collection, string id, string json)
+    private static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition, ResourceLifetimeV1 lifetime, string id, string json)
     {
-        var expected = new DocumentResult(new(partition, collection, id), D2ArchiveData.Single, json, false, []);
+        var reference = new EntityRef(partition, lifetime.ResourceName, id)
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        };
+        var expected = new DocumentResult(reference, D2ArchiveData.Single, json, false, []);
         await D2ResourceInventoryAssertions.EqualAsync(expected, database.GetDocument(D2ArchiveData.Root, expected.Reference));
     }
 }

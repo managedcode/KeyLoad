@@ -54,8 +54,8 @@ internal static class UserAnalyticsProcessProtocol
             new(Average, Amount, AnalyticsAggregateKind.Average), new(Minimum, Amount, AnalyticsAggregateKind.Min),
             new(Maximum, Amount, AnalyticsAggregateKind.Max)], MaximumGroups);
     internal static AnalyticsAggregateResult Expected(bool updated)
-        => new([new(ImmutableDictionary<string, string>.Empty.Add(Region, North),
-            ImmutableDictionary<string, double>.Empty.Add(Count, ExpectedCount).Add(Sum, updated ? UpdatedSum : InitialSum)
+        => new([new(ImmutableDictionary.Create<string, string>(StringComparer.Ordinal).Add(Region, North),
+            ImmutableDictionary.Create<string, double>(StringComparer.Ordinal).Add(Count, ExpectedCount).Add(Sum, updated ? UpdatedSum : InitialSum)
                 .Add(Average, updated ? UpdatedAverage : InitialAverage).Add(Minimum, updated ? SecondValue : FirstValue)
                 .Add(Maximum, updated ? UpdatedValue : SecondValue))], EventCount);
 }

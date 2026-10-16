@@ -32,6 +32,9 @@ internal sealed class NativeOperationMarkerTests
         await Assert.That(prior.Error).IsNull();
         var operation = database.Database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, NativeAuthorityFixture.Root,
             DateTimeOffset.UnixEpoch, NativeAuthorityFixture.InvalidJson));
+        var marker = NativeAuthorityFixture.Read(operation);
+        await Assert.That(marker.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(marker.SafeDetail).IsEqualTo(NativeCommandContract.InvalidJson);
         var result = database.Database.Apply(operation);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.ClockUncertain);
         await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)!.Error).IsEqualTo(ErrorCode.ClockUncertain);
@@ -93,7 +96,8 @@ internal sealed class NativeOperationMarkerTests
 
     private static void Verify(TestDatabase database, ReplicatedOperation operation, NativeCommandPayload payload, byte[] json)
         => database.Database.VerifyNativeAuthority(operation.Id, operation.Kind, operation.PrincipalId, json,
-            payload.Value, payload.Error, payload.SafeDetail, payload.Authority, payload.Signature);
+            payload.Value, payload.Error, payload.SafeDetail, payload.Authority, payload.Signature,
+            payload.RetryDecisions, payload.TransferProof, payload.ResourceAdmission);
 }
 
 internal static class NativeMarkerFixtures

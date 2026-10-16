@@ -30,6 +30,8 @@ internal sealed class ResourceRetirementCleanupReadView(IKeyValueView inner,
         ExaminedRecords = checked(ExaminedRecords + Step);
     }
 
+    public int MaximumRangeRecords => inner.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key)
     {
         byte[]? result = null;

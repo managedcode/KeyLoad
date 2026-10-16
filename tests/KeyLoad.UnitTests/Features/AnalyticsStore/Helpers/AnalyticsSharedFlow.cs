@@ -12,13 +12,15 @@ internal static class AnalyticsSharedFlow
             AnalyticsSchema = new([P.Dimension], [P.Metric])
         };
         var actual = fixture.Submit(OperationKind.ConfigureResource,
-            new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition)).Get<ResourceDefinition>();
+            new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition),
+            id: AnalyticsExpectedResourceCreation.SharedStore).Get<ResourceDefinition>();
         if (!NativeSerialization.Serialize(definition).AsSpan().SequenceEqual(NativeSerialization.Serialize(actual)))
         {
             throw new InvalidOperationException("The actual analytics resource definition differs.");
         }
 
-        fixture.Configure(P.Documents, ResourceKind.Collection);
+        var documents = new ResourceDefinition(P.Documents, ResourceKind.Collection, fixture.Partition.TransactionDomainId);
+        _ = AnalyticsExpectedResourceCreation.Configure(fixture, documents, AnalyticsExpectedResourceCreation.SharedDocuments);
     }
 
     internal static async Task MixedAsync(CancellationToken token)
@@ -46,9 +48,9 @@ internal static class AnalyticsSharedFlow
         var seedTime = fixture.ReadRetainedEntry(anchor.CommandId).Operation!.EvaluatedAt;
         var commandTime = fixture.ReadRetainedEntry(command.CommandId).Operation!.EvaluatedAt;
         await SubscriptionOldCutOutbox.EntriesAsync(fixture.Database, fixture.Partition,
-            [AnalyticsSharedAssertions.DocumentEntry(1, P.Anchor, seed.Token, fixture.Partition, seedTime),
+            [AnalyticsSharedAssertions.DocumentEntry(fixture, 1, P.Anchor, seed.Token, fixture.Partition, seedTime),
              new(2, 0, receipt.Token, commandTime, upsert, new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.EventId, 1)),
-             AnalyticsSharedAssertions.DocumentEntry(3, P.Effect, receipt.Token, fixture.Partition, commandTime, 1)]);
+             AnalyticsSharedAssertions.DocumentEntry(fixture, 3, P.Effect, receipt.Token, fixture.Partition, commandTime, 1)]);
     }
 
     internal static async Task<CommitReceipt> CommitAsync(TestDatabase fixture, CommandRequest command,

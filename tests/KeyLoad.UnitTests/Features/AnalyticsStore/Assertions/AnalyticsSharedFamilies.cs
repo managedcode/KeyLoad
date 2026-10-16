@@ -53,8 +53,9 @@ internal static class AnalyticsSharedFamilies
         await AnalyticsSharedAssertions.SameAsync(definition, configured.Definition);
         var batch = fixture.Database.ReadProjectionBatch(P.Root, new(consumer));
         await Assert.That(batch.Entries.Length).IsEqualTo(1);
-        await AnalyticsSharedAssertions.SameAsync(new OutboxEntry(1, 0, receipt.Token, evaluatedAt, upsert,
+        await AnalyticsStoreNativeTestOperations.EqualAsync(new OutboxEntry(1, 0, receipt.Token, evaluatedAt, upsert,
             new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.EventId, 1)), batch.Entries.Single());
+        await Assert.That(batch.Entries.Single().Receipt.CompositionReferences).IsEmpty();
     }
 
     private static async Task PageAsync(TestDatabase fixture, PartitionRef partition, string family,

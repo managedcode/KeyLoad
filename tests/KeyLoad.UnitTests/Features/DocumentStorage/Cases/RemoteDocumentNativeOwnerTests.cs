@@ -83,6 +83,6 @@ internal sealed class RemoteDocumentNativeOwnerTests
             var healthy = fixture.Destination.Database.ReadOwnedDocument(RemoteDocumentNativeFixture.Reader,
                 RemoteDocumentNativeFixture.Tenant, new(RemoteDocumentNativeFixture.Reference, fixture.Receipt.Token),
                 PhysicalOwnerDirectoryWholeFlow.Destination.Owner, default);
-            await RemoteDocumentNativeAssertions.DocumentAsync(healthy, fixture.Destination, fixture.Destination.Store.Position);
+            await RemoteDocumentNativeAssertions.DocumentAsync(healthy, fixture, fixture.Destination.Store.Position);
         });
 }

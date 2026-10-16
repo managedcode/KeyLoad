@@ -89,6 +89,8 @@ internal class PartitionControlResourceView : IKeyValueView, IResourceEffectObse
         }
     }
 
+    public int MaximumRangeRecords => inner.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key)
     {
         byte[]? value = null;

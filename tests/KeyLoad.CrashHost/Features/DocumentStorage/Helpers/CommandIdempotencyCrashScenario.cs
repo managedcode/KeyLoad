@@ -50,10 +50,9 @@ internal static class CommandIdempotencyCrashScenario
         var followUp = CommandIdempotencyCrashData.CreateFollowUp(database);
         CommandIdempotencyCrashAssertions.RequireFollowUp(followUp);
         CommandIdempotencyCrashAssertions.AssertCanonicalEffects(database, store, expected, seedTail + FollowUpOutboxTail, seedTail);
-        CommandIdempotencyCrashAssertions.RequireDocument(database.GetDocument(CrashFixtureValues.Principal,
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId)),
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId),
-            InitialRevision, CommandIdempotencyCrashContract.FollowUpJson);
+        var reference = CommandIdempotencyCrashData.ExpectedDocumentReference(CommandIdempotencyCrashContract.FollowUpDocumentId);
+        CommandIdempotencyCrashAssertions.RequireDocument(database.GetDocument(CrashFixtureValues.Principal, reference),
+            reference, InitialRevision, CommandIdempotencyCrashContract.FollowUpJson);
     }
 
     private static async Task SaveEvidenceAsync(string directory, CommitReceipt receipt, long seedTail)

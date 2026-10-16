@@ -37,7 +37,7 @@ internal static class InitialConservationArchiveFlow
     }
 
     internal static async Task<InitialConservationArchive> CaptureNextAsync(EventingArtifactFixture fixture,
-        InitialConservationSlot first, CancellationToken token)
+        InitialConservationSlot first, ResourceLifetimeV1 lifetime, CancellationToken token)
     {
         ZoneTreeStore? store = null;
         TestDatabaseReplicaAdmission? admission = null;
@@ -62,7 +62,7 @@ internal static class InitialConservationArchiveFlow
             await InitialConservationLineageAssertions.EqualAsync(expected, actual);
             await InitialConservationLineageAssertions.EqualAsync(actual,
                 admission.Submit(original, explicitTime: true, token).Get<CommitReceipt>());
-            await InitialConservationLineageAssertions.DocumentAsync(database, fixture.Source.Partition, P.Two, P.UpdatedJson, token);
+            await InitialConservationLineageAssertions.DocumentAsync(database, fixture.Source.Partition, lifetime, P.Two, P.UpdatedJson, token);
             result = await CaptureAsync(store, database, Path.Combine(fixture.Root, P.SecondArchive), token);
         }, failures);
         if (admission is not null)

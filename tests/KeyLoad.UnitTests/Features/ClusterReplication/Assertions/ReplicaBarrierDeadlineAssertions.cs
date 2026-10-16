@@ -1,5 +1,6 @@
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
@@ -42,7 +43,7 @@ internal static class ReplicaBarrierDeadlineAssertions
         var before = Image(node);
         var actual = node.Journal.Database.GetDocument(P.Root,
             new(P.Partition, P.Collection, P.DocumentId), cancellationToken: token);
-        await EqualAsync(new DocumentResult(new(P.Partition, P.Collection, P.DocumentId), 1, P.Json, false, []), actual);
+        await EqualAsync(new DocumentResult(NativeLocalChildLifetimeReferences.Expected(node, P.DocumentId), 1, P.Json, false, []), actual);
         var outbox = node.Journal.Database.GetOutboxStatus(P.Root, P.Partition);
         await Assert.That(outbox.Head.Tail).IsEqualTo(1L);
         await Assert.That(outbox.Head.FirstAvailable).IsEqualTo(1L);

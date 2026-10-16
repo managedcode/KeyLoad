@@ -48,10 +48,9 @@ internal static class NativeChecksumProfileOperations
             CrashFixtureValues.Principal, CommandId(append))))?.Result.Get<CommitReceipt>()
             ?? throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(retained, receipt);
-        CommandIdempotencyCrashAssertions.RequireDocument(database.GetDocument(CrashFixtureValues.Principal,
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, DocumentId(append))),
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, DocumentId(append)),
-            NativeChecksumProfileProtocol.InitialRevision, Json(append));
+        var reference = CommandIdempotencyCrashData.ExpectedDocumentReference(DocumentId(append));
+        CommandIdempotencyCrashAssertions.RequireDocument(database.GetDocument(CrashFixtureValues.Principal, reference),
+            reference, NativeChecksumProfileProtocol.InitialRevision, Json(append));
         var seedTail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, CommandIdempotencyCrashContract.SeedTailEvidenceFile);
         RequireOutbox(store, receipt, seedTail + NativeChecksumProfileProtocol.OriginalEffects + append, append);
     }

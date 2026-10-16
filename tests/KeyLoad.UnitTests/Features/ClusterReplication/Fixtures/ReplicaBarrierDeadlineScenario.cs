@@ -8,6 +8,9 @@ namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
 internal sealed class ReplicaBarrierDeadlineScenario
 {
+    private readonly Lock resourceCreationGate = new();
+    private readonly Guid resourceCreationId = Guid.NewGuid();
+    private ReplicatedOperation? resourceCreation;
     internal const int CanonicalKeyBytes = 32;
     internal const string Root = "root";
     internal const string Collection = "barrier-deadline";
@@ -70,7 +73,7 @@ internal sealed class ReplicaBarrierDeadlineScenario
         released.Task.WaitAsync(RequestCqrsCohortRuntimeFixture.ShutdownBound).GetAwaiter().GetResult();
     };
 
-    internal static void Prepare(DatabaseEngine database, ReplicaConfiguration configuration)
+    internal ReplicatedOperation Prepare(DatabaseEngine database, ReplicaConfiguration configuration)
     {
         configuration.Validate();
         if (configuration.Incarnation != database.Store.Identity.Incarnation)
@@ -79,12 +82,26 @@ internal sealed class ReplicaBarrierDeadlineScenario
         }
         TestDatabaseEngineFactory.Bootstrap(database, Root, Credential, physicalCatalog: false);
         PhysicalShardTestBootstrap.Bootstrap(database, Root, configuration.VoterIds);
-        var request = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
-            new(Collection, ResourceKind.Collection, Partition.TransactionDomainId));
-        // This pre-log baseline must precede the original history when a fresh peer catches up.
-        var operation = database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), Root,
-            DateTimeOffset.UnixEpoch, NativeSerialization.Serialize(request));
-        _ = database.Apply(operation).Get<ResourceDefinition>();
+        // Every voter applies the same retained original creation; its fingerprint owns the resource lifetime.
+        var original = ResourceCreation(database);
+        _ = database.Apply(original).Get<ResourceDefinition>();
+        return original;
+    }
+
+    private ReplicatedOperation ResourceCreation(DatabaseEngine database)
+    {
+        lock (resourceCreationGate)
+        {
+            if (resourceCreation is null)
+            {
+                var request = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
+                    new(Collection, ResourceKind.Collection, Partition.TransactionDomainId));
+                // This pre-log baseline must precede the original history when a fresh peer catches up.
+                resourceCreation = database.CreateNativeOperation(OperationKind.ConfigureResource, resourceCreationId, Root,
+                    DateTimeOffset.UnixEpoch, NativeSerialization.Serialize(request));
+            }
+            return resourceCreation;
+        }
     }
 
     internal IReplicaTransportObservation Observe(string voter) => new Incoming(this, voter);

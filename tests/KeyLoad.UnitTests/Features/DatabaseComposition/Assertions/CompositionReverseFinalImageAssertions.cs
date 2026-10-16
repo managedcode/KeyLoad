@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.DatabaseComposition;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
@@ -41,19 +40,33 @@ internal static class CompositionReverseFinalImageAssertions
     private static async Task OutcomeAsync(SafeProjectorOperationDatabase owner, ReplicatedOperation operation,
         CommitReceipt receipt, EntityRef? start)
     {
-        var expected = new StoredOutcome(NativeOperationFingerprint.Compute(operation), owner.Store.Identity.Incarnation,
-            1, new(null)
-            {
-                NativeValue = receipt
-            })
+        var actual = OutcomeStoreOracle.ReadStored(owner.Store, operation)
+            ?? throw new InvalidOperationException("The original composition outcome is absent.");
+        await Assert.That(actual.Fingerprint).IsEqualTo(NativeOperationFingerprint.Compute(operation));
+        await Assert.That(actual.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
+        await Assert.That(actual.PolicyEpoch).IsEqualTo(1);
+        await Assert.That(actual.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
+        await Assert.That(actual.Partition).IsEqualTo(owner.Source.Partition);
+        await Assert.That(actual.BlobAuthority).IsNull();
+        await Assert.That(actual.OnlineTextAuthority).IsNull();
+        await Assert.That(actual.RemoteTransferFailureAuthority).IsNull();
+        await Assert.That(actual.RemoteTransferAuthority).IsNull();
+        await Assert.That(actual.Result.Json).IsNull();
+        await Assert.That(actual.Result.Error).IsNull();
+        await Assert.That(actual.Result.SafeDetail).IsNull();
+        await Assert.That(actual.Result.NativeValue).IsTypeOf<CommitReceipt>();
+        await A.ReceiptAsync(receipt, actual.Result.Get<CommitReceipt>());
+        if (start is null)
         {
-            ScopeKind = CommandOutcomeScopeKind.Partition,
-            Partition = owner.Source.Partition,
-            CompositionAuthority = start is null ? null : new CompositionOutcomeAuthority([start])
-        };
-        var actual = OutcomeStoreOracle.ReadStored(owner.Store, operation);
-        await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
-        await A.ReceiptAsync(receipt, actual!.Result.Get<CommitReceipt>());
+            await Assert.That(actual.CompositionAuthority).IsNull();
+        }
+        else
+        {
+            var authority = actual.CompositionAuthority
+                ?? throw new InvalidOperationException("The admitted original composition authority is absent.");
+            await Assert.That(start.Lifetime).IsNotNull();
+            await Assert.That(authority.References.SequenceEqual([start])).IsTrue();
+        }
     }
 
     private static async Task ModelsAsync(SafeProjectorOperationDatabase owner, CompositionReverseFinalImageState state)

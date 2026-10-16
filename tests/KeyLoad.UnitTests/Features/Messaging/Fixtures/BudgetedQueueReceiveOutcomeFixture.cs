@@ -1,9 +1,13 @@
+using System.Text.Json;
+using KeyLoad.Core.Features.InternalSerialization;
 using P = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeProtocol;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
 {
+    private const int FirstMutationIndex = 0;
+    private const int SecondMutationIndex = 1;
     internal TestDatabase Database { get; } = new(nativeReplicaAdmission: true);
     internal ResourceDefinition Resource { get; private set; } = null!;
     internal PrincipalRecord Worker { get; private set; } = null!;
@@ -56,11 +60,19 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
         var command = new CommandRequest(Guid.NewGuid(), Database.Partition,
             [new EnqueueMessage(P.Queue, P.First, P.Payload, P.Headers),
                 new EnqueueMessage(P.Queue, P.Second, P.Payload, P.Headers)]);
+        var original = Database.Database.NormalizeOperation(new(command.CommandId, OperationKind.Batch, P.Root,
+            Database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
+        var originalBytes = NativeSerialization.Serialize(original);
+        var input = NativeCommandPayload.Read<CommandRequest>(original);
+        await Assert.That(JsonSerializer.Serialize(input, JsonDefaults.Options))
+            .IsEqualTo(JsonSerializer.Serialize(command, JsonDefaults.Options));
         var index = checked(Database.ReadJournalCut().LastIndex + P.Step);
-        var produced = Database.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
+        var produced = Database.SubmitIssuedEmbedded(original, token).Get<CommitReceipt>();
+        await Assert.That(NativeSerialization.Serialize(original).SequenceEqual(originalBytes)).IsTrue();
         await BudgetedQueueReceiveOutcomeAssertions.EqualAsync(new CommitReceipt(command.CommandId,
             new(Database.Store.Identity.Incarnation, Database.Partition.AtomicPartitionId, index, P.Initial),
-            [new(P.EnqueueKind, P.Queue, P.First, P.Initial), new(P.EnqueueKind, P.Queue, P.Second, P.Initial)],
+            [new(P.EnqueueKind, input.Mutations[FirstMutationIndex].Resource, P.First, P.Initial),
+                new(P.EnqueueKind, input.Mutations[SecondMutationIndex].Resource, P.Second, P.Initial)],
             DurabilityProfile.ProcessDurable), produced);
         (OriginalIntent, Result, OriginalIntentBytes) = Receive();
         await BudgetedQueueReceiveOutcomeAssertions.ReceiveAsync(this, OriginalIntent, Result, P.First);

@@ -66,7 +66,8 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsHostedRuntimeFix
             fixture.Database.Partition.TenantId,
             [new ScopeGrant(fixture.Database.Partition.DatabaseId, lanes[0].Queue, Capability.QueueConsume),
              new ScopeGrant(fixture.Database.Partition.DatabaseId, lanes[2].Queue, Capability.QueueConsume)], []);
-        fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal));
+        fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal),
+            RequestCqrsHostedProfile.Root, null, null, TestContext.Current!.Execution.CancellationToken);
         var beforeDenied = NativeSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(), [.. lanes.Select(lane => new ReceiveRequest(Guid.NewGuid(), lane))]);
         var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request, principal.Id);

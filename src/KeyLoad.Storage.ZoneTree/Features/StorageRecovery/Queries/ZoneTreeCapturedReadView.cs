@@ -3,6 +3,7 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Owns bounded frozen bytes and complete admitted lookup scopes, never a live store view.</summary>
 internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
 {
+    private const int MaximumRequestedRecords = int.MaxValue;
     private const int NoImportedRecords = 0;
     private const int FirstRecordIndex = 0;
     private const int EmptyRecordCount = 0;
@@ -31,6 +32,9 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
         records.Sort(static (left, right) => left.Key.Span.SequenceCompareTo(right.Key.Span));
         exactKeys.Sort(BinaryKeyComparer.Instance);
     }
+
+    // Frozen ranges accept any positive Int32 request; capture retention and work stay separately bounded.
+    public int MaximumRangeRecords => MaximumRequestedRecords;
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
     {

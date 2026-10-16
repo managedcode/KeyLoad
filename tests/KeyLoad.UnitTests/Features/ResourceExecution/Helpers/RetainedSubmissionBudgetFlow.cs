@@ -23,7 +23,7 @@ internal static class RetainedSubmissionBudgetFlow
         using var fixture = new TestDatabase(nativeReplicaAdmission: true);
         fixture.Configure(Collection, ResourceKind.Collection);
         var subject = new PrincipalRecord(Subject, fixture.Partition.TenantId,
-            [new(fixture.Partition.DatabaseId, fixture.Partition.TransactionDomainId, Capability.DocumentsWrite)], [])
+            [new(fixture.Partition.DatabaseId, Collection, Capability.DocumentsWrite)], [])
         {
             PolicyEpoch = InitialEpoch
         };

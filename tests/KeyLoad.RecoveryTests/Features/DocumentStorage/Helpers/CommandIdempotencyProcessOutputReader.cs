@@ -12,16 +12,23 @@ internal sealed class CommandIdempotencyProcessOutputReader
     private const int WitnessUnreported = 0;
     private const int WitnessReported = 1;
     private int witnessReported;
+    private const int EmptyRetainedCharacters = 0;
+    private const int BufferStartIndex = 0;
+    private const string RetainedErrorMarker = "KEYLOAD_ORIGINAL_CHILD_STDERR";
+    private readonly bool retainOutput;
+    private StringBuilder? retained;
+    private int retainedReported;
     private readonly string? expectedSignal;
     private readonly TaskCompletionSource<Exception> pipeFailure;
     private readonly TaskCompletionSource<bool> acknowledgement = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal CommandIdempotencyProcessOutputReader(int maximumCharacters, string? expectedSignal,
-        TaskCompletionSource<Exception> pipeFailure)
+        TaskCompletionSource<Exception> pipeFailure, bool retainOutput = false)
     {
         WitnessLimit = maximumCharacters;
         this.expectedSignal = expectedSignal;
         this.pipeFailure = pipeFailure;
+        this.retainOutput = retainOutput;
     }
 
     internal Task<bool> Acknowledgement => acknowledgement.Task;
@@ -67,6 +74,17 @@ internal sealed class CommandIdempotencyProcessOutputReader
         }
     }
 
+    internal void ReportRetainedOutput()
+    {
+        if (retained is null || Interlocked.Exchange(ref retainedReported, WitnessReported) != WitnessUnreported)
+        {
+            return;
+        }
+        Console.Error.WriteLine(FormattableString.Invariant(
+            $"{RetainedErrorMarker} observedCharacters={WitnessTotal} retainedCharacters={retained.Length} truncated={WitnessTotal > retained.Length}"));
+        Console.Error.Write(retained.ToString());
+    }
+
     internal void FailAcknowledgement(Exception failure)
     {
         if (expectedSignal is not null)
@@ -88,6 +106,11 @@ internal sealed class CommandIdempotencyProcessOutputReader
         {
             characters = checked(characters + read);
             WitnessTotal = characters;
+            if (retainOutput && (retained?.Length ?? EmptyRetainedCharacters) < WitnessLimit)
+            {
+                retained ??= new StringBuilder();
+                retained.Append(buffer, BufferStartIndex, Math.Min(read, WitnessLimit - retained.Length));
+            }
             if (!exceeded)
             {
                 exceeded = RecordOutputLimit(characters);

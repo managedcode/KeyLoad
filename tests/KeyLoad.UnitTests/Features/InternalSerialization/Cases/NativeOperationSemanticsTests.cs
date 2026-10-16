@@ -86,7 +86,7 @@ internal sealed class NativeOperationSemanticsTests
                 or OperationKind.MovePartition or OperationKind.MaintainOnlineTextIndex
                 or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase
                 or OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge or OperationKind.DeliverRemoteGraphEdge
-                or OperationKind.PersistPlacementIntent or OperationKind.ApplyPlacementIntent)
+                or OperationKind.PersistPlacementIntent or OperationKind.ApplyPlacementIntent or OperationKind.DropTable)
             {
                 await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNull();
             }
@@ -111,6 +111,7 @@ internal sealed class NativeOperationSemanticsTests
     [Arguments(OperationKind.PersistPlacementIntent)]
     [Arguments(OperationKind.ApplyPlacementIntent)]
     [Arguments(OperationKind.PlacementIntentPhase)]
+    [Arguments(OperationKind.DropTable)]
     public async Task GenericUnsupportedOperationCannotBecomeOneCoreAtomicCommandOrChangeCanonicalState(OperationKind kind)
     {
         using var database = new TestDatabase();

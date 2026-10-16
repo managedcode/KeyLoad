@@ -13,9 +13,11 @@ internal static class RequestCqrsHostedMaintenanceData
     {
         cancellationToken.ThrowIfCancellationRequested();
         var before = database.Store.Position;
-        var result = database.Submit(kind, request, id: commandId).Get<T>();
+        var result = database.Submit(kind, request, RequestCqrsHostedProfile.Root,
+            commandId, null, cancellationToken).Get<T>();
         var after = database.Store.Position;
-        var replay = database.Submit(kind, request, id: commandId).Get<T>();
+        var replay = database.Submit(kind, request, RequestCqrsHostedProfile.Root,
+            commandId, null, cancellationToken).Get<T>();
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(after);
         await Assert.That(after).IsGreaterThanOrEqualTo(before);

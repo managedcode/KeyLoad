@@ -53,6 +53,8 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
     }
 
     /// <inheritdoc />
+    public int MaximumRangeRecords => view.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);

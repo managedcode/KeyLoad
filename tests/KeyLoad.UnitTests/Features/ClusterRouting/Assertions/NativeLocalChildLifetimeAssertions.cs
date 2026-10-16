@@ -15,12 +15,14 @@ internal static class NativeLocalChildLifetimeAssertions
 
     internal static async Task RowsAsync(RequestCqrsCohortNativeNode node, CancellationToken token)
     {
-        var first = new EntityRef(P.Partition, P.Collection, K.FirstId);
-        var second = new EntityRef(P.Partition, P.Collection, K.SecondId);
+        var first = NativeLocalChildLifetimeReferences.Expected(node, K.FirstId);
+        var second = NativeLocalChildLifetimeReferences.Expected(node, K.SecondId);
         await EqualAsync(new DocumentResult(first, K.Revision, K.FirstJson, false, []),
-            node.Journal.Database.GetDocument(P.Root, first, cancellationToken: token));
+            node.Journal.Database.GetDocument(P.Root, first, cancellationToken: token)
+                ?? throw new InvalidOperationException(K.Missing));
         await EqualAsync(new DocumentResult(second, K.Revision, K.SecondJson, false, []),
-            node.Journal.Database.GetDocument(P.Root, second, cancellationToken: token));
+            node.Journal.Database.GetDocument(P.Root, second, cancellationToken: token)
+                ?? throw new InvalidOperationException(K.Missing));
     }
 
     internal static async Task QueryAsync(NativeLocalChildLifetimeSeeded state,
@@ -28,13 +30,17 @@ internal static class NativeLocalChildLifetimeAssertions
     {
         var expected = new PartitionQueryCandidateV1[]
         {
-            new(K.Version, new(P.Partition, P.Collection, K.FirstId),
+            new(K.Version, NativeLocalChildLifetimeReferences.Expected(state.Leader, K.FirstId),
                 new(K.FirstId, K.Revision, K.FirstJson, false, []), []),
-            new(K.Version, new(P.Partition, P.Collection, K.SecondId),
+            new(K.Version, NativeLocalChildLifetimeReferences.Expected(state.Leader, K.SecondId),
                 new(K.SecondId, K.Revision, K.SecondJson, false, []), [])
         };
         var rows = actual.Candidates.OrderBy(row => row.Reference.Id, StringComparer.Ordinal).ToArray();
-        await EqualAsync(expected, rows);
+        await Assert.That(rows.Length).IsEqualTo(expected.Length);
+        for (var index = K.Empty; index < expected.Length; index++)
+        {
+            await EqualAsync(expected[index], rows[index]);
+        }
         await Assert.That(actual.Version).IsEqualTo(K.Version);
         await Assert.That(actual.Partition).IsEqualTo(P.Partition);
         await Assert.That(actual.NodeId).IsEqualTo(state.Leader.Journal.Database.Store.Identity.NodeId);

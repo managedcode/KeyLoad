@@ -22,7 +22,7 @@ internal static class ReplicaForwardedOriginalWorkFlow
                 var nodes = ReplicaForwardedOriginalWorkNodes.All(fixture);
                 var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
                 var follower = nodes.First(node => !ReferenceEquals(node, leader));
-                var definition = fixture.Database.Configure(P.Collection, ResourceKind.Collection);
+                var creation = await ReplicaForwardedOriginalWorkAssertions.ConfigureAsync(fixture, nodes, P.Collection, token);
                 fixture.Database.Commit(new PutDocument(P.Collection, P.Anchor, P.AnchorJson, P.NewRecordVersion));
                 await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
                 var requestCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -36,7 +36,7 @@ internal static class ReplicaForwardedOriginalWorkFlow
                 original = submitted;
                 await CancelAsync(nodes, observation, submitted, requestCancellation, token);
                 originalObserved = true;
-                await HealthyAsync(fixture, nodes, leader, follower, definition, observation, token);
+                await HealthyAsync(fixture, nodes, leader, follower, creation, observation, token);
             }, failures);
             observation.Release();
             if (selected is not null)
@@ -76,7 +76,7 @@ internal static class ReplicaForwardedOriginalWorkFlow
     }
 
     private static async Task HealthyAsync(RequestCqrsHostedRuntimeFixture fixture, RequestCqrsCohortNativeNode[] nodes,
-        RequestCqrsCohortNativeNode leader, RequestCqrsCohortNativeNode follower, ResourceDefinition definition,
+        RequestCqrsCohortNativeNode leader, RequestCqrsCohortNativeNode follower, ReplicatedOperation creation,
         ReplicaForwardedOriginalWorkObservation observation, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), fixture.Database.Partition,
@@ -90,9 +90,9 @@ internal static class ReplicaForwardedOriginalWorkFlow
         await ReplicaForwardedOriginalWorkAssertions.JoinedAsync(observed, token);
         await ReplicaForwardedOriginalWorkAssertions.ReceiptAsync(leader, fixture.Database.Partition,
             command.CommandId, P.Healthy, expectedIndex, receipt);
-        await ReplicaForwardedOriginalWorkAssertions.DependencyAsync(observed, leader, fixture.Database.Partition, definition);
+        await ReplicaForwardedOriginalWorkAssertions.DependencyAsync(observed, leader, fixture.Database.Partition, creation);
         await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
-        await ReplicaForwardedOriginalWorkAssertions.DocumentsAsync(nodes, fixture.Database.Partition, token);
+        await ReplicaForwardedOriginalWorkAssertions.DocumentsAsync(nodes, fixture.Database.Partition, creation, token);
         var before = nodes.Select(ReplicaBarrierDeadlineAssertions.Image).ToArray();
         var replay = (await follower.Hosted!.Coordinator.SubmitNativeAsync(OperationKind.Batch,
             command.CommandId, P.Root, payload, cancellationToken: token)).Get<CommitReceipt>();
@@ -101,7 +101,7 @@ internal static class ReplicaForwardedOriginalWorkFlow
         await Assert.That(ReferenceEquals(observed.Work, replayObserved.Work)).IsFalse();
         await ReplicaForwardedOriginalWorkAssertions.SameOriginalAsync(replayObserved);
         await ReplicaForwardedOriginalWorkAssertions.JoinedAsync(replayObserved, token);
-        await ReplicaForwardedOriginalWorkAssertions.DependencyAsync(replayObserved, leader, fixture.Database.Partition, definition);
+        await ReplicaForwardedOriginalWorkAssertions.DependencyAsync(replayObserved, leader, fixture.Database.Partition, creation);
         for (var index = 0; index < nodes.Length; index++)
         {
             await ReplicaBarrierDeadlineAssertions.UnchangedAsync(nodes[index], before[index]);

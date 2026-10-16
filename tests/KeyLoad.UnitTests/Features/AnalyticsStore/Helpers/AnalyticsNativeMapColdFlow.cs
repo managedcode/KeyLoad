@@ -22,7 +22,7 @@ internal static class AnalyticsNativeMapColdFlow
             await O.EqualAsync(expected, owner.Source.Submit(OperationKind.Batch, request, id: id).Get<CommitReceipt>());
             var original = owner.Source.ReadRetainedEntry(id).Operation
                 ?? throw new InvalidOperationException("The original native analytics command was not retained.");
-            var decoded = NativeSerialization.Deserialize<CommandRequest>(original.NativePayload.Span);
+            var decoded = KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(original);
             await O.EqualAsync(request, decoded);
             await Assert.That(decoded.Mutations.Single()).IsTypeOf<UpsertAnalyticsEvents>();
             await AnalyticsNativeMapColdReads.VerifyAsync(owner, events, token);

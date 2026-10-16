@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using Microsoft.Extensions.Options;
 using P = KeyLoad.UnitTests.Features.BackupRestore.InitialConservationLineageProtocol;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -10,12 +11,21 @@ internal static class InitialConservationLineageAssertions
         => await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
 
     internal static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition,
-        long revision, string json, CancellationToken token)
+        ResourceLifetimeV1 lifetime, long revision, string json, CancellationToken token)
     {
-        var reference = new EntityRef(partition, P.Collection, P.Document);
+        var reference = new EntityRef(partition, P.Collection, P.Document)
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        };
         await EqualAsync(new DocumentResult(reference, revision, json, false, []),
             database.GetDocument(P.Root, reference, cancellationToken: token)!);
     }
+
+    internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution()
+        => UnitExecutionOptions.StorageExecution(new()
+        {
+            MaximumRangeRecords = P.One
+        });
 
     internal static ResourceRetirementConservationSourceOriginV1 Origin(InitialConservationSlot slot,
         ResourceRetirementConservationFloorV1? sourceFloor, ResourceRetirementAuthoritySummary sourceSummary)

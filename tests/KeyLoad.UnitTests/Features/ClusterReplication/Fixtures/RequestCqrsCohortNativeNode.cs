@@ -20,6 +20,10 @@ internal sealed class RequestCqrsCohortNativeNode : IAsyncDisposable
     {
         get; private set;
     }
+    internal ReplicatedOperation? BaselineResourceCreation
+    {
+        get;
+    }
     internal IReplicaTransportObservation? BarrierObservation
     {
         get;
@@ -61,7 +65,7 @@ internal sealed class RequestCqrsCohortNativeNode : IAsyncDisposable
             checkpoints?.Prepare(voter, Journal);
             if (barrierDeadline is not null)
             {
-                ReplicaBarrierDeadlineScenario.Prepare(Journal.Database, Journal.Configuration);
+                BaselineResourceCreation = barrierDeadline.Prepare(Journal.Database, Journal.Configuration);
             }
             BarrierObservation = barrierDeadline?.Observe(voter);
             Peers = new(new(StringComparer.Ordinal), secret, RequestCqrsCohortScenario.ClusterId)

@@ -27,7 +27,8 @@ internal static class AnalyticsCompositionOperations
         foreach (var definition in definitions)
         {
             var operation = Issue(owner, OperationKind.ConfigureResource,
-                new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition), Guid.NewGuid());
+                new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition),
+                definition.Name == D.AnchorCollection ? AnalyticsExpectedResourceCreation.Anchor : Guid.NewGuid());
             await O.EqualAsync(definition, owner.Submit(operation).Get<ResourceDefinition>());
         }
         await PolicyAsync(owner, 1, true);

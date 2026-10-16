@@ -16,10 +16,9 @@ internal static class ControlledPartitionMovementModelAssertions
     internal static async Task ReadAsync(ControlledPartitionMovementNode node, DateTimeOffset recordedAt,
         long expectedCut, CancellationToken cancellationToken)
     {
-        await ControlledPartitionMovementVectorAssertions.ReadAsync(node, cancellationToken);
+        var reference = await ControlledPartitionMovementExpectedReferences.DocumentAsync(node);
+        await ControlledPartitionMovementVectorAssertions.ReadAsync(node, reference, cancellationToken);
         var partition = ControlledPartitionMovementCorpus.Partition;
-        var reference = new EntityRef(partition, ControlledPartitionMovementCorpus.Collection,
-            ControlledPartitionMovementCorpus.DocumentId);
         var document = node.Database.GetDocument(PhysicalShardCatalogFixture.RootPrincipalId,
             reference, cancellationToken: cancellationToken);
         await EqualAsync(document, new DocumentResult(reference, ControlledPartitionMovementCorpus.InitialRevision,

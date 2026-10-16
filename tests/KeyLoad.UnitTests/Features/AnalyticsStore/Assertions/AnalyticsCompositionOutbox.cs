@@ -11,11 +11,13 @@ internal static class AnalyticsCompositionOutbox
         IReadOnlyList<AnalyticsCompositionCommit> commits)
     {
         var partition = owner.Source.Partition;
+        var anchorReference = AnalyticsExpectedResourceCreation.Bind(owner.Source, new(partition, D.AnchorCollection, D.AnchorId),
+            AnalyticsExpectedResourceCreation.Anchor);
         var anchorMutation = new PutDocument(D.AnchorCollection, D.AnchorId, D.AnchorJson, 0);
         var time = (owner.Entry(anchor.Operation).Operation ?? throw new InvalidOperationException("The retained test operation is missing.")).EvaluatedAt;
         var expected = new List<OutboxEntry> { new(1, 0, anchor.Receipt.Token, time, anchorMutation,
             new(P.Put, D.AnchorCollection, D.AnchorId, 1),
-            After: new(new(partition, D.AnchorCollection, D.AnchorId), 1, D.AnchorJson, new(), time)) };
+            After: new(anchorReference, 1, D.AnchorJson, new(), time)) };
         foreach (var commit in commits)
         {
             var request = KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(commit.Operation);
@@ -24,7 +26,8 @@ internal static class AnalyticsCompositionOutbox
             {
                 var mutation = request.Mutations[ordinal];
                 var document = mutation is PutDocument put
-                    ? new DocumentRecord(new(partition, put.Collection, put.Id), 1, P.Json, new(), time) : null;
+                    ? new DocumentRecord(AnalyticsExpectedResourceCreation.Bind(owner.Source, new(partition, put.Collection, put.Id),
+                        AnalyticsExpectedResourceCreation.Anchor), 1, P.Json, new(), time) : null;
                 expected.Add(new(expected.Count + 1, ordinal, commit.Receipt.Token, time,
                     mutation, commit.Receipt.Mutations[ordinal], After: document));
             }

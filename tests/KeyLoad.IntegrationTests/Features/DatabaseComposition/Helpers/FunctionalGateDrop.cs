@@ -37,7 +37,9 @@ internal static class FunctionalGateDrop
             await SqlRf3Protocol.EqualAsync(P.Definition(context.Partition, index),
                 await FunctionalGateRelationalCalls.SqlSdkAsync<ResourceDefinition>(context,
                     context.Administrator, create, token));
-            tables.Add(await RecreateAsync(context, index, references[index], parents[index], drops[index], token));
+            var expectedLifetime = FunctionalGateCreationLifetime.Create(context, create.CommandId!.Value,
+                P.Definition(context.Partition, index), table: true);
+            tables.Add(await RecreateAsync(context, index, references[index], parents[index], drops[index], expectedLifetime, token));
         }
         var state = new FunctionalGateDropState(original, receipt, tables.ToImmutable());
         await FunctionalGateAnalyticsLinkLifecycle.VerifyAsync(context, state, analyticsLink, token);
@@ -60,7 +62,7 @@ internal static class FunctionalGateDrop
     }
 
     private static async Task<FunctionalGateDropTable> RecreateAsync(FunctionalGateContext context, int index,
-        EntityRef original, Guid parent, DropTableResult dropped, CancellationToken token)
+        EntityRef original, Guid parent, DropTableResult dropped, EntityRefLifetimeV1 expectedLifetime, CancellationToken token)
     {
         var reference = FunctionalGateDropRows.Reference(context, index, FunctionalGateDropRows.FreshId);
         var json = FunctionalGateDropRows.Json(context, index, reference.Id);
@@ -72,6 +74,7 @@ internal static class FunctionalGateDrop
             [new(P.PutKind, reference.Collection, reference.Id, P.Initial)], token);
         var bound = await FunctionalGateEntityReferences.CaptureRecreatedAsync(context,
             context.Administrator, original, new(reference, P.Initial, json, false, []), token);
+        await Assert.That(bound.Lifetime).IsEqualTo(expectedLifetime);
         await Assert.That(bound.Lifetime).IsNotEqualTo(original.Lifetime);
         return new(index, original, parent, Request(context, index), dropped,
             new(bound, P.Initial, json, false, []), command, receipt);

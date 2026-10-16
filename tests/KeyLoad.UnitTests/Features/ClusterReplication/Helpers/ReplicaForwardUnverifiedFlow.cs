@@ -25,7 +25,8 @@ internal static class ReplicaForwardUnverifiedFlow
                 var lifetime = fixture.Database.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
                     partition.TenantId, partition.DatabaseId, P.Collection, definition)) ?? throw new InvalidOperationException(P.Missing);
                 fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(P.Writer,
-                    partition.TenantId, [new ScopeGrant(partition.DatabaseId, P.Collection, Capability.DocumentsWrite)], []))).Get<PrincipalRecord>();
+                    partition.TenantId, [new ScopeGrant(partition.DatabaseId, P.Collection, Capability.DocumentsWrite)], [])),
+                    RequestCqrsHostedProfile.Root, null, null, token).Get<PrincipalRecord>();
                 await ReplicaForwardedOriginalWorkNodes.BarrierAsync(nodes, token);
                 var leader = await ReplicaForwardedOriginalWorkNodes.LeaderAsync(nodes, token);
                 var follower = nodes.First(node => !ReferenceEquals(node, leader));

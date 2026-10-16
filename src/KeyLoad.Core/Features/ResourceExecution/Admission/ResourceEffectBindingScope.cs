@@ -45,7 +45,7 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
             return;
         }
         var bytes = NativeSerialization.Measure(lifetime);
-        if (observed.Count >= limits.MaxBatchMutations || bytes > limits.MaxBatchBytes - retainedBytes)
+        if (bytes <= ResourceEffectAdmissionProtocol.Zero || bytes > limits.MaxBatchBytes - retainedBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ResourceEffectAdmissionProtocol.Capacity);
         }

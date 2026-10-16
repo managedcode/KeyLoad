@@ -11,7 +11,8 @@ internal static class AnalyticsStorePolicyPublicationFlow
     {
         using var db = new TestDatabase(nativeReplicaAdmission: true);
         await O.InitializeAsync(db, privacy: true);
-        db.Configure(S.OtherCollection, ResourceKind.Collection);
+        var other = new ResourceDefinition(S.OtherCollection, ResourceKind.Collection, db.Partition.TransactionDomainId);
+        await O.EqualAsync(other, AnalyticsExpectedResourceCreation.Configure(db, other, AnalyticsExpectedResourceCreation.Unrelated));
         AnalyticsEventData[] rows = [D.Event(db, D.First, D.Alpha, S.FirstValue, owned: true),
             D.Event(db, D.Second, D.Alpha, S.SecondValue, owned: true),
             D.Event(db, D.Third, D.Beta, S.ThirdValue, owned: true)];

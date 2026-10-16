@@ -52,9 +52,8 @@ internal static class CommandIdempotencyCrashAssertions
             CommandIdempotencyCrashContract.Partition, CrashFixtureValues.Principal, CommandIdempotencyCrashContract.CommandId)))?.Result.Get<CommitReceipt>()
             ?? throw new InvalidOperationException(AssertCanonicalEffectsMessageText);
         RequireSameReceipt(durable, expectedReceipt);
-        RequireDocument(database.GetDocument(CrashFixtureValues.Principal,
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId)),
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId),
+        var reference = CommandIdempotencyCrashData.ExpectedDocumentReference(CommandIdempotencyCrashContract.DocumentId);
+        RequireDocument(database.GetDocument(CrashFixtureValues.Principal, reference), reference,
             InitialRevision, CommandIdempotencyCrashContract.DocumentJson);
         var page = database.ReadStream(CrashFixtureValues.Principal,
             new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.StreamSet, CommandIdempotencyCrashContract.StreamId), limit: EventReadPageSize);

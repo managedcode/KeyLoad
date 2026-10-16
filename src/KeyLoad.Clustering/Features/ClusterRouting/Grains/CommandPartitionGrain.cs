@@ -23,7 +23,7 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
     : Grain, ICommandPartitionGrain
 {
     private readonly GrainCommandExecutor commands = new(database, borrowCoordinator(), clock, options, codec, borrowWorkOwner(), services.GetService<IPhysicalRequestPlacement>(),
-        services.GetService<IGrainPartitionMovementSealedOperationObserver>(), services.GetService<Func<INativeOnlineTextMaintenance>>()?.Invoke(), services.GetService<IPlacementIntentPersistence>(), services.GetRequiredService<INativeDropTableExecution>());
+        services.GetService<IGrainPartitionMovementSealedOperationObserver>(), services.GetService<Func<INativeOnlineTextMaintenance>>()?.Invoke(), services.GetService<IPlacementIntentPersistence>(), () => services.GetRequiredService<INativeDropTableExecution>());
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>

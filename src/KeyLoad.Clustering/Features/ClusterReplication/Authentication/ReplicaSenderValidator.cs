@@ -26,7 +26,14 @@ internal static class ReplicaSenderValidator
                 break;
             case ReplicaRpc.Forward:
                 var frame = ReplicaNativeAdmissionPolicy.Inspect<ReplicaForwardRequestV1>(payload, configuration.MaxAppendEntries).Value;
-                ReplicaForwardFrameValidation.RequireRequest(frame);
+                try
+                {
+                    ReplicaForwardFrameValidation.RequireRequest(frame);
+                }
+                catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
+                {
+                    throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidPayload);
+                }
                 _ = ReplicaNativeAdmissionPolicy.Inspect<ReplicatedOperation>(frame.Operation, configuration.MaxAppendEntries, sender);
                 break;
             case ReplicaRpc.ReadBarrier:

@@ -20,9 +20,18 @@ internal static class ResourceRetirementNativeEnvelopeData
     internal static ResourceRetirementNativeRequest Request(ReplicaSecurityFixture fixture, DateTimeOffset now)
     {
         var owners = PhysicalOwnerProbeNativeTestValues.Call(fixture);
+        var endpoints = fixture.Configuration.VoterIds.Select(static endpoint => new Uri(endpoint).AbsoluteUri);
+        var control = owners.Control with
+        {
+            Endpoints = [.. endpoints]
+        };
+        var destination = owners.Destination with
+        {
+            Endpoints = [.. endpoints]
+        };
         var commandId = Guid.NewGuid();
         return new(ResourceRetirementNativeProtocol.Version, Guid.NewGuid(), Guid.NewGuid(), Principal, 0,
-            owners.Control, owners.Destination, ReplicaSecurityFixture.VoterA, fixture.Discovery.RuntimeAddress,
+            control, destination, ReplicaSecurityFixture.VoterA, fixture.Discovery.RuntimeAddress,
             ReplicaSecurityFixture.VoterB, fixture.Discovery.RuntimeAddress, now, now + Lifetime,
             Limits.Value.MaxQueryReadBytes, Limits.Value.MaxScanRecords, Limits.Value.MaxBatchBytes,
             NativeSerialization.Serialize(commandId), string.Empty, commandId, true);

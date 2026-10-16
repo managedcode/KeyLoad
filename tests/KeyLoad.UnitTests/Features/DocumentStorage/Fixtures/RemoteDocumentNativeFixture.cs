@@ -1,4 +1,7 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server;
+using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
@@ -11,6 +14,7 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
     internal const string Collection = "remote-documents";
     internal const string DocumentId = "one";
     private const string PartitionKey = "one";
+    private const string ChangedCreation = "The native resource catalog differs from its original creation operation.";
     internal const string Title = "/title";
     internal const string Secret = "/secret";
     internal const string Classification = "private";
@@ -32,6 +36,12 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
     {
         get;
     }
+    internal ResourceLifetimeV1 SourceCreation { get; private set; } = null!;
+    internal ResourceLifetimeV1 DestinationCreation { get; private set; } = null!;
+    internal EntityRef ExpectedDestinationReference => Reference with
+    {
+        Lifetime = new(DestinationCreation.Incarnation.Value)
+    };
     internal ReplicatedOperation Write { get; private set; } = null!;
     internal CommitReceipt Receipt { get; private set; } = null!;
 
@@ -58,8 +68,9 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
             PhysicalOwnerDirectoryWholeFlow.Destination.Owner.Incarnation, PhysicalOwnerDirectoryWholeFlow.Destination.Owner.VoterIds)));
         Require(Source.Database.Apply(PhysicalOwnerDirectoryWholeFlow.Operation(Source,
             PhysicalOwnerDirectoryWholeFlow.Request(), PhysicalOwnerDirectoryWholeFlow.RegistrationId)));
-        Configure(Source);
-        Configure(Destination);
+        SourceCreation = Configure(Source);
+        DestinationCreation = Configure(Destination);
+        RequireOriginalResourceBindings();
         Source.AddPrincipal(new(Reader, Tenant,
             [new(Partition.DatabaseId, Collection, Capability.DocumentsRead)], [Title]));
         Destination.AddPrincipal(new(Reader, Tenant, [], [Title]));
@@ -82,13 +93,38 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
         PolicyEpoch = Second
     });
 
-    private static void Configure(PhysicalShardCatalogFixture fixture)
-        => Require(fixture.Database.Apply(Operation(fixture, OperationKind.ConfigureResource, Guid.NewGuid(),
-            new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
-                new(Collection, ResourceKind.Collection, Partition.TransactionDomainId)
-                {
-                    FieldPolicies = [new(Secret, Classification)]
-                }))));
+    private static ResourceLifetimeV1 Configure(PhysicalShardCatalogFixture fixture)
+    {
+        var definition = new ResourceDefinition(Collection, ResourceKind.Collection, Partition.TransactionDomainId)
+        {
+            FieldPolicies = [new(Secret, Classification)]
+        };
+        var creation = Operation(fixture, OperationKind.ConfigureResource, Guid.NewGuid(),
+            new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, definition));
+        var expected = ResourceLifetimeIdentity.Create(creation, Partition.TenantId, Partition.DatabaseId, definition);
+        Require(fixture.Database.Apply(creation));
+        RequireCreation(fixture, expected);
+        return expected;
+    }
+
+    internal void RequireOriginalResourceBindings()
+    {
+        RequireCreation(Source, SourceCreation);
+        RequireCreation(Destination, DestinationCreation);
+    }
+
+    private static void RequireCreation(PhysicalShardCatalogFixture fixture, ResourceLifetimeV1 expected)
+    {
+        var actual = fixture.Store.Read(view =>
+        {
+            var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(Tenant, Partition.DatabaseId, Collection));
+            return ResourceLifetimeCatalog.Read(view, Tenant, Partition.DatabaseId, Collection, definition);
+        });
+        if (actual != expected)
+        {
+            throw new InvalidOperationException(ChangedCreation);
+        }
+    }
 
     private static OperationResult Require(OperationResult result)
         => result.Error is null ? result : throw new InvalidOperationException(result.SafeDetail);

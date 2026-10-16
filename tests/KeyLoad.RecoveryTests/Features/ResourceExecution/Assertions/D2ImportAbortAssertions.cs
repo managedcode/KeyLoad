@@ -66,7 +66,10 @@ internal static class D2ImportAbortAssertions
         {
             var partition = D2ImportCrashProtocol.Partition(ordinal == D2ImportCrashProtocol.Empty
                 ? D2ImportCrashProtocol.FirstPartition : D2ImportCrashProtocol.SecondPartition);
-            var reference = new EntityRef(partition, D2ImportCrashProtocol.Collection, D2ImportCrashProtocol.DocumentId);
+            var reference = new EntityRef(partition, D2ImportCrashProtocol.Collection, D2ImportCrashProtocol.DocumentId)
+            {
+                Lifetime = new(session.Lifetimes.Source.Incarnation.Value)
+            };
             var document = session.Source.Store.Read(view =>
                 view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(reference)));
             var original = session.SourceSeeds[ordinal].Original;

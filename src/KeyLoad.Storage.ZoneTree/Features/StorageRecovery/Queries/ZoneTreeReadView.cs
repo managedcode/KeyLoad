@@ -5,6 +5,8 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValueView
 {
+    public int MaximumRangeRecords => runtime.Options.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);

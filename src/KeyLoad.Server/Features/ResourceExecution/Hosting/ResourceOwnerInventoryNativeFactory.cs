@@ -1,11 +1,13 @@
 using KeyLoad.Clustering;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.ResourceExecution;
 
 internal static class ResourceOwnerInventoryNativeFactory
 {
     internal static async Task<ResourceOwnerInventoryNativeRuntime> CreateAsync(OrleansNode node,
-        PartitionHost partition, ServerRuntimeOptions options, ReplicaSiloDiscoveryState local, TimeProvider clock)
+        PartitionHost partition, ServerRuntimeOptions options, PartitionMovementGrainServiceClient movement,
+        ReplicaSiloDiscoveryState local, TimeProvider clock)
     {
         partition.Database.RequireResourceLifetimeWorkFenceAttached();
         ResourceOwnerInventoryNativeClient? client = null;
@@ -13,7 +15,6 @@ internal static class ResourceOwnerInventoryNativeFactory
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() =>
         {
-            var movement = node.BorrowPartitionMovementTransport();
             var authority = new ResourceOwnerInventoryNativeAuthority(node, partition, options.Node, movement, local);
             var trust = new ResourceOwnerInventoryNativeTrust(partition, options.Node, options.Core.DatabaseLimits);
             var authentication = new PhysicalOwnerStartupRequests(node, options.Node, options.McpExecution);

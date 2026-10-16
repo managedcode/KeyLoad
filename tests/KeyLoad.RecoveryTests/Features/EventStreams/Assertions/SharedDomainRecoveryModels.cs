@@ -8,6 +8,7 @@ internal static class SharedDomainRecoveryModels
 {
     internal static async Task RequireAsync(DatabaseEngine database, SharedDomainRecoveryInput input, bool committed, bool healthy, CancellationToken token)
     {
+        var lifetimes = await SharedDomainRecoveryReferences.CaptureAsync(input);
         var scopes = SharedDomainCorpus.Create(Tenant, Database);
         foreach (var scope in scopes)
         {
@@ -15,8 +16,8 @@ internal static class SharedDomainRecoveryModels
             var continued = healthy && scope.Partition.TransactionDomainId is FirstDomain or SecondDomain;
             if (scope.Documents is { } documents)
             {
-                await DocumentAsync(database, scope, documents, Item, present, token);
-                await DocumentAsync(database, scope, documents, Healthy, continued, token);
+                await DocumentAsync(database, scope, documents, Item, present, lifetimes[documents], token);
+                await DocumentAsync(database, scope, documents, Healthy, continued, lifetimes[documents], token);
             }
             if (scope.Streams is { } streams)
             {
@@ -38,9 +39,12 @@ internal static class SharedDomainRecoveryModels
     }
 
     private static async Task DocumentAsync(DatabaseEngine database, SharedDomainScope scope, string collection, string id,
-        bool present, CancellationToken token)
+        bool present, ResourceLifetimeV1 lifetime, CancellationToken token)
     {
-        var reference = new EntityRef(scope.Partition, collection, id);
+        var reference = new EntityRef(scope.Partition, collection, id)
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        };
         await SharedDomainRecoveryValues.EqualAsync(database.GetDocument(Root, reference, cancellationToken: token),
             present ? new DocumentResult(reference, FirstRevision, scope.Payload, false, []) : null);
     }

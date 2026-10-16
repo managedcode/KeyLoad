@@ -27,6 +27,7 @@ internal sealed class D2ImportSession(string root, List<Exception> failures) : I
         get; private set;
     }
     internal List<(ReplicatedOperation Original, OperationResult Result)> SourceSeeds { get; } = [];
+    internal D2ImportLifetimes Lifetimes { get; } = new();
 
     internal void Open(CancellationToken token, bool unknownTargetOrigin = false)
     {

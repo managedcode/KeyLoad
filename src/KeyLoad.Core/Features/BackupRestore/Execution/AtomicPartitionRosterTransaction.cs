@@ -45,6 +45,8 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
             ? appliedIndex : AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex;
     }
 
+    public int MaximumRangeRecords => inner.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key) => inner.ReadOwnedValue(key);
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)
         => inner.Scan(prefix, maxRecords, afterKey);

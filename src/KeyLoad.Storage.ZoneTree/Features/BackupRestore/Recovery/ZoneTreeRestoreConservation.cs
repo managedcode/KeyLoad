@@ -42,7 +42,7 @@ internal static class ZoneTreeRestoreConservation
             throw Errors.Fail(ErrorCode.Validation, MissingMapping);
         }
         var origin = ResourceRetirementConservationOriginImport.SourceCapture(view, source, identity,
-            position, applied, target, options.MaximumReadCutRecords, options.MaxFrameBytes, cancellationToken);
+            position, applied, target, options.MaximumReadCutRecords, options.MaximumRangeRecords, options.MaxFrameBytes, cancellationToken);
         var sameFloor = proof.Floor is null ? origin.SourceFloor is null
             : origin.SourceFloor is not null && ResourceRetirementConservation.Same(proof.Floor, origin.SourceFloor);
         if (!sameFloor || origin.SourceAuthorityRecordCount != proof.AuthorityRecords

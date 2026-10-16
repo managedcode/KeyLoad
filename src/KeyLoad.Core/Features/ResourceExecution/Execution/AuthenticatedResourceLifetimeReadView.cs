@@ -10,6 +10,8 @@ internal sealed class AuthenticatedResourceLifetimeReadView(IKeyValueView view, 
         ResourceDefinition definition, ResourceLifetimeV1 lifetime)
         => binding.ObserveAuthenticated(partition, lifetime);
 
+    public int MaximumRangeRecords => view.MaximumRangeRecords;
+
     public byte[]? ReadOwnedValue(byte[] key) => view.ReadOwnedValue(key);
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)

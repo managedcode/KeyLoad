@@ -21,6 +21,7 @@ internal static class FunctionalFileOwnershipProfileModel
     private const string FirstVoter = "node1";
     private const string SecondVoter = "node2";
     private const string ThirdVoter = "node3";
+    private const string ExpectedImageReference = "ghcr.io/managedcode/keyload@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     internal static async Task VerifyAsync()
     {
@@ -85,7 +86,8 @@ internal static class FunctionalFileOwnershipProfileModel
             await Assert.That(aliases.Add(alias)).IsTrue();
             await Assert.That(containers.Add(resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name)).IsTrue();
             await Assert.That(resource.TryGetContainerImageName(out var reference)).IsTrue();
-            await Assert.That(reference).IsEqualTo(builder.Configuration[ContainerImageOptions.ServerKey]);
+            // Native digest-pinned image names omit the configured tag.
+            await Assert.That(reference).IsEqualTo(ExpectedImageReference);
             var actual = resource.Annotations.OfType<ContainerImageAnnotation>().Single();
             await Assert.That(actual.Registry).IsEqualTo(image.Registry);
             await Assert.That(actual.Image).IsEqualTo(image.Image);

@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.CrashHost.Features.DocumentStorage;
 
@@ -85,10 +86,26 @@ internal static class CommandIdempotencyCrashData
         return NativeSerialization.Deserialize<T>(await File.ReadAllBytesAsync(path, cancellationToken));
     }
 
+    internal static EntityRef ExpectedDocumentReference(string id)
+    {
+        var partition = CommandIdempotencyCrashContract.Partition;
+        var request = Configuration(CommandIdempotencyCrashContract.Collection, ResourceKind.Collection);
+        // The frozen Configure GUID/body determine creation identity; its fingerprint excludes evaluation time.
+        var original = CrashDatabase.Operation(OperationKind.ConfigureResource, request, Guid.Parse(CollectionCommand));
+        var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, request.Definition);
+        return new(partition, CommandIdempotencyCrashContract.Collection, id)
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        };
+    }
+
+    private static ConfigureResourceRequest Configuration(string name, ResourceKind kind)
+        => new(CommandIdempotencyCrashContract.Partition.TenantId, CommandIdempotencyCrashContract.Partition.DatabaseId,
+            new(name, kind, CommandIdempotencyCrashContract.Partition.TransactionDomainId));
+
     private static void Configure(DatabaseEngine database, string commandId, string name, ResourceKind kind)
     {
-        var request = new ConfigureResourceRequest(CommandIdempotencyCrashContract.Partition.TenantId, CommandIdempotencyCrashContract.Partition.DatabaseId,
-            new(name, kind, CommandIdempotencyCrashContract.Partition.TransactionDomainId));
+        var request = Configuration(name, kind);
         _ = CrashDatabase.Submit(database, OperationKind.ConfigureResource, request, Guid.Parse(commandId))
             .Get<ResourceDefinition>();
     }

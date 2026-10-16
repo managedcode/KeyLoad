@@ -18,7 +18,7 @@ internal static class ResourceEffectAdmissionValidation
         var value = NativeSerialization.Deserialize<ResourceEffectAdmissionV1>(payload.ResourceAdmission.Span);
         if (value is null || value.Version != ResourceEffectAdmissionProtocol.Version
             || value.OperationFingerprint != NativeOperationFingerprint.Compute(operation)
-            || value.Bindings.IsDefault || value.Bindings.Length > limits.MaxBatchMutations
+            || value.Bindings.IsDefault
             || (value.Error is null) != (value.SafeDetail is null)
             || value.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(value.SafeDetail)
                 || !value.Bindings.IsEmpty))
@@ -26,13 +26,20 @@ internal static class ResourceEffectAdmissionValidation
             throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
         }
         var keys = new HashSet<ResourceLifetimeV1>();
+        long retainedBytes = ResourceEffectAdmissionProtocol.Zero;
         foreach (var lifetime in value.Bindings)
         {
             ResourceOwnerInventoryValidation.Lifetime(lifetime);
+            var bytes = NativeSerialization.Measure(lifetime);
+            if (bytes <= ResourceEffectAdmissionProtocol.Zero || bytes > limits.MaxBatchBytes - retainedBytes)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
+            }
             if (!keys.Add(lifetime))
             {
                 throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
             }
+            retainedBytes += bytes;
         }
         return value;
     }

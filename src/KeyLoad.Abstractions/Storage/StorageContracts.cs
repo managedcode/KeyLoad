@@ -31,6 +31,14 @@ public sealed record StorageSnapshot([property: Orleans.Id(0)] Guid Incarnation,
 /// <summary>Reads a consistent view only inside its owning store action.</summary>
 public interface IKeyValueView
 {
+    /// <summary>Gets the provider's actual accepted requested-record ceiling for forward range traversal.</summary>
+    /// <remarks>Zero means range traversal is unsupported. This is not a cumulative work allowance;
+    /// examined records, lookahead, bytes and lifetime remain bounded by their original owners.</remarks>
+    int MaximumRangeRecords
+    {
+        get;
+    }
+
     /// <summary>Copies a found record into an independently owned buffer.</summary>
     /// <param name="key">Encoded lookup key.</param>
     /// <returns>Owned logical bytes, or null when the key is absent or deleted.</returns>

@@ -120,7 +120,7 @@ internal static class ZoneTreeBackupRestoreRestore
                 if (origin is not null)
                 {
                     ResourceRetirementConservationOriginImport.StageFresh(tx, origin, origin.TargetOwner,
-                        restored.Identity, options.MaximumReadCutRecords, options.MaxFrameBytes, cancellationToken);
+                        restored.Identity, options.MaximumReadCutRecords, options.MaximumRangeRecords, options.MaxFrameBytes, cancellationToken);
                 }
                 tx.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));
                 tx.Delete(KeyCodec.Encode(SystemNamespace, ClockKey));

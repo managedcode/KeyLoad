@@ -3,22 +3,24 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "The current complete strict Release solution passed R677 with zero warnings/errors in 391.182072 seconds, source drift zero and all native processes/readers joined. The combined264 source checkpoint c32fa153e and its residual29-source ownership/compiler/format repairs are included. Native semantic residuals progressed 103 to8 to4; the final four pending-ledger acquisitions now have genuine lexical disposal while preserving each original Prepare/cleanup/settlement boundary. Current scoped Crash native diagnostics are zero. Related TUnit/recovery R679 and refreshed public ONE/RF3 remain pending; original105 acceptance states unchanged.",
+    "implementation": "Current116-source native runtime repair and independent public ONE lifetime/replay-oracle stage passed full strict Release R697: zero warnings/errors in260.015528 seconds; all116 C# hashes unchanged. Whole-cohort source drift contains only the unrelated benchmark redesign proposal Markdown. Original R679 Unit failed149/411, bound-disposal failed4/11, corrected process recovery failed17/21, and original ONE failed at native startup before public scenarios. Source repairs are integrated; their focused Unit/recovery and refreshed ONE/RF3 qualification remain open. Original105 acceptance states unchanged.",
     "strictBuild": {
-      "label": "root-r677-lexical-retention-full-release",
+      "label": "root-r697-causal116-full-release",
       "result": "passed",
       "exitCode": 0,
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 391.1820720001124,
-      "sourceDrift": 0,
-      "compiledDriftCount": 140,
-      "compiledDriftClassification": "Expected rebuilt Release DLL/PDB outputs, not runtime drift.",
+      "elapsedSeconds": 260.01552783395164,
+      "wholeRepositorySourceDrift": [
+        "docs/implementation/benchmark-redesign-proposal.uk.md"
+      ],
+      "compiledCSharpSourceDrift": [],
+      "current116HashesUnchanged": true,
       "allProcessesAndReadersJoined": true,
-      "stdoutSha256": "61ad08404b3ae90e7321478146ac7dd790a16108c9bf758d36531ad044788424",
-      "evidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.completion.original.json",
-      "cohortEvidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.cohort-after.original.json",
-      "scope": "Complete current Release solution under SDK10.0.401, all configured analyzers enforced. No new runtime, public functional, Linux, durability, performance, coverage or task-acceptance pass inferred."
+      "stdoutSha256": "263590231b4f3f14f1729880f5a1f4cba2a855ddc62b9a298e6d684c1075f885",
+      "evidence": "TestResults/stage61-native-join/root-r697-causal116-full-release.completion.original.json",
+      "cohortEvidence": "TestResults/stage61-native-join/root-r697-causal116-full-release.cohort-after.original.json",
+      "scope": "Complete current working-tree strict Release solution. One unrelated benchmark proposal Markdown changed during execution; no whole-repository frozen-source-zero claim. All current116 C# hashes and compiler sources unchanged. Local build does not prove runtime or delivered Linux acceptance."
     },
     "format": "Native R641scope1509whitespaceapply child0/306intentionalchanges/noDLLdrift; matchingR641vverifyPASS13.2867s source/DLL0. R64727fileapply/verifybothPASSwithsource/DLL0. OptionaladditionalPowerShell native-tokenproof exited2 atparserload andremainsOPEN; no tokenequality claim. Fullrepo canonicalall-analyzergate remainsOPEN.",
     "focusedRuntime": {
@@ -265,26 +267,34 @@
       }
     },
     "latestCompilerAttempt": {
-      "label": "root-r677-lexical-retention-full-release",
+      "label": "root-r697-causal116-full-release",
       "result": "passed",
       "exitCode": 0,
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 391.1820720001124,
-      "sourceDrift": 0,
-      "compiledDriftCount": 140,
-      "compiledDriftClassification": "Expected rebuilt Release DLL/PDB outputs, not runtime drift.",
+      "elapsedSeconds": 260.01552783395164,
+      "wholeRepositorySourceDrift": [
+        "docs/implementation/benchmark-redesign-proposal.uk.md"
+      ],
+      "compiledCSharpSourceDrift": [],
+      "current116HashesUnchanged": true,
       "allProcessesAndReadersJoined": true,
-      "stdoutSha256": "61ad08404b3ae90e7321478146ac7dd790a16108c9bf758d36531ad044788424",
-      "evidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.completion.original.json",
-      "cohortEvidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.cohort-after.original.json",
-      "scope": "Complete current Release solution under SDK10.0.401, all configured analyzers enforced. No new runtime, public functional, Linux, durability, performance, coverage or task-acceptance pass inferred."
+      "stdoutSha256": "263590231b4f3f14f1729880f5a1f4cba2a855ddc62b9a298e6d684c1075f885",
+      "evidence": "TestResults/stage61-native-join/root-r697-causal116-full-release.completion.original.json",
+      "cohortEvidence": "TestResults/stage61-native-join/root-r697-causal116-full-release.cohort-after.original.json",
+      "scope": "Complete current working-tree strict Release solution. One unrelated benchmark proposal Markdown changed during execution; no whole-repository frozen-source-zero claim. All current116 C# hashes and compiler sources unchanged. Local build does not prove runtime or delivered Linux acceptance."
     },
     "latestPublicFunctionalAttempt": {
-      "label": "R600 ONE then R602 RF3 normal public pair",
-      "result": "accepted_local_normal_pair",
-      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
-      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
+      "label": "root-r681-functional-one-normal-one",
+      "result": "failed_native_startup_before_public_scenario",
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "elapsedSeconds": 298.20875891600735,
+      "stdoutSha256": "872e674f36ee113ad983694d8b49860d89a12a1529c2a7ea99d6e93123cedd9e",
+      "rootCause": "ResourceOwnerInventoryNativeFactory borrowed public routing transport before native silo startup publication. Startup2 now uses the registered native client. Runtime rerun required.",
+      "evidence": "TestResults/stage61-native-join/root-r681-functional-one-normal-one.completion.original.json",
+      "scope": "No current ONE or RF3 public-operation pass inferred."
     },
     "previousCompilerAttempt": {
       "label": "root-r673-combined-residual-full-release",
@@ -298,25 +308,33 @@
       "scope": "One unique CrashHost CA2000; downstream Unit not compiled on that attempt. All four same-shape pending-owner acquisitions repaired together after complete R674 native4 catalogue."
     },
     "latestFocusedRuntime": {
-      "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
-      "sourceDrift": 0,
-      "compiledDrift": 0,
+      "sourceCommit": "e02c02db2",
       "unit": {
-        "total": 42,
-        "passed": 38,
-        "failed": 4,
+        "total": 411,
+        "passed": 262,
+        "failed": 149,
         "skipped": 0,
-        "elapsedSeconds": 161.27667083311826
+        "elapsedSeconds": 1239.1865473750513,
+        "stdoutSha256": "dfc7aeb185352ee4164af3c1a51572e2ce4bd5532e7045693c89cf74ae26e4f9"
       },
-      "recovery": {
-        "total": 20,
-        "passed": 20,
-        "failed": 0,
-        "skipped": 0,
-        "elapsedSeconds": 102.57824708311819
+      "ownedDisposal": {
+        "total": 11,
+        "passed": 7,
+        "failed": 4
       },
-      "evidence": "TestResults/stage61-native-join/root-r623-native-unit-recovery-terminal-evaluation.original.json",
-      "qualification": "Related focused local arm64 selections; not full Unit/Recovery suite or Linux/public RF3 qualification."
+      "correctedRecovery": {
+        "total": 21,
+        "passed": 4,
+        "failed": 17,
+        "stdoutSha256": "d2878bdadafb16ba41bc30620eab5343821e4e6bddef56c59b28e5ed686fdefa"
+      },
+      "failureCatalogue": "TestResults/stage61-native-join/root-r693-unit-terminal-reviewed-feature-map.prepared.json",
+      "failureCatalogueSha256": "bdfdb6d3e74519e11e0f30f1b4421108b8acfa6c375d696e5db8eea70ad03d84",
+      "sourceDrift": [],
+      "unitOutputPdbCopiesMissingAfter": 6,
+      "all159DllHashesUnchanged": true,
+      "pdbDeletionCause": "unresolved; original two static-instrumented Unit processes overlapped on same assembly path, future selection uses one Unit process",
+      "scope": "Failed previous-source local development; no gate or current-source acceptance pass."
     },
     "latestPublicInventoryMovement": {
       "sourceCommit": "244900c1e12fccc106e627724f73ab9fc2b4b9b9",
@@ -350,27 +368,24 @@
       "scope": "Complete Release original R609 source. KLD0031 partial test helper201>200 and IDE0005 unused import. All product projects compiled, but no complete build/runtime acceptance."
     },
     "formatVerification": {
-      "label": "root-r676-lexical-retention-whitespace-verify",
-      "result": "passed_selected29_files",
-      "childExitCode": 0,
-      "selectedCSharpFiles": 29,
-      "compiledDrift": 0,
-      "sourceDrift": [
-        "docs/implementation/benchmark-redesign-proposal.uk.md"
-      ],
-      "scope": "Native formatter reported no changes in selected current29 C# files. One unrelated proposal document changed during the wrapper; this is not a whole-repository frozen-source proof. R677 subsequently passed with full source drift zero.",
-      "evidence": "TestResults/stage61-native-join/root-r676-lexical-retention-whitespace-verify.completion.original.json"
+      "label": "root-r702-causal116-whitespace-verify",
+      "result": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 9.173529250081629,
+      "scope": "Native dotnet whitespace verification of116 changed C# files only. Full final dotnet format and functional qualification remain separate.",
+      "evidence": "TestResults/stage61-native-join/root-r702-causal116-whitespace-verify.completion.original.json"
     },
     "focusedRawCoverage": {
-      "linesCovered": 25140,
-      "linesValid": 115216,
-      "branchesCovered": 11592,
-      "branchesValid": 73066,
-      "lineRate": 0.21819886126926816,
-      "branchRate": 0.15865108258287028,
-      "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
-      "scope": "Original production-only collector for focused42-case Unit selection with4failures. No load/test assemblies. Raw partial evidence, not complete-suite coverage or passing coverage acceptance.",
-      "evidence": "TestResults/stage61-native-join/root-r612-native-genesis-and-lifetime-unit/functional.cobertura.xml"
+      "sourceCommit": "e02c02db2",
+      "lineRate": 0.2729578713968958,
+      "branchRate": 0.19031634870804154,
+      "linesCovered": 15388,
+      "linesValid": 56375,
+      "actualProductionModules": 7,
+      "requestedProductionModules": 14,
+      "loadTestsIncluded": false,
+      "scope": "Raw coverage of failed selected411-case Unit development only. Missing modules and six absent PDB copies explicitly prevent interpreting this as complete project coverage; no causal deletion claim. Not current116 source coverage.",
+      "evidence": "TestResults/stage61-native-join/root-r692-r679-focused-coverage.raw-observation.original.json"
     },
     "latestPublicInventoryMovementAttempt": {
       "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
@@ -586,7 +601,8 @@
       },
       "ownership": "Single reference-owned pending ledger transfers only after actual lease Attach. Each original successful/failed Prepare, cleanup-before-settlement and original/cleanup failure identity remains preserved. Actual lexical CTS/request-scope disposal retains original native tasks and join ordering. No suppression, duplicate Dispose, provider replacement or current runtime claim.",
       "runtimeSelection": "TestResults/root-r679-related-foundation-selection-r1/combined-related-native.config.prepared.json",
-      "scope": "Original105 task statuses unchanged. Public DROP/AnalyticsStore/eight-user cold and both physical file requirements remain separately unqualified."
+      "scope": "Original105 task statuses unchanged. Public DROP/AnalyticsStore/eight-user cold and both physical file requirements remain separately unqualified.",
+      "runtimeStatus": "R679 failed149/411; successor116 current runtime pending"
     },
     "earlierCompilerAttemptR662": {
       "label": "root-r662-combined-clustering-filecases-full-release",
@@ -602,6 +618,68 @@
       "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-filecases-full-release.completion.original.json",
       "diagnostics": "TestResults/stage61-native-join/root-r662-compiler-diagnostics.prepared.json",
       "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
+    },
+    "strictBuildBeforeRuntimeRepairR677": {
+      "label": "root-r677-lexical-retention-full-release",
+      "result": "passed",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 391.1820720001124,
+      "sourceDrift": 0,
+      "compiledDriftCount": 140,
+      "compiledDriftClassification": "Expected rebuilt Release DLL/PDB outputs, not runtime drift.",
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "61ad08404b3ae90e7321478146ac7dd790a16108c9bf758d36531ad044788424",
+      "evidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.completion.original.json",
+      "cohortEvidence": "TestResults/stage61-native-join/root-r677-lexical-retention-full-release.cohort-after.original.json",
+      "scope": "Complete current Release solution under SDK10.0.401, all configured analyzers enforced. No new runtime, public functional, Linux, durability, performance, coverage or task-acceptance pass inferred."
+    },
+    "runtimeCausalRepairR687R697": {
+      "sourceCount": 116,
+      "sourceIdentity": "TestResults/stage61-native-join/root-r696-causal116-current-source.original.json",
+      "sourceIdentitySha256": "103f073374b20545e3506c26d60c58a920482313b4f9cde3a3ce4046fb8628fb",
+      "scope": [
+        "native silo startup DI before public routing publication",
+        "lazy genuine Drop executor only in actual Drop branch",
+        "target document lifetime authority",
+        "retirement reservation identity and bounded provider-cap paging",
+        "analytics physical segment capacity distinct from logical query bounds",
+        "original creation-derived independent native and public lifetime/replay oracles",
+        "process recovery original creation evidence and bounded postjoin stderr"
+      ],
+      "runtimeStatus": "current_source_not_run",
+      "nextFocusedSelection": "TestResults/stage61-native-join/root-r700-causal116-fast-two-lanes.config.prepared.json",
+      "remaining": [
+        "complete current functional ONE then RF3 and cold counterparts",
+        "composition ordered dynamic-prefix admission repair",
+        "genuine Server connection-fixture whole-caller migration",
+        "both physical file ownership scenarios including positive same-files mode",
+        "original Linux/fault/endurance/security/performance/release acceptance gates"
+      ]
+    },
+    "focusedRawCoverageBeforeR679": {
+      "linesCovered": 25140,
+      "linesValid": 115216,
+      "branchesCovered": 11592,
+      "branchesValid": 73066,
+      "lineRate": 0.21819886126926816,
+      "branchRate": 0.15865108258287028,
+      "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
+      "scope": "Original production-only collector for focused42-case Unit selection with4failures. No load/test assemblies. Raw partial evidence, not complete-suite coverage or passing coverage acceptance.",
+      "evidence": "TestResults/stage61-native-join/root-r612-native-genesis-and-lifetime-unit/functional.cobertura.xml"
+    },
+    "formatVerificationBeforeR702": {
+      "label": "root-r676-lexical-retention-whitespace-verify",
+      "result": "passed_selected29_files",
+      "childExitCode": 0,
+      "selectedCSharpFiles": 29,
+      "compiledDrift": 0,
+      "sourceDrift": [
+        "docs/implementation/benchmark-redesign-proposal.uk.md"
+      ],
+      "scope": "Native formatter reported no changes in selected current29 C# files. One unrelated proposal document changed during the wrapper; this is not a whole-repository frozen-source proof. R677 subsequently passed with full source drift zero.",
+      "evidence": "TestResults/stage61-native-join/root-r676-lexical-retention-whitespace-verify.completion.original.json"
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {

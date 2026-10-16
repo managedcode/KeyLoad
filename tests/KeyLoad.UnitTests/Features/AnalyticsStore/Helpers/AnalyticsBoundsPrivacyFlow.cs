@@ -77,6 +77,7 @@ internal static class AnalyticsBoundsPrivacyFlow
 
     private static Task RawAsync(TestDatabase db, AnalyticsEventData[] events, CancellationToken token)
         => O.EqualAsync(new AnalyticsEventsPage([.. events.Select(row => new AnalyticsEventRecord(row.Id,
-            row.Timestamp, ImmutableDictionary<string, string>.Empty, row.Metrics, row.RowAccess, row.Links, 1))], false, null),
+            row.Timestamp, ImmutableDictionary<string, string>.Empty, row.Metrics, row.RowAccess, [.. row.Links.Select(link => AnalyticsExpectedResourceCreation.Bind(db, link,
+                AnalyticsExpectedResourceCreation.Anchor))], 1))], false, null),
             db.Database.ReadAnalyticsEvents(D.Reader, D.Read(db), token));
 }
