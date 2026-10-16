@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 internal static class NativeCurrentModelSelectionAssertions
 {
     private const string Selections = "currentModels";
-    private const int ExpectedSelections = 11;
+    private const int ExpectedSelections = 12;
     private static readonly string[] Filters =
     [
         "/*/*/GraphSearchPathPolicyRf3Tests/*",
@@ -18,7 +18,8 @@ internal static class NativeCurrentModelSelectionAssertions
         "/*/*/AggregateReplayRf3LeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay",
         "/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
         "/*/*/PartitionQueryPublicValidationTests/*",
-        "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable"
+        "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
+        "/*/*/RemotePartitionQueryRf3Tests/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart"
     ];
 
     internal static async Task AssertAsync(JsonElement root)

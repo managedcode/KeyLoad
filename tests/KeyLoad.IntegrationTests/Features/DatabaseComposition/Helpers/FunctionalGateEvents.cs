@@ -24,10 +24,12 @@ internal static class FunctionalGateEvents
         }
     }
 
-    internal static async Task ExerciseAsync(FunctionalGateContext context, int iteration, CancellationToken token)
+    internal static async Task ExerciseAsync(FunctionalGateContext context, int iteration, int resourceIndex, CancellationToken token)
     {
         await Assert.That(iteration).IsGreaterThanOrEqualTo(0);
-        var resource = iteration % FunctionalGateEventsProtocol.ResourceCount;
+        ArgumentOutOfRangeException.ThrowIfNegative(resourceIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(resourceIndex, FunctionalGateEventsProtocol.ResourceCount);
+        var resource = resourceIndex;
         var baseline = FunctionalGateEventsProtocol.Stream(context, -1, resource);
         await FunctionalGateEventsAssertions.BaselineAsync(context, baseline, token);
         var stream = FunctionalGateEventsProtocol.Stream(context, iteration, resource);

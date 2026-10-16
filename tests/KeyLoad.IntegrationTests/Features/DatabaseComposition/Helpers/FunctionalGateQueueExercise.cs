@@ -4,9 +4,9 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateQueueExercise
 {
-    internal static async Task RunAsync(FunctionalGateContext ctx, int iteration, CancellationToken token)
+    internal static async Task RunAsync(FunctionalGateContext ctx, int iteration, int resourceIndex, CancellationToken token)
     {
-        var lane = new QueueLaneRef(ctx.Partition, FunctionalGateQueues.Queue(iteration % ctx.ResourceCount));
+        var lane = new QueueLaneRef(ctx.Partition, FunctionalGateQueues.Queue(resourceIndex));
         var id = FunctionalGateQueues.Id(iteration);
         var payload = FunctionalGateQueues.Payload(ctx, iteration);
         var command = new CommandRequest(Guid.NewGuid(), ctx.Partition, [new EnqueueMessage(lane.Queue, id, payload)]);

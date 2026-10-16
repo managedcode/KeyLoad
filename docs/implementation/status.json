@@ -4,13 +4,83 @@
     "status": "in_progress",
     "scope": "D1 active resource lifetime producer plus authored authorization/cross-tenant regressions; not completed DROP, global inventory, full READ proof or original105 acceptance.",
     "strictBuild": {
+      "label": "root-r496-complete-native-functional-rotation-full-release",
+      "result": "passed",
+      "elapsedSeconds": 233.72071900009178,
+      "sourceDrift": 0,
+      "compiledDrift": 4,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "74d881df7162772af97f8be2aabd2ce191a8f046770b6beb4619bf06f9d18e5c",
+      "errors": 0,
+      "warnings": 0
+    },
+    "nativeWholeOperationDevelopment": {
+      "label": "root-r500-actual-host-analytics-query-whole-unit",
+      "result": "passed",
+      "elapsedSeconds": 32.36187220783904,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "b9bf6ce067e2b10f885c8ea4cbdec23a72be5f8aa5ce205a902bbdf9dce28420",
+      "total": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "trx": "TestResults/stage61-native-join/root-r500-actual-host-analytics-query-whole-unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "trxSha256": "6eb5d99d7c6ba9ae5d43f7faa782fc4681f87ac6b7cd1e49d4a37b55fbc13703",
+      "coverage": {
+        "path": "TestResults/stage61-native-join/root-r500-actual-host-analytics-query-whole-unit/functional.cobertura.xml",
+        "sha256": "61d66e2024cae4e9c4fa3b7eb6d49e093de60d40086e23af1ab3810c1fdb49a0",
+        "counts": {
+          "line-rate": "0.1116326924313549",
+          "branch-rate": "0.07790871273064602",
+          "complexity": "71702",
+          "version": "1.9",
+          "timestamp": "1792127303",
+          "lines-covered": "12152",
+          "lines-valid": "108857",
+          "branches-covered": "5375",
+          "branches-valid": "68991"
+        },
+        "selectedRunOnly": true
+      }
+    },
+    "actualRf3ColdFailure": {
+      "label": "root-r475-principal-expiry-actual-rf3",
+      "result": "failed",
+      "phase": "DiscoveryAuthorityCold all-three same-root restart",
+      "originalReport": "root-r475-principal-expiry-actual-rf3.stdout.original.txt",
+      "originalReportSha256": "44ed7b7d2ae299ecf4b8f1f494cdf19c51cf19fef6aad2e7d7bb145b6af7d25d",
+      "scope": "Whole case is failed; warm substeps are not separate qualification.",
+      "observed": "All nodes reject physical root at PartitionRootAdmission.InspectEntry line107 during cold restart.",
+      "sourceConfirmedCause": "Native OperationalAnalyticsOwner creates derived-operational-analytics after initial admission; current root-directory inventory omits this owned directory. Exact original offending entry was not retained/observed.",
+      "repairQualification": "Repaired known native analytics-directory admission; original R491 complete public authorization/all3 same-root restart passes. Original failure remains historical."
+    },
+    "gate1Gate2HistoricalProof": "FUNCTIONAL-GATES-20261016 binds original86834e8a local pair, not these newer product binaries. Fresh combined gates and exact-source Linux qualification remain open.",
+    "next": "Run fresh corrected one-node then RF3 functional pair with independent event/queue/topic/blob resource rotation; separately qualify authored public query/cross-tenant and mandatory command/read lifetime proofs.",
+    "historicalStrictBuild": {
       "label": "root-r486-fresh-admission-cross-tenant-full-release",
       "result": "passed",
       "errors": 0,
       "warnings": 0,
       "sourceDrift": 0
     },
-    "nativeWholeOperationDevelopment": {
+    "nativeUnitCompilerCheckpoint": {
+      "label": "root-r499-actual-host-receipt-unit-release",
+      "result": "passed",
+      "elapsedSeconds": 138.44427712494507,
+      "sourceDrift": 0,
+      "compiledDrift": 2,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "73493b611bd02b5e42116b326ba1bf9dff42a90cfd22136f2aa6afa4b11d9a12",
+      "errors": 0,
+      "warnings": 0,
+      "scope": "Test-only receipt profile correction after full strict build; production sources and binaries unchanged."
+    },
+    "historicalNativeWholeOperationDevelopment": {
       "label": "root-r484-lifetime-policy-identity-whole-unit",
       "total": 22,
       "passed": 22,
@@ -33,22 +103,62 @@
         }
       }
     },
-    "actualRf3ColdFailure": {
-      "label": "root-r475-principal-expiry-actual-rf3",
-      "result": "failed",
-      "phase": "DiscoveryAuthorityCold all-three same-root restart",
-      "originalReport": "root-r475-principal-expiry-actual-rf3.stdout.original.txt",
-      "originalReportSha256": "44ed7b7d2ae299ecf4b8f1f494cdf19c51cf19fef6aad2e7d7bb145b6af7d25d",
-      "scope": "Whole case is failed; warm substeps are not separate qualification.",
-      "observed": "All nodes reject physical root at PartitionRootAdmission.InspectEntry line107 during cold restart.",
-      "sourceConfirmedCause": "Native OperationalAnalyticsOwner creates derived-operational-analytics after initial admission; current root-directory inventory omits this owned directory. Exact original offending entry was not retained/observed.",
-      "repairQualification": "Narrow known-directory admission and actual analytics joined-close/cold-reopen regression pending."
+    "nativeRecoveryDevelopment": {
+      "label": "root-r497-complete-native-analytics-recovery",
+      "result": "passed",
+      "elapsedSeconds": 11.710340291960165,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "500a047440290e7328b23b7469e06e2fbcc4600b3cbcde9b0441fe9ec4e6086f",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "trx": "TestResults/stage61-native-join/root-r497-complete-native-analytics-recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+      "trxSha256": "15593a249f28a17b4008cceb97519160ffe124ae4e4283c376e02cfdbefe77ee"
     },
-    "gate1Gate2HistoricalProof": "FUNCTIONAL-GATES-20261016 binds original86834e8a local pair, not these newer product binaries. Fresh combined gates and exact-source Linux qualification remain open.",
-    "next": "Qualify analytics-root cold repair, rerun actual RF3 auth/query/cross-tenant and fresh one/RF3 functional pair; continue independent mandatory command/read lifetime proof."
+    "actualRf3ColdRepair": {
+      "label": "root-r491-principal-expiry-after-analytics-cold-repair",
+      "result": "passed",
+      "elapsedSeconds": 267.1759884171188,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "6f058af7845240d037d07e105f481d1cf4c264c04312fbdb65953600751b8fc2",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "trx": "TestResults/stage61-native-join/root-r491-principal-expiry-after-analytics-cold-repair/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "trxSha256": "4fb3f789f05f3ee36f738f92627b11d47e688c8997bfcfa1b555a7b70ecee1ae",
+      "evidence": "TestResults/stage61-native-join/root-r491-public-auth-all-node-cold-terminal-evidence.original.json",
+      "evidenceSha256": "5a2b31029a0696eee9db487c91081337f3319774c39263172f8f9c19cd957f14",
+      "productionCohortR491ToR500": {
+        "source": {
+          "scope": "all src/ entries in original full beforecohorts",
+          "entries": 3840,
+          "differences": [],
+          "digest": "c01546e0479dba1338c9a6da2367b10de16490fa97fda2518073f40608d96a84"
+        },
+        "compiled": {
+          "scope": "all src/ entries in original full beforecohorts",
+          "entries": 140,
+          "differences": [],
+          "digest": "9db49c7b1a07efda5b75dba4a09ededc14fa9b050211ff831df3cd8f377def4e"
+        }
+      },
+      "boundary": "Native analytics host/component cold test separately passes in R500. Direct unit Apply is not RF3 proof; original public R491 is genuine RF3 evidence. Full original105 gates remain open."
+    },
+    "terminalEvidence": {
+      "path": "TestResults/stage61-native-join/root-r500-current-cold-query-recovery-terminal-evidence.original.json",
+      "sha256": "83683dc7f552ff9167c22ff9b1c71eca913ff0651d56a4e385688d1c8b6e2ab1"
+    }
   },
   "FUNCTIONAL-GATES-20261016": {
-    "status": "done",
+    "status": "in_progress",
     "ownerPriority": "One actual working Aspire instance, then the same canonical functional scenario on three genuine RF3 nodes before unrelated 105-task expansion",
     "workingWindowStartUtc": "2026-10-15T22:18:00Z",
     "workingWindowEndUtc": "2026-10-16T04:18:00Z",
@@ -71,8 +181,8 @@
     "persistedQueueOperators": 1,
     "minimumSuccessfulOperationsPerTopology": 10000,
     "orchestration": "Aspire AppHost owns native Azure Table membership through local Azurite, actual one/three-node resources, readiness, endpoints and joined shutdown",
-    "gate1": "PASSED R456: one genuine Aspire instance, 10302 successful public SDK/MCP/SQL operations, every model and server-side QueueGraph roundtrip, joined cleanup and zero source/executable/image drift.",
-    "gate2": "PASSED R457 after accepted R456: genuine RF3 completed 10306 successful operations and every original cleanup check on the exact same frozen source/executable/image input cohort.",
+    "gate1": "Historical R456 passed10302 operations; fresh independently rotated scenario pending.",
+    "gate2": "Historical R457 passed10306 operations; fresh RF3 runs only after fresh Gate1 terminalPASS.",
     "latestLocalExecution": {
       "lane": "Root R457",
       "result": "passed",
@@ -109,7 +219,7 @@
       "sourceCommit": "86834e8a68d54c8c749221a373bb38b94b5d8436",
       "boundary": "Accepted local native functional proof after original caller/Aspire shutdown, exact image checks and released storage ownership. Not full-product/Linux/endurance/performance qualification."
     },
-    "qualification": "Both local functional gates passed. Full original-task acceptance, complete Linux/fault/endurance/security/performance/release qualification remain separate; RF1 proves no replica fault tolerance.",
+    "qualification": "Original R456/R457 local scenarios passed on86834e8a; a subsequently confirmed scheduler correlation leaves all3-resource repeated lifecycle coverage open until fresh corrected Gate1 then Gate2. Original105 and Linux/fault/endurance/security/performance/release remain separate.",
     "originalTaskStatusCounts": {
       "done": 20,
       "in_progress": 85,
@@ -387,7 +497,13 @@
       "focusedLinuxTask": "functional-gates",
       "boundary": "This record asserts the retained local proofs. Exact-source Linux execution and original artifacts are reported by the independent GitHub Actions run; full original-task Linux qualification is separate."
     },
-    "completionScope": "Owner-selected local working-base objective only: same whole-model public scenario passed on one Aspire node then genuine RF3. Original 105 acceptance statuses and complete product qualification remain independent."
+    "completionScope": "Owner-selected local working-base objective only: same whole-model public scenario passed on one Aspire node then genuine RF3. Original 105 acceptance statuses and complete product qualification remain independent.",
+    "currentSourceCoverageCorrection": {
+      "scope": "Explicit resource index independent from globally unique iteration; events, queues/topics and blobs rotate over all3 configured resources. At least27complete waves AND10000successful public operations required.",
+      "sourceEvidence": "TestResults/stage61-native-join/functional-model-inventory-sourceN-r2/independent-schedule-enumeration.json",
+      "runtimeStatus": "fresh corrected pair pending; original10302/10306 counts preserved as historical facts",
+      "analyticsBoundary": "Three persisted TimeSeries sets serve data/aggregate operations; native operational analytics is one derived engine pernode, not3 catalog stores."
+    }
   },
   "NATIVE-FOUNDATION-20261015": {
     "status": "in_progress",
@@ -58010,52 +58126,52 @@
     "historicalZoneTree198ChecksumDeliveryObservation": {
       "qualification": "Historical original 1.9.8 findings, private repair receipts and then-observed publication blocker; superseded only for current official publication state. Original object value bytes retained unchanged.",
       "canonicalZoneTreeRepairDelivery": {
-      "officialPinnedVersion": "1.9.8",
-      "officialAuditedCommit": "46864afa36eed46e0cfe16828ff8f40cac85e369",
-      "owningSibling": "/Users/ksemenenko/Developer/ZoneTree",
-      "siblingIsOfficialNuGetOwner": false,
-      "sealedPatchSha256": "68c65aa2efc5ec5866d489726eebc04b38b68bf9a146b791639bfefed119a388",
-      "manifestSha256": "1ec78451bc021d0d1fe6bd048dcfba7f7b921e61f8c71ad0c4e1ed61f5ab25a7",
-      "originalNativeLedgerSha256": "087cb5d3c045747bc72f44f0766b3790cd5ff9c96534cfba641c30e71d6167e6",
-      "baselineNativeRegressions": {
-        "total": 2,
-        "failed": 2
+        "officialPinnedVersion": "1.9.8",
+        "officialAuditedCommit": "46864afa36eed46e0cfe16828ff8f40cac85e369",
+        "owningSibling": "/Users/ksemenenko/Developer/ZoneTree",
+        "siblingIsOfficialNuGetOwner": false,
+        "sealedPatchSha256": "68c65aa2efc5ec5866d489726eebc04b38b68bf9a146b791639bfefed119a388",
+        "manifestSha256": "1ec78451bc021d0d1fe6bd048dcfba7f7b921e61f8c71ad0c4e1ed61f5ab25a7",
+        "originalNativeLedgerSha256": "087cb5d3c045747bc72f44f0766b3790cd5ff9c96534cfba641c30e71d6167e6",
+        "baselineNativeRegressions": {
+          "total": 2,
+          "failed": 2
+        },
+        "repairedNativeRegressions": {
+          "total": 2,
+          "passed": 2
+        },
+        "canonicalOwningNativeNUnit": {
+          "total": 317,
+          "passed": 317,
+          "failed": 0,
+          "skipped": 0,
+          "nativeExitCode": 0,
+          "originalTrxSha256": "0f2ae5461ecbe18c4d9e8fbf207d1fb11c80d239f15a9d4c9b47a7e9fadad57c"
+        },
+        "sourceImageWindow": "642 source/DLL/PDB inputs unchanged from observed DURING required run to terminal; no pre-invocation snapshot claim.",
+        "platformQualification": "Original local ARM native owning-source development only; no Linux x64, RF3, package publication or consumer delivery claim.",
+        "publicationBlocked": true,
+        "blocker": "Official ZoneTree push/admin/maintain authority is absent; sibling personal fork cannot publish the canonical official feed. Upstream maintainer acceptance of cross-profile portable WAL checksum contract and official NUGET_TOKEN release authority are required.",
+        "packageReferenceChanged": false,
+        "consumerFallbackIntroduced": false,
+        "runtimeQualified": false
       },
-      "repairedNativeRegressions": {
-        "total": 2,
-        "passed": 2
-      },
-      "canonicalOwningNativeNUnit": {
-        "total": 317,
-        "passed": 317,
-        "failed": 0,
-        "skipped": 0,
-        "nativeExitCode": 0,
-        "originalTrxSha256": "0f2ae5461ecbe18c4d9e8fbf207d1fb11c80d239f15a9d4c9b47a7e9fadad57c"
-      },
-      "sourceImageWindow": "642 source/DLL/PDB inputs unchanged from observed DURING required run to terminal; no pre-invocation snapshot claim.",
-      "platformQualification": "Original local ARM native owning-source development only; no Linux x64, RF3, package publication or consumer delivery claim.",
-      "publicationBlocked": true,
-      "blocker": "Official ZoneTree push/admin/maintain authority is absent; sibling personal fork cannot publish the canonical official feed. Upstream maintainer acceptance of cross-profile portable WAL checksum contract and official NUGET_TOKEN release authority are required.",
-      "packageReferenceChanged": false,
-      "consumerFallbackIntroduced": false,
-      "runtimeQualified": false
-    },
       "currentPublicZoneTreeChecksumIssueDevelopment": {
-      "issue": "https://github.com/ZoneTree/ZoneTree/issues/182",
-      "issueStateObserved": "open",
-      "maintainerResponse": "https://github.com/ZoneTree/ZoneTree/issues/182#issuecomment-6086006047",
-      "maintainerPullRequest": "https://github.com/ZoneTree/ZoneTree/pull/184",
-      "pullRequestTitleObserved": "Replace CRC32 with XXH3-64.",
-      "pullRequestStateObserved": "open",
-      "auditedPublishedSourceVersion": "1.9.8",
-      "auditedPublishedSourceCommit": "46864afa36eed46e0cfe16828ff8f40cac85e369",
-      "officialMainObserved": "8347664f5e5d1c98a530e2c15eb63ab42118e9e4",
-      "officialMainQualification": "Observed source identity only; this later main merge is unrelated PR183 and was not runtime-qualified here.",
-      "officialPatchedNuGetDeliveryVerified": false,
-      "consumerProviderPinChangedForThisIssue": false,
-      "qualification": "Detailed original CPU checksum and native WAL issue publicly reported. Maintainer implementation is in progress; no unpublished provider, consumer fallback or migration is installed."
-    }
+        "issue": "https://github.com/ZoneTree/ZoneTree/issues/182",
+        "issueStateObserved": "open",
+        "maintainerResponse": "https://github.com/ZoneTree/ZoneTree/issues/182#issuecomment-6086006047",
+        "maintainerPullRequest": "https://github.com/ZoneTree/ZoneTree/pull/184",
+        "pullRequestTitleObserved": "Replace CRC32 with XXH3-64.",
+        "pullRequestStateObserved": "open",
+        "auditedPublishedSourceVersion": "1.9.8",
+        "auditedPublishedSourceCommit": "46864afa36eed46e0cfe16828ff8f40cac85e369",
+        "officialMainObserved": "8347664f5e5d1c98a530e2c15eb63ab42118e9e4",
+        "officialMainQualification": "Observed source identity only; this later main merge is unrelated PR183 and was not runtime-qualified here.",
+        "officialPatchedNuGetDeliveryVerified": false,
+        "consumerProviderPinChangedForThisIssue": false,
+        "qualification": "Detailed original CPU checksum and native WAL issue publicly reported. Maintainer implementation is in progress; no unpublished provider, consumer fallback or migration is installed."
+      }
     },
     "currentStageXLVIIIActualCaseUnionDevelopment": {
       "requirement": "REQ/AC-TUNIT-ENTRY-010",

@@ -14,7 +14,8 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/AggregateReplayRf3LeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay",
               "/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
               "/*/*/PartitionQueryPublicValidationTests/*",
-              "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable"
+              "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
+              "/*/*/RemotePartitionQueryRf3Tests/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -22,6 +23,12 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              '/*/*/RemotePartitionQueryRf3Tests/*',
+              '/*/*/RemotePartitionQueryRf3Tests*/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart',
+              currentModelFilters[11] + '*',
+              currentModelFilters[11] + ' ',
+              '/*/*/RemotePartitionQueryRf3Tests/OtherMethod',
+              '/*/*/(RemotePartitionQueryRf3Tests|DistributedQueryAuthorityRf3Tests)/*',
               '/*/*/CrossTenantRf3WholeFlowTests/*',
               '/*/*/CrossTenantRf3WholeFlowTests*/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable',
               currentModelFilters[10] + '*',

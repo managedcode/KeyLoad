@@ -27,11 +27,13 @@ internal static class FunctionalGateQueues
         }
     }
 
-    internal static async Task ExerciseAsync(FunctionalGateContext ctx, int iteration, CancellationToken token)
+    internal static async Task ExerciseAsync(FunctionalGateContext ctx, int iteration, int resourceIndex, CancellationToken token)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(iteration);
-        await FunctionalGateQueueExercise.RunAsync(ctx, iteration, token);
-        await FunctionalGateTopicExercise.RunAsync(ctx, iteration, token);
+        ArgumentOutOfRangeException.ThrowIfNegative(resourceIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(resourceIndex, ctx.ResourceCount);
+        await FunctionalGateQueueExercise.RunAsync(ctx, iteration, resourceIndex, token);
+        await FunctionalGateTopicExercise.RunAsync(ctx, iteration, resourceIndex, token);
     }
 
     internal static async Task VerifyBaselineAsync(FunctionalGateContext ctx, CancellationToken token)

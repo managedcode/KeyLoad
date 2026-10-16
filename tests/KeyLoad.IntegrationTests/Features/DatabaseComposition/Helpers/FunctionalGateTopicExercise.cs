@@ -21,9 +21,9 @@ internal static class FunctionalGateTopicExercise
             McpCallerTools.SubscriptionsConfigure, request, token));
     }
 
-    internal static async Task RunAsync(FunctionalGateContext ctx, int iteration, CancellationToken token)
+    internal static async Task RunAsync(FunctionalGateContext ctx, int iteration, int resourceIndex, CancellationToken token)
     {
-        var subscription = Subscription(ctx, iteration % ctx.ResourceCount);
+        var subscription = Subscription(ctx, resourceIndex);
         var before = await ctx.SdkAsync(ctx.Writer.Sdk.SubscriptionStatusAsync(subscription, token));
         await Assert.That(before.Checkpoint).IsEqualTo(before.TailPosition);
         await Assert.That(before.IssuedPosition).IsEqualTo(before.TailPosition);

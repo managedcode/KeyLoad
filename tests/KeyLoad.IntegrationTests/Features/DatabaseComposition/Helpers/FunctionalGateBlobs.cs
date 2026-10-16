@@ -23,9 +23,11 @@ internal static class FunctionalGateBlobs
         }
     }
 
-    internal static async Task ExerciseAsync(FunctionalGateContext context, int iteration, CancellationToken token)
+    internal static async Task ExerciseAsync(FunctionalGateContext context, int iteration, int resourceIndex, CancellationToken token)
     {
-        var index = iteration % Resources;
+        ArgumentOutOfRangeException.ThrowIfNegative(resourceIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(resourceIndex, Resources);
+        var index = resourceIndex;
         var blob = new BlobRef(context.Partition, $"gate_blobs_{index}", $"iteration_{iteration}");
         var published = await FunctionalGateBlobUpload.PublishAsync(context, blob, iteration, token);
         await FunctionalGateBlobAssertions.ContentAsync(context, published.Published.Value, published.Bytes, token);

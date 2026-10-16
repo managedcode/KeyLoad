@@ -10,7 +10,7 @@ unrelated task expansion follow a working database.
 
 REQ-DBGATE-001 requires one shared, real-client model scenario on one Aspire
 instance followed by the same scenario on three RF3 nodes, with three resources
-per model, eight workload users, one queue operator and at least 10,000
+per supported catalog model, eight workload users, one queue operator and at least 10,000
 successful public operations per topology.
 
 - AC-DBGATE-001: the single-instance native TUnit case executes once without
@@ -48,10 +48,14 @@ Azurite, image preparation, readiness, discovered endpoints and joined shutdown.
 The one-instance development gate has its actual single-replica acknowledgement
 contract; it is not evidence of RF3 durability.
 
-Create three named resources of each supported model: typed relational tables,
-documents, event stream sets, work queues, topics, graphs, time series and
-analytics operations, blob stores, vector indexes and full-text indexes. Use
-independent data and canonical entity references between models in one database.
+Create three named resources of each supported catalog model: typed relational
+tables, documents, event stream sets, work queues, topics, graphs, time-series
+sets, blob stores, vector-profile collections and full-text-search collections.
+Time-series reads and aggregate operations use the three persisted time-series
+sets. Native operational analytics is separate derived node-local history: each
+node owns one native analytics engine, observed through the administrator
+dashboard. It is not a catalog model or three independent user analytics stores.
+Use independent data and canonical entity references between models in one database.
 Create eight persisted workload users with writer and reader permissions. A
 separate persisted tenant-local operator has the native administrative role and
 explicit grants for the three queues, as required for dead-letter redrive.
@@ -131,10 +135,30 @@ identities are recorded in `docs/implementation/status.json`.
 The subsequent strict R465 build passed with zero warnings/errors. R466 passed
 all nine selected native whole-operation cases, including both purposes in all
 four new deadline flows; R467 passed all three selected process/native recovery
-cases. The default fixture correction changes one nullable-key expression only;
-product and public functional-test source remains unchanged from the recorded
-local pair. R466 collects production coverage for its nine cases only, not a
-full-product coverage result.
+cases. At that historical R465/R466 checkpoint, the default fixture correction
+changed one nullable-key expression only; product and public functional-test
+source remained unchanged from the recorded local pair. The later resource-index
+correction below changes the functional scenario and requires a fresh matched
+Gate1/Gate2 pair, which remains open. R466 collected production coverage for its
+nine cases only, not a full-product coverage result.
+
+## Current source coverage limitation
+
+Source inspection found that the wave scheduler and iteration-based resource
+selection correlate: `model = (wave + worker) % 9` and
+`iteration = 4 * wave + worker` imply `iteration % 3 = model % 3`.
+Consequently, repeated event-stream exercises select resource 0, queue/topic
+exercises select resource 1, and blob exercises select resource 2. All three
+resources are configured and initialized, but the remaining resources do not
+receive those complete repeated operation flows in the original scenario. The
+source correction passes a separate resource index to these operation flows and
+requires at least 27 complete waves before the successful-operation threshold can
+end execution. In the unchanged four-worker schedule this schedules four full
+visits to each model/resource combination. A failed original visit still fails
+the gate; scheduled visits do not increment successful-operation counters. The
+corrected scenario requires a fresh matched gate pair. Original recorded PASS
+reports and operation counts remain historical facts; they do not prove complete
+lifecycle coverage of all three resources for these models.
 
 ## Historical repair evidence
 

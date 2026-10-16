@@ -35,10 +35,10 @@ internal static class RemotePartitionQueryRf3Assertions
         var expectedRows = new PartitionQueryRowV1[]
         {
             new(RemoteDocumentRf3Protocol.Reference, new(RemoteDocumentRf3Protocol.Document,
-                FirstRevision, RemoteDocumentRf3Protocol.ProjectedJson, true, [RemoteDocumentRf3Protocol.Secret])),
+                FirstRevision, RemoteDocumentRf3Protocol.ProjectedJson, false, [])),
             new(new(RemotePartitionQueryRf3Seed.Local, RemoteDocumentRf3Protocol.Collection,
                 RemoteDocumentRf3Protocol.Document), new(RemoteDocumentRf3Protocol.Document,
-                FirstRevision, RemotePartitionQueryRf3Seed.SourceProjected, true, [RemoteDocumentRf3Protocol.Secret]))
+                FirstRevision, RemotePartitionQueryRf3Seed.SourceProjected, false, []))
         };
         await Assert.That(actual.Version).IsEqualTo(RemotePartitionQueryRf3Seed.Version);
         await Assert.That(actual.Complete).IsTrue();

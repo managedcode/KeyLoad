@@ -13,10 +13,10 @@ internal static class RemotePartitionQueryNativeAssertions
         var expected = new PartitionQueryPageV1(RemoteDocumentNativeFixture.Version,
         [
             new(RemoteDocumentNativeFixture.Reference, new(RemoteDocumentNativeFixture.DocumentId,
-                RemoteDocumentNativeFixture.First, RemoteDocumentNativeFixture.ProjectedJson, true, [RemoteDocumentNativeFixture.Secret])),
+                RemoteDocumentNativeFixture.First, RemoteDocumentNativeFixture.ProjectedJson, false, [])),
             new(new(RemotePartitionQueryNativeFlow.Local, RemoteDocumentNativeFixture.Collection,
                 RemoteDocumentNativeFixture.DocumentId), new(RemoteDocumentNativeFixture.DocumentId,
-                RemoteDocumentNativeFixture.First, RemotePartitionQueryNativeFlow.SourceProjected, true, [RemoteDocumentNativeFixture.Secret]))
+                RemoteDocumentNativeFixture.First, RemotePartitionQueryNativeFlow.SourceProjected, false, []))
         ],
         [
             new(RemoteDocumentNativeFixture.Partition, fixture.Destination.Store.Position,

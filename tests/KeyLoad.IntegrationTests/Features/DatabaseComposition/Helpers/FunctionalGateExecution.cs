@@ -25,7 +25,7 @@ internal static class FunctionalGateExecution
             {
                 break;
             }
-            if (wave >= FunctionalGateProtocol.ModelCount
+            if (wave >= FunctionalGateProtocol.ModelCount * FunctionalGateProtocol.ResourceCount
                 && (failures.Count > 0
                     || contexts.Sum(context => context.CompletedOperations) >= FunctionalGateProtocol.MinimumOperations))
             {
@@ -58,7 +58,8 @@ internal static class FunctionalGateExecution
             }
             var beforeStart = failures.Count;
             ServerFailureObserver.Observe(() => tasks.Add((model, StepAsync(contexts[index], model,
-                checked(wave * contexts.Length + index), queue, token))), failures);
+                checked(wave * contexts.Length + index),
+                (wave / FunctionalGateProtocol.ModelCount) % FunctionalGateProtocol.ResourceCount, queue, token))), failures);
             if (failures.Count != beforeStart)
             {
                 blockedModels[model] = true;
@@ -93,15 +94,15 @@ internal static class FunctionalGateExecution
     }
 
     private static Task StepAsync(FunctionalGateContext context, int model, int iteration,
-        SemaphoreSlim queue, CancellationToken token)
+        int resourceIndex, SemaphoreSlim queue, CancellationToken token)
         => model switch
         {
             0 => FunctionalGateDocuments.ExerciseAsync(context, iteration, token),
             1 => FunctionalGateRelational.ExerciseAsync(context, iteration, token),
             2 => FunctionalGateComposition.ExerciseAsync(context, iteration, token),
-            3 => FunctionalGateEvents.ExerciseAsync(context, iteration, token),
-            4 => QueueAsync(context, iteration, queue, token),
-            5 => FunctionalGateBlobs.ExerciseAsync(context, iteration, token),
+            3 => FunctionalGateEvents.ExerciseAsync(context, iteration, resourceIndex, token),
+            4 => QueueAsync(context, iteration, resourceIndex, queue, token),
+            5 => FunctionalGateBlobs.ExerciseAsync(context, iteration, resourceIndex, token),
             6 => FunctionalGateGraphs.ExerciseAsync(context, iteration, token),
             7 => FunctionalGateSearch.ExerciseAsync(context, iteration, token),
             8 => FunctionalGateAnalytics.ExerciseAsync(context, iteration, token),
@@ -109,12 +110,12 @@ internal static class FunctionalGateExecution
         };
 
     private static async Task QueueAsync(FunctionalGateContext context, int iteration,
-        SemaphoreSlim queue, CancellationToken token)
+        int resourceIndex, SemaphoreSlim queue, CancellationToken token)
     {
         await queue.WaitAsync(token);
         try
         {
-            await FunctionalGateQueues.ExerciseAsync(context, iteration, token);
+            await FunctionalGateQueues.ExerciseAsync(context, iteration, resourceIndex, token);
         }
         finally
         {

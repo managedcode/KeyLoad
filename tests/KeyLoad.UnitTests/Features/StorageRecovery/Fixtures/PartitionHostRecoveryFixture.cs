@@ -45,6 +45,8 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
     private const string CaptureRowSeparator = ":";
     private const string UncertainPriorOwner = "A prior native owner attempt is uncertain; retain its root.";
     private readonly List<PartitionHostRecoveryAttempt> attempts = [];
+    private bool retainRoot;
+    internal void RetainRoot() => retainRoot = true;
     private readonly string directory;
     private readonly RecoveryImageCaptureOptions capture = UnitExecutionOptions.RecoveryImageCapture().Value;
     private readonly ILoggerFactory logging = LoggerFactory.Create(_ =>
@@ -220,7 +222,7 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         {
             failures.Add(failure);
         }
-        if (failures.Count == 0 && Directory.Exists(directory))
+        if (!retainRoot && failures.Count == 0 && Directory.Exists(directory))
         {
             ServerFailureObserver.Observe(() => Directory.Delete(directory, true), failures);
         }

@@ -38,9 +38,9 @@ internal static class DistributedQueryAuthorityPages
         var rows = new PartitionQueryRowV1[]
         {
             new(RemoteDocumentRf3Protocol.Reference, new(RemoteDocumentRf3Protocol.Document, DistributedQueryAuthorityProtocol.FirstRevision,
-                RemoteDocumentRf3Protocol.ProjectedJson, true, [RemoteDocumentRf3Protocol.Secret])),
+                RemoteDocumentRf3Protocol.ProjectedJson, false, [])),
             new(new(RemotePartitionQueryRf3Seed.Local, RemoteDocumentRf3Protocol.Collection, RemoteDocumentRf3Protocol.Document),
-                new(RemoteDocumentRf3Protocol.Document, DistributedQueryAuthorityProtocol.FirstRevision, RemotePartitionQueryRf3Seed.SourceProjected, true, [RemoteDocumentRf3Protocol.Secret]))
+                new(RemoteDocumentRf3Protocol.Document, DistributedQueryAuthorityProtocol.FirstRevision, RemotePartitionQueryRf3Seed.SourceProjected, false, []))
         };
         var expected = new PartitionQueryPageV1(RemotePartitionQueryRf3Seed.Version, [.. rows],
             [new(RemoteDocumentRf3Protocol.Partition, actual.Leaves[DistributedQueryAuthorityProtocol.DestinationLeaf].CutPosition, state.DestinationEpoch, DistributedQueryAuthorityProtocol.InitialSchema, FullScan),
