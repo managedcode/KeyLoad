@@ -33,7 +33,11 @@ internal sealed class NativeCommandObservationPublication<T>(
             {
                 clearOnFailure(value!);
             }
-            catch (Exception error)
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                original = NativeCommandObservationCompletion.Retain(original, error)!;
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
                 original = NativeCommandObservationCompletion.Retain(original, error)!;
             }
@@ -42,7 +46,11 @@ internal sealed class NativeCommandObservationPublication<T>(
         {
             NativeCommandObservationEncoding.Clear(inner);
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            original = NativeCommandObservationCompletion.Retain(original, error)!;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             original = NativeCommandObservationCompletion.Retain(original, error)!;
         }

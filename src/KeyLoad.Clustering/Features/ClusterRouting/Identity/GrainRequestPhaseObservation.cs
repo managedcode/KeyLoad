@@ -41,4 +41,26 @@ internal static class GrainRequestPhaseObservation
         ArgumentNullException.ThrowIfNull(context);
         observer.ProducerDisposed(identity, context);
     }
+
+    internal static ValueTask ObserveNativeAsync(IGrainRequestPhaseObserver? observer,
+        DecodedGrainRequest request, GrainRequestPhase phase,
+        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(actualRuntime);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Enum.IsDefined(phase) || phase == GrainRequestPhase.RequestStarted)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+        }
+        if (observer is null)
+        {
+            return ValueTask.CompletedTask;
+        }
+        if (observer is not IGrainRequestNativePhaseObserver native)
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest);
+        }
+        return native.ObserveNativeAsync(GrainRequestProbeIdentity.From(request.Envelope), phase,
+            actualRuntime, cancellationToken);
+    }
 }

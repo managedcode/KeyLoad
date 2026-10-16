@@ -19,10 +19,9 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         var requestId = Guid.NewGuid();
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
         var failures = new List<Exception>();
+        var cleanup = new List<Exception>();
         AnnMaintenanceResult? result = null;
         NativeRequestWorkChildReservation? reservation = null;
-        CancellationTokenSource? cancellation = null;
-        GrainRequestIdentityScope? identity = null;
         byte[]? payload = null;
         try
         {
@@ -36,26 +35,26 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
             }
             reservation = native.OriginalProducer.ReserveLocalChild(verified,
                 services.GetRequiredService<PhysicalShardRecord>(), services.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
-            cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, reservation.Cancellation);
-            identity = new GrainRequestIdentityScope(services, principal, requestId,
-                original.CommandId, cancellation.Token, connectionId: connectionId);
-            try
-            {
-                var actor = grains.GetGrain<IConnectionGrain>(connectionId);
-                var purpose = new NativeCqrsStreamPurpose(() => codec.Verify(signed));
-                var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-                    streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer, requestId,
-                    clock, routing, purpose, cancellation.Token).ConfigureAwait(true);
-                result = Read(reply, original);
-            }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            result = await AnnProjectionJobDispatchSettlement.RunOwnedAsync(services, principal, requestId,
+                original.CommandId, connectionId, reservation,
+                scopeToken => ReadAsync(grains, signed, requestId, original, connectionId, scopeToken), failures, cleanup, token).ConfigureAwait(true);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        await AnnProjectionJobDispatchSettlement.CompleteAsync(reservation, identity, cancellation, payload, failures).ConfigureAwait(true);
+        await AnnProjectionJobDispatchSettlement.CompleteAsync(reservation, payload, failures, cleanup).ConfigureAwait(true);
         AnnProjectionJobFailures.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, InvalidResult);
+    }
+
+    private async Task<AnnMaintenanceResult> ReadAsync(global::Orleans.IGrainFactory grains, string signed,
+        Guid requestId, AnnMaintenanceRequest original, Guid connectionId, CancellationToken token)
+    {
+        var actor = grains.GetGrain<IConnectionGrain>(connectionId);
+        var purpose = new NativeCqrsStreamPurpose(() => codec.Verify(signed));
+        var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
+            streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer, requestId,
+            clock, routing, purpose, token).ConfigureAwait(true);
+        return Read(reply, original);
     }
 
     private static AnnMaintenanceResult Read(GrainOperationReply reply, AnnMaintenanceRequest original)

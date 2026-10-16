@@ -42,7 +42,11 @@ internal static class NativeCommandObservationSubmission
             await observation.AbortAsync(original).ConfigureAwait(true);
             return original;
         }
-        catch (Exception cleanup)
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            return NativeRequestWorkSettlement.Preserve(original, cleanup)!;
+        }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
         {
             return NativeRequestWorkSettlement.Preserve(original, cleanup)!;
         }

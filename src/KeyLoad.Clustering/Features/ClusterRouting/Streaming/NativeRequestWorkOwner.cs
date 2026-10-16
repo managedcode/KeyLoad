@@ -32,8 +32,8 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
     public NativeRequestWorkOwner(IOptions<GrainRoutingOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        admissions = new(options.Value);
-        retentions = new(options.Value);
+        admissions = new(options);
+        retentions = new(options);
         children = new(gate, this, physical, admissions, retentions, () => admissionClosed);
         Observations = new(gate, this, physical, admissions);
         shutdownToken = shutdown.Token;
@@ -154,7 +154,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
             }
 
             start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            task = NativeRequestWorkDrain.DisposeAsync(start.Task, DrainAsync, () => shutdown.Dispose());
+            task = NativeRequestWorkDrain.DisposeAsync(start.Task, DrainAsync, shutdown.Dispose);
             disposeTask = task;
         }
 
@@ -177,8 +177,8 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
         Exception? original, Exception? cleanup)
         => NativeRequestWorkCompletion.CompleteAsync(gate, lease, original, cleanup);
 
-    internal void CompleteUnbound(NativeRequestWorkLease lease)
-        => NativeRequestWorkCompletion.CompleteUnbound(gate, lease);
+    internal void CompleteUnbound(NativeRequestWorkLease lease, Action disposeCancellation)
+        => NativeRequestWorkCompletion.CompleteUnbound(gate, lease, disposeCancellation);
 
     internal void Bind(NativeRequestWorkLease lease, ImmutableArray<ResourceLifetimeV1> lifetimes)
     {

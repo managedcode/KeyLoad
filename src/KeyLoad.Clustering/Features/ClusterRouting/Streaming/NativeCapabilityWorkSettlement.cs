@@ -188,7 +188,7 @@ internal struct NativeCapabilityCleanupFailures
     }
 }
 
-internal sealed class NativeCapabilityWorkRegistration(CancellationToken requestToken)
+internal sealed class NativeCapabilityWorkRegistration(CancellationToken requestToken) : IDisposable
 {
     private NativeRequestWorkLease? lease;
     private CancellationTokenSource? linkedCancellation;
@@ -234,6 +234,17 @@ internal sealed class NativeCapabilityWorkRegistration(CancellationToken request
         }
         linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(requestToken, owner.ShutdownToken,
             lease.Cancellation);
+    }
+
+    public void Dispose()
+    {
+        const int NoCleanupFailures = 0;
+        var failures = default(NativeCapabilityCleanupFailures);
+        Release(ref failures);
+        if (failures.Count > NoCleanupFailures)
+        {
+            NativeCapabilityWorkSettlement.ThrowCombined(null, failures);
+        }
     }
 
     internal void Release(ref NativeCapabilityCleanupFailures failures)

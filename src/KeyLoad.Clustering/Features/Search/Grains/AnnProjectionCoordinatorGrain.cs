@@ -25,8 +25,8 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         new(codec, services, clock, serializer, routing));
 
     public Task ScheduleAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId, CancellationToken cancellationToken)
-        => AnnProjectionJobOperation.RunAsync(services, database, cancellationToken,
-            (binding) => ScheduleCoreAsync(consumer, generation, nodeId, binding));
+        => AnnProjectionJobOperation.RunAsync(services, database,
+            (binding) => ScheduleCoreAsync(consumer, generation, nodeId, binding), cancellationToken);
 
     private async Task ScheduleCoreAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId,
         NativeCapabilityWorkLifetime binding)
@@ -85,8 +85,8 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
         => RequestContextHelper.RunWithCurrentCallerAsync(typeof(AnnProjectionCoordinatorGrain).FullName!,
             nameof(IDurableJobHandler.ExecuteJobAsync), () => AnnProjectionJobOperation.RunAsync(
-                services, database, cancellationToken,
-                (binding) => ExecuteOriginalAsync(context, binding)));
+                services, database,
+                (binding) => ExecuteOriginalAsync(context, binding), cancellationToken));
 
     private async Task ExecuteOriginalAsync(IJobRunContext context, NativeCapabilityWorkLifetime binding)
     {

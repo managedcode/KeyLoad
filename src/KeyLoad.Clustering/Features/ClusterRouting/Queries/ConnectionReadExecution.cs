@@ -26,6 +26,8 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
 
     /// <summary>Executes one verified, call-local read without creating another activation.</summary>
     /// <param name="request">The verified operation whose native identity remains current.</param>
+    /// <param name="originalBinding">Original operation lifetime binding retained by this read capability.</param>
+    /// <param name="observeOriginalFailure">Records the original failure on the owning operation before reply encoding or propagation.</param>
     /// <param name="cancellationToken">Cancellation for quorum barrier and read execution.</param>
     /// <returns>A bounded safe reply from the requested persisted-authorized capability.</returns>
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, IResourceLifetimeWorkBinding originalBinding, Action<Exception> observeOriginalFailure, CancellationToken cancellationToken)

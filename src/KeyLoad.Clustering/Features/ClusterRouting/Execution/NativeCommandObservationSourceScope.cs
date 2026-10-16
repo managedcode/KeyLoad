@@ -1,7 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.Clustering;
 
@@ -10,6 +8,9 @@ internal sealed class NativeCommandObservationSourceScope
 {
     private const int MetadataHeadroomDivisor = 2;
     private const int MinimumAllowance = 1;
+    private const int EmptyObservationTokenLength = 0;
+    private const long EmptySourceReadBytes = 0L;
+    private const int EmptySourceExaminedRecords = 0;
     private const string Uncertain = "The write outcome is unknown. Retry the same command ID.";
     private const string CauseKey = "keyload.native-command-observation-source-failure";
     private readonly ReadExecutionBudgetReadGrant grant;
@@ -85,7 +86,7 @@ internal sealed class NativeCommandObservationSourceScope
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }
-        if (!first.Payload.IsEmpty || proof.ObservationToken is not { Length: > 0 } opaque)
+        if (!first.Payload.IsEmpty || proof.ObservationToken is not { Length: > EmptyObservationTokenLength } opaque)
         {
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         }
@@ -104,8 +105,8 @@ internal sealed class NativeCommandObservationSourceScope
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         }
         var observed = GrainNativePayload.Read<NativeCommandObservationResultV1>(reply.Payload);
-        if (observed.Result is null || observed.Lifetimes.IsDefault || observed.ReadBytes < 0
-            || observed.ExaminedRecords < 0 || observed.ReadBytes > admission.MaximumReadBytes
+        if (observed.Result is null || observed.Lifetimes.IsDefault || observed.ReadBytes < EmptySourceReadBytes
+            || observed.ExaminedRecords < EmptySourceExaminedRecords || observed.ReadBytes > admission.MaximumReadBytes
             || observed.ExaminedRecords > admission.MaximumExaminedRecords)
         {
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
@@ -127,7 +128,11 @@ internal sealed class NativeCommandObservationSourceScope
         {
             work.CompleteSettledReadGrant(grant);
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
         }

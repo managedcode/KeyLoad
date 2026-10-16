@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
@@ -55,7 +54,7 @@ internal sealed class NativeCommandObservation
         PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, TimeProvider clock,
         CancellationToken callerToken)
     {
-        resources.Initialize(this, Lease, owner.ShutdownToken, admission, verified.Envelope.ExpiresAt, clock, callerToken);
+        resources.Initialize(this, Lease, admission, verified.Envelope.ExpiresAt, clock, owner.ShutdownToken, callerToken);
         Budget.Check();
         Budget.CheckResult(verified.Envelope);
         var payload = verified.Payload.ToArray();

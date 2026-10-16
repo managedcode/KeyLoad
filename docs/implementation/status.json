@@ -3,7 +3,7 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "Core and Query strict project gates passed. All R653 Query/Replication diagnostics and R656/R657 owning disposal/import defects are repaired in source. R659 complete strict solution reached Clustering and failed with 75 diagnostics in 13.0 seconds; distinct owners are repairing the combined batch. Aspire physical-file cases, bounded contender logs, exact native admission and CI enrollment are adopted. Shared same-file positive mode remains OPEN. No new runtime pass or original task acceptance is claimed.",
+    "implementation": "All R659 Clustering source repair packets are adopted with exact source guards. R662 full strict solution completed in 55.60 seconds with 27 Clustering diagnostics; true owner-mediated disposal consumers are being repaired as a combined batch. Core and Query earlier project passes remain scoped. Native file-profile operation tests now include 16 refused configurations and a genuine healthy Aspire model. No new runtime or whole-task acceptance pass.",
     "strictBuild": {
       "label": "root-r619-hosted-cold-full-release",
       "result": "passed",
@@ -260,6 +260,27 @@
       }
     },
     "latestCompilerAttempt": {
+      "label": "root-r662-combined-clustering-filecases-full-release",
+      "result": "failed",
+      "errors": 27,
+      "warnings": 0,
+      "elapsedSeconds": 55.59655975014903,
+      "sourceDrift": 0,
+      "compiledDrift": 88,
+      "compiledDriftClassification": "Expected rebuilt Release outputs during full compilation; not runtime execution.",
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "e87c60946d4bdf469c47e22786262a406eceecf7278b9e2b9091665f64a4ae33",
+      "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-filecases-full-release.completion.original.json",
+      "diagnostics": "TestResults/stage61-native-join/root-r662-compiler-diagnostics.prepared.json",
+      "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
+    },
+    "latestPublicFunctionalAttempt": {
+      "label": "R600 ONE then R602 RF3 normal public pair",
+      "result": "accepted_local_normal_pair",
+      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
+      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
+    },
+    "previousCompilerAttempt": {
       "label": "root-r659-combined-models-filecases-full-release",
       "result": "failed",
       "errors": 75,
@@ -272,24 +293,6 @@
       "evidence": "TestResults/stage61-native-join/root-r659-combined-models-filecases-full-release.completion.original.json",
       "diagnostics": "TestResults/stage61-native-join/root-r659-compiler-diagnostics.prepared.json",
       "scope": "Actual Clustering compiler/analyzer layer; Core and Query project passes do not establish a full solution or runtime pass."
-    },
-    "latestPublicFunctionalAttempt": {
-      "label": "R600 ONE then R602 RF3 normal public pair",
-      "result": "accepted_local_normal_pair",
-      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
-      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
-    },
-    "previousCompilerAttempt": {
-      "label": "root-r656-combined-models-full-release",
-      "result": "failed",
-      "warnings": 0,
-      "errors": 1,
-      "elapsedSeconds": 8.668360457988456,
-      "sourceDrift": 0,
-      "compiledDrift": 0,
-      "stdoutSha256": "20e0684f6f4e2b6be163478c999d4b81278104fd563bcb21d86d07f863c0e720",
-      "evidence": "TestResults/stage61-native-join/root-r656-combined-models-full-release.completion.original.json",
-      "scope": "Fullsolution afterQuery4/Replication21sourcefixes. Only remainingCA2000deadlineallocation; causalusingownershiprepairinC4. Core/QueryseparatestrictPASSretainownscope; no runtimeacceptance."
     },
     "latestFocusedRuntime": {
       "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
@@ -344,13 +347,13 @@
       "scope": "Complete Release original R609 source. KLD0031 partial test helper201>200 and IDE0005 unused import. All product projects compiled, but no complete build/runtime acceptance."
     },
     "formatVerification": {
-      "label": "root-r659-filecase-combined-whitespace-verify",
+      "label": "root-r662-combined-clustering-whitespace-verify",
       "result": "passed",
-      "changedCSharpScope": 175,
+      "changedCSharpScope": 47,
       "sourceDrift": 0,
       "compiledDrift": 0,
-      "evidence": "TestResults/stage61-native-join/root-r659-filecase-combined-whitespace-verify.completion.original.json",
-      "scope": "Native whitespace only; the later R660 validation/blank-line repairs await the combined matching verification."
+      "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-whitespace-verify.completion.original.json",
+      "scope": "Native whitespace only; not a complete formatting, compiler or runtime qualification."
     },
     "focusedRawCoverage": {
       "linesCovered": 25140,
@@ -431,6 +434,16 @@
         "TestResults/stage61-native-join/root-r655-replication21-in16.adoption.original.json"
       ],
       "scope": "Cohesive Query capturedview/search/preparedleafownership; exactCTcallbacks; nativeForwardtypedaliases, fullpublicationorder/buffercleanup/firstEDI+fatalpriority+Unknownpoison; actualCTSfinallyownership; completecoordinator/consensusshutdownownership inexistingowners/allactualcallers. No limits/suppression/ABI/fallbackchanges."
+    },
+    "postR659Repair": {
+      "stage": "R661",
+      "state": "source_adopted_residual_ownership_compiler_batch_open",
+      "evidence": [
+        "TestResults/stage61-native-join/root-r661-clustering-replica-search-command10.adoption.original.json",
+        "TestResults/stage61-native-join/root-r661-clustering-generic-streaming10.adoption.original.json",
+        "TestResults/stage61-native-join/root-r661-clustering-observation-codec28.adoption.original.json"
+      ],
+      "reviewCorrection": "Main removed an introduced double CTS disposal before adoption; exact stage cancellation then single CTS disposal order is retained."
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {
@@ -69636,6 +69649,14 @@
       "refusedNearMisses": 7,
       "unchangedInputsAndHealthyFollowup": true,
       "evidence": "TestResults/stage61-native-join/root-r659-filecase-native-js-selection.original.json"
-    }
+    },
+    "nativeProfileRegression": {
+      "state": "source_adopted_not_executed",
+      "rejectedSelections": 16,
+      "healthyModel": "Actual Aspire model has exactly three original voters and three explicit-start diagnostic contenders sharing the exact node1 data root and image; distinct voter roots and original fault command identities remain required.",
+      "case": "FunctionalColdReopenProfileTests.InvalidColdAndConflictingSelectionsRefuseBeforeResourcesThenHealthyModelWorks",
+      "evidence": "TestResults/stage61-native-join/root-r661-filecase-native-profile3.adoption.original.json"
+    },
+    "focusedRuntimeSelection": "TestResults/root-r662-related-foundation-selection-r1/combined-related-native.config.prepared.json"
   }
 }

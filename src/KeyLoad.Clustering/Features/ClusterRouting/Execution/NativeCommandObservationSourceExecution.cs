@@ -45,7 +45,11 @@ internal static class NativeCommandObservationSourceExecution
                 result = NativeCommandObservationSourceReply.Encode(observed, first, services, work, token);
             }
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failure = error;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             failure = error;
         }

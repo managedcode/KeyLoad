@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
@@ -13,7 +12,7 @@ internal static class NativeCommandObservationAdmission
         var resources = new NativeCommandObservationResources(database.OperationLimitsOptions, admission.MaximumResultBytes);
         NativeRequestWorkLease? lease = null;
         NativeCommandObservation? observation = null;
-        Exception? primary = null;
+        Exception? primary;
         try
         {
             lease = owner.AcquireCommandObservation(admission.ObservationId, commandWork.OriginalProducer,

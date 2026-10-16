@@ -6,12 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload)
+internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : IDisposable
 {
     private const int NoFailures = 0;
     private NativeRequestWorkChildReservation? reservation;
     private CancellationTokenSource? cancellation;
     private GrainRequestIdentityScope? identity;
+    private bool cleanupPrepared;
+    private bool disposed;
     internal CancellationToken Token => cancellation?.Token
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
 
@@ -43,12 +45,8 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload)
     {
         var original = failures.Count == NoFailures ? null : failures[NoFailures];
         var cleanup = new List<Exception>();
-        Capture(() => identity?.Dispose(), cleanup);
-        Capture(() => cancellation?.Dispose(), cleanup);
-        if (ownedPayload is not null)
-        {
-            Capture(() => CryptographicOperations.ZeroMemory(ownedPayload), cleanup);
-        }
+        cleanupPrepared = true;
+        Dispose(cleanup);
         failures.AddRange(cleanup);
         if (reservation is not null)
         {
@@ -64,6 +62,43 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload)
             {
                 failures.Add(failure);
             }
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!cleanupPrepared)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+        }
+        var failures = new List<Exception>();
+        Dispose(failures);
+        Exception? failure = null;
+        foreach (var error in failures)
+        {
+            failure = NativeRequestWorkSettlement.Preserve(failure, error);
+        }
+        NativeRequestWorkSettlement.Rethrow(failure);
+    }
+
+    private void Dispose(List<Exception> cleanup)
+    {
+        if (disposed)
+        {
+            return;
+        }
+        disposed = true;
+        if (identity is { } originalIdentity)
+        {
+            Capture(originalIdentity.Dispose, cleanup);
+        }
+        if (cancellation is { } originalCancellation)
+        {
+            Capture(originalCancellation.Dispose, cleanup);
+        }
+        if (ownedPayload is not null)
+        {
+            Capture(() => CryptographicOperations.ZeroMemory(ownedPayload), cleanup);
         }
     }
 

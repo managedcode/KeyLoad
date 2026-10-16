@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.Clustering;
 
 /// <summary>Freezes the ordinary factory dispatch subset whose immutable intent has the strict stored-outcome contract.</summary>

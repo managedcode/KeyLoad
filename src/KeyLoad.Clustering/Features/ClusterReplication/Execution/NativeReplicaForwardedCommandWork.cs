@@ -4,7 +4,7 @@ using KeyLoad.Core.Features.ResourceExecution;
 namespace KeyLoad.Clustering;
 
 /// <summary>Owns the single native lease, result ledger and budget of an incoming authenticated replica forward.</summary>
-internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedCommandWork
+internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedCommandWork, IAsyncDisposable
 {
     private readonly NativeRequestWorkLease lease;
     private readonly Lock gate = new();
@@ -39,7 +39,12 @@ internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedComma
             work.budget.Check();
             return work;
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            NativeRequestWorkSettlement.Rethrow(await work.CompleteAsync(error).ConfigureAwait(false));
+            throw;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             NativeRequestWorkSettlement.Rethrow(await work.CompleteAsync(error).ConfigureAwait(false));
             throw;
@@ -66,6 +71,9 @@ internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedComma
         }
     }
 
+    public async ValueTask DisposeAsync()
+        => NativeRequestWorkSettlement.Rethrow(await CompleteAsync(null).ConfigureAwait(false));
+
     private async Task<Exception?> CompleteCoreAsync(Exception? original)
     {
         Exception? cleanup = null;
@@ -82,7 +90,12 @@ internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedComma
             }
             await lease.PrepareCompletionAsync().ConfigureAwait(false);
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return NativeRequestWorkSettlement.Preserve(original,
+                NativeRequestWorkSettlement.Preserve(cleanup, error));
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             return NativeRequestWorkSettlement.Preserve(original,
                 NativeRequestWorkSettlement.Preserve(cleanup, error));
@@ -93,7 +106,12 @@ internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedComma
             var outcome = await lease.CompleteAsync(original, cleanup).ConfigureAwait(false);
             return NativeRequestWorkSettlement.Preserve(outcome.OriginalFailure, outcome.CleanupOrJoinFailure);
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return NativeRequestWorkSettlement.Preserve(original,
+                NativeRequestWorkSettlement.Preserve(cleanup, error));
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             return NativeRequestWorkSettlement.Preserve(original,
                 NativeRequestWorkSettlement.Preserve(cleanup, error));
@@ -106,7 +124,11 @@ internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedComma
         {
             cancellation?.Dispose();
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
         }
@@ -114,7 +136,11 @@ internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedComma
         {
             retention?.Dispose();
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
         }

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Clustering;
 
 /// <summary>Resources of one original observation lease; none is created after the effect.</summary>
-internal sealed class NativeCommandObservationResources(IOptions<DatabaseLimits> options, int maximumResultBytes)
+internal sealed class NativeCommandObservationResources(IOptions<DatabaseLimits> options, int maximumResultBytes) : IAsyncDisposable
 {
     internal ResourceLifetimeWorkResultRetention ResultRetention { get; } = new(options);
     internal int MaximumResultBytes => maximumResultBytes;
@@ -20,8 +20,8 @@ internal sealed class NativeCommandObservationResources(IOptions<DatabaseLimits>
     internal CancellationToken Token => linked?.Token ?? stopping.Token;
 
     internal void Initialize(NativeCommandObservation state, NativeRequestWorkLease lease,
-        CancellationToken shutdownToken, NativeCommandObservationAdmissionV1 admission,
-        DateTimeOffset originalExpiry, TimeProvider clock, CancellationToken callerToken)
+        NativeCommandObservationAdmissionV1 admission, DateTimeOffset originalExpiry, TimeProvider clock,
+        CancellationToken shutdownToken, CancellationToken callerToken)
     {
         linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, shutdownToken, lease.Cancellation, stopping.Token);
         budget = new(options, clock, linked.Token);
@@ -51,6 +51,12 @@ internal sealed class NativeCommandObservationResources(IOptions<DatabaseLimits>
             SingleFailure => failures[NoFailures],
             _ => new AggregateException(failures)
         };
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        var failure = await DisposeAsync().ConfigureAwait(false);
+        NativeRequestWorkSettlement.Rethrow(failure);
     }
 
     private const int NoFailures = 0;

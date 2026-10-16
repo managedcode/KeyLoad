@@ -26,7 +26,6 @@ internal static class NativeCommandObservationRead
     {
         CancellationTokenSource? linked = null;
         ReadExecutionBudgetStageCancellationLease? stage = null;
-        GrainOperationReply? reply = null;
         Exception? primary = null;
         Exception? cleanup = null;
         KeyLoadException? refusal = null;
@@ -39,22 +38,7 @@ internal static class NativeCommandObservationRead
             original.Budget.Check();
             await coordinator.ReadBarrierAsync(linked.Token).ConfigureAwait(true);
             original.Budget.Check();
-            OperationResult result;
-            try
-            {
-                result = database.ResolveSubmissionOutcome(original.Intent, original.Budget);
-            }
-            catch (KeyLoadException error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                refusal = error;
-                result = new(null, error.Code, error.Message);
-            }
-            var observed = new NativeCommandObservationResultV1(result, original.Budget.ReadBytes,
-                original.Budget.ConstrainedNativeRecords, [.. original.Lease.Dependencies]);
-            reply = NativeCommandObservationEncoding.Encode(observed, original.Budget, options, linked.Token);
-            _ = publication.Capture(reply, original.Budget);
-            original.Budget.Check();
-            original.Lease.AdmitPublication();
+            PublishOutcome(database, original, options, publication, ref refusal, linked.Token);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -64,8 +48,22 @@ internal static class NativeCommandObservationRead
         {
             primary = NativeCommandObservationCompletion.Retain(refusal, error);
         }
-        cleanup = Dispose(stage, cleanup);
-        cleanup = Dispose(linked, cleanup);
+        finally
+        {
+            cleanup = Dispose(stage, cleanup);
+            try
+            {
+                linked?.Dispose();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                cleanup = NativeCommandObservationCompletion.Retain(cleanup, error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                cleanup = NativeCommandObservationCompletion.Retain(cleanup, error);
+            }
+        }
         var failure = await NativeCommandObservationCompletion.CompleteAsync(original,
             primary ?? refusal, cleanup, refusal).ConfigureAwait(true);
         if (failure is not null)
@@ -74,6 +72,28 @@ internal static class NativeCommandObservationRead
             NativeRequestWorkSettlement.Rethrow(failure);
         }
         return publication.Value;
+    }
+
+    private static void PublishOutcome<T>(DatabaseEngine database, NativeCommandObservation original,
+        IOptions<GrainRoutingOptions> options, NativeCommandObservationPublication<T> publication,
+        ref KeyLoadException? refusal, CancellationToken token)
+    {
+        OperationResult result;
+        try
+        {
+            result = database.ResolveSubmissionOutcome(original.Intent, original.Budget);
+        }
+        catch (KeyLoadException error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            refusal = error;
+            result = new(null, error.Code, error.Message);
+        }
+        var observed = new NativeCommandObservationResultV1(result, original.Budget.ReadBytes,
+            original.Budget.ConstrainedNativeRecords, [.. original.Lease.Dependencies]);
+        var reply = NativeCommandObservationEncoding.Encode(observed, original.Budget, options, token);
+        _ = publication.Capture(reply, original.Budget);
+        original.Budget.Check();
+        original.Lease.AdmitPublication();
     }
 
     private static Exception? Dispose(IDisposable? owned, Exception? previous)

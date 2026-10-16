@@ -50,12 +50,16 @@ internal static class NativeAdministratorAuthenticationRead
         return reply;
     }
 
+    private const int NoReadBytes = 0;
+    private const int NoExaminedRecords = 0;
+    private const int NoResultBytes = 0;
+
     private static void Require(NativeAdministratorAuthenticationRequestV1 input, DateTimeOffset expiry, DatabaseLimits limits)
     {
         if (string.IsNullOrEmpty(input.Secret) || input.ExpiresAt != expiry
-            || input.MaximumReadBytes <= 0 || input.MaximumReadBytes > limits.MaxQueryReadBytes
-            || input.MaximumExaminedRecords <= 0 || input.MaximumExaminedRecords > limits.MaxScanRecords
-            || input.MaximumResultBytes <= 0 || input.MaximumResultBytes > limits.MaxBatchBytes)
+            || input.MaximumReadBytes <= NoReadBytes || input.MaximumReadBytes > limits.MaxQueryReadBytes
+            || input.MaximumExaminedRecords <= NoExaminedRecords || input.MaximumExaminedRecords > limits.MaxScanRecords
+            || input.MaximumResultBytes <= NoResultBytes || input.MaximumResultBytes > limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

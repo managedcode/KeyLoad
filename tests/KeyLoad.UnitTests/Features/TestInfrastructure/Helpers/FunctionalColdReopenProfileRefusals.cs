@@ -19,6 +19,7 @@ internal static class FunctionalColdReopenProfileRefusals
             await Assert.That(Directory.Exists(root) || File.Exists(root)).IsFalse();
         }
         await FunctionalColdReopenProfileModel.VerifyAsync(3, true, true);
+        await FunctionalFileOwnershipProfileRefusals.RunAsync();
     }
 
     private static IEnumerable<KeyValuePair<string, string?>[]> Rejected()

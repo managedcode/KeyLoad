@@ -54,7 +54,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func
             signed = codec.CreateTextMaintenanceChild(actorId, principal.Id, read, command,
                 commandId, payload, parent.Envelope.ExpiresAt);
         }
-        catch
+        catch (Exception)
         {
             CryptographicOperations.ZeroMemory(payload);
             throw;

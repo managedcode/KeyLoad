@@ -27,7 +27,7 @@ internal static class NativeCommandObservationPreparation
             GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
             PhysicalCommandActorKey.Validate(request, actorKey, physical);
             work = NativeCapabilityWorkLifetime.Acquire(owner, request.Envelope.RequestId,
-                NativeRequestWorkKind.CommandCapability, token, database.OperationLimitsOptions)
+                NativeRequestWorkKind.CommandCapability, database.OperationLimitsOptions, token)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             observation = await NativeCommandObservationSubmission.ReserveAsync(database, clock, request,
                 owner, work, physical, runtime, token).ConfigureAwait(true)
@@ -50,9 +50,14 @@ internal static class NativeCommandObservationPreparation
         finally
         {
             observation?.FinishPreparation();
-            if (observation is null || work is null || !observation.OwnsCommandWork(work))
+            if (work is not null && observation is not null && observation.OwnsCommandWork(work))
             {
-                await NativeCapabilityWorkLifetime.SettleAsync(primary, work, null, null).ConfigureAwait(true);
+                work = null;
+            }
+            if (work is not null)
+            {
+                work.PrimaryError = primary;
+                await work.DisposeAsync().ConfigureAwait(true);
             }
         }
     }

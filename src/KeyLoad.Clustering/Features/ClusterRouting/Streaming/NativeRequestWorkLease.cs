@@ -11,10 +11,7 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
     private ResourceLifetimeWorkResultRetention? resultRetention;
     private readonly CancellationTokenSource cancellation = new();
     private readonly TaskCompletionSource<NativeRequestWorkOriginalSettlement> settlement = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private TaskCompletionSource? cancelObservers;
-    private int observerCount;
-    private bool publicationClosed;
-    private readonly Dictionary<ResourceLifetimeV1, NativeResourceWorkFenceAdmission> retirements = [];
+    private NativeRequestWorkLeasePublication publication = new([]);
     internal NativeRequestWorkChildReservation? ChildReservation
     {
         get; set;
@@ -26,18 +23,12 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
     public NativeRequestWorkLease OriginalProducer => this;
     internal bool OwnsResultRetention => ChildReservation is null;
     internal ImmutableArray<Exception> ChildCleanupFailures { get; set; } = [];
-    internal bool HasRetirementHolds => retirements.Count != NoRetirements;
-    private const int NoRetirements = 0;
-    internal bool Completing
-    {
-        get; private set;
-    }
+    internal bool HasRetirementHolds => publication.HasRetirementHolds;
+    internal bool Completing => publication.Completing;
     internal Task? CompletionDriver
     {
         get; set;
     }
-    private const int NoObservers = 0;
-    private const int SingleObserver = 1;
 
     internal NativeRequestWorkLease(NativeRequestWorkOwner owner, Guid id, NativeRequestWorkKind kind, long generation)
     {
@@ -98,71 +89,19 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
     internal Task<Exception?> CancelAsync() => NativeRequestWorkSettlement.CancelAsync(cancellation);
 
     internal void MarkRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-    {
-        if (retirements.TryGetValue(fence.Control.Lifetime, out var original))
-        {
-            NativeResourceWorkRetentions.RequireFingerprint(original.Fingerprint, fingerprint);
-            return;
-        }
-        publicationClosed = true;
-        retirements.Add(fence.Control.Lifetime, new(fingerprint, Snapshot()));
-    }
+        => publication.MarkRetirement(fence, fingerprint, this);
 
     internal NativeResourceWorkSnapshot RetirementSnapshot(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-    {
-        var original = retirements[fence.Control.Lifetime];
-        NativeResourceWorkRetentions.RequireFingerprint(original.Fingerprint, fingerprint);
-        return original.Snapshot;
-    }
+        => publication.RetirementSnapshot(fence, fingerprint);
 
     internal void ConsumeRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-    {
-        _ = RetirementSnapshot(fence, fingerprint);
-        retirements.Remove(fence.Control.Lifetime);
-    }
+        => publication.ConsumeRetirement(fence, fingerprint);
 
-    internal bool ClosePublication(bool retainCancellation)
-    {
-        publicationClosed = true;
-        if (Completing || !retainCancellation)
-        {
-            return false;
-        }
-        if (observerCount == NoObservers)
-        {
-            cancelObservers = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        }
-        observerCount = checked(observerCount + SingleObserver);
-        return true;
-    }
-
-    internal void RetainCompletionObserver()
-    {
-        RequirePublicationOpen();
-        if (observerCount == NoObservers)
-        {
-            cancelObservers = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        }
-        observerCount = checked(observerCount + SingleObserver);
-    }
-
-    internal Task BeginCompletion()
-    {
-        Completing = true;
-        publicationClosed = true;
-        return cancelObservers?.Task ?? Task.CompletedTask;
-    }
-
-    internal TaskCompletionSource? ReleaseCloseObserver()
-        => --observerCount == NoObservers ? cancelObservers : null;
-
-    internal void RequirePublicationOpen()
-    {
-        if (publicationClosed || Completing)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.AdmissionClosedMessage);
-        }
-    }
+    internal bool ClosePublication(bool retainCancellation) => publication.ClosePublication(retainCancellation);
+    internal void RetainCompletionObserver() => publication.RetainCompletionObserver();
+    internal Task BeginCompletion() => publication.BeginCompletion();
+    internal TaskCompletionSource? ReleaseCloseObserver() => publication.ReleaseCloseObserver();
+    internal void RequirePublicationOpen() => publication.RequirePublicationOpen();
 
     internal Task PrepareCompletionAsync() => owner.PrepareCompletionAsync(this);
 
@@ -173,15 +112,15 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
     {
         await start.ConfigureAwait(false);
         await observers.ConfigureAwait(false);
-        Finish(original, cleanup);
+        Finish(original, cleanup, cancellation.Dispose);
     }
 
-    internal NativeRequestWorkOriginalSettlement Finish(Exception? original, Exception? cleanup)
+    internal NativeRequestWorkOriginalSettlement Finish(Exception? original, Exception? cleanup, Action disposeCancellation)
     {
         var failures = ImmutableArray.CreateBuilder<Exception>();
         Add(cleanup, failures);
         failures.AddRange(ChildCleanupFailures);
-        Add(DisposeCancellation(), failures);
+        Add(DisposeCancellation(disposeCancellation), failures);
         Add(ReleaseAdmission(), failures);
         var outcome = new NativeRequestWorkOriginalSettlement(original, failures.ToImmutable());
         Volatile.Write(ref resultRetention, null);
@@ -197,11 +136,11 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
         }
     }
 
-    private Exception? DisposeCancellation()
+    private static Exception? DisposeCancellation(Action disposeCancellation)
     {
         try
         {
-            cancellation.Dispose();
+            disposeCancellation();
             return null;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
@@ -233,7 +172,7 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
 
     internal NativeResourceWorkSnapshot Snapshot()
         => new(RequestId, Kind, AdmissionGeneration, LastPublicationGeneration);
-    public void Dispose() => owner.CompleteUnbound(this);
+    public void Dispose() => owner.CompleteUnbound(this, cancellation.Dispose);
 }
 
 internal sealed record NativeRequestWorkOriginalSettlement(Exception? OriginalFailure, ImmutableArray<Exception> CleanupFailures)

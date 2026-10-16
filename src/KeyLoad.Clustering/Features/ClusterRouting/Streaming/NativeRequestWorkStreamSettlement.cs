@@ -105,7 +105,7 @@ internal static class NativeRequestWorkStreamSettlement
 }
 
 /// <summary>Owns only the original call's linked cancellation and, for a root producer, its one result ledger.</summary>
-internal sealed class NativeBoundCqrsStreamWork
+internal sealed class NativeBoundCqrsStreamWork : IDisposable
 {
     private CancellationTokenSource? deadline;
     private CancellationTokenSource? request;
@@ -117,6 +117,9 @@ internal sealed class NativeBoundCqrsStreamWork
     private Exception? admissionFailure;
     private NativeCqrsStreamPurpose? originalPurpose;
     private CancellationToken originalToken;
+    private bool cancellationDisposed;
+    private bool completionPrepared;
+    private bool retentionDisposed;
     internal CancellationToken Token => selected?.Token ?? execution?.Token ?? request?.Token ?? originalToken;
 
     internal void Start(TimeProvider clock, IOptions<GrainRoutingOptions> options, NativeRequestWorkOwner owner,
@@ -170,11 +173,7 @@ internal sealed class NativeBoundCqrsStreamWork
         Func<ValueTask> settled, Exception? primary)
     {
         var cleanup = await NativeCqrsStreamSettlement.SettleAwaitedAsync(enumerator, settled, null).ConfigureAwait(true);
-        cleanup = Dispose(selected, cleanup);
-        cleanup = Dispose(execution, cleanup);
-        cleanup = Dispose(ownerRequest, cleanup);
-        cleanup = Dispose(request, cleanup);
-        cleanup = Dispose(deadline, cleanup);
+        cleanup = DisposeCancellation(cleanup);
         var original = primary ?? originalPurpose?.OriginalFailure ?? admissionFailure;
         var preparation = await PrepareAsync().ConfigureAwait(true);
         cleanup = NativeRequestWorkSettlement.Preserve(cleanup, preparation);
@@ -182,7 +181,8 @@ internal sealed class NativeBoundCqrsStreamWork
         {
             return NativeRequestWorkSettlement.Preserve(original, cleanup);
         }
-        cleanup = Dispose(ownedRetention, cleanup);
+        completionPrepared = true;
+        cleanup = Dispose(this, cleanup);
         if (lease is not null)
         {
             var previous = cleanup;
@@ -201,6 +201,35 @@ internal sealed class NativeBoundCqrsStreamWork
             }
         }
         return cleanup is null ? null : NativeRequestWorkSettlement.Preserve(original, cleanup);
+    }
+
+    public void Dispose()
+    {
+        if (!completionPrepared)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+        }
+        var cleanup = DisposeCancellation(null);
+        if (!retentionDisposed)
+        {
+            retentionDisposed = true;
+            cleanup = Dispose(ownedRetention, cleanup);
+        }
+        NativeRequestWorkSettlement.Rethrow(cleanup);
+    }
+
+    private Exception? DisposeCancellation(Exception? cleanup)
+    {
+        if (cancellationDisposed)
+        {
+            return cleanup;
+        }
+        cancellationDisposed = true;
+        cleanup = Dispose(selected, cleanup);
+        cleanup = Dispose(execution, cleanup);
+        cleanup = Dispose(ownerRequest, cleanup);
+        cleanup = Dispose(request, cleanup);
+        return Dispose(deadline, cleanup);
     }
 
     private async Task<Exception?> PrepareAsync()

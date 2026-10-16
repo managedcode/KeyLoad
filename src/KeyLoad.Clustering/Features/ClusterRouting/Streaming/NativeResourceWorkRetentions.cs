@@ -1,12 +1,14 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ResourceExecution;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Retains only outstanding retirement observations within the existing frame capacity and owner gate.</summary>
-internal sealed class NativeResourceWorkRetentions(GrainRoutingOptions settings)
+internal sealed class NativeResourceWorkRetentions(IOptions<GrainRoutingOptions> options)
 {
+    private readonly GrainRoutingOptions settings = options.Value;
     private readonly Dictionary<(Guid RetirementId, Guid CommandId), NativeResourceWorkClosure> qualified = [];
 
     internal NativeResourceWorkClosure[] Outstanding => qualified.Values.ToArray();

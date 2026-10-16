@@ -1,17 +1,17 @@
 using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Stores the existing owner's active admissions; every access requires that owner's gate.</summary>
-internal sealed class NativeRequestWorkAdmissions
+internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> options)
 {
     private readonly Dictionary<(Guid RequestId, NativeRequestWorkKind Kind), NativeRequestWorkLease> active = [];
-    private readonly GrainRoutingOptions settings;
+    private readonly GrainRoutingOptions settings = options.Value;
     private long admissionGeneration;
     private long publicationGeneration;
     private int requestProducers;
 
-    internal NativeRequestWorkAdmissions(GrainRoutingOptions settings) => this.settings = settings;
     internal int Count => active.Count;
     internal Task<NativeRequestWorkOriginalSettlement>[] Settlements
         => active.Values.Select(lease => lease.Settlement).ToArray();
@@ -71,10 +71,7 @@ internal sealed class NativeRequestWorkAdmissions
         var completeSet = lease.Dependencies.Union(lifetimes);
         var parentSet = parent?.Dependencies.Union(lifetimes);
         lease.Dependencies = completeSet;
-        if (parent is not null)
-        {
-            parent.Dependencies = parentSet!;
-        }
+        parent?.Dependencies = parentSet!;
     }
 
     internal void AdmitPublication(NativeRequestWorkLease lease)

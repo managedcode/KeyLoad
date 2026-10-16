@@ -14,39 +14,32 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         CancellationToken cancellationToken, IGrainContext? context = null)
     {
         var stage = GrainFailureStage.PartitionResolution;
-        NativeCapabilityWorkLifetime? work = null;
-        Exception? primaryError = null;
         var coreEntered = false;
         try
         {
             ValidateRoute(request, actorKey, cancellationToken);
             stage = GrainFailureStage.CapabilityExecution;
-            work = NativeCapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
-                NativeRequestWorkKind.CommandCapability, cancellationToken, database.OperationLimitsOptions);
+            await using var work = NativeCapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
+                NativeRequestWorkKind.CommandCapability, database.OperationLimitsOptions, cancellationToken);
             coreEntered = true;
-            return await ExecuteCoreAsync(request, work, work?.Token ?? cancellationToken,
-                context).ConfigureAwait(true);
+            return await ExecuteCoreAsync(request, work, context,
+                work?.Token ?? cancellationToken).ConfigureAwait(true);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            primaryError = coreEntered ? error : MarkFailure(error, stage);
+            var primaryError = coreEntered ? error : MarkFailure(error, stage);
             NativeRequestWorkSettlement.Rethrow(primaryError);
             throw;
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            primaryError = error;
-            NativeRequestWorkSettlement.Rethrow(primaryError);
+            NativeRequestWorkSettlement.Rethrow(error);
             throw;
-        }
-        finally
-        {
-            await NativeCapabilityWorkLifetime.SettleAsync(primaryError, work, null, null).ConfigureAwait(true);
         }
     }
 
     private async Task<GrainOperationReply> ExecuteCoreAsync(DecodedGrainRequest request,
-        NativeCapabilityWorkLifetime? work, CancellationToken operationToken, IGrainContext? context)
+        NativeCapabilityWorkLifetime? work, IGrainContext? context, CancellationToken operationToken)
     {
         var stage = GrainFailureStage.CapabilityExecution;
         try
@@ -70,7 +63,21 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            NativeRequestWorkSettlement.Rethrow(MarkFailure(error, stage));
+            var primaryError = MarkFailure(error, stage);
+            if (work is not null)
+            {
+                work.PrimaryError = primaryError;
+            }
+            NativeRequestWorkSettlement.Rethrow(primaryError);
+            throw;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (work is not null)
+            {
+                work.PrimaryError = error;
+            }
+            NativeRequestWorkSettlement.Rethrow(error);
             throw;
         }
     }

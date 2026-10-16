@@ -45,17 +45,17 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable, IAsyncDisposab
         IResourceLifetimeWorkBinding? binding = null) => registration.Admit(owner, requestId, kind, binding);
 
     internal static NativeCapabilityWorkLifetime? Acquire(NativeRequestWorkOwner? owner, Guid requestId,
-        NativeRequestWorkKind kind, CancellationToken requestToken, IOptions<DatabaseLimits> limits)
+        NativeRequestWorkKind kind, IOptions<DatabaseLimits> options, CancellationToken token)
     {
         if (owner is null)
         {
             return null;
         }
 
-        var lifetime = new NativeCapabilityWorkLifetime(requestToken);
+        var lifetime = new NativeCapabilityWorkLifetime(token);
         try
         {
-            lifetime.registration.Admit(owner, requestId, kind, ownedLimits: limits);
+            lifetime.registration.Admit(owner, requestId, kind, ownedLimits: options);
             return lifetime;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))

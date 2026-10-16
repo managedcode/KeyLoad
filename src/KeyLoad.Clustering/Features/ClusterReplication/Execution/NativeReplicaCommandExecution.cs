@@ -41,7 +41,12 @@ internal static class NativeReplicaCommandExecution
             observation?.Created(work);
             return work;
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            NativeRequestWorkSettlement.Rethrow(await work.CompleteAsync(error).ConfigureAwait(false));
+            throw;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             NativeRequestWorkSettlement.Rethrow(await work.CompleteAsync(error).ConfigureAwait(false));
             throw;
@@ -70,39 +75,75 @@ internal static class NativeReplicaCommandExecution
         ReplicaConsensus consensus, ReplicatedOperation operation, ReadExecutionBudget? sourcePlanningBudget, CancellationToken token)
     {
         var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.CommandCapability);
-        CancellationTokenSource? linked = null;
         ResourceLifetimeWorkResultRetention? retention = null;
         OperationResult? result = null;
         Exception? primary = null;
         Exception? cleanup = null;
+        var prepared = false;
         try
         {
             retention = new(database.OperationLimitsOptions);
             lease.AttachResultRetention(retention);
-            linked = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
-            result = await consensus.SubmitAsync(operation, lease, sourcePlanningBudget, linked.Token).ConfigureAwait(false);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
+            try
+            {
+                result = await consensus.SubmitAsync(operation, lease, sourcePlanningBudget, linked.Token).ConfigureAwait(false);
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                primary = error;
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                primary = error;
+            }
+            finally
+            {
+                cleanup = await PrepareAsync(lease).ConfigureAwait(false);
+                prepared = true;
+            }
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            primary = error;
+            primary = prepared ? primary : error;
+            cleanup = prepared ? NativeRequestWorkSettlement.Preserve(cleanup, error) : cleanup;
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            primary = error;
+            primary = prepared ? primary : error;
+            cleanup = prepared ? NativeRequestWorkSettlement.Preserve(cleanup, error) : cleanup;
         }
-        cleanup = await NativeRequestWorkSettlement.JoinAsync(lease.PrepareCompletionAsync()).ConfigureAwait(false);
+        finally
+        {
+            if (!prepared)
+            {
+                cleanup = await PrepareAsync(lease).ConfigureAwait(false);
+            }
+            cleanup = DisposeRetention(retention, cleanup);
+        }
+        var failure = await SettleAsync(lease, primary, cleanup).ConfigureAwait(false);
+        NativeRequestWorkSettlement.Rethrow(failure);
+        return result!;
+    }
+
+    private static async Task<Exception?> PrepareAsync(NativeRequestWorkLease lease)
+    {
         try
         {
-            linked?.Dispose();
+            return await NativeRequestWorkSettlement.JoinAsync(lease.PrepareCompletionAsync()).ConfigureAwait(false);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
+            return error;
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
+            return error;
         }
+    }
+
+    private static Exception? DisposeRetention(ResourceLifetimeWorkResultRetention? retention, Exception? cleanup)
+    {
         try
         {
             retention?.Dispose();
@@ -115,9 +156,7 @@ internal static class NativeReplicaCommandExecution
         {
             cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
         }
-        var failure = await SettleAsync(lease, primary, cleanup).ConfigureAwait(false);
-        NativeRequestWorkSettlement.Rethrow(failure);
-        return result!;
+        return cleanup;
     }
 
     private static async Task<Exception?> SettleAsync(NativeRequestWorkLease lease, Exception? primary, Exception? cleanup)

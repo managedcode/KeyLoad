@@ -27,7 +27,7 @@ internal static class NativeRequestWorkCompletion
         return lease.Settlement;
     }
 
-    internal static void CompleteUnbound(Lock gate, NativeRequestWorkLease lease)
+    internal static void CompleteUnbound(Lock gate, NativeRequestWorkLease lease, Action disposeCancellation)
     {
         lock (gate)
         {
@@ -41,7 +41,7 @@ internal static class NativeRequestWorkCompletion
             }
             _ = lease.BeginCompletion();
         }
-        var outcome = lease.Finish(null, null);
+        var outcome = lease.Finish(null, null, disposeCancellation);
         NativeRequestWorkSettlement.Rethrow(outcome.CleanupOrJoinFailure);
     }
     private const int EmptyDependencies = 0;

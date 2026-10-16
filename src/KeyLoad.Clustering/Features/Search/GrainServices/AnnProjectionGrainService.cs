@@ -132,8 +132,8 @@ public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFact
     {
         try
         {
-            return await AnnProjectionJobOperation.RunAsync<byte[]?>(services, database, token,
-                binding => CycleCoreAsync(after, binding)).ConfigureAwait(true);
+            return await AnnProjectionJobOperation.RunAsync<byte[]?>(services, database,
+                binding => CycleCoreAsync(after, binding), token).ConfigureAwait(true);
         }
         catch (OperationCanceledException) when (!token.IsCancellationRequested)
         {

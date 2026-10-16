@@ -10,30 +10,17 @@ internal static class NativeCommandObservationCommandExecution
         IPhysicalRequestPlacement physical, ReplicaSiloDiscoveryState actualRuntime, NativeCommandObservation original,
         Func<CancellationToken, Task> admitPeer, NativeCommandObservationPublication<T> publication, CancellationToken token)
     {
-        CancellationTokenSource? linked = null;
-        ReadExecutionBudgetStageCancellationLease? stage = null;
-        Exception? failure = null;
-        try
-        {
-            linked = CancellationTokenSource.CreateLinkedTokenSource(original.Token, token);
-            stage = original.Budget.EnterStageCancellation(linked.Token);
-            original.Budget.Check();
-            await admitPeer(linked.Token).ConfigureAwait(true);
-            original.Budget.Check();
-            await SubmitAndPublishAsync(database, coordinator, clock, settings, codec, physical,
-                actualRuntime, original, publication, linked.Token).ConfigureAwait(true);
-        }
-        catch (Exception error)
-        {
-            failure = error;
-        }
-        failure = Dispose(stage, failure);
-        failure = Dispose(linked, failure);
+        var failure = await ExecuteOwnedAsync(database, coordinator, clock, settings, codec, physical,
+            actualRuntime, original, admitPeer, publication, token).ConfigureAwait(true);
         try
         {
             await original.FinishCommandExecutionAsync(failure).ConfigureAwait(true);
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failure = NativeCommandObservationCompletion.Retain(failure, error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             failure = NativeCommandObservationCompletion.Retain(failure, error);
         }
@@ -43,13 +30,57 @@ internal static class NativeCommandObservationCommandExecution
             {
                 await original.AbortAsync(failure).ConfigureAwait(true);
             }
-            catch (Exception error)
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failure = NativeCommandObservationCompletion.Retain(failure, error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
                 failure = NativeCommandObservationCompletion.Retain(failure, error);
             }
             NativeRequestWorkSettlement.Rethrow(publication.Clear(failure!));
         }
         return publication.Value;
+    }
+
+    private static async Task<Exception?> ExecuteOwnedAsync<T>(DatabaseEngine database, ICommitCoordinator coordinator,
+        TimeProvider clock, GrainRoutingOptions settings, GrainRequestCodec codec,
+        IPhysicalRequestPlacement physical, ReplicaSiloDiscoveryState actualRuntime, NativeCommandObservation original,
+        Func<CancellationToken, Task> admitPeer, NativeCommandObservationPublication<T> publication, CancellationToken token)
+    {
+        ReadExecutionBudgetStageCancellationLease? stage = null;
+        Exception? failure = null;
+        try
+        {
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(original.Token, token);
+            try
+            {
+                stage = original.Budget.EnterStageCancellation(linked.Token);
+                original.Budget.Check();
+                await admitPeer(linked.Token).ConfigureAwait(true);
+                original.Budget.Check();
+                await SubmitAndPublishAsync(database, coordinator, clock, settings, codec, physical,
+                    actualRuntime, original, publication, linked.Token).ConfigureAwait(true);
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failure = error;
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failure = error;
+            }
+            failure = Dispose(stage, failure);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failure = NativeCommandObservationCompletion.Retain(failure, error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failure = NativeCommandObservationCompletion.Retain(failure, error);
+        }
+        return failure;
     }
 
     private static async Task SubmitAndPublishAsync<T>(DatabaseEngine database, ICommitCoordinator coordinator,
@@ -86,7 +117,11 @@ internal static class NativeCommandObservationCommandExecution
         {
             resource?.Dispose();
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return NativeCommandObservationCompletion.Retain(previous, error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             return NativeCommandObservationCompletion.Retain(previous, error);
         }

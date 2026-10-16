@@ -1,28 +1,28 @@
 namespace KeyLoad.Clustering;
 
-public sealed partial class GrainRequestCodec
+/// <summary>Issues the original bounded multi-lane receive child without changing its native payload.</summary>
+internal static class MultiLaneReceiveRequestIssuance
 {
-    internal string CreateAnnMaintenanceChild(Guid requestId, string principalId,
-        GrainReadKind? readKind, OperationKind? commandKind, Guid commandId, byte[] payload, DateTimeOffset expiry)
+    internal static string CreateMultiLaneReceiveChild(GrainRequestCodec codec, Guid requestId, string principalId, Guid commandId,
+        byte[] payload, DateTimeOffset expiry)
     {
-        var context = LifetimeReadContext;
+        var context = codec.LifetimeReadContext;
         if (expiry <= context.Now || expiry > context.Now + context.Lifetime)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         var envelope = new GrainRequestEnvelope
         {
-            Purpose = AnnMaintenanceChildScope.Purpose,
+            Purpose = MultiLaneReceiveChildScope.Purpose,
             RequestId = requestId,
             PrincipalId = principalId,
             Incarnation = context.Database.Store.Identity.Incarnation,
-            ReadKind = readKind,
-            CommandKind = commandKind,
+            CommandKind = OperationKind.Receive,
             CommandId = commandId,
             Payload = GrainNativePayload.Copy(payload, context.Database.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
-        _ = AnnMaintenanceChildScope.Validate(envelope);
-        return Issue(envelope);
+        _ = MultiLaneReceiveChildScope.Validate(envelope);
+        return codec.Issue(envelope);
     }
 }

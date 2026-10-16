@@ -7,41 +7,36 @@ namespace KeyLoad.Clustering;
 internal static class AnnProjectionJobOperation
 {
     internal static async Task<T> RunAsync<T>(IServiceProvider services, DatabaseEngine database,
-        CancellationToken token, Func<NativeCapabilityWorkLifetime, Task<T>> execute)
+        Func<NativeCapabilityWorkLifetime, Task<T>> execute, CancellationToken token)
     {
         T result = default!;
-        await RunAsync(services, database, token, async binding =>
+        await RunAsync(services, database, async binding =>
         {
             result = await execute(binding).ConfigureAwait(true);
-        }).ConfigureAwait(true);
+        }, token).ConfigureAwait(true);
         return result;
     }
 
     internal static async Task RunAsync(IServiceProvider services, DatabaseEngine database,
-        CancellationToken token, Func<NativeCapabilityWorkLifetime, Task> execute)
+        Func<NativeCapabilityWorkLifetime, Task> execute, CancellationToken token)
     {
         var owner = services.GetRequiredService<Func<NativeRequestWorkOwner>>()();
-        var lifetime = NativeCapabilityWorkLifetime.Acquire(owner, Guid.NewGuid(),
-            NativeRequestWorkKind.RequestProducer, token, database.OperationLimitsOptions)
+        await using var lifetime = NativeCapabilityWorkLifetime.Acquire(owner, Guid.NewGuid(),
+            NativeRequestWorkKind.RequestProducer, database.OperationLimitsOptions, token)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
-        Exception? original = null;
         try
         {
             await execute(lifetime).ConfigureAwait(true);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
-            original = failure;
+            lifetime.PrimaryError = failure;
             throw;
         }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
-            original = failure;
+            lifetime.PrimaryError = failure;
             throw;
-        }
-        finally
-        {
-            await NativeCapabilityWorkLifetime.SettleAsync(original, lifetime, null, null).ConfigureAwait(true);
         }
     }
 }
