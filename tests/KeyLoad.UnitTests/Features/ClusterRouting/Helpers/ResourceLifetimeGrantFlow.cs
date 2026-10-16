@@ -10,6 +10,22 @@ internal static class ResourceLifetimeGrantFlow
 {
     private const int KeyBytes = 32;
 
+    internal static async Task ExecuteWholeAsync()
+        => await ControlledPartitionMovementTerminalOwners.ExecuteAsync(async (source, target, listeners, corpus) =>
+        {
+            try
+            {
+                await ControlledPartitionMovementTerminalTrial.ExecuteAsync(source, target, listeners, corpus);
+                await ResourceLifetimeGrantFlow.ExecuteAsync(source, target, listeners, corpus);
+            }
+            catch (Exception)
+            {
+                source.RetainRoot = true;
+                target.RetainRoot = true;
+                throw;
+            }
+        });
+
     internal static async Task ExecuteAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
         ControlledPartitionMovementLoopbackCorpus corpus)

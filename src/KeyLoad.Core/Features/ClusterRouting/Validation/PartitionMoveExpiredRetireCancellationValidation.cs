@@ -8,27 +8,6 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    /// <summary>Only distinct transport material is excluded; first native cancellation authority is immutable.</summary>
-    private ReadOnlyMemory<byte> CanonicalMoveRetireCancellationBody(ReadOnlyMemory<byte> body)
-    {
-        if (body.IsEmpty || body.Length > Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
-        }
-        var value = NativeSerialization.Deserialize<PartitionMoveRetireCancellationBody>(body.Span);
-        var canonical = value with
-        {
-            OriginalRequestBytes = ReadOnlyMemory<byte>.Empty,
-            OriginalRequestSignature = string.Empty,
-            CancellationExpiresAt = default,
-            OriginalSourceWitness = null
-        };
-        if (NativeSerialization.Measure(canonical) > Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
-        }
-        return NativeSerialization.Serialize(canonical);
-    }
     private void RequireMoveRetireCancellationScope(IKeyValueView view,
         PartitionMoveRetireCancellationBody body, string principalId, long policyEpoch, DateTimeOffset now)
     {

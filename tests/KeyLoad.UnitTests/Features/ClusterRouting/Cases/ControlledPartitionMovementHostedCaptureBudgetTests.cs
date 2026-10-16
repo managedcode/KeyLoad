@@ -45,10 +45,12 @@ internal sealed class ControlledPartitionMovementHostedCaptureBudgetTests
                 var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(owners.Source,
                     ControlledPartitionMovementCaptureRequest.CaptureCommandId, token);
                 var operation = entry.Operation ?? throw new InvalidOperationException(nameof(entry.Operation));
+                var journal = await ControlledPartitionMovementNativeJournalBudget.CreateAndRefuseAsync(owners.Source, token);
                 for (var cold = FirstColdCut; cold < ColdCuts; cold++)
                 {
                     await owners.RestartAsync(token);
                     await ControlledPartitionMovementNativeRegistration.VerifyAsync(owners);
+                    await ControlledPartitionMovementNativeJournalBudget.VerifyAsync(owners.Source, journal, token);
                     foreach (var node in owners.Nodes)
                     {
                         await Assert.That(node.Database.Limits.MaxBatchBytes).IsEqualTo(EightKiB);
@@ -65,6 +67,7 @@ internal sealed class ControlledPartitionMovementHostedCaptureBudgetTests
                     await ControlledPartitionMovementNativeBlobAssertions.ReplayAsync(owners.Source, blob.Request, blob.Expected, token);
                     await ControlledPartitionMovementNativeModels.ReadAsync(owners.Source, seedOperation.EvaluatedAt, token);
                 }
+                await ControlledPartitionMovementNativeJournalBudget.DeleteAsync(owners.Source, token);
             }, failures);
             if (failures.Count != 0)
             {

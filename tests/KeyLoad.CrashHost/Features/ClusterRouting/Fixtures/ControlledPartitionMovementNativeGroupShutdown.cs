@@ -19,11 +19,10 @@ internal static class ControlledPartitionMovementNativeGroupShutdown
         Func<ControlledPartitionMovementNativeHost, Task> start, CancellationToken caller)
     {
         var failures = new List<Exception>();
-        var dependents = await Task.WhenAll(nodes.Skip(FirstDependent)
-            .Select((node, index) => JoinNodeAsync(node, start, index + FirstDependent, caller))).ConfigureAwait(false);
-        foreach (var original in dependents)
+        // Join each native directory handoff while every remaining transfer partner and the membership primary are live.
+        for (var index = FirstDependent; index < nodes.Count; index++)
         {
-            failures.AddRange(original);
+            failures.AddRange(await JoinNodeAsync(nodes[index], start, index, caller).ConfigureAwait(false));
         }
         if (nodes.Count > NativePrimary)
         {

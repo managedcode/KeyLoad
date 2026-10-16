@@ -77,7 +77,7 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var prepared = await PrepareAsync(token).ConfigureAwait(false);
+        var prepared = await PrepareAsync(payload, token).ConfigureAwait(false);
         var principal = prepared.Principal;
         var requestId = Guid.NewGuid();
         var signed = prepared.Codec.CreateRuntimeJournalRead(requestId, kind, payload);
@@ -98,7 +98,7 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var prepared = await PrepareAsync(token).ConfigureAwait(false);
+        var prepared = await PrepareAsync(payload, token).ConfigureAwait(false);
         var principal = prepared.Principal;
         var requestId = Guid.NewGuid();
         var signed = prepared.Codec.CreateRuntimeJournalCommand(requestId, principal.Id, commandId, payload);
@@ -121,12 +121,12 @@ internal sealed class RuntimeJournalClient(
         return result;
     }
 
-    private async Task<(PrincipalRecord Principal, GrainRequestCodec Codec)> PrepareAsync(CancellationToken cancellationToken)
+    private async Task<(PrincipalRecord Principal, GrainRequestCodec Codec)> PrepareAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         await admission.WaitAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var database = databaseFactory();
-        ValidateDatabaseLimits(database);
+        ValidateDatabaseLimits(database, payload);
         await coordinatorFactory().ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var principal = ReadProtectedPrincipal(database);
@@ -157,11 +157,12 @@ internal sealed class RuntimeJournalClient(
         return value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
     }
 
-    private void ValidateDatabaseLimits(DatabaseEngine database)
+    private static void ValidateDatabaseLimits(DatabaseEngine database, ReadOnlyMemory<byte> payload)
     {
-        if (journalOptions.Value.MaximumJournalBytes > database.Limits.MaxBatchBytes - GrainRoutingProtocol.EnvelopeMetadataBytes)
+        // The signed-token wrapper has its own additive envelope allowance. Bound the complete native DTO here.
+        if (payload.Length > database.Limits.MaxBatchBytes)
         {
-            throw new InvalidOperationException(RuntimeJournalStoragePolicy.InvalidLimits);
+            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
         }
     }
 

@@ -13,6 +13,7 @@ internal sealed class ResourcePartitionInventoryRf3Held
     private RequestCqrsProbeMarkerRecord? marker;
     private Guid arm;
     private bool originalValidated;
+    private bool releaseWritten;
 
     internal static async Task RunAsync(TwoRf3MembershipWave wave, ResourcePartitionInventoryRf3Seed seed,
         RemoteTransferNativeMembership membership, bool cancel, Func<CancellationToken, Task>? change,
@@ -46,7 +47,7 @@ internal sealed class ResourcePartitionInventoryRf3Held
         else
         {
             await (change ?? throw new InvalidOperationException("The source policy mutation was not supplied."))(token).ConfigureAwait(false);
-            wave.QueryControls.WriteRelease(arm, held.RequestId);
+            Release(wave.QueryControls, held);
             await ResourcePartitionInventoryRf3Assertions.RefusalAsync(await original.ConfigureAwait(false),
                 ErrorCode.TokenInvalidated).ConfigureAwait(false);
         }
@@ -60,8 +61,7 @@ internal sealed class ResourcePartitionInventoryRf3Held
         await ServerFailureObserver.ObserveAsync(selected.CancelAsync, failures).ConfigureAwait(false);
         if (marker is { } held)
         {
-            await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.ReleaseOpenArmsAsync(
-                membership.Source, cleanup.Token), failures).ConfigureAwait(false);
+            ServerFailureObserver.Observe(() => Release(wave.QueryControls, held), failures);
             if (original is { } producer && !originalValidated)
             {
                 await ServerFailureObserver.ObserveAsync(async () => _ = await producer.ConfigureAwait(false),
@@ -78,6 +78,15 @@ internal sealed class ResourcePartitionInventoryRf3Held
         {
             await ServerFailureObserver.ObserveAsync(async () => _ = await producer.ConfigureAwait(false),
                 failures).ConfigureAwait(false);
+        }
+    }
+
+    private void Release(RequestCqrsProbeFixture controls, RequestCqrsProbeMarkerRecord held)
+    {
+        if (!releaseWritten)
+        {
+            controls.WriteRelease(arm, held.RequestId);
+            releaseWritten = true;
         }
     }
 

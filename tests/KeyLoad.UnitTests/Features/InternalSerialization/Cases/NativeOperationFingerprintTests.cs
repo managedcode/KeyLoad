@@ -1,9 +1,11 @@
 using System.Text;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
+[NotInParallel]
 internal sealed class NativeOperationFingerprintTests
 {
     private const string Escaped = "\"\\\b\f\n\r\t<>&+'界λ😀\u2028\u2029";
@@ -24,6 +26,8 @@ internal sealed class NativeOperationFingerprintTests
             await Check(kind, Escaped);
             await Check(kind, NumericJson);
         }
+        // Movement's strict operation contract is exercised with a genuinely issued full native root, not public JSON.
+        await ResourceLifetimeGrantFlow.ExecuteWholeAsync();
     }
 
     [Test]
@@ -48,8 +52,17 @@ internal sealed class NativeOperationFingerprintTests
             operation.PrincipalId,
             operation.PayloadJson
         });
-        await Assert.That(NativeOperationFingerprint.Compute(operation)).IsEqualTo(expected);
+        // The four-argument primitive retains the frozen JSON hash shape for every kind, including movement and unknown values.
         await Assert.That(NativeOperationFingerprint.Compute(Id, kind, Principal, Encoding.UTF8.GetBytes(payload))).IsEqualTo(expected);
+        if (kind == OperationKind.PartitionMovementPhase)
+        {
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeOperationFingerprint.Compute(operation));
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+        }
+        else
+        {
+            await Assert.That(NativeOperationFingerprint.Compute(operation)).IsEqualTo(expected);
+        }
     }
 }
 

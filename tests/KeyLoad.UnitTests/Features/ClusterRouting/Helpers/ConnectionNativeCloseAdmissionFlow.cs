@@ -23,8 +23,10 @@ internal static class ConnectionNativeCloseAdmissionFlow
             await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Fixture.RequestWork, requestId);
             await Assert.That(original.IsCompleted).IsFalse();
             await RefusalsAsync(scenario, second, token);
+            await Assert.That(callback.AdmissionClosed.Task.IsCompleted).IsFalse();
             close = scenario.Connection.CloseAsync(
                 scenario.Fixture.Codec.CreateConnectionClose(scenario.Fixture.ConnectionId), token);
+            await callback.AdmissionClosed.Task.WaitAsync(token);
             await ClosedAdmissionAsync(scenario, second, token);
             await Assert.That(original.IsCompleted).IsFalse();
             await Assert.That(close.IsCompleted).IsFalse();

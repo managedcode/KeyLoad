@@ -48,7 +48,7 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
             throw Invalid();
         }
         original.ProducerDisposed(identity, context);
-        return callbacks.TryGetValue(identity.RequestId, out var callback) ? callback.NotifyAsync() : ValueTask.CompletedTask;
+        return callbacks.TryGetValue(identity.RequestId, out var callback) ? callback.NotifyAsync(connection.AdmissionClosedToken) : ValueTask.CompletedTask;
     }
 
     internal GrainRequestContextState Identity(Guid requestId) => identities[requestId];

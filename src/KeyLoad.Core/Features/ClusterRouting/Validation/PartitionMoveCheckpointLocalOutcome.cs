@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
@@ -41,9 +42,9 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        var identity = MovementPhaseIdentityJson(original);
-        var fingerprint = CommandFingerprint(new(pending.OriginalPhaseCommandId,
-            OperationKind.PartitionMovementPhase, principal.Id, default, identity));
+        PartitionMoveCanonicalCommandIdentity.RequireBudget(original, Limits.MaxBatchBytes);
+        var fingerprint = PartitionMoveCanonicalCommandIdentity.Fingerprint(pending.OriginalPhaseCommandId,
+            principal.Id, original);
         if (actual.Incarnation != Store.Identity.Incarnation || actual.PolicyEpoch != pending.OriginalIssuancePolicyEpoch
             || actual.Fingerprint != fingerprint)
         {

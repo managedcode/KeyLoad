@@ -538,3 +538,52 @@ REQ-IS-TYPE-FRAMING-002: directly qualify the new synchronous NativeEncodedTypeM
 AC-IS-TYPE-FRAMING-002: representative CommandRequest and QueueCounters operations retain exact native frame bytes/type, then all literal command ownership/partition/derived mutation fields and counter fields survive actual serialization. A corrupt native type-version frame is denied by the actual reader before a healthy fresh reader/frame/complete typed operation succeeds. Twenty concurrently admitted fresh-session operations use bounded Parallel.ForEachAsync and an owned admission barrier, await/join all tasks, and compare each independent frame/full payload to the original literal fixture. An already-cancelled owner denies parallel admission, then a fresh healthy operation succeeds. The synchronous production Measure method has no cancellation parameter; cancellation qualifies only the test's owning concurrent-work admission/join, never preemption of Measure. Writer disposal is in finally and real session disposal in using on success/error; no borrowed provider disposal.
 
 Implementation: UnitTests InternalSerialization Cases/NativeEncodedTypeMeasureTests.cs owns three complete scenarios; Fixtures/NativeEncodedTypeFrameFixture.cs owns real native writer/reader APIs and literal payloads. Related ADR060, REQ/AC-IS-TYPE-FRAMING-001 and TASK-KL036-NATIVE-TYPE-FRAMING-001 remain unchanged. Root owns guarded source join/full build/normal+scalar native metadata and runtime qualification. These tests qualify framing/serializer operations only; current63-schema parent capacity, operational+1, arbitrary future SafeDetail, and genuine parent/RF3 gates remain OPEN. Rollback removes only these additive tests/docs; no persistence/alias/ID/format/API/default changes. Source-authored cases are not observed discovery or PASS.
+
+## Movement native identity representation repair (R612, source-only)
+
+The homogeneous current movement path retains its complete generated
+`PartitionMovementAuthenticatedCommandV1` root (original phase, complete body,
+receiver admission and lifetime proofs) in the existing authenticated native
+payload. Its synthetic `ReplicatedOperation.PayloadJson` is empty. All native
+phase, authenticated payload, transport, command, scan, deadline and total
+retention limits remain unchanged; an actual native oversize is still refused
+before effects. This is not permission to enlarge an operation or omit any family.
+
+The full duplicated JSON phase can exceed MaxBatchBytes solely through base64
+and repeated routing fields even when the complete native operation fits. It is
+therefore generated transiently by the existing Microsoft JSON serializer into
+the existing incremental hash, not retained beside the owning native root. The
+outer opaque JSON-string fingerprint bytes are EXACTLY the former canonical
+CommandFingerprint: same field order, enum spelling, string escaping and all
+original phase/body content, with only the existing receiver-admission exclusion,
+ControlAdmit evaluation/expiry normalization and RetireCancel transport exclusions.
+No digest replaces the full operation, and no handwritten parser or encoder is
+introduced. Transient serializer storage is bounded by the already admitted native
+input; the streaming adapter does not accumulate expanded identity output.
+
+This is a forward-only homogeneous current-format contract: exact native root and
+empty synthetic identity are mandatory on issue, local apply, retained outcome
+lookup and borrowed replica authority validation. Nonempty duplicate identity,
+wrong native roots and missing/duplicate lifetime-proof roots are rejected as
+Corruption before effects. Generated serializer aliases/field IDs and all original
+fingerprint digests remain unchanged. There is no automatic stored-record rewrite,
+old/new representation fallback, compatibility reader or mixed-version deployment.
+An incompatible persisted/replica cohort remains refused under the existing format
+and deployment gates.
+
+Focused validation must retain both original actual-8192 whole-flow regressions,
+all six Blob outcomes, full receipts, native full-carrier oversize refusal,
+healthy completion and two cold cuts. Actual issued operations are compared with
+an independent complete former-JSON fingerprint oracle, including borrowed authority
+input; native size and former expanded identity size are retained as bounded numeric
+evidence. Re-signed wrong-root/missing/duplicate-proof variants and nonempty duplicate
+identity must refuse with unchanged original owners. Source, strict build and runtime
+results are separate gates; this source repair is not current Linux/RF3 acceptance.
+
+The explicit serializer execution wrapper is validated before movement decoding.
+Its admitted FingerprintChunkCharacters flows unchanged through movement
+canonicalization and the opaque-string hash stream, including the borrowed native
+fingerprint overload; default callers retain the existing process wrapper. Real
+issued-phase controls compare the former complete JSON fingerprint under both the
+process policy and a different admitted two/three-byte policy, on owned and borrowed
+paths, without changing the operation or interpreting a getter as execution proof.

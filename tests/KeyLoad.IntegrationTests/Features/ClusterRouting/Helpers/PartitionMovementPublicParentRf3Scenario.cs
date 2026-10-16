@@ -11,8 +11,9 @@ internal static class PartitionMovementPublicParentRf3Scenario
     internal static async Task RunAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
         CancellationToken cancellationToken)
     {
-        var first = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.MovePartitionAsync(
-            seed.FirstRequest, cancellationToken).ConfigureAwait(false));
+        var first = await PartitionMovementPublicParentRf3SdkFailure.RequireSuccessAsync(
+            await seed.Source.MovePartitionAsync(seed.FirstRequest, cancellationToken).ConfigureAwait(false),
+            seed.FirstRequest.MoveId);
         await RequireTerminalAsync(seed, seed.FirstRequest, seed.OriginalPlacement,
             seed.Directory.ControlOwner, first, cancellationToken).ConfigureAwait(false);
         await seed.VerifyAsync(cancellationToken).ConfigureAwait(false);

@@ -69,9 +69,8 @@ public sealed partial class DatabaseEngine
             || cancellation.OriginalPhaseIdentityDigest != PartitionMoveOriginalDispatchIdentity.Digest(query.OriginalPhaseCommandId, original)
             || cancellation.OriginalRequestNonce != original.Nonce || cancellation.OriginalExpiresAt != original.ExpiresAt
             || cut < cancellation.CancellationReceipt.AppliedPosition
-            || actual.Fingerprint != CommandFingerprint(new(cancellation.CancellationCommandId,
-                OperationKind.PartitionMovementPhase, cancellation.CancellationPrincipalId,
-                default, MovementPhaseIdentityJson(cancellation.CancellationPhase)))
+            || actual.Fingerprint != PartitionMoveCanonicalCommandIdentity.Fingerprint(cancellation.CancellationCommandId,
+                cancellation.CancellationPrincipalId, cancellation.CancellationPhase)
             || !NativeSerialization.Serialize(scope.OriginalEnvelope).AsSpan().SequenceEqual(NativeSerialization.Serialize(original))
             || !NativeSerialization.Serialize(scope.OriginalAuthorization).AsSpan().SequenceEqual(NativeSerialization.Serialize(query.OriginalAuthorization)))
         {

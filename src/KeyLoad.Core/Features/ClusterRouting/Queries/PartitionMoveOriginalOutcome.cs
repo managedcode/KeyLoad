@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
@@ -74,8 +75,7 @@ public sealed partial class DatabaseEngine
             original.ControlIntentDigest, original.Stage, original.PageOrdinal, original.Body,
             original.Grant?.GrantId, original.Grant?.Resources
                 ?? System.Collections.Immutable.ImmutableArray<ResourceDefinition>.Empty);
-        var identity = MovementPhaseIdentityJson(command);
-        return CommandFingerprint(new(commandId, OperationKind.PartitionMovementPhase, principalId,
-            default, identity));
+        PartitionMoveCanonicalCommandIdentity.RequireBudget(command, Limits.MaxBatchBytes);
+        return PartitionMoveCanonicalCommandIdentity.Fingerprint(commandId, principalId, command);
     }
 }

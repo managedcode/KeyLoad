@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
@@ -106,9 +107,9 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        var identity = MovementPhaseIdentityJson(cancellation.CancellationPhase);
-        var fingerprint = CommandFingerprint(new(cancellation.CancellationReceipt.CommandId,
-            OperationKind.PartitionMovementPhase, principal.Id, default, identity));
+        PartitionMoveCanonicalCommandIdentity.RequireBudget(cancellation.CancellationPhase, Limits.MaxBatchBytes);
+        var fingerprint = PartitionMoveCanonicalCommandIdentity.Fingerprint(cancellation.CancellationReceipt.CommandId,
+            principal.Id, cancellation.CancellationPhase);
         if (stored.Incarnation != Store.Identity.Incarnation || stored.PolicyEpoch != cancellation.CancellationPolicyEpoch
             || stored.Fingerprint != fingerprint
             || stored.Result.Error is not null)

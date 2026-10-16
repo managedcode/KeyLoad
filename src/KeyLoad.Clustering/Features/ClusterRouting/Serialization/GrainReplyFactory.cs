@@ -23,6 +23,19 @@ internal static class GrainReplyFactory
         };
     }
 
+    internal static GrainOperationReply ParentValue<T>(T result, IOptions<GrainRoutingOptions> options, CancellationToken token)
+    {
+        try
+        {
+            return Value(result, options, token);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.ReplyEncoding);
+            throw;
+        }
+    }
+
     internal static GrainOperationReply Operation(OperationResult result, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
     {
         if (result.Error is { } error)

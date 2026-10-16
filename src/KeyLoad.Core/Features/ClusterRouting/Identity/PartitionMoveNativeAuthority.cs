@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
@@ -88,14 +89,14 @@ public sealed partial class DatabaseEngine
             verified.ControlIntentDigest, verified.Stage, verified.PageOrdinal, verified.Body, verified.Grant?.GrantId, verified.Grant?.Resources
                 ?? System.Collections.Immutable.ImmutableArray<ResourceDefinition>.Empty, admission);
         RequireMovementCommandAdmission(commandId, localPrincipalId, evaluatedAt, command);
-        var identity = MovementPhaseIdentityJson(command);
+        PartitionMoveCanonicalCommandIdentity.RequireBudget(command, Limits.MaxBatchBytes);
         var authenticated = new PartitionMovementAuthenticatedCommandV1(command,
             lifetimeProof is null ? System.Collections.Immutable.ImmutableArray<PartitionMoveLifetimeProofV1>.Empty : [lifetimeProof]);
         PartitionMovementNativePayload.Require(authenticated);
         var payload = NativeSerialization.Serialize(authenticated);
         RequireNativeBudget(payload.Length);
         return IssueNativeOperation(new(commandId, OperationKind.PartitionMovementPhase, localPrincipalId,
-            evaluatedAt, identity), new NativeCommandPayload(payload));
+            evaluatedAt, string.Empty), new NativeCommandPayload(payload));
     }
 
     private void RequireMovementCommandAdmission(Guid commandId, string localPrincipalId,

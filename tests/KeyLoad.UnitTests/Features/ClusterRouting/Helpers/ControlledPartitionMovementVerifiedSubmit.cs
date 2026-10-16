@@ -49,6 +49,7 @@ internal static class ControlledPartitionMovementVerifiedSubmit
                                     receiver.Database.EvaluationClock, cancellationToken))
                             : receiver.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
                                 principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
+                    await PartitionMovementNativeIdentityAssertions.VerifyAsync(operation, receiver.Database.Limits);
                     result = receiver.Journal.Submit(operation, cancellationToken);
                 }, failures);
             }
@@ -89,6 +90,7 @@ internal static class ControlledPartitionMovementVerifiedSubmit
                 GrainRequestAuthority.RequireAdministrator(principal);
                 var operation = receiver.Database.CreateVerifiedPartitionMovementOperation(request.CommandId,
                     principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), request.Envelope, verified.Proof);
+                await PartitionMovementNativeIdentityAssertions.VerifyAsync(operation, receiver.Database.Limits);
                 result = receiver.Journal.Submit(operation, cancellationToken);
             }, failures);
         }, failures);

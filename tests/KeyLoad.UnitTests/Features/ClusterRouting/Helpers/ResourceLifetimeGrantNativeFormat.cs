@@ -25,20 +25,33 @@ internal static class ResourceLifetimeGrantNativeFormat
         var valid = state.Target.Database.CreateVerifiedPartitionMovementOperation(state.Record.EffectId,
             principal, state.Target.Database.EvaluationClock.GetUtcNow(), envelope, state.Proof);
         var root = PartitionMovementNativePayload.ReadAuthenticated(valid);
-        await Assert.That(valid.PayloadJson).IsEqualTo(JsonSerializer.Serialize(root.Original, JsonDefaults.Options));
+        await PartitionMovementNativeIdentityAssertions.VerifyAsync(valid, state.Target.Database.Limits);
+        var duplicate = valid with
+        {
+            PayloadJson = JsonSerializer.Serialize(root.Original, JsonDefaults.Options)
+        };
+        var duplicateError = Assert.ThrowsExactly<KeyLoadException>(() => state.Target.Database.VerifyOperationAuthority(duplicate));
+        await Assert.That(duplicateError.Code).IsEqualTo(ErrorCode.Corruption);
+        await source.AssertUnchangedAsync(state.Source);
+        await target.AssertUnchangedAsync(state.Target);
         ReadOnlyMemory<byte>[] variants =
         [
             NativeSerialization.Serialize(root.Original),
-            NativeSerialization.Serialize(root with { LifetimeProofs = [] }),
-            NativeSerialization.Serialize(root with { LifetimeProofs = [state.Proof, state.Proof] })
+            NativeSerialization.Serialize(root with
+            {
+                LifetimeProofs = []
+            }),
+            NativeSerialization.Serialize(root with
+            {
+                LifetimeProofs = [state.Proof, state.Proof]
+            })
         ];
         foreach (var value in variants)
         {
             token.ThrowIfCancellationRequested();
             var changed = Resign(valid, value, state.Target.Store.Identity.SigningKey.Span);
-            var verified = state.Target.Database.VerifyOperationAuthority(changed);
-            await Assert.That(verified.NativePayload.Span.SequenceEqual(changed.NativePayload.Span)).IsTrue();
-            await OutcomeAsync(state.Target.Database.ResolveOutcome(changed), ErrorCode.Corruption);
+            var error = Assert.ThrowsExactly<KeyLoadException>(() => state.Target.Database.VerifyOperationAuthority(changed));
+            await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
             await source.AssertUnchangedAsync(state.Source);
             await target.AssertUnchangedAsync(state.Target);
         }

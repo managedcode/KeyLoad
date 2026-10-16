@@ -48,9 +48,10 @@ public sealed partial class DatabaseEngine
             original.ControlOwner, original.SourcePlacement, original.DestinationOwner, original.ControlIntentDigest,
             PartitionMovePeerStage.RetireCancel, original.PageOrdinal, payload,
             Resources: ImmutableArray<ResourceDefinition>.Empty);
+        PartitionMoveCanonicalCommandIdentity.RequireBudget(phase, Limits.MaxBatchBytes);
         work.Check();
         return IssueNativeOperation(new(owned.CancellationCommandId, OperationKind.PartitionMovementPhase,
-            principal.Id, EvaluationClock.GetUtcNow(), MovementPhaseIdentityJson(phase)),
+            principal.Id, EvaluationClock.GetUtcNow(), string.Empty),
             new NativeCommandPayload(NativeSerialization.Serialize(new PartitionMovementAuthenticatedCommandV1(phase, ImmutableArray<PartitionMoveLifetimeProofV1>.Empty))));
     }
     private PartitionMovePhaseResult ExecuteExpiredRetireCancellation(IAtomicTransaction transaction,

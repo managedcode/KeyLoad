@@ -82,8 +82,9 @@ public sealed partial class DatabaseEngine
         var phase = new PartitionMovePhaseCommand(original.Version, original.MoveId, original.Partition,
             original.ControlOwner, original.SourcePlacement, original.DestinationOwner, original.ControlIntentDigest,
             PartitionMovePeerStage.ReceiverIssue, original.PageOrdinal, payload, Resources: ImmutableArray<ResourceDefinition>.Empty);
+        PartitionMoveCanonicalCommandIdentity.RequireBudget(phase, Limits.MaxBatchBytes);
         work.Check();
         return IssueNativeOperation(new(commandId, OperationKind.PartitionMovementPhase, principal.Id,
-            EvaluationClock.GetUtcNow(), MovementPhaseIdentityJson(phase)), new NativeCommandPayload(NativeSerialization.Serialize(new PartitionMovementAuthenticatedCommandV1(phase, ImmutableArray<PartitionMoveLifetimeProofV1>.Empty))));
+            EvaluationClock.GetUtcNow(), string.Empty), new NativeCommandPayload(NativeSerialization.Serialize(new PartitionMovementAuthenticatedCommandV1(phase, ImmutableArray<PartitionMoveLifetimeProofV1>.Empty))));
     }
 }

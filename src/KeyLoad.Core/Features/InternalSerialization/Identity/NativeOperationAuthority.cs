@@ -30,7 +30,8 @@ public sealed partial class DatabaseEngine
     }
 
     // Borrowed peer admission: caller holds its input stable until this synchronous check returns.
-    // Only small metadata/authority is decoded; no JSON string or typed command body is materialized.
+    // Ordinary commands decode only metadata/authority. Movement decodes its bounded generated native phase
+    // to stream the exact frozen JSON fingerprint; no expanded identity string is retained.
     internal void VerifyNativeAuthority(Guid id, OperationKind kind, string principalId, ReadOnlySpan<byte> payloadJsonUtf8,
         ReadOnlyMemory<byte> value, ErrorCode? error, string? safeDetail,
         ReadOnlyMemory<byte> authority, ReadOnlyMemory<byte> signature, ReadOnlyMemory<byte> retryDecisions = default, ReadOnlyMemory<byte> transferProof = default)
@@ -39,7 +40,7 @@ public sealed partial class DatabaseEngine
         var identity = Store.Identity;
         var claims = ReadNativeAuthority(identity, payload);
         VerifyNativeAuthority(identity, claims, id, kind, principalId,
-            NativeOperationFingerprint.Compute(id, kind, principalId, payloadJsonUtf8), payload);
+            NativeOperationFingerprint.Compute(id, kind, principalId, payloadJsonUtf8, value), payload);
     }
 
     private static void VerifyNativeAuthority(StoreIdentity identity, NativeCommandAuthority claims,
@@ -86,7 +87,7 @@ public sealed partial class DatabaseEngine
     {
         var identity = Store.Identity;
         var claims = new NativeCommandAuthority(KeyLoad.Core.Features.Search.OnlineTextNativeAuthorityPurpose.For(operation.Kind), identity.Incarnation,
-            operation.Id, operation.Kind, operation.PrincipalId, NativeOperationFingerprint.Compute(operation),
+            operation.Id, operation.Kind, operation.PrincipalId, NativeOperationFingerprint.Compute(operation, payload.Value),
             SHA256.HashData(payload.Value.Span), payload.Error, payload.SafeDetail,
             payload.RetryDecisions.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.RetryDecisions.Span),
             payload.TransferProof.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.TransferProof.Span));

@@ -3,7 +3,7 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "R619 complete strict Release passed with zero warnings and errors after R609 native35, R617 hosted/cold21 and R620 structured cancellation/join repair. Scoped canonical format verification of the20 newly affected files passed. Current source is compiled; focused Unit/recovery and public inventory/movement/eight-user cold reruns remain pending. Original R608 recovery7 and accepted normal R600/R602 ONE/RF3 retain their own source cohorts.",
+    "implementation": "R624/R625 native repair and R628/R631/R632/R633/R635 coherent compiler/test corrections adopted. Last complete attempt R636 exit1 with zero logged diagnostics/no project output; contemporaneous native MSBuild sidecars report denied worker IPC, parent attribution unproven. R634 previously compiled all product and Unit/Recovery projects, failing only the Integration import repaired in R635. Full strict build/runtime remain open; last passing complete Release R619. Exact original current46764194 Unit38/42 and Recovery20/20 remain terminal; public R614/R615 failed later gates; accepted R600/R602 normal pair retains its original cohort.",
     "strictBuild": {
       "label": "root-r619-hosted-cold-full-release",
       "result": "passed",
@@ -15,7 +15,7 @@
       "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold-full-release.completion.original.json",
       "scope": "Complete strict Release after R609 native35, R617 hosted/cold21 and R620 structured wave join. All original processes/readers joined, source drift zero; rebuilt DLL changes expected. New runtime selections remain pending."
     },
-    "format": "R619 scoped canonical dotnet format --verify-no-changes passed for all20 newly affected files, with empty original stdout/stderr and unchanged source. Earlier R611 complete formatter failure and R618 apply diagnostics remain historical originals; scoped PASS is not complete canonical formatter qualification.",
+    "format": "R626 scoped27-file whitespace apply exited0 in7.855s and made1 verified whitespace-only source change, with no DLL change. This is not full canonical formatter qualification. Earlier R619 scoped20 canonical verification passed on its prior cohort.",
     "focusedRuntime": {
       "cohort": "root-r597-600-unit-recovery-analyzers-functional-one",
       "sourceCommit": "afee683468c447670a3d911e29a195ede7377e3f",
@@ -66,7 +66,7 @@
     },
     "currentSourceRepairs": {
       "stage": "R601",
-      "state": "compiled_focused_runtime_pending",
+      "state": "source_adopted_latest_full_build_failed_import_successor_pending",
       "scope": [
         "Original native transport injection removes the inventory startup dependency cycle",
         "Verified restored new-history local applied cut zero without restoring old authority",
@@ -83,13 +83,15 @@
         "Bounded secret-free original recovery-child phase witness written only before arming; same-handle bounded failure evidence read only after actual child/readers join, original exception retained"
       ],
       "unresolved": [
-        "R607 genuine8KiB complete capture native bytes and Blob actual8KiB full flow await the R609 shared exact empty digest and actual owner-limit reruns. Complete hosted outer reply qualification remains OPEN.",
-        "R607 retained-replay quorum rerun passed but original R597 failure cause remains unresolved; no causal fix or retry was introduced.",
-        "Public RF3 inventory and movement both failed before movement/cold. R609 genuine first-null-entry genesis and strict body-owned SQL envelope corrections await full rebuild and original public reruns.",
-        "R608 selected shared-domain Recovery7 passed. Other Recovery20 cuts and full Linux/fault/endurance qualification require their own exact-source evidence."
+        "Actual8KiB native phase succeeds capture but synthetic JSON expansion rejects command identity. R625 native-only carrier/exact old-fingerprint streaming repair awaits build/wholeflow replay/cold qualification.",
+        "Actual hosted whole outer replies measured at most5638bytes under8192; first native cold shutdown exceeded original30s owner budget. Sequential joined departures and exact journal DTO admission source repair await actual cold/provider regressions.",
+        "Native Close test raced signedClose with another RPC before witnessing owner admission close. Exact owner-cancellation witness source repair retains OwnershipLost/no-effects and awaits original wholecase.",
+        "R614 public inventory fixture reused stopped probe after first hold cleanup. Scoped per-arm release source repair awaits full cancellation/policy/recovery/two-cold case.",
+        "R615 public MOVE BudgetExceeded exact originating gate remains unknown. New bounded original SDK Problem witness must execute before selecting a production fix.",
+        "Public DROP/recreate, user AnalyticsStore and refreshed8-user cold ONE/RF3 scenarios and exact-source Linux/full fault/endurance/release qualification remain open."
       ],
       "publicFunctionalRefresh": "R600 ONE then R602 RF3 normal public pair accepted. Refreshed eight-user cold pair, DROP/recreate and user-addressable AnalyticsStore remain open.",
-      "verification": "R619 complete strict Release passed0warnings0errors and scoped20-file canonical format verification passed, original source drift0. Original R611 failed diagnostics remain preserved in previousFailedCompilerAttempt. Current focused runtime is pending; R600/R602 normal public pair, R608Recovery7 and R6071/3 retain their distinct original evidence.",
+      "verification": "Original R612 Unit38/42 and R613 Recovery20/20, source/DLL drift0. Original R614/R615 public later failures remain open. R635 repairs actual last C# namespace error; R636 complete attempt exit1 with no logged compiler diagnostics/no rebuilt DLLs. Concurrent native MSBuild worker IPC permission failures retained separately with attribution boundary; no compiler/runtime pass inferred. Combined future DROP/analytics/ref/budget source not yet adopted or built.",
       "previousAdoptedStage": {
         "stage": "R603/R606",
         "state": "compiled_focused_runtime_pending",
@@ -137,18 +139,59 @@
         "status": "compiled_focused_runtime_pending",
         "evidence": "TestResults/stage61-native-join/root-r620-cold-structured-join1.adoption.original.json",
         "scope": "Direct await of fixed8 borrowed cancellation wave, protected task starts, original cancellation and all started-task settlement/inner errors retained before owner disposal."
+      },
+      "currentRepairBatch": {
+        "stages": [
+          "R624",
+          "R625"
+        ],
+        "files": 29,
+        "state": "source_adopted_build_and_runtime_pending",
+        "evidence": [
+          "TestResults/stage61-native-join/root-r624-native-close-journal-inventory10.adoption.original.json",
+          "TestResults/stage61-native-join/root-r625-native-movement-and-public-diagnostic19.adoption.original.json"
+        ],
+        "scope": [
+          "Exact native connection close witness, complete native journal DTO admission and joined sequential native shutdown with real provider oversize/noeffects/healthy/two-cold regression",
+          "Full native movement phase/proofs with exact original fingerprint streaming and caller-selected chunk policy; no synthetic JSON duplicate or raised cap",
+          "Per-arm inventory probe cleanup preserves subsequent fault-arm admission; bounded failure-only original SDK MOVE error witness preserves primary exception"
+        ]
+      },
+      "compilerCorrections": {
+        "stages": [
+          "R628",
+          "R631",
+          "R632",
+          "R633",
+          "R635"
+        ],
+        "state": "source_adopted_build_and_runtime_pending",
+        "scope": [
+          "Remove duplicate import and use named empty native identity bound without loosening validation",
+          "Keep all fingerprint golden cases and add genuine issued native whole flow through existing complete scenario",
+          "Move complete original six parent-reply call sites into existing GrainReplyFactory.ParentValue retaining reply-encoding fault marking and original token/options",
+          "Import actual existing Contracts namespace for the original bounded SDK failure diagnostic"
+        ],
+        "evidence": [
+          "TestResults/stage61-native-join/root-r628-native-compiler-twofile-successor.adoption.original.json",
+          "TestResults/stage61-native-join/root-r631-native-identity-empty-bound-successor.adoption.original.json",
+          "TestResults/stage61-native-join/root-r632-native-fingerprint-wholeflow3.adoption.original.json",
+          "TestResults/stage61-native-join/root-r633-parent-reply-ownership2.adoption.original.json",
+          "TestResults/stage61-native-join/root-r635-integration-protocol-import.adoption.original.json"
+        ]
       }
     },
     "latestCompilerAttempt": {
-      "label": "root-r619-hosted-cold-full-release",
-      "result": "passed",
+      "label": "root-r636-native-full-release",
+      "result": "failed_without_logged_compiler_diagnostics",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 463.07599595887586,
+      "elapsedSeconds": 271.1687912091147,
       "sourceDrift": 0,
-      "stdoutSha256": "5410ac4fc837158886a38b26a6c656f0f1226a84bf741c76d9ec46fec78540ce",
-      "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold-full-release.completion.original.json",
-      "scope": "Complete strict Release after R609 native35, R617 hosted/cold21 and R620 structured wave join. All original processes/readers joined, source drift zero; rebuilt DLL changes expected. New runtime selections remain pending."
+      "compiledDrift": 0,
+      "stdoutSha256": "cc03fe2a9d9687af1153ded7aacdd7067717d08c9465fb4e5f7813bf8ec0b775",
+      "evidence": "TestResults/stage61-native-join/root-r636-native-full-release.completion.original.json",
+      "scope": "Exit1 with only Build FAILED, zero logged warnings/errors and no project outputs; not a successful build. Native MSBuild worker sidecars in the exact interval report SocketException13 Permission denied creating named-pipe IPC endpoints. Sidecars do not themselves record parent PID attribution. Next combined source build requires permitted native worker IPC and binary log."
     },
     "latestPublicFunctionalAttempt": {
       "label": "R600 ONE then R602 RF3 normal public pair",
@@ -157,40 +200,36 @@
       "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
     },
     "previousCompilerAttempt": {
-      "label": "root-r606-recovery-keyspace-full-release",
-      "result": "passed",
+      "label": "root-r634-native-full-release",
+      "result": "failed",
       "warnings": 0,
-      "errors": 0,
-      "elapsedSeconds": 131.2092912499793,
+      "errors": 1,
+      "elapsedSeconds": 423.0168257500045,
       "sourceDrift": 0,
-      "stdoutSha256": "c4e6756fa6ca21b0ae1bb79a08430312dce47b4faf5608a12f1c36b974d5cd39",
-      "scope": "Complete strict Release after native accounting7, complete recovery-image/D2 oracle6, explicit Blob composed fixture6, bounded failure-only quorum diagnostic2 and one existing namespace import. Whole-operation runtime refresh remains pending."
+      "stdoutSha256": "5a6616123dd6171e8587cd39428740bd9e224c4c09520a0451dcffb80f06258c",
+      "evidence": "TestResults/stage61-native-join/root-r634-native-full-release.completion.original.json",
+      "scope": "All product projects and Unit/Recovery projects compiled; IntegrationTests failed only missing PartitionMoveProtocol namespace import. R635 corrected actual import after original process and both output readers joined; no current complete-build/runtime pass inferred."
     },
     "latestFocusedRuntime": {
-      "cohort": "root-r607-608-repaired-native-unit-recovery",
-      "sourceCommit": "244900c1e12fccc106e627724f73ab9fc2b4b9b9",
+      "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
       "sourceDrift": 0,
       "compiledDrift": 0,
       "unit": {
-        "label": "root-r607-repaired-native-unit3",
-        "total": 3,
-        "passed": 1,
-        "failed": 2,
+        "total": 42,
+        "passed": 38,
+        "failed": 4,
         "skipped": 0,
-        "scope": "Actual three-voter retained replay/quorum flow passed. Genuine8KiB native capture overflows; Blob case previously used default8MiB owners. A passing rerun with only failure diagnostics does not establish the earlier quorum failure cause or deterministic closure.",
-        "evidence": "TestResults/stage61-native-join/root-r607-repaired-native-unit3.completion.original.json"
+        "elapsedSeconds": 161.27667083311826
       },
       "recovery": {
-        "label": "root-r608-repaired-shared-domain-recovery7",
-        "total": 7,
-        "passed": 7,
+        "total": 20,
+        "passed": 20,
         "failed": 0,
         "skipped": 0,
-        "elapsedSeconds": 29.04047999996692,
-        "scope": "All seven selected original shared-domain process cuts, complete raw native conservation and two reopened owners; not complete Recovery20, Linux or power-loss qualification.",
-        "evidence": "TestResults/root-r594-document-recovery-repair-r1/r608-shared-domain-recovery7.accepted-focused-evidence.original.json",
-        "evidenceSha256": "4c275892a0266eb2fe0dfe0ceea9105adaaed35f83f311296fbb161f021de83c"
-      }
+        "elapsedSeconds": 102.57824708311819
+      },
+      "evidence": "TestResults/stage61-native-join/root-r623-native-unit-recovery-terminal-evaluation.original.json",
+      "qualification": "Related focused local arm64 selections; not full Unit/Recovery suite or Linux/public RF3 qualification."
     },
     "latestPublicInventoryMovement": {
       "sourceCommit": "244900c1e12fccc106e627724f73ab9fc2b4b9b9",
@@ -230,6 +269,33 @@
       "elapsedSeconds": 713.9612580828834,
       "sourceDrift": 0,
       "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold20-format-verify.completion.original.json"
+    },
+    "focusedRawCoverage": {
+      "linesCovered": 25140,
+      "linesValid": 115216,
+      "branchesCovered": 11592,
+      "branchesValid": 73066,
+      "lineRate": 0.21819886126926816,
+      "branchRate": 0.15865108258287028,
+      "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
+      "scope": "Original production-only collector for focused42-case Unit selection with4failures. No load/test assemblies. Raw partial evidence, not complete-suite coverage or passing coverage acceptance.",
+      "evidence": "TestResults/stage61-native-join/root-r612-native-genesis-and-lifetime-unit/functional.cobertura.xml"
+    },
+    "latestPublicInventoryMovementAttempt": {
+      "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "inventory": {
+        "result": "failed",
+        "elapsedSeconds": 406.7042038331274,
+        "cause": "Fixture-wide probe cleanup closed admission before second fault arm."
+      },
+      "movement": {
+        "result": "failed",
+        "elapsedSeconds": 144.9203429168556,
+        "cause": "Actual first public MOVE HTTP429/BudgetExceeded; exact production budget gate unproven."
+      },
+      "evidence": "TestResults/stage61-native-join/root-r614-615-current-public-inventory-move.cohort-after.original.json"
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {

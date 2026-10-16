@@ -1,55 +1,63 @@
-using System.Text;
-using System.Text.Json;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.InternalSerialization;
 
-namespace KeyLoad.Core;
+namespace KeyLoad.Core.Features.ClusterRouting.Identity;
 
-public sealed partial class DatabaseEngine
+/// <summary>Derives the frozen JSON fingerprint from the complete owning native phase without persisting a JSON duplicate.</summary>
+internal static class PartitionMoveCanonicalCommandIdentity
 {
-    private string MovementPhaseIdentityJson(PartitionMovePhaseCommand actual)
+    internal static void RequireBudget(PartitionMovePhaseCommand actual, int maximumBytes)
     {
-        if (NativeSerialization.Measure(actual) > Limits.MaxBatchBytes)
+        if (NativeSerialization.Measure(actual) > maximumBytes
+            || NativeSerialization.Measure(Canonical(actual)) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
         }
+    }
+
+    internal static string Fingerprint(Guid id, string principalId, PartitionMovePhaseCommand actual)
+        => NativeOperationFingerprint.ComputeValue(id, OperationKind.PartitionMovementPhase, principalId, Canonical(actual));
+
+    internal static string Fingerprint(Guid id, string principalId, PartitionMovePhaseCommand actual,
+        int chunkCharacters)
+        => NativeOperationFingerprint.ComputeValue(id, OperationKind.PartitionMovementPhase, principalId,
+            Canonical(actual), chunkCharacters);
+
+    internal static PartitionMovePhaseCommand Canonical(PartitionMovePhaseCommand actual)
+    {
         var identity = actual with
         {
             ReceiverEffectAdmission = null
         };
         if (actual.Stage == PartitionMovePeerStage.RetireCancel)
         {
-            identity = actual with
+            var body = NativeSerialization.Deserialize<PartitionMoveRetireCancellationBody>(actual.Body.Span);
+            identity = identity with
             {
-                Body = CanonicalMoveRetireCancellationBody(actual.Body),
-                ReceiverEffectAdmission = null
+                Body = NativeSerialization.Serialize(body with
+                {
+                    OriginalRequestBytes = ReadOnlyMemory<byte>.Empty,
+                    OriginalRequestSignature = string.Empty,
+                    CancellationExpiresAt = default,
+                    OriginalSourceWitness = null
+                })
             };
         }
         else if (actual.Stage == PartitionMovePeerStage.ControlAdmitCommand)
         {
             var body = NativeSerialization.Deserialize<PartitionControlAdmitBody>(actual.Body.Span);
-            var canonical = body with
+            identity = identity with
             {
-                OriginalOperation = body.OriginalOperation with
+                Body = NativeSerialization.Serialize(body with
                 {
-                    EvaluatedAt = default
-                },
-                ExpiresAt = default
-            };
-            if (NativeSerialization.Measure(canonical) > Limits.MaxBatchBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
-            }
-            identity = actual with
-            {
-                Body = NativeSerialization.Serialize(canonical),
-                ReceiverEffectAdmission = null
+                    OriginalOperation = body.OriginalOperation with
+                    {
+                        EvaluatedAt = default
+                    },
+                    ExpiresAt = default
+                })
             };
         }
-        var json = JsonSerializer.Serialize(identity, JsonDefaults.Options);
-        if (Encoding.UTF8.GetByteCount(json) > Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
-        }
-        return json;
+        return identity;
     }
 }

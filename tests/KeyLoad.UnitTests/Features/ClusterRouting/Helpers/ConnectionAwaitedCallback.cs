@@ -8,13 +8,15 @@ internal sealed class ConnectionAwaitedCallback(Exception? failure)
     private int invocations;
     internal TaskCompletionSource Arrived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    internal TaskCompletionSource AdmissionClosed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    internal async ValueTask NotifyAsync()
+    internal async ValueTask NotifyAsync(CancellationToken ownerShutdown)
     {
         if (Interlocked.Increment(ref invocations) != FirstInvocation)
         {
             throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
         }
+        using var admission = ownerShutdown.Register(() => AdmissionClosed.TrySetResult());
         Arrived.SetResult();
         await Release.Task.ConfigureAwait(true);
         if (failure is not null)
