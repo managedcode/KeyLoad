@@ -63,7 +63,10 @@ internal static class CompositionSqlColdAuthority
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true);
-        var sql = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command, command.CommandId);
+        var sql = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command) with
+        {
+            CommandId = command.CommandId
+        };
         var q1 = await callers.Sdk.ExecuteSqlAsync(sql, token);
         await Assert.That(q1.IsFailed).IsTrue();
         await Assert.That(q1.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));

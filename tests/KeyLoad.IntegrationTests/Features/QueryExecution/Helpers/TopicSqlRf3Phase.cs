@@ -54,7 +54,10 @@ internal static class TopicSqlRf3Phase
             await SqlRf3Protocol.EqualAsync(state.Receipt, replay);
             var mcpReplay = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Command, token))).Value;
             await SqlRf3Protocol.EqualAsync(state.Receipt, mcpReplay);
-            var q1 = SqlRf3Protocol.Call(state.Partition, McpCallerTools.DocumentsCommit, state.Command, state.Command.CommandId);
+            var q1 = SqlRf3Protocol.Call(state.Partition, McpCallerTools.DocumentsCommit, state.Command) with
+            {
+                CommandId = state.Command.CommandId
+            };
             await SqlRf3Protocol.EqualAsync(state.Receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(admin.Sdk, q1, token));
             await SqlRf3Protocol.EqualAsync(state.Receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(admin.Mcp, q1, token));
             var queue = await PublicReadAssertions.MessageAsync(await admin.Sdk.InspectAsync(state.Inspect, token));

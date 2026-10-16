@@ -162,7 +162,10 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
             await seed.Source.CommitAsync(command, token).ConfigureAwait(false)));
         await SqlRf3Protocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await seed.Official.CallAsync(McpCallerTools.DocumentsCommit, command, token).ConfigureAwait(false))).Value);
-        var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, command, command.CommandId);
+        var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, command) with
+        {
+            CommandId = command.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(seed.Source, sql, token));
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(seed.Official, sql, token));
     }

@@ -17,8 +17,10 @@ internal static class SparseCompositePrefixRf3Current
         await ServerFailureObserver.ObserveAsync(async () => await SqlRf3Protocol.EqualAsync(state.Receipt,
             await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(state.Seed, token))), failures);
         await ServerFailureObserver.ObserveAsync(async () => await SqlRf3Protocol.EqualAsync(state.Receipt,
-            await SqlRf3Protocol.McpAsync<CommitReceipt>(root.Mcp, SqlRf3Protocol.Call(state.Partition,
-                McpCallerTools.DocumentsCommit, state.Seed, state.Seed.CommandId), token)), failures);
+            await SqlRf3Protocol.McpAsync<CommitReceipt>(root.Mcp, SqlRf3Protocol.Call(state.Partition, McpCallerTools.DocumentsCommit, state.Seed) with
+            {
+                CommandId = state.Seed.CommandId
+            }, token)), failures);
         await ServerFailureObserver.ObserveAsync(() => DocumentsAsync(root, state, token), failures);
         await ServerFailureObserver.ObserveAsync(async () => await SqlRf3Protocol.EqualAsync(state.Outbox,
             await QueryCursorRequestIdentityR47Current.OutboxAsync(root, state.Partition, token)), failures);

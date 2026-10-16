@@ -24,8 +24,10 @@ internal static class ClusterRestoreRf3AuthorityTrial
             await ErrorAsync(await sdk.CommitAsync(original.Command, cancellationToken).ConfigureAwait(false), ErrorCode.TokenInvalidated);
             await McpCallerAssertions.ErrorAsync(await official.CallAsync(McpCallerTools.DocumentsCommit,
                 original.Command, cancellationToken).ConfigureAwait(false), ErrorCode.TokenInvalidated, dispatched: true);
-            var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit,
-                original.Command, original.Command.CommandId);
+            var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, original.Command) with
+            {
+                CommandId = original.Command.CommandId
+            };
             await ErrorAsync(await sdk.ExecuteSqlAsync(sql, cancellationToken).ConfigureAwait(false), ErrorCode.TokenInvalidated);
             await McpCallerAssertions.ErrorAsync(await official.CallAsync(SqlOperationProtocol.ToolName, sql,
                 cancellationToken).ConfigureAwait(false), ErrorCode.TokenInvalidated, dispatched: true);
@@ -60,7 +62,10 @@ internal static class ClusterRestoreRf3AuthorityTrial
             cancellationToken).ConfigureAwait(false)));
         await SqlRf3Protocol.EqualAsync(original, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await official
             .CallAsync(McpCallerTools.DocumentsCommit, first, cancellationToken).ConfigureAwait(false))).Value);
-        var sql = SqlRf3Protocol.Call(partition, McpCallerTools.DocumentsCommit, first, first.CommandId);
+        var sql = SqlRf3Protocol.Call(partition, McpCallerTools.DocumentsCommit, first) with
+        {
+            CommandId = first.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(original, await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, cancellationToken));
         await SqlRf3Protocol.EqualAsync(original, await SqlRf3Protocol.McpAsync<CommitReceipt>(official, sql, cancellationToken));
         await MinimumAsync(sdk, official, partition, FreshId, original.Token, cancellationToken).ConfigureAwait(false);
@@ -75,8 +80,10 @@ internal static class ClusterRestoreRf3AuthorityTrial
             original.Command, cancellationToken).ConfigureAwait(false)));
         await SqlRf3Protocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await official
             .CallAsync(McpCallerTools.DocumentsCommit, original.Command, cancellationToken).ConfigureAwait(false))).Value);
-        var sql = SqlRf3Protocol.Call(original.Command.Partition, McpCallerTools.DocumentsCommit,
-            original.Command, original.Command.CommandId);
+        var sql = SqlRf3Protocol.Call(original.Command.Partition, McpCallerTools.DocumentsCommit, original.Command) with
+        {
+            CommandId = original.Command.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(original.Receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, cancellationToken));
         await SqlRf3Protocol.EqualAsync(original.Receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(official, sql, cancellationToken));
         await MinimumAsync(sdk, official, original.Command.Partition, FreshId, original.Receipt.Token,

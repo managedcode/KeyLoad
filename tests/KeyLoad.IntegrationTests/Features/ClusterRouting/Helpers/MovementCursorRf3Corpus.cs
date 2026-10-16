@@ -63,8 +63,10 @@ internal static class MovementCursorRf3Corpus
         await SqlRf3Protocol.EqualAsync(original.Receipt,
             (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await seed.Official.CallAsync(
                 McpCallerTools.DocumentsCommit, original.Command, token))).Value);
-        var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit,
-            original.Command, original.Command.CommandId);
+        var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, original.Command) with
+        {
+            CommandId = original.Command.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(original.Receipt,
             await SqlRf3Protocol.SdkAsync<CommitReceipt>(seed.Source, sql, token));
         await SqlRf3Protocol.EqualAsync(original.Receipt,

@@ -3,18 +3,19 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "Native canonical inventory and selected current repair batch are integrated. R606 complete strict Release passed with zero warnings/errors. The matched local normal public ONE/RF3 pair R600/R602 remains accepted on its original afee6834 frozen source/DLL/image-input cohort. Focused R597/R598 retain real failures; the newly rebuilt batch awaits focused original Unit3/Recovery7 and public inventory/movement runs. DROP/AnalyticsStore successors remain source-only.",
+    "implementation": "R619 complete strict Release passed with zero warnings and errors after R609 native35, R617 hosted/cold21 and R620 structured cancellation/join repair. Scoped canonical format verification of the20 newly affected files passed. Current source is compiled; focused Unit/recovery and public inventory/movement/eight-user cold reruns remain pending. Original R608 recovery7 and accepted normal R600/R602 ONE/RF3 retain their own source cohorts.",
     "strictBuild": {
-      "label": "root-r606-recovery-keyspace-full-release",
+      "label": "root-r619-hosted-cold-full-release",
       "result": "passed",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 131.2092912499793,
+      "elapsedSeconds": 463.07599595887586,
       "sourceDrift": 0,
-      "stdoutSha256": "c4e6756fa6ca21b0ae1bb79a08430312dce47b4faf5608a12f1c36b974d5cd39",
-      "scope": "Complete strict Release after native accounting7, complete recovery-image/D2 oracle6, explicit Blob composed fixture6, bounded failure-only quorum diagnostic2 and one existing namespace import. Whole-operation runtime refresh remains pending."
+      "stdoutSha256": "5410ac4fc837158886a38b26a6c656f0f1226a84bf741c76d9ec46fec78540ce",
+      "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold-full-release.completion.original.json",
+      "scope": "Complete strict Release after R609 native35, R617 hosted/cold21 and R620 structured wave join. All original processes/readers joined, source drift zero; rebuilt DLL changes expected. New runtime selections remain pending."
     },
-    "format": "R604d scoped21 C# whitespace verification passed; R606 final namespace-helper whitespace verification passed. Full-solution canonical formatter qualification remains pending.",
+    "format": "R619 scoped canonical dotnet format --verify-no-changes passed for all20 newly affected files, with empty original stdout/stderr and unchanged source. Earlier R611 complete formatter failure and R618 apply diagnostics remain historical originals; scoped PASS is not complete canonical formatter qualification.",
     "focusedRuntime": {
       "cohort": "root-r597-600-unit-recovery-analyzers-functional-one",
       "sourceCommit": "afee683468c447670a3d911e29a195ede7377e3f",
@@ -47,7 +48,7 @@
       "evidence": "TestResults/stage61-native-join/root-r597-600-unit-recovery-analyzers-functional-one.cohort-after.original.json",
       "scope": "Local development selections, not complete Unit/recovery qualification. Original processes/readers joined. R597 failed retained-replay quorum repair, controlled Blob outcome original fixture-entry lookup and actual8192-owner movement read-result budget. R598 failed all7 original shared-domain process cuts. R597 issuer/full-carrier control passed with carrier8097 under cap8192, but supporting owners/peers remain8388608; this does not pass true8192-owner qualification."
     },
-    "publicQualification": "Local normal public ONE/RF3 R600/R602 accepted on matched frozen source/DLL/image inputs. Public inventory-specific RF3, refreshed eight-user cold ONE/RF3, DROP/recreate and user AnalyticsStore qualification remain OPEN; historical cold receipts retain their original source and three-user scope.",
+    "publicQualification": "Accepted local normal R600/R602 ONE/RF3 retains its matched afee6834 cohort. Current inventory/movement RF3 failed before movement/cold. New DROP/recreate, user AnalyticsStore and refreshed eight-user cold require complete exact-source actual SDK/official MCP scenarios.",
     "remaining": [
       "Full public resource DROP/recreate lifecycle",
       "User-addressable analytics stores (current native integration is node operational analytics only)",
@@ -65,7 +66,7 @@
     },
     "currentSourceRepairs": {
       "stage": "R601",
-      "state": "compiled_with_runtime_failures_and_uncompiled_successors_pending",
+      "state": "compiled_focused_runtime_pending",
       "scope": [
         "Original native transport injection removes the inventory startup dependency cycle",
         "Verified restored new-history local applied cut zero without restoring old authority",
@@ -82,13 +83,14 @@
         "Bounded secret-free original recovery-child phase witness written only before arming; same-handle bounded failure evidence read only after actual child/readers join, original exception retained"
       ],
       "unresolved": [
-        "R597 true8192-byte native-owner full movement fails the original read-result budget; issuer/carrier-only control passed at8097bytes with larger supportingowners.",
-        "R597 post-restart retained-replay quorum control barrier and controlled Blob outcome fixture-entry failures remain open.",
-        "R598 shared-domain Recovery7 failed; native-image evidence and exact D2 conservation successors are prepared, not yet compiled or executed."
+        "R607 genuine8KiB complete capture native bytes and Blob actual8KiB full flow await the R609 shared exact empty digest and actual owner-limit reruns. Complete hosted outer reply qualification remains OPEN.",
+        "R607 retained-replay quorum rerun passed but original R597 failure cause remains unresolved; no causal fix or retry was introduced.",
+        "Public RF3 inventory and movement both failed before movement/cold. R609 genuine first-null-entry genesis and strict body-owned SQL envelope corrections await full rebuild and original public reruns.",
+        "R608 selected shared-domain Recovery7 passed. Other Recovery20 cuts and full Linux/fault/endurance qualification require their own exact-source evidence."
       ],
       "publicFunctionalRefresh": "R600 ONE then R602 RF3 normal public pair accepted. Refreshed eight-user cold pair, DROP/recreate and user-addressable AnalyticsStore remain open.",
-      "verification": "R601 strict Release0warnings/0errors. R597 Unit35/38 and R598 recovery13/20 retain their original failures; R599 analyzers391/391 passed. R600/R602 normal public pair accepted. Subsequent source-ready quorum diagnostics, recovery image/D2 correction, DROP and AnalyticsStore packets are not covered by those compiler/runtime receipts and require adoption, strict rebuild and original tests. R603/R606 current21-file correction batch now passes full strict Release0/0 and scoped whitespace; focused runtime is pending and no prior failure is reclassified.",
-      "nextAdoptedStage": {
+      "verification": "R619 complete strict Release passed0warnings0errors and scoped20-file canonical format verification passed, original source drift0. Original R611 failed diagnostics remain preserved in previousFailedCompilerAttempt. Current focused runtime is pending; R600/R602 normal public pair, R608Recovery7 and R6071/3 retain their distinct original evidence.",
+      "previousAdoptedStage": {
         "stage": "R603/R606",
         "state": "compiled_focused_runtime_pending",
         "files": 21,
@@ -102,9 +104,59 @@
         "namespaceCorrection": "R606 existing KeyLoad.Core import fixes both original CS0103 errors; full strict Release passed0/0.",
         "scopedFormat": "R604d scoped21 passed; final R606 import-helper matching whitespace verification passed.",
         "buildEvidence": "TestResults/stage61-native-join/root-r606-recovery-keyspace-full-release.completion.original.json"
+      },
+      "previousAdoptedStageR609": {
+        "stage": "R609",
+        "state": "source_adopted_build_and_runtime_pending",
+        "files": 35,
+        "causalRows": 36,
+        "scope": [
+          "Share the exact SHA256(empty) immutable string across zero-record capture families, retaining every family and semantic digest under the unchanged8192 native result limit",
+          "Configure genuine8192 Blob source/target peers and both cold owners without reducing whole-operation corpus or increasing product bounds",
+          "Initialize proven resource inventory origin only inside the genuine first committed null-entry atomic transaction before its watermark, retaining strict Unknown refusals",
+          "Correct23 public body-owned SQL calls across20files to retain original body GUID at the outer command identity without forbidden duplicate inner headers"
+        ],
+        "evidence": "TestResults/stage61-native-join/root-r609-current-native35.adoption.original.json",
+        "evidenceSha256": "c3867760cb46beed562309931c157458971a13f4f8572b92b7ae1ab37158e4ef"
+      },
+      "nextAdoptedStage": {
+        "stage": "R617",
+        "state": "compiled_focused_runtime_pending",
+        "files": 21,
+        "causalRows": 22,
+        "scope": [
+          "Whole native signed outer replies through real addressed grain service, genuine8192 six-silo owner profile, complete capture/pages/release and two same-root native cold reopens",
+          "Exactly8 cold identities (writer,reader,queueoperator,5additional) with gated original public SDK/MCP sessions and joined warm/cold waves before policy changes; unchanged original Aspire lifecycle and full receipt/refusal/repair checks",
+          "Correct original import diagnostics and extract complete bounded stopped-store native reader into its own nonpartial responsibility without dropping any oracle or raising analyzer limits"
+        ],
+        "evidence": "TestResults/stage61-native-join/root-r617-current-hosted-cold21.adoption.original.json",
+        "evidenceSha256": "c0300bc6fda770d7bea46344dee2380a1fdfa5add921bb07685a29e0cf6848df"
+      },
+      "asyncColdRepair": {
+        "stage": "R620",
+        "status": "compiled_focused_runtime_pending",
+        "evidence": "TestResults/stage61-native-join/root-r620-cold-structured-join1.adoption.original.json",
+        "scope": "Direct await of fixed8 borrowed cancellation wave, protected task starts, original cancellation and all started-task settlement/inner errors retained before owner disposal."
       }
     },
     "latestCompilerAttempt": {
+      "label": "root-r619-hosted-cold-full-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 463.07599595887586,
+      "sourceDrift": 0,
+      "stdoutSha256": "5410ac4fc837158886a38b26a6c656f0f1226a84bf741c76d9ec46fec78540ce",
+      "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold-full-release.completion.original.json",
+      "scope": "Complete strict Release after R609 native35, R617 hosted/cold21 and R620 structured wave join. All original processes/readers joined, source drift zero; rebuilt DLL changes expected. New runtime selections remain pending."
+    },
+    "latestPublicFunctionalAttempt": {
+      "label": "R600 ONE then R602 RF3 normal public pair",
+      "result": "accepted_local_normal_pair",
+      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
+      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
+    },
+    "previousCompilerAttempt": {
       "label": "root-r606-recovery-keyspace-full-release",
       "result": "passed",
       "warnings": 0,
@@ -114,21 +166,70 @@
       "stdoutSha256": "c4e6756fa6ca21b0ae1bb79a08430312dce47b4faf5608a12f1c36b974d5cd39",
       "scope": "Complete strict Release after native accounting7, complete recovery-image/D2 oracle6, explicit Blob composed fixture6, bounded failure-only quorum diagnostic2 and one existing namespace import. Whole-operation runtime refresh remains pending."
     },
-    "latestPublicFunctionalAttempt": {
-      "label": "R600 ONE then R602 RF3 normal public pair",
-      "result": "accepted_local_normal_pair",
-      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
-      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
+    "latestFocusedRuntime": {
+      "cohort": "root-r607-608-repaired-native-unit-recovery",
+      "sourceCommit": "244900c1e12fccc106e627724f73ab9fc2b4b9b9",
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "unit": {
+        "label": "root-r607-repaired-native-unit3",
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "skipped": 0,
+        "scope": "Actual three-voter retained replay/quorum flow passed. Genuine8KiB native capture overflows; Blob case previously used default8MiB owners. A passing rerun with only failure diagnostics does not establish the earlier quorum failure cause or deterministic closure.",
+        "evidence": "TestResults/stage61-native-join/root-r607-repaired-native-unit3.completion.original.json"
+      },
+      "recovery": {
+        "label": "root-r608-repaired-shared-domain-recovery7",
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 29.04047999996692,
+        "scope": "All seven selected original shared-domain process cuts, complete raw native conservation and two reopened owners; not complete Recovery20, Linux or power-loss qualification.",
+        "evidence": "TestResults/root-r594-document-recovery-repair-r1/r608-shared-domain-recovery7.accepted-focused-evidence.original.json",
+        "evidenceSha256": "4c275892a0266eb2fe0dfe0ceea9105adaaed35f83f311296fbb161f021de83c"
+      }
     },
-    "previousCompilerAttempt": {
-      "label": "root-r605-native-recovery-blob-full-release",
+    "latestPublicInventoryMovement": {
+      "sourceCommit": "244900c1e12fccc106e627724f73ab9fc2b4b9b9",
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "result": "both_failed_before_movement",
+      "inventory": {
+        "label": "root-after-r598-repairs-inventory-rf3-r1",
+        "result": "failed",
+        "elapsedSeconds": 233.46293008397333,
+        "cause": "Initial SDK inventory returned RecoveryRequired. Actual first committed native null entry moved the authentication-only store beyond the strict genesis cut before physical catalog bootstrap; retained six owners had no origin.",
+        "stdoutSha256": "a139773478ce1581c8a82fbc09e57b027db91f2ccd4bc8dbd74ab26f0f263461"
+      },
+      "movement": {
+        "label": "root-after-r598-repairs-public-move-rf3-r1",
+        "result": "failed",
+        "elapsedSeconds": 103.83545854198746,
+        "cause": "Initial document SQL call supplied forbidden duplicate inner args.commandId to the strict body-owned request decoder. No movement or cold phase was reached.",
+        "stdoutSha256": "1139501eeb90474a6e890922e9a7ff87e37f916cb1a53c264857c8142cd51832"
+      },
+      "cleanup": "Original native fixture process/readers and owned resource shutdown joined. No failure reclassified as a normal functional pass."
+    },
+    "previousFailedCompilerAttempt": {
+      "label": "root-r611-native35-full-release",
       "result": "failed",
       "warnings": 0,
       "errors": 2,
-      "elapsedSeconds": 483.0473872500006,
+      "elapsedSeconds": 624.716780167073,
       "sourceDrift": 0,
-      "stdoutSha256": "9cbb2559cef0acfb8c6106f6ef816f6a43732ea952c124885919a385e8af2c15",
-      "scope": "Complete strict Release collected two CS0103 KeySpace namespace import errors in the new shared-domain recovery oracle. Existing KeyLoad.Core import correction adopted; R606 complete rebuild pending. No runtime acceptance claim."
+      "stdoutSha256": "8445a18206d17932f62c06617cead6d7bd61a390decc5981eb79a56254d8fd74",
+      "scope": "Complete Release original R609 source. KLD0031 partial test helper201>200 and IDE0005 unused import. All product projects compiled, but no complete build/runtime acceptance."
+    },
+    "formatVerification": {
+      "label": "root-r619-hosted-cold20-format-verify",
+      "result": "passed",
+      "files": 20,
+      "elapsedSeconds": 713.9612580828834,
+      "sourceDrift": 0,
+      "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold20-format-verify.completion.original.json"
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {
@@ -349,7 +450,15 @@
       "R509 fullbuild1auto-propertyerror",
       "R505 single-node test-input VALUESINSERT dialect2 unsupported beforecold; nativeversion1 correctionpreservedalloracles"
     ],
-    "linuxQualification": "OPEN. Existingmanual BuildandTests task=functional-gates nowchains normal1/normalRF3/nativeUnit10/cold1/coldRF3 withstrictoriginalTRX/image/source/cleanupreceipts; current-sourceGitHubresultsrequired."
+    "linuxQualification": "OPEN. Existingmanual BuildandTests task=functional-gates nowchains normal1/normalRF3/nativeUnit10/cold1/coldRF3 withstrictoriginalTRX/image/source/cleanupreceipts; current-sourceGitHubresultsrequired.",
+    "currentEightUserSource": {
+      "status": "in_progress",
+      "stage": "R617",
+      "scope": "Exactly8coldidentities includesqueueoperator, notnormal8workload+1operator. Ready-gated real SDK/official MCP producers warm/cold, original-token cancel and all8 disposal joins, per-user successful SDK/MCP counters; original same-root Aspire restart/policy/receipt/typed-join lifecycle unchanged.",
+      "sourceEvidence": "TestResults/stage61-native-join/root-r617-current-hosted-cold21.adoption.original.json",
+      "runtime": "Not yet executed; original historical three-identity receipts do not qualify this new eight-identity source.",
+      "limits": "No physical8simultaneous requests, throughput, DROP/AnalyticsStore or Linux/full105 claim."
+    }
   },
   "RESOURCE-LIFETIME-D1-20261016": {
     "title": "Atomic resource creation lifetime and focused authorization/cold regression checkpoint",
@@ -1129,6 +1238,15 @@
         "imageInputDigest": "sha256:d28ea66b6b6773a0fdc59e9adb84754b6ec989d0ca61e6e0079fa451bb828a62"
       },
       "limits": "Actual test-owned Aspire Docker normal ONE/RF3 through real .NET SDK, official MCP SDK and selected T-SQL. Local arm64 development evidence, not Linux release, comparative performance, power-loss or production qualification. Single-voter ONE has no replica fault tolerance. DROP/resource recreation, user AnalyticsStore and refreshed eight-user cold remain open."
+    },
+    "ownerScenarioExpansion": {
+      "status": "in_progress",
+      "scope": [
+        "Full resource DROP/recreate lifecycle and old-command isolation",
+        "User-addressable AnalyticsStore in the same mixed-model SDK/MCP/T-SQL flow",
+        "Refreshed eight-user same-root cold ONE followed by RF3"
+      ],
+      "normalGateEvidence": "Original R600/R602 baseline remains accepted on its own frozen cohort; not evidence for unadopted or unexecuted expansion."
     }
   },
   "NATIVE-FOUNDATION-20261015": {

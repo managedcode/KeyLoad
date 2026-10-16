@@ -13,22 +13,14 @@ internal static class FunctionalGateColdWorkloads
         {
             await FunctionalGateColdWorkloadProvision.InventoryAsync(state);
             await FunctionalGateColdRelationalClosure.OriginalsAsync(context, state, token);
-            var proofs = new List<FunctionalGateColdWorkload>();
-            for (var index = 0; index < state.AdditionalIdentities.Length; index++)
-            {
-                var identity = state.AdditionalIdentities[index];
-                var collection = FunctionalGateColdWorkloadProvision.Resource(index);
-                var proof = await RunAsync(fixture, context, identity,
-                    caller => SeedOneAsync(caller, state, identity, collection, token), token);
-                proofs.Add(proof);
-            }
+            var proofs = await FunctionalGateColdConcurrent.RunAsync(fixture, context, state, seed: true, token);
             return state with
             {
-                Workloads = [.. proofs]
+                Workloads = proofs
             };
         }, token);
 
-    private static async Task<FunctionalGateColdWorkload> SeedOneAsync(FunctionalGateContext context,
+    internal static async Task<FunctionalGateColdWorkload> SeedOneAsync(FunctionalGateContext context,
         FunctionalGateColdState state, McpPersistedIdentity identity, string collection, CancellationToken token)
     {
         var json = JsonSerializer.Serialize(new

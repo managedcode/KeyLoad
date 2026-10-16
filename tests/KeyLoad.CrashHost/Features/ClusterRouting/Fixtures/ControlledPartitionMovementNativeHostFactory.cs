@@ -11,10 +11,11 @@ internal static class ControlledPartitionMovementNativeHostFactory
 
     internal static async Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory,
-        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory, CancellationToken cancellationToken)
+        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory, CancellationToken cancellationToken,
+        int? maximumBatchBytes = null)
     {
         using var endpoints = new ControlledPartitionMovementNativeHostEndpoints();
-        var settings = new ControlledPartitionMovementNativeHostSettings(endpoints);
+        var settings = new ControlledPartitionMovementNativeHostSettings(endpoints, maximumBatchBytes);
         var retainedRoot = ControlledPartitionMovementNativeFailureRoot.Capture(settings);
         ControlledPartitionMovementNativeHosts? owner = null;
         var failures = new List<Exception>();

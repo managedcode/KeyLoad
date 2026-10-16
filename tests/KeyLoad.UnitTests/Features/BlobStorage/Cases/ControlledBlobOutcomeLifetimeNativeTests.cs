@@ -12,6 +12,10 @@ internal sealed class ControlledBlobOutcomeLifetimeNativeTests
         {
             try
             {
+                await Assert.That(source.Database.Limits.MaxBatchBytes)
+                    .IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+                await Assert.That(target.Database.Limits.MaxBatchBytes)
+                    .IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
                 await ControlledBlobOutcomeLifetimeNativeFlow.ExecuteAsync(source, target, listeners, corpus,
                     TestContext.Current!.Execution.CancellationToken);
             }
@@ -21,6 +25,13 @@ internal sealed class ControlledBlobOutcomeLifetimeNativeTests
                 target.RetainRoot = true;
                 throw;
             }
-        }, sourceHistoryEntries: ControlledPartitionMovementNativeJournal.BlobOutcomeSourceHistoryEntries,
+        }, limits: Limits(), sourceHistoryEntries: ControlledPartitionMovementNativeJournal.BlobOutcomeSourceHistoryEntries,
             targetHistoryEntries: ControlledPartitionMovementNativeJournal.BlobOutcomeTargetHistoryEntries);
+
+    private static DatabaseLimits Limits()
+    {
+        var limits = new DatabaseLimits { MaxBatchBytes = NativeControlledLifetimePayloadBoundary.MaximumBytes };
+        limits.Validate();
+        return limits;
+    }
 }

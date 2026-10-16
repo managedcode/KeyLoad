@@ -85,7 +85,10 @@ internal static class ClusterRestoreRf3EventingReadOracle
         await SqlRf3Protocol.EqualAsync(expected, sdkValue);
         await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<T>(await official.CallAsync(
             tool, request, cancellationToken).ConfigureAwait(false))).Value);
-        var sql = SqlRf3Protocol.Call(partition, tool, request, CommandId(request));
+        var sql = SqlRf3Protocol.Call(partition, tool, request) with
+        {
+            CommandId = CommandId(request)
+        };
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<T>(sdk, sql, cancellationToken));
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<T>(official, sql, cancellationToken));
     }

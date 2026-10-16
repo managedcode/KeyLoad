@@ -70,8 +70,10 @@ internal static class ClusterRestoreRf3SecondaryPartition
                 await McpCallerAssertions.ErrorAsync(await official.CallAsync(McpCallerTools.DocumentsGet,
                     new GetDocumentRequest(state.Document.Reference, state.Receipt.Token), cancellationToken).ConfigureAwait(false),
                     ErrorCode.TokenInvalidated, dispatched: true);
-                var oldCommit = SqlRf3Protocol.Call(state.Command.Partition, McpCallerTools.DocumentsCommit,
-                    state.Command, state.Command.CommandId);
+                var oldCommit = SqlRf3Protocol.Call(state.Command.Partition, McpCallerTools.DocumentsCommit, state.Command) with
+                {
+                    CommandId = state.Command.CommandId
+                };
                 await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.ExecuteSqlAsync(oldCommit,
                     cancellationToken).ConfigureAwait(false), ErrorCode.TokenInvalidated);
                 await McpCallerAssertions.ErrorAsync(await official.CallAsync(SqlOperationProtocol.ToolName,

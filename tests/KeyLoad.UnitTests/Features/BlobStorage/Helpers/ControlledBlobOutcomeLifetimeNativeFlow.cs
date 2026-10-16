@@ -25,6 +25,10 @@ internal static class ControlledBlobOutcomeLifetimeNativeFlow
         var targetKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(KeyBytes));
         var sourceOptions = ControlledPartitionMovementLoopbackOptions.Bind(source, corpus, sourceKey, targetKey, true);
         var targetOptions = ControlledPartitionMovementLoopbackOptions.Bind(target, corpus, sourceKey, targetKey, false);
+        await Assert.That(sourceOptions.Core.DatabaseLimits.Value.MaxBatchBytes)
+            .IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+        await Assert.That(targetOptions.Core.DatabaseLimits.Value.MaxBatchBytes)
+            .IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
         var execution = new ControlledBlobOutcomeLifetimeNativeExecution(source, target, listeners, corpus,
             sourceOptions, targetOptions);
         var proofs = await ControlledBlobOutcomeLifetimeNativeCommands.SeedAsync(execution, token);

@@ -37,7 +37,8 @@ internal static class ControlledPartitionMovementCaptureFlow
                 var sourceIndex = source.Journal.Log.State.LastIndex;
                 handle = await owner.Source.CaptureAsync(Principal(source, verified), verified.Envelope,
                     cancellationToken);
-                await Assert.That(NativeSerialization.Measure(handle)).IsLessThanOrEqualTo(source.Database.Limits.MaxBatchBytes);
+                await ControlledPartitionMovementCaptureNativeBudget.AssertAsync(handle,
+                    source.Database.Limits.MaxBatchBytes, cancellationToken);
                 await ControlledPartitionMovementResourceAssertions.CaptureAsync(handle.Descriptor, source.AdditionalSeedResources);
                 await Assert.That(handle.ExpiresAt).IsEqualTo(originalExpiry);
                 pages = await ControlledPartitionMovementCapturedPageReader.ReadAsync(source, owner.Source,

@@ -18,6 +18,10 @@ internal static class ControlledBlobOutcomeLifetimeNativeCold
         {
             state.Source.Reopen();
             state.Target.Reopen();
+            await Assert.That(state.Source.Database.Limits.MaxBatchBytes)
+                .IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+            await Assert.That(state.Target.Database.Limits.MaxBatchBytes)
+                .IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
             await ControlledBlobOutcomeLifetimeNativeAssertions.UnchangedAsync(state, source, target);
             foreach (var proof in state.Proofs)
             {

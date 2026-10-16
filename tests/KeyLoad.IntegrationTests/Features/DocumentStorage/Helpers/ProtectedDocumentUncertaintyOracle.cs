@@ -45,7 +45,10 @@ internal static class ProtectedDocumentUncertaintyOracle
         await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token)));
         await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync("keyload_documents_commit", command, token))).Value);
-        var sql = SqlRf3Protocol.Call(command.Partition, "keyload_documents_commit", command, command.CommandId);
+        var sql = SqlRf3Protocol.Call(command.Partition, "keyload_documents_commit", command) with
+        {
+            CommandId = command.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, token));
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, sql, token));
         await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token))).Applied).IsGreaterThanOrEqualTo(before.Applied);

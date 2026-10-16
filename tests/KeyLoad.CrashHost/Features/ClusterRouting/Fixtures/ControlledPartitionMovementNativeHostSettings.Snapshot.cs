@@ -7,11 +7,14 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
 {
     private const int SnapshotVersion = 1;
     private const int FirstSource = 0;
+    private const int NoBatchOverrideArguments = 0;
+    private const int SingleBatchOverrideArgument = 1;
 
     private ControlledPartitionMovementNativeHostSettings(ControlledPartitionMovementNativeHostInput input,
         string originalRoot)
     {
         (origins, silos) = ControlledPartitionMovementNativeHostInputValidation.Read(input, originalRoot);
+        maximumBatchBytes = ReadMaximumBatchBytes(input.Arguments[FirstSource]);
         Root = input.Root;
         signing = Read(input, FirstSource, nameof(NodeOptions.SigningKey));
         controlPeer = Read(input, FirstSource, nameof(NodeOptions.PeerSecret));
@@ -45,6 +48,23 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
 
     private static string Read(ControlledPartitionMovementNativeHostInput input, int index, string key)
         => ControlledPartitionMovementNativeHostInputValidation.Read(input.Arguments[index], key);
+
+    private static int? ReadMaximumBatchBytes(ImmutableArray<string> arguments)
+    {
+        var selected = arguments.Where(value => value.StartsWith(BatchBytesArgumentPrefix,
+            StringComparison.Ordinal)).ToArray();
+        if (selected.Length == NoBatchOverrideArguments)
+        {
+            return null;
+        }
+        if (selected.Length != SingleBatchOverrideArgument || !int.TryParse(selected[FirstSource][BatchBytesArgumentPrefix.Length..],
+            System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var maximum))
+        {
+            throw ControlledPartitionMovementNativeHostInputValidation.Invalid();
+        }
+        new DatabaseLimits { MaxBatchBytes = maximum }.Validate();
+        return maximum;
+    }
 
     private static bool Same(RegisteredPhysicalOwnerV1 retained, RegisteredPhysicalOwnerV1 configured)
         => retained is not null && retained.Owner is not null

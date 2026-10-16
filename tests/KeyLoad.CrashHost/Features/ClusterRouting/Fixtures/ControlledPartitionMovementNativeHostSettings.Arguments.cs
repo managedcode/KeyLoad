@@ -15,6 +15,8 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     private const string ConsoleErrorArgument = "--Logging:Console:LogToStandardErrorThreshold=Trace";
     private const string ConsoleLevelArgument = "--Logging:LogLevel:Default=Warning";
     private const int FirstVoter = 0;
+    private const string BatchBytesArgumentPrefix = ConfigurationArgumentPrefix + DatabaseLimits.SectionName
+        + KeySeparator + nameof(DatabaseLimits.MaxBatchBytes) + Assignment;
 
     internal string[] Arguments(int index)
     {
@@ -50,6 +52,10 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
             var ordinal = voter.ToString(CultureInfo.InvariantCulture);
             Set(nameof(NodeOptions.Peers) + KeySeparator + ordinal, local.VoterIds[voter]);
             Set(trust + nameof(PhysicalGroupTrustOptions.ForeignVoterIds) + KeySeparator + ordinal, foreign.VoterIds[voter]);
+        }
+        if (maximumBatchBytes is { } maximum)
+        {
+            arguments.Add(BatchBytesArgumentPrefix + maximum.ToString(CultureInfo.InvariantCulture));
         }
         return arguments.ToArray();
     }

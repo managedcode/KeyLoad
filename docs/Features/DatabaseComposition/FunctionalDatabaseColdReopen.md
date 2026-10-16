@@ -87,8 +87,12 @@ Cold-only persisted writer, reader and tenant-local queue operator identities re
 their original private secrets in memory. All original SDK and official MCP caller
 scopes join disposal before kill; new discovered public sessions use those same
 credentials after restart. No identity or fixture is replaced and no store is copied.
-These three cold-only identities supplement the existing eight-user working gate;
-they do not qualify eight-user cold concurrency.
+The original three-identity cold ledgers and source-bound results above remain
+historical evidence for their original scope. The current selected cold scenario
+adds five persisted identities to those same writer, reader and queue operator
+identities, for exactly eight identities total, under REQ-DBCOLD-005. Registering
+eight identities or passing the original three-identity cases does not establish
+current eight-user cold concurrency.
 
 | Model family | Actual native request and original retained result |
 | --- | --- |
@@ -114,11 +118,39 @@ required. Text freshness uses the original token; exact vector search uses its n
 canonical read contract. No ANN consumer/generation is provisioned here, so this gate
 makes no approximate-search generation recovery claim.
 
-REQ-DBCOLD-005 verifies fresh persisted authorization after cold, including denied
-reader writes and denial of an original writer command after persisted grant revocation.
-A persisted grant repair admits a new healthy command; its cross-client replay and exact
-reads pass, and every original model baseline is checked again. This does not claim
-resource catalog deletion, DROP TABLE or complete model-specific lifecycle coverage.
+REQ-DBCOLD-005 requires one fixed eight-identity cold workload: the original
+writer, reader and queue operator plus five additional persisted identities. The
+queue operator is one of the eight, not a ninth caller. Each identity uses its own
+actual owned .NET SDK and official MCP sessions and its unchanged persisted grants.
+Before restart, all eight sessions reach one readiness gate before the bounded
+`Task.WhenAll` wave releases. The five additional identities write their distinct
+existing collection resources and retain complete original receipts; the original
+three identities exercise their distinct original model resources, including writer
+receipt replay. Typed joins in the concurrent wave are read-only; the existing
+mutable constraint checks remain sequential and preserve all original rows.
+
+The wave uses the original test cancellation/deadline. A caller failure cancels
+its peers, preserves original and cleanup failures, and joins all eight tasks and
+owned client disposals before the original Aspire-owned same-root restart. After
+restart, the same eight credentials open fresh owned sessions and complete another
+readiness-gated, joined wave of exact original replay and complete model/typed-join
+reads before any policy revocation. Every identity must record more than zero actual
+successful SDK operations and more than zero actual successful official MCP
+operations in each wave, using fresh per-caller counters. The bounded witness records
+eight ready callers, eight completed callers, joined ownership and those counters.
+The gate and eight tasks establish overlapping owned caller lifetimes; they do not
+claim eight physically simultaneous requests or a throughput result.
+
+The original post-cold authorization checks remain mandatory: denied reader writes,
+denial of an original writer command after persisted grant revocation, and the
+additional identities' original foreign-resource and revoked-command denials. A
+persisted grant repair admits a new healthy command; its cross-client replay and
+exact reads pass, and every original model baseline is checked again. Existing
+scenario selectors, public endpoints, native ABI, topology profiles, lifecycle,
+receipts, limits and deadlines remain unchanged. This scope is the current cold
+eight-user scenario, not future user Analytics, DROP or broader lifecycle work.
+Source alone does not qualify either cold topology, Linux delivery, the complete
+105-task plan or performance.
 
 REQ-DBCOLD-006 checks native operational analytics separately: each actual node owns
 one derived native engine. Both real SDK and official MCP dashboard reads always
@@ -147,6 +179,17 @@ and strict TRX bindings to all six native FunctionalColdReopenProfileTests contr
 all four native NativeTUnitSelectionTests controls and the exact two cold methods
 named above. A failed, skipped, missing or mismatched original control/case or
 receipt cannot qualify its corresponding stage.
+
+AC-DBCOLD-005 maps REQ-DBCOLD-005 to the same two exact
+`FunctionalDatabaseColdReopenTests` methods named in AC-DBCOLD-001/002. For each
+actual current-source topology result, require native PASS without skips, original
+warm and cold witnesses each containing exactly eight ready and completed callers,
+all owned callers joined and positive SDK/MCP counters for every caller. Retain the
+original same-root restart/process receipts, complete original model and receipt
+comparisons, sequential constraint checks, fresh authorization denials/repair,
+healthy continuation and joined Aspire shutdown. Missing or failed caller evidence
+keeps this criterion open even if an older three-identity run passed. Local runtime
+results remain development evidence; exact-source Linux qualification is separate.
 
 AC-DBCOLD-003 keeps either optional gate open after any original failure, unexpected
 effect, missing authoritative record, replay mismatch, invalid fresh analytics report
@@ -179,18 +222,21 @@ only its DLL/PDB changed. The original failed report is retained. Corrected R516
 R517 RF3 cold run; both original outcomes are recorded above.
 
 The owning contracts remain ADR-117 native test entry, ADR-125 connection execution
-and ADR-136 physical partition ownership. No new product provider, topology, library,
-resource limit or compatibility fallback is introduced.
+and ADR-136 physical partition ownership. No new ADR is required for
+REQ-DBCOLD-005: it composes the existing owned public caller lifetimes with a fixed
+bounded test wave and retains the same native execution, transport trust, physical
+ownership and restart contracts. It introduces no product scheduling primitive,
+provider, topology, library, resource limit or compatibility fallback.
 
 ```mermaid
 flowchart LR
     A[Existing Aspire 1 or 3 voters] --> B[Persist credentials and original model ledgers]
-    B --> C[SDK MCP SQL complete reads]
+    B --> C[Fixed eight owned SDK MCP callers and complete SQL reads]
     C --> D[Join original caller disposal]
     D --> E[Native kill every original node]
     E --> F[Accept every native Start]
     F --> G[Join health and original runtime receipts]
-    G --> H[Reconnect same credentials and replay originals]
+    G --> H[Same eight credentials joined cold wave and exact replay]
     H --> I[Verify all models and fresh authorization]
     I --> J[Healthy new write and joined shutdown]
 ```

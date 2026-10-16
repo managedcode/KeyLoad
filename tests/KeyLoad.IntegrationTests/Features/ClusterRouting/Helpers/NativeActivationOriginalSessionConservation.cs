@@ -57,8 +57,10 @@ internal static class NativeActivationOriginalSessionConservation
     internal static async Task ReplayAsync(RequestCqrsRf3Callers callers,
         NativeActivationOriginalSessionState state, int route, CancellationToken token)
     {
-        var call = SqlRf3Protocol.Call(state.Command.Partition, McpCallerTools.DocumentsCommit,
-            state.Command, state.Command.CommandId);
+        var call = SqlRf3Protocol.Call(state.Command.Partition, McpCallerTools.DocumentsCommit, state.Command) with
+        {
+            CommandId = state.Command.CommandId
+        };
         var actual = route switch
         {
             0 => await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(state.Command, token)),

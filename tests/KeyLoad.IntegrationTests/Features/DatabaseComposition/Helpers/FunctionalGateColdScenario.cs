@@ -27,6 +27,7 @@ internal static class FunctionalGateColdScenario
                 {
                     await FunctionalGateNodeAssertions.VerifyAsync(fixture, context, lifetime.Token);
                     await FunctionalGateColdReplay.RunAsync(context, state, lifetime.Token);
+                    _ = await FunctionalGateColdConcurrent.RunAsync(fixture, context, state, seed: false, lifetime.Token);
                     await FunctionalGateColdAuthorization.RunAsync(context, state, lifetime.Token);
                     await FunctionalGateColdWorkloads.VerifyAsync(fixture, context, state, lifetime.Token);
                     await FunctionalGateColdAnalytics.VerifyAsync(fixture, state, lifetime.Token);

@@ -27,7 +27,10 @@ internal static class ClusterRestoreRf3RpoOracle
             command, cancellationToken).ConfigureAwait(false)));
         await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await seed.Official
             .CallAsync(McpCallerTools.DocumentsCommit, command, cancellationToken).ConfigureAwait(false))).Value);
-        var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, command, command.CommandId);
+        var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, command) with
+        {
+            CommandId = command.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<CommitReceipt>(seed.Source,
             sql, cancellationToken).ConfigureAwait(false));
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<CommitReceipt>(seed.Official,

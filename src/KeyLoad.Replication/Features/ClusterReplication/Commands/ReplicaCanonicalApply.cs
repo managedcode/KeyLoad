@@ -7,6 +7,7 @@ namespace KeyLoad.Replication;
 internal static class ReplicaCanonicalApply
 {
     private const int ContiguousIndexStep = 1;
+    private const long FirstCanonicalEntryIndex = 1;
 
     private static readonly byte[] AppliedStorageKey = KeySpace.Applied.ToArray();
 
@@ -36,7 +37,15 @@ internal static class ReplicaCanonicalApply
     {
         if (entry.Operation is not { } operation)
         {
-            database.Store.Commit((transaction, _) => { transaction.PutRecord(AppliedStorageKey, entry.Index); return true; });
+            database.Store.Commit((transaction, _) =>
+            {
+                if (entry.Index == FirstCanonicalEntryIndex)
+                {
+                    database.InitializeNativeResourceOwnerInventoryGenesis(transaction);
+                }
+                transaction.PutRecord(AppliedStorageKey, entry.Index);
+                return true;
+            });
             return;
         }
         if (canonicalObservation is null)

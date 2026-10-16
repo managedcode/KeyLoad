@@ -26,6 +26,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     private readonly ImmutableArray<string> origins;
     private readonly ImmutableArray<System.Net.IPEndPoint> silos;
     private readonly string cluster;
+    private readonly int? maximumBatchBytes;
     internal string AdministratorKey
     {
         get;
@@ -43,8 +44,14 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         get;
     }
 
-    internal ControlledPartitionMovementNativeHostSettings(ControlledPartitionMovementNativeHostEndpoints endpoints)
+    internal ControlledPartitionMovementNativeHostSettings(ControlledPartitionMovementNativeHostEndpoints endpoints,
+        int? maximumBatchBytes = null)
     {
+        if (maximumBatchBytes is { } maximum)
+        {
+            new DatabaseLimits { MaxBatchBytes = maximum }.Validate();
+        }
+        this.maximumBatchBytes = maximumBatchBytes;
         origins = Enumerable.Range(FirstSource, ControlledPartitionMovementNativeHostEndpoints.OwnerCount)
             .Select(endpoints.Origin).ToImmutableArray();
         silos = Enumerable.Range(FirstSource, ControlledPartitionMovementNativeHostEndpoints.OwnerCount)

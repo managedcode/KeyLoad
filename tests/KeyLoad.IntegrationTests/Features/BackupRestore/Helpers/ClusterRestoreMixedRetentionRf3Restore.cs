@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.Messaging;
@@ -77,8 +78,14 @@ internal static class ClusterRestoreMixedRetentionRf3Restore
             CommitInboxRequest inbox => (Guid?)inbox.CommandId,
             _ => ClusterRestoreRf3EventingReadOracle.CommandId(request)
         };
-        var sql = SqlRf3Protocol.Call(partition, tool, request, id);
-        await TargetInboxRf3Assertions.DeniedAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), expected);
+        var sql = SqlRf3Protocol.Call(partition, tool, request) with
+        {
+            CommandId = id
+        };
+        var refusedSql = await callers.Sdk.ExecuteSqlAsync(sql, token);
+        await Assert.That(refusedSql.IsFailed).IsTrue();
+        await Assert.That(refusedSql.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
+        await Assert.That(refusedSql.Problem!.ErrorCode).IsEqualTo(expected.ToString());
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), expected, dispatched: true);
     }
 }

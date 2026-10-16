@@ -32,8 +32,10 @@ internal static class SqlOffsetRf3Sources
         await SqlRf3Protocol.EqualAsync(state.Receipt, replay);
         await Assert.That(NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(state.Receipt))).IsTrue();
         await Assert.That(replay.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        var official = await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, SqlRf3Protocol.Call(state.Partition,
-            McpCallerTools.DocumentsCommit, state.Seed, state.Seed.CommandId), token);
+        var official = await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, SqlRf3Protocol.Call(state.Partition, McpCallerTools.DocumentsCommit, state.Seed) with
+        {
+            CommandId = state.Seed.CommandId
+        }, token);
         await SqlRf3Protocol.EqualAsync(state.Receipt, official);
         await Assert.That(NativeSerialization.Serialize(official).AsSpan().SequenceEqual(NativeSerialization.Serialize(state.Receipt))).IsTrue();
     }

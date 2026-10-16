@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -17,11 +18,13 @@ internal static class PartitionMovementPolicyEpochColdRf3Replays
             await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
             await McpCallerAssertions.ErrorAsync(await seed.Official.CallAsync(McpCallerTools.DocumentsCommit,
                 original.Command, cancellationToken).ConfigureAwait(false), ErrorCode.PermissionDenied, dispatched: true);
-            var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, original.Command,
-                original.Command.CommandId);
+            var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, original.Command) with
+            {
+                CommandId = original.Command.CommandId
+            };
             var q1 = await seed.Source.ExecuteSqlAsync(sql, cancellationToken).ConfigureAwait(false);
             await Assert.That(q1.IsFailed).IsTrue();
-            await Assert.That(q1.Value).IsNull();
+            await Assert.That(q1.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
             await Assert.That(q1.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
             await McpCallerAssertions.ErrorAsync(await seed.Official.CallAsync(SqlOperationProtocol.ToolName,
                 sql, cancellationToken).ConfigureAwait(false), ErrorCode.PermissionDenied, dispatched: true);

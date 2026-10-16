@@ -10,6 +10,7 @@ namespace KeyLoad.Core.Features.ClusterRouting.Queries;
 internal static class PartitionMoveFamilyCapture
 {
     private const int ControlOwnedPageRecords = 1;
+    private static readonly string EmptyRecordsDigest = Convert.ToHexStringLower(SHA256.HashData([]));
 
     internal static PartitionMoveImageFamily Capture(IKeyValueView view, PartitionMoveSourceFenceRecord fence,
         string family, ReadExecutionBudget work, PartitionMoveCaptureBudget captureBudget, DatabaseLimits limits, int maximumPageBytes,
@@ -64,7 +65,10 @@ internal static class PartitionMoveFamilyCapture
             }
             after = page.Continuation ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
         }
-        return new(family, count, rawBytes, pages.Count - before, Convert.ToHexStringLower(digest.GetHashAndReset()));
+        var completedDigest = Convert.ToHexStringLower(digest.GetHashAndReset());
+        // All zero-record families have the same immutable hash; native string references retain every field.
+        return new(family, count, rawBytes, pages.Count - before,
+            count == PartitionMoveProtocol.EmptyCount ? EmptyRecordsDigest : completedDigest);
     }
 
     internal static bool ControlOwned(string family)

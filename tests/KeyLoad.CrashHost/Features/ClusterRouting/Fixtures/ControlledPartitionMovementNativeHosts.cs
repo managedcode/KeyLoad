@@ -56,6 +56,12 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, cancellationToken);
     }
 
+    internal static Task<ControlledPartitionMovementNativeHosts> CreateWithMaximumBatchBytesAsync(
+        int maximumBatchBytes, CancellationToken cancellationToken)
+    {
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, cancellationToken, maximumBatchBytes);
+    }
+
     internal void RetainCreationFailure(Exception original) => creationFailure = original;
 
     internal async Task CreateNodesAsync(CancellationToken startupCancellation)

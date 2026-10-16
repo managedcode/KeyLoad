@@ -9,6 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
 internal static class ResourcePartitionInventoryRf3Assertions
 {
     private const int WriterVersion = 1;
+    private const long NoEnrollmentRevision = 0;
 
     internal static async Task<ResourceOwnerInventoryResultV1> SuccessAsync(ResourcePartitionInventoryRf3Reply reply)
     {
@@ -26,6 +27,7 @@ internal static class ResourcePartitionInventoryRf3Assertions
             await Assert.That(cut.StoreIncarnation).IsNotEqualTo(Guid.Empty);
             await Assert.That(cut.ReadGeneration).IsGreaterThanOrEqualTo(0L);
             await Assert.That(cut.WriterVersion).IsEqualTo(WriterVersion);
+            await Assert.That(cut.EnrollmentRevision).IsGreaterThan(NoEnrollmentRevision);
             await Assert.That(cut.AppliedIndex).IsGreaterThanOrEqualTo(0L);
             await Assert.That(cut.StorePosition).IsGreaterThanOrEqualTo(0L);
         }

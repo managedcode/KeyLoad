@@ -39,7 +39,10 @@ internal static class ClusterRestoreRf3EventingFences
     {
         await McpCallerAssertions.ErrorAsync(await official.CallAsync(tool, request, cancellationToken).ConfigureAwait(false),
             expected, dispatched: true);
-        var sql = SqlRf3Protocol.Call(partition, tool, request, ClusterRestoreRf3EventingReadOracle.CommandId(request));
+        var sql = SqlRf3Protocol.Call(partition, tool, request) with
+        {
+            CommandId = ClusterRestoreRf3EventingReadOracle.CommandId(request)
+        };
         await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.ExecuteSqlAsync(sql,
             cancellationToken).ConfigureAwait(false), expected);
         await McpCallerAssertions.ErrorAsync(await official.CallAsync(SqlOperationProtocol.ToolName,

@@ -70,8 +70,10 @@ internal static partial class PartitionMovementPublicParentRf3Cut
             await SqlRf3Protocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await seed.Official.CallAsync(McpCallerTools.DocumentsCommit, original.Command, cancellationToken)
                     .ConfigureAwait(false))).Value);
-            var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, original.Command,
-                original.Command.CommandId);
+            var sql = SqlRf3Protocol.Call(seed.Partition, McpCallerTools.DocumentsCommit, original.Command) with
+            {
+                CommandId = original.Command.CommandId
+            };
             await SqlRf3Protocol.EqualAsync(original.Receipt,
                 await SqlRf3Protocol.SdkAsync<CommitReceipt>(seed.Source, sql, cancellationToken));
             await SqlRf3Protocol.EqualAsync(original.Receipt,

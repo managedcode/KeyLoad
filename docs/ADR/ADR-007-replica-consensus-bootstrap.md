@@ -8,6 +8,12 @@ The database cluster uses Orleans as its sole distributed runtime and membership
 
 Bootstrap must establish a fixed RF3 voter set and persisted cluster metadata without a second competing membership authority. Empty/restarted replicas join through verified metadata/snapshot and ordered tail. The precise consensus proof and deployment source of voter identity remain governed by the owning replication contract; no single-node substitute is allowed.
 
+## First native barrier and resource inventory genesis
+
+The real RF3 physical catalog prerequisite requires an already committed and materialized native entry. Its original first null entry advances the canonical apply watermark before catalog bootstrap. While applying only entry index one, before staging that watermark, Core may initialize the resource inventory origin using the exact existing configured physical owner and the unchanged original authentication-only Store.Position-one genesis proof. The origin and applied watermark are published in the same original atomic commit. Neither the quorum/term/acknowledgement order nor the number of canonical commits changes.
+
+The null-entry path never handles a nonnull first entry; the existing first physical-catalog path retains the same original genesis proof. An earlier non-catalog command, a second authentication bootstrap, an unproven/preexisting root, an unrelated retained key or a later/replayed entry cannot initialize origin. Inventory continues to refuse Unknown; restart and query paths never backfill it. The original six-voter public inventory/write/move/replay/two-cold scenario verifies positive owner-cut enrollment revisions; native Unit controls retain the first-nonnull and two-authentication refusals. Source review and these focused checks do not replace Linux RF3 or durability qualification.
+
 ## Rationale and consequences
 
 One cluster foundation avoids split-brain membership and duplicate routing layers. Orleans activation placement is not storage ownership. This requires explicit request routing, stable replica identity, control-plane capacity, quorum barriers, and recovery evidence. Source presence and historical CI do not qualify current delivered behavior.

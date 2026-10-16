@@ -10,6 +10,15 @@ public sealed partial class DatabaseEngine
 {
     private const string BootstrapRequiresRevisionZero = "Physical shard catalog bootstrap requires expected revision zero.";
     private const string ExistingCatalogConflict = "The physical shard catalog conflicts with configured cluster identity.";
+    internal void InitializeNativeResourceOwnerInventoryGenesis(IAtomicTransaction transaction)
+    {
+        if (configuredPhysicalOwner is { } owner
+            && ResourceOwnerInventoryGenesis.CanInitialize(transaction, Store.Identity, Store.Position, owner, Limits))
+        {
+            ResourceOwnerInventoryCatalog.InitializeFresh(transaction, Store.Identity, owner, Limits);
+        }
+    }
+
     private OperationResult ExecuteBootstrapPhysicalShardCatalog(IAtomicTransaction transaction,
         ReplicatedOperation operation)
     {

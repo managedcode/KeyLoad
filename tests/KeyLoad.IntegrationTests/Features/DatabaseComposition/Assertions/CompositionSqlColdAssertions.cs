@@ -37,7 +37,10 @@ internal static class CompositionSqlColdAssertions
         await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token)));
         await SqlRf3Protocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value);
-        var sql = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command, command.CommandId);
+        var sql = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command) with
+        {
+            CommandId = command.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
     }

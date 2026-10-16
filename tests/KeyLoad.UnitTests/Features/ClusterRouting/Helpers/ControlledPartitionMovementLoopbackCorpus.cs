@@ -16,6 +16,15 @@ internal sealed class ControlledPartitionMovementLoopbackCorpus
             listeners.DestinationOrigins.Length).Select(index => listeners.NativeEndpoint(index).ToString()).ToArray();
     }
 
+    internal ControlledPartitionMovementLoopbackCorpus(ControlledPartitionMovementNativeHosts owners)
+    {
+        Control = owners.Control;
+        Destination = owners.Destination;
+        DestinationSiloEndpoints = owners.Nodes.Skip(owners.Control.Owner.VoterIds.Length)
+            .Select(node => global::Orleans.Runtime.SiloAddress.FromParsableString(node.CallerSiloAddress)
+                .Endpoint.ToString()).ToArray();
+    }
+
     internal RegisteredPhysicalOwnerV1 Control
     {
         get;

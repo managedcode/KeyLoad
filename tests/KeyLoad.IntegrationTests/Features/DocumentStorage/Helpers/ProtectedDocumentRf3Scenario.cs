@@ -97,7 +97,10 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
         var q1Read = SqlRf3Protocol.Call(seed.Partition, Get, new GetDocumentRequest(seed.Reference));
         await Assert.That((await sdk.ExecuteSqlAsync(q1Read, token)).Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, q1Read, token), ErrorCode.PermissionDenied, dispatched: true);
-        var q1Write = SqlRf3Protocol.Call(seed.Partition, Commit, mutation, mutation.CommandId);
+        var q1Write = SqlRf3Protocol.Call(seed.Partition, Commit, mutation) with
+        {
+            CommandId = mutation.CommandId
+        };
         await Assert.That((await sdk.ExecuteSqlAsync(q1Write, token)).Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, q1Write, token), ErrorCode.PermissionDenied, dispatched: true);
         await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token))).Applied).IsGreaterThanOrEqualTo(beforeA.Applied);
@@ -157,7 +160,10 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
         var beforeTarget = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
         await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token)));
         await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(Commit, command, token))).Value);
-        var q1 = SqlRf3Protocol.Call(command.Partition, Commit, command, command.CommandId);
+        var q1 = SqlRf3Protocol.Call(command.Partition, Commit, command) with
+        {
+            CommandId = command.CommandId
+        };
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, q1, token));
         await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, q1, token));
         await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token))).Applied).IsGreaterThanOrEqualTo(beforeTarget.Applied);
