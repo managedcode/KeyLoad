@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 internal static class NativeCurrentModelSelectionAssertions
 {
     private const string Selections = "currentModels";
-    private const int ExpectedSelections = 9;
+    private const int ExpectedSelections = 11;
     private static readonly string[] Filters =
     [
         "/*/*/GraphSearchPathPolicyRf3Tests/*",
@@ -16,7 +16,9 @@ internal static class NativeCurrentModelSelectionAssertions
         "/*/*/(NativeDatabaseMigrationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsAuthorityFaultTests|RequestCqrsRf3FollowerRestartTests|SagaDueRf3Tests|SagaTimeoutRf3Tests|SampleChunkCorrectionPredicateRf3Tests|ConnectionRf3AuthorizationTests|DocumentSessionReadRf3Tests|MetadataBootstrapRf3Tests|PartitionMovementPublicParentFlowTests|PhysicalOwnerRegistrationRf3Tests|ProtectedDocumentRf3Tests|QueryContextSessionRf3Tests|StrongReadSessionAbsenceRf3Tests)/*",
         "/*/*/AspireContainerFaultCommandTests/WrongStaleAndForeignIdsRefuseWithoutEffectsBeforeHealthySdkMcpRestart",
         "/*/*/AggregateReplayRf3LeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay",
-        "/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners"
+        "/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
+        "/*/*/PartitionQueryPublicValidationTests/*",
+        "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable"
     ];
 
     internal static async Task AssertAsync(JsonElement root)

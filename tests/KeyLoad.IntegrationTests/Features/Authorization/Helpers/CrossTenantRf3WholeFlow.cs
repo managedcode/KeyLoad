@@ -25,11 +25,11 @@ internal static class CrossTenantRf3WholeFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, identity.Secret, deadline.Token);
-            await RejectReadsAsync(sdk, session, foreign, identity.Secret, deadline.Token);
+            await RejectReadsAsync(admin, sdk, session, owned, foreign, identity.Secret, deadline.Token);
             await CrossTenantRf3StateAssertions.StateAsync(admin, owned, McpDocumentProtocol.InitialJson, 1, deadline.Token);
             await CrossTenantRf3StateAssertions.StateAsync(admin, foreign, McpDocumentProtocol.InitialJson, 1, deadline.Token);
             var denied = foreign.Command(Guid.NewGuid(), HealthyJson);
-            await RejectWritesAsync(sdk, session, denied, identity.Secret, deadline.Token);
+            await RejectWritesAsync(admin, sdk, session, owned, foreign, denied, identity.Secret, deadline.Token);
             await CrossTenantRf3StateAssertions.StateAsync(admin, foreign, McpDocumentProtocol.InitialJson, 1, deadline.Token);
             await CrossTenantRf3StateAssertions.StateAsync(admin, owned, McpDocumentProtocol.InitialJson, 1, deadline.Token);
             await CrossTenantRf3HealthyFlow.VerifyAsync(sdk, session, owned, identity.Secret, deadline.Token);
@@ -55,31 +55,42 @@ internal static class CrossTenantRf3WholeFlow
         await scenario.SeedAsync(fixture, token);
         return scenario;
     }
-    private static async Task RejectReadsAsync(KeyLoadClient sdk, McpOfficialClient mcp, McpDocumentScenario foreign,
-        string secret, CancellationToken token)
+    private static async Task RejectReadsAsync(KeyLoadClient admin, KeyLoadClient sdk, McpOfficialClient mcp,
+        McpDocumentScenario owned, McpDocumentScenario foreign, string secret, CancellationToken token)
     {
+        var before = await CrossTenantRf3StateAssertions.ImageAsync(admin, owned, foreign, token);
         await CrossTenantRf3ErrorAssertions.SdkAsync(await sdk.GetAsync(foreign.Reference, token), secret);
+        await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
         await CrossTenantRf3ErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(foreign.Reference), token), secret);
+        await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
         foreach (var indexed in new[] { false, true })
         {
             var request = CrossTenantRf3StateAssertions.Query(foreign.Partition, indexed);
             await CrossTenantRf3ErrorAssertions.SdkAsync(await sdk.QueryAsync(request, token), secret);
+            await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
             await CrossTenantRf3ErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.QueryExecute, request, token), secret);
+            await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
         }
     }
-    private static async Task RejectWritesAsync(KeyLoadClient sdk, McpOfficialClient mcp, CommandRequest request,
-        string secret, CancellationToken token)
+    private static async Task RejectWritesAsync(KeyLoadClient admin, KeyLoadClient sdk, McpOfficialClient mcp,
+        McpDocumentScenario owned, McpDocumentScenario foreign, CommandRequest request, string secret, CancellationToken token)
     {
+        var before = await CrossTenantRf3StateAssertions.ImageAsync(admin, owned, foreign, token);
         await CrossTenantRf3ErrorAssertions.SdkAsync(await sdk.CommitAsync(request, token), secret);
+        await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
         await CrossTenantRf3ErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, request, token), secret);
+        await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
         await CrossTenantRf3ErrorAssertions.SdkAsync(await sdk.CommitAsync(request, token), secret);
+        await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
         var changed = request with
         {
             Mutations = [new PutDocument(McpDocumentProtocol.Collection,
             McpDocumentProtocol.Entity, McpDocumentProtocol.ConflictingJson)]
         };
         await CrossTenantRf3ErrorAssertions.SdkAsync(await sdk.CommitAsync(changed, token), secret);
+        await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
         await CrossTenantRf3ErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, token), secret);
+        await CrossTenantRf3StateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
     }
 }

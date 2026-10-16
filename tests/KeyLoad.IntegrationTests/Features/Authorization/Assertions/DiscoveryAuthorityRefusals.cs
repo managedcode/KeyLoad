@@ -9,6 +9,8 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class DiscoveryAuthorityRefusals
 {
+    private const string UnauthenticatedProblemType = "urn:keyload:error:Unauthenticated";
+    private const string UnavailableCredentialDetail = "The credential is unavailable or expired.";
     internal static async Task RestrictedAsync(KeyLoadClient root, KeyLoadClient reader, McpOfficialClient session,
         DiscoveryAuthorityState state, Guid firstRequest, CancellationToken token)
     {
@@ -23,17 +25,28 @@ internal static class DiscoveryAuthorityRefusals
         await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
     }
 
-    internal static async Task RevokedAsync(ClusterFixture fixture, KeyLoadClient root, KeyLoadClient reader,
+    internal static async Task UnauthenticatedAsync(ClusterFixture fixture, KeyLoadClient root, KeyLoadClient reader,
         McpOfficialClient session, DiscoveryAuthorityState state, CancellationToken token)
     {
         var before = await DiscoveryAuthorityValues.ImageAsync(root, state, token);
-        await SdkAsync(await reader.GetAsync(state.Scenario.Reference, token), state, ErrorCode.Unauthenticated);
+        var sdk = await reader.GetAsync(state.Scenario.Reference, token);
+        await SdkAsync(sdk, state, ErrorCode.Unauthenticated);
+        await SqlRf3Protocol.EqualAsync(new ManagedCode.Communication.Problem
+        {
+            Type = UnauthenticatedProblemType,
+            Title = nameof(ErrorCode.Unauthenticated),
+            StatusCode = (int)HttpStatusCode.Unauthorized,
+            Detail = UnavailableCredentialDetail,
+            ErrorCode = nameof(ErrorCode.Unauthenticated)
+        }, sdk.Problem);
+        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         var error = await Assert.ThrowsAsync<HttpRequestException>(() => session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Scenario.Reference), token));
         await Assert.That(error).IsNotNull();
         await Assert.That(error?.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
         await Assert.That(error?.Message.Contains(state.Identity.Secret, StringComparison.Ordinal) == true).IsFalse();
         await Assert.That(error?.Message.Contains(McpDocumentProtocol.PrivateValue, StringComparison.Ordinal) == true).IsFalse();
+        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node2, state.Identity.Secret, token);
         await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
     }

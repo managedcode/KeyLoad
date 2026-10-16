@@ -1,4 +1,52 @@
 {
+  "RESOURCE-LIFETIME-D1-20261016": {
+    "title": "Atomic resource creation lifetime and focused authorization/cold regression checkpoint",
+    "status": "in_progress",
+    "scope": "D1 active resource lifetime producer plus authored authorization/cross-tenant regressions; not completed DROP, global inventory, full READ proof or original105 acceptance.",
+    "strictBuild": {
+      "label": "root-r486-fresh-admission-cross-tenant-full-release",
+      "result": "passed",
+      "errors": 0,
+      "warnings": 0,
+      "sourceDrift": 0
+    },
+    "nativeWholeOperationDevelopment": {
+      "label": "root-r484-lifetime-policy-identity-whole-unit",
+      "total": 22,
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "elapsedSeconds": 32.42321683303453,
+      "trx": "TestResults/stage61-native-join/root-r484-lifetime-policy-identity-whole-unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "trxSha256": "a535e5508151cc941579d3c797ff8dfc3e063a4dfdd7884fd14cb3c5b9dce6d3",
+      "coverage": {
+        "path": "TestResults/stage61-native-join/root-r484-lifetime-policy-identity-whole-unit/functional.cobertura.xml",
+        "sha256": "4a7182aeb1ce75c538889ba22df90e6a0e1ac9f0c88dae30e99e98f1e8e81a2d",
+        "selectedRunOnly": true,
+        "counts": {
+          "lines-covered": "9324",
+          "lines-valid": "108857",
+          "branches-covered": "4201",
+          "branches-valid": "68987"
+        }
+      }
+    },
+    "actualRf3ColdFailure": {
+      "label": "root-r475-principal-expiry-actual-rf3",
+      "result": "failed",
+      "phase": "DiscoveryAuthorityCold all-three same-root restart",
+      "originalReport": "root-r475-principal-expiry-actual-rf3.stdout.original.txt",
+      "originalReportSha256": "44ed7b7d2ae299ecf4b8f1f494cdf19c51cf19fef6aad2e7d7bb145b6af7d25d",
+      "scope": "Whole case is failed; warm substeps are not separate qualification.",
+      "observed": "All nodes reject physical root at PartitionRootAdmission.InspectEntry line107 during cold restart.",
+      "sourceConfirmedCause": "Native OperationalAnalyticsOwner creates derived-operational-analytics after initial admission; current root-directory inventory omits this owned directory. Exact original offending entry was not retained/observed.",
+      "repairQualification": "Narrow known-directory admission and actual analytics joined-close/cold-reopen regression pending."
+    },
+    "gate1Gate2HistoricalProof": "FUNCTIONAL-GATES-20261016 binds original86834e8a local pair, not these newer product binaries. Fresh combined gates and exact-source Linux qualification remain open.",
+    "next": "Qualify analytics-root cold repair, rerun actual RF3 auth/query/cross-tenant and fresh one/RF3 functional pair; continue independent mandatory command/read lifetime proof."
+  },
   "FUNCTIONAL-GATES-20261016": {
     "status": "done",
     "ownerPriority": "One actual working Aspire instance, then the same canonical functional scenario on three genuine RF3 nodes before unrelated 105-task expansion",
@@ -57923,6 +57971,45 @@
       "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment"
     },
     "canonicalZoneTreeRepairDelivery": {
+      "sourceStage": "SourceN_stage61_official_ZoneTree_2_0_1_delivery_observed_runtime_qualification_pending",
+      "officialPinnedVersion": "2.0.1",
+      "officialPublishedVersion": "2.0.1",
+      "officialPublishedSourceCommit": "ec774af2223bd87457a0aa985908f0b4e508e4c8",
+      "officialRelease": "https://github.com/ZoneTree/ZoneTree/releases/tag/release-v2.0.1",
+      "officialNuGetPackage": "https://api.nuget.org/v3-flatcontainer/zonetree/2.0.1/zonetree.2.0.1.nupkg",
+      "officialNupkgSha256": "00d4eec9e16d70c0f989afa8f5908620ec41b3df95668a0b97542a15e583256b",
+      "officialPatchedNuGetDeliveryVerified": true,
+      "publicationBlocked": false,
+      "packageReferenceChangedForThisObservation": false,
+      "consumerFallbackIntroduced": false,
+      "runtimeQualified": false,
+      "originalEvidence": "TestResults/stage61-native-join/zonetree-issue182-pr184-published-delivery.json",
+      "originalEvidenceSha256": "ad1de5a501823dfafa29b07cc63ce19725ea31cb79847ff1a842c1873bbe34e0",
+      "observedUtc": "2026-10-16T03:54:27.429278+00:00",
+      "qualification": "Official publication and existing central pin verified through live package download, nuspec source identity, matching official release tag and PR ancestry. Published source uses XXH3 truncated to 32 bits. Exact published-package native portable-WAL, corruption and Linux/RF3 recovery gates remain open; no full KL-015 acceptance or power-loss durability claim.",
+      "nextGate": "Qualify the actual published package through the authorized Aspire test entry point; inspect the current persistence-format guard and native legacy-WAL checksum policy before admitting old formats."
+    },
+    "currentPublicZoneTreeChecksumIssueDevelopment": {
+      "issue": "https://github.com/ZoneTree/ZoneTree/issues/182",
+      "issueStateObserved": "closed",
+      "issueStateReasonObserved": "completed",
+      "issueClosedUtc": "2026-10-09T20:44:38Z",
+      "maintainerResponse": "https://github.com/ZoneTree/ZoneTree/issues/182#issuecomment-6088947784",
+      "maintainerPullRequest": "https://github.com/ZoneTree/ZoneTree/pull/184",
+      "pullRequestTitleObserved": "Replace CRC32 with XXH3-64.",
+      "pullRequestStateObserved": "merged",
+      "pullRequestMergedUtc": "2026-10-09T20:44:03Z",
+      "pullRequestMergeCommit": "5d24bf5f46772facbe4e40e355b2ed1aa6e66c9b",
+      "officialPatchedNuGetDeliveryVerified": true,
+      "officialPublishedVersion": "2.0.1",
+      "officialPublishedSourceCommit": "ec774af2223bd87457a0aa985908f0b4e508e4c8",
+      "consumerProviderPinChangedForThisObservation": false,
+      "runtimeQualified": false,
+      "qualification": "Maintainer closed issue182 as completed and identified v2.0.0 as the fix. PR184 is merged and official 2.0.1 is published and already centrally pinned. This public delivery observation supplies no runtime portable-WAL or Linux/RF3 acceptance; previous 1.9.8 findings and private repair receipts remain historical."
+    },
+    "historicalZoneTree198ChecksumDeliveryObservation": {
+      "qualification": "Historical original 1.9.8 findings, private repair receipts and then-observed publication blocker; superseded only for current official publication state. Original object value bytes retained unchanged.",
+      "canonicalZoneTreeRepairDelivery": {
       "officialPinnedVersion": "1.9.8",
       "officialAuditedCommit": "46864afa36eed46e0cfe16828ff8f40cac85e369",
       "owningSibling": "/Users/ksemenenko/Developer/ZoneTree",
@@ -57954,7 +58041,7 @@
       "consumerFallbackIntroduced": false,
       "runtimeQualified": false
     },
-    "currentPublicZoneTreeChecksumIssueDevelopment": {
+      "currentPublicZoneTreeChecksumIssueDevelopment": {
       "issue": "https://github.com/ZoneTree/ZoneTree/issues/182",
       "issueStateObserved": "open",
       "maintainerResponse": "https://github.com/ZoneTree/ZoneTree/issues/182#issuecomment-6086006047",
@@ -57968,6 +58055,7 @@
       "officialPatchedNuGetDeliveryVerified": false,
       "consumerProviderPinChangedForThisIssue": false,
       "qualification": "Detailed original CPU checksum and native WAL issue publicly reported. Maintainer implementation is in progress; no unpublished provider, consumer fallback or migration is installed."
+    }
     },
     "currentStageXLVIIIActualCaseUnionDevelopment": {
       "requirement": "REQ/AC-TUNIT-ENTRY-010",

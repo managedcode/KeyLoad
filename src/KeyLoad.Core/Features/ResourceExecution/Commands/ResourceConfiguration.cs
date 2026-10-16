@@ -2,6 +2,7 @@ using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -27,9 +28,14 @@ public sealed partial class DatabaseEngine
         ValidateResource(request);
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
         var previous = transaction.GetRecord<ResourceDefinition>(key);
+        _ = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Definition.Name, previous);
         ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
         RequireQueueDeliveryPolicyChange(transaction, request, previous);
         RequireResourceMetadataChangeAdmission(transaction, request.TenantId, request.DatabaseId);
+        if (previous is null)
+        {
+            _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition);
+        }
         BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation,
             BlobExecution.InitialCatalogProofRecords);
         transaction.PutRecord(key, request.Definition);

@@ -12,7 +12,9 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/(NativeDatabaseMigrationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsAuthorityFaultTests|RequestCqrsRf3FollowerRestartTests|SagaDueRf3Tests|SagaTimeoutRf3Tests|SampleChunkCorrectionPredicateRf3Tests|ConnectionRf3AuthorizationTests|DocumentSessionReadRf3Tests|MetadataBootstrapRf3Tests|PartitionMovementPublicParentFlowTests|PhysicalOwnerRegistrationRf3Tests|ProtectedDocumentRf3Tests|QueryContextSessionRf3Tests|StrongReadSessionAbsenceRf3Tests)/*",
               "/*/*/AspireContainerFaultCommandTests/WrongStaleAndForeignIdsRefuseWithoutEffectsBeforeHealthySdkMcpRestart",
               "/*/*/AggregateReplayRf3LeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay",
-              "/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners"
+              "/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
+              "/*/*/PartitionQueryPublicValidationTests/*",
+              "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -20,6 +22,16 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              '/*/*/CrossTenantRf3WholeFlowTests/*',
+              '/*/*/CrossTenantRf3WholeFlowTests*/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable',
+              currentModelFilters[10] + '*',
+              currentModelFilters[10] + ' ',
+              '/*/*/(CrossTenantRf3WholeFlowTests|PartitionQueryPublicValidationTests)/*',
+              '/*/*/PartitionQueryPublicValidationTests*/*',
+              currentModelFilters[9] + ' ',
+              '/*/*/PartitionQueryPublicValidationTests/AcPquery001InvalidVersionAndLeafOverflowAreValidationWithHealthyFollowup',
+              '/*/*/PartitionQueryPublicValidationTests/AcPquery005OversizedRequestAndCancelledSdkAndMcpCallsHaveHealthyFollowups',
+              '/*/*/(McpPersistedAuthorizationTests|PartitionQueryPublicValidationTests)/*',
               '/*/*/ControlledPartitionMovementNativeRetireTests/*',
               currentModelFilters[8] + ' ',
               currentModelFilters[8].replace('ControlledPartitionMovementNativeRetireTests/', 'ControlledPartitionMovementNativeRetireTests*/'),

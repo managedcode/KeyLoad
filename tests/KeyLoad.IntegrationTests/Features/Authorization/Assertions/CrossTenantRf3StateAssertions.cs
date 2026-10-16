@@ -1,6 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
@@ -8,6 +9,30 @@ internal static class CrossTenantRf3StateAssertions
 {
     private const string Scan = "SELECT TOP (10) * FROM \"mcp-documents\" ORDER BY id ASC";
     private const string Indexed = "SELECT TOP (10) * FROM \"mcp-documents\" WHERE secret = 'mcp-private-value-canary' ORDER BY id ASC";
+    internal static async Task<AdversarialAuthorityImage> ImageAsync(KeyLoadClient admin,
+        McpDocumentScenario owned, McpDocumentScenario foreign, CancellationToken token)
+    {
+        var ownedDocument = await InitialDocumentAsync(admin, owned, token);
+        var foreignDocument = await InitialDocumentAsync(admin, foreign, token);
+        var ownedOutbox = await McpCallerAssertions.SdkSuccessAsync(await admin.OutboxStatusAsync(owned.Partition, token));
+        var foreignOutbox = await McpCallerAssertions.SdkSuccessAsync(await admin.OutboxStatusAsync(foreign.Partition, token));
+        return new(ownedDocument, foreignDocument, ownedOutbox, foreignOutbox);
+    }
+
+    internal static async Task UnchangedAsync(KeyLoadClient admin, McpDocumentScenario owned,
+        McpDocumentScenario foreign, AdversarialAuthorityImage before, CancellationToken token)
+        => await SqlRf3Protocol.EqualAsync(before, await ImageAsync(admin, owned, foreign, token));
+
+    private static async Task<DocumentResult> InitialDocumentAsync(KeyLoadClient admin,
+        McpDocumentScenario scenario, CancellationToken token)
+    {
+        var actual = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(scenario.Reference, token));
+        await Assert.That(actual).IsNotNull();
+        await SqlRf3Protocol.EqualAsync(new DocumentResult(scenario.Reference, McpCallerProtocol.FirstRevision,
+            McpDocumentProtocol.InitialJson, false, []), actual);
+        return actual!;
+    }
+
     internal static QueryRequest Query(PartitionRef partition, bool indexed)
         => new(partition, indexed ? Indexed : Scan, AllowFullScan: true);
     internal static async Task StateAsync(KeyLoadClient admin, McpDocumentScenario scenario, string json,

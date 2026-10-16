@@ -32,7 +32,13 @@ internal static class DiscoveryAuthorityFlow
             Revoked = true,
             PolicyEpoch = DiscoveryAuthorityProtocol.RevokedEpoch
         }, token);
-        await DiscoveryAuthorityRefusals.RevokedAsync(fixture, root, reader, session, state, token);
+        await DiscoveryAuthorityRefusals.UnauthenticatedAsync(fixture, root, reader, session, state, token);
+        _ = await PersistAsync(root, Guid.NewGuid(), state.Identity.Principal with
+        {
+            ExpiresAt = TimeProvider.System.GetUtcNow() - McpCallerProtocol.ExpiredOffset,
+            PolicyEpoch = DiscoveryAuthorityProtocol.ExpiredEpoch
+        }, token);
+        await DiscoveryAuthorityRefusals.UnauthenticatedAsync(fixture, root, reader, session, state, token);
         state.OriginalRepairResult = await PersistAsync(root, state.RepairCommandId, state.Repaired, token);
         await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state, token);
         await DiscoveryAuthorityValues.ReplayAsync(root, state, token);

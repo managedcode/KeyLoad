@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -20,11 +21,14 @@ public sealed partial class DatabaseEngine
         var configuration = new ConfigureResourceRequest(request.TenantId, request.DatabaseId, request.Definition);
         ValidateResource(configuration);
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
-        if (transaction.GetRecord<ResourceDefinition>(key) is not null)
+        var previous = transaction.GetRecord<ResourceDefinition>(key);
+        _ = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Definition.Name, previous);
+        if (previous is not null)
         {
             throw Errors.Fail(ErrorCode.Conflict, TableCreationExists);
         }
         RequireResourceMetadataChangeAdmission(transaction, request.TenantId, request.DatabaseId);
+        _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);
     }

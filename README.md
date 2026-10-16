@@ -92,7 +92,9 @@ flowchart LR
 
 [KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
 
-The [working database functional gates](docs/Features/DatabaseComposition/FunctionalDatabaseGates.md) now pass locally: **one Aspire instance completed 10,302 successful operations; three RF3 nodes completed 10,306** on the same source, executable and image-input cohort. Both scenarios use the real SDK, official MCP SDK and selected T-SQL, with three resources per model, eight workload users, one queue operator and the server-side queue → graph → queue roundtrip. Original native results include owned shutdown and released-storage checks.
+The [working database functional gates](docs/Features/DatabaseComposition/FunctionalDatabaseGates.md) passed locally on the recorded `86834e8a` cohort: **one Aspire instance completed 10,302 successful operations; three RF3 nodes completed 10,306** on the same source, executable and image-input cohort. Both scenarios use the real SDK, official MCP SDK and selected T-SQL, with three resources per model, eight workload users, one queue operator and the server-side queue → graph → queue roundtrip. Original native results include owned shutdown and released-storage checks.
+
+The subsequent resource-lifetime checkpoint passes its strict solution build and all 22 selected native whole-operation tests. Its RF3 authorization case reached the all-node cold restart and failed physical-root admission for the native analytics directory. That repair and fresh combined RF3 qualification remain open; the earlier gate results do not qualify newer binaries.
 
 `DROP TABLE` remains open. Local functional proof does not complete unified SQL, failover/endurance, security, performance or release qualification. This working-base priority precedes the broader [foundation-first plan](docs/Features/RepositoryGovernance/FoundationDelivery.md); original [task acceptance](docs/implementation/status.json) remains **20 accepted / 85 in progress**.
 

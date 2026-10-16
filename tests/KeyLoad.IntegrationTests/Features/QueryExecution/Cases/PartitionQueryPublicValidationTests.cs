@@ -71,6 +71,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         await cancellation.CancelAsync().ConfigureAwait(false);
         var cancelled = await sdk.PartitionQueryAsync(scenario.Request(), cancellation.Token).ConfigureAwait(false);
         await Assert.That(cancelled.IsSuccess).IsFalse();
+        await Assert.That(cancelled.Value).IsNull();
         await Assert.That(cancelled.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Cancelled));
         using var mcpCancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
         await mcpCancellation.CancelAsync().ConfigureAwait(false);
@@ -85,6 +86,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
     {
         var result = await sdk.PartitionQueryAsync(request, cancellationToken).ConfigureAwait(false);
         await Assert.That(result.IsSuccess).IsFalse();
+        await Assert.That(result.Value).IsNull();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(expected.ToString());
         var reply = await mcp.CallAsync(PartitionQueryRf3Protocol.ToolName, request, cancellationToken)
             .ConfigureAwait(false);
