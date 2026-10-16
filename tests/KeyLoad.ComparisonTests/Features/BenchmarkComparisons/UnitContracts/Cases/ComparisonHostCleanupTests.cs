@@ -7,17 +7,20 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>An unavailable real native endpoint keeps failed measured accounting and original safe disposal evidence.</summary>
 internal sealed class ComparisonHostCleanupTests
 {
+    private const string TargetProfileField = "targetProfile";
+
     [Test]
     public async Task NativeSessionEndpointFailureRetainsEveryActualCaseAndDoesNotAcknowledgeAnInitialLoad()
     {
         using var directory = new ImageBundleTestDirectory();
         var settings = SessionHostStartupSupport.ValidSettings();
-        settings[SessionHostStartupSupport.Target] = "Qdrant";
-        settings[SessionFields.SessionEnvironment] = "qdrant-n3";
-        settings[SessionFields.ApiKeyEnvironment] = SessionHostStartupSupport.Canary;
+        settings[SessionHostStartupSupport.Target] = "OpenSearch";
+        settings[SessionFields.SessionEnvironment] = "opensearch-n3";
+        settings[SessionHostStartupSupport.User] = "native-session-user";
+        settings[SessionHostStartupSupport.Password] = SessionHostStartupSupport.Canary;
         settings[SessionFields.OutputEnvironment] = directory.Root;
-        settings[SessionHostStartupSupport.Image] = "docker.io/qdrant/qdrant:v1.17.1@"
-            + global::BenchmarkResources.QdrantDigest;
+        settings[SessionHostStartupSupport.Image] = "opensearchproject/opensearch:3.6.0@"
+            + global::BenchmarkResources.OpenSearchDigest;
         try
         {
             var result = await ComparisonHostProcess.RunAsync([], settings, TestContext.Current!.Execution.CancellationToken);
@@ -30,6 +33,8 @@ internal sealed class ComparisonHostCleanupTests
             }
             var state = JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(directory.Root, "session-state.json")))!;
             await Assert.That(state[SessionFields.Outcome]!.GetValue<string>()).IsEqualTo("failure");
+            await Assert.That(state[SessionFields.Target]!.GetValue<string>()).IsEqualTo("OpenSearch");
+            await Assert.That(state[TargetProfileField] is null).IsTrue();
             await Assert.That(state[SessionFields.Cases]!.AsArray().Count).IsEqualTo(SessionHostStartupSupport.NativeNames.Length);
             var load = JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(directory.Root, "reports", "load-million.json")))!;
             await Assert.That(load[SessionFields.Status]!.GetValue<string>()).IsEqualTo("failed");

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using KeyLoad.Comparisons;
+using OperationResult = KeyLoad.Comparisons.OperationResult;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
