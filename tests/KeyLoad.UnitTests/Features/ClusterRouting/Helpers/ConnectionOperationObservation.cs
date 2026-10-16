@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserver
+internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver
 {
     private readonly ConcurrentDictionary<Guid, ConnectionObservedOperation> operations = new();
     private readonly ConcurrentDictionary<Guid, ConnectionOperationGate> gates = new();
@@ -30,6 +30,24 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
                 throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
             }
         }
+        await ObserveGateAsync(identity, phase, cancellationToken).ConfigureAwait(true);
+    }
+
+    public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(actualRuntime);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (phase == GrainRequestPhase.RequestStarted)
+        {
+            throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+        }
+        return ObserveGateAsync(identity, phase, cancellationToken);
+    }
+
+    private async ValueTask ObserveGateAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+        CancellationToken cancellationToken)
+    {
         if (!gates.TryGetValue(identity.RequestId, out var gate) || phase != gate.Phase)
         {
             return;

@@ -48,6 +48,7 @@ internal static class McpToolDescriptions
     private const string MessagesComplete = "Acknowledge, reject or renew a queue delivery using its signed token.";
     private const string InboxCommit = "Commit authorized target inbox effects once for a declared input; source ACK is separate.";
     private const string MessagesProcess = "Atomically complete an idempotent queue handler and its declared mutation effects.";
+    private const string TablesDrop = "Drop one table after native owner retirement, joined work and canonical cleanup. Supply the same outer commandId when retrying an uncertain result.";
     private const string ResourcesConfigure = "Configure a resource as an administrator. Supply a stable outer commandId together with the canonical request.";
     private const string PrincipalsConfigure = "Configure a persisted principal as an administrator. Supply a stable outer commandId; this request never establishes caller authority.";
     private const string CredentialsConfigure = "Configure a persisted API-key verifier as an administrator. Supply a stable outer commandId; do not send a plaintext key.";
@@ -66,7 +67,7 @@ internal static class McpToolDescriptions
     private const string AdminPartitionPlacementBind = "Bind one atomic partition to the current physical shard using the expected placement directory revision; requires persisted cluster administrator authority.";
     private const string AdminPartitionPlacementRead = "Read one atomic partition placement and the committed default-shard identity from one authorized view; requires persisted cluster administrator authority.";
 
-    internal static string For(string name) => TenantPlacementMcpDescriptions.Find(name) ?? McpEventFeedDescriptions.Find(name)
+    internal static string For(string name) => AnalyticsStoreMcpDescriptions.Find(name) ?? TenantPlacementMcpDescriptions.Find(name) ?? McpEventFeedDescriptions.Find(name)
         ?? global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphMcpDescriptions.Find(name) ?? name switch
         {
             McpToolNames.DocumentsGet => DocumentsGet,
@@ -111,6 +112,7 @@ internal static class McpToolDescriptions
             McpToolNames.MessagesComplete => MessagesComplete,
             McpToolNames.InboxCommit => InboxCommit,
             McpToolNames.MessagesProcess => MessagesProcess,
+            McpToolNames.TablesDrop => TablesDrop,
             McpToolNames.ResourcesConfigure => ResourcesConfigure,
             McpToolNames.PrincipalsConfigure => PrincipalsConfigure,
             McpToolNames.CredentialsConfigure => CredentialsConfigure,

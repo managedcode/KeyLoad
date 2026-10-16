@@ -58,10 +58,10 @@ internal static class FunctionalGateAnalytics
     {
         var tags = JsonSerializer.Serialize(new
         {
-            anchor = ctx.Anchor
+            anchor = ctx.Bind(ctx.Anchor)
         }, JsonDefaults.Options);
         var samples = Samples(series);
-        var expectedTags = ExpectedTags(ctx.Anchor);
+        var expectedTags = ExpectedTags(ctx.Bind(ctx.Anchor));
         await CommitAsync(ctx, new AppendSamples(set, series, samples[..InitialCount], tags),
             "appendSamples", series, InitialCount, token);
         await FunctionalGateAnalyticsAssertions.ReadAsync(ctx, set, series,
@@ -107,25 +107,10 @@ internal static class FunctionalGateAnalytics
     }
 
     private static string ExpectedTags(EntityRef anchor)
-    {
-        var partition = new
+        => FunctionalGateBoundJson.Serialize(new
         {
-            atomicPartitionId = anchor.Partition.AtomicPartitionId,
-            databaseId = anchor.Partition.DatabaseId,
-            partitionKey = anchor.Partition.PartitionKey,
-            tenantId = anchor.Partition.TenantId,
-            transactionDomainId = anchor.Partition.TransactionDomainId
-        };
-        return JsonSerializer.Serialize(new
-        {
-            anchor = new
-            {
-                collection = anchor.Collection,
-                id = anchor.Id,
-                partition
-            }
-        }, JsonDefaults.Options);
-    }
+            anchor
+        });
 
     private static ImmutableArray<SampleData> Samples(string series)
         => [.. Values.Select((value, index) => new SampleData(series + "-" + index.ToString(CultureInfo.InvariantCulture),

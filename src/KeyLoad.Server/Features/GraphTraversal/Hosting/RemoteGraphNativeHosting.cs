@@ -12,7 +12,8 @@ internal static class RemoteGraphNativeHosting
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<global::Orleans.Runtime.ISiloStatusOracle>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<ILogger<RemoteGraphNativeRuntime>>()));
+            provider.GetRequiredService<ILogger<RemoteGraphNativeRuntime>>(),
+            provider.GetRequiredService<Func<NativeRequestWorkOwner>>()));
         services.AddSingleton(provider => new RemoteGraphNativeClient(provider, provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow(),
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<PartitionMovementGrainServiceClient>(),

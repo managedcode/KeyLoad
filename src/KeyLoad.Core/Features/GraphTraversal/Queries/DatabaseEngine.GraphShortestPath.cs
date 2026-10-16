@@ -37,7 +37,7 @@ public sealed partial class DatabaseEngine
             var budgetedView = budget.CreateView(view);
             var principal = Principal(budgetedView, principalId, Clock.GetUtcNow());
             Authorization.Require(principal, request.Partition, request.Graph, Capability.GraphRead);
-            var graph = Resource(budgetedView, request.Partition, request.Graph, ResourceKind.Graph);
+            var graph = BindAuthorizedReadResource(budgetedView, request.Partition, request.Graph, ResourceKind.Graph);
             if (labels is { Length: > GraphShortestPathEmptyElementCount })
             {
                 Authorization.RequireFieldUse(principal, graph, LabelField);

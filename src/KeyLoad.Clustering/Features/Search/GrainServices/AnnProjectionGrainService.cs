@@ -132,6 +132,20 @@ public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFact
     {
         try
         {
+            return await AnnProjectionJobOperation.RunAsync<byte[]?>(services, database, token,
+                binding => CycleCoreAsync(after, binding)).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException) when (!token.IsCancellationRequested)
+        {
+            return after;
+        }
+    }
+
+    private async Task<byte[]?> CycleCoreAsync(byte[]? after, NativeCapabilityWorkLifetime binding)
+    {
+        var token = binding.Token;
+        try
+        {
             if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true))
             {
                 return null;
@@ -142,7 +156,7 @@ public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFact
                 return null;
             }
             var budget = new ReadExecutionBudget(limits, clock, token);
-            var page = database.ReadAnnProjectionWorkPage(after, budget);
+            var page = database.ReadAnnProjectionWorkPageBound(after, budget, binding);
             foreach (var rejection in page.Rejected)
             {
                 AnnProjectionJobDiagnostics.Failed(diagnostics, rejection);
@@ -156,6 +170,7 @@ public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFact
                     AnnProjectionJobProtocol.GrainKey(consumer, generation, work.NodeId));
                 try
                 {
+                    binding.OriginalProducer.AdmitPublication();
                     await JoinAsync(target.ScheduleAsync(consumer, generation, work.NodeId, token), token).ConfigureAwait(true);
                 }
                 catch (KeyLoadException refusal)

@@ -164,6 +164,16 @@ internal sealed class NativeCqrsStreamAdmission(
     {
         if (final.IsSuccess)
         {
+            if (final.Value is { Metadata: not null } counted)
+            {
+                if (kind != CqrsStreamChunkKind.Completed || final.Problem is not null
+                    || purpose?.MetadataAdmission is not { } admission)
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+                }
+                NativeCommandMetadataReplies.Require(counted, admission, options);
+                return;
+            }
             if (kind != CqrsStreamChunkKind.Completed || final.Problem is not null
                 || final.Value is not { } reply || reply.Payload.IsEmpty || reply.Payload.Length > options.Value.MaximumReplyBytes
                 || reply.Error is not null || reply.SafeDetail is not null)

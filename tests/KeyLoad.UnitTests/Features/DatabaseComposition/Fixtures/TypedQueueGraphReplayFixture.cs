@@ -26,17 +26,21 @@ internal static class TypedQueueGraphReplayFixture
         ConfigureTyped(db, ToCollection);
         var first = new EntityRef(db.Partition, FromCollection, First);
         var second = new EntityRef(db.Partition, ToCollection, Second);
+        var boundFrom = DatabaseCompositionExpectedReferences.Capture(db, first);
+        var boundTo = DatabaseCompositionExpectedReferences.Capture(db, second);
+        var marker = DatabaseCompositionExpectedReferences.Capture(db,
+            new(db.Partition, QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker));
         var at = TimeProvider.System.GetUtcNow().AddSeconds(ForwardOffsetSeconds);
         var payload = QueueGraphIdentityAssertions.Payload(new(first, second,
             QueueGraphIdentityState.Label, QueueGraphIdentityState.AttributesJson));
-        var seed = await QueueGraphIdentityFlow.CompileAsync(new(Guid.NewGuid(), db.Partition,
+        var seed = await QueueGraphIdentityFlow.CompileAsync(db.Database, new(Guid.NewGuid(), db.Partition,
             [new PutDocument(FromCollection, First, FirstJson),
              new PutDocument(ToCollection, Second, SecondJson),
              new EnqueueMessage(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message,
                  payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]), at);
         var receipt = db.Database.Apply(seed).Get<CommitReceipt>();
         await SeedReceiptAsync(db, seed, receipt);
-        var failed = await QueueGraphIdentityFlow.CompileAsync(new(Guid.NewGuid(), db.Partition,
+        var failed = await QueueGraphIdentityFlow.CompileAsync(db.Database, new(Guid.NewGuid(), db.Partition,
             [new PutDocument(QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker,
                 QueueGraphIdentityState.MarkerJson),
              new QueueToGraph(QueueGraphIdentityState.Graph, QueueGraphIdentityState.Queue,
@@ -45,16 +49,16 @@ internal static class TypedQueueGraphReplayFixture
         var command = global::System.Text.Json.JsonSerializer.Deserialize<CommandRequest>(
             failed.PayloadJson, JsonDefaults.Options)!;
         var healthy = await QueueGraphIdentityFlow.CompileAsync(
-            command with
+            db.Database, command with
             {
                 CommandId = Guid.NewGuid()
             }, at.AddSeconds(HealthyOffsetSeconds));
         var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(from ? first : second);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))!;
         var state = new QueueGraphIdentityState(db, first, second, at,
-            new(first, FirstRevision, FirstJson, new(), at), new(second, FirstRevision, SecondJson, new(), at),
+            new(boundFrom, FirstRevision, FirstJson, new(), at), new(boundTo, FirstRevision, SecondJson, new(), at),
             new(new(QueueGraphIdentityState.Message, MessageState.Ready, NoAttempts, FirstRevision, FirstRevision, null, null),
-                payload, QueueGraphIdentityState.HeadersJson), seed, receipt, failed, healthy, key, original);
+                payload, QueueGraphIdentityState.HeadersJson), seed, receipt, failed, healthy, key, original, boundFrom, boundTo, marker);
         await QueueGraphIdentityAssertions.ModelsAsync(state, db.Database, db.Store, healthy: false);
         return state;
     }

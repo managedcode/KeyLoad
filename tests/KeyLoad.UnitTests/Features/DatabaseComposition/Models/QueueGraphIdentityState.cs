@@ -13,7 +13,10 @@ internal sealed record QueueGraphIdentityState(
     ReplicatedOperation Failed,
     ReplicatedOperation Healthy,
     byte[] EndpointKey,
-    byte[] OriginalEndpoint)
+    byte[] OriginalEndpoint,
+    EntityRef BoundFrom,
+    EntityRef BoundTo,
+    EntityRef MarkerReference)
 {
     internal ErrorCode FailureCode { get; init; } = ErrorCode.Corruption;
     internal string FailureDetail { get; init; } = "The typed endpoint record has a different canonical identity.";

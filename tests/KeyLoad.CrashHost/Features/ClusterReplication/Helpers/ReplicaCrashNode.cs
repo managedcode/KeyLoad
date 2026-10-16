@@ -47,7 +47,8 @@ internal sealed class ReplicaCrashNode : IDisposable
                 Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
                 Log = new(ReplicaStore, configurationOptions, observer, canonicalDatabase: Database);
                 Bootstrap();
-                Snapshots = new(Canonical, Log, configurationOptions, CrashExecutionOptions.Replica(), observer);
+                Snapshots = new(Canonical, Log, configurationOptions, CrashExecutionOptions.Replica(), replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken)), observer);
             }
             catch (Exception primary)
             {

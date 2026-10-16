@@ -22,7 +22,8 @@ internal static class EventVectorParentLookup
 
     internal static (StoredOutcome Outcome, ReadOnlyMemory<byte> PhaseBytes, Guid PhaseId)? ReadTerminalDetails(
         IKeyValueView view, IAuthorizationPolicy authorization, PrincipalRecord principal, EventFeedControlRequest request, Guid incarnation,
-        ReadOnlyMemory<byte> freshSourceAuthorizationWitness, IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
+        ReadOnlyMemory<byte> freshSourceAuthorizationWitness, IOptions<DatabaseLimits> options, CancellationToken cancellationToken,
+        EventVectorReadLifetimeBinding? lifetimeBinding = null)
     {
         var admission = new EventVectorAdmissionPolicy(options);
         var budget = new EventVectorInventoryReadBudget(options);
@@ -39,9 +40,16 @@ internal static class EventVectorParentLookup
             return null;
         }
         RequireIndex(index, principal, request, admission);
-        EventVectorParentScopes.Authorize(authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
+        if (lifetimeBinding is null)
+        {
+            EventVectorParentScopes.Authorize(authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
+        }
+        else
+        {
+            lifetimeBinding.Authorize(authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
+        }
         var fresh = freshSourceAuthorizationWitness.IsEmpty ? null : EventVectorCurrentSourceAuthorization.Require(view,
-            principal, request, index.OriginalAuthorizedSourceScopes, freshSourceAuthorizationWitness, admission);
+            principal, request, index.OriginalAuthorizedSourceScopes, freshSourceAuthorizationWitness, admission, lifetimeBinding);
         cancellationToken.ThrowIfCancellationRequested();
         admission.RequireEncodedBytes(index.OriginalNativeTerminalPhaseBytes.Length);
         var phase = NativeSerialization.Deserialize<EventVectorControlPhase>(index.OriginalNativeTerminalPhaseBytes.Span);
@@ -59,6 +67,7 @@ internal static class EventVectorParentLookup
         }
         var outcome = EventVectorParentOutcome.Require(view, principal, phase, index.ActualTerminalControlPhaseId,
             index.ActualTerminalOutcomeFingerprint, incarnation, admission);
+        lifetimeBinding?.Phase(index.OriginalNativeTerminalPhaseBytes, admission);
         return (outcome, index.OriginalNativeTerminalPhaseBytes, index.ActualTerminalControlPhaseId);
     }
 

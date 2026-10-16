@@ -26,8 +26,8 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, GraphEdgeSourceMismatch);
         }
-        VisibleVertex(tx, principal, edge.From);
-        VisibleVertex(tx, principal, edge.To);
+        var from = VisibleVertex(tx, principal, edge.From).Reference;
+        var to = VisibleVertex(tx, principal, edge.To).Reference;
         foreach (var policy in resource.FieldPolicies)
         {
             Authorization.RequireFieldWrite(principal, resource, policy.Path);
@@ -42,7 +42,7 @@ public sealed partial class DatabaseEngine
         var ownerVersion = CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous);
         CheckRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision, edge.ExpectedRevision);
         var nextRevision = NextRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision);
-        var record = new EdgeRecord(edge.EdgeId, edge.From, edge.To, edge.Label,
+        var record = new EdgeRecord(edge.EdgeId, from, to, edge.Label,
             JsonData.Validate(edge.AttributesJson, Limits), nextRevision);
         if (edge.To.Partition != partition)
         {

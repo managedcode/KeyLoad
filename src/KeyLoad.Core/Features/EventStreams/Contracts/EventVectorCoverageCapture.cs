@@ -1,9 +1,14 @@
+using System.Text.Json.Serialization;
+
 namespace KeyLoad.Core;
 
 [Orleans.GenerateSerializer]
 [Orleans.Alias(EventVectorCoverageCapture.SerializerAlias)]
 internal sealed record EventVectorCoverageCapture
 {
+    private const uint SourceDefinitionField = 23;
+    private const uint SourceLifetimeField = 24;
+
     internal const string SerializerAlias = "keyload.core.event-vector-coverage-capture.v1";
 
     [Orleans.Id(0)]
@@ -110,6 +115,20 @@ internal sealed record EventVectorCoverageCapture
 
     [Orleans.Id(22)]
     public EventVectorCoverageRow? RosterRestoreIdentity
+    {
+        get; init;
+    }
+
+    [Orleans.Id(SourceDefinitionField)]
+    [JsonIgnore]
+    public ResourceDefinition? SourceDefinition
+    {
+        get; init;
+    }
+
+    [Orleans.Id(SourceLifetimeField)]
+    [JsonIgnore]
+    public ResourceLifetimeV1? SourceLifetime
     {
         get; init;
     }

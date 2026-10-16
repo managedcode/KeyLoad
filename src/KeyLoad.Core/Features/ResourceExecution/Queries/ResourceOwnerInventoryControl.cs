@@ -37,7 +37,8 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceOwnerInventoryReadValidation.Changed);
             }
-            var current = CaptureInventoryControl(view, principal, control.Request, initial: false);
+            var retiring = ResourceRetirementInventoryAdmission.IsSourceRetiringControl(view, control, Limits);
+            var current = CaptureInventoryControl(view, principal, control.Request, initial: false, retiring, control.RetirementAttempt);
             if (!ResourceOwnerInventoryReadValidation.Same(current.Definition, control.Definition)
                 || !ResourceOwnerInventoryReadValidation.Same(current.Lifetime, control.Lifetime))
             {
@@ -65,7 +66,8 @@ public sealed partial class DatabaseEngine
     }
 
     private ResourceOwnerInventoryControlV1 CaptureInventoryControl(IKeyValueView view, PrincipalRecord principal,
-        ResourceOwnerInventoryRequestV1 request, bool initial)
+        ResourceOwnerInventoryRequestV1 request, bool initial, bool retiring = false,
+        ResourceRetirementAttemptV1? retirementAttempt = null)
     {
         var (definition, lifetime) = ReadInventoryResourcePair(view, request.TenantId,
             request.DatabaseId, request.ResourceName, initial);
@@ -81,7 +83,18 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Corruption, ResourceOwnerInventoryReadValidation.Malformed);
         }
         var result = new ResourceOwnerInventoryControlV1(request, definition, lifetime, catalog, directory,
-            ReadInventoryPlacementRevision(view), principal.Id, principal.PolicyEpoch);
+            ReadInventoryPlacementRevision(view), principal.Id, principal.PolicyEpoch)
+        {
+            RetirementAttempt = retirementAttempt
+        };
+        if (retiring)
+        {
+            ResourceRetirementInventoryAdmission.RequireSourceContext(view, result, Limits);
+        }
+        else
+        {
+            ResourceRetirementStorage.RequireOpen(view, lifetime, Limits);
+        }
         ResourceOwnerInventoryReadValidation.Bound(result, Limits);
         return result;
     }

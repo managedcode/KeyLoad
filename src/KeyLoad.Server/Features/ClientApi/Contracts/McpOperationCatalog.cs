@@ -12,7 +12,7 @@ internal static class McpOperationCatalog
     {
         get;
     } =
-        [.. McpReadCatalog.Entries, .. McpCommandCatalog.Entries, .. McpSubscriptionCatalog.Entries,
+        [.. AnalyticsStoreMcpCatalog.Entries, .. McpReadCatalog.Entries, .. McpCommandCatalog.Entries, .. McpSubscriptionCatalog.Entries,
             .. McpProjectionCatalog.Entries, .. KeyLoad.Server.Features.Search.OnlineTextMcpCatalog.Entries, .. BlobMcpCatalog.Entries, .. AdminDashboardMcpCatalog.Entries, SqlMcpCatalog.Entry, .. TenantPlacementMcpCatalog.Entries];
 
     private static readonly FrozenDictionary<string, McpOperationDescriptor> Lookup =

@@ -18,4 +18,20 @@ internal sealed record RemoteQueueTransferPeerCall(
     [property: global::Orleans.Id(RemoteTransferCallFields.IntentToken)] string IntentToken,
     [property: global::Orleans.Id(RemoteTransferCallFields.IntentClaims)] RemoteTransferIntentClaims IntentClaims,
     [property: global::Orleans.Id(RemoteTransferCallFields.MaximumReplyBytes)] int MaximumReplyBytes,
-    [property: global::Orleans.Id(RemoteTransferCallFields.SourceCut)] CommitToken SourceCut);
+    [property: global::Orleans.Id(RemoteTransferCallFields.SourceCut)] CommitToken SourceCut)
+{
+    // Missing fields are decodable only to refuse old, lifetime-unbound native carriers.
+    [global::Orleans.Id(RemoteTransferCallFields.SourceDefinition)]
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public ResourceDefinition? SourceDefinition
+    {
+        get; init;
+    }
+
+    [global::Orleans.Id(RemoteTransferCallFields.SourceLifetime)]
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public ResourceLifetimeV1? SourceLifetime
+    {
+        get; init;
+    }
+}

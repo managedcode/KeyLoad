@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class RequestCqrsAnnInvocation
 {
     internal static async Task<(AnnMaintenanceResult Result, GrainOperationReply Reply)> RunAsync(
-        RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request, CancellationToken token, bool retainedReplay = false)
+        RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request, CancellationToken token, bool retainedReplay = false)
     {
         var id = Guid.NewGuid();
         var signed = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,

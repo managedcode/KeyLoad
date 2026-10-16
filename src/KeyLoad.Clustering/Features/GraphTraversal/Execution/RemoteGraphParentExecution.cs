@@ -1,7 +1,7 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -9,8 +9,9 @@ internal static class RemoteGraphParentExecution
 {
     internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest original,
         IServiceProvider services, TimeProvider clock, GrainRequestCodec codec, global::Orleans.Runtime.IGrainContext context,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var token = writer.CancellationToken;
         token.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(context);
@@ -23,12 +24,13 @@ internal static class RemoteGraphParentExecution
         _ = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         var parent = services.GetService<IRemoteGraphParent>()
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest);
-        var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, token);
+        var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        work.AttachResourceLifetimeBinding(binding);
         work.ConstrainLifetime(original.Envelope.ExpiresAt);
         if (original.Envelope.ReadKind == GrainReadKind.RemoteGraphIncomingParent)
         {
             var request = GrainNativePayload.ReadPublicInput<ReadRemoteIncomingGraphEdgesRequestV1>(original.Payload);
-            var result = await parent.ReadIncomingAsync(original.Envelope, request, work, token).ConfigureAwait(true);
+            var result = await parent.ReadIncomingAsync(original.Envelope, request, work, token, binding).ConfigureAwait(true);
             work.CheckResult(result);
             return GrainReplyFactory.Value(result, codec.ExecutionOptions, token);
         }
@@ -38,7 +40,7 @@ internal static class RemoteGraphParentExecution
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var command = await parent.ExecuteAsync(original.Envelope, kind, original.Payload, work, token).ConfigureAwait(true);
+        var command = await parent.ExecuteAsync(original.Envelope, kind, original.Payload, work, token, binding).ConfigureAwait(true);
         work.CheckResult(command);
         return GrainReplyFactory.Value(command, codec.ExecutionOptions, token);
     }

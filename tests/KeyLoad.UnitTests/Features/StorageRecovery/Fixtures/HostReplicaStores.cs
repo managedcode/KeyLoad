@@ -27,7 +27,8 @@ internal sealed class HostReplicaStores : IDisposable
             Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(Configuration));
             attempt.Ownership.Host.NativeConstructorReturned();
             Database = new(Canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-            Snapshots = new(Canonical, Log, UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitExecutionOptions.ReplicaExecution());
+            Snapshots = new(Canonical, Log, UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitExecutionOptions.ReplicaExecution(), replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken)));
         }
         catch (Exception primary)
         {

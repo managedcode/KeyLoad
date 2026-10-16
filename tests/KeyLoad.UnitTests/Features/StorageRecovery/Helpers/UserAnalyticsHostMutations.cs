@@ -1,0 +1,52 @@
+using System.Collections.Immutable;
+using KeyLoad.Core;
+using KeyLoad.Server;
+using P = KeyLoad.UnitTests.Features.StorageRecovery.UserAnalyticsHostProtocol;
+
+namespace KeyLoad.UnitTests.Features.StorageRecovery;
+
+internal static class UserAnalyticsHostMutations
+{
+    internal static async Task BootstrapAsync(PartitionHostRecoveryFixture fixture, PartitionHost host, CancellationToken token)
+    {
+        var bootstrap = new BootstrapPhysicalShardCatalogRequest(1, 0, fixture.Options.PhysicalShardId,
+            host.Configuration.Incarnation, host.Configuration.VoterIds);
+        var operation = host.Database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
+            PhysicalShardCatalogIdentity.CreateBootstrapCommandId(fixture.Options.PhysicalShardId),
+            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(bootstrap));
+        await UserAnalyticsHostAssertions.SameAsync(true, host.Database.ApplyEmbedded(operation, token).Get<bool>());
+        var definition = new ResourceDefinition(P.Store, ResourceKind.AnalyticsStore, P.Domain)
+        {
+            AnalyticsSchema = new([P.Region], [P.Amount])
+        };
+        var configure = host.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(),
+            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(
+                new ConfigureResourceRequest(P.Tenant, P.Database, definition)));
+        await UserAnalyticsHostAssertions.SameAsync(definition,
+            host.Database.ApplyEmbedded(configure, token).Get<ResourceDefinition>());
+    }
+
+    internal static async Task<(ReplicatedOperation Original, CommitReceipt Receipt)> ApplyAsync(PartitionHost host,
+        Mutation mutation, string kind, string id, long generation)
+    {
+        var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions, host.Database.EvaluationClock,
+            TestContext.Current!.Execution.CancellationToken);
+        var command = new CommandRequest(Guid.NewGuid(), P.Partition, [mutation]);
+        var operation = host.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
+            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(command), work);
+        var expected = new CommitReceipt(command.CommandId, new(host.Database.Store.Identity.Incarnation,
+            P.Partition.AtomicPartitionId, checked(host.Database.Store.Position + 1), 1),
+            [new(kind, P.Store, id, generation)], DurabilityProfile.QuorumProcessDurable);
+        var actual = host.Database.Apply(operation).Get<CommitReceipt>();
+        await UserAnalyticsHostAssertions.SameAsync(expected, actual);
+        await Assert.That(actual.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();
+        return (operation, expected);
+    }
+
+    internal static UpsertAnalyticsEvents Initial() => new(P.Store, [P.Event(P.First, 10d), P.Event(P.Second, 20d)],
+        ImmutableDictionary<string, long>.Empty.Add(P.First, 0).Add(P.Second, 0));
+    internal static UpsertAnalyticsEvents Update() => new(P.Store, [P.Event(P.First, 40d)],
+        ImmutableDictionary<string, long>.Empty.Add(P.First, 1));
+    internal static DeleteAnalyticsEvents Delete() => new(P.Store,
+        ImmutableDictionary<string, long>.Empty.Add(P.Second, 1));
+}

@@ -44,7 +44,9 @@ internal enum RequestCqrsProbePhase
     MovementParentStateExecuting,
     MovementParentStateReturned,
     ControlledLifetimeReplayBeforeDispatch,
-    ResourceOwnerInventoryOwnerValidation
+    ResourceOwnerInventoryOwnerValidation,
+    OriginalClaimReturned = 40,
+    OriginalBusinessReplyReturned = 41
 }
 
 internal enum RequestCqrsProbeAction

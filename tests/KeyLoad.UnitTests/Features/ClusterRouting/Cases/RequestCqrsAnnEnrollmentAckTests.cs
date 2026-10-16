@@ -1,8 +1,8 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource(nativeAnnMaintenance: true)]
+[RequestCqrsHostedDataSource(nativeAnnMaintenance: true)]
 [NotInParallel]
-internal sealed class RequestCqrsAnnEnrollmentAckTests(RequestCqrsClusterFixture fixture)
+internal sealed class RequestCqrsAnnEnrollmentAckTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]
     public async Task OriginalResultReturnsOnlyAfterCanonicalInitialSettlementAndExactReplayPreservesIt()

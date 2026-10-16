@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.QueryExecution;
 
 internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHost partition,
-    IOptions<NodeOptions> nodeOptions, RemoteDocumentClient client)
+    IOptions<NodeOptions> nodeOptions, RemoteDocumentClient client, IResourceLifetimeWorkBinding binding)
 {
     private NodeOptions Options => nodeOptions.Value;
     private const int EmptyGrant = 0;
@@ -93,7 +94,7 @@ internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHo
     {
         var result = call is null
             ? await RemoteQueryLifetimeLocalRead.QueryAsync(node, partition, principalId, request, metadata,
-                expiresAt, token).ConfigureAwait(false)
+                expiresAt, token, binding).ConfigureAwait(false)
             : await RemoteQueryLifetimeExchange.ReadAsync<PartitionQueryLeafResultV1>(client, call, metadata,
                 PartitionQueryParallelRetention.ReplyBytes(request.Plan), token).ConfigureAwait(false);
         return new(request.Owner, result);
@@ -117,7 +118,7 @@ internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHo
                 QueryFieldAuthorization.RequireSchema(partition.Database, principal, resource, plan.Request);
                 return RemoteQueryLifetimeSource.Capture(partition.Database, view, principal, resource, digest,
                     plan.Partition, grant, budget);
-            });
+            }, budget);
 
     private static void RequireSame(PartitionQuerySourceFenceV2 expected, PartitionQuerySourceFenceV2 actual)
         => RemoteQueryLifetimeSource.RequireSame(expected, actual, FenceChanged);

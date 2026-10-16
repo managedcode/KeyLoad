@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
@@ -25,10 +26,10 @@ public sealed partial class DatabaseEngine
         var sourceResource = Resource(transaction, partition, request.SourceDocument.Collection, ResourceKind.Collection);
         Authorization.RequireFieldUse(principal, sourceResource, request.InputField);
         var sourceDocument = VisibleVertex(transaction, principal, request.SourceDocument);
-        if (sourceDocument.Reference != request.SourceDocument)
+        request = request with
         {
-            throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
-        }
+            SourceDocument = sourceDocument.Reference
+        };
         if (sourceDocument.Revision != request.SourceDocumentRevision)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, SourceEventMismatchMessage);
@@ -229,6 +230,7 @@ public sealed partial class DatabaseEngine
             request.Target.Field, request.Target.Id);
         var lineage = transaction.GetRecord<VectorProjectionLineage>(lineageKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, ProjectionEffectCorruptMessage);
+        EntityReferenceLifetime.RequireStored(transaction, lineage.SourceDocument, sourceResource);
         if (!LineageMatchesRequest(lineage, request))
         {
             throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);

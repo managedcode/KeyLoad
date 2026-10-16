@@ -15,6 +15,12 @@ internal static class RequestCqrsCanonicalArmValidation
 
     private static bool ValidCanonical(RequestCqrsProbeArmRecord arm)
     {
+        if (arm.Phase is RequestCqrsProbePhase.OriginalClaimReturned or RequestCqrsProbePhase.OriginalBusinessReplyReturned)
+        {
+            return arm.ReadKind is null && arm.CommandId != Guid.Empty
+                && arm.Partition is null && arm.SourceRequestId is null && arm.SourceArmId is null
+                && (arm.TargetVoter is null || RequestCqrsProbeActivationTargetValidation.Valid(arm.TargetVoter));
+        }
         if (arm.Phase == RequestCqrsProbePhase.ControlledLifetimeReplayBeforeDispatch)
         {
             return RequestCqrsControlledLifetimeArmValidation.Valid(arm);

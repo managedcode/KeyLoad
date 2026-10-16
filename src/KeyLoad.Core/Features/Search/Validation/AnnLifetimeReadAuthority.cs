@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Search;
@@ -23,15 +23,17 @@ internal static class AnnLifetimeReadAuthority
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, Invalid);
         }
-        var lifetime = ResourceLifetimeCatalog.Read(budget.CreateView(view), partition.TenantId,
-            partition.DatabaseId, collection, targetResource)
-            ?? throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        var metadata = budget.CreateView(view);
+        var lifetime = budget.CaptureResourceLifetimes(database, metadata, partition, [targetResource]).Lifetimes.Single();
         RequireSchema(database, source.Principal, source.Definition, field);
         RequireSchema(database, target, targetResource, field);
         database.Authorization.Require(source.Principal, partition, collection, Capability.VectorSearch);
         database.Authorization.Require(target, partition, collection, Capability.VectorSearch);
         database.Authorization.RequireFieldUse(source.Principal, source.Definition, field);
         database.Authorization.RequireFieldUse(target, targetResource, field);
+        var sourceLifetime = source.Coverage.Lifetimes.Single(value => value.ResourceName == source.Definition.Name);
+        budget.CaptureAuthenticatedResourceLifetimes(database, metadata,
+            new ResourceLifetimeCoverageV1(partition, [sourceLifetime]), [source.Definition]);
         return lifetime;
     }
 

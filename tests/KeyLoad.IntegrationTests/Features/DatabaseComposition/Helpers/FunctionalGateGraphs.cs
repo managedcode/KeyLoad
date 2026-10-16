@@ -49,21 +49,21 @@ internal static class FunctionalGateGraphs
         {
             var suffix = index.ToString(CultureInfo.InvariantCulture) + Separator + iteration.ToString(CultureInfo.InvariantCulture);
             var graph = GraphPrefix + index.ToString(CultureInfo.InvariantCulture);
-            var vertex = new EntityRef(ctx.Partition, ctx.MutableDocumentCollection, VertexPrefix + suffix);
+            var vertex = ctx.Bind(new EntityRef(ctx.Partition, ctx.MutableDocumentCollection, VertexPrefix + suffix));
             var edgeId = VertexPrefix + suffix;
             var createdJson = DocumentJson(vertex, InitialState);
             var updatedJson = DocumentJson(vertex, UpdatedState);
             await CommitAsync(ctx, [new PutDocument(vertex.Collection, vertex.Id, createdJson, Initial)],
                 [new(PutKind, vertex.Collection, vertex.Id, Created)], false, token);
             await DocumentAsync(ctx, vertex, new(vertex, Created, createdJson, false, []), token);
-            await CommitAsync(ctx, [new UpsertEdge(graph, edgeId, vertex, ctx.Anchor, Label, createdJson, Initial)],
+            await CommitAsync(ctx, [new UpsertEdge(graph, edgeId, vertex, ctx.Bind(ctx.Anchor), Label, createdJson, Initial)],
                 [new(LinkKind, graph, edgeId, Created)], true, token);
-            await TraverseAsync(ctx, graph, vertex, new(edgeId, vertex, ctx.Anchor, Label, createdJson, Created), token);
+            await TraverseAsync(ctx, graph, vertex, new(edgeId, vertex, ctx.Bind(ctx.Anchor), Label, createdJson, Created), token);
             await CommitAsync(ctx, [new PutDocument(vertex.Collection, vertex.Id, updatedJson, Created),
-                new UpsertEdge(graph, edgeId, vertex, ctx.Anchor, Label, updatedJson, Created)],
+                new UpsertEdge(graph, edgeId, vertex, ctx.Bind(ctx.Anchor), Label, updatedJson, Created)],
                 [new(PutKind, vertex.Collection, vertex.Id, Updated), new(LinkKind, graph, edgeId, Updated)], false, token);
             await DocumentAsync(ctx, vertex, new(vertex, Updated, updatedJson, false, []), token);
-            await TraverseAsync(ctx, graph, vertex, new(edgeId, vertex, ctx.Anchor, Label, updatedJson, Updated), token);
+            await TraverseAsync(ctx, graph, vertex, new(edgeId, vertex, ctx.Bind(ctx.Anchor), Label, updatedJson, Updated), token);
             await CommitAsync(ctx, [new DeleteEdge(graph, edgeId, Updated)],
                 [new(UnlinkKind, graph, edgeId, Deleted)], true, token);
             await TraverseAsync(ctx, graph, vertex, null, token);
@@ -121,7 +121,7 @@ internal static class FunctionalGateGraphs
     {
         var request = new TraverseRequest(ctx.Partition, graph, vertex, Depth, MaximumVertices, MaximumEdges);
         var expected = edge is null ? new global::KeyLoad.GraphTraversal([vertex], [])
-            : new global::KeyLoad.GraphTraversal([.. new[] { vertex, ctx.Anchor }
+            : new global::KeyLoad.GraphTraversal([.. new[] { vertex, ctx.Bind(ctx.Anchor) }
                 .OrderBy(item => item.Collection, StringComparer.Ordinal).ThenBy(item => item.Id, StringComparer.Ordinal)], [edge]);
         await SqlRf3Protocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.TraverseAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(expected, await ctx.McpAsync<global::KeyLoad.GraphTraversal>(

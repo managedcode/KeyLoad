@@ -11,7 +11,7 @@ internal static class ZoneTreePersistenceFormat
     internal const int SequenceOffset = 12;
     internal const int ChecksumOffset = 20;
     internal const int ChecksumLength = 32;
-    internal const int CheckpointVersion = 5;
+    internal const int CheckpointVersion = 6;
     internal const int CurrentDataEpoch = 7;
     internal const int BackupManifestVersion = 2;
     internal const int SigningKeyBytes = 32;

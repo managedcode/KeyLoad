@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
@@ -13,7 +12,8 @@ internal static class ZoneTreeRestoreSlotDriver
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, TimeProvider clock, ClusterRestoreSlotContext context,
         ReadOnlyMemory<byte> signingKey,
         Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>, ClusterRestoreSlotContext> reconcile,
-        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, Action<NativeClusterRestoreStage>? observer, CancellationToken ct)
+        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, Action<NativeClusterRestoreStage>? observer, CancellationToken ct,
+        Func<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext, ClusterRestoreOwnerMapping>? resolveOwnerMapping = null)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         ArgumentNullException.ThrowIfNull(context);
@@ -26,18 +26,11 @@ internal static class ZoneTreeRestoreSlotDriver
         var sourceFiles = ZoneTreeRestoreSlotSource.Describe(backup, policy, ct);
         var sourceMetadata = ZoneTreeCatalogBackupMetadataFile.ReadVerified(backup, original,
             context.SourcePosition, policy).Metadata;
-        destination = Path.TrimEndingDirectorySeparator(Path.GetFullPath(destination));
-        stage = Path.TrimEndingDirectorySeparator(Path.GetFullPath(stage));
-        if (stage == destination || context.TargetNodeId == Guid.Empty || context.TargetIncarnation == original.Incarnation
-            || signingKey.Length != SigningKeyBytes || context.TargetNodeId == original.NodeId
-            || !string.Equals(Convert.ToHexStringLower(SHA256.HashData(signingKey.Span)),
-                context.TargetSignerFingerprint, StringComparison.Ordinal)
-            || CryptographicOperations.FixedTimeEquals(original.SigningKey.Span, signingKey.Span))
-        {
-            throw Errors.Fail(ErrorCode.Validation, Invalid);
-        }
+        ZoneTreeRestoreSlotTargetAdmission.Require(original, context, signingKey, ref destination, ref stage);
         var published = Directory.Exists(destination);
         var ownedRoot = published ? destination : stage;
+        var conservation = new ZoneTreeRestoreSlotConservation(
+            new ZoneTreeStoreOptions(ownedRoot).ResolveExecutionOptions(executionOptions), clock, resolveOwnerMapping);
         var owner = ZoneTreeRestoreSlotAdmissionOwner.Acquire(ownedRoot, context, sourceFiles, policy, clock, requireExisting: false, ct);
         Exception? primary = null;
         var cleanupCompleted = false;
@@ -46,7 +39,7 @@ internal static class ZoneTreeRestoreSlotDriver
             try
             {
                 var completion = Continue(backup, ownedRoot, executionOptions, context, original, signingKey,
-                    manifest, sourceMetadata, reconcile, verify, published, observer, ct);
+                    manifest, sourceMetadata, reconcile, verify, published, observer, conservation, ct);
                 ct.ThrowIfCancellationRequested();
                 PublishJoined(published, stage, destination);
                 return completion;
@@ -77,7 +70,8 @@ internal static class ZoneTreeRestoreSlotDriver
         StoreIdentity original, ReadOnlyMemory<byte> signingKey, ZoneTreeBackupRestoreManifest manifest,
         ReadOnlyMemory<byte> metadata,
         Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>, ClusterRestoreSlotContext> reconcile,
-        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, bool published, Action<NativeClusterRestoreStage>? observer, CancellationToken ct)
+        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, bool published, Action<NativeClusterRestoreStage>? observer, ZoneTreeRestoreSlotConservation conservation,
+        CancellationToken ct)
     {
         ZoneTreeRestoreSlotPrefixPreparation.Require(backup, root, options.Value, original, manifest,
             published, observer, IdentityFileName, JournalFileName, ct);
@@ -100,7 +94,7 @@ internal static class ZoneTreeRestoreSlotDriver
                 }
                 if (sourceIdentity)
                 {
-                    ZoneTreeRestoreSlotTransactions.Continue(store, original, context, metadata, reconcile, verify, observer, ct);
+                    ZoneTreeRestoreSlotTransactions.Continue(store, original, context, metadata, reconcile, verify, observer, conservation, ct);
                     var target = original with
                     {
                         NodeId = context.TargetNodeId,
@@ -109,12 +103,12 @@ internal static class ZoneTreeRestoreSlotDriver
                         DispatchPaused = true
                     };
                     // Join the original native store BEFORE publishing its admitted target identity.
-                    return CompleteAfterReopen(store, target, root, options, context, signingKey, verify, observer, ct);
+                    return CompleteAfterReopen(store, target, root, options, context, signingKey, verify, observer, conservation, ct);
                 }
                 ZoneTreeRestoreSlotState.RequireTarget(store.Identity, context, signingKey);
-                ZoneTreeRestoreSlotTransactions.Continue(store, original, context, metadata, reconcile, verify, observer, ct);
-                ZoneTreeRestoreSlotTransactions.Reset(store, context, verify, observer, ct);
-                return Observe(store, context, signingKey, verify, ct);
+                ZoneTreeRestoreSlotTransactions.Continue(store, original, context, metadata, reconcile, verify, observer, conservation, ct);
+                ZoneTreeRestoreSlotTransactions.Reset(store, context, verify, observer, conservation, ct);
+                return Observe(store, context, signingKey, verify, conservation, ct);
             }
             catch (Exception failure)
             {
@@ -141,7 +135,8 @@ internal static class ZoneTreeRestoreSlotDriver
     private static NativeCatalogRestoreSlotCompletion CompleteAfterReopen(ZoneTreeStore original, StoreIdentity targetIdentity, string root,
         IOptions<ZoneTreeStorageExecutionOptions> options, ClusterRestoreSlotContext context,
         ReadOnlyMemory<byte> signingKey,
-        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, Action<NativeClusterRestoreStage>? observer, CancellationToken ct)
+        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, Action<NativeClusterRestoreStage>? observer, ZoneTreeRestoreSlotConservation conservation,
+        CancellationToken ct)
     {
         original.Dispose();
         ct.ThrowIfCancellationRequested();
@@ -160,8 +155,8 @@ internal static class ZoneTreeRestoreSlotDriver
                 runtime = null; // The actual successful store constructor takes runtime ownership.
 
                 ZoneTreeRestoreSlotState.RequireTarget(target.Identity, context, signingKey);
-                ZoneTreeRestoreSlotTransactions.Reset(target, context, verify, observer, ct);
-                return Observe(target, context, signingKey, verify, ct);
+                ZoneTreeRestoreSlotTransactions.Reset(target, context, verify, observer, conservation, ct);
+                return Observe(target, context, signingKey, verify, conservation, ct);
             }
             catch (Exception failure)
             {
@@ -201,6 +196,6 @@ internal static class ZoneTreeRestoreSlotDriver
 
     internal static NativeCatalogRestoreSlotCompletion Observe(ZoneTreeStore store, ClusterRestoreSlotContext context,
         ReadOnlyMemory<byte> signingKey,
-        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, CancellationToken ct)
-        => ZoneTreeRestoreSlotCompletionObservation.Observe(store, context, signingKey, verify, ct);
+        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, ZoneTreeRestoreSlotConservation conservation, CancellationToken ct)
+        => ZoneTreeRestoreSlotCompletionObservation.Observe(store, context, signingKey, verify, conservation, ct);
 }

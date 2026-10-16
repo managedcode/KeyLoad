@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsAnnCheckpointReplay
 {
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         AnnMaintenanceResult result, CancellationToken token)
     {
         var manifest = RequestCqrsAnnResultAssertions.Manifest(fixture, request);

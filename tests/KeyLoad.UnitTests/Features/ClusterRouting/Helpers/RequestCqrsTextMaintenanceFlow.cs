@@ -8,12 +8,12 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsTextMaintenanceFlow
 {
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture, TextIndexMaintenanceMode mode,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, TextIndexMaintenanceMode mode,
         RequestCqrsTextFault? fault)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         fixture.Database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
-        var request = (await NativeTextMaintenanceRequestFixture.CreateAsync(fixture.Database, token));
+        var request = (await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token));
         var payload = NativeSerialization.Serialize(false);
         var cut = fixture.Database.Store.Position;
         var bytes = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -30,7 +30,7 @@ internal static class RequestCqrsTextMaintenanceFlow
         await RequestCqrsActualTextMaintenanceFlow.RunAsync(fixture, mode, request, token);
     }
 
-    private static async Task<Observed> ConsumeAsync(RequestCqrsClusterFixture fixture,
+    private static async Task<Observed> ConsumeAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, byte[] payload, RequestCqrsTextFault? fault, CancellationToken token)
     {
         var id = Guid.NewGuid();

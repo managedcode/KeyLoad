@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -21,8 +22,13 @@ public sealed partial class DatabaseEngine
         {
             ValidateDocumentSessionToken(view, reference.Partition, minimumToken);
         }
-        var resource = Resource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
+        var resource = BindAuthorizedReadResource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
+        reference = EntityReferenceLifetime.Bind(view, reference, resource);
         var record = view.GetRecord<DocumentRecord>(DocumentKey(reference.Partition, reference.Collection, reference.Id));
+        if (record is not null)
+        {
+            EntityReferenceLifetime.RequireStored(view, record.Reference, resource);
+        }
         var result = record is null || record.Deleted || !Authorization.CanReadRow(principal, record.Access)
             ? null : Project(principal, resource, record);
         cancellationToken.ThrowIfCancellationRequested();

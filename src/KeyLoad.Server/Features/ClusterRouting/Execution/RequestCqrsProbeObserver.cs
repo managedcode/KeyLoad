@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGrainPartitionMovementJournalObserver, IGrainRequestProducerDisposedObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver, IAsyncDisposable
+internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver, IGrainPartitionMovementJournalObserver, IGrainRequestProducerDisposedObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver, IAsyncDisposable
 {
     private readonly Lock disposeSync = new();
     internal readonly RequestCqrsRetireSealedCapture RetireSealed;
@@ -95,6 +95,21 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         return new ValueTask(ObserveCoreAsync(identity, phase, context, cancellationToken));
     }
 
+    public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(actualRuntime);
+        var actual = actualRuntime.Read();
+        if (actual.VoterId != replica.LocalId || actual.SiloAddress != siloAddress
+            || actual.Incarnation != replica.Incarnation || phase == GrainRequestPhase.RequestStarted)
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord);
+        }
+        cancellationToken.ThrowIfCancellationRequested();
+        lifecycle.EnterCallback();
+        return new ValueTask(ObserveCoreAsync(identity, phase, null, cancellationToken));
+    }
+
     public void CaptureSealed(GrainRequestProbeIdentity identity, ReplicatedOperation original, IGrainContext context)
         => RetireSealed.Capture(lifecycle, identity, original, context);
 
@@ -133,7 +148,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         return new ValueTask(completion);
     }
 
-    private async Task ObserveCoreAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase, IGrainContext context,
+    private async Task ObserveCoreAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase, IGrainContext? context,
         CancellationToken requestCancellation)
     {
         RequestCqrsProbeClaim? claim = null;
@@ -141,7 +156,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         try
         {
             claim = Claim(identity, phase, files.ReadSnapshot());
-            if (claim is not null && identity.ReadKind is GrainReadKind.AstQuery or GrainReadKind.WaitForIndex
+            if (context is not null && claim is not null && identity.ReadKind is GrainReadKind.AstQuery or GrainReadKind.WaitForIndex
                 && phase == GrainRequestPhase.AuthorizationReload)
             {
                 claim.QueryReadContext = context;
@@ -150,7 +165,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
             {
                 return;
             }
-            if (await receiverIssueAdjunct.TryObserveAsync(claim, phase, context, requestCancellation).ConfigureAwait(true))
+            if (context is not null && await receiverIssueAdjunct.TryObserveAsync(claim, phase, context, requestCancellation).ConfigureAwait(true))
             {
                 return;
             }
@@ -171,8 +186,11 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
                 files.EventVectorExpiry.Publish(claim);
             }
             RequestCqrsMovementJournalCapture.PublishReturned(files, claim, marker);
-            RequestCqrsProbeActivationCapture.Observe(files, marker, context);
-            if (gate && selectedPhase == RequestCqrsProbePhase.RequestStarted)
+            if (context is not null)
+            {
+                RequestCqrsProbeActivationCapture.Observe(files, marker, context);
+            }
+            if (context is not null && gate && selectedPhase == RequestCqrsProbePhase.RequestStarted)
             {
                 await connections.Value.ObserveAsync(marker, context, requestCancellation).ConfigureAwait(true);
             }

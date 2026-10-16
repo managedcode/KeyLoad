@@ -52,6 +52,7 @@ public sealed partial class DatabaseEngine
     {
         return mutation switch
         {
+            UpsertAnalyticsEvents or DeleteAnalyticsEvents => Capability.AnalyticsWrite,
             InsertTypedRow or PutDocument or PatchDocument or DeleteDocument => Capability.DocumentsWrite,
             AppendEvents => Capability.EventsAppend,
             PublishTopic => Capability.TopicsPublish,

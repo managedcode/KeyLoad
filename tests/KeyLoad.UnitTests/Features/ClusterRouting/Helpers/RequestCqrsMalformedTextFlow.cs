@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsMalformedTextFlow
 {
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
@@ -42,7 +42,7 @@ internal static class RequestCqrsMalformedTextFlow
     }
     private static async Task AssertMalformedShapeAsync(
         List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> frames,
-        Guid requestId, RequestCqrsClusterFixture fixture)
+        Guid requestId, RequestCqrsHostedRuntimeFixture fixture)
     {
         const int StartedOffset = 0;
         const int FailedOffset = 1;

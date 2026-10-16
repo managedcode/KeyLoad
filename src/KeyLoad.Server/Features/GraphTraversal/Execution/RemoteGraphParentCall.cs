@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -8,15 +9,16 @@ internal static class RemoteGraphParentCall
 {
     internal static async Task<T> ReadAsync<T>(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, GrainReadKind kind, object actualRequest, DateTimeOffset expiry,
-        ReadExecutionBudget work, CancellationToken token)
+        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding) where T : class
     {
+        work.RequireResourceLifetimeBinding(binding);
         var bytes = RemoteGraphNativeResultEncoding.Encode(actualRequest, partition.Database.Limits.MaxBatchBytes, work);
         try
         {
             var id = Guid.NewGuid();
             var signed = node.CatalogRequestCodec().RemoteGraph.CreateRemoteGraphRead(id, principal.Id, kind, bytes, expiry);
-            var result = await RemoteGraphNativeChild.ExecuteAsync<T>(node, partition, principal,
-                id, Guid.Empty, signed, false, null, work, token).ConfigureAwait(false);
+            var result = await RemoteGraphNativeChild.ReadSignedAsync<T>(node, partition, principal,
+                id, signed, work, token, binding, bytes).ConfigureAwait(false);
             try
             {
                 return Decode<T>(result, partition, work);

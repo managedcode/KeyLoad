@@ -7,8 +7,8 @@ internal static class FunctionalGateQueueGraph
     internal static async Task RunAsync(FunctionalGateContext ctx, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(P.GuidFormat);
-        var from = new EntityRef(ctx.Partition, ctx.MutableDocumentCollection, P.FromPrefix + suffix);
-        var to = new EntityRef(ctx.Partition, ctx.MutableDocumentCollection, P.ToPrefix + suffix);
+        var from = ctx.Bind(new EntityRef(ctx.Partition, ctx.MutableDocumentCollection, P.FromPrefix + suffix));
+        var to = ctx.Bind(new EntityRef(ctx.Partition, ctx.MutableDocumentCollection, P.ToPrefix + suffix));
         var link = new QueueGraphLink(from, to, P.Label, P.Attributes);
         var sourceId = P.SourcePrefix + suffix;
         var edgePrefix = P.EdgePrefix + suffix + P.Separator;

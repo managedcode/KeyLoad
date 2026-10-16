@@ -1,4 +1,6 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
@@ -9,7 +11,7 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
 {
 
     public async Task<DocumentResult?> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        GetDocumentRequest request, CancellationToken cancellationToken)
+        GetDocumentRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
         var failures = new List<Exception>();
         DocumentResult? document = null;
@@ -21,17 +23,18 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
                 using var originalExpiry = OriginalExpiry(envelope.ExpiresAt);
                 using var original = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, originalExpiry.Token);
+                var work = new ReadExecutionBudget(limits, clock, original.Token);
                 var controlled = await new ControlledDocumentSourceRead(node, partition, nodeOptions, limits, client, clock)
-                    .TryReadAsync(envelope, principal.Id, request, original.Token).ConfigureAwait(false);
+                    .TryReadAsync(envelope, principal.Id, request, work, original.Token, binding).ConfigureAwait(false);
                 if (controlled.Routed)
                 {
                     document = controlled.Document;
                     return;
                 }
                 var ordinary = await new OrdinaryDocumentLifetimeSourceRead(node, partition, nodeOptions, limits, client, clock)
-                    .TryReadAsync(envelope, principal.Id, request, original.Token).ConfigureAwait(false);
+                    .TryReadAsync(envelope, principal.Id, request, work, original.Token, binding).ConfigureAwait(false);
                 document = ordinary.Routed ? ordinary.Document
-                    : partition.Database.GetDocument(principal.Id, request.Reference, request.MinimumToken, original.Token);
+                    : partition.Database.GetDocumentBound(principal.Id, request, work, binding);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -39,9 +42,9 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
     }
 
     public Task<RemoteQueueTransferReceiptRead> InspectTransferAsync(GrainRequestEnvelope envelope,
-        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken)
+        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
         => new KeyLoad.Server.Features.Messaging.RemoteTransferReceiptRouter(node, partition, nodeOptions,
-            limits, client, owner, clock).ReadAsync(envelope, principal, request, cancellationToken);
+            limits, client, owner, clock).ReadAsync(envelope, principal, request, cancellationToken, binding);
 
     private CancellationTokenSource OriginalExpiry(DateTimeOffset expiresAt)
     {

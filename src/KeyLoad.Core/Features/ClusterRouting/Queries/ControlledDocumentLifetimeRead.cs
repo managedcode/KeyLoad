@@ -17,6 +17,7 @@ public sealed partial class DatabaseEngine
             RequireControlledDocumentReadReceiver(charged, localPrincipalId, frame.Original);
             PartitionControlLifetimeCoverage.Require(frame.Coverage, frame.Original.Reference.Partition,
                 [frame.Original.Resource], Limits.MaxBatchBytes);
+            work.CaptureAuthenticatedResourceLifetimes(this, charged, frame.Coverage, [frame.Original.Resource]);
             var controlled = new PartitionControlResourceView(charged, frame.Original.Reference.Partition,
                 [frame.Original.Resource], frame.Coverage, Limits.MaxBatchBytes, work, grant);
             return ReadDocumentAtCut(controlled, frame.Original.Principal, frame.Original.Reference,

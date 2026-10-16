@@ -13,23 +13,31 @@ internal static class ZoneTreeCheckpointWriter
     private const int SingleRecordIncrement = 1;
 
     internal static StorageSnapshot WriteMutations(FileStream output, ZoneTreeStoreOptions options,
-        StorageSnapshot snapshot, Action<Action<StorageMutation>> visit)
+        StorageSnapshot snapshot, Action<Action<StorageMutation>> visit, IKeyValueView? view = null)
     {
         ArgumentNullException.ThrowIfNull(output);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(visit);
+        ZoneTreeCheckpointPublication.RequireStream(output);
         if (snapshot.Incarnation == Guid.Empty || snapshot.Position < InitialSnapshotPosition || snapshot.AppliedPosition < InitialSnapshotPosition
             || snapshot.RecordCount < InitialRecordCount)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
         }
 
-        var metadata = new ZoneTreeCheckpointMetadata(ZoneTreePersistenceFormat.CheckpointVersion,
-            KeyCodec.Version, snapshot.Incarnation, snapshot.Position, snapshot.AppliedPosition);
+        var proof = view is null ? null : new ZoneTreeCheckpointSourceProof(view, options, TimeProvider.System, CancellationToken.None);
+        var budget = proof?.View.Budget ?? new(options, TimeProvider.System, CancellationToken.None);
+        var metadata = proof?.Metadata(snapshot.Incarnation, snapshot.Position, snapshot.AppliedPosition)
+            ?? new(ZoneTreePersistenceFormat.CheckpointVersion, KeyCodec.Version, snapshot.Incarnation,
+                snapshot.Position, snapshot.AppliedPosition)
+            {
+                ConservationAuthorityDigest = new byte[ResourceRetirementAuthoritySummary.DigestBytes]
+            };
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointMagic, metadata.Position,
             NativeSerialization.Serialize(metadata), digest);
-        var records = WriteMutations(output, options, metadata.Position, visit, digest);
+        var records = WriteMutations(output, options, metadata.Position, visit, digest, proof, budget);
+        proof?.Complete();
         if (records != snapshot.RecordCount)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointVerificationFailed);
@@ -41,6 +49,7 @@ internal static class ZoneTreeCheckpointWriter
         options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, ObserverNonMutationIndex);
         output.Flush(true);
         options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, ObserverNonMutationIndex);
+        ZoneTreeCheckpointPublication.RequireReplayable(output, options, work: budget);
         return snapshot;
     }
 
@@ -50,18 +59,19 @@ internal static class ZoneTreeCheckpointWriter
         StoreIdentity identity,
         long position,
         long appliedPosition,
-        IZoneTree<Memory<byte>, Memory<byte>> tree)
+        IZoneTree<Memory<byte>, Memory<byte>> tree, IKeyValueView? view = null)
     {
-        var metadata = new ZoneTreeCheckpointMetadata(
-            ZoneTreePersistenceFormat.CheckpointVersion,
-            KeyCodec.Version,
-            identity.Incarnation,
-            position,
-            appliedPosition);
+        var proof = view is null ? null : new ZoneTreeCheckpointSourceProof(view, options, TimeProvider.System, CancellationToken.None);
+        var budget = proof?.View.Budget ?? new(options, TimeProvider.System, CancellationToken.None);
+        var metadata = proof?.Metadata(identity.Incarnation, position, appliedPosition)
+            ?? new(ZoneTreePersistenceFormat.CheckpointVersion, KeyCodec.Version, identity.Incarnation, position, appliedPosition)
+            {
+                ConservationAuthorityDigest = new byte[ResourceRetirementAuthoritySummary.DigestBytes]
+            };
         using var output = new FileStream(
             path,
             FileMode.CreateNew,
-            FileAccess.Write,
+            FileAccess.ReadWrite,
             FileShare.None,
             options.FileBufferBytes,
             FileOptions.WriteThrough);
@@ -69,13 +79,15 @@ internal static class ZoneTreeCheckpointWriter
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointMagic, metadata.Position,
             NativeSerialization.Serialize(metadata), digest);
-        var records = WriteRecords(output, options, metadata.Position, tree, digest);
+        var records = WriteRecords(output, options, metadata.Position, tree, digest, proof, budget);
+        proof?.Complete();
         var footer = new ZoneTreeCheckpointFooter(records, Convert.ToHexStringLower(digest.GetHashAndReset()));
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointEndMagic, metadata.Position,
             NativeSerialization.Serialize(footer), null);
         options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, ObserverNonMutationIndex);
         output.Flush(true);
         options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, ObserverNonMutationIndex);
+        ZoneTreeCheckpointPublication.RequireReplayable(output, options, work: budget);
         return new(metadata.Incarnation, metadata.Position, metadata.AppliedPosition, records);
     }
 
@@ -84,7 +96,7 @@ internal static class ZoneTreeCheckpointWriter
         ZoneTreeStoreOptions options,
         long position,
         IZoneTree<Memory<byte>, Memory<byte>> tree,
-        IncrementalHash digest)
+        IncrementalHash digest, ZoneTreeCheckpointSourceProof? proof, ZoneTreeConservationBudget budget)
     {
         var batch = new List<StorageMutation>();
         long batchBytes = EmptyBatchBytes;
@@ -96,6 +108,7 @@ internal static class ZoneTreeCheckpointWriter
                 ZoneTreeNativeValueHeader.RequireLive(iterator.CurrentValue.Span);
                 var item = new StorageMutation(iterator.CurrentKey.ToArray(), iterator.CurrentValue.Span[
                     ZoneTreePersistenceFormat.StorageValueHeaderBytes..].ToArray());
+                ZoneTreeCheckpointUnboundSource.Observe(proof, budget, options, item.Key.Span, item.Value!.Value.Span);
                 batch.Add(item);
                 batchBytes += item.Key.Length + item.Value!.Value.Length;
                 records++;
@@ -118,7 +131,7 @@ internal static class ZoneTreeCheckpointWriter
     }
 
     private static long WriteMutations(FileStream output, ZoneTreeStoreOptions options, long position,
-        Action<Action<StorageMutation>> visit, IncrementalHash digest)
+        Action<Action<StorageMutation>> visit, IncrementalHash digest, ZoneTreeCheckpointSourceProof? proof, ZoneTreeConservationBudget budget)
     {
         var batch = new List<StorageMutation>();
         long batchBytes = EmptyBatchBytes;
@@ -130,6 +143,7 @@ internal static class ZoneTreeCheckpointWriter
                 throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
             }
 
+            ZoneTreeCheckpointUnboundSource.Observe(proof, budget, options, mutation.Key.Span, value.Span);
             var copy = new StorageMutation(mutation.Key.ToArray(), value.ToArray());
             batch.Add(copy);
             batchBytes = checked(batchBytes + copy.Key.Length + copy.Value!.Value.Length);

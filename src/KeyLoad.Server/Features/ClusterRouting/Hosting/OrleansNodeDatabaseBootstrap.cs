@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -18,7 +19,7 @@ internal sealed class OrleansNodeDatabaseBootstrap
     {
         await registered.ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        await partition.Coordinator.StartAsync(cancellationToken).ConfigureAwait(false);
+        await NativeReplicaCommandExecution.StartAsync(partition.Coordinator, node.RequestWork, partition.Database, cancellationToken).ConfigureAwait(false);
         var options = nodeOptions.Value;
         if (options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Destination
             && !options.PhysicalGroupTrust.RemoteDocumentReads)

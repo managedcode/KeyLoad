@@ -60,7 +60,7 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Validation, InvalidEventSourceGenerationDetail);
             }
             Authorization.Require(principal, partition, resourceName, Capability.Query | capability);
-            var resource = Resource(budgetedView, partition, resourceName, kind);
+            var resource = BindAuthorizedReadResource(budgetedView, partition, resourceName, kind);
             if (source.Kind == ModelQuerySourceKind.QueueMessages && source.Generation != QueueModelGeneration)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidQueueSourceGenerationDetail);

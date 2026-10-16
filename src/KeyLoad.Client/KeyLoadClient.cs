@@ -15,11 +15,7 @@ public sealed partial class KeyLoadClient
     /// <param name="apiKey">The persisted database credential.</param>
     /// <param name="executionOptions">The caller's centrally bound transport budget.</param>
     public KeyLoadClient(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> executionOptions)
-    {
-        ArgumentNullException.ThrowIfNull(http);
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        transport = new KeyLoadClientTransport(http, apiKey, executionOptions);
-    }
+        => transport = new KeyLoadClientTransport(http, apiKey, executionOptions);
 
     internal KeyLoadClientExecutionOptions ExecutionOptions => transport.ExecutionOptions;
 

@@ -15,7 +15,7 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
     private const ulong EligibleFirst = 1;
     private const double OrthogonalScore = 0;
 
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest initial, AnnMaintenanceRequest current, string leaf, CancellationToken token)
     {
         var original = Receipt(fixture).OriginalOperations.Single(row => row.Key == new NativeAnnOwnedKey(current.Consumer, current.IndexGeneration));
@@ -37,7 +37,7 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
         await RequestCqrsAnnRetirementFlow.RunAsync(fixture, initial, leaf, token);
     }
 
-    private static IAnnProjectionLease Acquire(RequestCqrsClusterFixture fixture,
+    private static IAnnProjectionLease Acquire(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest request, CancellationToken token)
     {
         var database = fixture.Database.Database;
@@ -53,7 +53,7 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
             });
     }
 
-    private static async Task ReleaseAsync(RequestCqrsClusterFixture fixture,
+    private static async Task ReleaseAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest current, CancellationToken token)
     {
         var release = current with
@@ -66,7 +66,7 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
             release.IndexGeneration, AnnMaintenancePhase.Completed, null, RequestCqrsAnnTestData.EmptyCount, null, null), released.Result);
     }
 
-    private static async Task RetainedAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest current,
+    private static async Task RetainedAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest current,
         NativeAnnOriginalOperation original, string leaf, (string Path, string Bytes)[] leafFiles,
         IAnnProjectionLease held, CancellationToken token)
     {
@@ -105,7 +105,7 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
         await UnchangedAsync(fixture, image, cut, files);
     }
 
-    private static async Task RefuseFreshReadAsync(RequestCqrsClusterFixture fixture,
+    private static async Task RefuseFreshReadAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest request, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -123,11 +123,11 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
         await UnchangedAsync(fixture, image, cut, files);
     }
 
-    private static NativeAnnRootReceipt Receipt(RequestCqrsClusterFixture fixture)
+    private static NativeAnnRootReceipt Receipt(RequestCqrsHostedRuntimeFixture fixture)
         => NativeAnnReceiptFiles.Read<NativeAnnRootReceipt>(Path.Combine(fixture.Database.Directory,
             NativeAnnProtocol.RootDirectory, NativeAnnProtocol.RootReceipt), new NativeAnnExecutionOptions()).Value;
 
-    private static async Task UnchangedAsync(RequestCqrsClusterFixture fixture, string[] image, long cut,
+    private static async Task UnchangedAsync(RequestCqrsHostedRuntimeFixture fixture, string[] image, long cut,
         (string Path, string Bytes)[] files)
     {
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);

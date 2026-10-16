@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Replication;
@@ -13,7 +15,8 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     /// <inheritdoc />
     public void Dispose() => rounds.Dispose();
 
-    internal async Task<OperationResult> SubmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    internal async Task<OperationResult> SubmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken,
+        IResourceLifetimeWorkBinding? binding = null, ReadExecutionBudget? sourcePlanningBudget = null)
     {
         operation = ReplicaOperationAuthority.Verify(operation, state.Materializer.Database)!;
         var boundary = new ReplicaSubmissionBoundary();
@@ -24,7 +27,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             Exception? primary = null;
             try
             {
-                terminal = await SubmitOwnedAsync(operation, boundary, cancellationToken).ConfigureAwait(false);
+                terminal = await SubmitOwnedAsync(operation, boundary, binding, sourcePlanningBudget, cancellationToken).ConfigureAwait(false);
                 return terminal;
             }
             catch (Exception error)
@@ -65,16 +68,17 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     }
 
     private async Task<OperationResult> SubmitOwnedAsync(ReplicatedOperation operation,
-        ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
+        ReplicaSubmissionBoundary boundary, IResourceLifetimeWorkBinding? binding, ReadExecutionBudget? sourcePlanningBudget,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var term = await ReplicaLeaderSubmissionReadCut.RequireAsync(state, followers, cancellationToken).ConfigureAwait(false);
-        await ReplicaLeaderSubmissionAdmission.ValidateAsync(state, operation, cancellationToken).ConfigureAwait(false);
+        await ReplicaLeaderSubmissionAdmission.ValidateAsync(state, operation, cancellationToken, sourcePlanningBudget).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var admission = await state.LockedAsync(() =>
         {
             state.RequireLeader(term);
-            return ReplicaLeaderSubmissionAdmission.AppendOwned(state, operation, boundary, cancellationToken);
+            return ReplicaLeaderSubmissionAdmission.AppendOwned(state, operation, boundary, cancellationToken, binding, sourcePlanningBudget);
         }, cancellationToken).ConfigureAwait(false);
         if (admission.Outcome is { } originalOutcome)
         {

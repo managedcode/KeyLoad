@@ -47,5 +47,5 @@ internal static class TenantAdmissionOperations
     internal static AdmittedCommand Enqueue(TestDatabase fixture, AdmittedCommandInbox inbox,
         ReplicatedOperation operation, CancellationToken token)
         => inbox.Enqueue(operation, Principal(fixture, operation.PrincipalId),
-            RuntimeJournalBootstrapAdmissionFlow.PayloadBytes(operation), token);
+            RuntimeJournalBootstrapAdmissionFlow.PayloadBytes(operation), cancellationToken: token);
 }

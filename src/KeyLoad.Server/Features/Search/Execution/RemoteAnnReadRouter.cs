@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -13,8 +14,10 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
     TimeProvider clock) : IRemoteAnnReadRouter
 {
     public async Task<object> ReadAnnAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        GrainReadKind kind, ReadOnlyMemory<byte> payload, SearchEngine actualSearch, CancellationToken cancellationToken)
+        GrainReadKind kind, ReadOnlyMemory<byte> payload, SearchEngine actualSearch, CancellationToken cancellationToken,
+        IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
         {
@@ -22,18 +25,19 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
         }
         var selected = RemoteAnnReadSelection.Decode(kind, payload);
         var work = new ReadExecutionBudget(limits, clock, cancellationToken);
+        work.AttachResourceLifetimeBinding(binding);
         QueryResultBudgetPolicy.Constrain(work, execution);
         work.ConstrainLifetime(envelope.ExpiresAt);
         work.ConstrainNativeWork(work.MaximumNativeReadBytes, work.MaximumNativeScanRecords);
         work.ChargeBytes(payload.Length);
-        var captured = partition.Database.CaptureRemoteAnnLifetimeRead(principal.Id, selected.Consumer, selected.Collection,
+        var captured = partition.Database.CaptureRemoteAnnLifetimeReadBound(principal.Id, selected.Consumer, selected.Collection,
             selected.Field, selected.Space, selected.Generation,
-            PhysicalOwnerConfiguredTuples.Local(options.Value, partition), work);
+            PhysicalOwnerConfiguredTuples.Local(options.Value, partition), work, binding);
         var route = captured.Original;
         if (route is null || route.OriginalMaintenance.NodeId == partition.Database.Store.Identity.NodeId)
         {
             return await ReadLocalAsync(envelope, principal, selected, actualSearch, captured, work,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken, binding).ConfigureAwait(false);
         }
         var failures = new List<Exception>();
         object? result = null;
@@ -72,7 +76,7 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
     }
     private async Task<object> ReadLocalAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
         RemoteAnnReadSelection selected, SearchEngine actualSearch, RemoteAnnReadFenceV2 captured,
-        ReadExecutionBudget work, CancellationToken token)
+        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
         var failures = new List<Exception>();
         object? result = null;
@@ -89,11 +93,11 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
                 using var deadline = new CancellationTokenSource(remaining, clock);
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, operation.ShutdownToken, deadline.Token);
                 using var cancellation = work.EnterStageCancellation(linked.Token);
-                result = await selected.ExecuteLocalAsync(actualSearch, principal.Id, work, captured.Metadata, linked.Token)
+                result = await selected.ExecuteLocalAsync(actualSearch, principal.Id, work, captured.Metadata, linked.Token, binding)
                     .ConfigureAwait(false);
                 await partition.Coordinator.ReadBarrierAsync(linked.Token).ConfigureAwait(false);
-                partition.Database.ValidateRemoteAnnLifetimeRead(captured, selected.Consumer, selected.Collection,
-                    selected.Field, selected.Space, selected.Generation, work);
+                partition.Database.ValidateRemoteAnnLifetimeReadBound(captured, selected.Consumer, selected.Collection,
+                    selected.Field, selected.Space, selected.Generation, work, binding);
                 work.CheckResult(result);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

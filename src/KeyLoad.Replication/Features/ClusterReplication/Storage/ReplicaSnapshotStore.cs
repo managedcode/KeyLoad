@@ -15,6 +15,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     private readonly IDurableReplicaLog log;
     private readonly ReplicaConfiguration configuration;
     private readonly Action<ReplicaCrashBoundary>? faultObserver;
+    private readonly Action<CancellationToken> beforeReplacement;
     private readonly Lock gate = new();
     private readonly ReplicaSnapshotFiles files;
     private readonly ReplicaIncomingTransfer incoming;
@@ -24,18 +25,22 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     /// <param name="log">Borrowed durable replica log publishing the verified snapshot cut.</param>
     /// <param name="configurationOptions">Centrally validated snapshot scope, private directory and transfer limits.</param>
     /// <param name="executionOptions">Centrally validated replica IO budgets.</param>
+    /// <param name="beforeReplacement">Mandatory current live-state guard invoked only while the caller owns exclusive replacement.</param>
     /// <param name="faultObserver">Optional observer invoked at durable transfer and installation boundaries.</param>
     public ReplicaSnapshotStore(IAtomicStore canonical, IDurableReplicaLog log, IOptions<ReplicaConfiguration> configurationOptions,
-        IOptions<ReplicaExecutionOptions> executionOptions, Action<ReplicaCrashBoundary>? faultObserver = null)
+        IOptions<ReplicaExecutionOptions> executionOptions, Action<CancellationToken> beforeReplacement,
+        Action<ReplicaCrashBoundary>? faultObserver = null)
     {
         ArgumentNullException.ThrowIfNull(canonical);
         ArgumentNullException.ThrowIfNull(log);
+        ArgumentNullException.ThrowIfNull(beforeReplacement);
         ArgumentNullException.ThrowIfNull(configurationOptions);
         configuration = configurationOptions.Value;
         configuration.Validate();
         this.canonical = canonical;
         this.log = log;
         this.faultObserver = faultObserver;
+        this.beforeReplacement = beforeReplacement;
         files = new(configurationOptions, executionOptions);
         incoming = new(files, configurationOptions, faultObserver);
     }
@@ -54,7 +59,10 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     private ReplicaIncomingTransfer Incoming => incoming;
 
     /// <inheritdoc />
-    public void Recover()
+    public void Recover() => Recover(default);
+
+    /// <inheritdoc />
+    public void Recover(CancellationToken cancellationToken)
     {
         lock (gate)
         {
@@ -64,7 +72,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
                 ReplicaPersistence.ValidateSnapshot(published, configuration);
                 ReplicaPersistence.VerifyImage(canonical, files.ImagePath(published), published);
             }
-            Incoming.Recover(canonical, Current, Complete);
+            Incoming.Recover(canonical, Current, transferId => Complete(transferId, cancellationToken));
             var applied = ReplicaPersistence.AppliedPosition(canonical);
             if (applied > log.State.CommittedIndex || applied < (Current?.Index ?? BeforeFirstLogPosition))
             {
@@ -74,11 +82,14 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     }
 
     /// <inheritdoc />
-    public void ResetIncoming()
+    public void ResetIncoming() => ResetIncoming(default);
+
+    /// <inheritdoc />
+    public void ResetIncoming(CancellationToken cancellationToken)
     {
         lock (gate)
         {
-            Recover();
+            Recover(cancellationToken);
             files.ClearIncoming();
         }
     }
@@ -147,7 +158,10 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     }
 
     /// <inheritdoc />
-    public ReplicaSnapshot Complete(Guid transferId)
+    public ReplicaSnapshot Complete(Guid transferId) => Complete(transferId, default);
+
+    /// <inheritdoc />
+    public ReplicaSnapshot Complete(Guid transferId, CancellationToken cancellationToken)
     {
         lock (gate)
         {
@@ -166,6 +180,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
             faultObserver?.Invoke(ReplicaCrashBoundary.SnapshotVerified);
             if (ReplicaPersistence.AppliedPosition(canonical) < snapshot.Index)
             {
+                beforeReplacement(cancellationToken);
                 canonical.InstallSnapshot(files.TransferImage(snapshot), snapshot.Index);
             }
             faultObserver?.Invoke(ReplicaCrashBoundary.SnapshotInstalled);

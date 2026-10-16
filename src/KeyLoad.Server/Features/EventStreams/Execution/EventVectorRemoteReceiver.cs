@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
@@ -13,10 +14,12 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
 
     internal ReadExecutionBudget CreateWork(EventVectorAdmittedCall admitted,
-        CancellationToken originalCancellationToken)
+        CancellationToken originalCancellationToken, IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(admitted);
-        return partition.Database.CreateEventVectorReadWork(admitted.Original.Call.ExpiresAt, originalCancellationToken);
+        var work = partition.Database.CreateEventVectorReadWork(admitted.Original.Call.ExpiresAt, originalCancellationToken);
+        work.AttachResourceLifetimeBinding(binding);
+        return work;
     }
 
     internal Task<ReadOnlyMemory<byte>> ExecuteAsync(EventVectorAdmittedCall admitted,

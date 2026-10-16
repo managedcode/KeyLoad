@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -30,7 +32,7 @@ internal sealed class ReplicaNativeSnapshotTests
         using var target = targetFiles.Open(CanonicalDirectory);
         var (sender, image) = CreateNativeSnapshot(source, sourceLog, sourceFiles.Configuration);
         target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode(ValueKey), OldValue); return true; });
-        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(targetFiles.Configuration), UnitExecutionOptions.ReplicaExecution());
+        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(targetFiles.Configuration), UnitExecutionOptions.ReplicaExecution(), replacementToken => RequireReplacement(target, replacementToken));
         await Assert.That(receiver.Begin(image)).IsEqualTo(0);
         var first = sender.ReadChunk(image.TransferId, 0, FirstChunkBytes);
         await Assert.That(receiver.Append(image.TransferId, 0, first)).IsEqualTo(first.LongLength);
@@ -52,7 +54,7 @@ internal sealed class ReplicaNativeSnapshotTests
     private static async Task ResumeAndCompleteAsync(ReplicaSnapshotStore sender, ReplicaSnapshot image,
         IAtomicStore target, IDurableReplicaLog targetLog, ReplicaConfiguration configuration, long expectedOffset)
     {
-        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution());
+        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution(), replacementToken => RequireReplacement(target, replacementToken));
         receiver.Recover();
         var offset = receiver.Begin(image);
         await Assert.That(offset).IsEqualTo(expectedOffset);
@@ -75,8 +77,15 @@ internal sealed class ReplicaNativeSnapshotTests
             tx.PutRecord(KeyCodec.Encode(ValueKey), NewValue);
             return true;
         });
-        var sender = new ReplicaSnapshotStore(source, log, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution());
+        var sender = new ReplicaSnapshotStore(source, log, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution(), replacementToken => RequireReplacement(source, replacementToken));
         return (sender, sender.Create(1, 1));
+    }
+
+    private static void RequireReplacement(IAtomicStore store, CancellationToken cancellationToken)
+    {
+        var limits = UnitExecutionOptions.DatabaseLimits();
+        ResourceRetirementSnapshotReplacement.Require(store, limits.Value,
+            new ReadExecutionBudget(limits, TimeProvider.System, cancellationToken));
     }
 
     private static async Task VerifyUnsupportedDescriptorAsync(ReplicaSnapshotStore receiver,

@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.ChangeFeeds;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Storage;
@@ -67,9 +68,13 @@ public sealed partial class QueryEngine
     /// <summary>Describes the supported query language and configured budgets.</summary>
     public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create(database.Limits, execution);
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null, ReadExecutionBudget? originalBudget = null)
     {
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = originalBudget ?? new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -95,7 +100,9 @@ public sealed partial class QueryEngine
         var query = request.Query;
         budget.Check();
         Bind(principal, resource, request);
-        var cursor = QueryCursorExecution.Resolve(database, view, principal, resource, request, hash, clock);
+        var coverage = budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [resource]);
+        var cursor = QueryCursorExecution.Resolve(database, view, principal, resource, request, hash, clock,
+            coverage.Lifetimes.Single());
         var prepared = new PreparedQuery(query, cursor.Offset, database.Limits.MaxScanRecords);
         var accessPath = new QueryCandidateReader(database, view, principal, resource, request, budget, document =>
         {

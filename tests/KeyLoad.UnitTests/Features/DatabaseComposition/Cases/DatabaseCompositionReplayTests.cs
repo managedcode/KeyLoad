@@ -34,8 +34,11 @@ internal sealed class DatabaseCompositionReplayTests
     {
         using var db = NewDatabase();
         db.Commit(new EnqueueMessage(Queue, Message, Link(db, First, Second)));
+        var expectedFrom = DatabaseCompositionExpectedReferences.Capture(db, Vertex(db, First));
+        var expectedTo = DatabaseCompositionExpectedReferences.Capture(db, Vertex(db, Second));
         var operation = Forward(db);
         var first = db.Database.Apply(operation).Get<CommitReceipt>();
+        await Assert.That(first.Mutations.Single().CompositionReferences.SequenceEqual([expectedFrom, expectedTo])).IsTrue();
         db.Commit(new EnqueueMessage(Queue, "new-source", Link(db, Second, Third)));
 
         var retry = db.Database.Apply(operation).Get<CommitReceipt>();

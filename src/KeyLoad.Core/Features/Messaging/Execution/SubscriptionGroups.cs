@@ -52,12 +52,12 @@ public sealed partial class DatabaseEngine
     private static GroupState Group(IKeyValueView view, SubscriptionRef subscription)
         => view.GetRecord<GroupState>(GroupKey(SubscriptionGroupsSubscriptionKeySpace, subscription)) ?? throw Errors.Fail(ErrorCode.NotFound, SubscriptionGroupsSubscriptionGroupIsUnavailableDetail);
     private ResourceDefinition AuthorizeSubscription(IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription,
-        Capability capability, DateTimeOffset now, bool requireDataPrincipal = false)
+        Capability capability, DateTimeOffset now, bool requireDataPrincipal = false, bool authorizedRead = false)
     {
         JsonData.Identifier(subscription.GroupId);
         Authorization.Require(principal, subscription.Source.Partition, subscription.Source.Resource, capability);
         Authorization.Require(principal, subscription.Source.Partition, subscription.Source.Resource, SourceReadCapability(subscription.Source));
-        var resource = SourceResource(view, subscription.Source);
+        var resource = SourceResource(view, subscription.Source, authorizedRead);
         if (requireDataPrincipal)
         {
             Authorization.RequireWorkerInput(principal, resource);
@@ -288,18 +288,21 @@ public sealed partial class DatabaseEngine
     /// <param name="principalId">Persisted principal identifier.</param>
     /// <param name="subscription">Subscription identity.</param>
     /// <returns>The persisted subscription state.</returns>
-    public SubscriptionInfo GetSubscription(string principalId, SubscriptionRef subscription) => Store.Read(view =>
+    public SubscriptionInfo GetSubscription(string principalId, SubscriptionRef subscription)
+        => Store.Read(view => GetSubscriptionRead(view, principalId, subscription));
+
+    private SubscriptionInfo GetSubscriptionRead(IKeyValueView view, string principalId, SubscriptionRef subscription)
     {
         var now = Clock.GetUtcNow();
         var principal = Principal(view, principalId, now);
         try
         {
-            AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsManage, now);
+            AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsManage, now, authorizedRead: true);
         }
         catch (KeyLoadException exception) when (exception.Code == ErrorCode.PermissionDenied)
         {
-            AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsConsume, now);
+            AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsConsume, now, authorizedRead: true);
         }
         return GroupInfo(view, subscription, Group(view, subscription));
-    });
+    }
 }

@@ -45,7 +45,7 @@ public sealed partial class DatabaseEngine
         foreach (var preparation in command.Preparations)
         {
             if (preparation?.Preparation?.Request is null || !retained.Intents.Any(intent =>
-                intent.Content.Destination == preparation.Preparation.Request.Destination
+                intent.Content.Destination == RemoteGraphLifetimeAdmission.BindDestination(preparation.Preparation)
                 && intent.Content.Deleted == preparation.Preparation.Request.Deleted))
             {
                 throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
@@ -66,7 +66,7 @@ public sealed partial class DatabaseEngine
         foreach (var verified in command.Preparations)
         {
             if (verified?.Preparation?.Request is null || string.IsNullOrEmpty(verified.Token)
-                || !targets.Add(verified.Preparation.Request.Destination))
+                || !targets.Add(RemoteGraphLifetimeAdmission.BindDestination(verified.Preparation)))
             {
                 throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
             }

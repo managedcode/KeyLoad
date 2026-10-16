@@ -16,12 +16,14 @@ internal static class ApiEndpoints
     {
         ArgumentNullException.ThrowIfNull(app);
         DocumentApi.Map(app);
+        RelationalStorageApi.Map(app);
         BlobApi.Map(app);
         EventStreamApi.Map(app);
         MessagingApi.Map(app);
         QueueDispatchApi.Map(app);
         GraphApi.Map(app);
         TimeSeriesApi.Map(app);
+        AnalyticsStoreApi.Map(app);
         QueryApi.Map(app);
         SearchApi.Map(app);
         ChangeFeedApi.Map(app);

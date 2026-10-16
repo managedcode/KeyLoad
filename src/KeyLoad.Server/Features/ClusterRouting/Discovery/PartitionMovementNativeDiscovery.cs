@@ -63,13 +63,20 @@ internal sealed class PartitionMovementNativeDiscovery(PartitionHost partition, 
         return found;
     }
 
-    internal async Task RequireCallerAsync(string voter, string address, CancellationToken token,
+    internal Task RequireCallerAsync(string voter, string address, CancellationToken token,
+        Action<PartitionMovementNativeObservationStage>? observeStage = null)
+        => RequireCallerAsync(PhysicalOwnerConfiguredTuples.Control(settings, partition.Configuration),
+            voter, address, token, observeStage);
+
+    internal async Task RequireCallerAsync(RegisteredPhysicalOwnerV1 expectedOwner, string voter,
+        string address, CancellationToken token,
         Action<PartitionMovementNativeObservationStage>? observeStage = null)
     {
         observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerIdentity);
         token.ThrowIfCancellationRequested();
-        var control = PhysicalOwnerConfiguredTuples.Control(settings, partition.Configuration);
-        if (!control.Owner.VoterIds.Contains(voter, StringComparer.Ordinal)
+        if (!PhysicalOwnerEntryValidation.Valid(expectedOwner)
+            || !PhysicalOwnerEntryValidation.SameOwner(expectedOwner.Owner, RequireDestination(voter).Owner)
+            || !expectedOwner.Owner.VoterIds.Contains(voter, StringComparer.Ordinal)
             || !PhysicalGroupAddress.CanonicalAddress(address, membership))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
@@ -90,7 +97,7 @@ internal sealed class PartitionMovementNativeDiscovery(PartitionHost partition, 
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
         }
-        PartitionMovementNativeDiscoveryIdentity.Require(settings, partition.Configuration, control,
+        PartitionMovementNativeDiscoveryIdentity.Require(settings, partition.Configuration, expectedOwner,
             actual, nonce, reply, identity, membership, observeStage);
         token.ThrowIfCancellationRequested();
         observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerActiveAfterDiscovery);

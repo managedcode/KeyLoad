@@ -45,7 +45,7 @@ public sealed partial class DatabaseEngine
             RequireConfiguredMovementOwner();
         }
         operation = NormalizeOperation(operation);
-        return Store.Commit((transaction, position) =>
+        var committed = Store.Commit((transaction, position) =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             var admitted = selectEmbeddedClock ? operation with
@@ -58,6 +58,8 @@ public sealed partial class DatabaseEngine
             }
             return ApplyCommittedCommand(transaction, admitted, position, replicationIndex);
         });
+        ClosePublishedResourceRetirementFence(committed);
+        return committed;
     }
 
     private OperationResult ApplyCommittedCommand(IAtomicTransaction transaction, ReplicatedOperation operation,
@@ -125,8 +127,11 @@ public sealed partial class DatabaseEngine
                 replayed = true;
                 return previous;
             }
-            RequireNoPartitionMovementFence(transaction, operation, partitionScope);
-            ValidateCommandClock(transaction, operation.EvaluatedAt);
+            RequireOriginalEffectAdmission(transaction, principal, operation, partitionScope);
+            if (!RequirePreparedResourceRetirementClock(transaction, operation))
+            {
+                ValidateCommandClock(transaction, operation.EvaluatedAt);
+            }
             ValidateQueueRetryDecisions(transaction, principal, operation);
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             transferFailure = CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
@@ -134,7 +139,7 @@ public sealed partial class DatabaseEngine
             eventVectorEligibility = EventVectorFailedParentLocator.Capture(transaction, principal, operation, Store.Identity.Incarnation, Authorization, OperationLimitsOptions);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
                 placement);
-            compositionAuthority = CaptureCompositionOutcome(operation, result);
+            compositionAuthority = CaptureCompositionOutcome(transaction, principal, operation, result);
         }
         catch (KeyLoadException exception) when (exception.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
             or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
@@ -150,11 +155,8 @@ public sealed partial class DatabaseEngine
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
         persistOutcome = selection.Outcome is null;
-        var actualOutcome = BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope, onlineTextAuthority) with
-        {
-            RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null,
-            RemoteTransferAuthority = result.Error is null ? remoteTransferAuthority : null
-        };
+        var actualOutcome = BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority,
+            partitionScope, onlineTextAuthority, transferFailure, remoteTransferAuthority);
         if (persistOutcome)
         {
             EventVectorFailedParentLocator.Write(transaction, eventVectorEligibility, actualOutcome, OperationLimitsOptions);
@@ -171,14 +173,18 @@ public sealed partial class DatabaseEngine
         BlobOutcomeAuthority? blobAuthority,
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority,
         CommandOutcomePartitionScope partitionScope,
-        global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? onlineTextAuthority)
+        global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? onlineTextAuthority,
+        global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure,
+        global::KeyLoad.Core.Features.Messaging.RemoteTransferOutcomeAuthority? remoteTransferAuthority)
         => new(fingerprint, Store.Identity.Incarnation, policyEpoch, result)
         {
             BlobAuthority = result.Error is null ? blobAuthority : null,
             CompositionAuthority = result.Error is null ? compositionAuthority : null,
             ScopeKind = partitionScope.Kind,
             Partition = partitionScope.Partition,
-            OnlineTextAuthority = onlineTextAuthority
+            OnlineTextAuthority = onlineTextAuthority,
+            RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null,
+            RemoteTransferAuthority = result.Error is null ? remoteTransferAuthority : null
         };
 
     private OperationResult ReplayCommand(IAtomicTransaction transaction, PrincipalRecord principal,

@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -15,7 +16,7 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
                 return;
             }
             var expected = marker;
-            var page = database.Store.Read(view => Collect(view, expected));
+            var page = database.Store.Read(view => BlobRestorePageReader.Collect(view, expected, database.BlobExecution));
             marker = database.Store.Commit((tx, _) => CommitPage(tx, expected, page));
         }
     }
@@ -56,6 +57,9 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             {
                 return null;
             }
+            ResourceRetirementStorage.RequireNoRetirement(tx, database.Limits);
+            ResourceRetirementPreparationStorage.RequireNoPreparation(tx, database.Limits);
+            ResourceRetirementPreparedOperationStorage.RequireNoReplacement(tx, database.Limits);
             var marker = new BlobRestoreMarker(BlobKeys.FormatVersion, global.Incarnation,
                 database.Store.Identity.Incarnation, BlobRestorePhase.States, null, ReservedBytesEmptyCount, ObjectKeysEmptyCount, VersionsEmptyCount, ActiveUploadsEmptyCount, ResourcesEmptyCount);
             tx.PutRecord(BlobRestoreFence.MarkerKey, marker);
@@ -63,42 +67,13 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
         });
     }
 
-    private List<KeyValueRecord> Collect(IKeyValueView view, BlobRestoreMarker marker)
-    {
-        const long BytesInitialValue = 0L;
-        const int EmptyCollectedRecordCount = 0;
-
-        var policy = database.BlobExecution;
-        var records = new List<KeyValueRecord>(policy.MetadataPageSize);
-        var prefix = KeyCodec.Encode(BlobRestoreFence.Space(marker.Phase));
-        var bytes = BytesInitialValue;
-        view.VisitRange(prefix, policy.MetadataPageSize, (key, value) =>
-        {
-            if (marker.Phase is BlobRestorePhase.States or BlobRestorePhase.Heads
-                or BlobRestorePhase.VerifyStates or BlobRestorePhase.VerifyHeads)
-            {
-                BlobMetadataRules.EncodedLength(value.Length);
-            }
-            var candidate = checked((long)key.Length + value.Length);
-            if (candidate > policy.RestorePageBytes - bytes && records.Count > EmptyCollectedRecordCount)
-            {
-                return false;
-            }
-            if (candidate > policy.RestorePageBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, BlobErrors.RestoreWorkBudget);
-            }
-            records.Add(new(key.ToArray(), value.ToArray()));
-            bytes = checked(bytes + candidate);
-            return records.Count < policy.MetadataPageSize && bytes < policy.RestorePageBytes;
-        }, marker.ExclusiveCursor?.ToArray());
-        return records;
-    }
-
     private BlobRestoreMarker CommitPage(IAtomicTransaction tx, BlobRestoreMarker expected, List<KeyValueRecord> page)
     {
         const int EmptyPageCount = 0;
 
+        ResourceRetirementStorage.RequireNoRetirement(tx, database.Limits);
+        ResourceRetirementPreparationStorage.RequireNoPreparation(tx, database.Limits);
+        ResourceRetirementPreparedOperationStorage.RequireNoReplacement(tx, database.Limits);
         RequireMarker(tx, expected);
         var marker = expected;
         foreach (var record in page)
@@ -171,6 +146,9 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
 
         database.Store.Commit((tx, _) =>
         {
+            ResourceRetirementStorage.RequireNoRetirement(tx, database.Limits);
+            ResourceRetirementPreparationStorage.RequireNoPreparation(tx, database.Limits);
+            ResourceRetirementPreparedOperationStorage.RequireNoReplacement(tx, database.Limits);
             RequireMarker(tx, marker);
             if (marker.Resources != EmptyRestoreAccountingCount || marker.ActiveUploads != EmptyRestoreAccountingCount
                 || tx.VisitRange(BlobRestoreFence.Accounts, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRestoreAccountingCount)

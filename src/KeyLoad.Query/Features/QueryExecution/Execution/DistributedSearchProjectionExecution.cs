@@ -33,7 +33,7 @@ internal static class DistributedSearchProjectionExecution
             (view, principal, resource, digest) => Project(database, view, principal, resource, digest,
                 request, tenant, witness, selected, budget, grant, metadata);
         return metadata is null
-            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read)
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read, budget)
             : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
                 grant, budget, metadata, read);
     }

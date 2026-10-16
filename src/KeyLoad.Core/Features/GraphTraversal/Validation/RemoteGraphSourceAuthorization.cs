@@ -1,6 +1,7 @@
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.GraphTraversal;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -52,7 +53,9 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(graphName);
         JsonData.Identifier(edgeId);
         Authorization.Require(principal, original.SourcePartition, graphName, Capability.GraphWrite);
-        var graph = Resource(view, original.SourcePartition, graphName, ResourceKind.Graph);
+        var graph = view is IResourceLifetimeReadBindingView
+            ? BindAuthorizedReadResource(view, original.SourcePartition, graphName, ResourceKind.Graph)
+            : Resource(view, original.SourcePartition, graphName, ResourceKind.Graph);
         if (command.PreviousEdge is { } prior)
         {
             ValidateCanonicalEdge(prior, original.SourcePartition, edgeId);

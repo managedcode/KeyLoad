@@ -7,8 +7,8 @@ internal static class FunctionalGateCompositionAssertions
 {
     internal static async Task AnchorAsync(FunctionalGateContext context, CancellationToken token)
     {
-        var actual = await context.SdkAsync(context.Reader.Sdk.GetAsync(context.Anchor, token));
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(new(context.Anchor, P.Initial,
+        var actual = await context.SdkAsync(context.Reader.Sdk.GetAsync(context.Bind(context.Anchor), token));
+        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(new(context.Bind(context.Anchor), P.Initial,
             P.AnchorJson, false, [])), actual);
     }
 

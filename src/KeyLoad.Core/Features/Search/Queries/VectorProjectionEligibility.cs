@@ -1,5 +1,5 @@
-using System.Collections.Immutable;
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Search;
@@ -7,13 +7,6 @@ namespace KeyLoad.Core.Features.Search;
 /// <summary>Revalidates the current source authority for a derived vector inside its read cut.</summary>
 internal static class VectorProjectionEligibility
 {
-    private const int HasInvalidSourceLineageGenerationValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourceEventRevisionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourceDocumentRevisionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourceSchemaVersionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourcePolicyEpochValidationBoundary = 0;
-    private const int HasInvalidSourceLineageTargetSchemaVersionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageReducerGenerationValidationBoundary = 1;
 
     private const string LineageCorrupt = "The stored vector projection lineage is corrupt.";
 
@@ -41,14 +34,18 @@ internal static class VectorProjectionEligibility
         {
             return false;
         }
-        ValidateResource(sourceResource, lineage.SourceDocument.Collection, partition);
+        VectorProjectionLineageValidation.ValidateResource(sourceResource, lineage.SourceDocument.Collection, partition);
         if (!CanReadSource(database, principal, partition, sourceResource))
         {
             return false;
         }
+        var metadata = budget.CreateView(view);
+        _ = database.BindAuthorizedReadResource(metadata, partition,
+            sourceResource.Name, ResourceKind.Collection);
+        EntityReferenceLifetime.RequireStored(metadata, lineage.SourceDocument, sourceResource);
         if (lifetime is not null)
         {
-            var sourceDefinition = lifetime.Resolve(view, partition, sourceResource, budget);
+            var sourceDefinition = lifetime.Resolve(database, view, partition, sourceResource, budget);
             if (sourceDefinition is null || !lifetime.CanSeeInput(database, sourceResource, sourceDefinition, lineage.InputField))
             {
                 return false;
@@ -61,7 +58,8 @@ internal static class VectorProjectionEligibility
         {
             return false;
         }
-        if (source.Reference is null || source.Reference != lineage.SourceDocument)
+        EntityReferenceLifetime.RequireStored(metadata, source.Reference, sourceResource);
+        if (source.Reference != lineage.SourceDocument)
         {
             throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         }
@@ -81,10 +79,10 @@ internal static class VectorProjectionEligibility
         var targetResource = budget.ReadRecord<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection))
             ?? throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
-        ValidateResource(targetResource, collection, partition);
+        VectorProjectionLineageValidation.ValidateResource(targetResource, collection, partition);
         if (lifetime is not null)
         {
-            var definition = lifetime.Resolve(view, partition, targetResource, budget);
+            var definition = lifetime.Resolve(database, view, partition, targetResource, budget);
             if (definition is null)
             {
                 return false;
@@ -130,98 +128,5 @@ internal static class VectorProjectionEligibility
 
     internal static void ValidateLineage(VectorProjectionLineage lineage, PartitionRef partition,
         DocumentRecord targetDocument, VectorRecord vector)
-    {
-        if (HasInvalidLineageShape(lineage, partition, targetDocument, vector))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
-        }
-
-        ValidateIdentifiers(lineage);
-        ValidateClassifications(lineage.SourceClassifications);
-        ValidateClassifications(lineage.TargetClassifications);
-    }
-
-    private static bool HasInvalidLineageShape(VectorProjectionLineage lineage, PartitionRef partition,
-        DocumentRecord targetDocument, VectorRecord vector)
-        => HasInvalidSourceLineage(lineage, partition) || HasInvalidTargetLineage(lineage, partition, targetDocument, vector);
-
-    private static bool HasInvalidSourceLineage(VectorProjectionLineage lineage, PartitionRef partition)
-        => lineage.SourceStream?.Partition != partition || lineage.SourceDocument?.Partition != partition
-            || lineage.SourceStream.Generation < HasInvalidSourceLineageGenerationValidationBoundary || lineage.SourceEventRevision < HasInvalidSourceLineageSourceEventRevisionValidationBoundary
-            || lineage.SourceDocumentRevision < HasInvalidSourceLineageSourceDocumentRevisionValidationBoundary || lineage.SourceSchemaVersion < HasInvalidSourceLineageSourceSchemaVersionValidationBoundary
-            || lineage.SourcePolicyEpoch < HasInvalidSourceLineageSourcePolicyEpochValidationBoundary || lineage.TargetSchemaVersion < HasInvalidSourceLineageTargetSchemaVersionValidationBoundary
-            || lineage.ReducerGeneration < HasInvalidSourceLineageReducerGenerationValidationBoundary || lineage.SourceEventId is null
-            || lineage.InputField is null || lineage.ReducerId is null || lineage.ReducerVersion is null
-            || lineage.TargetCollection is null || lineage.TargetId is null || lineage.TargetField is null
-            || lineage.TargetSpace is null || lineage.SourceClassifications.IsDefault;
-
-    private static bool HasInvalidTargetLineage(VectorProjectionLineage lineage, PartitionRef partition,
-        DocumentRecord targetDocument, VectorRecord vector)
-        => lineage.TargetClassifications.IsDefault || targetDocument.Reference is null
-            || targetDocument.Reference.Partition != partition
-            || targetDocument.Reference.Collection != lineage.TargetCollection
-            || targetDocument.Reference.Id != vector.DocumentId
-            || lineage.TargetCollection != targetDocument.Reference.Collection || lineage.TargetId != vector.DocumentId
-            || lineage.TargetField != vector.Field || lineage.TargetSpace != vector.Space;
-
-    private static void ValidateIdentifiers(VectorProjectionLineage lineage)
-    {
-        const int DimensionFirstCount = 1;
-        const int DimensionValidationBound = 4_096;
-
-        try
-        {
-            JsonData.Identifier(lineage.SourceStream.StreamSet);
-            JsonData.Identifier(lineage.SourceStream.StreamId);
-            JsonData.Identifier(lineage.SourceEventId);
-            JsonData.Identifier(lineage.SourceDocument.Collection);
-            JsonData.Identifier(lineage.SourceDocument.Id);
-            _ = JsonData.PathSegments(lineage.InputField);
-            JsonData.Identifier(lineage.TargetCollection);
-            JsonData.Identifier(lineage.TargetId);
-            _ = JsonData.PathSegments(lineage.TargetField);
-            JsonData.Identifier(lineage.ReducerId);
-            JsonData.Identifier(lineage.ReducerVersion);
-            JsonData.Identifier(lineage.TargetSpace.Id);
-            JsonData.Identifier(lineage.TargetSpace.Model);
-            JsonData.Identifier(lineage.TargetSpace.Version);
-        }
-        catch (KeyLoadException)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
-        }
-
-        if (lineage.TargetSpace.Dimension is < DimensionFirstCount or > DimensionValidationBound || !Enum.IsDefined(lineage.TargetSpace.Metric))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
-        }
-    }
-
-    private static void ValidateClassifications(ImmutableArray<string> classifications)
-    {
-        const int CompareOrdinalValidationBoundary = 0;
-
-        string? previous = null;
-        foreach (var classification in classifications)
-        {
-            if (string.IsNullOrEmpty(classification)
-                || previous is not null && string.CompareOrdinal(previous, classification) >= CompareOrdinalValidationBoundary)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
-            }
-            previous = classification;
-        }
-    }
-
-    private static void ValidateResource(ResourceDefinition resource, string expectedName, PartitionRef partition)
-    {
-        const int SchemaVersionValidationBoundary = 1;
-
-        if (resource.Name != expectedName || resource.Kind != ResourceKind.Collection
-            || resource.TransactionDomainId != partition.TransactionDomainId || resource.SchemaVersion < SchemaVersionValidationBoundary)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
-        }
-    }
-
+        => VectorProjectionLineageValidation.ValidateLineage(lineage, partition, targetDocument, vector);
 }

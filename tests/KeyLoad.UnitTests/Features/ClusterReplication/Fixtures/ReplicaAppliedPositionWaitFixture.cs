@@ -141,7 +141,8 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
     private ReplicaMaterializer CreateMaterializer(IOptions<ReplicaConfiguration> configuration,
         IOptions<ReplicaExecutionOptions> execution)
         => new(Canonical.Database, Log,
-            new ReplicaSnapshotStore(Canonical.Store, Log, configuration, UnitExecutionOptions.ReplicaExecution()), execution);
+            new ReplicaSnapshotStore(Canonical.Store, Log, configuration, UnitExecutionOptions.ReplicaExecution(), replacementToken => Canonical.Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Canonical.Database.OperationLimitsOptions, Canonical.Database.EvaluationClock, replacementToken))), execution);
 
     internal async Task AssertDocument(string documentId)
     {

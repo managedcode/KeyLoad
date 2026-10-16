@@ -38,7 +38,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Conflict, RemoteGraphProtocol.Invalid);
         }
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
-        var graph = Resource(view, actual.Request.Target.Partition, actual.Request.Graph, ResourceKind.Graph);
+        var graph = BindAuthorizedReadResource(view, actual.Request.Target.Partition, actual.Request.Graph, ResourceKind.Graph);
         var proofs = IndexRemoteGraphIncomingProofs(request, work);
         var rows = ImmutableArray.CreateBuilder<RemoteIncomingGraphEdgeRowV1>();
         var retainedBytes = work.MeasureResult(new RemoteIncomingGraphEdgesPageV1(

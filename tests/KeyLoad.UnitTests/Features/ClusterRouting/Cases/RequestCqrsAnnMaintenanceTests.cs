@@ -1,7 +1,7 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource(nativeAnnMaintenance: true)]
-internal sealed class RequestCqrsAnnMaintenanceTests(RequestCqrsClusterFixture fixture)
+[RequestCqrsHostedDataSource(nativeAnnMaintenance: true)]
+internal sealed class RequestCqrsAnnMaintenanceTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]
     public Task SignedNativeAnnBuildRestoreCarriesEveryPhaseLiteralSearchAndOriginalCheckpointReplay()

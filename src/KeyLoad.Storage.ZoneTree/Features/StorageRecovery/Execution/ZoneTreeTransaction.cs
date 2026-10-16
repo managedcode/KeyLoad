@@ -3,7 +3,7 @@ using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomicTransaction
+internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomicTransaction, IAtomicCommitCandidateValidation
 {
     private const int NoValueBytes = 0;
     private const int NoStagedBytes = 0;
@@ -83,6 +83,44 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
     }
 
     public void ValidateCommit() => _ = PreparePayload();
+
+    public void ValidateCandidate(IReadOnlyList<StorageMutation> mutations)
+    {
+        ArgumentNullException.ThrowIfNull(mutations);
+        var candidate = new SortedSet<ZoneTreeStagedEntry>(Changes, ZoneTreeStagedEntryComparer.Instance);
+        foreach (var mutation in mutations)
+        {
+            ArgumentNullException.ThrowIfNull(mutation);
+            if (mutation.Key.IsEmpty)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ZoneTreeJournalCodec.JournalRecordsInvalid);
+            }
+            if (mutation.Key.Length > runtime.Options.MaxFrameBytes
+                || (long)mutation.Key.Length + (mutation.Value?.Length ?? NoValueBytes) > runtime.Options.MaxFrameBytes)
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, TransactionFrameLimitExceeded);
+            }
+            var row = new ZoneTreeStagedEntry(mutation.Key.ToArray(), mutation.Value?.ToArray());
+            candidate.Remove(row);
+            candidate.Add(row);
+        }
+        if (candidate.Count == NoStagedBytes)
+        {
+            return;
+        }
+        long rawBytes = NoStagedBytes;
+        foreach (var row in candidate)
+        {
+            rawBytes = checked(rawBytes + MutationBytes(row.Key, row.Value));
+            if (rawBytes > runtime.Options.MaxFrameBytes)
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, TransactionFrameLimitExceeded);
+            }
+        }
+        var records = candidate.Select(row => new StorageMutation(row.Key,
+            row.Value is null ? null : new ReadOnlyMemory<byte>(row.Value))).ToArray();
+        _ = ZoneTreeJournalCodec.Serialize(records, runtime.Options.MaxFrameBytes);
+    }
 
     internal StorageMutation[] PrepareChanges()
         => preparedChanges ??= Changes.Select(pair => new StorageMutation(pair.Key,

@@ -11,7 +11,8 @@ internal static class ZoneTreeBackupRestoreRestore
     internal static StoreIdentity Restore(string backup, string destination,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation, byte[]? newSigningKey,
         Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>>? verifyCatalog = null,
-        CancellationToken cancellationToken = default)
+        Func<IKeyValueView, StoreIdentity, long, ClusterRestoreOwnerMapping>? resolveOwnerMapping = null,
+        PhysicalShardRecord? targetOwner = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         var policy = executionOptions.Value;
@@ -30,15 +31,15 @@ internal static class ZoneTreeBackupRestoreRestore
             if (verifyCatalog is not null)
             {
                 ZoneTreeCatalogRestoreEntry.RequireFreshIdentity(originalIdentity, newIncarnation, newSigningKey);
-                ZoneTreeCatalogRestoreVerification.Require(backup, staging, originalIdentity, originalPosition,
-                    executionOptions, verifyCatalog, ownership, cancellationToken);
             }
+            var origin = ZoneTreeCatalogRestoreVerification.Require(backup, staging, originalIdentity, originalPosition,
+                executionOptions, verifyCatalog, ownership, resolveOwnerMapping, targetOwner, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             var identity = CreateRestoredIdentity(originalIdentity, newIncarnation, newSigningKey);
             ZoneTreeCatalogRestoreEntry.RequireFreshIdentity(originalIdentity,
                 identity.Incarnation, identity.SigningKey.ToArray());
             ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity, policy.IdentityBufferBytes);
-            var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions, originalIdentity.Incarnation, ownership);
+            var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions, originalIdentity.Incarnation, ownership, origin, cancellationToken);
             Publish(staging, destinationPath);
             return restoredIdentity;
         }
@@ -103,10 +104,12 @@ internal static class ZoneTreeBackupRestoreRestore
     }
 
     private static StoreIdentity ApplyRestoreAuthorityState(string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid sourceIncarnation, ZoneTreeRestoreStagingOwnership ownership)
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid sourceIncarnation, ZoneTreeRestoreStagingOwnership ownership,
+        ResourceRetirementConservationSourceOriginV1? origin, CancellationToken cancellationToken)
     {
         ownership.BeginOpen();
-        var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(destination).ResolveExecutionOptions(executionOptions));
+        var options = new ZoneTreeStoreOptions(destination).ResolveExecutionOptions(executionOptions);
+        var runtime = new ZoneTreeStoreRuntime(options);
         var restored = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
         Exception? primary = null;
         try
@@ -114,6 +117,11 @@ internal static class ZoneTreeBackupRestoreRestore
             var hasHistoricalOrigins = ZoneTreeBackupRestoreRoster.CarryOrigins(restored, sourceIncarnation);
             restored.Commit((tx, _) =>
             {
+                if (origin is not null)
+                {
+                    ResourceRetirementConservationOriginImport.StageFresh(tx, origin, origin.TargetOwner,
+                        restored.Identity, options.MaximumReadCutRecords, options.MaxFrameBytes, cancellationToken);
+                }
                 tx.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));
                 tx.Delete(KeyCodec.Encode(SystemNamespace, ClockKey));
                 tx.PutRecord(KeyCodec.Encode(SystemNamespace, DispatchPausedKey), true);

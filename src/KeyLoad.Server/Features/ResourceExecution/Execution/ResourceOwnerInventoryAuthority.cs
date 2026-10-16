@@ -27,7 +27,43 @@ internal sealed class ResourceOwnerInventoryAuthority(PartitionHost partition, R
         var configuredControl = PhysicalOwnerConfiguredTuples.Control(nodeOptions.Value, partition);
         var initial = await reads.ExecuteAsync(true, ResourceOwnerInventoryReadOperation.CaptureControl, request,
             null, configuredControl, null, null, null, sourcePrincipalId, sourcePolicyEpoch, work, token).ConfigureAwait(false);
-        var control = initial.Control!;
+        return await ExecuteCapturedAsync(sourcePrincipalId, sourcePolicyEpoch, request, initial.Control!, work, token)
+            .ConfigureAwait(false);
+    }
+
+    internal Task<ResourceOwnerInventoryResultV1> ExecuteRetiringAsync(string sourcePrincipalId, long sourcePolicyEpoch,
+        ResourceRetirementControlV1 retiring, ResourceRetirementAttemptV1 attempt, ResourceOwnerInventoryControlV1 control,
+        ReadExecutionBudget work, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(control);
+        var source = PhysicalOwnerConfiguredTuples.Control(nodeOptions.Value, partition);
+        ResourceRetirementReceiptValidation.RequireControl(retiring, retiring.Request, source.Owner);
+        ResourceRetirementAttemptValidation.Require(attempt, retiring, source.Owner);
+        var inventoryId = attempt.OriginalCommandId;
+        if (attempt.Stage != ResourceRetirementAttemptStage.Prepared
+            || !ResourceRetirementReceiptValidation.Same(control.RetirementAttempt, attempt)
+            || control.Request.ExpiresAt > attempt.ExpiresAt
+            || attempt.PrincipalId != sourcePrincipalId || attempt.PolicyEpoch != sourcePolicyEpoch
+            || control.Request.InventoryId != inventoryId || control.Request.ExpectedIncarnation != retiring.Request.ExpectedIncarnation
+            || control.Request.TenantId != retiring.Request.TenantId || control.Request.DatabaseId != retiring.Request.DatabaseId
+            || control.Request.ResourceName != retiring.Request.ResourceName || control.Lifetime != retiring.Lifetime
+            || control.PlacementDirectoryRevision != retiring.PlacementDirectoryRevision
+            || !ResourceRetirementReceiptValidation.Same(control.Definition, retiring.Definition)
+            || !ResourceRetirementReceiptValidation.Same(control.Catalog, retiring.Catalog)
+            || !ResourceRetirementReceiptValidation.Same(control.Directory, retiring.Directory))
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceRetirementNativeProtocol.Unavailable);
+        }
+        token.ThrowIfCancellationRequested();
+        work.ConstrainLifetime(control.Request.ExpiresAt);
+        return ExecuteCapturedAsync(sourcePrincipalId, sourcePolicyEpoch, control.Request, control, work, token);
+    }
+
+    private async Task<ResourceOwnerInventoryResultV1> ExecuteCapturedAsync(string sourcePrincipalId, long sourcePolicyEpoch,
+        ResourceOwnerInventoryRequestV1 request, ResourceOwnerInventoryControlV1 control,
+        ReadExecutionBudget work, CancellationToken token)
+    {
+        var configuredControl = PhysicalOwnerConfiguredTuples.Control(nodeOptions.Value, partition);
         if (control.Request != request || control.PrincipalId != sourcePrincipalId || control.PolicyEpoch != sourcePolicyEpoch)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceOwnerInventoryNativeProtocol.Unavailable);

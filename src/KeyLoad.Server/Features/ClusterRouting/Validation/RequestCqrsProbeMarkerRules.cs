@@ -32,6 +32,7 @@ internal static class RequestCqrsProbeMarkerRules
                 or RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch
                 or RequestCqrsProbePhase.ControlledLifetimeReplayBeforeDispatch
                 or RequestCqrsProbePhase.ResourceOwnerInventoryOwnerValidation
+                or RequestCqrsProbePhase.OriginalClaimReturned or RequestCqrsProbePhase.OriginalBusinessReplyReturned
                 or RequestCqrsProbePhase.ReplicaEntryAcknowledged
                 or RequestCqrsProbePhase.ReplicaEntryObserverDisposed or RequestCqrsProbePhase.QueryReadCutCaptured or RequestCqrsProbePhase.WaitForIndexReadCutCaptured)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))

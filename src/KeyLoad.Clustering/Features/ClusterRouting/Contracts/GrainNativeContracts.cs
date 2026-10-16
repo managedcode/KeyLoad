@@ -6,6 +6,12 @@ internal static class GrainNativeContracts
     internal const string RuntimeJournalPurpose = "keyload-runtime-journal-data-epoch7-v1";
     internal const string EnvelopeAlias = "keyload.request.envelope.v2";
     internal const string ValueAlias = "keyload.request.value.v1";
+    internal const string CommandObservationAdmissionAlias = "keyload.native-command-observation-admission.v1";
+    internal const string CommandWorkProofAlias = "keyload.native-command-work-proof.v1";
+    internal const string AdministratorAuthenticationRequestAlias = "keyload.native-administrator-auth-request.v1";
+    internal const string AdministratorAuthenticationResultAlias = "keyload.native-administrator-auth-result.v1";
+    internal const string CommandObservationHandleAlias = "keyload.native-command-observation-handle.v1";
+    internal const string CommandObservationResultAlias = "keyload.native-command-observation-result.v1";
     internal const string SignedTokenPrefix = "KLT2.";
     internal const int NoDtoMarker = 0;
     internal const int PurposeField = 0;
@@ -18,5 +24,7 @@ internal static class GrainNativeContracts
     // Field 7 was EncodedPayload. It is retired and must never be reused.
     internal const int ExpiresAtField = 8;
     internal const int PayloadField = 9;
+    internal const int ObservationField = 10;
+    internal const int MetadataField = 11;
     internal const int ValueField = 0;
 }

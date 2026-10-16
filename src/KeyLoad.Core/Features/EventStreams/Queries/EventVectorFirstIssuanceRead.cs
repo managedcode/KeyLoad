@@ -32,10 +32,12 @@ public sealed partial class DatabaseEngine
         }
         Authorization.Require(principal, request.ControlPartition, request.Scope.Resource,
             Capability.SubscriptionsManage);
+        var lifetimeBinding = new EventVectorReadLifetimeBinding(this, bounded, work);
+        lifetimeBinding.Scope(request);
         _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
         cancellationToken.ThrowIfCancellationRequested();
         var result = EventVectorFirstIssuanceLookup.Read(bounded, principal, request, controlOwner,
-            Store.Identity, Authorization, OperationLimitsOptions, cancellationToken);
+            Store.Identity, Authorization, OperationLimitsOptions, cancellationToken, lifetimeBinding);
         work.CheckResult(result);
         return result;
     }

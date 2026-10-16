@@ -7,7 +7,7 @@ internal static class RequestCqrsAnnRetirementFlow
     private const string NextConsumerSuffix = "-next";
     private const long NextGenerationStep = 1;
 
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, string originalLeaf, CancellationToken token)
     {
         var root = Path.Combine(fixture.Database.Directory, NativeAnnProtocol.RootDirectory);

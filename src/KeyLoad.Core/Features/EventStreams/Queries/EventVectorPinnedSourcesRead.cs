@@ -63,7 +63,7 @@ public sealed partial class DatabaseEngine
                 || mutation.ControlIncarnation != catalog.DefaultShard.Incarnation
                 || mutation.LogicalPlacementRevision != placement.Revision
                 || mutation.DirectoryFence != placement.DirectoryRevision
-                || SourceResource(bounded, request.Source).SchemaVersion != mutation.SourceSchemaVersion)
+                || SourceResource(bounded, request.Source, authorizedRead: true).SchemaVersion != mutation.SourceSchemaVersion)
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorPinnedRead);
             }

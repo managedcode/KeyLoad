@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 namespace KeyLoad.Server;
 
 internal static class PhysicalShardCatalogFence
@@ -13,6 +15,18 @@ internal static class PhysicalShardCatalogFence
             throw Errors.Fail(ErrorCode.OwnershipLost, NotReady);
         }
         return catalog.EnsureAdmissionAsync(cancellationToken);
+    }
+
+    internal static Task EnsureAdmissionAsync(PhysicalShardCatalogStartup? catalog,
+        ReadExecutionBudget work, ReadExecutionBudgetReadGrant? sourceMeta, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+        work.Check();
+        if (catalog is null || !catalog.IsReady)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, NotReady);
+        }
+        return catalog.EnsureAdmissionAsync(work, sourceMeta, token);
     }
 
     internal static bool Matches(PhysicalShardCatalog catalog, Guid physicalShardId,

@@ -56,7 +56,7 @@ internal static class ReplicaCanonicalApply
         ReplicaObservedCanonicalApply.Apply(database, entry, canonicalObservation);
     }
 
-    internal static long Begin(IReplicaSnapshotStore snapshots, ReplicaSnapshot snapshot)
+    internal static long Begin(IReplicaSnapshotStore snapshots, ReplicaSnapshot snapshot, CancellationToken cancellationToken)
     {
         try
         {
@@ -64,7 +64,7 @@ internal static class ReplicaCanonicalApply
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Conflict && error.Message == ReplicaProtocol.SnapshotUnavailable)
         {
-            snapshots.ResetIncoming();
+            snapshots.ResetIncoming(cancellationToken);
             return snapshots.Begin(snapshot);
         }
     }

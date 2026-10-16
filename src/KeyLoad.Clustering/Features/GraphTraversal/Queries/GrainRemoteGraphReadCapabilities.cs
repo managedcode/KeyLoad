@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.GraphTraversal;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
@@ -8,8 +9,9 @@ namespace KeyLoad.Clustering;
 internal static class GrainRemoteGraphReadCapabilities
 {
     internal static object Execute(DatabaseEngine database, IServiceProvider services, TimeProvider clock,
-        PrincipalRecord principal, DecodedGrainRequest request, CancellationToken token)
+        PrincipalRecord principal, DecodedGrainRequest request, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         ArgumentNullException.ThrowIfNull(clock);
         token.ThrowIfCancellationRequested();
         if (!RemoteGraphRequestScope.HandlesRead(request.Envelope.ReadKind)
@@ -19,6 +21,7 @@ internal static class GrainRemoteGraphReadCapabilities
         }
         var owner = services.GetRequiredService<PhysicalShardRecord>();
         var work = database.CreateRemoteGraphReadWork(request.Envelope.ExpiresAt, token);
+        work.AttachResourceLifetimeBinding(binding);
         return request.Envelope.ReadKind switch
         {
             GrainReadKind.RemoteGraphTargetPreparation => Preparation(database, principal, request, owner, work),

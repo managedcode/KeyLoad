@@ -12,6 +12,7 @@ internal static class FunctionalGateColdCallers
                     RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, fixture.NodeNames[^1], state.QueueOperator.Secret, queueOperator =>
                         action(new(administrator, writer, reader, state.Partition, state.Anchor, FunctionalGateColdProtocol.Resources)
                         {
+                            ReferenceBindings = state.ReferenceBindings,
                             QueueAdministrator = queueOperator,
                             WriterPrincipalId = state.Writer.Principal.Id,
                             ReaderPrincipalId = state.Reader.Principal.Id,

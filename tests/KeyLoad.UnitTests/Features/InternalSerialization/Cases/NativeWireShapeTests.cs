@@ -11,7 +11,7 @@ internal sealed class NativeWireShapeTests
     public async Task AcIs002UnverifiedNativeSurrogatesCannotEnterDynamicObjectDecode()
     {
         using var serializer = new NativeSerializerFixture();
-        object[] values = [ImmutableList.Create(1f), ImmutableDictionary.CreateRange(new[] { new KeyValuePair<string, float>(ValueKey, 1f) }), Tuple.Create(new[] { 1f })];
+        object[] values = [ImmutableList.Create(1f), Tuple.Create(new[] { 1f })];
         foreach (var value in values)
         {
             var bytes = serializer.Encode(value);

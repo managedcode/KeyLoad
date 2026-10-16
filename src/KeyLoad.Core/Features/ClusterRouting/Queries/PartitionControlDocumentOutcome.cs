@@ -53,6 +53,7 @@ public sealed partial class DatabaseEngine
         }
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, original, selected);
         ValidateCachedResult(view, principal, original, previous, BatchResourceAdmission.RetiredOutcomeMetadata);
+        BindControlledDocumentReadDependencies(view, command);
         return previous.Result;
     }
 }

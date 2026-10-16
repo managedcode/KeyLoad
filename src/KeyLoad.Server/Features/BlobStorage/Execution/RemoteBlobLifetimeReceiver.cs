@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 
@@ -9,7 +10,8 @@ namespace KeyLoad.Server.Features.BlobStorage;
 internal sealed class RemoteBlobLifetimeReceiver(OrleansNode node, PartitionHost partition,
     ServerRuntimeOptions options, TimeProvider clock)
 {
-    internal async Task<ReadOnlyMemory<byte>> ExecuteAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token)
+    internal async Task<ReadOnlyMemory<byte>> ExecuteAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token,
+        IResourceLifetimeWorkBinding binding)
     {
         var request = Require(call, token);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
@@ -17,27 +19,10 @@ internal sealed class RemoteBlobLifetimeReceiver(OrleansNode node, PartitionHost
         GrainRequestAuthority.RequireAdministrator(principal);
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateControlledBlobReadV2(requestId, principal.Id, request);
-        ControlledBlobReadResultV2? result = null;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            using var identity = node.OpenRequestContext(principal, requestId, Guid.Empty, token);
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                var reply = await node.ExecuteAsync(requestId, signed, command: false,
-                    cancellationToken: token).ConfigureAwait(false);
-                _ = Require(call, token);
-                if (reply.Error is { } error)
-                {
-                    throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable);
-                }
-                result = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as ControlledBlobReadResultV2
-                    ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
+        var actual = await NativeLifetimeReadChildExecution.ExecuteAsync<ControlledBlobReadResultV2>(
+            node, principal, requestId, signed, null, token, binding).ConfigureAwait(false);
+        _ = Require(call, token);
         token.ThrowIfCancellationRequested();
-        var actual = result ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
         if (NativeSerialization.Measure(actual) > call.MaximumReplyBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.Unavailable);

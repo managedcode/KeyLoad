@@ -1,5 +1,6 @@
-using System.Security.Cryptography;
 using KeyLoad.Clustering;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -41,6 +42,25 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         await VerifyCatalogAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    internal async Task EnsureAdmissionAsync(ReadExecutionBudget work,
+        ReadExecutionBudgetReadGrant? sourceMeta, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+        work.Check();
+        token.ThrowIfCancellationRequested();
+        if (!IsReady)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
+        }
+        var catalog = await PhysicalShardCatalogLocalRead.ReadAsync(partition, work, sourceMeta, token)
+            .ConfigureAwait(false);
+        if (!MatchesCurrentCatalog(catalog))
+        {
+            throw Errors.Fail(ErrorCode.NotFound, PhysicalShardCatalogLocalRead.CatalogMissing);
+        }
+        work.Check();
+    }
+
     internal void OpenAdmission() => Volatile.Write(ref ready, AdmissionReady);
 
     internal void CloseAdmission() => Volatile.Write(ref ready, AdmissionClosed);
@@ -68,30 +88,9 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         CancellationToken cancellationToken)
         => NativeReplicaStartupPrerequisite.WaitAsync(node, partition, clock, observation, cancellationToken);
 
-    internal async Task<PrincipalRecord> AuthenticateBootstrapAdministratorAsync(CancellationToken cancellationToken)
-    {
-        var requestId = Guid.NewGuid();
-        var codec = node.CatalogRequestCodec();
-        var payload = NativeSerialization.Serialize(options.AdminKey);
-        string signed;
-        try
-        {
-            signed = codec.CreateRead(requestId, null, GrainReadKind.Authenticate, payload);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(payload);
-        }
-        using var requestContext = node.OpenRequestContext(null, requestId, Guid.Empty, cancellationToken);
-        var reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
-        var principal = McpNativeAuthentication.ReadPrincipal(payload: reply.Payload.Span, cancellationToken: cancellationToken, options: mcpExecutionOptions);
-        if (!principal.ClusterAdministrator)
-        {
-            throw Errors.Fail(ErrorCode.PermissionDenied, PhysicalShardCatalogFence.AdministratorRequired);
-        }
-        return principal;
-    }
+    internal Task<PrincipalRecord> AuthenticateBootstrapAdministratorAsync(CancellationToken cancellationToken)
+        => NativeAdministratorAuthenticationRequests.StartupAsync(node, options.AdminKey,
+            mcpExecutionOptions, cancellationToken);
 
     private async Task SubmitBootstrapAsync(PrincipalRecord administrator, Guid commandId, byte[] payload,
         CancellationToken cancellationToken)
@@ -142,6 +141,11 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
     private async Task<bool> TryVerifyCurrentCatalogAsync(CancellationToken cancellationToken)
     {
         var catalog = await PhysicalShardCatalogLocalRead.ReadAsync(partition, cancellationToken).ConfigureAwait(false);
+        return MatchesCurrentCatalog(catalog);
+    }
+
+    private bool MatchesCurrentCatalog(PhysicalShardCatalog? catalog)
+    {
         if (catalog is null)
         {
             return false;

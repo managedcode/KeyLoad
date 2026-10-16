@@ -68,7 +68,8 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
             profile?.Bootstrap(journal.Database, configuration.VoterIds);
             var execution = RecoveryExecutionOptions.Replica();
             openedMaterializer = new(journal.Database, journal.BorrowLog(), new ReplicaSnapshotStore(
-                journal.Database.Store, journal.BorrowLog(), RecoveryExecutionOptions.Configuration(Configuration), execution), execution);
+                journal.Database.Store, journal.BorrowLog(), RecoveryExecutionOptions.Configuration(Configuration), execution, replacementToken => journal.Database.RequireNoRetirementForSnapshotReplacement(
+                    new(journal.Database.OperationLimitsOptions, journal.Database.EvaluationClock, replacementToken))), execution);
             materializer = openedMaterializer;
             openedConsensus = new(materializer, RecoveryExecutionOptions.Configuration(Configuration), execution, TimeProvider.System);
             Consensus = openedConsensus;
@@ -104,7 +105,8 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
             clockProfile?.ClockFor(Configuration.LocalId), deleteDirectoryOnFailure: false);
         var execution = RecoveryExecutionOptions.Replica();
         coldMaterializer = new(coldJournal.Database, coldJournal.BorrowLog(), new ReplicaSnapshotStore(
-            coldJournal.Database.Store, coldJournal.BorrowLog(), RecoveryExecutionOptions.Configuration(Configuration), execution), execution);
+            coldJournal.Database.Store, coldJournal.BorrowLog(), RecoveryExecutionOptions.Configuration(Configuration), execution, replacementToken => coldJournal.Database.RequireNoRetirementForSnapshotReplacement(
+                    new(coldJournal.Database.OperationLimitsOptions, coldJournal.Database.EvaluationClock, replacementToken))), execution);
     }
 
     internal Task CloseForColdAsync()

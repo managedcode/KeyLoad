@@ -33,6 +33,7 @@ internal static class ClientApiRoutes
     internal const string Search = "/v1/search";
     internal const string GraphTraverse = "/v1/graph/traverse";
     internal const string SeriesRead = "/v1/series/read";
+    internal const string TablesDrop = "/v1/admin/tables/drop";
     internal const string ResourcesConfigure = "/v1/admin/resources";
     internal const string PrincipalsConfigure = "/v1/admin/principals";
     internal const string ApiKeysConfigure = "/v1/admin/api-keys";

@@ -17,12 +17,21 @@ internal sealed class RemoteTransferPendingBudget : IDisposable
     internal static RemoteTransferPendingBudget Coordination(DatabaseEngine database, CancellationToken token)
         => new(database, coordination: true, token);
 
+    internal static RemoteTransferPendingBudget Coordination(DatabaseEngine database, ReadExecutionBudget original)
+        => new(database, coordination: true, original);
+
     private RemoteTransferPendingBudget(DatabaseEngine database, bool coordination, CancellationToken token)
+        : this(database, coordination, new ReadExecutionBudget(database.OperationLimitsOptions,
+            database.EvaluationClock, token))
+    {
+    }
+
+    private RemoteTransferPendingBudget(DatabaseEngine database, bool coordination, ReadExecutionBudget original)
     {
         clock = database.EvaluationClock;
         started = clock.GetTimestamp();
         deadline = database.DueDiscoveryDeadline;
-        budget = new(database.OperationLimitsOptions, clock, token);
+        budget = original;
         grant = coordination
             ? budget.CreateReadGrant(budget.MaximumNativeReadBytes, budget.MaximumNativeScanRecords)
             : budget.CreateReadGrant(Math.Min(database.DueExecution.MaximumRangeBytes, budget.MaximumNativeReadBytes),

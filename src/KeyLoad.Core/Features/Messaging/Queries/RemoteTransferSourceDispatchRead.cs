@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -60,20 +61,28 @@ public sealed partial class DatabaseEngine
         RequireTransferPublisher(principal, claims.Source, source);
         RequireTransferPublisher(principal, claims.Destination, destination);
         RequireTransferInspector(principal, claims.Destination, destination);
+        if (view is IResourceLifetimeReadBindingView)
+        {
+            _ = BindAuthorizedReadResource(view, claims.Source.Partition, claims.Source.Queue, ResourceKind.WorkQueue);
+            _ = RemoteTransferDestinationReadResource(view, claims.Destination);
+        }
         _ = RemoteTransferStorage.RequireSourceCounter(view, claims.Source);
-        return CaptureRemoteTransferSourcePolicy(view, principal, claims, intent, destination, work);
+        return CaptureRemoteTransferSourcePolicy(view, principal, claims, intent, source, destination, work);
     }
 
     private RemoteTransferSourceDispatch CaptureRemoteTransferSourcePolicy(IKeyValueView view,
         PrincipalRecord principal, RemoteTransferIntentClaims claims, RemoteTransferIntentRecord intent,
-        ResourceDefinition destination, ReadExecutionBudget work)
+        ResourceDefinition source, ResourceDefinition destination, ReadExecutionBudget work)
     {
+        var lifetime = ResourceLifetimeCatalog.Read(view, claims.Source.Partition.TenantId,
+            claims.Source.Partition.DatabaseId, claims.Source.Queue, source)
+            ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
         var encodedPolicy = NativeSerialization.Serialize(destination);
         work.ChargeBytes(encodedPolicy.Length);
         var digest = Convert.ToHexString(SHA256.HashData(encodedPolicy));
         var target = intent.RemoteTarget ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
         var result = new RemoteTransferSourceDispatch(claims, intent, target, principal.PolicyEpoch,
-            digest, Token(view, claims.Source.Partition, Store.Position));
+            digest, Token(view, claims.Source.Partition, Store.Position), source, lifetime);
         work.Check();
         return result;
     }

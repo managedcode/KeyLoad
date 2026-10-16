@@ -11,7 +11,7 @@ internal static class RequestCqrsAnnOriginalReplay
 {
     private const int EmptyPayload = 0;
 
-    internal static async Task RequireAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest request, AnnMaintenanceResult expected, CancellationToken token)
     {
         var canonical = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -25,18 +25,18 @@ internal static class RequestCqrsAnnOriginalReplay
         await UnchangedAsync(fixture, canonical, cut, native, nativeRoot);
     }
 
-    internal static Task RefuseUnsettledAsync(RequestCqrsClusterFixture fixture,
+    internal static Task RefuseUnsettledAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)
         => RefuseAsync(fixture, original with
         {
             CommandId = Guid.NewGuid()
         }, ErrorCode.RecoveryRequired, token);
 
-    internal static Task RefusePriorAsync(RequestCqrsClusterFixture fixture,
+    internal static Task RefusePriorAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)
         => RefuseAsync(fixture, original, ErrorCode.HistoryUnavailable, token);
 
-    internal static Task RefuseChangedAsync(RequestCqrsClusterFixture fixture,
+    internal static Task RefuseChangedAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)
         => RefuseAsync(fixture, original with
         {
@@ -44,7 +44,7 @@ internal static class RequestCqrsAnnOriginalReplay
             ? AnnMaintenanceMode.Restore : AnnMaintenanceMode.Build
         }, ErrorCode.Conflict, token);
 
-    private static async Task RefuseAsync(RequestCqrsClusterFixture fixture,
+    private static async Task RefuseAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, ErrorCode expected, CancellationToken token)
     {
         var canonical = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -73,7 +73,7 @@ internal static class RequestCqrsAnnOriginalReplay
         await UnchangedAsync(fixture, canonical, cut, native, nativeRoot);
     }
 
-    private static async Task UnchangedAsync(RequestCqrsClusterFixture fixture, string[] expected,
+    private static async Task UnchangedAsync(RequestCqrsHostedRuntimeFixture fixture, string[] expected,
         long cut, (string Path, string Bytes)[] files, bool nativeRoot)
     {
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);

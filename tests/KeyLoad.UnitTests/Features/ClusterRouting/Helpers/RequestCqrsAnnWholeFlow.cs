@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsAnnWholeFlow
 {
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture, bool malformed)
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, bool malformed)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var request = await RequestCqrsAnnTestData.SeedAsync(fixture, token);
@@ -52,7 +52,7 @@ internal static class RequestCqrsAnnWholeFlow
         var originalLeaf = RequestCqrsAnnResultAssertions.Manifest(fixture, noOp).GenerationLeaf;
         await RequestCqrsAnnPinnedRetirementFlow.RunAsync(fixture, request, noOp, originalLeaf, token);
     }
-    private static async Task<AnnMaintenanceRequest> NoOpSequenceAsync(RequestCqrsClusterFixture fixture,
+    private static async Task<AnnMaintenanceRequest> NoOpSequenceAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest restore, AnnMaintenanceResult restored, CancellationToken token)
     {
         var noOp = restore with
@@ -86,7 +86,7 @@ internal static class RequestCqrsAnnWholeFlow
         return fresh;
     }
 
-    private static async Task NoOpResultAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    private static async Task NoOpResultAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         AnnMaintenanceResult actual, AnnMaintenanceResult prior, long before, long applied, CancellationToken token)
     {
         var source = actual.Source ?? throw new InvalidOperationException();

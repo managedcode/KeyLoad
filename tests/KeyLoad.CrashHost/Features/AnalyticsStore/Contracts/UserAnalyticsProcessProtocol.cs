@@ -1,0 +1,83 @@
+using System.Collections.Immutable;
+using KeyLoad.Server;
+
+namespace KeyLoad.CrashHost.Features.AnalyticsStore;
+
+internal static class UserAnalyticsProcessProtocol
+{
+    internal const string Prepare = "user-analytics-derived-prepare";
+    internal const string Recover = "user-analytics-derived-recover";
+    internal const string PhysicalDirectory = "physical";
+    internal const string EvidenceFile = "analytics-original.bin";
+    internal const string EvidenceAlias = "keyload.crashhost.analytics-derived-original.v1";
+    internal const string Tenant = "analytics-process";
+    internal const string Database = "database";
+    internal const string Domain = "events";
+    internal const string Store = "analytics";
+    internal const string First = "first";
+    internal const string Second = "second";
+    internal const string Region = "region";
+    internal const string Amount = "amount";
+    internal const string North = "north";
+    internal const string Count = "count";
+    internal const string Sum = "sum";
+    internal const string Average = "average";
+    internal const string Minimum = "minimum";
+    internal const string Maximum = "maximum";
+    internal const string Invalid = "The original analytics process recovery invariant failed.";
+    internal const int ArgumentCount = 2;
+    internal const int RootArgument = 0;
+    internal const int ModeArgument = 1;
+    private const string FirstVoter = "https://127.0.0.1:5511";
+    private const string SecondVoter = "https://127.0.0.1:5512";
+    private const string ThirdVoter = "https://127.0.0.1:5513";
+    private const int TestSecretBytes = 32;
+    private const byte TestKeyByte = 42;
+    private const string IncarnationText = "b48b95ce-971b-4de0-bbca-4823deec6db3";
+    private const string ShardText = "6088f23d-d45f-4d7b-8a5b-3e201a979ec9";
+    internal const int CatalogVersion = 1;
+    internal const long Absent = 0;
+    internal const long Created = 1;
+    internal const long Updated = 2;
+    internal const double FirstValue = 10d;
+    internal const double SecondValue = 20d;
+    internal const double UpdatedValue = 40d;
+    private const int BusinessEpochDays = 2;
+    private const int WindowSeconds = 1;
+    private const int MaximumGroups = 10;
+    private const long EventCount = 2;
+    private const double ExpectedCount = 2d;
+    private const double InitialSum = 30d;
+    private const double InitialAverage = 15d;
+    private const double UpdatedSum = 60d;
+    private const double UpdatedAverage = 30d;
+    private static readonly Guid Incarnation = new(IncarnationText);
+    private static readonly Guid Shard = new(ShardText);
+    internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, First);
+    internal static readonly DateTimeOffset Epoch = DateTimeOffset.UnixEpoch.AddDays(BusinessEpochDays);
+
+    internal static NodeOptions Options(string root) => new()
+    {
+        DataDirectory = Path.Combine(root, PhysicalDirectory),
+        PublicEndpoint = FirstVoter,
+        Peers = [FirstVoter, SecondVoter, ThirdVoter],
+        Incarnation = Incarnation,
+        PhysicalShardId = Shard,
+        SigningKey = Convert.ToBase64String(Enumerable.Repeat(TestKeyByte, TestSecretBytes).ToArray()),
+        PeerSecret = Convert.ToBase64String(Enumerable.Repeat(TestKeyByte, TestSecretBytes).ToArray()),
+        AdminKey = CrashFixtureValues.Credential
+    };
+
+    internal static AnalyticsEventData Event(string id, double amount)
+        => new(id, Epoch, ImmutableDictionary<string, string>.Empty.Add(Region, North),
+            ImmutableDictionary<string, double>.Empty.Add(Amount, amount), null, []);
+    internal static AggregateAnalyticsRequest Query() => new(Partition, Store, Epoch.AddSeconds(-WindowSeconds), Epoch.AddSeconds(WindowSeconds),
+        [Region], [new(Count, string.Empty, AnalyticsAggregateKind.Count), new(Sum, Amount, AnalyticsAggregateKind.Sum),
+            new(Average, Amount, AnalyticsAggregateKind.Average), new(Minimum, Amount, AnalyticsAggregateKind.Min),
+            new(Maximum, Amount, AnalyticsAggregateKind.Max)], MaximumGroups);
+    internal static AnalyticsAggregateResult Expected(bool updated)
+        => new([new(ImmutableDictionary<string, string>.Empty.Add(Region, North),
+            ImmutableDictionary<string, double>.Empty.Add(Count, ExpectedCount).Add(Sum, updated ? UpdatedSum : InitialSum)
+                .Add(Average, updated ? UpdatedAverage : InitialAverage).Add(Minimum, updated ? SecondValue : FirstValue)
+                .Add(Maximum, updated ? UpdatedValue : SecondValue))], EventCount);
+}

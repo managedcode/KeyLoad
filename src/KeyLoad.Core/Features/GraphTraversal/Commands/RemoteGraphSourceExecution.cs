@@ -16,7 +16,8 @@ public sealed partial class DatabaseEngine
         var edgeId = original.Upsert?.EdgeId ?? original.Delete!.EdgeId;
         var revision = NextRevision(command.ExpectedOwnerRevision);
         var next = original.Upsert is { } upsert
-            ? new EdgeRecord(edgeId, upsert.From, upsert.To, upsert.Label,
+            ? new EdgeRecord(edgeId, VisibleVertex(tx, principal, upsert.From).Reference,
+                BindRemoteGraphDestination(command, upsert.To), upsert.Label,
                 JsonData.Validate(upsert.AttributesJson, Limits), revision) : null;
         var token = Token(tx, original.SourcePartition, position);
         var intents = BuildRemoteGraphSourceIntents(tx, principal, command, previous, next, token, revision);

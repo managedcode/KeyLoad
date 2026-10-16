@@ -22,4 +22,16 @@ public sealed record GrainOperationReply
     {
         get; init;
     }
+    /// <summary>Authenticated native command dependencies; canonical results and public JSON exclude this proof.</summary>
+    [Orleans.Id(3), System.Text.Json.Serialization.JsonIgnore]
+    internal NativeCommandWorkProofV1? WorkProof
+    {
+        get; init;
+    }
+    /// <summary>Actual private retirement receiver metadata work, excluded from public JSON.</summary>
+    [Orleans.Id(NativeCommandMetadataProtocol.ReplyMetadataField), System.Text.Json.Serialization.JsonIgnore]
+    internal NativeCommandMetadataStatisticsV1? Metadata
+    {
+        get; init;
+    }
 }

@@ -2,6 +2,8 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateDocuments
 {
+    private const string BindingId = "functional-reference-binding";
+    private const string BindingJson = "{\"docId\":\"functional-reference-binding\",\"kind\":\"reference-binding\"}";
     private const string PrimaryKeyColumn = "id";
 
     internal static async Task InitializeAsync(FunctionalGateContext context, CancellationToken token)
@@ -33,13 +35,29 @@ internal static class FunctionalGateDocuments
             FunctionalGateDocumentsState.AnchorJson, ExpectedRevision: 0);
         await FunctionalGateDocumentsWrites.CommitAsync(context, [mutation],
             [new("putDocument", "gate_docs_0", "anchor", 1)], official: false, token);
+        await FunctionalGateEntityReferences.CaptureAsync(context, context.Administrator,
+            new(context.Anchor, 1, FunctionalGateDocumentsState.AnchorJson, false, []), token);
+        for (var index = 1; index < FunctionalGateDocumentsState.CollectionCount; index++)
+        {
+            var reference = new EntityRef(context.Partition, FunctionalGateDocumentsState.Collection(index), BindingId);
+            await FunctionalGateDocumentsWrites.CommitAsync(context,
+                [new PutDocument(reference.Collection, reference.Id, BindingJson, 0)],
+                [new("putDocument", reference.Collection, reference.Id, 1)], official: false, token);
+            await FunctionalGateEntityReferences.CaptureAsync(context, context.Administrator,
+                new(reference, 1, BindingJson, false, []), token);
+        }
         await FunctionalGateDocumentsReads.AnchorAsync(context, token);
     }
 
     internal static async Task ExerciseAsync(FunctionalGateContext context, int iteration, CancellationToken token)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(iteration);
-        var state = FunctionalGateDocumentsState.Create(context.Partition, iteration);
+        var names = FunctionalGateDocumentsState.Create(context.Partition, iteration);
+        var state = names with
+        {
+            Independent = context.Bind(names.Independent),
+            Related = context.Bind(names.Related)
+        };
         var cut = await FunctionalGateDocumentsWrites.CreateAsync(context, state, token);
         await FunctionalGateDocumentsReads.PairAsync(context, state, 1, 1, "created", false, true, cut, token);
         cut = await FunctionalGateDocumentsWrites.UpdateAsync(context, state, token);

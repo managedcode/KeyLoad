@@ -3,6 +3,7 @@ using System.Text;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -12,18 +13,37 @@ public sealed partial class DatabaseEngine
     internal QueueTransferReceiptInspection MintRemoteTransferReceiptInspection(string principalId,
         InspectQueueTransferReceiptRequest request, RemoteTransferSourceDispatch original,
         RegisteredPhysicalOwnerV1 sourceOwner, QueueTransferReceiptInspection receipt, ReadExecutionBudget work)
+        => MintRemoteTransferReceiptInspectionCore(principalId, request, original, sourceOwner, receipt, work,
+            bindResourceLifetime: false);
+
+    internal QueueTransferReceiptInspection MintRemoteTransferReceiptInspectionBound(string principalId,
+        InspectQueueTransferReceiptRequest request, RemoteTransferSourceDispatch original,
+        RegisteredPhysicalOwnerV1 sourceOwner, QueueTransferReceiptInspection receipt, ReadExecutionBudget work,
+        IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        work.RequireResourceLifetimeBinding(binding);
+        return MintRemoteTransferReceiptInspectionCore(principalId, request, original, sourceOwner, receipt, work,
+            bindResourceLifetime: true);
+    }
+
+    private QueueTransferReceiptInspection MintRemoteTransferReceiptInspectionCore(string principalId,
+        InspectQueueTransferReceiptRequest request, RemoteTransferSourceDispatch original,
+        RegisteredPhysicalOwnerV1 sourceOwner, QueueTransferReceiptInspection receipt, ReadExecutionBudget work,
+        bool bindResourceLifetime)
     {
         work.Check();
         work.ChargeBytes(NativeSerialization.Measure(receipt));
         return Store.Read(view => MintRemoteTransferReceiptAtCut(work.CreateView(view), principalId,
-            request, original, sourceOwner, receipt, work));
+            request, original, sourceOwner, receipt, work, bindResourceLifetime));
     }
 
     private QueueTransferReceiptInspection MintRemoteTransferReceiptAtCut(IKeyValueView view, string principalId,
         InspectQueueTransferReceiptRequest request, RemoteTransferSourceDispatch original,
-        RegisteredPhysicalOwnerV1 sourceOwner, QueueTransferReceiptInspection receipt, ReadExecutionBudget work)
+        RegisteredPhysicalOwnerV1 sourceOwner, QueueTransferReceiptInspection receipt, ReadExecutionBudget work,
+        bool bindResourceLifetime)
     {
-        var current = ReadRemoteTransferReceiptDispatch(view, principalId, request, work)
+        var current = ReadRemoteTransferReceiptDispatch(view, principalId, request, work, bindResourceLifetime)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable);
         RequireRemoteTransferSameDispatch(original, current);
         ValidateRemoteTransferOriginalSourceCommit(view, current.Intent);

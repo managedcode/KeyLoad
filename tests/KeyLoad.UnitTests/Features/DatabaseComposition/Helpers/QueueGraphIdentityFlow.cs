@@ -11,7 +11,7 @@ internal static class QueueGraphIdentityFlow
     internal static async Task RunAsync(TestDatabase db, bool from, int component)
     {
         var state = await SeedAsync(db, from);
-        var reference = from ? state.From : state.To;
+        var reference = from ? state.First.Reference : state.Second.Reference;
         var foreign = new PartitionRef(db.Partition.TenantId, db.Partition.DatabaseId,
             db.Partition.TransactionDomainId, QueueGraphIdentityState.ForeignPartition);
         var mismatched = component switch
@@ -76,6 +76,10 @@ internal static class QueueGraphIdentityFlow
     {
         var first = new EntityRef(db.Partition, QueueGraphIdentityState.Collection, "first");
         var second = new EntityRef(db.Partition, QueueGraphIdentityState.Collection, "second");
+        var boundFrom = DatabaseCompositionExpectedReferences.Capture(db, first);
+        var boundTo = DatabaseCompositionExpectedReferences.Capture(db, second);
+        var marker = DatabaseCompositionExpectedReferences.Capture(db,
+            new(db.Partition, QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker));
         var at = TimeProvider.System.GetUtcNow().AddSeconds(1);
         var link = new QueueGraphLink(first, second, QueueGraphIdentityState.Label,
             QueueGraphIdentityState.AttributesJson);
@@ -85,7 +89,7 @@ internal static class QueueGraphIdentityFlow
                 new PutDocument(QueueGraphIdentityState.Collection, second.Id, QueueGraphIdentityState.SecondJson),
                 new EnqueueMessage(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message,
                     payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]);
-        var operation = await CompileAsync(seed, at);
+        var operation = await CompileAsync(db.Database, seed, at);
         var receipt = db.Database.Apply(operation).Get<CommitReceipt>();
         var expectedReceipt = new CommitReceipt(operation.Id,
             new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
@@ -100,8 +104,8 @@ internal static class QueueGraphIdentityFlow
                 QueueGraphIdentityState.MarkerJson),
                 new QueueToGraph(QueueGraphIdentityState.Graph, QueueGraphIdentityState.Queue,
                     QueueGraphIdentityState.Prefix)]);
-        var failed = await CompileAsync(failedRequest, at.AddSeconds(1));
-        var healthy = await CompileAsync(failedRequest with
+        var failed = await CompileAsync(db.Database, failedRequest, at.AddSeconds(1));
+        var healthy = await CompileAsync(db.Database, failedRequest with
         {
             CommandId = Guid.NewGuid()
         }, at.AddSeconds(2));
@@ -111,14 +115,14 @@ internal static class QueueGraphIdentityFlow
         var source = new MessageInspection(new(QueueGraphIdentityState.Message, MessageState.Ready,
             0, 1, 1, null, null), payload, QueueGraphIdentityState.HeadersJson);
         var state = new QueueGraphIdentityState(db, first, second, at,
-            new(first, 1, QueueGraphIdentityState.FirstJson, new(), at),
-            new(second, 1, QueueGraphIdentityState.SecondJson, new(), at), source,
-            operation, receipt, failed, healthy, key, original);
+            new(boundFrom, 1, QueueGraphIdentityState.FirstJson, new(), at),
+            new(boundTo, 1, QueueGraphIdentityState.SecondJson, new(), at), source,
+            operation, receipt, failed, healthy, key, original, boundFrom, boundTo, marker);
         await QueueGraphIdentityAssertions.ModelsAsync(state, db.Database, db.Store, healthy: false);
         return state;
     }
 
-    internal static async Task<ReplicatedOperation> CompileAsync(CommandRequest command, DateTimeOffset at)
+    internal static async Task<ReplicatedOperation> CompileAsync(DatabaseEngine engine, CommandRequest command, DateTimeOffset at)
     {
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
@@ -135,7 +139,9 @@ internal static class QueueGraphIdentityFlow
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);
         var decoded = NativeSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(command))).IsTrue();
-        return new(command.CommandId, OperationKind.Batch, QueueGraphIdentityState.Root, at,
-            JsonSerializer.Serialize(decoded, JsonDefaults.Options));
+        var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock,
+            TestContext.Current!.Execution.CancellationToken);
+        return engine.CreateNativeOperation(OperationKind.Batch, command.CommandId, QueueGraphIdentityState.Root, at,
+            NativeSerialization.Serialize(decoded), work);
     }
 }

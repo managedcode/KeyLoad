@@ -21,6 +21,8 @@ internal sealed class McpGraphPathCatalogTests
     private const string Array = "array";
     private const string Boolean = "boolean";
     private const string Result = "result";
+    private const string Lifetime = "lifetime";
+    private const string Incarnation = "incarnation";
     private const string AdditionalProperties = "additionalProperties";
 
     [Test]
@@ -119,8 +121,9 @@ internal sealed class McpGraphPathCatalogTests
     private static async Task VerifyEntityAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
-        await VerifyObjectAsync(schema, [Partition, McpGraphPathCatalogProtocol.Collection, McpGraphPathCatalogProtocol.Id],
+        await VerifyObjectAsync(schema, [Partition, McpGraphPathCatalogProtocol.Collection, McpGraphPathCatalogProtocol.Id, Lifetime],
             [Partition, McpGraphPathCatalogProtocol.Collection, McpGraphPathCatalogProtocol.Id]);
+        await VerifyLifetimeAsync(root, schema.GetProperty(Properties).GetProperty(Lifetime));
         var partition = Resolve(root, schema.GetProperty(Properties).GetProperty(Partition));
         await VerifyObjectAsync(partition, [McpGraphPathCatalogProtocol.TenantId, McpGraphPathCatalogProtocol.DatabaseId, McpGraphPathCatalogProtocol.TransactionDomainId, McpGraphPathCatalogProtocol.PartitionKey, McpGraphPathCatalogProtocol.AtomicPartitionId],
             [McpGraphPathCatalogProtocol.TenantId, McpGraphPathCatalogProtocol.DatabaseId, McpGraphPathCatalogProtocol.TransactionDomainId, McpGraphPathCatalogProtocol.PartitionKey]);
@@ -131,6 +134,19 @@ internal sealed class McpGraphPathCatalogTests
         {
             await VerifyTypeAsync(root, field.Value, String);
         }
+    }
+
+    private static async Task VerifyLifetimeAsync(JsonElement root, JsonElement schema)
+    {
+        schema = Resolve(root, schema);
+        await Assert.That(schema.GetProperty(Type).EnumerateArray().Select(value => value.GetString()!))
+            .IsEquivalentTo(new[] { Object, McpSchemaInspector.Null });
+        await Assert.That(schema.GetProperty(AdditionalProperties).GetBoolean()).IsFalse();
+        await Assert.That(schema.GetProperty(Properties).EnumerateObject().Select(value => value.Name))
+            .IsEquivalentTo(new[] { Incarnation });
+        await Assert.That(schema.GetProperty(Required).EnumerateArray().Select(value => value.GetString()!))
+            .IsEquivalentTo(new[] { Incarnation });
+        await VerifyTypeAsync(root, schema.GetProperty(Properties).GetProperty(Incarnation), String);
     }
 
     private static async Task VerifyPartitionAsync(JsonElement root, JsonElement schema)

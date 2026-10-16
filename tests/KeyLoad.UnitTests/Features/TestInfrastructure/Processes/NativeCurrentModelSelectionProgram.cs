@@ -24,7 +24,8 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/ResourcePartitionInventoryRf3Tests/AuthenticatedConservativeInventoryRetainsReplayRollbackAndTwoColdOwners",
               "/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay",
               "/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
-              "/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects"
+              "/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects",
+              "/*/*/DropTableLifecycleRf3Tests/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -32,6 +33,13 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              currentModelFilters[21] + ' ',
+              currentModelFilters[21] + '*',
+              currentModelFilters[21].replace('DropTableLifecycleRf3Tests/', 'DropTableLifecycleRf3Tests*/'),
+              '/*/*/DropTableLifecycleRf3Tests/*',
+              '/*/*/DropTableLifecycleRf3Tests/OtherMethod',
+              '/*/*/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves/DropTableLifecycleRf3Tests',
+              '/*/*/(DropTableLifecycleRf3Tests|ResourcePartitionInventoryRf3Tests)/*',
               currentModelFilters[19] + ' ',
               currentModelFilters[19] + '*',
               currentModelFilters[19].replace('EmptyReplicaSnapshotRf3Tests/', 'EmptyReplicaSnapshotRf3Tests*/'),
@@ -150,7 +158,7 @@ internal static class NativeCurrentModelSelectionProgram
               }
               if (!rejected) throw new Error('Unsupported current model cohort selector was accepted.');
             }
-            for (const addedIndex of [15, 16, 17, 18, 19, 20]) {
+            for (const addedIndex of [15, 16, 17, 18, 19, 20, 21]) {
               const currentModelHealthy = nativeSelection(currentModelArgs[addedIndex], publicCohortEnvironment);
               if (JSON.stringify(currentModelHealthy) !== JSON.stringify(currentModels[addedIndex])) {
                 throw new Error('Exact current model selection changed after refused selectors.');

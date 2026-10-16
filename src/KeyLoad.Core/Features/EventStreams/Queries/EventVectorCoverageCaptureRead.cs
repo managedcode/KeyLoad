@@ -63,6 +63,8 @@ public sealed partial class DatabaseEngine
         var encoded = EventVectorEntryEncoding.Encode(entries.ToImmutable(), admission);
         var result = EventVectorCaptureResult(request, groupOrdinal, sourceOwner, principal, identity,
             storeCut, applied, catalog, roster, directory, placements, heads, encoded);
+        result = EventVectorCoverageLifetimeValidation.Capture(bounded, result, admission);
+        new EventVectorReadLifetimeBinding(this, bounded, work).Capture(result);
         admission.RequireEncodedBytes(NativeSerialization.Measure(result));
         work.CheckResult(result);
         return result;

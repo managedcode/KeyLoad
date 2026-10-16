@@ -188,5 +188,11 @@ public enum GrainReadKind
     /// <summary>Privately validates an original blob command outcome under mandatory lifetime coverage.</summary>
     ControlledBlobOutcomeV2 = 91,
     /// <summary>Privately reads bounded canonical resource-owner inventory under current administrator authority.</summary>
-    ResourceOwnerInventory = 92
+    ResourceOwnerInventory = 92,
+    /// <summary>Privately reads exact durable resource retirement state under current authority.</summary>
+    ResourceRetirement = 93,
+    /// <summary>Reads bounded canonical user analytics events under current persisted authority.</summary>
+    AnalyticsEvents = 94,
+    /// <summary>Aggregates a bounded authorized user analytics source cut through the native derived engine.</summary>
+    AnalyticsAggregate = 95
 }

@@ -1,3 +1,5 @@
+using KeyLoad.Core.Features.ResourceExecution;
+
 namespace KeyLoad.Core;
 
 /// <summary>Owns one dispatched operation and its completion until the consumer reports an outcome.</summary>
@@ -31,9 +33,22 @@ public sealed class AdmittedCommand : IDisposable
     /// <summary>Gets the task completed when the consumer records the operation outcome.</summary>
     public Task<OperationResult> Completion => completion.Task;
 
-    internal AdmittedCommand(ReplicatedOperation operation, CommandAdmissionLease lease)
+    internal ReadExecutionBudget? SourcePlanningBudget
+    {
+        get;
+    }
+
+    internal IReplicaForwardedCommandWork? ReceiverWork
+    {
+        get;
+    }
+
+    internal AdmittedCommand(ReplicatedOperation operation, CommandAdmissionLease lease,
+        ReadExecutionBudget? sourcePlanningBudget = null, IReplicaForwardedCommandWork? receiverWork = null)
     {
         Operation = operation;
+        SourcePlanningBudget = sourcePlanningBudget;
+        ReceiverWork = receiverWork;
         Control = lease.Control;
         Tenant = lease.Tenant;
         this.lease = lease;

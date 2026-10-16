@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 
 namespace KeyLoad.Core;
@@ -7,6 +8,18 @@ public sealed partial class DatabaseEngine
 {
     internal LocalAnnObservationFence CaptureLocalAnnObservation(string principalId, AnnMaintenanceRequest original,
         ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null)
+        => CaptureLocalAnnObservationCore(principalId, original, budget, sourceMetadata, bindResourceLifetime: false);
+
+    internal LocalAnnObservationFence CaptureLocalAnnObservationBound(string principalId, AnnMaintenanceRequest original,
+        ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata, IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        budget.AttachResourceLifetimeBinding(binding);
+        return CaptureLocalAnnObservationCore(principalId, original, budget, sourceMetadata, bindResourceLifetime: true);
+    }
+
+    private LocalAnnObservationFence CaptureLocalAnnObservationCore(string principalId, AnnMaintenanceRequest original,
+        ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata, bool bindResourceLifetime)
     {
         return Store.Read(view =>
         {
@@ -18,7 +31,9 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.PermissionDenied, RemoteAnnReadInvalid);
             }
             Authorization.Require(principal, original.Consumer.Partition, original.Collection, Capability.VectorSearch);
-            var resource = Resource(bounded, original.Consumer.Partition, original.Collection, ResourceKind.Collection);
+            var resource = bindResourceLifetime
+                ? BindAuthorizedReadResource(bounded, original.Consumer.Partition, original.Collection, ResourceKind.Collection)
+                : Resource(bounded, original.Consumer.Partition, original.Collection, ResourceKind.Collection);
             if (sourceMetadata is null)
             {
                 Authorization.RequireFieldUse(principal, resource, original.Field);

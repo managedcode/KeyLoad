@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -12,10 +13,11 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
     : IControlledDocumentCommandRouter
 {
     public async Task<OperationResult?> TryExecuteAsync(GrainRequestEnvelope envelope,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken,
+        ReadOnlyMemory<byte> payload, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken,
         Func<CancellationToken, ValueTask>? grantSettled = null,
         Func<CancellationToken, ValueTask>? outcomeObserved = null)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         cancellationToken.ThrowIfCancellationRequested();
         if (envelope.CommandKind != OperationKind.Batch
             && (envelope.CommandKind is not { } kind || !BlobStorageOperations.Handles(kind)))
@@ -35,7 +37,7 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
             {
                 await runtime.RunAsync(async token =>
                 {
-                    result = await ExecuteAtCutAsync(runtime, envelope, payload, grantSettled, outcomeObserved, token).ConfigureAwait(false);
+                    result = await ExecuteAtCutAsync(runtime, envelope, payload, binding, grantSettled, outcomeObserved, token).ConfigureAwait(false);
                 }, linked.Token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
@@ -43,14 +45,15 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
         return result;
     }
     private async Task<OperationResult?> ExecuteAtCutAsync(PartitionMovementRuntime runtime,
-        GrainRequestEnvelope envelope, ReadOnlyMemory<byte> payload,
+        GrainRequestEnvelope envelope, ReadOnlyMemory<byte> payload, IResourceLifetimeWorkBinding binding,
         Func<CancellationToken, ValueTask>? grantSettled,
         Func<CancellationToken, ValueTask>? outcomeObserved, CancellationToken token)
     {
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         node.CatalogRequestCodec().ValidateScope(envelope);
         var principal = GrainRequestAuthority.ReloadForRequest(partition.Database, envelope, clock);
-        var work = new ReadExecutionBudget(limits, clock, token);
+        var work = new ReadExecutionBudget(partition.Database.OperationLimitsOptions, clock, token);
+        work.AttachResourceLifetimeBinding(binding);
         var original = partition.Database.CreateNativeOperation(envelope.CommandKind!.Value,
             envelope.CommandId, principal.Id, clock.GetUtcNow(), payload);
         var context = partition.Database.TryCaptureControlledDocumentCommand(principal.Id, original, work);
@@ -60,7 +63,7 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
         }
         var control = PhysicalOwnerConfiguredTuples.Control(options.Value, partition).Owner;
         var phases = new ControlledDocumentPhaseExecution(runtime, control, partition, grantSettled, outcomeObserved);
-        var flow = new ControlledDocumentCommandFlow(partition, phases, blobReads, envelope.RequestId, limits, clock);
+        var flow = new ControlledDocumentCommandFlow(partition, phases, blobReads, envelope.RequestId, limits, clock, binding);
         try
         {
             var result = await flow.ExecuteAsync(original, context, envelope.ExpiresAt, work, token)

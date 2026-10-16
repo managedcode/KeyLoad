@@ -25,12 +25,13 @@ internal static class GraphIncomingReadScope
         return principal;
     }
 
-    internal static ResourceDefinition ReadGraphResource(IKeyValueView view,
-        ReadExecutionBudgetReadGrant grant, PartitionRef partition, string graph)
+    internal static ResourceDefinition ReadGraphResource(DatabaseEngine database, IKeyValueView view,
+        ReadExecutionBudgetReadGrant grant, PartitionRef partition, string graph, ReadExecutionBudget budget)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, graph), grant);
-        _ = ResourceLifetimeCatalog.Read(grant.CreateView(view), partition.TenantId, partition.DatabaseId, graph, resource);
+        var metadata = budget.CreateView(view, grant);
+        var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, graph, resource);
         if (resource is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, MissingResource);
@@ -43,15 +44,17 @@ internal static class GraphIncomingReadScope
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceKindConflict);
         }
+        database.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
         return resource;
     }
 
-    internal static ResourceDefinition ReadCollection(IKeyValueView view,
-        ReadExecutionBudgetReadGrant grant, PartitionRef partition, string collection)
+    internal static ResourceDefinition ReadCollection(DatabaseEngine database, IKeyValueView view,
+        ReadExecutionBudgetReadGrant grant, PartitionRef partition, string collection, ReadExecutionBudget budget)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection), grant);
-        _ = ResourceLifetimeCatalog.Read(grant.CreateView(view), partition.TenantId, partition.DatabaseId, collection, resource);
+        var metadata = budget.CreateView(view, grant);
+        var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, collection, resource);
         if (resource is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, MissingResource);
@@ -64,6 +67,7 @@ internal static class GraphIncomingReadScope
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceKindConflict);
         }
+        database.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
         return resource;
     }
 

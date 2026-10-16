@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
@@ -10,7 +11,29 @@ public sealed partial class DatabaseEngine
         ReadExecutionBudget budget)
         => Store.Read(view => ReadAnnProjectionWork(view, consumer, generation, budget));
 
+    internal AnnProjectionWork ReadAnnProjectionWorkBound(ProjectionConsumerRef consumer, long generation,
+        ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        budget.AttachResourceLifetimeBinding(binding);
+        return Store.Read(view => ReadAnnProjectionWork(view, consumer, generation, budget, binding));
+    }
+
     internal AnnProjectionWorkPage ReadAnnProjectionWorkPage(byte[]? after, ReadExecutionBudget budget)
+        => ReadAnnProjectionWorkPageCore(after, budget, null);
+
+    internal AnnProjectionWorkPage ReadAnnProjectionWorkPageBound(byte[]? after, ReadExecutionBudget budget,
+        IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        budget.AttachResourceLifetimeBinding(binding);
+        var page = ReadAnnProjectionWorkPageCore(after, budget, binding);
+        budget.CheckResult(page);
+        return page;
+    }
+
+    private AnnProjectionWorkPage ReadAnnProjectionWorkPageCore(byte[]? after, ReadExecutionBudget budget,
+        IResourceLifetimeWorkBinding? binding)
     {
         const int LastConsumerRecordOffset = 1;
         return Store.Read<AnnProjectionWorkPage>(view =>
@@ -32,8 +55,8 @@ public sealed partial class DatabaseEngine
                 }
                 try
                 {
-                    items.Add(ReadAnnProjectionWork(bounded, current.Consumer,
-                        current.Definition.IndexGeneration, budget));
+                    items.Add(ReadAnnProjectionWork(binding is null ? bounded : view, current.Consumer,
+                        current.Definition.IndexGeneration, budget, binding));
                 }
                 catch (KeyLoadException refusal) when (refusal.Code is ErrorCode.PermissionDenied
                     or ErrorCode.Unauthenticated or ErrorCode.TokenInvalidated)
@@ -47,9 +70,11 @@ public sealed partial class DatabaseEngine
     }
 
     private AnnProjectionWork ReadAnnProjectionWork(global::KeyLoad.Storage.IKeyValueView view,
-        ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget)
+        ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget,
+        IResourceLifetimeWorkBinding? binding = null)
     {
-        var current = ReadProjectionMaintenanceEligibility(view, consumer, generation, budget);
+        var current = binding is null ? ReadProjectionMaintenanceEligibility(view, consumer, generation, budget)
+            : ReadProjectionMaintenanceEligibilityCore(view, consumer, generation, budget, null, true);
         var bounded = budget.CreateView(view);
         var authority = current.MaintenanceAuthority
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidMaintenanceAuthority);

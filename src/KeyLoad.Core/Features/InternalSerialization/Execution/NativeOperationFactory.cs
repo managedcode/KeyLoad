@@ -16,6 +16,18 @@ public sealed partial class DatabaseEngine
     /// <returns>The typed internal operation; public JSON is retained solely for its existing fingerprint.</returns>
     public ReplicatedOperation CreateNativeOperation(OperationKind kind, Guid id, string principalId,
         DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload)
+        => CreateNativeOperationCore(kind, id, principalId, evaluatedAt, payload, null);
+
+    internal ReplicatedOperation CreateNativeOperation(OperationKind kind, Guid id, string principalId,
+        DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget work)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+        work.Check();
+        return CreateNativeOperationCore(kind, id, principalId, evaluatedAt, payload, work);
+    }
+
+    private ReplicatedOperation CreateNativeOperationCore(OperationKind kind, Guid id, string principalId,
+        DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)
     {
         RequireNativeBudget(payload.Length);
         if (kind == OperationKind.BootstrapPhysicalShardCatalog)
@@ -35,7 +47,7 @@ public sealed partial class DatabaseEngine
         var identity = kind switch
         {
             OperationKind.ConfigurePlacementPolicy => Identity<ConfigurePlacementPolicyRequest>(payload),
-            OperationKind.Batch => Identity<CommandRequest>(payload),
+            OperationKind.Batch => BatchIdentity(payload, work),
             OperationKind.Receive => Identity<ReceiveRequest>(payload),
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),
             OperationKind.Processing => Identity<ProcessingRequest>(payload),
@@ -68,8 +80,26 @@ public sealed partial class DatabaseEngine
             OperationKind.ReclaimBlob => Identity<ReclaimBlobRequest>(payload),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, NativeCommandContract.Unsupported)
         };
-        return IssueNativeOperation(new(id, kind, principalId, evaluatedAt, identity), new NativeCommandPayload(payload));
+        var operation = new ReplicatedOperation(id, kind, principalId, evaluatedAt, identity);
+        return work is null ? IssueNativeOperation(operation, new NativeCommandPayload(payload))
+            : IssueNativeOperation(operation, new NativeCommandPayload(payload), work);
     }
+
+    private string BatchIdentity(ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)
+    {
+        var request = NativeSerialization.Deserialize<CommandRequest>(payload.Span, NativeValidationProfile.PublicInputElements);
+        if (!NativeAnalyticsIdentity.HasAnalyticsMutation(request))
+        {
+            return JsonSerializer.Serialize(request, JsonDefaults.Options);
+        }
+        if (work is null)
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, NativeAnalyticsWorkRequired);
+        }
+        return NativeAnalyticsIdentity.Canonicalize(request, work, Limits.MaxBatchBytes);
+    }
+
+    private const string NativeAnalyticsWorkRequired = "Native analytics issuance requires the original operation budget.";
 
     private static string Identity<T>(ReadOnlyMemory<byte> payload)
         => JsonSerializer.Serialize(NativeSerialization.Deserialize<T>(payload.Span, NativeValidationProfile.PublicInputElements), JsonDefaults.Options);

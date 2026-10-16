@@ -60,7 +60,8 @@ internal static class NativeWireWalk
         if (field.WireType == WireType.TagDelimited)
         {
             NativeWireCheck.Require(frames.Count + NativeWireIdentities.EnvelopeAndValueDepth <= NativeSerializationLimits.WireDepth);
-            frames.Push(new NativeWireFrame(actual));
+            var immutableValues = frames.TryPeek(out var parent) && parent.IsImmutableDictionaryValues;
+            frames.Push(new NativeWireFrame(actual, immutableValues));
             return;
         }
         ConsumeScalar(ref reader, field, actual);

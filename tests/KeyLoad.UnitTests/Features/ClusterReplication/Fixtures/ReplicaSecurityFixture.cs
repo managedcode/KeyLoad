@@ -111,7 +111,10 @@ internal sealed class ReplicaSecurityFixture : IDisposable
             kind is { } value ? Operation(value) : null)).ToImmutableArray()));
     internal ReplicaPeerEnvelope Request<T>(ReplicaRpc method, T payload, string? sender = null)
     {
-        var request = Sender.SignRequest(VoterB, method, Discovery.RuntimeAddress, ReplicaProtocolCodec.Serialize(payload));
+        var bytes = method == ReplicaRpc.Forward && payload is ReplicatedOperation operation
+            ? ReplicaForwardTestFrame.Payload(operation)
+            : ReplicaProtocolCodec.Serialize(payload);
+        var request = Sender.SignRequest(VoterB, method, Discovery.RuntimeAddress, bytes);
         return sender is null ? request : Resign(request with
         {
             Sender = sender
@@ -124,7 +127,7 @@ internal sealed class ReplicaSecurityFixture : IDisposable
         var request = Request(ReplicaRpc.Forward, operation);
         return Resign(request with
         {
-            Payload = ReplicaSecurityWireFixture.Operation(operation, scenario)
+            Payload = ReplicaForwardTestFrame.WrapOperation(ReplicaSecurityWireFixture.Operation(operation, scenario))
         });
     }
     internal ReplicaPeerEnvelope DuplicateAppend(bool operation)

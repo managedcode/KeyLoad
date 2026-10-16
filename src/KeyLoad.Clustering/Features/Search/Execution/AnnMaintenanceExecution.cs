@@ -25,7 +25,7 @@ internal static class AnnMaintenanceExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         purpose.EnableAnnMaintenance(request.Mode);
-        var children = new AnnMaintenanceChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics);
+        var children = new AnnMaintenanceChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics, purpose.WorkBinding);
         AnnMaintenanceResult result;
         try
         {

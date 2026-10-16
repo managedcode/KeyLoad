@@ -5,6 +5,7 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaRpcClient
 {
+    private const int NoForwardEntries = 0;
     private readonly ReplicaConfiguration configuration;
     private readonly ReplicaExecutionOptions execution;
     private readonly CancellationToken stoppingToken;
@@ -32,8 +33,12 @@ internal sealed class ReplicaRpcClient
         }
     }
 
-    internal async Task<TReply> InvokeAsync<TRequest, TReply>(string voter, ReplicaRpc method, TRequest request,
+    internal Task<TReply> InvokeAsync<TRequest, TReply>(string voter, ReplicaRpc method, TRequest request,
         CancellationToken cancellationToken)
+        => InvokeAsync<TRequest, TReply>(voter, method, request, null, cancellationToken);
+
+    internal async Task<TReply> InvokeAsync<TRequest, TReply>(string voter, ReplicaRpc method, TRequest request,
+        Action? beforeTransport, CancellationToken cancellationToken)
     {
         var active = Volatile.Read(ref transport) ?? throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         var payload = EncodeRequest(request, configuration);
@@ -46,6 +51,7 @@ internal sealed class ReplicaRpcClient
             ReadOnlyMemory<byte> reply;
             try
             {
+                beforeTransport?.Invoke();
                 reply = await active.InvokeAsync(voter, method, payload, deadline.Token)
                     .ConfigureAwait(false);
                 transportOutcome = DatabasePhaseOutcome.Completed;
@@ -96,7 +102,9 @@ internal sealed class ReplicaRpcClient
         var decodeOutcome = DatabasePhaseOutcome.Faulted;
         try
         {
-            var decoded = ReplicaProtocolCodec.Deserialize<TReply>(reply.Span);
+            var decoded = typeof(TReply) == typeof(ReplicaForwardReplyV1)
+                ? (TReply)(object)DecodeForwardReply(reply)
+                : ReplicaProtocolCodec.Deserialize<TReply>(reply.Span);
             decodeOutcome = DatabasePhaseOutcome.Completed;
             return decoded;
         }
@@ -109,6 +117,25 @@ internal sealed class ReplicaRpcClient
         {
             DatabasePhaseTelemetry.End(DatabasePhaseKind.ReplicaReplyDecode, decodeOutcome, decodeStarted);
         }
+    }
+
+    private static ReplicaForwardReplyV1 DecodeForwardReply(ReadOnlyMemory<byte> reply)
+    {
+        var inspected = ReplicaNativeInspection.Inspect<ReplicaForwardReplyV1>(reply, NoForwardEntries);
+        var result = inspected.Value;
+        if (result.Error is not null && result.SafeDetail is { } proxy)
+        {
+            if (inspected.Utf8Length(proxy) > ReplicaProtocol.PayloadMetadataBytes
+                || inspected.Utf16Length(proxy) > ReplicaProtocol.MaximumDetailCharacters)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ReplicaPersistence.InvalidEncoding);
+            }
+            result = result with
+            {
+                SafeDetail = inspected.Metadata(proxy, ReplicaProtocol.PayloadMetadataBytes)
+            };
+        }
+        return result;
     }
 
     internal static bool Unavailable(Exception error) => error is HttpRequestException or TimeoutException or OperationCanceledException

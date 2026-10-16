@@ -1,3 +1,5 @@
+using KeyLoad.Core.Features.ResourceExecution;
+
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
@@ -18,13 +20,24 @@ public sealed partial class DatabaseEngine
         return Store.Read(view => ReadProjectionMaintenanceEligibility(view, consumer, generation, budget));
     }
 
+    internal ProjectionConsumerInfo ReadProjectionMaintenanceEligibilityBound(ProjectionConsumerRef consumer,
+        long generation, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        budget.AttachResourceLifetimeBinding(binding);
+        ValidatePartition(consumer.Partition);
+        JsonData.Identifier(consumer.Name);
+        budget.Check();
+        return Store.Read(view => ReadProjectionMaintenanceEligibilityCore(view, consumer, generation, budget, null, true));
+    }
+
     internal ProjectionConsumerInfo ReadProjectionMaintenanceEligibility(global::KeyLoad.Storage.IKeyValueView view,
         ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget)
         => ReadProjectionMaintenanceEligibilityCore(view, consumer, generation, budget, null);
 
     private ProjectionConsumerInfo ReadProjectionMaintenanceEligibilityCore(global::KeyLoad.Storage.IKeyValueView view,
         ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget,
-        ResourceDefinition? authorizedRemoteMetadata)
+        ResourceDefinition? authorizedRemoteMetadata, bool bindResource = false)
     {
         var bounded = budget.CreateView(view);
         var state = ProjectionConsumer(bounded, consumer);
@@ -41,8 +54,9 @@ public sealed partial class DatabaseEngine
         }
         RequireProjectionMaintenanceProfile(state.Definition, profile);
         Authorization.Require(principal, consumer.Partition, profile.Collection, Capability.VectorSearch);
-        var resource = authorizedRemoteMetadata
-            ?? Resource(bounded, consumer.Partition, profile.Collection, ResourceKind.Collection);
+        var resource = authorizedRemoteMetadata ?? (bindResource
+            ? BindAuthorizedReadResource(bounded, consumer.Partition, profile.Collection, ResourceKind.Collection)
+            : Resource(bounded, consumer.Partition, profile.Collection, ResourceKind.Collection));
         Authorization.RequireFieldUse(principal, resource, profile.Field);
         RequireProjectionMaintenanceResource(resource, profile);
         budget.Check();

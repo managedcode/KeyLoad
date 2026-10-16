@@ -4,10 +4,11 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-internal sealed class NativeMovementParentStateEvidence(int configuredObserverOwnerIndex) : IGrainRequestPhaseObserver
+internal sealed class NativeMovementParentStateEvidence(int configuredObserverOwnerIndex) : IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver
 {
     private readonly Lock gate = new();
     private readonly NativeMovementParentCommandEvidence commands = new();
+    private NativeStage? nativeStage;
     private Stage? executing;
     private Stage? returned;
     private Stage? lastExecuting;
@@ -47,23 +48,41 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
         return ValueTask.CompletedTask;
     }
 
+    public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(actualRuntime);
+        cancellationToken.ThrowIfCancellationRequested();
+        commands.Observe(identity, phase, cancellationToken);
+        var runtime = actualRuntime.Read();
+        lock (gate)
+        {
+            nativeStage = new(identity.RequestId, identity.ReadKind, phase,
+                runtime.VoterId, runtime.SiloAddress, runtime.Incarnation);
+        }
+        return ValueTask.CompletedTask;
+    }
+
     public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)
         => commands.ProducerDisposed(identity);
 
     internal void Write(TextWriter output)
     {
+        NativeStage? actualNative;
         Stage? before;
         Stage? after;
         Stage? latestBefore;
         Stage? latestAfter;
         lock (gate)
         {
+            actualNative = nativeStage;
             before = executing;
             after = returned;
             latestBefore = lastExecuting;
             latestAfter = lastReturned;
         }
         commands.Write(output, configuredObserverOwnerIndex);
+        output.WriteLine($"Native movement configuredObserverOwnerIndex={configuredObserverOwnerIndex}; NativeExecution={actualNative}");
         output.WriteLine($"Native movement configuredObserverOwnerIndex={configuredObserverOwnerIndex}; Executing={before}; Returned={after}; LastExecuting={latestBefore}; LastReturned={latestAfter}");
     }
 
@@ -87,6 +106,9 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(context.GrainId.ToString()))),
             context.ActivationId.ToParsableString(), configuredOwner);
     }
+
+    private sealed record NativeStage(Guid RequestId, GrainReadKind? ReadKind, GrainRequestPhase Phase,
+        string VoterId, string SiloAddress, Guid Incarnation);
 
     private sealed record Stage(Guid RequestId, GrainReadKind? ReadKind, string GrainIdDigest,
         string ActivationId, ConfiguredOwner? ConfiguredActivationOwner);

@@ -10,7 +10,7 @@ namespace KeyLoad.Clustering;
 /// <param name="loggerFactory">Factory used by the Orleans grain-service base type.</param>
 /// <param name="services">The actual silo provider; storage-backed services resolve only during native initialization.</param>
 /// <param name="diagnostics">Operational logging for unexpected endpoint failures.</param>
-public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
+public sealed partial class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
     IServiceProvider services, ILogger<PartitionReplicaGrainService> diagnostics)
     : GrainService(id, silo, loggerFactory), IPartitionReplicaGrainService
 {
@@ -48,6 +48,10 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
     public async Task<ReplicaPeerReply> ExchangeAsync(ReplicaPeerEnvelope request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+        if (request.Method == ReplicaRpc.Forward && RequiresOwnedForward())
+        {
+            return await ExchangeForwardAsync(request, cancellationToken).ConfigureAwait(true);
+        }
         try
         {
             request = authentication.VerifyRequest(request);

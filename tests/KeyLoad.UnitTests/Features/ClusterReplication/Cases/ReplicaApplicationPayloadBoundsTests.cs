@@ -127,8 +127,8 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         var padding = new string(PayloadPadding, payloadLength);
         if (method == ReplicaRpc.Forward)
         {
-            var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(template.Payload.Span);
-            return ReplicaProtocolCodec.Serialize(WithPayload(fixture, operation, padding));
+            var operation = ReplicaForwardTestFrame.ReadOperation(template.Payload);
+            return ReplicaForwardTestFrame.Payload(WithPayload(fixture, operation, padding));
         }
 
         var append = ReplicaProtocolCodec.Deserialize<AppendRequest>(template.Payload.Span);
@@ -137,8 +137,8 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
 
     private static byte[] ForwardWithPayloadLength(ReplicaSecurityFixture fixture, ReplicaPeerEnvelope template, int payloadLength)
     {
-        var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(template.Payload.Span);
-        return ReplicaProtocolCodec.Serialize(WithPayload(fixture, operation, new string(PayloadPadding, payloadLength)));
+        var operation = ReplicaForwardTestFrame.ReadOperation(template.Payload);
+        return ReplicaForwardTestFrame.Payload(WithPayload(fixture, operation, new string(PayloadPadding, payloadLength)));
     }
 
     private static byte[] AppendWithinEntryBound(ReplicaSecurityFixture fixture, ReplicaPeerEnvelope template, int maximumAppendBytes, int maximumPayloadBytes)

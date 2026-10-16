@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.Extensions.Options;
 
@@ -8,12 +9,14 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal sealed class ControlledDocumentCommandFlow(PartitionHost partition,
     ControlledDocumentPhaseExecution phases, ControlledBlobSourceRead blobReads, Guid ingressRequestId,
-    IOptions<DatabaseLimits> limits, TimeProvider clock)
+    IOptions<DatabaseLimits> limits, TimeProvider clock, IResourceLifetimeWorkBinding binding)
 {
     internal async Task<OperationResult> ExecuteAsync(ReplicatedOperation original,
         PartitionControlDocumentCommandContext context, DateTimeOffset requestExpiry,
         ReadExecutionBudget originalWork, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(binding);
+        originalWork.AttachResourceLifetimeBinding(binding);
         if (context.OriginalOutcome is { } retained)
         {
             return BlobStorageOperations.Handles(original.Kind)
@@ -65,9 +68,9 @@ internal sealed class ControlledDocumentCommandFlow(PartitionHost partition,
         {
             queryExpiry = expiry;
         }
-        var frame = partition.Database.TryCaptureControlledBlobOutcomeV2(original.PrincipalId, original, queryExpiry, work)
+        var frame = partition.Database.TryCaptureControlledBlobOutcomeV2Bound(original.PrincipalId, original, queryExpiry, work, binding)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteDocumentProtocol.Unavailable);
-        return await blobReads.ObserveOutcomeAsync(ingressRequestId, frame, work, token).ConfigureAwait(false);
+        return await blobReads.ObserveOutcomeAsync(ingressRequestId, frame, work, token, binding).ConfigureAwait(false);
     }
 
     private async Task<PartitionControlCommandRecord> ApplyEffectAsync(ReplicatedOperation original,

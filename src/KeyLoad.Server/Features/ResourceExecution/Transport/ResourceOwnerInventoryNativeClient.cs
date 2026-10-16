@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ResourceExecution;
 
-internal sealed class ResourceOwnerInventoryNativeClient : IAsyncDisposable
+internal sealed partial class ResourceOwnerInventoryNativeClient : IAsyncDisposable
 {
     private readonly PartitionHost partition;
     private readonly PartitionMovementGrainServiceClient movement;
@@ -22,7 +22,7 @@ internal sealed class ResourceOwnerInventoryNativeClient : IAsyncDisposable
 
     internal ResourceOwnerInventoryNativeClient(PartitionHost partition, PartitionMovementGrainServiceClient movement,
         ResourceOwnerInventoryNativeAuthority authority, ResourceOwnerInventoryNativeTrust trust,
-        ResourceOwnerInventorySignedReads reads, IOptions<DatabaseLimits> limits, IOptions<GrainRoutingOptions> routing,
+        ResourceOwnerInventorySignedReads reads, ResourceRetirementNativeExchange retirement, IOptions<DatabaseLimits> limits, IOptions<GrainRoutingOptions> routing,
         IOptions<NodeOptions> options, ReplicaSiloDiscoveryState local, TimeProvider clock)
     {
         this.partition = partition;
@@ -30,6 +30,7 @@ internal sealed class ResourceOwnerInventoryNativeClient : IAsyncDisposable
         this.authority = authority;
         this.trust = trust;
         this.reads = reads;
+        this.retirement = retirement;
         this.limits = limits;
         this.routing = routing;
         this.options = options.Value;
@@ -41,11 +42,11 @@ internal sealed class ResourceOwnerInventoryNativeClient : IAsyncDisposable
     internal Task<ResourceOwnerInventoryReadReplyV1> SendToVoterAsync(RegisteredPhysicalOwnerV1 destination,
         string voter, ResourceOwnerInventoryReadRequestV1 query, string sourcePrincipalId, long sourcePolicyEpoch,
         CancellationToken token)
-        => ExecuteAsync(query, caller => SendCoreAsync(destination, voter, query, sourcePrincipalId, sourcePolicyEpoch, caller), token);
+        => ExecuteAsync(query.Request.ExpiresAt, NativeRequestWorkKind.ReadCapability, ResourceOwnerInventoryNativeProtocol.Unavailable, caller => SendCoreAsync(destination, voter, query, sourcePrincipalId, sourcePolicyEpoch, caller), token);
 
     internal Task<ResourceOwnerInventoryReadReplyV1> ExecuteLocalAsync(ResourceOwnerInventoryReadRequestV1 query,
         string sourcePrincipalId, long sourcePolicyEpoch, CancellationToken token)
-        => ExecuteAsync(query, caller => ReadLocalAsync(query, sourcePrincipalId, sourcePolicyEpoch, caller), token);
+        => ExecuteAsync(query.Request.ExpiresAt, NativeRequestWorkKind.ReadCapability, ResourceOwnerInventoryNativeProtocol.Unavailable, caller => ReadLocalAsync(query, sourcePrincipalId, sourcePolicyEpoch, caller), token);
 
     private async Task<ResourceOwnerInventoryReadReplyV1> ReadLocalAsync(ResourceOwnerInventoryReadRequestV1 query,
         string sourcePrincipalId, long sourcePolicyEpoch, CancellationToken token)
@@ -59,21 +60,21 @@ internal sealed class ResourceOwnerInventoryNativeClient : IAsyncDisposable
         return await reads.ReadAsync(query, sourcePrincipalId, sourcePolicyEpoch, false, token).ConfigureAwait(false);
     }
 
-    private async Task<ResourceOwnerInventoryReadReplyV1> ExecuteAsync(ResourceOwnerInventoryReadRequestV1 query,
-        Func<CancellationToken, Task<ResourceOwnerInventoryReadReplyV1>> operation, CancellationToken token)
+    private async Task<T> ExecuteAsync<T>(DateTimeOffset expiresAt, NativeRequestWorkKind kind, string unavailable,
+        Func<CancellationToken, Task<T>> operation, CancellationToken token) where T : class
     {
         var failures = new List<Exception>();
         NativeRequestWorkLease? lease = null;
         CancellationTokenSource? deadline = null;
         CancellationTokenSource? linked = null;
-        ResourceOwnerInventoryReadReplyV1? result = null;
+        T? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            lease = work.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
-            var remaining = query.Request.ExpiresAt - clock.GetUtcNow();
+            lease = work.Acquire(Guid.NewGuid(), kind);
+            var remaining = expiresAt - clock.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
             {
-                throw Errors.Fail(ErrorCode.CursorExpired, ResourceOwnerInventoryNativeProtocol.Unavailable);
+                throw Errors.Fail(ErrorCode.CursorExpired, unavailable);
             }
             deadline = new(remaining < routing.Value.ExecutionLifetime ? remaining : routing.Value.ExecutionLifetime, clock);
             linked = CancellationTokenSource.CreateLinkedTokenSource(token, work.ShutdownToken, deadline.Token);
@@ -81,17 +82,17 @@ internal sealed class ResourceOwnerInventoryNativeClient : IAsyncDisposable
             {
                 result = await operation(linked.Token).ConfigureAwait(false);
             }
-            catch (OperationCanceledException) when (!token.IsCancellationRequested
-                && !work.ShutdownToken.IsCancellationRequested && query.Request.ExpiresAt <= clock.GetUtcNow())
+            catch (OperationCanceledException) when (kind == NativeRequestWorkKind.ReadCapability && !token.IsCancellationRequested
+                && !work.ShutdownToken.IsCancellationRequested && expiresAt <= clock.GetUtcNow())
             {
-                throw Errors.Fail(ErrorCode.CursorExpired, ResourceOwnerInventoryNativeProtocol.Unavailable);
+                throw Errors.Fail(ErrorCode.CursorExpired, unavailable);
             }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => linked?.Dispose(), failures);
         ServerFailureObserver.Observe(() => deadline?.Dispose(), failures);
         ServerFailureObserver.Observe(() => lease?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        return result ?? throw Errors.Fail(ErrorCode.Corruption, ResourceOwnerInventoryNativeProtocol.Unavailable);
+        return result ?? throw Errors.Fail(ErrorCode.Corruption, unavailable);
     }
 
     private async Task<ResourceOwnerInventoryReadReplyV1> SendCoreAsync(RegisteredPhysicalOwnerV1 destination,

@@ -88,8 +88,12 @@ public enum Capability : long
     QueueCancel = 1L << 38,
     /// <summary>Allows target-only protected processing in a configured inbox namespace.</summary>
     InboxWrite = 1L << 39,
+    /// <summary>Allows reading canonical user analytics events and aggregates.</summary>
+    AnalyticsRead = 1L << 40,
+    /// <summary>Allows conditional canonical user analytics event mutation.</summary>
+    AnalyticsWrite = 1L << 41,
     /// <summary>Combines every defined capability.</summary>
-    All = (1L << 40) - 1
+    All = (1L << 42) - 1
 }
 
 /// <summary>Grants capabilities for a database and resource scope.</summary>

@@ -21,13 +21,15 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
     private const string EpochFence = "The principal policy changed since this command was evaluated.";
     private const Capability ReadCapabilities = Capability.DocumentsRead | Capability.Query | Capability.EventsRead | Capability.EventsReplay
         | Capability.QueueInspect | Capability.DeadLettersRead | Capability.GraphRead | Capability.SeriesRead
-        | Capability.VectorSearch | Capability.VectorRaw | Capability.TopicsRead | Capability.ChangesRead | Capability.BlobRead;
+        | Capability.VectorSearch | Capability.VectorRaw | Capability.TopicsRead | Capability.ChangesRead | Capability.BlobRead
+        | Capability.AnalyticsRead;
     private const Capability WriteCapabilities = ReadCapabilities | Capability.DocumentsWrite | Capability.EventsAppend
         | Capability.QueuePublish | Capability.QueueConsume | Capability.QueueAck | Capability.QueueRenew
         | Capability.DeadLettersRedrive | Capability.SubscriptionsManage | Capability.GraphWrite | Capability.SeriesAppend
         | Capability.TopicsPublish | Capability.SubscriptionsConsume | Capability.SubscriptionsAck | Capability.BlobWrite
         | Capability.BlobDelete | Capability.BlobManage | Capability.SeriesManage
-        | Capability.EventsSnapshotsManage | Capability.SchedulerManage | Capability.QueueCancel | Capability.InboxWrite;
+        | Capability.EventsSnapshotsManage | Capability.SchedulerManage | Capability.QueueCancel | Capability.InboxWrite
+        | Capability.AnalyticsWrite;
     private static readonly string[] ResourcePrefixes = ["gate_docs_", "gate_sql_", "gate_events_", "gate_queue_",
         "gate_topic_", "gate_blobs_", "gate_graph_", "gate_vectors_", "gate_text_", "gate_series_"];
     private readonly List<RequestCqrsRf3Callers> callers = [];
@@ -41,6 +43,7 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
     internal IReadOnlyList<RequestCqrsRf3Callers> Callers => callers;
     internal IReadOnlyList<RequestCqrsRf3Callers> Writers => callers.Take(WriterCount).ToArray();
     internal IReadOnlyList<RequestCqrsRf3Callers> Readers => callers.Skip(ReaderStart).Take(WriterCount).ToArray();
+    internal IReadOnlyList<PrincipalRecord> WriterPrincipals => identities.Take(WriterCount).Select(item => item.Principal).ToArray();
     internal IReadOnlyList<string> WriterPrincipalIds => identities.Take(WriterCount).Select(item => item.Principal.Id).ToArray();
     internal IReadOnlyList<string> ReaderPrincipalIds => identities.Skip(ReaderStart).Take(WriterCount).Select(item => item.Principal.Id).ToArray();
 
@@ -58,7 +61,9 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
                 var expected = identity.Principal with
                 {
                     PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1),
-                    Grants = Grants(partition.DatabaseId, capabilities)
+                    FieldGrants = [.. identity.Principal.FieldGrants.Concat(FunctionalGateAnalyticsAccess.Grants).Distinct(StringComparer.Ordinal)],
+                    Grants = Grants(partition.DatabaseId, capabilities, index < WriterCount
+                        ? identity.Principal.Id : owner.identities[index - ReaderStart].Principal.Id)
                 };
                 var persisted = await McpCallerAssertions.SdkSuccessAsync(
                     await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
@@ -93,7 +98,7 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
         {
             await FunctionalGateUserAssertions.EqualDocumentAsync(context, callers[index], context.Anchor, anchor, token);
         }
-        var probe = new EntityRef(context.Partition, context.MutableDocumentCollection, AuthId);
+        var probe = context.Bind(new(context.Partition, context.MutableDocumentCollection, AuthId));
         var absent = new DocumentReadResult(null);
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, context.Administrator, probe, absent, token);
         var command = new CommandRequest(Guid.NewGuid(), context.Partition,
@@ -174,7 +179,7 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
         var expected = identities[index].Principal with
         {
             PolicyEpoch = checked(identities[index].Principal.PolicyEpoch + 1),
-            Grants = Grants(context.Partition.DatabaseId, capabilities)
+            Grants = Grants(context.Partition.DatabaseId, capabilities, identities[index % WriterCount].Principal.Id)
         };
         var actual = await context.SdkAsync(context.Administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
         await SqlRf3Protocol.EqualAsync(expected, actual);
@@ -184,9 +189,11 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
         };
     }
 
-    private static ImmutableArray<ScopeGrant> Grants(string database, Capability capabilities)
+    private static ImmutableArray<ScopeGrant> Grants(string database, Capability capabilities, string analyticsOwner)
         => [.. ResourcePrefixes.SelectMany(prefix => Enumerable.Range(0, Resources)
-            .Select(index => new ScopeGrant(database, prefix + index, capabilities)))];
+                .Select(index => new ScopeGrant(database, prefix + index, capabilities))),
+            .. Enumerable.Range(0, Resources).Select(index => new ScopeGrant(database,
+                FunctionalGateUserAnalyticsState.StoreName(analyticsOwner, index), capabilities))];
 
     public async ValueTask DisposeAsync()
     {

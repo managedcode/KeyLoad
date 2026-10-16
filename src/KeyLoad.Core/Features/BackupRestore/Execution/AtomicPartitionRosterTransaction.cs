@@ -9,11 +9,15 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.BackupRestore.Execution;
 
-internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope, IResourceOwnerInventoryContext
+internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope, IResourceOwnerInventoryContext, IAtomicCommitCandidateValidation, IResourceEffectObservation
 {
     private const int NoCandidates = 0;
     private readonly IAtomicTransaction inner;
     private readonly ResourceOwnerInventoryStaging inventory;
+    internal ResourceEffectBindingScope EffectAdmission
+    {
+        get;
+    }
     bool IPartitionMovementReadScope.MovementAuthorityAbsent
     {
         get; set;
@@ -35,6 +39,7 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
         this.inner = inner ?? throw new ArgumentNullException(nameof(inner));
         this.limits = limits ?? throw new ArgumentNullException(nameof(limits));
         inventory = new(inner, limits);
+        EffectAdmission = new(limits.Value);
         this.storePosition = storePosition;
         this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
             ? appliedIndex : AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex;
@@ -56,6 +61,7 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
 
     public void Put(byte[] key, byte[] value)
     {
+        cleanupScope?.RequireMutation(key, hasValue: true);
         var candidate = PrepareCandidate(key, value, hasValue: true);
         ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
         movementViewChanged = true;
@@ -65,6 +71,7 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
 
     public void Delete(byte[] key)
     {
+        cleanupScope?.RequireMutation(key, hasValue: false);
         var candidate = PrepareCandidate(key, [], hasValue: false);
         ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
         movementViewChanged = true;
@@ -77,12 +84,19 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
         ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
         movementViewChanged = true;
         candidates.Clear();
+        cleanupScope = null;
         inventory.Reset();
         retainedKeyBytes = NoRetainedKeyBytes;
         inner.Reset();
     }
 
     public void ValidateCommit() => inner.ValidateCommit();
+
+    void IResourceEffectObservation.ObserveLifetime(ResourceLifetimeV1 lifetime)
+        => EffectAdmission.ObserveLifetime(lifetime);
+
+    void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime)
+        => EffectAdmission.Observe(partition, lifetime);
 
     void IResourceOwnerInventoryContext.UseVerifiedImage(PartitionRef partition)
         => inventory.UseVerifiedImage(partition);
@@ -94,6 +108,15 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
 
     internal void PersistCandidates(Guid currentIncarnation)
     {
+        if (cleanupScope is not null)
+        {
+            if (candidates.Count != NoCandidates)
+            {
+                throw ResourceOwnerInventoryValidation.Invalid();
+            }
+
+            return;
+        }
         inventory.Persist(currentIncarnation);
         if (candidates.Count == NoCandidates)
         {
@@ -145,6 +168,10 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
             return null;
         }
 
+        if (cleanupScope is not null)
+        {
+            return null;
+        }
         var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
         var retained = candidates.ContainsKey(partition);
         if (!retained && (candidates.Count >= limits.Value.MaxBatchMutations || rosterKey.Length > limits.Value.MaxBatchBytes

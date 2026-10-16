@@ -28,7 +28,7 @@ internal static class DistributedSearchWitnessRevalidation
                 return witness;
             };
         return metadata is null
-            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read)
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read, budget)
             : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
                 grant, budget, metadata, read);
     }

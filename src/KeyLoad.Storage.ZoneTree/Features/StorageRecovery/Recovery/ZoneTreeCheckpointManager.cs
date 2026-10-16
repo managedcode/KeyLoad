@@ -31,7 +31,7 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
         }
 
         return ZoneTreeCheckpointWriter.Write(path, runtime.Options, runtime.Identity,
-            runtime.Position, applied, runtime.Tree);
+            runtime.Position, applied, runtime.Tree, runtime.View);
     }
 
     private long AppliedPosition() => runtime.View.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, LastAppliedKey)) is { } value
@@ -47,7 +47,7 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
             var snapshot = WriteCurrent(temporary, null);
             using (var verify = File.OpenRead(temporary))
             {
-                ZoneTreeCheckpointReader.Read(verify, runtime.Options);
+                ZoneTreeCheckpointPublication.RequireReplayable(verify, runtime.Options);
             }
 
             ZoneTreeCheckpointGeneration.Replace(runtime, temporary, snapshot.Position, replaceTree: false);
@@ -81,8 +81,17 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
 
             runtime.NativeReadCuts.RequireNoActiveLeaseForTreeReplacement();
 
+            var budget = new ZoneTreeConservationBudget(runtime.Options, runtime.Clock, CancellationToken.None);
+            var view = new ZoneTreeConservationView(runtime.View, budget);
+            var liveFloor = ResourceRetirementConservationRead.ReadFloor(view, runtime.Options.MaxFrameBytes);
             File.Copy(path, temporary, false);
-            var snapshot = ReadStaged(temporary, expectedAppliedPosition);
+            var snapshot = ReadStaged(temporary, expectedAppliedPosition, liveFloor, view, budget);
+            var finalFloor = ResourceRetirementConservationRead.ReadFloor(view, runtime.Options.MaxFrameBytes);
+            if ((liveFloor is null) != (finalFloor is null)
+                || liveFloor is not null && !ResourceRetirementConservation.Same(liveFloor, finalFloor!))
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, SnapshotCutLost);
+            }
             ZoneTreeCheckpointGeneration.Replace(runtime, temporary, snapshot.Position, replaceTree: true);
             return snapshot;
         }
@@ -92,11 +101,17 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
         }
     }
 
-    private StorageSnapshot ReadStaged(string temporary, long expectedAppliedPosition)
+    private StorageSnapshot ReadStaged(string temporary, long expectedAppliedPosition,
+        ResourceRetirementConservationFloorV1? requiredFloor, IKeyValueView view, ZoneTreeConservationBudget budget)
     {
         using var input = new FileStream(temporary, FileMode.Open, FileAccess.ReadWrite, FileShare.None,
             runtime.Options.StreamBufferBytes);
-        var snapshot = ZoneTreeCheckpointReader.Read(input, runtime.Options);
+        var header = ZoneTreeCheckpointReader.ReadMetadata(budget.ReadFrame(input));
+        if (header.ConservationFloor is { } incomingFloor)
+        {
+            ResourceRetirementConservationCatalog.RequireOwner(view, incomingFloor.PhysicalOwner, runtime.Options.MaxFrameBytes);
+        }
+        var snapshot = ZoneTreeCheckpointPublication.RequireReplayable(input, runtime.Options, requiredFloor, budget);
         if (snapshot.Incarnation != runtime.Identity.Incarnation || snapshot.AppliedPosition != expectedAppliedPosition
             || input.Position != input.Length)
         {

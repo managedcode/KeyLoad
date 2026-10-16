@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -12,8 +13,9 @@ internal sealed class RemoteDistributedSearchRouter(OrleansNode node, PartitionH
 {
     public async Task<DistributedSearchPageV1> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
         DistributedSearchRequestV1 request, CancellationToken cancellationToken,
-        Func<CancellationToken, Task>? statisticsCaptured = null)
+        Func<CancellationToken, Task>? statisticsCaptured, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var failures = new List<Exception>();
         DistributedSearchPageV1? page = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -29,10 +31,10 @@ internal sealed class RemoteDistributedSearchRouter(OrleansNode node, PartitionH
                 using var expiry = new CancellationTokenSource(remaining, clock);
                 using var original = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, expiry.Token);
-                var reads = new RemoteDistributedSearchLeafRead(node, partition, options, client);
-                page = await DistributedSearchCoordinator.ExecuteAsync(partition.Database, request, execution,
+                var reads = new RemoteDistributedSearchLeafRead(node, partition, options, client, binding);
+                page = await DistributedSearchCoordinator.ExecuteBoundAsync(partition.Database, request, execution,
                     (work, grant, budget) => reads.Prepare(envelope, principal.Id, work, grant, budget),
-                    reads.RevalidateAsync, clock, envelope.ExpiresAt, original.Token, statisticsCaptured).ConfigureAwait(false);
+                    reads.RevalidateAsync, clock, envelope.ExpiresAt, original.Token, statisticsCaptured, binding).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

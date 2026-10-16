@@ -17,15 +17,17 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
     private readonly Dictionary<(PartitionRef Partition, string Collection), CollectionDecision> collections = [];
 
     /// <summary>Preserves start-vertex authorization and unavailable errors.</summary>
-    internal void RequireStart(EntityRef vertex)
+    internal EntityRef RequireStart(EntityRef vertex)
     {
         RequireCollection(vertex);
+        vertex = database.BindEntityReference(budget.CreateView(view), vertex);
         if (!ReadVisibility(vertex))
         {
             throw Errors.Fail(ErrorCode.NotFound, VertexUnavailable);
         }
         admitVertex?.Invoke(vertex);
-        visible.Add(vertex, true);
+        visible[vertex] = true;
+        return vertex;
     }
 
     /// <summary>Returns only a boolean; decoded document JSON is never retained.</summary>
@@ -40,7 +42,18 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         {
             return RememberVertex(vertex, false);
         }
+        database.RequireStoredEntityReference(budget.CreateView(view), vertex);
         return RememberVertex(vertex, ReadVisibility(vertex));
+    }
+
+    internal bool MatchesTarget(EntityRef admitted, EntityRef requested)
+    {
+        if (admitted.Partition != requested.Partition || admitted.Collection != requested.Collection
+            || admitted.Id != requested.Id)
+        {
+            return false;
+        }
+        return database.BindEntityReference(budget.CreateView(view), requested) == admitted;
     }
 
     private bool CanReadCollection(EntityRef vertex)
@@ -71,8 +84,8 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
             return;
         }
         database.Authorization.Require(principal, vertex.Partition, vertex.Collection, Capability.DocumentsRead);
-        var resourceView = admitCollection is null ? view : budget.CreateView(view);
-        var resource = database.Resource(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
+        var resourceView = budget.CreateView(view);
+        var resource = database.BindAuthorizedReadResource(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
         admitCollection?.Invoke(vertex.Partition, vertex.Collection);
         collections[key] = new(true, resource.SchemaVersion);
     }
@@ -128,10 +141,20 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
     private bool ReadVisibleDocument(EntityRef vertex)
     {
         var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(vertex));
-        if (document is not null && document.Reference != vertex)
+        if (document is null || document.Deleted || !database.Authorization.CanReadRow(principal, document.Access))
+        {
+            return false;
+        }
+        if (document.Reference is null || document.Reference.Partition != vertex.Partition
+            || document.Reference.Collection != vertex.Collection || document.Reference.Id != vertex.Id)
         {
             throw Errors.Fail(ErrorCode.Corruption, VertexMismatch);
         }
-        return document is not null && !document.Deleted && database.Authorization.CanReadRow(principal, document.Access);
+        database.RequireStoredEntityReference(budget.CreateView(view), document.Reference);
+        if (document.Reference != vertex)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, VertexMismatch);
+        }
+        return true;
     }
 }

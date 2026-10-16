@@ -46,6 +46,8 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
     {
         await registered.ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
+        work.BindPhysicalOwner(services.GetRequiredService<PhysicalShardRecord>());
+        work.AttachResourceLifetimeWorkFence(partition.Database, partition.Materializer.Log.State.LastIndex);
         partition.TransferVerification?.AttachRequests(work);
         PhysicalOwnerRegistrationRuntime.RequireProbeWork(nodeOptions, physicalOwnerWork);
         Volatile.Write(ref documents, await RemoteDocumentRuntime.CreateAsync(node, partition,
@@ -56,7 +58,6 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         await placement.InitializeAsync(node, partition, options, Movement, clock, token).ConfigureAwait(false);
         // Retain ownership before release publication; later initialization failures join DisposeCoreAsync.
         resourceInventory = await ResourceOwnerInventoryNativeFactory.CreateAsync(node, partition, options,
-            services.GetRequiredService<PartitionMovementGrainServiceClient>(),
             services.GetRequiredService<ReplicaSiloDiscoveryState>(), clock).ConfigureAwait(false);
         Volatile.Write(ref resourceInventory, resourceInventory);
         Volatile.Write(ref discovery, services.GetRequiredService<ReplicaSiloDiscoveryState>());

@@ -34,7 +34,7 @@ public sealed partial class DatabaseEngine
         RequireResourceMetadataChangeAdmission(transaction, request.TenantId, request.DatabaseId);
         if (previous is null)
         {
-            _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition);
+            _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition, Limits);
         }
         BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation,
             BlobExecution.InitialCatalogProofRecords);
@@ -60,6 +60,7 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(request.Definition.TransactionDomainId);
         var definition = request.Definition;
         Features.RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
+        Features.AnalyticsStore.AnalyticsStoreValidation.ValidateSchema(definition);
         BlobStorageOperations.ValidatePolicy(definition);
         Features.Search.VectorFieldProfiles.Validate(definition);
         if (!Enum.IsDefined(definition.Kind) || !Enum.IsDefined(definition.Authority)

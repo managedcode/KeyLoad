@@ -18,18 +18,18 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
         }
-        var result = Store.Read(view => CaptureRemoteGraphReceiverReceipt(work.CreateView(view), principalId, request));
+        var result = Store.Read(view => CaptureRemoteGraphReceiverReceipt(work.CreateView(view), principalId, request, work));
         work.CheckResult(result);
         return result;
     }
 
     private RemoteGraphReceiverResultV1 CaptureRemoteGraphReceiverReceipt(IKeyValueView view, string principalId,
-        RemoteGraphReceiverReceiptReadRequestV1 request)
+        RemoteGraphReceiverReceiptReadRequestV1 request, ReadExecutionBudget work)
     {
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
         var content = request.Intent.Content;
         Authorization.Require(principal, content.Destination.Partition, content.Graph, Capability.GraphWrite);
-        _ = Resource(view, content.Destination.Partition, content.Graph, ResourceKind.Graph);
+        _ = BindAuthorizedReadResource(view, content.Destination.Partition, content.Graph, ResourceKind.Graph);
         if (!content.Deleted)
         {
             _ = VisibleVertex(view, principal, content.Destination);
@@ -68,7 +68,8 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
         }
-        _ = RequireRemoteGraphReceiver(view, principal, retained.Original.SourceProof);
+        _ = RequireRemoteGraphReceiver(view, principal, retained.Original.SourceProof, work);
+        ObserveRemoteGraphReadIntent(view, request.Intent, work, target: true);
         var identity = Identity<RemoteGraphReceiverIdentityV1>(NativeSerialization.Serialize(
             new RemoteGraphReceiverIdentityV1(request.OriginalReceiveCommandId, request.Intent)));
         var bytes = NativeSerialization.Serialize(retained.Original);

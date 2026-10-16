@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
 using KeyLoad.Core.Features.GraphTraversal.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -34,7 +35,10 @@ public sealed partial class DatabaseEngine
             return NoChange(ApplyNoChangeReceipt, request.Graph, request.EdgeId,
                 intent?.Revision ?? request.ExpectedRevision);
         }
-        return ApplyCurrentIntent(tx, principal, targetPartition, request, intent);
+        return ApplyCurrentIntent(tx, principal, targetPartition, request with
+        {
+            Destination = intent.Destination
+        }, intent);
     }
 
     private MutationReceipt ApplyCurrentIntent(IAtomicTransaction tx, PrincipalRecord principal,
@@ -101,6 +105,10 @@ public sealed partial class DatabaseEngine
             return NoChange(CompleteNoChangeReceipt, request.Graph, request.EdgeId,
                 intent?.Revision ?? request.ExpectedRevision);
         }
+        request = request with
+        {
+            Destination = intent.Destination
+        };
         var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersionV1>(tx,
             GraphCrossPartitionKeys.OwnerVersion(sourcePartition, request.Graph, request.EdgeId));
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
@@ -140,6 +148,9 @@ public sealed partial class DatabaseEngine
         var intent = GraphCrossPartitionRecords.Read<GraphCrossPartitionDeliveryIntentV1>(view, key);
         if (intent is not null)
         {
+            var definition = BindResourceDefinition(view, destination.Partition, destination.Collection, ResourceKind.Collection);
+            destination = EntityReferenceLifetime.Bind(view, destination, definition);
+            EntityReferenceLifetime.RequireStored(view, intent.Destination, definition);
             GraphCrossPartitionValidation.ValidateIntent(intent, source, graph, edgeId, destination, limits);
         }
         return intent;

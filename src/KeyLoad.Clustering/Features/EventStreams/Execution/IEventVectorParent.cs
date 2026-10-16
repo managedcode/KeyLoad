@@ -1,11 +1,12 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
 internal interface IEventVectorParent
 {
     Task<GrainOperationReply> ExecuteAdmitAsync(DecodedGrainRequest original,
-        GrainRequestCodec codec, global::Orleans.Runtime.IGrainContext context, ReadExecutionBudget work, CancellationToken originalCancellationToken);
+        GrainRequestCodec codec, global::Orleans.Runtime.IGrainContext context, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken originalCancellationToken);
     Task<EventFeedControlResult?> ReadTailOfferAsync(DecodedGrainRequest original, ReadExecutionBudget work,
-        CancellationToken originalCancellationToken);
+        IResourceLifetimeWorkBinding binding, CancellationToken originalCancellationToken);
 }

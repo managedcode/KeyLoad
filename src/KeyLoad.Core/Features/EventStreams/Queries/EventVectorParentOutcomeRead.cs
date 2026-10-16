@@ -30,6 +30,8 @@ public sealed partial class DatabaseEngine
         }
         Authorization.Require(principal, request.ControlPartition, request.Scope.Resource,
             Capability.SubscriptionsManage);
+        var lifetimeBinding = new EventVectorReadLifetimeBinding(this, bounded, work);
+        lifetimeBinding.Scope(request);
         _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
         if (freshSourceAuthorizationWitness.IsEmpty)
         {
@@ -37,9 +39,9 @@ public sealed partial class DatabaseEngine
         }
         _ = EventVectorCurrentSourceAuthorization.Require(bounded, principal, request,
             System.Collections.Immutable.ImmutableArray<EventVectorAuthorizationScope>.Empty,
-            freshSourceAuthorizationWitness, new EventVectorAdmissionPolicy(OperationLimitsOptions));
+            freshSourceAuthorizationWitness, new EventVectorAdmissionPolicy(OperationLimitsOptions), lifetimeBinding);
         var original = EventVectorParentObservationRead.Read(bounded, Authorization, principal, request,
-            Store.Identity.Incarnation, freshSourceAuthorizationWitness, OperationLimitsOptions, cancellationToken);
+            Store.Identity.Incarnation, freshSourceAuthorizationWitness, OperationLimitsOptions, cancellationToken, lifetimeBinding);
         RequireEventVectorOriginalPublicTokens(original.Phase, original.Outcome, principal);
         var identity = Store.Identity;
         var result = new EventVectorParentObservation(EventVectorParentObservationVersion, principal.Id,

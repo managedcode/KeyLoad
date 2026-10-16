@@ -55,6 +55,7 @@ public sealed partial class DatabaseEngine
             CommandOutcomeKeyResolver.ValidateSelectedScope(view, original, selected);
             retained = previous.Result;
         }
+        BindControlledBlobReadDependency(view, original);
         return new(control, placement, operatorPrincipal.Id, identity, record, retained);
     }
 }

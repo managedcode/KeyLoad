@@ -1,6 +1,7 @@
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -70,6 +71,11 @@ public sealed partial class DatabaseEngine
         // This source cut supplies authorization metadata for the admitted remote data owner.
         var resource = BindResourceDefinition(view, reference.Partition, reference.Collection, ResourceKind.Collection);
         var coverage = PartitionControlLifetimeCoverage.Capture(view, reference.Partition, [resource], Limits.MaxBatchBytes);
+        foreach (var lifetime in coverage.Lifetimes)
+        {
+            BindAuthenticatedReadResourceLifetime(view, reference.Partition, resource, lifetime);
+        }
+        reference = EntityReferenceLifetime.Bind(reference, coverage.Lifetimes.Single());
         var route = new RemoteDocumentReadFenceV1(principal.Id, principal.TenantId, principal.PolicyEpoch,
             placement, directory.Revision, destination);
         return new(DocumentLifetimeVersion, queryId, expiry, reference, route, principal, resource, coverage);

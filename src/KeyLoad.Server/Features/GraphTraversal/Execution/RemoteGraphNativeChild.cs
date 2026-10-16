@@ -1,5 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -7,21 +9,46 @@ internal static class RemoteGraphNativeChild
 {
     internal static Task<ReadOnlyMemory<byte>> ReadAsync<T>(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, RemoteGraphNativeRequestV1 request, GrainReadKind kind,
-        ReadExecutionBudget work, CancellationToken token)
+        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding) where T : class
     {
+        work.RequireResourceLifetimeBinding(binding);
         work.Check();
         token.ThrowIfCancellationRequested();
         var childId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().RemoteGraph.CreateRemoteGraphRead(childId, principal.Id, kind,
             request.Payload, request.ExpiresAt);
-        return ExecuteAsync<T>(node, partition, principal, childId, Guid.Empty, signed,
-            command: false, boundary: null, work, token);
+        return ReadSignedAsync<T>(node, partition, principal, childId, signed, work, token, binding, null);
+    }
+
+    internal static async Task<ReadOnlyMemory<byte>> ReadSignedAsync<T>(OrleansNode node, PartitionHost partition,
+        PrincipalRecord principal, Guid childId, string signed, ReadExecutionBudget work, CancellationToken token,
+        IResourceLifetimeWorkBinding binding, ReadOnlyMemory<byte>? ownedInput) where T : class
+    {
+        work.RequireResourceLifetimeBinding(binding);
+        var actual = await NativeLifetimeReadChildExecution.ExecuteAsync<T>(node, principal, childId, signed,
+            ownedInput, token, binding, reply => RequireReply(reply, partition, work)).ConfigureAwait(false);
+        work.Check();
+        token.ThrowIfCancellationRequested();
+        return RemoteGraphNativeResultEncoding.Encode(actual, partition.Database.Limits.MaxBatchBytes, work);
+    }
+
+    private static void RequireReply(GrainOperationReply reply, PartitionHost partition, ReadExecutionBudget work)
+    {
+        if (reply.Payload.Length > partition.Database.Limits.MaxBatchBytes || reply.Payload.Length > work.MaximumResultBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
+        work.ChargeBytes(reply.Payload.Length);
     }
 
     internal static async Task<ReadOnlyMemory<byte>> ExecuteAsync<T>(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, Guid childId, Guid commandId, string signed, bool command,
         RemoteGraphEffectBoundary? boundary, ReadExecutionBudget work, CancellationToken token)
     {
+        if (!command)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.InvalidProof);
+        }
         GrainRequestIdentityScope? identity = null;
         GrainOperationReply? reply = null;
         var failures = new List<Exception>();

@@ -6,7 +6,7 @@ internal static class ZoneTreeRestoreSlotCompletionObservation
 
     internal static NativeCatalogRestoreSlotCompletion Observe(ZoneTreeStore store, ClusterRestoreSlotContext context,
         ReadOnlyMemory<byte> signingKey,
-        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, CancellationToken ct)
+        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, ZoneTreeRestoreSlotConservation conservation, CancellationToken ct)
         => store.Read(view =>
         {
             ct.ThrowIfCancellationRequested();
@@ -15,6 +15,8 @@ internal static class ZoneTreeRestoreSlotCompletionObservation
                 ClusterRestoreSlotCommitKind.Reconciled, store.Position);
             var reset = ZoneTreeRestoreSlotState.Require(view, context,
                 ClusterRestoreSlotCommitKind.AuthorityReset, store.Position);
+            ZoneTreeRestoreSlotConservation.RequireSameOrigin(reconciled, reset);
+            conservation.Require(view, store.Identity, context, reconciled, reset: true, ct);
             if (reset.MappingsDigest != reconciled.MappingsDigest)
             {
                 throw Errors.Fail(ErrorCode.Corruption, ZoneTreeRestoreSlotDriver.Invalid);

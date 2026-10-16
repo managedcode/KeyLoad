@@ -1,4 +1,6 @@
+using System.Security.Cryptography;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,7 +12,7 @@ namespace KeyLoad.Clustering;
 internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
     IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing, ILogger diagnostics)
+    IOptions<GrainRoutingOptions> routing, ILogger diagnostics, IResourceLifetimeWorkBinding binding)
 {
     private readonly Func<INativeTextMaintenance> borrowNative = services.GetRequiredService<Func<INativeTextMaintenance>>();
     internal Guid ParentRequestId => parent.Envelope.RequestId;
@@ -46,19 +48,27 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func
         var principal = GrainRequestAuthority.ReloadForRequest(Database, parent.Envelope, clock);
         GrainRequestAuthority.RequireAdministrator(principal);
         var actorId = Guid.NewGuid();
-        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
-        using var identity = new GrainRequestIdentityScope(services, principal, actorId, commandId, token, connectionId: connectionId);
-        var signed = command is { } kind ? codec.CreateCommand(actorId, principal.Id, kind, commandId, payload)
-            : codec.CreateRead(actorId, principal.Id, read!.Value, payload);
+        string signed;
+        try
+        {
+            signed = codec.CreateTextMaintenanceChild(actorId, principal.Id, read, command,
+                commandId, payload, parent.Envelope.ExpiresAt);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(payload);
+            throw;
+        }
         var invoked = false;
         GrainOperationReply reply;
         try
         {
-            reply = await GrainRequestStreamConsumer.DrainAsync(cancellation =>
-            {
-                invoked = true;
-                return executeChild(signed, cancellation);
-            }, serializer, actorId, clock, routing, token).ConfigureAwait(true);
+            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, signed, actorId, commandId,
+                (value, cancellation) =>
+                {
+                    invoked = true;
+                    return executeChild(value, cancellation);
+                }, services, codec, clock, serializer, routing, binding, payload, token).ConfigureAwait(true);
         }
         catch (KeyLoadException error) when (invoked && command is not null)
         {

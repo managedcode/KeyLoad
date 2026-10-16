@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsAnnResultAssertions
 {
-    internal static NativeAnnManifest Manifest(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request)
+    internal static NativeAnnManifest Manifest(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request)
     {
         var root = Path.Combine(fixture.Database.Directory, NativeAnnProtocol.RootDirectory);
         var owner = NativeAnnReceiptFiles.Read<NativeAnnRootReceipt>(Path.Combine(root,
@@ -20,7 +20,7 @@ internal static class RequestCqrsAnnResultAssertions
             selected.Pointer.GenerationLeaf, NativeAnnProtocol.ManifestFile), new NativeAnnExecutionOptions()).Value;
     }
 
-    internal static async Task RequireAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         AnnMaintenanceResult result, long before, bool changed, CancellationToken token)
     {
         var manifest = Manifest(fixture, request);
@@ -43,7 +43,7 @@ internal static class RequestCqrsAnnResultAssertions
         await SearchAsync(fixture, request, changed, token);
     }
 
-    private static async Task SourceAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    private static async Task SourceAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         AnnSourceCut source, long before, bool changed)
     {
         await Assert.That(source.NodeId).IsEqualTo(fixture.Database.Store.Identity.NodeId);
@@ -59,7 +59,7 @@ internal static class RequestCqrsAnnResultAssertions
             request.Space, RequestCqrsAnnTestData.Records(changed)));
     }
 
-    internal static async Task SearchAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    internal static async Task SearchAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         bool changed, CancellationToken token)
     {
         var native = fixture.NativeAnnMaintenance ?? throw new InvalidOperationException();
@@ -84,7 +84,7 @@ internal static class RequestCqrsAnnResultAssertions
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(image)).IsTrue();
     }
 
-    private static RankedDocument Row(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    private static RankedDocument Row(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         string id, string json, long revision, double score)
         => new(new(new(fixture.Database.Partition, request.Collection, id), revision, json, false, []), score);
 }

@@ -141,6 +141,11 @@ public sealed partial class DatabaseEngine
     private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation,
         BatchResourceAdmission admission)
     {
+        if (mutation is UpsertAnalyticsEvents or DeleteAnalyticsEvents)
+        {
+            AuthorizeAnalyticsMutation(view, principal, partition, mutation);
+            return;
+        }
         if (mutation is InsertTypedRow insert)
         {
             RequireTypedInsertPermissions(principal, partition, BatchResource(view, partition, insert.Collection, admission, ResourceKind.Collection));

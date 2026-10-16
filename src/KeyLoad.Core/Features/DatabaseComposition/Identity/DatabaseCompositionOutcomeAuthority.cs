@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core.Features.DatabaseComposition;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -11,7 +12,8 @@ public sealed partial class DatabaseEngine
 
     private const string MissingCompositionAuthority = "The composition outcome has no saved row authority.";
     private const string InvalidCompositionAuthority = "The composition outcome row authority is invalid.";
-    private CompositionOutcomeAuthority? CaptureCompositionOutcome(ReplicatedOperation operation, OperationResult result)
+    private CompositionOutcomeAuthority? CaptureCompositionOutcome(IKeyValueView view, PrincipalRecord principal,
+        ReplicatedOperation operation, OperationResult result)
     {
         const int EmptyReverseLength = 0;
 
@@ -29,7 +31,11 @@ public sealed partial class DatabaseEngine
         var distinct = new HashSet<EntityRef>();
         foreach (var mutation in reverse)
         {
-            AddCompositionReference(mutation.Start, partition, distinct, references);
+            // Successful expansion already authorized this visible start, even when it selected zero edges.
+            // A later mutation may delete the row; retain that admission instead of re-reading its final row image.
+            Authorization.Require(principal, partition, mutation.Start.Collection, Capability.DocumentsRead);
+            var start = BindEntityReference(view, mutation.Start);
+            AddCompositionReference(start, partition, distinct, references);
         }
         foreach (var effect in receipt.Mutations)
         {
@@ -41,12 +47,20 @@ public sealed partial class DatabaseEngine
         return new(references.ToImmutable());
     }
 
-    private ImmutableArray<EntityRef> CompositionMutationReferences(Mutation effect) => effect switch
+    private ImmutableArray<EntityRef> CompositionMutationReferences(Mutation effect)
     {
-        UpsertEdge edge => [edge.From, edge.To],
-        EnqueueMessage message => MessageCompositionReferences(message),
-        _ => throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority)
-    };
+        var references = effect switch
+        {
+            UpsertEdge edge => [edge.From, edge.To],
+            EnqueueMessage message => MessageCompositionReferences(message),
+            _ => throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority)
+        };
+        foreach (var reference in references)
+        {
+            EntityReferenceLifetime.RequireBound(reference);
+        }
+        return references;
+    }
 
     private ImmutableArray<EntityRef> MessageCompositionReferences(EnqueueMessage message)
     {
@@ -90,7 +104,8 @@ public sealed partial class DatabaseEngine
         foreach (var reference in references)
         {
             ValidateCompositionReference(reference, partition);
-            var document = VisibleVertex(view, principal, reference, budget);
+            EntityReferenceLifetime.RequireBound(reference);
+            var document = VisibleVertex(budget.CreateView(view), principal, reference);
             if (document.Reference != reference)
             {
                 throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
@@ -119,6 +134,7 @@ public sealed partial class DatabaseEngine
         const int MaxBatchMutationsScaleFactor = 3;
 
         ValidateCompositionReference(reference, partition);
+        EntityReferenceLifetime.RequireBound(reference);
         if (distinct.Add(reference))
         {
             if (references.Count >= checked(MaxBatchMutationsScaleFactor * Limits.MaxBatchMutations))

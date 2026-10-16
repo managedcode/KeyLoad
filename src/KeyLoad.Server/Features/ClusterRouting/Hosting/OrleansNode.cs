@@ -1,4 +1,6 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -200,6 +202,10 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
 
     internal Task EnsureCatalogAdmissionAsync(CancellationToken cancellationToken)
         => PhysicalShardCatalogFence.EnsureAdmissionAsync(databaseBootstrap.Catalog, cancellationToken);
+
+    internal Task EnsureCatalogAdmissionAsync(ReadExecutionBudget work,
+        ReadExecutionBudgetReadGrant? sourceMeta, CancellationToken token)
+        => PhysicalShardCatalogFence.EnsureAdmissionAsync(databaseBootstrap.Catalog, work, sourceMeta, token);
 
     internal void OpenCatalogAdmission(PhysicalShardCatalogStartup catalog,
         CancellationToken cancellationToken)

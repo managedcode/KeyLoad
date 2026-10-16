@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 
@@ -11,7 +12,7 @@ internal sealed class RemoteQueryLifetimeReceiver(OrleansNode node, PartitionHos
         options.GrainRouting, options.Membership, clock);
 
     internal async Task<ReadOnlyMemory<byte>> ExecuteAsync(RemoteResourceLifetimeReadCallV2 call,
-        CancellationToken token)
+        CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
         var request = NativeSerialization.Deserialize<RemoteQueryLifetimeRequestV2>(call.Payload.Span);
         RemoteQueryLifetimeScope.Require(call, request, Receiver, partition.Database.Limits, token);
@@ -25,9 +26,9 @@ internal sealed class RemoteQueryLifetimeReceiver(OrleansNode node, PartitionHos
         var metadata = new PartitionQueryLifetimeMetadata(request.Definition, request.Coverage, request.Principal);
         object value = original.QueryLeaf is { } query
             ? await RemoteQueryLifetimeLocalRead.QueryAsync(node, partition, principal.Id, query,
-                metadata, call.ExpiresAt, token).ConfigureAwait(false)
+                metadata, call.ExpiresAt, token, binding).ConfigureAwait(false)
             : await RemoteQueryLifetimeLocalRead.SearchAsync(node, partition, principal.Id, original.SearchLeaf!,
-                metadata, call.ExpiresAt, token).ConfigureAwait(false);
+                metadata, call.ExpiresAt, token, binding).ConfigureAwait(false);
         RemoteQueryLifetimeScope.Require(call, request, Receiver, partition.Database.Limits, token);
         RequireResult(original, value);
         return original.QueryLeaf is not null

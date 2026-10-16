@@ -51,19 +51,35 @@ internal sealed class DatabaseCompositionReverseTests
     [Test]
     public async Task AcComp006EqualSourceCutsProduceEqualDerivedContent()
     {
-        using var left = NewDatabase();
-        using var right = NewDatabase();
-        SeedEdges(left);
-        SeedEdges(right);
+        await DatabaseCompositionReplicaCut.RunAsync(() =>
+        {
+            var seeded = NewDatabase();
+            try
+            {
+                SeedEdges(seeded);
+                return seeded;
+            }
+            catch (Exception primary)
+            {
+                var failures = new List<Exception> { primary };
+                KeyLoad.Server.ServerFailureObserver.Observe(seeded.Dispose, failures);
+                KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+                throw;
+            }
+        }, async (left, right) =>
+        {
+            var expectedFrom = DatabaseCompositionExpectedReferences.Capture(left, Vertex(left, From));
+            var expectedTo = DatabaseCompositionExpectedReferences.Capture(left, Vertex(left, To));
 
-        left.Commit(new GraphToQueueMutation(Queue, Graph, Vertex(left, From), Prefix));
-        right.Commit(new GraphToQueueMutation(Queue, Graph, Vertex(right, From), Prefix));
-        var leftPayload = left.Database.InspectMessage("root", new(left.Partition, Queue), Prefix + FirstEdge)!.PayloadJson;
-        var rightPayload = right.Database.InspectMessage("root", new(right.Partition, Queue), Prefix + FirstEdge)!.PayloadJson;
-        await Assert.That(leftPayload).IsEqualTo(rightPayload);
-        var link = JsonSerializer.Deserialize<QueueGraphLink>(leftPayload!, JsonDefaults.Options);
-        await Assert.That(link!.From).IsEqualTo(Vertex(left, From));
-        await Assert.That(link.To).IsEqualTo(Vertex(left, To));
+            left.Commit(new GraphToQueueMutation(Queue, Graph, Vertex(left, From), Prefix));
+            right.Commit(new GraphToQueueMutation(Queue, Graph, Vertex(left, From), Prefix));
+            var leftPayload = left.Database.InspectMessage("root", new(left.Partition, Queue), Prefix + FirstEdge)!.PayloadJson;
+            var rightPayload = right.Database.InspectMessage("root", new(left.Partition, Queue), Prefix + FirstEdge)!.PayloadJson;
+            await Assert.That(leftPayload).IsEqualTo(rightPayload);
+            var link = JsonSerializer.Deserialize<QueueGraphLink>(leftPayload!, JsonDefaults.Options);
+            await Assert.That(link!.From).IsEqualTo(expectedFrom);
+            await Assert.That(link.To).IsEqualTo(expectedTo);
+        });
     }
 
     private static TestDatabase NewDatabase(QueuePolicy? policy = null)

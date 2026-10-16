@@ -1,5 +1,6 @@
 using System.Text;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Replication;
 
@@ -7,7 +8,8 @@ namespace KeyLoad.Replication;
 internal static class ClusterCoordinatorCommandAdmission
 {
     internal static AdmittedCommand Enqueue(DatabaseEngine database, TimeProvider clock, AdmittedCommandInbox commands,
-        Task? worker, ReplicatedOperation operation, CancellationToken cancellationToken)
+        Task? worker, ReplicatedOperation operation, CancellationToken cancellationToken,
+        ReadExecutionBudget? sourcePlanningBudget = null, IReplicaForwardedCommandWork? receiverWork = null)
     {
         ArgumentNullException.ThrowIfNull(operation.PrincipalId);
         cancellationToken.ThrowIfCancellationRequested();
@@ -24,8 +26,14 @@ internal static class ClusterCoordinatorCommandAdmission
         {
             EvaluatedAt = clock.GetUtcNow()
         };
-        var principal = database.Store.Read(view => database.Principal(view, evaluated.PrincipalId, evaluated.EvaluatedAt));
-        return commands.Enqueue(evaluated, principal, bytes, cancellationToken);
+        var work = receiverWork?.Budget ?? sourcePlanningBudget;
+        work?.Check();
+        var principal = database.Store.Read(raw => database.Principal(
+            work is null ? raw : work.CreateView(raw), evaluated.PrincipalId, evaluated.EvaluatedAt));
+        work?.Check();
+        return receiverWork is null
+            ? commands.Enqueue(evaluated, principal, bytes, sourcePlanningBudget, cancellationToken)
+            : commands.EnqueueForwarded(evaluated, principal, bytes, receiverWork, cancellationToken);
     }
 
 }

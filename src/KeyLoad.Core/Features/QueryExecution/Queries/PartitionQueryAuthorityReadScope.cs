@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
@@ -8,17 +9,17 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     internal T WithPartitionQueryView<T>(string principalId, PartitionRef partition, string collection,
-        ReadExecutionBudgetReadGrant grant, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read)
+        ReadExecutionBudgetReadGrant grant, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read, ReadExecutionBudget? work = null)
         => WithPartitionQueryFenceView(principalId, partition, collection, grant,
-            (view, principal, resource, _) => read(view, principal, resource));
+            (view, principal, resource, _) => read(view, principal, resource), work);
 
     internal T WithPartitionQueryFenceView<T>(string principalId, PartitionRef partition, string collection,
-        ReadExecutionBudgetReadGrant grant, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, T> read)
-        => Store.Read(view => ReadPartitionQueryFenceView(view, principalId, partition, collection, grant, read));
+        ReadExecutionBudgetReadGrant grant, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, T> read, ReadExecutionBudget? work = null)
+        => Store.Read(view => ReadPartitionQueryFenceView(view, principalId, partition, collection, grant, read, work));
 
     private T ReadPartitionQueryFenceView<T>(IKeyValueView view, string principalId, PartitionRef partition,
         string collection, ReadExecutionBudgetReadGrant grant,
-        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, T> read)
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, T> read, ReadExecutionBudget? work = null)
     {
         ValidatePartition(partition);
         var principal = ReadPartitionQueryAuthority<PrincipalRecord>(view, KeySpace.Principal(principalId), grant);
@@ -34,7 +35,8 @@ public sealed partial class DatabaseEngine
             resource = NativeSerialization.Deserialize<ResourceDefinition>(bytes);
             digest = Convert.ToHexStringLower(SHA256.HashData(bytes));
         });
-        _ = ResourceLifetimeCatalog.Read(grant.CreateView(view), partition.TenantId, partition.DatabaseId, collection, resource);
+        var charged = grant.CreateView(view);
+        var lifetime = ResourceLifetimeCatalog.Read(charged, partition.TenantId, partition.DatabaseId, collection, resource);
         if (resource is null || digest is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
@@ -47,6 +49,9 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
         }
+        var actualLifetime = lifetime ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        ResourceRetirementStorage.RequireOpen(charged, actualLifetime, Limits);
+        work?.ObserveResourceLifetime(partition, resource, actualLifetime);
         return read(view, principal, resource, digest);
     }
 

@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsAnnGraphIdentityReplay
 {
-    internal static async Task RequireAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, AnnMaintenanceResult result, CancellationToken token)
     {
         var profile = original.MaintenanceProfile ?? throw new InvalidOperationException();

@@ -7,18 +7,22 @@ internal static class ZoneTreeCatalogRestoreVerification
 {
     private const string WrongPosition = "The recovered original catalog archive position is inconsistent.";
 
-    internal static void Require(string backup, string staging, StoreIdentity originalIdentity,
+    internal static ResourceRetirementConservationSourceOriginV1? Require(string backup, string staging, StoreIdentity originalIdentity,
         long originalPosition, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
-        Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>> verifyCatalog,
-        ZoneTreeRestoreStagingOwnership ownership, CancellationToken cancellationToken)
+        Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>>? verifyCatalog,
+        ZoneTreeRestoreStagingOwnership ownership,
+        Func<IKeyValueView, StoreIdentity, long, ClusterRestoreOwnerMapping>? resolveOwnerMapping,
+        PhysicalShardRecord? targetOwner, CancellationToken cancellationToken)
     {
-        var metadata = ZoneTreeCatalogBackupMetadataFile.ReadVerified(backup, originalIdentity,
-            originalPosition, executionOptions.Value);
+        var metadata = verifyCatalog is null ? ReadOnlyMemory<byte>.Empty
+            : ZoneTreeCatalogBackupMetadataFile.ReadVerified(backup, originalIdentity,
+                originalPosition, executionOptions.Value).Metadata;
         cancellationToken.ThrowIfCancellationRequested();
         ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), originalIdentity,
             executionOptions.Value.IdentityBufferBytes);
         ownership.BeginOpen();
-        var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(staging).ResolveExecutionOptions(executionOptions));
+        var options = new ZoneTreeStoreOptions(staging).ResolveExecutionOptions(executionOptions);
+        var runtime = new ZoneTreeStoreRuntime(options);
         var source = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
         Exception? primary = null;
         try
@@ -27,13 +31,18 @@ internal static class ZoneTreeCatalogRestoreVerification
             {
                 throw Errors.Fail(ErrorCode.Corruption, WrongPosition);
             }
-            source.Commit((view, _) =>
+            return source.Commit((view, _) =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                verifyCatalog(view, originalIdentity, originalPosition, metadata.Metadata);
+                var proof = ZoneTreeRetirementConservation.Capture(view, options, TimeProvider.System, token: cancellationToken);
+                var applied = ZoneTreeRestoreConservation.ReadApplied(view);
+                verifyCatalog?.Invoke(view, originalIdentity, originalPosition, metadata);
+                var mapping = resolveOwnerMapping?.Invoke(view, originalIdentity, originalPosition);
+                var origin = ZoneTreeRestoreConservation.Capture(view, options, originalIdentity,
+                    originalPosition, applied, proof, mapping, targetOwner, cancellationToken);
                 view.ValidateCommit();
                 cancellationToken.ThrowIfCancellationRequested();
-                return true;
+                return origin;
             });
         }
         catch (Exception failure) { primary = failure; throw; }

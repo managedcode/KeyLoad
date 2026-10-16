@@ -16,12 +16,12 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(originalBudget);
         originalBudget.Check();
         cancellationToken.ThrowIfCancellationRequested();
-        var bounded = originalBudget.CreateView(originalView);
+        var bounded = originalView;
         var principal = Principal(bounded, principalId, Clock.GetUtcNow());
         Authorization.Require(principal, control, streamSet, Capability.SubscriptionsManage);
         Authorization.Require(principal, sourcePartition, streamSet, Capability.EventsRead);
         var placement = StreamTraversalPlacement(bounded, sourcePartition, configuredOwner);
-        var resource = Resource(bounded, sourcePartition, streamSet, ResourceKind.StreamSet);
+        var resource = BindAuthorizedReadResource(bounded, sourcePartition, streamSet, ResourceKind.StreamSet);
         var inventory = new EventVectorInventoryReadBudget(OperationLimitsOptions);
         var heads = EventVectorStreamHeadsRead.Read(bounded, sourcePartition, streamSet, inventory,
             cancellationToken);
@@ -29,7 +29,7 @@ public sealed partial class DatabaseEngine
         {
             originalBudget.Check();
             _ = SourceResource(bounded, new EventSourceRef(sourcePartition, streamSet,
-                EventSourceKind.Stream, captured.StreamId, captured.Head.Generation));
+                EventSourceKind.Stream, captured.StreamId, captured.Head.Generation), authorizedRead: true);
         }
         originalBudget.Check();
         return new(resource, placement, heads);

@@ -26,7 +26,7 @@ internal sealed record SampleReadScope(
         ValidateIdentifier(seriesId);
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, partition, set, Capability.SeriesRead);
-        var resource = database.Resource(view, partition, set, ResourceKind.TimeSeries);
+        var resource = database.BindAuthorizedReadResource(view, partition, set, ResourceKind.TimeSeries);
         return new(principal, resource, SampleReadKeys.Prefix(partition, set, seriesId));
     }
 

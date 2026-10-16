@@ -9,7 +9,7 @@ internal static class RequestCqrsNativeTextCheckpointObservation
 {
     private const string ObservationPrefix = "KL029_ORIGINAL_CHECKPOINT_CUT";
 
-    internal static async Task RecordAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RecordAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, CancellationToken token)
     {
         var database = fixture.Database;

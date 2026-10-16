@@ -20,6 +20,8 @@ public sealed partial class DatabaseEngine
                         consumer.Partition, definitions, Limits.MaxBatchBytes);
                     metadata = new(resource, coverage, principal, definitions);
                     metadata.Require(consumer.Partition, Limits.MaxBatchBytes);
+                    var lifetime = coverage.Lifetimes.Single(value => value.ResourceName == resource.Name);
+                    BindAuthenticatedReadResourceLifetime(budget.CreateView(view), consumer.Partition, resource, lifetime);
                 });
             var identity = Store.Identity;
             return new RemoteAnnReadFenceV2(original,

@@ -23,35 +23,12 @@ internal static class FunctionalGateColdProtocol
             state = "retained"
         }, JsonDefaults.Options);
     internal static string Tags(EntityRef reference)
-        => JsonSerializer.Serialize(new
+        => FunctionalGateBoundJson.Serialize(new
         {
-            anchor = new
-            {
-                collection = reference.Collection,
-                id = reference.Id,
-                partition = new
-                {
-                    atomicPartitionId = reference.Partition.AtomicPartitionId,
-                    databaseId = reference.Partition.DatabaseId,
-                    partitionKey = reference.Partition.PartitionKey,
-                    tenantId = reference.Partition.TenantId,
-                    transactionDomainId = reference.Partition.TransactionDomainId
-                }
-            }
-        }, JsonDefaults.Options);
-    internal static EventData Data(EntityRef reference) => new(Id, "retained-link", JsonSerializer.Serialize(new
-    {
-        collection = reference.Collection,
-        id = reference.Id,
-        partition = new
-        {
-            atomicPartitionId = reference.Partition.AtomicPartitionId,
-            databaseId = reference.Partition.DatabaseId,
-            partitionKey = reference.Partition.PartitionKey,
-            tenantId = reference.Partition.TenantId,
-            transactionDomainId = reference.Partition.TransactionDomainId
-        }
-    }, JsonDefaults.Options));
+            anchor = reference
+        });
+    internal static EventData Data(EntityRef reference) => new(Id, "retained-link",
+        FunctionalGateBoundJson.Serialize(reference));
     internal static Dictionary<string, JsonElement> Parameters(EntityRef reference)
         => new(StringComparer.Ordinal)
         {

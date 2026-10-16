@@ -1,24 +1,28 @@
 using KeyLoad.Core;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 internal sealed class FollowerDocumentReadExecution(DatabaseEngine database, ICommitCoordinator coordinator,
-    ReplicaConsensus consensus, PhysicalShardRecord owner, GrainRequestCodec codec)
+    ReplicaConsensus consensus, PhysicalShardRecord owner, GrainRequestCodec codec,
+    IOptions<DatabaseLimits> limits, TimeProvider clock)
 {
     private const long UnestablishedConsensusTerm = 0;
 
     internal async Task<FollowerDocumentReadResultV1> ExecuteAsync(DecodedGrainRequest request,
         IGrainContext context, NativeCapabilityWorkLifetime work)
     {
+        var budget = new ReadExecutionBudget(limits, clock, work.Token);
+        budget.ConstrainLifetime(request.Envelope.ExpiresAt);
         var capability = GrainNativePayload.Read<FollowerDocumentReadCapability>(request.Payload);
         DatabaseEngine.ValidateFollowerReadRequest(capability.Request);
         var before = await RequireFollowerAsync(capability.Request.ReplicaId, work.Token).ConfigureAwait(true);
         work.Stage = GrainFailureStage.CapabilityExecution;
         work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);
-        var snapshot = database.CaptureFollowerDocument(request.Envelope.PrincipalId!, capability.Request,
-            owner, before.VoterId, before.Term, work.Token);
+        var snapshot = database.CaptureFollowerDocumentBound(request.Envelope.PrincipalId!, capability.Request,
+            owner, before.VoterId, before.Term, budget, work);
         work.CompletePhase();
         var captured = await RequireFollowerAsync(before.VoterId, work.Token).ConfigureAwait(true);
         if (captured.Term != before.Term || captured.LeaderId != before.LeaderId)
@@ -40,8 +44,8 @@ internal sealed class FollowerDocumentReadExecution(DatabaseEngine database, ICo
         var authority = await RequireFollowerAsync(before.VoterId, work.Token).ConfigureAwait(true);
         work.Stage = GrainFailureStage.CapabilityExecution;
         work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);
-        var result = database.CompleteFollowerDocument(request.Envelope.PrincipalId!, capability,
-            snapshot, authority.VoterId, authority.Term, work.Token);
+        var result = database.CompleteFollowerDocumentBound(request.Envelope.PrincipalId!, capability,
+            snapshot, authority.VoterId, authority.Term, budget, work);
         work.CompletePhase();
         var completed = await RequireFollowerAsync(before.VoterId, work.Token).ConfigureAwait(true);
         if (completed.Term != authority.Term || completed.LeaderId != authority.LeaderId)

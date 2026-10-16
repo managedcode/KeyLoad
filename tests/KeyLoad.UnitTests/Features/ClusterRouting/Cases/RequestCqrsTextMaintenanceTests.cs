@@ -1,7 +1,7 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource(nativeTextMaintenance: true)]
-internal sealed class RequestCqrsTextMaintenanceTests(RequestCqrsClusterFixture fixture)
+[RequestCqrsHostedDataSource(nativeTextMaintenance: true)]
+internal sealed class RequestCqrsTextMaintenanceTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]
     public Task SignedMalformedTextPayloadKeepsStartedFailedThenSameConnectionHealthyReplay()

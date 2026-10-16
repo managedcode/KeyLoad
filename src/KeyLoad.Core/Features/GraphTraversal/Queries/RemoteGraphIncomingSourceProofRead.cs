@@ -32,9 +32,10 @@ public sealed partial class DatabaseEngine
         var content = intent.Content;
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
         Authorization.Require(principal, content.SourcePartition, content.Graph, Capability.GraphRead);
-        var graph = Resource(view, content.SourcePartition, content.Graph, ResourceKind.Graph);
+        var graph = BindAuthorizedReadResource(view, content.SourcePartition, content.Graph, ResourceKind.Graph);
         RequireRemoteGraphStoredIntent(view, content.SourcePartition, content.Graph, content.EdgeId,
             intent.SourceOwner, intent);
+        ObserveRemoteGraphReadIntent(view, intent, work, target: false);
         _ = VisibleVertex(view, principal, content.Edge.From);
         var cut = CaptureRemoteGraphOwnerCut(view, principal, content.SourcePartition,
             intent.SourceOwner, graph.SchemaVersion);

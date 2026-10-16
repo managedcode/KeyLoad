@@ -1,0 +1,73 @@
+using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.ResourceExecution;
+using static KeyLoad.UnitTests.Features.GraphTraversal.GraphReferenceLifetimeNativeProtocol;
+
+namespace KeyLoad.UnitTests.Features.GraphTraversal;
+
+internal static class GraphReferenceLifetimeNativeRefusals
+{
+    internal static async Task RunAsync(NativeDropRuntimeProfile profile, EntityRef anchor,
+        EntityRef originalTarget, EntityRef freshTarget, CancellationToken token)
+    {
+        var database = profile.Source.Database;
+        await ReadAsync(profile, () => database.Traverse(PartitionStoreProtocol.AdministratorId,
+            NativeDropRuntimeProtocol.Partition, OriginalGraph, anchor with
+            {
+                Lifetime = null
+            }, Depth, Vertices,
+            Edges, cancellationToken: token));
+        await ReadAsync(profile, () => database.ShortestPath(PartitionStoreProtocol.AdministratorId,
+            new(Version, NativeDropRuntimeProtocol.Partition, OriginalGraph, anchor with
+            {
+                Lifetime = null
+            },
+                freshTarget with
+                {
+                    Lifetime = null
+                }, Depth, Vertices, Edges), cancellationToken: token));
+        await ReadAsync(profile, () => database.ReadIncomingGraphEdges(PartitionStoreProtocol.AdministratorId,
+            new(Version, freshTarget with
+            {
+                Lifetime = null
+            }, OriginalGraph, Edges), cancellationToken: token));
+        await ReadAwaitedAsync(profile, () => GraphReferenceLifetimeNativeReads.SearchAsync(profile, OriginalGraph,
+            anchor with
+            {
+                Lifetime = null
+            }, token));
+        var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
+        var position = profile.Source.Store.Position;
+        var command = new CommandRequest(Guid.NewGuid(), NativeDropRuntimeProtocol.Partition,
+            [new UpsertEdge(FreshGraph, DeniedEdge, anchor, originalTarget, Label, Attributes)]);
+        var reply = await profile.Source.SubmitAsync(OperationKind.Batch, command.CommandId,
+            PartitionStoreProtocol.AdministratorId, NativeSerialization.Serialize(command), token);
+        await Assert.That(reply.Error).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
+        await Assert.That(reply.Payload.IsEmpty).IsTrue();
+        await SameAsync(profile, image, position);
+    }
+
+    private static async Task ReadAsync<T>(NativeDropRuntimeProfile profile, Func<T> read)
+    {
+        var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
+        var position = profile.Source.Store.Position;
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => _ = read());
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.OwnershipLost);
+        await SameAsync(profile, image, position);
+    }
+
+    private static async Task ReadAwaitedAsync<T>(NativeDropRuntimeProfile profile, Func<Task<T>> read)
+    {
+        var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
+        var position = profile.Source.Store.Position;
+        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => _ = await read());
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.OwnershipLost);
+        await SameAsync(profile, image, position);
+    }
+
+    private static async Task SameAsync(NativeDropRuntimeProfile profile, string[] image, long position)
+    {
+        await Assert.That(profile.Source.Store.Position).IsEqualTo(position);
+        await Assert.That(ControlledPartitionMovementRawImage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
+    }
+}

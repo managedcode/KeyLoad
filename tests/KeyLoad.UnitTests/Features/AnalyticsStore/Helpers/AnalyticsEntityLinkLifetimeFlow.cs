@@ -1,0 +1,95 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Storage;
+using A = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using F = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeFixture;
+
+namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+
+internal static class AnalyticsEntityLinkLifetimeFlow
+{
+    private const string ChangedLifetime = "The entity reference belongs to another resource lifetime.";
+
+    internal static Task IncomingAsync(CancellationToken token) => F.RunAsync(async fixture =>
+    {
+        var original = await CommitAsync(fixture, fixture.Plain, 0, token);
+        await A.UnchangedAsync(fixture, async () =>
+        {
+            await A.RowsAsync(fixture, original, 1, token);
+            var retained = fixture.Owner.Entry(original).Operation!;
+            await Assert.That(retained.NativePayload.Span.SequenceEqual(original.NativePayload.Span)).IsTrue();
+            var payload = NativeSerialization.Deserialize<NativeCommandPayload>(retained.NativePayload.Span);
+            var input = NativeSerialization.Deserialize<CommandRequest>(payload.Value.Span);
+            await A.EqualAsync(fixture.Plain, ((UpsertAnalyticsEvents)input.Mutations.Single()).Events.Single().Links.Single());
+        });
+        var bound = await CommitAsync(fixture, fixture.Bound, 1, token);
+        await A.UnchangedAsync(fixture, () => A.RowsAsync(fixture, bound, 2, token));
+        await ForeignRefusalAsync(fixture, token);
+        await A.UnchangedAsync(fixture, () => A.RowsAsync(fixture, bound, 2, token));
+        var healthy = await CommitAsync(fixture, fixture.Bound, 2, token);
+        await A.UnchangedAsync(fixture, () => A.RowsAsync(fixture, healthy, 3, token));
+    }, token);
+
+    internal static Task StoredCorruptionAsync(bool foreign, CancellationToken token) => F.RunAsync(async fixture =>
+    {
+        var original = await CommitAsync(fixture, fixture.Bound, 0, token);
+        await fixture.CorruptStoredLinkAsync(foreign, () => A.UnchangedAsync(fixture, async () =>
+        {
+            AnalyticsEventsPage? published = null;
+            var refusal = Assert.ThrowsExactly<KeyLoadException>(() => published = fixture.Owner.Database.ReadAnalyticsEvents(
+                D.Root, D.Read(fixture.Owner.Source), token));
+            await Assert.That(refusal.Code).IsEqualTo(foreign ? ErrorCode.OwnershipLost : ErrorCode.FormatUnsupported);
+            await Assert.That(published).IsNull();
+        }));
+        await A.UnchangedAsync(fixture, () => A.RowsAsync(fixture, original, 1, token));
+        var healthy = await CommitAsync(fixture, fixture.Plain, 1, token);
+        await A.UnchangedAsync(fixture, () => A.RowsAsync(fixture, healthy, 2, token));
+    }, token);
+
+    private static ReplicatedOperation Issue(F fixture, EntityRef link, long revision, CancellationToken token)
+    {
+        var owner = fixture.Owner;
+        var id = Guid.NewGuid();
+        var value = D.Event(owner.Source, D.First, D.Alpha, 2) with
+        {
+            Links = [link]
+        };
+        var request = new CommandRequest(id, owner.Source.Partition,
+            [new UpsertAnalyticsEvents(D.Store, [value], AnalyticsStoreNativeTestOperations.Revisions((D.First, revision)))]);
+        var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
+        return owner.Database.CreateNativeOperation(OperationKind.Batch, id, D.Root, owner.Database.EvaluationClock.GetUtcNow(),
+            NativeSerialization.Serialize(request), work);
+    }
+
+    private static async Task<ReplicatedOperation> CommitAsync(F fixture, EntityRef link, long revision, CancellationToken token)
+    {
+        var original = Issue(fixture, link, revision, token);
+        var expected = new CommitReceipt(original.Id, fixture.Owner.NextToken(),
+            [new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.First, revision + 1)], DurabilityProfile.ProcessDurable);
+        await A.ReceiptAsync(expected, fixture.Owner.Submit(original).Get<CommitReceipt>());
+        return original;
+    }
+
+    private static async Task ForeignRefusalAsync(F fixture, CancellationToken token)
+    {
+        var owner = fixture.Owner;
+        var business = A.BusinessImage(fixture);
+        var original = Issue(fixture, fixture.Foreign, 2, token);
+        var index = owner.JournalCut().LastIndex + 1;
+        var position = owner.Store.Position;
+        var result = owner.Submit(original);
+        await A.EqualAsync(new OperationResult(null, ErrorCode.OwnershipLost, ChangedLifetime), result);
+        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(A.BusinessImage(fixture).SequenceEqual(business, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(owner.JournalCut().LastIndex).IsEqualTo(index);
+        await Assert.That(owner.JournalCut().CommittedIndex).IsEqualTo(index);
+        await Assert.That(owner.Database.LastApplied).IsEqualTo(index);
+        await Assert.That(owner.Store.Position).IsEqualTo(position + 1);
+        // Failed command metadata is a legitimate native commit, not a business mutation.
+        var key = OutcomeStoreOracle.PartitionKey(owner.Source.Partition, D.Root, original.Id);
+        var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))!;
+        await A.EqualAsync(result, stored.Result);
+        await A.UnchangedAsync(fixture, () => A.EqualAsync(result, owner.Submit(original)));
+    }
+}

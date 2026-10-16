@@ -9,6 +9,12 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        return ReadSampleChunkWindowRead(principalId, request, budget);
+    }
+
+    private SampleChunkWindowResult ReadSampleChunkWindowRead(string principalId,
+        ReadSampleChunkWindowRequest request, ReadExecutionBudget budget)
+    {
         budget.Check();
         return Store.Read(original =>
         {

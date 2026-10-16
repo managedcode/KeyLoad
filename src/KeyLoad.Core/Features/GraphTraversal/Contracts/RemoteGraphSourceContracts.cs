@@ -33,6 +33,12 @@ internal sealed record RemoteGraphIntentV1(
     [property: global::Orleans.Id(5)] Guid SourceCommandId)
 {
     internal const string Alias = "keyload.core.remote-graph.intent.v1";
+    internal const int ResourceLifetimesField = 6;
+    [global::Orleans.Id(ResourceLifetimesField), System.Text.Json.Serialization.JsonIgnore]
+    public System.Collections.Immutable.ImmutableArray<ResourceLifetimeV1> ResourceLifetimes
+    {
+        get; init;
+    }
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RemoteGraphSourceResultV1.Alias)]

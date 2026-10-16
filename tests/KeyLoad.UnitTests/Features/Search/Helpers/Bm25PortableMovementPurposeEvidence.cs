@@ -4,7 +4,7 @@ using KeyLoad.UnitTests.Features.ClusterRouting;
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class Bm25PortableMovementPurposeEvidence(int node,
-    Bm25PortableMovementBorrow original) : IGrainPartitionMovementSealedOperationObserver, IGrainRequestPurposeObserver, IGrainRequestPhaseObserver
+    Bm25PortableMovementBorrow original) : IGrainPartitionMovementSealedOperationObserver, IGrainRequestPurposeObserver, IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver
 {
     private readonly NativeMovementParentStateEvidence phases = new(node);
     private readonly Lock gate = new();
@@ -17,6 +17,10 @@ internal sealed class Bm25PortableMovementPurposeEvidence(int node,
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         global::Orleans.Runtime.IGrainContext context, CancellationToken cancellationToken)
         => phases.ObserveAsync(identity, phase, context, cancellationToken);
+
+    public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken)
+        => phases.ObserveNativeAsync(identity, phase, actualRuntime, cancellationToken);
 
     public void ProducerDisposed(GrainRequestProbeIdentity identity, global::Orleans.Runtime.IGrainContext context)
         => phases.ProducerDisposed(identity, context);

@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsAnnEnrollmentAssertions
 {
-    internal static async Task RequireAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest original)
+    internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest original)
     {
         var actual = fixture.Database.Database.GetOutboxStatus(RequestCqrsAnnTestData.Principal,
             original.Consumer.Partition).Consumers.Single(value => value.Consumer == original.Consumer);

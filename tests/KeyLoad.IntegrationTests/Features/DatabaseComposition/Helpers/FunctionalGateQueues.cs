@@ -54,27 +54,13 @@ internal static class FunctionalGateQueues
     internal static string Topic(int index) => "gate_topic_" + index.ToString(CultureInfo.InvariantCulture);
     internal static string Id(int iteration) => "gate_message_" + iteration.ToString(CultureInfo.InvariantCulture);
     internal static string Payload(FunctionalGateContext ctx, int iteration)
-        => JsonSerializer.Serialize(new
+        => FunctionalGateBoundJson.Serialize(new
         {
             attributesJson = "{\"iteration\":" + iteration.ToString(CultureInfo.InvariantCulture) + "}",
-            from = Reference(ctx.Anchor),
+            from = ctx.Bind(ctx.Anchor),
             label = "gate_work",
-            to = Reference(ctx.Anchor)
-        }, JsonDefaults.Options);
-
-    private static object Reference(EntityRef reference) => new
-    {
-        collection = reference.Collection,
-        id = reference.Id,
-        partition = new
-        {
-            atomicPartitionId = reference.Partition.AtomicPartitionId,
-            databaseId = reference.Partition.DatabaseId,
-            partitionKey = reference.Partition.PartitionKey,
-            tenantId = reference.Partition.TenantId,
-            transactionDomainId = reference.Partition.TransactionDomainId
-        }
-    };
+            to = ctx.Bind(ctx.Anchor)
+        });
 
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonNode.DeepEquals(JsonSerializer.SerializeToNode(expected, JsonDefaults.Options),

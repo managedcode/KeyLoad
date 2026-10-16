@@ -13,7 +13,16 @@ public sealed partial class DatabaseEngine
     internal ReplicatedOperation PrepareQueueRetryOperation(ReplicatedOperation operation)
         => Store.Read(view => PrepareQueueRetryInView(view, operation));
 
-    private ReplicatedOperation PrepareQueueRetryInView(IKeyValueView view, ReplicatedOperation operation)
+    internal ReplicatedOperation PrepareQueueRetryOperation(ReplicatedOperation operation, ReadExecutionBudget work)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+        work.Check();
+        var prepared = Store.Read(raw => PrepareQueueRetryInView(work.CreateView(raw), operation, preserveBudgetFailure: true));
+        work.Check();
+        return prepared;
+    }
+
+    private ReplicatedOperation PrepareQueueRetryInView(IKeyValueView view, ReplicatedOperation operation, bool preserveBudgetFailure = false)
     {
         if (operation.Kind is not (OperationKind.Delivery or OperationKind.Receive or OperationKind.Batch))
         {
@@ -36,7 +45,7 @@ public sealed partial class DatabaseEngine
         var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
         if (selection.Outcome is { } outcome)
         {
-            ValidateRetainedQueueRetryAdmission(view, operation, selection, outcome);
+            ValidateRetainedQueueRetryAdmission(view, operation, selection, outcome, preserveBudgetFailure);
             return operation;
         }
         List<QueueRetryInput> inputs;
@@ -47,7 +56,8 @@ public sealed partial class DatabaseEngine
             inputs = ReadQueueRetryInputs(view, principal, operation);
         }
         catch (KeyLoadException failure) when (failure.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
-            or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
+            or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome)
+            && (!preserveBudgetFailure || failure.Code != ErrorCode.BudgetExceeded))
         {
             return operation;
         }
@@ -70,6 +80,6 @@ public sealed partial class DatabaseEngine
         return IssueNativeOperation(operation, payload with
         {
             RetryDecisions = decisions
-        });
+        }, preserveResourceAdmission: true);
     }
 }

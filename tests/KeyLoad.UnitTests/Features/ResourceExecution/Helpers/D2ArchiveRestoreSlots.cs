@@ -18,7 +18,7 @@ internal static class D2ArchiveRestoreSlots
                 D2ArchiveFaults.Alter(transaction, slot.Archive.Source, attack);
             },
             (view, identity, position, context) => Verify(slot, view, identity, position, context, work, token),
-            null, token);
+            null, token, (_view, _identity, _position, _context) => slot.Mapping);
 
     internal static NativeCatalogRestoreSlotCompletion Observe(D2ArchiveSlot slot, ReadExecutionBudget work, CancellationToken token)
         => ZoneTreeStore.ObserveCatalogBackupSlot(slot.Archive.Directory, slot.Destination,

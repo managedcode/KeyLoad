@@ -42,7 +42,8 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
             openedLog = new(storeOwners.Replica, RecoveryExecutionOptions.Configuration(Configuration));
             Log = openedLog;
             Database = new(storeOwners.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-            Materializer = new(Database, Log, new ReplicaSnapshotStore(storeOwners.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
+            Materializer = new(Database, Log, new ReplicaSnapshotStore(storeOwners.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica(), replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken))), RecoveryExecutionOptions.Replica());
         }
         catch (Exception error)
         {

@@ -1,0 +1,38 @@
+using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
+
+namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+
+internal static class FunctionalGateColdDropAssertions
+{
+    internal static async Task TableAsync(FunctionalGateContext context, FunctionalGateColdDropTable table,
+        CancellationToken token)
+    {
+        var expected = new DocumentReadResult(table.Fresh);
+        await SqlRf3Protocol.EqualAsync(expected, await context.SdkAsync(
+            context.Reader.Sdk.GetAsync(table.Fresh.Reference, token)));
+        await SqlRf3Protocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
+            McpCallerTools.DocumentsGet, new GetDocumentRequest(table.Fresh.Reference), token));
+        foreach (var id in new[] { table.OriginalReference.Id, FunctionalGateColdDropRows.AdministratorId })
+        {
+            var absent = table.Fresh.Reference with
+            {
+                Id = id
+            };
+            await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null), await context.SdkAsync(
+                context.Reader.Sdk.GetAsync(absent, token)));
+            await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null),
+                await context.McpAsync<DocumentReadResult>(context.Reader, McpCallerTools.DocumentsGet,
+                    new GetDocumentRequest(absent), token));
+        }
+    }
+
+    internal static async Task AllAsync(FunctionalGateContext context, FunctionalGateColdDropState state,
+        CancellationToken token)
+    {
+        foreach (var table in state.Tables)
+        {
+            await TableAsync(context, table, token);
+        }
+    }
+}

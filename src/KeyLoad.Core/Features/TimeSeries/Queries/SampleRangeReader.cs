@@ -19,9 +19,10 @@ internal static class SampleRangeReader
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidSampleReadBudget);
         }
-        var principal = database.Principal(view, principalId, clock.GetUtcNow());
+        var metadata = budget.CreateView(view);
+        var principal = database.Principal(metadata, principalId, clock.GetUtcNow());
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
-        var resource = database.Resource(view, request.Partition, request.Set, ResourceKind.TimeSeries);
+        var resource = database.BindAuthorizedReadResource(metadata, request.Partition, request.Set, ResourceKind.TimeSeries);
         var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         var from = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
             ? SampleRetentionStateReader.Before(retention) : request.From;

@@ -35,7 +35,7 @@ internal sealed class ReplicaCoordinatorAdmissionBoundaryTests
         else
         {
             var refusal = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => coordinator.SubmitNativeAsync(
-                OperationKind.SetDispatch, id, Principal, payload, cancellation.Token));
+                OperationKind.SetDispatch, id, Principal, payload, cancellationToken: cancellation.Token));
             await Assert.That(refusal!.Code).IsEqualTo(ErrorCode.OwnershipLost);
             await Assert.That(refusal.Message).IsEqualTo(ReplicaProtocol.NoLeader);
         }

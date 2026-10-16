@@ -162,8 +162,8 @@ internal sealed class ReplicaReplayCapacityTests
         });
         var malformed = fixture.Resign(original with
         {
-            Payload = ReplicaSecurityWireFixture.Operation(
-            ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(original.Payload.Span), ReplicaSecurityFixture.MissingOperationFields)
+            Payload = ReplicaForwardTestFrame.WrapOperation(ReplicaSecurityWireFixture.Operation(
+                ReplicaForwardTestFrame.ReadOperation(original.Payload), ReplicaSecurityFixture.MissingOperationFields))
         });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(read)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(vote)).Code).IsEqualTo(ErrorCode.Unauthenticated);
@@ -250,13 +250,13 @@ internal sealed class ReplicaReplayCapacityTests
     {
         using var fixture = new ReplicaSecurityFixture();
         var request = fixture.Forward(OperationKind.BootstrapPhysicalShardCatalog);
-        var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span);
+        var operation = ReplicaForwardTestFrame.ReadOperation(request.Payload);
         request = fixture.Resign(request with
         {
-            Payload = ReplicaProtocolCodec.Serialize(operation)
+            Payload = ReplicaForwardTestFrame.Payload(operation)
         });
         fixture.Receiver.VerifyRequest(request);
-        await Assert.That(ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span).PayloadJson).IsEqualTo(ReplicaSecurityFixture.OperationPayload);
+        await Assert.That(ReplicaForwardTestFrame.ReadOperation(request.Payload).PayloadJson).IsEqualTo(ReplicaSecurityFixture.OperationPayload);
     }
 
     /// <summary>AC-REP-006: warmed borrowed classification avoids decoded content; accepted requests own independent buffers.</summary>

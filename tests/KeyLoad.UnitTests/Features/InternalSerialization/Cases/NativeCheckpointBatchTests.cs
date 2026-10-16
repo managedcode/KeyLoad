@@ -19,13 +19,18 @@ internal sealed class NativeCheckpointBatchTests
     public async Task EntireNativeBatchIsValidatedBeforeFirstApply(int invalidCase)
     {
         var path = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
-        var options = new ZoneTreeStoreOptions(Path.GetTempPath());
+        var options = new ZoneTreeStoreOptions(Path.GetTempPath()).ResolveExecutionOptions(
+            Microsoft.Extensions.Options.Options.Create(new ZoneTreeStorageExecutionOptions()));
         var applied = 0;
         try
         {
             using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
             var metadata = new ZoneTreeCheckpointMetadata(ZoneTreePersistenceFormat.CheckpointVersion,
-                KeyCodec.Version, Guid.NewGuid(), Position, 0);
+                KeyCodec.Version, Guid.NewGuid(), Position, 0)
+            {
+                ConservationAuthorityDigest = new byte[32]
+            };
+            ZoneTreeCheckpointConservationShape.Require(metadata);
             ZoneTreeCheckpointFrame.Write(stream, options, ZoneTreePersistenceFormat.CheckpointMagic,
                 Position, NativeSerialization.Serialize(metadata), null);
             StorageMutation first = new(KeyCodec.Encode(KeyA), new byte[] { 1 });

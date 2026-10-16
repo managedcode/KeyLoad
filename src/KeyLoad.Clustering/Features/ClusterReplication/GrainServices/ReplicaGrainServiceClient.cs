@@ -7,6 +7,8 @@ namespace KeyLoad.Clustering;
 /// <summary>Direct-address Orleans RPC transport with bounded generation rediscovery.</summary>
 public sealed class ReplicaGrainServiceClient : GrainServiceClient<IPartitionReplicaGrainService>, IReplicaTransport
 {
+    private const int NoNestedEntries = 0;
+
     private readonly TimeProvider time;
     private readonly ReplicaConfiguration configuration;
     private readonly ReplicaTransportOptions settings;
@@ -55,6 +57,7 @@ public sealed class ReplicaGrainServiceClient : GrainServiceClient<IPartitionRep
 
         ReplicaCanonicalApplyObservation.ObserveOutbound();
         var payload = EncodePayload(payloadBytes);
+        var budgetedForward = IsBudgetedForward(method, payload);
         using var timeout = new CancellationTokenSource(ReplicaRpcDeadline.Select(method, configuration, execution), time);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
@@ -66,6 +69,11 @@ public sealed class ReplicaGrainServiceClient : GrainServiceClient<IPartitionRep
                 {
                     var reply = await ExchangeAsync(voterId, method, payload, attempt != EmptyAttempt, deadline.Token).ConfigureAwait(false);
                     return reply;
+                }
+                catch (OrleansMessageRejectionException error) when (budgetedForward)
+                {
+                    // A possibly admitted child cannot receive the same finite grant under a new nonce.
+                    throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaTransportProtocol.TransportUnavailable, error);
                 }
                 catch (OrleansMessageRejectionException) when (attempt + AttemptStep < maximumAttempts)
                 {
@@ -81,9 +89,20 @@ public sealed class ReplicaGrainServiceClient : GrainServiceClient<IPartitionRep
         }
         catch (Exception error) when (error is OrleansException or HttpRequestException or TimeoutException)
         {
-            throw Errors.Fail(InterruptedCode(method), ReplicaTransportProtocol.TransportUnavailable);
+            throw Errors.Fail(InterruptedCode(method), ReplicaTransportProtocol.TransportUnavailable, error);
         }
 
+    }
+
+    private static bool IsBudgetedForward(ReplicaRpc method, ReadOnlyMemory<byte> payload)
+    {
+        if (method != ReplicaRpc.Forward)
+        {
+            return false;
+        }
+        var frame = ReplicaNativeInspection.Inspect<ReplicaForwardRequestV1>(payload, NoNestedEntries).Value;
+        ReplicaForwardFrameValidation.RequireRequest(frame);
+        return frame.Grant is not null;
     }
 
     private async Task<ReadOnlyMemory<byte>> ExchangeAsync(string voterId, ReplicaRpc method, byte[] payload, bool refresh,

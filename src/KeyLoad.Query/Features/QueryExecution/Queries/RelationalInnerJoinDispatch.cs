@@ -10,7 +10,7 @@ internal static class RelationalInnerJoinDispatch
     {
         var database = owner.PartitionQueryOwner;
         QueryReadCutObservation? observation = null;
-        var result = database.WithQueryView(principalId, request.Partition, request.Query.Collection,
+        var result = database.WithQueryView(principalId, request.Partition, request.Query.Collection, Capability.None,
             (view, principal, leftResource) =>
             {
                 if (request.Query.InnerJoin is not { } join)
@@ -21,10 +21,12 @@ internal static class RelationalInnerJoinDispatch
                 }
                 database.Authorization.Require(principal, request.Partition, join.Collection,
                     Capability.Query | Capability.DocumentsRead);
-                var rightResource = database.Resource(view, request.Partition, join.Collection, ResourceKind.Collection);
+                var rightResource = database.BindAuthorizedReadResource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
+                budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition,
+                    leftResource.Name == rightResource.Name ? [leftResource] : [leftResource, rightResource]);
                 return RelationalInnerJoinExecutor.Execute(database, view, principal, leftResource, rightResource,
                     request, budget);
-            });
+            }, budget);
         owner.PublishQueryReadCut(observation, budget);
         return result;
     }

@@ -6,7 +6,7 @@ internal static class FunctionalGateEvents
 {
     internal static async Task InitializeAsync(FunctionalGateContext context, CancellationToken token)
     {
-        await Assert.That(context.Anchor).IsEqualTo(new EntityRef(context.Partition, "gate_docs_0", "anchor"));
+        await Assert.That(context.Bind(context.Anchor)).IsEqualTo(context.Bind(new EntityRef(context.Partition, "gate_docs_0", "anchor")));
         await Assert.That(context.ResourceCount).IsEqualTo(FunctionalGateEventsProtocol.ResourceCount);
         for (var resource = 0; resource < FunctionalGateEventsProtocol.ResourceCount; resource++)
         {

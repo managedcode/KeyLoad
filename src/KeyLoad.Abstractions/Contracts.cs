@@ -9,6 +9,8 @@ internal static class MutationDiscriminatorNames
 {
     internal const string Property = "kind";
     internal const string PutDocument = "putDocument";
+    internal const string UpsertAnalyticsEvents = AnalyticsStoreProtocol.UpsertKind;
+    internal const string DeleteAnalyticsEvents = AnalyticsStoreProtocol.DeleteKind;
     internal const string PatchDocument = "patchDocument";
     internal const string DeleteDocument = "deleteDocument";
     internal const string AppendEvents = "appendEvents";
@@ -171,6 +173,8 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 /// <summary>Defines one resource mutation included in a command.</summary>
 /// <param name="Resource">Identifies the resource scope or mutation target.</param>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = MutationDiscriminatorNames.Property)]
+[JsonDerivedType(typeof(UpsertAnalyticsEvents), AnalyticsStoreProtocol.UpsertKind)]
+[JsonDerivedType(typeof(DeleteAnalyticsEvents), AnalyticsStoreProtocol.DeleteKind)]
 [JsonDerivedType(typeof(InsertTypedRow), RelationalInsertProtocol.MutationKind)]
 [JsonDerivedType(typeof(PutDocument), MutationDiscriminatorNames.PutDocument)]
 [JsonDerivedType(typeof(PatchDocument), MutationDiscriminatorNames.PatchDocument)]
@@ -332,7 +336,11 @@ public enum OperationKind
     /// <summary>Changes one existing queue pause state through an explicit schema-version CAS.</summary>
     SetQueueDispatch = 50,
     /// <summary>Atomically creates one absent canonical typed table with an original caller identity.</summary>
-    CreateTable = 51
+    CreateTable = 51,
+    /// <summary>Commits one authenticated internal exact-lifetime retirement phase; excluded from public factories.</summary>
+    ResourceRetirementPhase = 52,
+    /// <summary>Native all-owner table retirement and logical removal through the authenticated request grain.</summary>
+    DropTable = 53
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

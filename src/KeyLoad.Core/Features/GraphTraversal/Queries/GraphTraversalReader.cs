@@ -34,7 +34,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
     {
         const int StartVertexDepth = 0;
 
-        visibility.RequireStart(start);
+        start = visibility.RequireStart(start);
         AddVertex(start, StartVertexDepth);
         while (pending.TryDequeue(out var item))
         {
@@ -81,6 +81,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         budget.Check();
         GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        _ = visibility.CanVisit(edge.From);
         if (edge.Id != id || edge.From != source
             || !key.SequenceEqual(KeySpace.Partition(AdjacencySpace, partition, graph,
                 OutDirection, source.Collection, source.Id, id)))

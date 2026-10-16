@@ -16,7 +16,8 @@ internal static class GraphSearchFieldAuthority
         database.Authorization.Require(principal, partition, graphName, Capability.GraphRead);
         var graph = budget.ReadRecord<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, graphName));
-        _ = ResourceLifetimeCatalog.Read(budget.CreateView(view), partition.TenantId, partition.DatabaseId, graphName, graph);
+        var metadata = budget.CreateView(view);
+        var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, graphName, graph);
         if (graph is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, MissingGraph);
@@ -25,6 +26,7 @@ internal static class GraphSearchFieldAuthority
         {
             throw Errors.Fail(ErrorCode.Conflict, InvalidGraphResource);
         }
+        database.BindAuthenticatedReadResourceLifetime(metadata, partition, graph, lifetime!);
         if (usesLabels)
         {
             database.Authorization.RequireFieldUse(principal, graph, LabelField);

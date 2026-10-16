@@ -42,9 +42,8 @@ internal static class EventVectorParentControlCall
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateEventVectorPhase(requestId, operation,
             envelope.ExpiresAt);
-        using var context = node.OpenRequestContext(principal, requestId, operation.Id, originalCancellationToken);
-        var reply = await node.ExecuteAsync(requestId, signed, command: true,
-            cancellationToken: originalCancellationToken).ConfigureAwait(false);
+        var reply = await EventVectorNativeChild.ExecuteAsync(node, principal, requestId, operation.Id,
+            signed, work, null, originalCancellationToken).ConfigureAwait(false);
         var transferred = false;
         try
         {

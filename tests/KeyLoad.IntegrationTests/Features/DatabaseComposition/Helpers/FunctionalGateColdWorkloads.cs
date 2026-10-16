@@ -33,8 +33,13 @@ internal static class FunctionalGateColdWorkloads
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
         await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, state.Partition,
             [new("putDocument", collection, "original", 1)]);
+        var literal = new DocumentResult(new(state.Partition, collection, "original"), 1, json, false, []);
+        var reference = await FunctionalGateEntityReferences.CaptureAsync(context, context.Reader, literal, token);
         var retained = new FunctionalGateColdWorkload(identity, command, receipt,
-            new(new(new(state.Partition, collection, "original"), 1, json, false, [])));
+            new(literal with
+            {
+                Reference = reference
+            }));
         await ReplayAsync(context, retained, token);
         foreach (var model in state.Models)
         {

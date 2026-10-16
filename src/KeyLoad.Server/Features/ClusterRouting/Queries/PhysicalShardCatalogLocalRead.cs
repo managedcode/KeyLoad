@@ -1,5 +1,7 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 
 namespace KeyLoad.Server;
 
@@ -23,4 +25,27 @@ internal static class PhysicalShardCatalogLocalRead
             return catalog;
         });
     }
+
+    internal static async Task<PhysicalShardCatalog?> ReadAsync(PartitionHost owner,
+        ReadExecutionBudget work, ReadExecutionBudgetReadGrant? sourceMeta, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+        work.Check();
+        await owner.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
+        token.ThrowIfCancellationRequested();
+        work.Check();
+        var result = owner.Database.Store.Read(raw =>
+        {
+            var view = sourceMeta is null ? work.CreateView(raw) : work.CreateView(raw, sourceMeta);
+            var catalog = PhysicalShardCatalogRecordSerialization.Read(view);
+            if (catalog is not null)
+            {
+                PhysicalShardCatalogValidation.ValidateCatalog(catalog);
+            }
+            return catalog;
+        });
+        work.Check();
+        return result;
+    }
+
 }

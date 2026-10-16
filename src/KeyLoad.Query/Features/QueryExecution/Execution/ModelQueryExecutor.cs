@@ -33,6 +33,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
     {
         var query = request.Query;
         var source = query.ModelSource!;
+        budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [resource]);
         var modelResource = ModelQueryPolicies.Rebase(resource);
         if (query.InnerJoin is not null)
         {

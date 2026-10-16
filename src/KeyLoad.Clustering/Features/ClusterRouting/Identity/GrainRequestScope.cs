@@ -14,7 +14,8 @@ internal static class GrainRequestScope
 
     internal static void Validate(GrainRequestEnvelope request, Guid incarnation, DateTimeOffset now, TimeSpan maximumFuture)
     {
-        if (request.Incarnation != incarnation
+        if (request.Metadata is not null && request.Purpose != ResourceRetirementCommandScope.Purpose
+            || request.Incarnation != incarnation
             || request.RequestId == Guid.Empty || request.ExpiresAt <= now || request.ExpiresAt > now + maximumFuture
             || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload.IsEmpty)
         {
@@ -27,7 +28,10 @@ internal static class GrainRequestScope
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
 
-        if (!ResourceOwnerInventoryReadScope.Validate(request) && !TenantPlacementRequestScope.Validate(request)
+        if (!NativeAdministratorAuthenticationScope.Validate(request)
+            && !TextMaintenanceChildScope.Validate(request) && !MultiLaneReceiveChildScope.Validate(request)
+            && !AnnProjectionJobChildScope.Validate(request) && !ResourceRetirementCommandScope.Validate(request) && !ResourceRetirementReadScope.Validate(request)
+            && !AnnMaintenanceChildScope.Validate(request) && !ResourceOwnerInventoryReadScope.Validate(request) && !TenantPlacementRequestScope.Validate(request)
             && !Bm25RequestScope.Validate(request) && !RemoteGraphRequestScope.Validate(request) && !AnnProjectionObservationScope.Validate(request)
             && !EventVectorRequestScope.Validate(request) && !OnlineTextRequestScope.Validate(request) && !PartitionMovementRequestScope.Validate(request)
             && !DocumentLifetimeReadScope.Validate(request) && !ControlledBlobReadScopeV2.Validate(request) && !ControlledBlobOutcomeReadScopeV2.Validate(request)

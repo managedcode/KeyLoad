@@ -65,7 +65,9 @@ public static class ClusterRestoreImageComparison
         {
             ClusterRestoreImageOrigins.Require(state);
         }
-        ClusterRestoreImageRows.Require(state, ClusterRestoreImageMetadata.ChangedKeys(state));
+        var changed = ClusterRestoreImageMetadata.ChangedKeys(state);
+        changed.AddRange(ClusterRestoreImageConservation.Require(state, sourceIdentity));
+        ClusterRestoreImageRows.Require(state, changed);
         work.Check();
     }
 }

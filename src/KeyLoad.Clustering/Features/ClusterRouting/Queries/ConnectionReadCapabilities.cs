@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,22 +15,35 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
     private GrainQueryReadCapabilities Query => query ??= new(services.GetRequiredService<QueryEngine>(),
         services.GetRequiredService<SearchEngine>(), runtimeClock, services.GetRequiredService<PhysicalShardRecord>());
     private INodeAdministration Administration => services.GetRequiredService<INodeAdministration>();
-    private readonly GrainBlobReadExecution blobs = new(localDatabase, services);
+    private readonly GrainBlobReadExecution blobs = new(localDatabase, services, runtimeClock);
 
     internal async Task<object?> ReadAsync(DecodedGrainRequest request, Guid requestId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var kind = request.Envelope.ReadKind!.Value;
         if (kind == GrainReadKind.Authenticate)
         {
-            return GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock);
+            return request.Envelope.Purpose == NativeAdministratorAuthenticationProtocol.Purpose
+                ? NativeAdministratorAuthenticationRead.Execute(localDatabase, runtimeClock, codec.ExecutionOptions,
+                    request, cancellationToken, binding)
+                : GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock);
         }
 
-        var principal = await ReloadPrincipalAsync(request, requestId, cancellationToken).ConfigureAwait(true);
-        if (kind == GrainReadKind.ResourceOwnerInventory)
+        var retirementWork = ResourceRetirementReadScope.Handles(kind)
+            ? ResourceRetirementReadExecution.CreateWork(localDatabase, runtimeClock, request, binding, cancellationToken)
+            : null;
+        retirementWork?.RequireResourceLifetimeBinding(binding);
+        var principal = await ReloadPrincipalAsync(request, requestId, retirementWork, cancellationToken).ConfigureAwait(true);
+        if (UserAnalyticsReadExecution.Handles(kind))
         {
-            return await ResourceOwnerInventoryObservedReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,
-                principal, request, codec, context, cancellationToken).ConfigureAwait(true);
+            return await UserAnalyticsReadExecution.ExecuteAsync(localDatabase, services, principal, kind, request,
+                cancellationToken, binding).ConfigureAwait(true);
+        }
+        if (ResourceLifecycleReadExecution.Handles(kind))
+        {
+            return await ResourceLifecycleReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,
+                principal, request, codec, context, retirementWork, cancellationToken).ConfigureAwait(true);
         }
         if (kind is GrainReadKind.PlacementPolicy or GrainReadKind.PlacementPlan or GrainReadKind.PlacementIntent)
         {
@@ -40,9 +54,9 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         {
             return kind == GrainReadKind.PartitionMovementParentState && codec.HasPhaseObserver
                 ? await MovementParentStateObservedRead.ExecuteAsync(localDatabase, services, runtimeClock,
-                    principal, request, codec, context, cancellationToken).ConfigureAwait(true)
+                    principal, request, codec, context, binding, cancellationToken).ConfigureAwait(true)
                 : GrainControlledReadCapabilities.Execute(localDatabase, services, runtimeClock,
-                    principal, request, cancellationToken);
+                    principal, request, binding, cancellationToken);
         }
         if (kind == GrainReadKind.ClusterBackupOwner)
         {
@@ -68,38 +82,39 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (GrainNativeMaintenanceReadCapabilities.Handles(kind))
         {
             return await GrainNativeMaintenanceReadCapabilities.ExecuteAsync(services, principal,
-                kind, request, cancellationToken).ConfigureAwait(true);
+                kind, request, cancellationToken, binding).ConfigureAwait(true);
         }
         return await ReadRemoteOrNativeCapabilityAsync(kind, principal, request, requestId,
-            cancellationToken).ConfigureAwait(true);
+            cancellationToken, binding).ConfigureAwait(true);
     }
 
     private async Task<object?> ReadRemoteOrNativeCapabilityAsync(GrainReadKind kind,
-        PrincipalRecord principal, DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
+        PrincipalRecord principal, DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken,
+        IResourceLifetimeWorkBinding binding)
     {
         if (kind == GrainReadKind.Document
             && services.GetService<IRemoteDocumentReadRouter>() is { } remoteDocuments)
         {
             return await remoteDocuments.ReadAsync(request.Envelope, principal,
-                GrainNativePayload.Read<GetDocumentRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
+                GrainNativePayload.Read<GetDocumentRequest>(request.Payload), cancellationToken, binding).ConfigureAwait(true);
         }
         if (kind is GrainReadKind.WaitForAnnIndex or GrainReadKind.ApproximateSearch
             && services.GetService<IRemoteAnnReadRouter>() is { } remoteAnn)
         {
             return await remoteAnn.ReadAnnAsync(request.Envelope, principal, kind, request.Payload,
-                services.GetRequiredService<SearchEngine>(), cancellationToken).ConfigureAwait(true);
+                services.GetRequiredService<SearchEngine>(), cancellationToken, binding).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.PartitionQuery
             && services.GetService<IRemotePartitionQueryRouter>() is { } remoteQueries)
         {
             return await remoteQueries.ReadAsync(request.Envelope, principal,
-                GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(request.Payload), cancellationToken).ConfigureAwait(true);
+                GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(request.Payload), cancellationToken, binding).ConfigureAwait(true);
         }
-        return await ReadNativeCapabilityAsync(kind, principal, request, requestId, cancellationToken).ConfigureAwait(true);
+        return await ReadNativeCapabilityAsync(kind, principal, request, requestId, cancellationToken, binding).ConfigureAwait(true);
     }
 
     private async Task<PrincipalRecord> ReloadPrincipalAsync(DecodedGrainRequest request, Guid requestId,
-        CancellationToken cancellationToken)
+        ReadExecutionBudget? work, CancellationToken cancellationToken)
     {
         if (codec.HasPhaseObserver)
         {
@@ -107,34 +122,32 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
                 context, cancellationToken).ConfigureAwait(true);
             ConnectionReadExecution.ValidateFreshRequest(codec, request, requestId, cancellationToken);
         }
-        return GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
+        return work is null
+            ? GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock)
+            : GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock, work);
     }
 
     private async Task<object?> ReadNativeCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
-        DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
+        DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken,
+        IResourceLifetimeWorkBinding binding)
     {
         if (kind is GrainReadKind.AnnProjectionObservation or GrainReadKind.AnnProjectionObservationV2)
         {
             return await AnnProjectionObservationRead.ExecuteAsync(localDatabase, services, runtimeClock,
-                principal, request, cancellationToken).ConfigureAwait(true);
+                principal, request, cancellationToken, binding).ConfigureAwait(true);
         }
         if (RemoteGraphRequestScope.HandlesRead(kind))
         {
-            return GrainRemoteGraphReadCapabilities.Execute(localDatabase, services, runtimeClock, principal, request, cancellationToken);
+            return GrainRemoteGraphReadCapabilities.Execute(localDatabase, services, runtimeClock, principal, request, cancellationToken, binding);
         }
         if (EventVectorRequestScope.HandlesRead(kind))
         {
-            return EventVectorReadCapabilities.Execute(localDatabase, services, principal, request, cancellationToken);
+            return EventVectorReadCapabilities.Execute(localDatabase, services, principal, request, cancellationToken, binding);
         }
         if (kind == GrainReadKind.DistributedSearch)
         {
             return await DistributedSearchReadCapability.ExecuteAsync(services, principal, request, requestId,
-                codec, context, cancellationToken).ConfigureAwait(true);
-        }
-        if (kind == GrainReadKind.DistributedSearchLeaf)
-        {
-            return DistributedSearchLeafCapability.Execute(localDatabase, services, runtimeClock,
-                principal, request, cancellationToken);
+                codec, context, cancellationToken, binding).ConfigureAwait(true);
         }
         if (RuntimeJournalRequestScope.Handles(kind))
         {
@@ -147,17 +160,17 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         if (GrainBlobReadCapabilities.Handles(kind))
         {
-            return await blobs.ExecuteAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
+            return await blobs.ExecuteAsync(kind, principal, request, cancellationToken, binding).ConfigureAwait(true);
         }
         if (ConnectionRemoteTransferReadCapabilities.HandlesPeer(kind, request.Envelope))
         {
-            return ConnectionRemoteTransferReadCapabilities.ExecutePeer(localDatabase, services,
-                runtimeClock, principal, request, cancellationToken);
+            return ConnectionRemoteTransferReadCapabilities.ExecutePeer(localDatabase,
+                runtimeClock, principal, request, cancellationToken, binding);
         }
         if (kind == GrainReadKind.QueueTransferReceipt)
         {
             var result = await ConnectionRemoteTransferReadCapabilities.TryReceiptAsync(services,
-                principal, request, cancellationToken).ConfigureAwait(true);
+                principal, request, cancellationToken, binding).ConfigureAwait(true);
             if (result.Routed)
             {
                 return result.Receipt;
@@ -165,22 +178,25 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         if (GrainCoreReadCapabilities.Handles(kind))
         {
-            return core.Execute(kind, principal.Id, request.Payload, cancellationToken,
+            var budget = new ReadExecutionBudget(localDatabase.OperationLimitsOptions,
+                runtimeClock, cancellationToken);
+            budget.ConstrainLifetime(request.Envelope.ExpiresAt);
+            return core.ExecuteBound(kind, principal.Id, request.Payload, budget, binding,
                 kind == GrainReadKind.Stream ? services.GetRequiredService<PhysicalShardRecord>() : null);
         }
 
-        return await ReadQueryOrAdministrationAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
+        return await ReadQueryOrAdministrationAsync(kind, principal, request, cancellationToken, binding).ConfigureAwait(true);
     }
 
     private async Task<object?> ReadQueryOrAdministrationAsync(GrainReadKind kind, PrincipalRecord principal,
-        DecodedGrainRequest request, CancellationToken cancellationToken)
+        DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
         if (kind is not (GrainReadKind.Backup or GrainReadKind.Admission or GrainReadKind.NodeStatus))
         {
             using var observation = codec.HasPhaseObserver
                 ? NativeTextPostingObservation.Enter(token => codec.ObservePhaseAsync(request,
                     GrainRequestPhase.NativeTextOriginalPostingRead, context, token)) : null;
-            return await Query.ExecuteAsync(kind, principal.Id, request.Payload, cancellationToken).ConfigureAwait(true);
+            return await Query.ExecuteAsync(kind, principal.Id, request.Payload, cancellationToken, binding).ConfigureAwait(true);
         }
 
         return await ReadAdministrationAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);

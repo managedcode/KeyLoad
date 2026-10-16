@@ -106,7 +106,7 @@ public sealed partial class DatabaseEngine
         _ = RequireActiveProjectionConsumer(view, principal, request.Consumer, request.ConsumerGeneration);
         Authorization.Require(principal, request.Consumer.Partition, request.Collection,
             Capability.Query | Capability.DocumentsRead);
-        var resource = Resource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
+        var resource = BindAuthorizedReadResource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
         Authorization.RequireFieldUse(principal, resource, request.Field);
         var current = ReadAtomicPartitionPlacement(view, principal.Id,
             new(AtomicPartitionPlacementProtocol.CurrentVersion, request.Consumer.Partition));

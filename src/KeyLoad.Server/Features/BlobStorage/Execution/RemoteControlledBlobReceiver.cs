@@ -1,6 +1,8 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -29,7 +31,7 @@ internal sealed class RemoteControlledBlobReceiver(OrleansNode node, PartitionHo
     }
 
     internal async Task<ControlledBlobReadResult> ReadOutcomeV2Async(RemoteControlledBlobOutcomeCallV2 call,
-        RemoteModelNativeEffectBoundary? boundary, CancellationToken token)
+        RemoteModelNativeEffectBoundary? boundary, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
         ValidateOutcomeV2(call, token);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
@@ -40,35 +42,15 @@ internal sealed class RemoteControlledBlobReceiver(OrleansNode node, PartitionHo
             original.MaximumReadBytes, original.MaximumExaminedRecords, original.MaximumResultBytes);
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateControlledBlobOutcomeReadV2(requestId, principal.Id, request);
-        ControlledBlobReadResult? result = null;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        boundary?.Begin(token);
+        var result = await NativeLifetimeReadChildExecution.ExecuteAsync<ControlledBlobReadResult>(
+            node, principal, requestId, signed, null, token, binding).ConfigureAwait(false);
+        ValidateOutcomeV2(call, token);
+        if (!result.OutcomeValidated || result.NativeValue is not null)
         {
-            using var identity = node.OpenRequestContext(principal, requestId, Guid.Empty, token);
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                boundary?.Begin(token);
-                var reply = await node.ExecuteAsync(requestId, signed, command: false, cancellationToken: token).ConfigureAwait(false);
-                ValidateOutcomeV2(call, token);
-                if (boundary is not null && reply.Error is { } terminal && terminal != ErrorCode.Corruption)
-                {
-                    throw new RemoteModelNativeTerminalException(
-                        Errors.Fail(terminal, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable));
-                }
-                if (reply.Error is { } error)
-                {
-                    throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable);
-                }
-                result = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as ControlledBlobReadResult
-                    ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
-                if (!result.OutcomeValidated || result.NativeValue is not null)
-                {
-                    throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
-                }
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
-        return result ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
+            throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
+        }
+        return result;
     }
 
     internal void Validate(RemoteControlledBlobCall call, CancellationToken token)

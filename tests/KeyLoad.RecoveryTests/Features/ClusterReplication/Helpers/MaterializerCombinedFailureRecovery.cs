@@ -24,7 +24,8 @@ internal static class MaterializerCombinedFailureRecovery
         var db = MaterializerCombinedFailureFixture.OpenDatabase(canonical);
         using var log = new DurableReplicaLog(replica, RecoveryExecutionOptions.Configuration(fixture.Configuration), canonicalDatabase: db);
         await using var materializer = new ReplicaMaterializer(db, log, new ReplicaSnapshotStore(canonical, log,
-            RecoveryExecutionOptions.Configuration(fixture.Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
+            RecoveryExecutionOptions.Configuration(fixture.Configuration), RecoveryExecutionOptions.Replica(), replacementToken => db.RequireNoRetirementForSnapshotReplacement(
+                    new(db.OperationLimitsOptions, db.EvaluationClock, replacementToken))), RecoveryExecutionOptions.Replica());
         await materializer.WaitForApplyAsync(FaultIndex, token);
         await RecordedQueueFollowerAssertions.EqualAsync(db.LastApplied, FaultIndex);
         await RecordedQueueFollowerAssertions.EqualAsync(canonical.Position, fixture.ExpectedRecoveredPosition);

@@ -72,7 +72,7 @@ internal static class ReplicaTransportShutdownFlow
         state.MarkTransportReady();
         var request = Request(runtime, state);
         observed.NativeAttempt = native.DiscoverAsync(request, token);
-        observed.EndpointAttempt = endpoint.Consensus.HandleAsync(ReplicaRpc.Forward, ReplicaProtocolCodec.Serialize(operation), token);
+        observed.EndpointAttempt = endpoint.Consensus.HandleAsync(ReplicaRpc.Forward, ReplicaForwardTestFrame.Payload(operation), token);
         await Task.WhenAll(discoveryGate.Entered.Task, endpointGate.Entered.Task).WaitAsync(token);
         var image = QueueWholeFlowStorage.Bytes(db.Store);
         var cut = db.Store.Position;

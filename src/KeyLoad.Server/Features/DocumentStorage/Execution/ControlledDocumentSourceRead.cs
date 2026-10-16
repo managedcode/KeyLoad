@@ -2,6 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -16,16 +17,15 @@ internal sealed class ControlledDocumentSourceRead(OrleansNode node, PartitionHo
     private const string NonceFormat = "N";
 
     internal async Task<(bool Routed, DocumentResult? Document)> TryReadAsync(GrainRequestEnvelope envelope,
-        string principalId, GetDocumentRequest request, CancellationToken token)
+        string principalId, GetDocumentRequest request, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
-        var work = new ReadExecutionBudget(limits, clock, token);
         var expiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (expiry > envelope.ExpiresAt)
         {
             expiry = envelope.ExpiresAt;
         }
-        var frame = partition.Database.TryCaptureControlledDocumentReadV2(principalId,
-            request.Reference, request.MinimumToken, expiry, work);
+        var frame = partition.Database.TryCaptureControlledDocumentReadV2Bound(principalId,
+            request.Reference, request.MinimumToken, expiry, work, binding);
         if (frame is null)
         {
             return (false, null);
@@ -53,7 +53,7 @@ internal sealed class ControlledDocumentSourceRead(OrleansNode node, PartitionHo
         work.ImportReadGrant(grant, observed.ReadBytes, observed.ExaminedRecords);
         work.MeasureResult(observed);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        partition.Database.ValidateControlledDocumentReadV2(frame, work);
+        partition.Database.ValidateControlledDocumentReadV2Bound(frame, work, binding);
         work.Check();
         return (true, observed.Document);
     }

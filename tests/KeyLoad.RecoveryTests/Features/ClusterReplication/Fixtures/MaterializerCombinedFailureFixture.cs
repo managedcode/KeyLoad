@@ -77,7 +77,8 @@ internal sealed class MaterializerCombinedFailureFixture : IAsyncDisposable
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             Log = openedLog = new(replica, RecoveryExecutionOptions.Configuration(Configuration), canonicalDatabase: Database);
             Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log,
-                RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
+                RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica(), replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken))), RecoveryExecutionOptions.Replica());
         }
         catch (Exception primary)
         {

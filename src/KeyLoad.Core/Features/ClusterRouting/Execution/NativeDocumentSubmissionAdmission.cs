@@ -42,14 +42,26 @@ public sealed partial class DatabaseEngine
 
     /// <summary>Checks authorized changed identity using the original verified operation and candidate.</summary>
     internal void ValidateSubmissionAdmission(ReplicatedOperation operation, CommandRequest command)
+        => ValidateSubmissionAdmissionCore(operation, command, null);
+
+    internal void ValidateSubmissionAdmission(ReplicatedOperation operation, CommandRequest command, ReadExecutionBudget work)
     {
-        _ = Store.Read(view =>
+        ArgumentNullException.ThrowIfNull(work);
+        work.Check();
+        ValidateSubmissionAdmissionCore(operation, command, work);
+        work.Check();
+    }
+
+    private void ValidateSubmissionAdmissionCore(ReplicatedOperation operation, CommandRequest command, ReadExecutionBudget? work)
+    {
+        _ = Store.Read(raw =>
         {
-            if (!TryAuthorizeOrdinaryDocumentSubmission(view, operation, out var principal, out var denial)
+            var view = work is null ? raw : work.CreateView(raw);
+            if (!TryAuthorizeOrdinaryDocumentSubmission(view, operation, out var principal, out var denial, work is not null)
                 || principal is null)
             {
                 if (principal is not null && denial is not null
-                    && HasChangedRetainedDocumentDenial(view, principal, operation, denial))
+                    && HasChangedRetainedDocumentDenial(view, principal, operation, denial, work is not null))
                 {
                     System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denial).Throw();
                 }
@@ -73,7 +85,7 @@ public sealed partial class DatabaseEngine
     }
 
     private bool TryAuthorizeOrdinaryDocumentSubmission(IKeyValueView view, ReplicatedOperation operation,
-        out PrincipalRecord? principal, out KeyLoadException? denial)
+        out PrincipalRecord? principal, out KeyLoadException? denial, bool bounded = false)
     {
         principal = null;
         denial = null;
@@ -82,13 +94,13 @@ public sealed partial class DatabaseEngine
             principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Unauthenticated) { throw; }
-        catch (KeyLoadException) { return false; }
+        catch (KeyLoadException error) when (CanDeclineDocumentAdmission(error, bounded)) { return false; }
         try
         {
             AuthorizeOperation(view, principal, operation);
             return true;
         }
-        catch (KeyLoadException error)
+        catch (KeyLoadException error) when (CanDeclineDocumentAdmission(error, bounded))
         {
             if (error.Code == ErrorCode.PermissionDenied)
             {
@@ -99,7 +111,7 @@ public sealed partial class DatabaseEngine
     }
 
     private bool HasChangedRetainedDocumentDenial(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, KeyLoadException denial)
+        ReplicatedOperation operation, KeyLoadException denial, bool bounded)
     {
         try
         {
@@ -123,8 +135,12 @@ public sealed partial class DatabaseEngine
                 && outcome.OnlineTextAuthority is null && outcome.RemoteTransferFailureAuthority is null
                 && outcome.RemoteTransferAuthority is null;
         }
-        catch (KeyLoadException) { return false; }
+        catch (KeyLoadException error) when (CanDeclineDocumentAdmission(error, bounded)) { return false; }
     }
+
+    private static bool CanDeclineDocumentAdmission(KeyLoadException error, bool bounded)
+        => !bounded || error.Code is not (ErrorCode.BudgetExceeded or ErrorCode.Corruption
+            or ErrorCode.FormatUnsupported or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome);
 
     private CommandRequest? ReadOrdinaryDocumentSubmission(ReplicatedOperation operation)
     {

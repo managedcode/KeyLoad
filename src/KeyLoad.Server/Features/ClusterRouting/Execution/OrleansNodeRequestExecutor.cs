@@ -58,7 +58,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         }
         var reply = await DrainAsync(grains, services, connectionId, requestId, signedRequest, command, clock,
             progress, execution.Token, cancellationToken).ConfigureAwait(false);
-        if (reply.Error is { } error)
+        if (reply.Error is { } error && reply.Metadata is null)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
         }
@@ -84,11 +84,20 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
                 return request;
             });
             stage = OrleansRpcFailureStage.Consumption;
-            return progress is null
+            var reply = progress is null
                 ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, serializer, requestId, clock,
                     routingOptions, purpose, executionToken).ConfigureAwait(false)
                 : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, serializer, requestId, clock,
                     routingOptions, purpose, progress, executionToken).ConfigureAwait(false);
+            if (reply.Metadata is not null)
+            {
+                if (purpose.MetadataAdmission is not { } metadata)
+                {
+                    throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+                }
+                NativeCommandMetadataReplies.Require(reply, metadata, routingOptions);
+            }
+            return reply;
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {

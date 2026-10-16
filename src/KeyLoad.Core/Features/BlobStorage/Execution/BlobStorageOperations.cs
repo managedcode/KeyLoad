@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.BlobStorage;
 /// <summary>Executes bounded canonical blob operations using borrowed node-local engine ownership.</summary>
 /// <param name="database">The engine that owns shared command and authorization semantics.</param>
 /// <param name="timeProvider">Optional business clock for gated read authority.</param>
-public sealed class BlobStorageOperations(DatabaseEngine database, TimeProvider? timeProvider = null)
+public sealed partial class BlobStorageOperations(DatabaseEngine database, TimeProvider? timeProvider = null)
 {
     private BlobReads Reads => new(database, timeProvider ?? database.EvaluationClock);
 

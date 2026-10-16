@@ -1,43 +1,20 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-internal static class DistributedSearchOwnedLeafExecution
+internal static partial class DistributedSearchOwnedLeafExecution
 {
     private const string OwnerChanged = "The distributed search receiving owner changed.";
     private const string InvalidPhase = "The distributed search receiving phase is invalid.";
 
-    internal static DistributedSearchLeafResultV1 Execute(DatabaseEngine database, string principalId,
-        DistributedSearchOwnedLeafV1 request, PhysicalShardRecord actualOwner,
-        IOptions<QueryExecutionOptions> options, TimeProvider clock, DateTimeOffset originalExpiry,
-        CancellationToken token)
-    {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(actualOwner);
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(clock);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
-        var execution = options.Value;
-        execution.Validate();
-        QueryResultBudgetPolicy.Constrain(budget, execution);
-        budget.ConstrainLifetime(originalExpiry);
-        DistributedSearchOwnedLeafValidation.Require(request, database.Limits, execution, budget);
-        RequireOwner(database, request.Owner, actualOwner);
-        budget.ConstrainResultBytes(request.MaxResultBytes);
-        var grant = budget.CreateReadGrant(request.MaxReadBytes, request.MaxExaminedRecords);
-        var result = ExecutePhase(database, principalId, request, options, budget, grant);
-        budget.CheckResult(result);
-        return result;
-    }
-
     internal static DistributedSearchLeafResultV1 ExecuteV2(DatabaseEngine database, string principalId,
         DistributedSearchOwnedLeafV2 request, PhysicalShardRecord actualOwner,
         IOptions<QueryExecutionOptions> options, TimeProvider clock, DateTimeOffset originalExpiry,
-        CancellationToken token)
+        CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
         if (request is null || request.Original is null || request.Definition is null || request.Coverage is null
             || request.Principal is null || request.Principal.Id != principalId)
@@ -46,6 +23,10 @@ internal static class DistributedSearchOwnedLeafExecution
         }
         var original = request.Original;
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         var execution = options.Value;
         execution.Validate();
         QueryResultBudgetPolicy.Constrain(budget, execution);

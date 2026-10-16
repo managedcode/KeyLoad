@@ -13,10 +13,11 @@ public sealed partial class DatabaseEngine
     {
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
         Authorization.Require(principal, request.SourcePartition, request.Graph, Capability.GraphWrite);
-        var graph = Resource(view, request.SourcePartition, request.Graph, ResourceKind.Graph);
+        var graph = BindAuthorizedReadResource(view, request.SourcePartition, request.Graph, ResourceKind.Graph);
         _ = CaptureRemoteGraphOwnerCut(view, principal, request.SourcePartition, request.SourceOwner, graph.SchemaVersion);
         var intent = ResolveRemoteGraphDeliveryIntent(view, request, work);
         RequireRemoteGraphStoredIntent(view, request, intent);
+        ObserveRemoteGraphReadIntent(view, intent, work, target: false);
         _ = VisibleVertex(view, principal, intent.Content.Edge.From, work);
         var original = ResolveRemoteGraphDeliveryOriginal(view, principal, request, intent);
         var resolved = request with
@@ -44,6 +45,7 @@ public sealed partial class DatabaseEngine
             RemoteGraphKeys.Intent(request.SourcePartition, request.Graph, request.EdgeId, delivery.Destination));
         if (pending?.Content?.Revision == delivery.ExpectedRevision)
         {
+            _ = RemoteGraphLifetimeAdmission.BindOriginalDestination(pending, delivery.Destination);
             return pending;
         }
         RemoteGraphIntentV1? found = null;
@@ -59,7 +61,7 @@ public sealed partial class DatabaseEngine
             }
             var intent = receipt.Intent;
             RequireRemoteGraphStoredIntent(view, request, intent);
-            if (intent.Content.Destination != delivery.Destination
+            if (RemoteGraphLifetimeAdmission.BindOriginalDestination(intent, delivery.Destination) != intent.Content.Destination
                 || !key.SequenceEqual(RemoteGraphKeys.Completion(request.SourcePartition, request.Graph,
                     request.EdgeId, delivery.Destination, intent.Content.Fingerprint)))
             {

@@ -22,7 +22,7 @@ internal sealed class ControlledDocumentNativePhaseFlow(ControlledPartitionMovem
         => await ApplyEncodedAsync(commandId, context, stage, NativeSerialization.Serialize(body),
             expiry, grant, authorization, token);
 
-    internal async Task<PartitionMovePhaseResult> ApplyEncodedAsync(Guid commandId,
+    internal async Task<OperationResult> SubmitEncodedAsync(Guid commandId,
         PartitionControlDocumentCommandContext context, PartitionMovePeerStage stage, ReadOnlyMemory<byte> body,
         DateTimeOffset expiry, PartitionMovePhaseGrant? grant,
         PartitionMoveJournalReceipt? authorization, CancellationToken token)
@@ -45,6 +45,16 @@ internal sealed class ControlledDocumentNativePhaseFlow(ControlledPartitionMovem
                 request, source.Database.CaptureControlledCommandLifetimeProof(envelope, token), token)
             : await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, sourceOptions, sourceAdmission,
                 request, token);
+        originalWork.Check();
+        return actual;
+    }
+
+    internal async Task<PartitionMovePhaseResult> ApplyEncodedAsync(Guid commandId,
+        PartitionControlDocumentCommandContext context, PartitionMovePeerStage stage, ReadOnlyMemory<byte> body,
+        DateTimeOffset expiry, PartitionMovePhaseGrant? grant,
+        PartitionMoveJournalReceipt? authorization, CancellationToken token)
+    {
+        var actual = await SubmitEncodedAsync(commandId, context, stage, body, expiry, grant, authorization, token);
         await Assert.That(actual.Error).IsNull();
         var result = actual.Get<PartitionMovePhaseResult>();
         await Assert.That(result.Journal.CommandId).IsEqualTo(commandId);

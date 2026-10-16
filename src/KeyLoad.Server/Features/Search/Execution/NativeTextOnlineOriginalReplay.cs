@@ -10,9 +10,9 @@ internal sealed class NativeTextOnlineOriginalReplay(DatabaseEngine database, Se
     private const int NoRetainedSessions = 0;
 
     internal async Task<OnlineTextCapabilityResult?> ExecuteAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token)
+        OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
-        var budget = new ReadExecutionBudget(options.Core.DatabaseLimits, clock, token);
+        var budget = originalBudget ?? new ReadExecutionBudget(options.Core.DatabaseLimits, clock, token);
         budget.ConstrainLifetime(expiry);
         var original = database.ReadOnlineTextOriginalOutcome(principal.Id, request.Request, budget);
         if (original is null)

@@ -22,8 +22,8 @@ internal static class FunctionalGateRelationalRows
             id = P.Baseline,
             title = ParentTitle,
             amount = InitialAmount,
-            doc_id = ctx.Anchor.Id,
-            anchor_ref = JsonSerializer.Serialize(ctx.Anchor, JsonDefaults.Options)
+            doc_id = ctx.Bind(ctx.Anchor).Id,
+            anchor_ref = JsonSerializer.Serialize(ctx.Bind(ctx.Anchor), JsonDefaults.Options)
         }, JsonDefaults.Options);
 
     internal static string Child(string id, string? parent)
@@ -50,9 +50,9 @@ internal static class FunctionalGateRelationalRows
     internal static Dictionary<string, JsonElement> InsertParameters(FunctionalGateContext ctx, string id)
     {
         var parameters = Parameters(id);
-        parameters.Add(P.DocumentId, JsonSerializer.SerializeToElement(ctx.Anchor.Id, JsonDefaults.Options));
+        parameters.Add(P.DocumentId, JsonSerializer.SerializeToElement(ctx.Bind(ctx.Anchor).Id, JsonDefaults.Options));
         parameters.Add(P.AnchorReference, JsonSerializer.SerializeToElement(
-            JsonSerializer.Serialize(ctx.Anchor, JsonDefaults.Options), JsonDefaults.Options));
+            JsonSerializer.Serialize(ctx.Bind(ctx.Anchor), JsonDefaults.Options), JsonDefaults.Options));
         return parameters;
     }
 

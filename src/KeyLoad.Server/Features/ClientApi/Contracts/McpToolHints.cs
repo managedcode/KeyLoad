@@ -24,6 +24,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges
             or GrainReadKind.RemoteGraphIncomingParent or GrainReadKind.SqlGraphPath
             => new(true, true, false),
+        GrainReadKind.AnalyticsEvents or GrainReadKind.AnalyticsAggregate => new(true, true, false),
         GrainReadKind.Samples => new(true, true, false),
         GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
             or GrainReadKind.SampleRetention or GrainReadKind.SampleRollup or GrainReadKind.SampleChunkWindow
@@ -69,6 +70,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         OperationKind.Delivery => new(false, true, true),
         OperationKind.CommitInbox => new(false, true, true),
         OperationKind.Processing => new(false, true, true),
+        OperationKind.DropTable => new(false, true, true),
         OperationKind.ConfigureResource or OperationKind.CreateTable => new(false, true, false),
         OperationKind.ConfigurePrincipal => new(false, true, true),
         OperationKind.ConfigureApiKey => new(false, true, true),

@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -26,6 +27,10 @@ public sealed partial class DatabaseEngine
         var resource = Resource(tx, partition, put.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
+        if (previous is not null)
+        {
+            EntityReferenceLifetime.RequireStored(tx, previous.Reference, resource);
+        }
         if (previous is { Deleted: false })
         {
             Authorization.RequireWriteRow(principal, previous.Access);
@@ -49,7 +54,7 @@ public sealed partial class DatabaseEngine
             JsonData.Identifier(team);
         }
         Authorization.RequireWriteRow(principal, access);
-        var document = new DocumentRecord(new(partition, put.Collection, put.Id),
+        var document = new DocumentRecord(EntityReferenceLifetime.Bind(tx, new(partition, put.Collection, put.Id), resource),
             checked((previous?.Revision ?? PreviousRevisionValidationBoundary) + PreviousRevisionStep), json, access, now);
         UpdateIndexes(tx, principal, resource, previous is { Deleted: false } ? previous : null, document);
         tx.PutRecord(context.Key, document);
@@ -70,6 +75,10 @@ public sealed partial class DatabaseEngine
         var resource = Resource(tx, partition, patch.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
+        if (previous is not null)
+        {
+            EntityReferenceLifetime.RequireStored(tx, previous.Reference, resource);
+        }
         if (previous is null || previous.Deleted)
         {
             throw Errors.Fail(ErrorCode.NotFound, UnavailableDocumentMutationMessage);
@@ -103,6 +112,10 @@ public sealed partial class DatabaseEngine
         var resource = Resource(tx, partition, delete.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
+        if (previous is not null)
+        {
+            EntityReferenceLifetime.RequireStored(tx, previous.Reference, resource);
+        }
         if (previous is null || previous.Deleted)
         {
             throw Errors.Fail(ErrorCode.NotFound, UnavailableDocumentMutationMessage);

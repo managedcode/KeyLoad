@@ -15,9 +15,8 @@ internal static class EventVectorIssuedAdmitCall
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateEventVectorPhase(requestId, issued,
             parent.Envelope.ExpiresAt);
-        using var context = node.OpenRequestContext(principal, requestId, issued.Id, cancellationToken);
-        var reply = await node.ExecuteAsync(requestId, signed, command: true,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+        var reply = await EventVectorNativeChild.ExecuteAsync(node, principal, requestId, issued.Id,
+            signed, work, null, cancellationToken).ConfigureAwait(false);
         work.Check();
         if (reply.Error is not null)
         {

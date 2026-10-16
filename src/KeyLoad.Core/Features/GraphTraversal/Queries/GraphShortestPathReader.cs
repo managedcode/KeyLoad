@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.GraphTraversal.Validation;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
@@ -47,14 +48,14 @@ internal sealed class GraphShortestPathReader
     {
         const int EmptyFrontierCount = 0;
 
-        visibility.RequireStart(request.From);
-        visited.Add(request.From);
-        if (request.From == request.To)
+        var from = visibility.RequireStart(request.From);
+        visited.Add(from);
+        if (visibility.MatchesTarget(from, request.To))
         {
-            foundVertices = [request.From];
+            foundVertices = [from];
             return FoundResult(ZeroHops);
         }
-        var frontier = new List<EntityRef> { request.From };
+        var frontier = new List<EntityRef> { from };
         for (var depth = ZeroHops; depth < request.MaxDepth && frontier.Count > EmptyFrontierCount; depth++)
         {
             budget.Check();
@@ -113,6 +114,11 @@ internal sealed class GraphShortestPathReader
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace,
             request.Partition, request.Graph, edgeId));
+        if (edge is not null)
+        {
+            GraphCrossPartitionValidation.ValidateEdge(edge, limits.Value);
+            _ = visibility.CanVisit(edge.From);
+        }
         GraphShortestPathValidation.ValidateAdjacency(key, edgeId, edge, source,
             request.Partition, request.Graph, limits.Value, budget);
         var validEdge = edge ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
@@ -133,7 +139,7 @@ internal sealed class GraphShortestPathReader
         visited.Add(validEdge.To);
         predecessors.Add(validEdge.To, predecessor);
         next.Add(validEdge.To);
-        if (validEdge.To == request.To)
+        if (visibility.MatchesTarget(validEdge.To, request.To))
         {
             foundVertices = ReconstructVertices(validEdge.To, checked(depth + OneHop));
             return true;

@@ -300,3 +300,14 @@ REQ-COMP-001/004/005 and AC-COMP-002/004/005/007 preserve both original canonica
 ## Native model/reference-join column binding correction
 
 REQ-COMP-001/002/004 and AC-COMP-002/004/005/007 preserve original queue/event canonical reference joins and derived projection lineage. Parser source context must keep their LEFT /id or /revision fields as ordinary model/schema columns; document-only SQL continues to use native /@id and /@revision metadata. No model bind validator, stored schema, canonical reference, persisted row/field authority, target grant, read budget, receipt or public AST is widened. The original ComposedProjectionLineage, queue/event reference, source-binding, alias-collision and retained event-integrity whole cases remain unchanged, including refusal→repair→same-ID replay→cold/healthy outcomes. Only a fresh actual original run can qualify this source correction.
+
+
+## Resource-lifetime identity for composition
+
+A name-only `EntityRef` inside an opaque user-supplied `QueueGraphLink` is an explicit lookup input. Composition resolves it against the authorized, visible row in the operation's transaction view and binds the derived graph endpoint to that collection's actual resource incarnation. An explicitly bound lookup must match that incarnation. Projection does not rewrite the stored source message, the original native command, its GUID, or its fingerprint.
+
+Graph-to-queue output is generated from canonical bound graph endpoints. Its strict JSON envelope permits the current `lifetime.incarnation` field with exactly 64 lowercase hexadecimal characters; malformed, duplicate or unknown properties remain invalid. The existing JSON admission boundary can reject malformed payloads before enqueue. A valid generated bound payload can be consumed by the same forward composition operation without a second parser or a name-only fallback.
+
+Derived native receipt references and retained composition outcome authority contain bound references. Replay checks their binding and current persisted authorization before returning a result; it never converts a missing stored binding into a lookup of the current collection name. Unsupported stored bindings refuse with `FormatUnsupported`, and a changed incarnation refuses with `OwnershipLost`. The reverse traversal's authorized start is retained even when no edge is selected. Capturing that authority uses the same actual catalog view and does not re-read the final row image after a later mutation in the same batch has deleted that row.
+
+Focused native tests must cover typed and untyped forward composition, generated reverse-to-forward payloads, full bound authority and original-command replay, malformed lifetime input, complete refusal-state conservation, and genuine same-root cold reopen. Real DROP/recreate and public SDK/MCP/SQL RF3 qualification remain separate required gates. Source review or authored tests alone do not pass those gates.

@@ -9,12 +9,14 @@ internal static class FunctionalGateBlobLinks
     internal static async Task<EntityRef> LinkAsync(FunctionalGateContext context,
         FunctionalGateBlobVersion published, int iteration, CancellationToken token)
     {
-        var reference = new EntityRef(context.Partition, context.MutableDocumentCollection, $"functional_blob_{iteration}");
+        var reference = context.Bind(new EntityRef(context.Partition, context.MutableDocumentCollection, $"functional_blob_{iteration}"));
         var json = LinkJson(context, reference, published.Begin.Blob);
         var request = new CommandRequest(Guid.NewGuid(), context.Partition,
             [new PutDocument(reference.Collection, reference.Id, json, 0L, new RowAccess())]);
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(request, token));
         await ReceiptAsync(receipt, request, reference, "putDocument", 1L);
+        reference = await FunctionalGateEntityReferences.CaptureAsync(context, context.Reader,
+            new DocumentResult(reference, 1L, json, false, []), token);
         var expected = new DocumentResult(reference, 1L, json, false, []);
         await SqlRf3Protocol.EqualAsync(expected,
             (await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, receipt.Token, token))).Document);
@@ -47,7 +49,7 @@ internal static class FunctionalGateBlobLinks
     internal static async Task BaselineAsync(FunctionalGateContext context,
         BlobRef blob, int index, CancellationToken token)
     {
-        var reference = new EntityRef(context.Partition, context.MutableDocumentCollection, $"functional_blob_{-1 - index}");
+        var reference = context.Bind(new EntityRef(context.Partition, context.MutableDocumentCollection, $"functional_blob_{-1 - index}"));
         var expected = new DocumentResult(reference, 1L, LinkJson(context, reference, blob), false, []);
         await SqlRf3Protocol.EqualAsync(expected,
             (await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token))).Document);
@@ -59,7 +61,7 @@ internal static class FunctionalGateBlobLinks
         => JsonSerializer.Serialize(new
         {
             id = reference.Id,
-            anchor = context.Anchor,
+            anchor = context.Bind(context.Anchor),
             blobRef = blob
         }, JsonDefaults.Options);
 

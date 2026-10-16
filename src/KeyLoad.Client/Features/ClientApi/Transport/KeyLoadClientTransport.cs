@@ -30,6 +30,13 @@ internal sealed class KeyLoadClientTransport
         streaming = streamingOptions is null ? null : KeyLoadClientStreamPolicy.Snapshot(streamingOptions);
     }
 
+    internal static KeyLoadClientTransport CreateStreaming(HttpClient http, string apiKey,
+        IOptions<KeyLoadClientExecutionOptions> executionOptions, IOptions<CqrsStreamClientOptions> streamingOptions)
+    {
+        ArgumentNullException.ThrowIfNull(streamingOptions);
+        return new KeyLoadClientTransport(http, apiKey, executionOptions, streamingOptions);
+    }
+
     internal KeyLoadClientExecutionOptions ExecutionOptions => execution.Value;
 
     internal IAsyncEnumerable<CqrsStreamChunk<EventFeedTailProgress, EventFeedControlResult>> TailEventFeedAsync(

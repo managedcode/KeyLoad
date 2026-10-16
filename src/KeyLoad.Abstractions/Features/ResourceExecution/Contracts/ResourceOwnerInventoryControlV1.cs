@@ -11,4 +11,12 @@ internal sealed record ResourceOwnerInventoryControlV1(
     [property: Orleans.Id(ResourceOwnerInventoryContract.ResourceOwnerInventoryControlV1DirectoryField)] PhysicalOwnerDirectoryV1 Directory,
     [property: Orleans.Id(ResourceOwnerInventoryContract.ResourceOwnerInventoryControlV1PlacementDirectoryRevisionField)] long PlacementDirectoryRevision,
     [property: Orleans.Id(ResourceOwnerInventoryContract.ResourceOwnerInventoryControlV1PrincipalIdField)] string PrincipalId,
-    [property: Orleans.Id(ResourceOwnerInventoryContract.ResourceOwnerInventoryControlV1PolicyEpochField)] long PolicyEpoch);
+    [property: Orleans.Id(ResourceOwnerInventoryContract.ResourceOwnerInventoryControlV1PolicyEpochField)] long PolicyEpoch)
+{
+    [Orleans.Id(8)]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public ResourceRetirementAttemptV1? RetirementAttempt
+    {
+        get; init;
+    }
+}

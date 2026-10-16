@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -5,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Replication;
 
 /// <summary>Fixed-voter node protocol hosted by Orleans; activation lifetime never owns canonical storage.</summary>
-public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
+public sealed class ReplicaConsensus : IReplicaEndpoint, IReplicaAuthenticatedForwardExchange, IAsyncDisposable
 {
     private const int NoLeaderReadyPosition = 0;
 
@@ -25,6 +27,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     private readonly ReplicaRequestDispatcher dispatcher;
     private readonly ReplicaReadRoundExecutor reads;
     private readonly ReplicaExecutionOptions execution;
+    private readonly ReplicaForwardedRequestExecution forwardedRequests = new();
     private Task? worker;
     private Task? shutdown;
     private Task? disposal;
@@ -84,8 +87,22 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     public void ConfigureForwarding(Func<ReplicatedOperation, CancellationToken, Task<OperationResult>> accept)
     {
         ArgumentNullException.ThrowIfNull(accept);
-        dispatcher.ConfigureForwarding(accept);
+        dispatcher.ConfigureForwarding((operation, receiverWork, token) =>
+        {
+            forwardedRequests.RequireLowerAdmission();
+            return accept(operation, token);
+        });
     }
+
+    internal void ConfigureForwardedCommandAdmission(
+        Func<ReplicatedOperation, IReplicaForwardedCommandWork?, CancellationToken, Task<OperationResult>> accept)
+        => dispatcher.ConfigureForwarding(accept);
+
+    internal void AttachForwardedCommandWork(
+        Func<DatabaseEngine, TimeProvider, CancellationToken, Task<IReplicaForwardedCommandWork>> factory)
+        => forwardedRequests.Attach(factory);
+
+    internal void RequireLowerForwardedAdmission() => forwardedRequests.RequireLowerAdmission();
 
     /// <summary>Returns diagnostic node state without claiming quorum readiness.</summary>
     /// <param name="cancellationToken">Cancellation while waiting for the protocol state gate.</param>
@@ -119,7 +136,12 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     /// <param name="operation">Stable-ID operation to commit or forward to the current leader.</param>
     /// <param name="cancellationToken">Caller cancellation within the bounded command deadline.</param>
     /// <returns>The persisted outcome after quorum commit and ordered canonical apply.</returns>
-    public async Task<OperationResult> SubmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    public Task<OperationResult> SubmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+        => SubmitAsync(operation, cancellationToken, null);
+
+    internal async Task<OperationResult> SubmitAsync(ReplicatedOperation operation,
+        CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding,
+        ReadExecutionBudget? sourcePlanningBudget = null)
     {
         ArgumentNullException.ThrowIfNull(operation);
         using var active = activity.Enter();
@@ -130,13 +152,14 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         var route = await state.LockedAsync(() => (state.Role, state.LeaderId), request.Token).ConfigureAwait(false);
         if (route.Role == ReplicaRole.Leader)
         {
-            return await leader.SubmitAsync(operation, request.Token).ConfigureAwait(false);
+            return await leader.SubmitAsync(operation, request.Token, binding, sourcePlanningBudget).ConfigureAwait(false);
         }
         if (route.LeaderId is null)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
-        return await rpc.InvokeAsync<ReplicatedOperation, OperationResult>(route.LeaderId, ReplicaRpc.Forward, operation, request.Token).ConfigureAwait(false);
+        return await ReplicaForwardSourceExecution.ExecuteAsync(rpc, route.LeaderId, operation,
+            sourcePlanningBudget, request.Token).ConfigureAwait(false);
     }
 
     /// <summary>Establishes a current-term quorum cut and waits for this node's canonical apply.</summary>
@@ -176,7 +199,28 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
-        return await dispatcher.HandleAsync(method, payload, request.Token).ConfigureAwait(false);
+        return method == ReplicaRpc.Forward
+            ? await forwardedRequests.ExecuteAsync(state.Materializer.Database, state.Clock, dispatcher,
+                payload, request.Token).ConfigureAwait(false)
+            : await dispatcher.HandleAsync(method, payload, request.Token).ConfigureAwait(false);
+    }
+
+    bool IReplicaAuthenticatedForwardExchange.RequiresOwnedForwardWork => forwardedRequests.IsAttached;
+
+    async Task<T> IReplicaAuthenticatedForwardExchange.HandleAuthenticatedForwardExchangeAsync<T>(
+        ReadOnlyMemory<byte> payload, Func<ReadOnlyMemory<byte>, Exception?, T> createReply,
+        Func<T, long> measureReply, Action<T> completed, CancellationToken cancellationToken)
+    {
+        using var active = activity.Enter();
+        using var deadline = new CancellationTokenSource(ReplicaRpcDeadline.SelectIncoming(ReplicaRpc.Forward, execution), state.Clock);
+        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token, deadline.Token);
+        request.Token.ThrowIfCancellationRequested();
+        if (!state.Ready)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+        }
+        return await forwardedRequests.ExecuteAuthenticatedAsync(state.Materializer.Database, state.Clock, dispatcher,
+            payload, createReply, measureReply, completed, request.Token).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

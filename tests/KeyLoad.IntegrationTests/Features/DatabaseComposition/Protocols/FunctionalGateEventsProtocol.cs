@@ -22,8 +22,8 @@ internal static class FunctionalGateEventsProtocol
         var kind = linked ? "linked" : "unlinked";
         var payload = JsonSerializer.Serialize(new
         {
-            to = linked ? context.Anchor : null,
-            previous = linked ? null : context.Anchor,
+            to = linked ? context.Bind(context.Anchor) : null,
+            previous = linked ? null : context.Bind(context.Anchor),
             iteration,
             linked
         }, JsonDefaults.Options);

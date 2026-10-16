@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -29,13 +30,13 @@ internal static class NativeAnnOriginalCapabilityExecution
     }
 
     internal static async Task<AnnMaintenanceCapabilityResult> ExecuteAsync(NativeAnnMaintenanceService native,
-        PrincipalRecord principal, AnnMaintenanceCapabilityRequest request, CancellationToken token)
+        PrincipalRecord principal, AnnMaintenanceCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
         if (request.Kind == AnnMaintenanceCapabilityKind.SettleOriginalResult)
         {
             native.RequireOriginalCapabilitySession(principal, request);
         }
-        var original = await native.ExecuteOriginalCapabilityAsync(principal, request, token).ConfigureAwait(false);
+        var original = await native.ExecuteOriginalCapabilityAsync(principal, request, token, originalBudget).ConfigureAwait(false);
         var result = original.Result;
         return new(request.SessionId, result?.Source, result?.Source?.ThroughSequence ?? EmptySequence,
             result?.Count ?? EmptyCount, null, result?.IndexSha256,

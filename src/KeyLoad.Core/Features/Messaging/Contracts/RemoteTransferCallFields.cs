@@ -19,4 +19,6 @@ internal static class RemoteTransferCallFields
     internal const uint IntentClaims = 14;
     internal const uint MaximumReplyBytes = 15;
     internal const uint SourceCut = 16;
+    internal const uint SourceDefinition = 17;
+    internal const uint SourceLifetime = 18;
 }

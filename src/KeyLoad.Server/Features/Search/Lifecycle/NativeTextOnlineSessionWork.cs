@@ -8,7 +8,7 @@ internal static class NativeTextOnlineSessionWork
     private const int SuccessfulCleanupFailureCount = 0;
 
     internal static (CancellationTokenSource Deadline, CancellationTokenSource Lifetime, ReadExecutionBudget Budget, byte[] Fingerprint)
-        Open(Guid id, OnlineTextIndexMaintenanceRequest request, DateTimeOffset originalExpiry, ServerRuntimeOptions options, TimeProvider clock, CancellationToken shutdown)
+        Open(Guid id, OnlineTextIndexMaintenanceRequest request, DateTimeOffset originalExpiry, ServerRuntimeOptions options, TimeProvider clock, CancellationToken shutdown, ReadExecutionBudget? originalBudget = null)
     {
         var remaining = originalExpiry - clock.GetUtcNow();
         if (id == Guid.Empty || request.CommandId == Guid.Empty || remaining <= TimeSpan.Zero)
@@ -24,7 +24,7 @@ internal static class NativeTextOnlineSessionWork
             var originalBound = TimeSpan.FromSeconds(options.Core.DatabaseLimits.Value.QueryDeadlineSeconds);
             openedDeadline = new(remaining < originalBound ? remaining : originalBound, clock);
             openedLifetime = CancellationTokenSource.CreateLinkedTokenSource(shutdown, openedDeadline.Token);
-            admitted = new(options.Core.DatabaseLimits, clock, openedLifetime.Token);
+            admitted = originalBudget ?? new(options.Core.DatabaseLimits, clock, openedLifetime.Token);
             admitted.ConstrainLifetime(originalExpiry);
             admitted.ChargeBytes(NativeSerialization.Measure(request));
             admitted.ChargeBytes(SHA256.HashSizeInBytes);

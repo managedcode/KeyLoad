@@ -39,17 +39,24 @@ public sealed partial class DatabaseEngine
     {
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
         Authorization.Require(principal, request.Destination.Partition, request.Graph, Capability.GraphWrite);
-        var graph = Resource(view, request.Destination.Partition, request.Graph, ResourceKind.Graph);
+        var graph = BindAuthorizedReadResource(view, request.Destination.Partition, request.Graph, ResourceKind.Graph);
         var cut = CaptureRemoteGraphOwnerCut(view, principal, request.Destination.Partition,
             request.DestinationOwner.Owner, graph.SchemaVersion);
         long? documentRevision = null;
-        var collection = Resource(view, request.Destination.Partition, request.Destination.Collection,
+        var collection = BindAuthorizedReadResource(view, request.Destination.Partition, request.Destination.Collection,
             ResourceKind.Collection);
         if (!request.Deleted)
         {
             documentRevision = VisibleVertex(view, principal, request.Destination, work).Revision;
         }
         work.Check();
-        return new(RemoteGraphProtocol.Version, request, cut, collection.SchemaVersion, documentRevision);
+        var result = new RemoteGraphTargetPreparationV1(RemoteGraphProtocol.Version, request, cut, collection.SchemaVersion, documentRevision)
+        {
+            ResourceLifetimes = RemoteGraphLifetimeAdmission.Capture(view, request.Destination.Partition,
+                request.Graph, request.Destination.Collection, Limits, requireOpen: true)
+        };
+        RemoteGraphLifetimeAdmission.RequirePreparation(result);
+        ObserveRemoteGraphReadValues(view, result.ResourceLifetimes, work);
+        return result;
     }
 }

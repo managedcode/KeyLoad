@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -8,13 +9,13 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.QueryExecution;
 
 internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, PartitionHost partition,
-    IOptions<NodeOptions> nodeOptions, RemoteDocumentClient client)
+    IOptions<NodeOptions> nodeOptions, RemoteDocumentClient client, IResourceLifetimeWorkBinding binding)
 {
     private const int EmptyGrant = 0;
     private const int CurrentVersion = 1;
     private const int MetadataPassesRemaining = 2;
     private readonly Dictionary<PartitionRef, PartitionQuerySourceFenceV2> original = [];
-    private readonly RemoteDistributedSearchLeafCall calls = new(node, partition, nodeOptions, client);
+    private readonly RemoteDistributedSearchLeafCall calls = new(node, partition, nodeOptions, client, binding);
 
     internal DistributedSearchPreparedLeaf Prepare(GrainRequestEnvelope envelope, string principalId,
         DistributedSearchPhaseWork work, ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget)
@@ -83,5 +84,5 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
                 partition.Database.Authorization.RequireSchemaVisibility(principal, resource);
                 return RemoteQueryLifetimeSource.Capture(partition.Database, view, principal, resource, digest,
                     request.Partition, grant, budget);
-            });
+            }, budget);
 }

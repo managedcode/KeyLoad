@@ -27,7 +27,11 @@ internal static class RemoteTransferSourceCall
             discovery.SiloAddress, PhysicalOwnerConfiguredTuples.Local(options, partition),
             context.Target.DestinationOwner, stage, stage == RemoteQueueTransferPeerStage.Receipt
                 ? Guid.Empty : envelope.CommandId, context.Intent.PrincipalId, context.PolicyEpoch,
-            context.FieldHeaderDigest, context.Intent.IntentToken, context.Claims, maximumReplyBytes, context.SourceCut);
+            context.FieldHeaderDigest, context.Intent.IntentToken, context.Claims, maximumReplyBytes, context.SourceCut)
+        {
+            SourceDefinition = context.SourceDefinition,
+            SourceLifetime = context.SourceLifetime
+        };
         RemoteTransferPeerShape.Require(call);
         return call;
     }

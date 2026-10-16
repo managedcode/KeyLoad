@@ -8,8 +8,8 @@ internal static class FunctionalGateDocumentsWrites
 {
     internal static Task<long> CreateAsync(FunctionalGateContext context, FunctionalGateDocumentsState state, CancellationToken token)
         => CommitAsync(context,
-            [new PutDocument(state.Independent.Collection, state.Independent.Id, state.IndependentJson(context.Anchor, "created", false), 0),
-                new PutDocument(state.Related.Collection, state.Related.Id, state.RelatedJson(context.Anchor, true), 0)],
+            [new PutDocument(state.Independent.Collection, state.Independent.Id, state.IndependentJson(context.Bind(context.Anchor), "created", false), 0),
+                new PutDocument(state.Related.Collection, state.Related.Id, state.RelatedJson(context.Bind(context.Anchor), true), 0)],
             [Receipt("putDocument", state.Independent, 1), Receipt("putDocument", state.Related, 1)], state.Iteration % 2 == 0, token);
 
     internal static Task<long> UpdateAsync(FunctionalGateContext context, FunctionalGateDocumentsState state, CancellationToken token)
@@ -19,7 +19,7 @@ internal static class FunctionalGateDocumentsWrites
 
     internal static Task<long> LinkAsync(FunctionalGateContext context, FunctionalGateDocumentsState state, CancellationToken token)
         => CommitAsync(context, [new PatchDocument(state.Independent.Collection, state.Independent.Id,
-            [new("/anchor", PatchKind.Set, JsonSerializer.Serialize(context.Anchor, JsonDefaults.Options)),
+            [new("/anchor", PatchKind.Set, JsonSerializer.Serialize(context.Bind(context.Anchor), JsonDefaults.Options)),
                 new("/related", PatchKind.Set, JsonSerializer.Serialize(state.Related, JsonDefaults.Options))], 2)],
             [Receipt("patchDocument", state.Independent, 3)], official: true, token);
 

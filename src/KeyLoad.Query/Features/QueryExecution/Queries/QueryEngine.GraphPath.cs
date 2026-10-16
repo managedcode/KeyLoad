@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.QueryExecution;
 
 namespace KeyLoad.Query;
@@ -14,7 +15,17 @@ public sealed partial class QueryEngine
     public GraphShortestPathResult ShortestPathSql(string principalId, SqlGraphPathRequest request,
         TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
+        return ExecuteShortestPathSql(principalId, request, timeProvider, cancellationToken);
+    }
+
+    private GraphShortestPathResult ExecuteShortestPathSql(string principalId, SqlGraphPathRequest request,
+        TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
+    {
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         if (request is null)

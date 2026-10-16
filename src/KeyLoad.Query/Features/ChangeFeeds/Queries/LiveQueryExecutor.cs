@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Storage;
 
@@ -14,10 +15,14 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
     private const string LiveQueryProfileRequiresAnUnorderedCompleteScalarResultSetDetail = "The live-query profile requires an unordered complete scalar result set.";
 
     internal LiveQuerySnapshot Start(string principalId, StartLiveQueryRequest request,
-        TimeProvider? timeProvider, CancellationToken cancellationToken)
+        TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         QueryResultBudgetPolicy.Constrain(budget, queryEngine.Execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -30,10 +35,14 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
     }
 
     internal LiveQueryPage Read(string principalId, ReadLiveQueryRequest request,
-        TimeProvider? timeProvider, CancellationToken cancellationToken)
+        TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         QueryResultBudgetPolicy.Constrain(budget, queryEngine.Execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -50,6 +59,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         AstQueryRequest query, string hash, ReadExecutionBudget budget, TimeProvider clock)
     {
         budget.Check();
+        var lifetime = CaptureLifetime(budget.CreateView(view), query, resource, budget);
         var capture = database.CaptureChangeFeedCursor(view, principal, query.Partition, query.Query.Collection);
         var page = queryEngine.ExecuteView(view, principal, resource, query, hash, budget, clock);
         if (page.Cursor is not null)
@@ -58,7 +68,8 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
                 LiveQuerySnapshotExceedsItsCompleteResultSetBudgetDetail);
         }
         var snapshot = new LiveQuerySnapshot(page.Rows,
-            database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, capture.Cursor)), capture.Tail,
+            database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, capture.Cursor,
+                lifetime, LiveCursorContract.CurrentVersion)), capture.Tail,
             page.CutPosition);
         budget.CheckResult(snapshot);
         return snapshot;
@@ -69,9 +80,11 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         ReadExecutionBudget budget)
     {
         budget.Check();
+        var lifetime = CaptureLifetime(view, query, resource, budget);
         queryEngine.Bind(principal, resource, query);
         var claims = database.Verify<LiveCursorClaims>(request.Cursor);
-        if (claims.Purpose != LiveCursorContract.Purpose || claims.QueryHash != hash)
+        if (claims.Version != LiveCursorContract.CurrentVersion || claims.Lifetime != lifetime
+            || claims.Purpose != LiveCursorContract.Purpose || claims.QueryHash != hash)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, LiveQueryCursorBelongsToADifferentQueryDetail);
         }
@@ -82,7 +95,8 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
             (schema, change) => MapChange(principal, schema, change, query, prepared, budget),
             retained is null ? null : retained.Accept);
         var result = new LiveQueryPage(page.Changes,
-            database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor)), page.ThroughSequence,
+            database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor,
+                lifetime, LiveCursorContract.CurrentVersion)), page.ThroughSequence,
             page.HasMore, page.CutPosition);
         budget.CheckResult(result);
         return result;
@@ -102,6 +116,10 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
             matchesAfter ? queryEngine.Project(principal, schema, change.After, query.Query.Projection,
                 prepared.Paths) : null);
     }
+
+    private ResourceLifetimeV1 CaptureLifetime(IKeyValueView view, AstQueryRequest query,
+        ResourceDefinition resource, ReadExecutionBudget budget)
+        => budget.CaptureResourceLifetimes(database, view, query.Partition, [resource]).Lifetimes.Single();
 
     private static bool Matches(DocumentRecord? record, AstQueryRequest query, PreparedQuery prepared)
     {

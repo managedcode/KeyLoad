@@ -8,7 +8,7 @@ internal static class FunctionalGateRelational
     internal static async Task InitializeAsync(FunctionalGateContext ctx, CancellationToken token)
     {
         await Assert.That(ctx.ResourceCount).IsEqualTo(P.TableCount);
-        await Assert.That(ctx.Anchor.Partition).IsEqualTo(ctx.Partition);
+        await Assert.That(ctx.Bind(ctx.Anchor).Partition).IsEqualTo(ctx.Partition);
         foreach (var table in Enumerable.Range(P.First, P.TableCount))
         {
             var request = new SqlOperationRequest(ctx.Partition, P.Create[table], CommandId: Guid.NewGuid());
@@ -27,6 +27,19 @@ internal static class FunctionalGateRelational
         await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, ctx.Partition,
             [new(P.PutKind, P.Parent, P.Baseline, P.Initial), new(P.PutKind, P.Child, P.Baseline, P.Initial),
                 new(P.PutKind, P.Independent, P.Baseline, P.Initial)]);
+        DocumentResult[] baseline =
+        [
+            new(new(ctx.Partition, P.Parent, P.Baseline), P.Initial,
+                FunctionalGateRelationalRows.Parent(ctx), false, []),
+            new(new(ctx.Partition, P.Child, P.Baseline), P.Initial,
+                FunctionalGateRelationalRows.Child(P.Baseline, P.Baseline), false, []),
+            new(new(ctx.Partition, P.Independent, P.Baseline), P.Initial,
+                FunctionalGateRelationalRows.Independent(P.Baseline), false, [])
+        ];
+        foreach (var expected in baseline)
+        {
+            await FunctionalGateEntityReferences.CaptureAsync(ctx, ctx.Administrator, expected, token);
+        }
         await FunctionalGateRelationalAssertions.AnchorAsync(ctx, P.Baseline, receipt.Token, token);
         await FunctionalGateRelationalAssertions.BaselineAsync(ctx, token);
     }

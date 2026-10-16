@@ -16,6 +16,12 @@ public sealed partial class DatabaseEngine
         CancellationToken cancellationToken = default)
     {
         var budget = new ReadExecutionBudget(OperationLimitsOptions, timeProvider ?? Clock, cancellationToken);
+        return ReadIncomingGraphEdgesRead(principalId, request, timeProvider ?? Clock, budget);
+    }
+
+    private GraphIncomingEdgesPageV1 ReadIncomingGraphEdgesRead(string principalId,
+        ReadIncomingGraphEdgesRequestV1 request, TimeProvider clock, ReadExecutionBudget budget)
+    {
         budget.Check();
         GraphCrossPartitionValidation.ValidateIncoming(request, Limits, budget);
         return Store.Read(view =>
@@ -23,7 +29,7 @@ public sealed partial class DatabaseEngine
             budget.Check();
             var grant = budget.CreateReadGrant(Limits.MaxQueryReadBytes, Limits.MaxScanRecords);
             var principal = GraphIncomingReadScope.ReadPrincipal(view, grant, principalId,
-                (timeProvider ?? Clock).GetUtcNow());
+                clock.GetUtcNow());
             return new GraphIncomingEdgesReader(this, view, principal, request, budget, grant,
                 Store.Position).Read();
         });

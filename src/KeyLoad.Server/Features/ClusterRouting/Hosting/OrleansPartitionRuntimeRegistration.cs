@@ -19,11 +19,25 @@ internal static class OrleansPartitionRuntimeRegistration
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<ISiloStatusOracle>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<ILogger<RemoteModelNativeRuntime>>()));
+            provider.GetRequiredService<ILogger<RemoteModelNativeRuntime>>(),
+            provider.GetRequiredService<Func<NativeRequestWorkOwner>>()));
         services.AddSingleton(provider => new RemoteModelNativeClient(provider, Host(provider),
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<PartitionMovementGrainServiceClient>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>()));
+        services.AddSingleton(provider => new NativeCommandObservationTarget(Host(provider).Database,
+            provider.GetRequiredService<Func<ICommitCoordinator>>(), provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
+            provider.GetRequiredService<Func<NativeRequestWorkOwner>>()(),
+            provider.GetRequiredService<IPhysicalRequestPlacement>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<GrainRequestCodec>()));
+        services.AddSingleton(provider => new CommandObservationNativeEndpoint(Host(provider),
+            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<PartitionMovementGrainServiceClient>(),
+            provider.GetRequiredService<NativeCommandObservationTarget>()));
+        services.AddSingleton<INativeCommandObservationTransport>(provider => new CommandObservationNativeTransport(Host(provider),
+            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<PartitionMovementGrainServiceClient>()));
         RemoteGraphNativeHosting.Register(services);
         RegisterDiscovery(services);
     }

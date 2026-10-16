@@ -31,7 +31,7 @@ internal static class ZoneTreeRestoreSlotObserver
         {
             try
             {
-                return ReadOwnedStore(destination, options, context, signingKey, verify, ct);
+                return ReadOwnedStore(destination, options, clock, context, signingKey, verify, ct);
             }
             catch (Exception failure) { primary = failure; throw; }
             finally { owner.Dispose(); cleanupCompleted = true; }
@@ -47,7 +47,7 @@ internal static class ZoneTreeRestoreSlotObserver
     }
 
     private static NativeCatalogRestoreSlotCompletion ReadOwnedStore(string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> options, ClusterRestoreSlotContext context,
+        IOptions<ZoneTreeStorageExecutionOptions> options, TimeProvider clock, ClusterRestoreSlotContext context,
         ReadOnlyMemory<byte> signingKey, Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify,
         CancellationToken ct)
     {
@@ -62,7 +62,9 @@ internal static class ZoneTreeRestoreSlotObserver
                 runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(destination).ResolveExecutionOptions(options));
                 store = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
                 runtime = null; // The actual successful store constructor takes runtime ownership.
-                return ZoneTreeRestoreSlotDriver.Observe(store, context, signingKey, verify, ct);
+                return ZoneTreeRestoreSlotDriver.Observe(store, context, signingKey, verify,
+                    new ZoneTreeRestoreSlotConservation(
+                        new ZoneTreeStoreOptions(destination).ResolveExecutionOptions(options), clock, resolveOwnerMapping: null), ct);
             }
             catch (Exception failure) { primary = failure; throw; }
             finally { store?.Dispose(); runtime?.Dispose(); cleanupCompleted = true; }

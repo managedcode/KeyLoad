@@ -79,8 +79,14 @@ public interface IReplicaSnapshotStore
     int ReclaimCheckpointPrefix(CancellationToken cancellationToken);
     /// <summary>Recovers complete installations and validates the published canonical cut.</summary>
     void Recover();
+    /// <summary>Recovers complete installations with the original native owner cancellation.</summary>
+    /// <param name="cancellationToken">Original owner or incoming operation token.</param>
+    void Recover(CancellationToken cancellationToken);
     /// <summary>Recovers any complete verified installation, then abandons only an incomplete fenced upload.</summary>
     void ResetIncoming();
+    /// <summary>Recovers before abandoning an incomplete upload under the original operation token.</summary>
+    /// <param name="cancellationToken">Original incoming operation token.</param>
+    void ResetIncoming(CancellationToken cancellationToken);
     /// <summary>Captures and publishes a verified checkpoint at the requested committed cut.</summary>
     /// <param name="index">Exact committed and applied replica position.</param>
     /// <param name="term">Term at that position.</param>
@@ -100,6 +106,11 @@ public interface IReplicaSnapshotStore
     /// <param name="transferId">Identity of the completed transfer.</param>
     /// <returns>The verified installed image description.</returns>
     ReplicaSnapshot Complete(Guid transferId);
+    /// <summary>Installs the verified image with its mandatory live guard under original ownership.</summary>
+    /// <param name="transferId">Identity of the completed transfer.</param>
+    /// <param name="cancellationToken">Original incoming operation token.</param>
+    /// <returns>The verified installed image description.</returns>
+    ReplicaSnapshot Complete(Guid transferId, CancellationToken cancellationToken);
     /// <summary>Copies a bounded chunk from the published verified image.</summary>
     /// <param name="transferId">Identity of the published image.</param>
     /// <param name="offset">Image byte offset to copy.</param>

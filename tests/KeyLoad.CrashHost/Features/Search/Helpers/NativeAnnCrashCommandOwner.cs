@@ -39,7 +39,8 @@ internal sealed class NativeAnnCrashCommandOwner : IDisposable
             log = new(replica, configuration, canonicalDatabase: database);
             try
             {
-                var snapshots = new ReplicaSnapshotStore(database.Store, log, configuration, options);
+                var snapshots = new ReplicaSnapshotStore(database.Store, log, configuration, options, replacementToken => database.RequireNoRetirementForSnapshotReplacement(
+                    new(database.OperationLimitsOptions, database.EvaluationClock, replacementToken)));
                 materializer = new(database, log, snapshots, options);
             }
             catch (Exception primary)

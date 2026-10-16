@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
@@ -10,7 +11,12 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
     private readonly OrleansNode node;
     private readonly PartitionHost partition;
     private readonly TimeProvider clock;
-    private readonly NativeRequestWorkOwner work;
+    private readonly CancellationTokenSource stopping = new();
+    private readonly ReplicaDiscoveryLifetime lifetime;
+    private readonly Lock closing = new();
+    private Task? disposal;
+    private int joined;
+    private const int Joined = 1;
     private IRemoteGraphParent? parent;
     private RemoteGraphNativeRuntime? receiver;
 
@@ -20,12 +26,13 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
         this.node = node;
         this.partition = partition;
         this.clock = clock;
-        work = new(options);
+        _ = options.Value;
+        lifetime = new(stopping, () => Volatile.Write(ref joined, Joined));
     }
 
     internal IRemoteGraphParent Parent => Volatile.Read(ref parent)
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
-    internal bool IsJoined => work.IsJoined;
+    internal bool IsJoined => Volatile.Read(ref joined) == Joined;
 
     internal static async Task<RemoteGraphRuntime?> CreateAsync(OrleansNode node, PartitionHost partition,
         ServerRuntimeOptions options, TimeProvider clock)
@@ -42,7 +49,7 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
         var original = new RemoteGraphRuntime(node, partition, clock, options.GrainRouting);
         try
         {
-            original.parent = new RemoteGraphLifetimeParent(new RemoteGraphParent(node, partition, clock), original.work);
+            original.parent = new RemoteGraphLifetimeParent(new RemoteGraphParent(node, partition, clock), original.EnterScope);
             return original;
         }
         catch (Exception primary) when (NativeCqrsBoundaryErrors.IsNonFatal(primary))
@@ -94,23 +101,42 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
     }
 
     internal async Task<ReadOnlyMemory<byte>> ExecuteNativeAsync(RemoteGraphNativeRequestV1 request,
-        RemoteGraphEffectBoundary boundary, ReadExecutionBudget budget, CancellationToken caller)
+        RemoteGraphEffectBoundary boundary, ReadExecutionBudget budget, CancellationToken caller,
+        IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(boundary);
         ArgumentNullException.ThrowIfNull(budget);
-        using var operation = work.Acquire(request.RequestId, RemoteGraphNativeProtocol.MayHaveEffects(request.Action)
-            ? NativeRequestWorkKind.CommandCapability : NativeRequestWorkKind.ReadCapability);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, work.ShutdownToken);
+        budget.RequireResourceLifetimeBinding(binding);
+        using var operation = EnterScope();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, operation.ShutdownToken);
         using var stage = budget.EnterStageCancellation(linked.Token);
         linked.Token.ThrowIfCancellationRequested();
         budget.Check();
         var result = await RemoteGraphNativeDispatch.ExecuteAsync(node, partition, clock, request, boundary,
-            budget, linked.Token).ConfigureAwait(false);
+            budget, linked.Token, binding).ConfigureAwait(false);
         linked.Token.ThrowIfCancellationRequested();
         budget.Check();
         return result;
     }
 
-    public ValueTask DisposeAsync() => work.DisposeAsync();
+    internal ReplicaDiscoveryLifetime.Operation EnterScope()
+        => lifetime.TryEnter() ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
+
+    public ValueTask DisposeAsync()
+    {
+        lock (closing)
+        {
+            return new(disposal ??= DisposeCoreAsync());
+        }
+    }
+
+    private async Task DisposeCoreAsync()
+    {
+        await Task.Yield();
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(lifetime.StopAsync, failures).ConfigureAwait(false);
+        ServerFailureObserver.Observe(stopping.Dispose, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
 }

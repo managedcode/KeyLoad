@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using Microsoft.Extensions.Configuration;
@@ -15,13 +16,19 @@ internal sealed class NativeAnnMaintenanceTestRuntime : IAsyncDisposable
     }
     internal Guid SessionId { get; } = Guid.NewGuid();
     internal NativeAnnMaintenanceTestRuntime(TestDatabase database, TimeProvider? phaseClock = null, IConfiguration? configuration = null)
+        : this(database.Database, database.Directory, phaseClock, configuration)
+    {
+    }
+
+    internal NativeAnnMaintenanceTestRuntime(DatabaseEngine database, string directory,
+        TimeProvider? phaseClock = null, IConfiguration? configuration = null)
     {
         var registrations = new ServiceCollection().AddRuntimeOptions(configuration ?? new ConfigurationBuilder().Build());
-        registrations.AddSingleton(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        registrations.AddSingleton(database.OperationLimitsOptions);
         services = registrations.BuildServiceProvider();
         try
         {
-            Owner = new(database.Directory, database.Database, services.GetRequiredService<ServerRuntimeOptions>(), phaseClock ?? database.Database.EvaluationClock);
+            Owner = new(directory, database, services.GetRequiredService<ServerRuntimeOptions>(), phaseClock ?? database.EvaluationClock);
         }
         catch (Exception primary)
         {

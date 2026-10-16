@@ -12,7 +12,7 @@ internal static class EventVectorCurrentSourceAuthorization
 
     internal static EventVectorCoverageWitness Require(IKeyValueView bounded, PrincipalRecord principal,
         EventFeedControlRequest request, ImmutableArray<EventVectorAuthorizationScope> originalScopes,
-        ReadOnlyMemory<byte> encoded, EventVectorAdmissionPolicy admission)
+        ReadOnlyMemory<byte> encoded, EventVectorAdmissionPolicy admission, EventVectorReadLifetimeBinding? lifetimeBinding = null)
     {
         if (originalScopes.IsDefault)
         {
@@ -58,6 +58,7 @@ internal static class EventVectorCurrentSourceAuthorization
                 throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
             }
         }
+        lifetimeBinding?.Witness(fresh, admission);
         return fresh;
     }
 

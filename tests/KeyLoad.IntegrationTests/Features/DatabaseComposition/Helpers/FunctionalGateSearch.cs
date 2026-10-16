@@ -26,6 +26,8 @@ internal static class FunctionalGateSearch
     internal const double FirstRank = 1d / 61;
     internal const double SecondRank = 1d / 62;
     internal static readonly VectorSpace Space = new("gate-search-space", 2, DistanceMetric.DotProduct, "gate-model", "1");
+    private const string BindingId = "functional-reference-binding";
+    private const string BindingJson = "{\"kind\":\"reference-binding\"}";
     private const string Graph = "gate_graph_0";
     private const string Link = "upsertEdge";
     private const string Unlink = "deleteEdge";
@@ -45,7 +47,18 @@ internal static class FunctionalGateSearch
                 VectorProfiles = [new(VectorField, Space)]
             }, token);
             await ConfigureAsync(ctx, new(TextPrefix + suffix, ResourceKind.Collection, ctx.Partition.TransactionDomainId), token);
+            await CaptureAsync(ctx, VectorPrefix + suffix, token);
+            await CaptureAsync(ctx, TextPrefix + suffix, token);
         }
+    }
+
+    private static async Task CaptureAsync(FunctionalGateContext ctx, string collection, CancellationToken token)
+    {
+        var reference = new EntityRef(ctx.Partition, collection, BindingId);
+        await CommitAsync(ctx, [new PutDocument(collection, BindingId, BindingJson, Initial)],
+            [new(Put, collection, BindingId, Created)], officialFirst: false, token);
+        await FunctionalGateEntityReferences.CaptureAsync(ctx, ctx.Administrator,
+            new(reference, Created, BindingJson, false, []), token);
     }
 
     internal static async Task ExerciseAsync(FunctionalGateContext ctx, int iteration, CancellationToken token)
@@ -91,7 +104,7 @@ internal static class FunctionalGateSearch
     }
 
     internal static RankedDocument Hit(FunctionalGateContext ctx, string collection, string id,
-        long revision, string json, double score) => new(new(new(ctx.Partition, collection, id), revision, json, false, []), score);
+        long revision, string json, double score) => new(new(ctx.Bind(new(ctx.Partition, collection, id)), revision, json, false, []), score);
 
     internal static async Task SearchAsync(FunctionalGateContext ctx, SearchRequest request,
         RankedDocument[] expected, CancellationToken token)
@@ -104,11 +117,11 @@ internal static class FunctionalGateSearch
     internal static async Task LinkAndUnlinkAsync(FunctionalGateContext ctx, string collection,
         string id, CancellationToken token)
     {
-        var vertex = new EntityRef(ctx.Partition, collection, id);
+        var vertex = ctx.Bind(new(ctx.Partition, collection, id));
         var edgeId = collection + "-" + id;
-        await CommitAsync(ctx, [new UpsertEdge(Graph, edgeId, vertex, ctx.Anchor, edgeId, Attributes, Initial)],
+        await CommitAsync(ctx, [new UpsertEdge(Graph, edgeId, vertex, ctx.Bind(ctx.Anchor), edgeId, Attributes, Initial)],
             [new(Link, Graph, edgeId, Created)], true, token);
-        await TraverseAsync(ctx, vertex, edgeId, new(edgeId, vertex, ctx.Anchor, edgeId, Attributes, Created), token);
+        await TraverseAsync(ctx, vertex, edgeId, new(edgeId, vertex, ctx.Bind(ctx.Anchor), edgeId, Attributes, Created), token);
         await CommitAsync(ctx, [new DeleteEdge(Graph, edgeId, Created)], [new(Unlink, Graph, edgeId, Updated)], false, token);
         await TraverseAsync(ctx, vertex, edgeId, null, token);
     }
@@ -118,7 +131,7 @@ internal static class FunctionalGateSearch
     {
         var request = new TraverseRequest(ctx.Partition, Graph, vertex, Depth, Vertices, Edges, [label]);
         var expected = edge is null ? new global::KeyLoad.GraphTraversal([vertex], [])
-            : new global::KeyLoad.GraphTraversal([.. new[] { vertex, ctx.Anchor }
+            : new global::KeyLoad.GraphTraversal([.. new[] { vertex, ctx.Bind(ctx.Anchor) }
                 .OrderBy(item => item.Collection, StringComparer.Ordinal).ThenBy(item => item.Id, StringComparer.Ordinal)], [edge]);
         await SqlRf3Protocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.TraverseAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(expected, await ctx.McpAsync<global::KeyLoad.GraphTraversal>(

@@ -1,21 +1,26 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
 /// <summary>Uses the existing native plan and merge with authenticated, individually admitted owner leaves.</summary>
-internal static class PartitionQueryRemoteExecution
+internal static partial class PartitionQueryRemoteExecution
 {
     private const int FirstLeafIndex = 0;
     private const string DeadlineExceededDetail = "The read execution deadline is exceeded.";
     internal static async Task<PartitionQueryPageV1> ExecuteAsync(QueryEngine engine,
         PartitionQueryRequestV1 request,
         Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, PartitionQueryPreparedLeaf> prepare,
-        Func<CancellationToken, Task> revalidate, TimeProvider clock, CancellationToken cancellationToken)
+        Func<CancellationToken, Task> revalidate, TimeProvider clock, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         budget.Check();
         using var admission = database.AdmitQuery(cancellationToken);

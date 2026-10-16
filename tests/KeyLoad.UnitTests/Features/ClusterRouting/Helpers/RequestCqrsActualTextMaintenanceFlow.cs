@@ -14,18 +14,18 @@ internal static class RequestCqrsActualTextMaintenanceFlow
     private const int TrackedRecords = 2;
     private const int EmptyEffects = 0;
 
-    internal static Task RunAsync(RequestCqrsClusterFixture fixture, TextIndexMaintenanceMode mode,
+    internal static Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, TextIndexMaintenanceMode mode,
         CancellationToken token) => RunAsync(fixture, mode, null, token);
 
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture, TextIndexMaintenanceMode mode,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, TextIndexMaintenanceMode mode,
         TextIndexMaintenanceRequest? prepared, CancellationToken token)
     {
         if (prepared is null)
         {
             fixture.Database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
         }
-        var request = prepared ?? await NativeTextMaintenanceRequestFixture.CreateAsync(fixture.Database, token);
-        _ = await NativeTextMaintenanceSeed.CommitAsync(fixture.Database, token);
+        var request = prepared ?? await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token);
+        _ = await RequestCqrsHostedMaintenanceData.SeedAsync(fixture.Database, token);
         var built = await ExecuteAsync(fixture, request, token);
         await VerifyResultAsync(fixture, request, built);
         await RequestCqrsActualTextReplayFlow.ReplayAsync(fixture, request, built, token);
@@ -38,7 +38,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
                     ChangedJson, ExpectedRevision: OriginalRevision),
                  new DeleteDocument(request.Collection, NativeTextBilingualAudit.EnglishId,
                     ExpectedRevision: OriginalRevision)]);
-            _ = await NativeTextMaintenanceCommit.ExecuteAsync<CommitReceipt>(fixture.Database,
+            _ = await RequestCqrsHostedMaintenanceData.ExecuteAsync<CommitReceipt>(fixture.Database,
                 OperationKind.Batch, write, id, token);
             var restore = request with
             {
@@ -59,10 +59,10 @@ internal static class RequestCqrsActualTextMaintenanceFlow
         await RequestCqrsActualTextReplayFlow.ReleaseAsync(fixture, request, token);
     }
 
-    internal static Task<TextIndexMaintenanceResult> ExecuteAsync(RequestCqrsClusterFixture fixture,
+    internal static Task<TextIndexMaintenanceResult> ExecuteAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, CancellationToken token) => ExecuteAsync(fixture, request, true, token);
 
-    internal static async Task<TextIndexMaintenanceResult> ExecuteAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task<TextIndexMaintenanceResult> ExecuteAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, bool expectNativeWork, CancellationToken token)
     {
         var reply = await InvokeAsync(fixture, request, expectNativeWork, token);
@@ -71,7 +71,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
             ?? throw new InvalidOperationException();
     }
 
-    internal static async Task<GrainOperationReply> InvokeAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task<GrainOperationReply> InvokeAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, bool expectNativeWork, CancellationToken token)
     {
         var id = Guid.NewGuid();
@@ -110,7 +110,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
         return reply;
     }
 
-    private static async Task VerifyResultAsync(RequestCqrsClusterFixture fixture,
+    private static async Task VerifyResultAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, TextIndexMaintenanceResult result)
     {
         await Assert.That(result.CommandId).IsEqualTo(request.CommandId);

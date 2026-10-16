@@ -4,7 +4,7 @@ using KeyLoad.Clustering;
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperationObservation original)
-    : IGrainRequestPhaseObserver, IGrainRequestProducerDisposedObserver
+    : IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver, IGrainRequestProducerDisposedObserver
 {
     private readonly ConcurrentDictionary<Guid, ConnectionAwaitedCallback> callbacks = new();
     private readonly ConcurrentDictionary<Guid, GrainRequestContextState> identities = new();
@@ -36,6 +36,10 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
         }
         return original.ObserveAsync(identity, phase, context, token);
     }
+
+    public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+        ReplicaSiloDiscoveryState actualRuntime, CancellationToken token)
+        => original.ObserveNativeAsync(identity, phase, actualRuntime, token);
 
     public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)
         => original.ProducerDisposed(identity, context);

@@ -2,6 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -15,15 +16,14 @@ internal sealed class OrdinaryDocumentLifetimeSourceRead(OrleansNode node, Parti
     private const string NonceFormat = "N";
 
     internal async Task<(bool Routed, DocumentResult? Document)> TryReadAsync(GrainRequestEnvelope envelope,
-        string principalId, GetDocumentRequest request, CancellationToken token)
+        string principalId, GetDocumentRequest request, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
-        var work = new ReadExecutionBudget(limits, clock, token);
         var expiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (expiry > envelope.ExpiresAt)
         {
             expiry = envelope.ExpiresAt;
         }
-        var frame = partition.Database.CaptureRemoteDocumentReadV2(principalId, request.Reference, expiry, work);
+        var frame = partition.Database.CaptureRemoteDocumentReadV2Bound(principalId, request.Reference, expiry, work, binding);
         if (frame is null)
         {
             return (false, null);
@@ -58,7 +58,7 @@ internal sealed class OrdinaryDocumentLifetimeSourceRead(OrleansNode node, Parti
         work.ImportReadGrant(grant, observed.ReadBytes, observed.ExaminedRecords);
         work.CheckResult(observed);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        partition.Database.ValidateRemoteDocumentReadV2(frame, work);
+        partition.Database.ValidateRemoteDocumentReadV2Bound(frame, work, binding);
         work.Check();
         return (true, observed.Result.Document);
     }

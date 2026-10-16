@@ -17,6 +17,7 @@ internal static class NativeCanonicalModelCutDiagnosticEndpoints
         NativeRetireCutEndpoints.Map(app);
         NativeCommandLifetimeCutEndpoints.Map(app);
         Features.ResourceExecution.NativeResourceOwnerInventoryDiagnosticEndpoints.Map(app);
+        Features.ResourceExecution.NativeResourceRetirementDiagnosticEndpoints.Map(app);
     }
 
     private static async Task<IResult> ReadAsync(HttpContext context, PartitionHostApplicationOwner owner, OrleansNode node, TimeProvider clock)

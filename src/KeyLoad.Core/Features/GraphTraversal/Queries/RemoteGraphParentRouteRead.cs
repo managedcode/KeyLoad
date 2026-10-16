@@ -25,7 +25,8 @@ public sealed partial class DatabaseEngine
             var bounded = work.CreateView(view);
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             Authorization.Require(principal, source, graph, Capability.GraphWrite);
-            _ = Resource(bounded, source, graph, ResourceKind.Graph);
+            _ = BindAuthorizedReadResourceMetadata(bounded, source.TenantId, source.DatabaseId,
+                source.TransactionDomainId, graph, ResourceKind.Graph, work);
             var directory = ReadRemoteGraphControlDirectory(bounded, configuredControl);
             var actualSource = RouteRemoteGraphOwner(directory, ReadPlacementWitness(bounded, source));
             if (!PhysicalOwnerEntryValidation.SameOwner(actualSource.Owner, configuredControl))
@@ -61,6 +62,10 @@ public sealed partial class DatabaseEngine
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             Authorization.Require(principal, target.Partition, graph, Capability.GraphRead);
             Authorization.Require(principal, target.Partition, target.Collection, Capability.DocumentsRead);
+            _ = BindAuthorizedReadResourceMetadata(bounded, target.Partition.TenantId, target.Partition.DatabaseId,
+                target.Partition.TransactionDomainId, graph, ResourceKind.Graph, work);
+            _ = BindAuthorizedReadResourceMetadata(bounded, target.Partition.TenantId, target.Partition.DatabaseId,
+                target.Partition.TransactionDomainId, target.Collection, ResourceKind.Collection, work);
             var directory = ReadRemoteGraphControlDirectory(bounded, configuredControl);
             return new RemoteGraphIncomingRouteV1(RouteRemoteGraphOwner(directory,
                 ResolveRegisteredPlacement(bounded, target.Partition, configuredControl)), directory);

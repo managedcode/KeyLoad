@@ -76,7 +76,7 @@ internal static class QueueEntityRefJoinBinding
             throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         }
         database.Authorization.Require(principal, request.Partition, join.Collection, Capability.Query | Capability.DocumentsRead);
-        var target = database.Resource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
+        var target = database.BindAuthorizedReadResource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
         database.Authorization.RequireSchemaVisibility(principal, target);
         var schema = target.RelationalSchema ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         RelationalRowValidation.ValidateSchema(target);
@@ -98,6 +98,7 @@ internal static class QueueEntityRefJoinBinding
             }
             throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         }
+        budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [queue, target]);
         return target;
     }
 

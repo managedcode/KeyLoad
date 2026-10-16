@@ -1,4 +1,5 @@
 using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
@@ -10,18 +11,19 @@ internal static class GrainNativeMaintenanceReadCapabilities
         => kind is GrainReadKind.TextMaintenance or GrainReadKind.AnnMaintenance or GrainReadKind.OnlineTextMaintenance;
 
     internal static async Task<object?> ExecuteAsync(IServiceProvider services, PrincipalRecord principal,
-        GrainReadKind kind, DecodedGrainRequest request, CancellationToken cancellationToken)
+        GrainReadKind kind, DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         GrainRequestAuthority.RequireAdministrator(principal);
         return kind switch
         {
-            GrainReadKind.OnlineTextMaintenance => await services.GetRequiredService<Func<INativeOnlineTextMaintenance>>()().ExecuteAsync(principal,
+            GrainReadKind.OnlineTextMaintenance => await services.GetRequiredService<Func<INativeOnlineTextMaintenance>>()().ExecuteBoundAsync(principal,
                 GrainNativePayload.Read<OnlineTextCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt,
-                cancellationToken).ConfigureAwait(true),
-            GrainReadKind.TextMaintenance => await services.GetRequiredService<Func<INativeTextMaintenance>>()().ExecuteAsync(principal,
-                GrainNativePayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true),
-            GrainReadKind.AnnMaintenance => await services.GetRequiredService<Func<INativeAnnMaintenance>>()().ExecuteAsync(principal,
-                GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true),
+                cancellationToken, binding).ConfigureAwait(true),
+            GrainReadKind.TextMaintenance => await services.GetRequiredService<Func<INativeTextMaintenance>>()().ExecuteBoundAsync(principal,
+                GrainNativePayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, cancellationToken, binding).ConfigureAwait(true),
+            GrainReadKind.AnnMaintenance => await services.GetRequiredService<Func<INativeAnnMaintenance>>()().ExecuteBoundAsync(principal,
+                GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, cancellationToken, binding).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

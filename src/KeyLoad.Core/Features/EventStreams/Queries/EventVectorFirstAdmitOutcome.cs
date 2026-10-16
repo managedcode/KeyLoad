@@ -14,7 +14,8 @@ internal static class EventVectorFirstAdmitOutcome
 
     internal static (Guid CommandId, StoredOutcome Outcome, ReadOnlyMemory<byte> Raw) Read(
         IKeyValueView boundedView, PrincipalRecord principal, EventFeedControlRequest request,
-        Guid incarnation, IAuthorizationPolicy authorization, EventVectorAdmissionPolicy admission)
+        Guid incarnation, IAuthorizationPolicy authorization, EventVectorAdmissionPolicy admission,
+        EventVectorReadLifetimeBinding? lifetimeBinding = null)
     {
         var identity = EventVectorFirstIssuanceIds.Admit(request, principal.Id, admission);
         var commandId = EventVectorFirstIssuanceIds.For(identity, admission);
@@ -31,7 +32,7 @@ internal static class EventVectorFirstAdmitOutcome
         if (outcome.Result.Error is null)
         {
             RequireResult(outcome.Result.Get<EventVectorFirstIssuanceResult>(), principal, request,
-            commandId, incarnation, authorization, admission);
+            commandId, incarnation, authorization, admission, lifetimeBinding);
         }
         else if (outcome.Result.NativeValue is not null)
         {
@@ -47,7 +48,8 @@ internal static class EventVectorFirstAdmitOutcome
 
     internal static (Guid CommandId, StoredOutcome? Outcome, ReadOnlyMemory<byte> Raw) Observe(
         IKeyValueView boundedView, PrincipalRecord principal, EventFeedControlRequest request,
-        Guid incarnation, IAuthorizationPolicy authorization, EventVectorAdmissionPolicy admission)
+        Guid incarnation, IAuthorizationPolicy authorization, EventVectorAdmissionPolicy admission,
+        EventVectorReadLifetimeBinding? lifetimeBinding = null)
     {
         var identity = EventVectorFirstIssuanceIds.Admit(request, principal.Id, admission);
         var commandId = EventVectorFirstIssuanceIds.For(identity, admission);
@@ -57,13 +59,13 @@ internal static class EventVectorFirstAdmitOutcome
         {
             return (commandId, null, ReadOnlyMemory<byte>.Empty);
         }
-        var actual = Read(boundedView, principal, request, incarnation, authorization, admission);
+        var actual = Read(boundedView, principal, request, incarnation, authorization, admission, lifetimeBinding);
         return (actual.CommandId, actual.Outcome, actual.Raw);
     }
 
     private static void RequireResult(EventVectorFirstIssuanceResult result, PrincipalRecord principal,
         EventFeedControlRequest request, Guid commandId, Guid incarnation, IAuthorizationPolicy authorization,
-        EventVectorAdmissionPolicy admission)
+        EventVectorAdmissionPolicy admission, EventVectorReadLifetimeBinding? lifetimeBinding)
     {
         if (result.Version != Version || result.NativeCommandId != commandId || result.Issuance is null
             || result.Receipt is null || result.Receipt.CommandId != commandId
@@ -77,8 +79,15 @@ internal static class EventVectorFirstAdmitOutcome
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
         }
-        EventVectorParentScopes.Authorize(authorization, principal,
-            result.Issuance.OriginalAuthorizedSourceScopes, admission);
+        if (lifetimeBinding is null)
+        {
+            EventVectorParentScopes.Authorize(authorization, principal,
+                result.Issuance.OriginalAuthorizedSourceScopes, admission);
+        }
+        else
+        {
+            lifetimeBinding.Authorize(authorization, principal, result.Issuance.OriginalAuthorizedSourceScopes, admission);
+        }
         _ = EventVectorFirstIssuanceValidation.RequireRequest(result.Issuance, request, admission);
     }
 }

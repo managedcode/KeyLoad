@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.Search;
@@ -9,8 +10,8 @@ internal sealed class AnnProjectionNativeReceiver(OrleansNode node, PartitionHos
     ServerRuntimeOptions options, TimeProvider clock)
 {
     internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteLifetimeAsync(
-        RemoteModelNativeRequest original, CancellationToken cancellationToken)
-        => new AnnProjectionNativeLifetimeReceiver(node, partition, options, clock).ExecuteAsync(original, cancellationToken);
+        RemoteModelNativeRequest original, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        => new AnnProjectionNativeLifetimeReceiver(node, partition, options, clock).ExecuteAsync(original, cancellationToken, binding);
 
     internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
         RemoteModelNativeRequest original, CancellationToken cancellationToken)

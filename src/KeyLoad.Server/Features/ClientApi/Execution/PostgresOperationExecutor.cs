@@ -43,11 +43,11 @@ internal static class PostgresOperationExecutor
             var operation = compilation.Operation ?? throw ScriptDomOperationErrors.Unsupported();
             if (operation.ReadKind is not (GrainReadKind.Query or GrainReadKind.AstQuery
                 or GrainReadKind.Document or GrainReadKind.Message or GrainReadKind.Traverse)
-                && operation.CommandKind is not (OperationKind.Batch or OperationKind.CreateTable))
+                && operation.CommandKind is not (OperationKind.Batch or OperationKind.CreateTable or OperationKind.DropTable))
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
             }
-            result.PossibleWrite = operation.CommandKind is OperationKind.Batch or OperationKind.CreateTable;
+            result.PossibleWrite = operation.CommandKind is OperationKind.Batch or OperationKind.CreateTable or OperationKind.DropTable;
             var value = await CanonicalConnectionDispatch.ExecuteAsync(services, owner, principal, operation, token).ConfigureAwait(false);
             try
             {

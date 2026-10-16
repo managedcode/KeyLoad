@@ -9,7 +9,16 @@ namespace KeyLoad;
 /// <param name="Id">Identifies the entity, document, key, message, event, or operation.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.EntityRef)]
-public sealed record EntityRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Collection, [property: Orleans.Id(2)] string Id);
+public sealed record EntityRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Collection, [property: Orleans.Id(2)] string Id)
+{
+    /// <summary>Gets the exact server-bound lifetime, or null only on a fresh external name-only submission.</summary>
+    [Orleans.Id(EntityRefLifetimeContract.LifetimeField)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public EntityRefLifetimeV1? Lifetime
+    {
+        get; init;
+    }
+}
 
 /// <summary>Identifies the kind of resource configured in a database.</summary>
 public enum ResourceKind
@@ -27,7 +36,9 @@ public enum ResourceKind
     /// <summary>A time-series resource.</summary>
     TimeSeries,
     /// <summary>A canonical chunked binary object resource.</summary>
-    BlobStore
+    BlobStore,
+    /// <summary>An independent canonical user analytics event store.</summary>
+    AnalyticsStore = 7
 }
 
 /// <summary>Selects which source owns a resource’s canonical document state.</summary>
@@ -129,6 +140,13 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [Orleans.Id(14)]
     public InboxPolicy? InboxPolicy
+    {
+        get; init;
+    }
+    /// <summary>Gets the closed user analytics dimension and metric schema.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [Orleans.Id(15)]
+    public AnalyticsStoreSchema? AnalyticsSchema
     {
         get; init;
     }

@@ -16,6 +16,8 @@ internal static class McpGraphPathSchemaAssertions
         McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition];
     private static readonly ImmutableArray<string> EntityProperties =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection, McpDiscoveryProtocol.Id];
+    private const string Lifetime = "lifetime";
+    private const string Incarnation = "incarnation";
     private static readonly ImmutableArray<string> PartitionRequired =
     [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId,
         McpDiscoveryProtocol.TransactionDomainId, McpDiscoveryProtocol.PartitionKey];
@@ -72,7 +74,8 @@ internal static class McpGraphPathSchemaAssertions
     private static async Task VerifyEntityAsync(JsonElement schema, JsonElement root)
     {
         schema = Resolve(root, schema);
-        await VerifyFieldsAsync(schema, EntityProperties, EntityProperties);
+        await VerifyFieldsAsync(schema, EntityProperties.Add(Lifetime), EntityProperties);
+        await VerifyLifetimeAsync(schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(Lifetime), root);
         var properties = schema.GetProperty(McpDiscoveryProtocol.Properties);
         var partition = Resolve(root, properties.GetProperty(McpDiscoveryProtocol.Partition));
         await VerifyFieldsAsync(partition, PartitionProperties, PartitionRequired);
@@ -86,6 +89,19 @@ internal static class McpGraphPathSchemaAssertions
             [McpDiscoveryProtocol.String, McpDiscoveryProtocol.Null]);
         await VerifyPrimitiveAsync(schema, McpDiscoveryProtocol.Collection, McpDiscoveryProtocol.String, root);
         await VerifyPrimitiveAsync(schema, McpDiscoveryProtocol.Id, McpDiscoveryProtocol.String, root);
+    }
+
+    private static async Task VerifyLifetimeAsync(JsonElement schema, JsonElement root)
+    {
+        schema = Resolve(root, schema);
+        await VerifyExactTypeSetAsync(schema.GetProperty(McpDiscoveryProtocol.Type),
+            [McpDiscoveryProtocol.Object, McpDiscoveryProtocol.Null]);
+        await Assert.That(schema.GetProperty(McpDiscoveryProtocol.AdditionalProperties).GetBoolean()).IsFalse();
+        var properties = schema.GetProperty(McpDiscoveryProtocol.Properties).EnumerateObject()
+            .Select(property => property.Name).ToArray();
+        await Assert.That(properties.SequenceEqual([Incarnation], StringComparer.Ordinal)).IsTrue();
+        await RequiredAsync(schema, [Incarnation]);
+        await VerifyPrimitiveAsync(schema, Incarnation, McpDiscoveryProtocol.String, root);
     }
 
     private static async Task VerifyFieldsAsync(JsonElement schema, ImmutableArray<string> properties,

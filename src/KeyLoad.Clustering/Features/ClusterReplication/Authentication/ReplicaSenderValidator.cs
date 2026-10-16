@@ -25,6 +25,10 @@ internal static class ReplicaSenderValidator
                 _ = ReplicaNativeAdmissionPolicy.Inspect<SnapshotCompleteRequest>(payload, configuration.MaxAppendEntries, sender);
                 break;
             case ReplicaRpc.Forward:
+                var frame = ReplicaNativeAdmissionPolicy.Inspect<ReplicaForwardRequestV1>(payload, configuration.MaxAppendEntries).Value;
+                ReplicaForwardFrameValidation.RequireRequest(frame);
+                _ = ReplicaNativeAdmissionPolicy.Inspect<ReplicatedOperation>(frame.Operation, configuration.MaxAppendEntries, sender);
+                break;
             case ReplicaRpc.ReadBarrier:
             case ReplicaRpc.ControlReadBarrier:
                 break;

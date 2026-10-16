@@ -13,7 +13,7 @@ internal static class RequestCqrsAnnProgressControls
     private const int RepeatedReplay = 2;
 
     // Controlled native CQRS grammar inputs reuse the genuine Build reply; they execute no ANN owner work.
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         GrainOperationReply genuineReply, CancellationToken token)
     {
         await Assert.That(request.Mode).IsEqualTo(AnnMaintenanceMode.Build);
@@ -23,7 +23,7 @@ internal static class RequestCqrsAnnProgressControls
         await RequireAsync(fixture, request, genuineReply, RepeatedReplay, token);
     }
 
-    private static async Task RequireAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    private static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         GrainOperationReply genuineReply, int replayCount, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);

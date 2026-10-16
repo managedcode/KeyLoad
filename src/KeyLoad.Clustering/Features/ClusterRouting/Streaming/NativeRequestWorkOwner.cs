@@ -1,30 +1,41 @@
+using System.Collections.Immutable;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Owns bounded active native request producers and verified capability frames for one silo.</summary>
-public sealed class NativeRequestWorkOwner : IAsyncDisposable
+public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetimeWorkFence
 {
     private const int GetIsJoinedEmptyRead = 0;
+    private const int Joined = 1;
 
     private readonly Lock gate = new();
+    private readonly NativeResourceWorkPhysicalBinding physical = new();
     private readonly CancellationTokenSource shutdown = new();
     private readonly CancellationToken shutdownToken;
-    private readonly Dictionary<(Guid RequestId, NativeRequestWorkKind Kind), NativeRequestWorkLease> active = [];
-    private TaskCompletionSource? zeroFrames;
+    private readonly NativeRequestWorkAdmissions admissions;
+    private readonly NativeResourceWorkRetentions retentions;
+    private readonly NativeRequestWorkChildren children;
+    internal NativeCommandObservationGate Observations
+    {
+        get;
+    }
     private Task? drainTask;
     private Task? disposeTask;
-    private int requestProducers;
     private bool admissionClosed;
     private int isJoined;
-    private readonly GrainRoutingOptions settings;
 
     /// <summary>Creates an empty silo-local work registry.</summary>
     /// <param name="options">The centrally validated request and capability admission limits.</param>
     public NativeRequestWorkOwner(IOptions<GrainRoutingOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        settings = options.Value;
+        admissions = new(options.Value);
+        retentions = new(options.Value);
+        children = new(gate, this, physical, admissions, retentions, () => admissionClosed);
+        Observations = new(gate, this, physical, admissions);
         shutdownToken = shutdown.Token;
     }
 
@@ -40,43 +51,67 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
     /// <returns>The lease which releases this exact admission.</returns>
     internal NativeRequestWorkLease Acquire(Guid requestId, NativeRequestWorkKind kind)
     {
-        const int EmptyActiveCount = 0;
-
         if (requestId == Guid.Empty || !Enum.IsDefined(kind))
         {
             throw Errors.Fail(ErrorCode.Validation, NativeRequestWorkLimits.InvalidIdentityMessage);
         }
-
         lock (gate)
         {
             if (admissionClosed)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.AdmissionClosedMessage);
             }
-
-            var key = (requestId, kind);
-            if (active.ContainsKey(key) || active.Count >= settings.MaximumTotalFrames
-                || kind == NativeRequestWorkKind.RequestProducer
-                && requestProducers >= settings.MaximumRequestProducers)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeRequestWorkLimits.CapacityMessage);
-            }
-
-            if (active.Count == EmptyActiveCount)
-            {
-                zeroFrames = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            }
-
-            var lease = new NativeRequestWorkLease(this, requestId, kind);
-            active.Add(key, lease);
-            if (kind == NativeRequestWorkKind.RequestProducer)
-            {
-                requestProducers++;
-            }
-
-            return lease;
+            retentions.RequireAdmissionSlot(admissions.Count);
+            return admissions.Acquire(this, requestId, kind);
         }
     }
+
+    internal Task<NativeCommandObservation> ReserveCommandObservationAsync(DecodedGrainRequest verified,
+        NativeCommandObservationAdmissionV1 admission, NativeCapabilityWorkLifetime commandWork, PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime,
+        DatabaseEngine database, TimeProvider clock, CancellationToken originalCallerToken)
+        => NativeCommandObservationAdmission.ReserveAsync(this, verified, admission, commandWork,
+            actualOwner, actualRuntime, database, clock, originalCallerToken);
+
+    internal NativeRequestWorkLease AcquireCommandObservation(Guid id, NativeRequestWorkLease command,
+        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database,
+        NativeCommandObservationResources resources)
+        => Observations.AcquireCommandObservation(id, command, actualOwner, actualRuntime, database, resources);
+
+    internal NativeCommandObservation ConsumeCommandObservation(NativeCommandObservationHandleV1 handle,
+        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        => Observations.ConsumeCommandObservation(handle, actualOwner, actualRuntime, database);
+
+    internal NativeCommandObservation BeginCommandExecution(NativeCommandObservationHandleV1 handle,
+        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        => Observations.BeginCommandExecution(handle, actualOwner, actualRuntime, database);
+
+    internal Task AbortCommandObservationByHandleAsync(NativeCommandObservationHandleV1 handle,
+        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        => Observations.AbortCommandObservationByHandleAsync(handle, actualOwner, actualRuntime, database);
+
+    internal void MarkCommandObservationSettled(NativeCommandObservation observation)
+        => Observations.MarkCommandObservationSettled(observation);
+
+    internal Task SettleCommandObservation(NativeCommandObservation observation,
+        Exception? original, Exception? cleanup, bool abort)
+        => Observations.SettleCommandObservation(observation, original, cleanup, abort);
+
+    internal NativeRequestWorkLease RequireOriginalParentBinding(NativeRequestWorkLease child)
+        => children.RequireOriginalParentBinding(child);
+
+    internal NativeRequestWorkChildReservation ReserveLocalChild(NativeRequestWorkLease parent,
+        DecodedGrainRequest verified, PhysicalShardRecord expectedOwner, ReplicaSiloDiscovery expectedRuntime)
+        => children.Reserve(parent, verified, expectedOwner, expectedRuntime);
+
+    internal NativeRequestWorkLease AcquireVerifiedProducer(DecodedGrainRequest verified,
+        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime)
+        => children.AcquireVerifiedProducer(verified, actualOwner, actualRuntime);
+
+    internal bool BeginChildDispatchCompletion(NativeRequestWorkChildReservation reservation)
+        => children.BeginCompletion(reservation);
+
+    internal void RecordChildCleanup(NativeRequestWorkLease parent, ImmutableArray<Exception> failures)
+        => children.RecordCleanup(parent, failures);
 
     /// <summary>Closes admission, cancels work, and returns the shared original drain task.</summary>
     /// <returns>The same task to every caller.</returns>
@@ -92,9 +127,11 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
             }
 
             admissionClosed = true;
-            var frames = zeroFrames?.Task ?? Task.CompletedTask;
+            var frames = admissions.Settlements;
+            var retirements = retentions.Outstanding;
             start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            task = CompleteDrainAsync(start.Task, frames);
+            task = NativeRequestWorkDrain.JoinAndPublishAsync(start.Task, shutdown, frames, retirements,
+                () => Volatile.Write(ref isJoined, Joined));
             drainTask = task;
         }
 
@@ -117,7 +154,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
             }
 
             start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            task = CompleteDisposeAsync(start.Task);
+            task = NativeRequestWorkDrain.DisposeAsync(start.Task, DrainAsync, () => shutdown.Dispose());
             disposeTask = task;
         }
 
@@ -125,65 +162,89 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
         return task;
     }
 
-    private async Task CompleteDrainAsync(Task start, Task frames)
-    {
-        const int ValueSingleItemCount = 1;
-
-        await start.ConfigureAwait(false);
-        var cancelFailure = await NativeRequestWorkSettlement.CancelAsync(shutdown).ConfigureAwait(false);
-        var frameFailure = await NativeRequestWorkSettlement.JoinAsync(frames).ConfigureAwait(false);
-        Volatile.Write(ref isJoined, ValueSingleItemCount);
-        NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(cancelFailure, frameFailure));
-    }
-
-    private async Task CompleteDisposeAsync(Task start)
-    {
-        await start.ConfigureAwait(false);
-        var drainFailure = await NativeRequestWorkSettlement.JoinAsync(DrainAsync()).ConfigureAwait(false);
-        Exception? disposeFailure = null;
-        try
-        {
-            shutdown.Dispose();
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            disposeFailure = error;
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            disposeFailure = error;
-        }
-
-        NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(drainFailure, disposeFailure));
-    }
-
     internal void Release(NativeRequestWorkLease lease)
     {
-        const int EmptyActiveCount = 0;
-
-        ArgumentNullException.ThrowIfNull(lease);
-        TaskCompletionSource? drained = null;
         lock (gate)
         {
-            var key = (lease.RequestId, lease.Kind);
-            if (!active.TryGetValue(key, out var registered) || !ReferenceEquals(registered, lease))
-            {
-                throw Errors.Fail(ErrorCode.Corruption, NativeRequestWorkLimits.LeaseIdentityMessage);
-            }
-
-            active.Remove(key);
-            if (lease.Kind == NativeRequestWorkKind.RequestProducer)
-            {
-                requestProducers--;
-            }
-
-            if (active.Count == EmptyActiveCount)
-            {
-                drained = zeroFrames;
-                zeroFrames = null;
-            }
+            admissions.Release(lease);
         }
-
-        drained?.TrySetResult();
     }
+
+    internal Task PrepareCompletionAsync(NativeRequestWorkLease lease)
+        => NativeRequestWorkCompletion.PrepareAsync(gate, lease);
+
+    internal Task<NativeRequestWorkOriginalSettlement> CompleteAsync(NativeRequestWorkLease lease,
+        Exception? original, Exception? cleanup)
+        => NativeRequestWorkCompletion.CompleteAsync(gate, lease, original, cleanup);
+
+    internal void CompleteUnbound(NativeRequestWorkLease lease)
+        => NativeRequestWorkCompletion.CompleteUnbound(gate, lease);
+
+    internal void Bind(NativeRequestWorkLease lease, ImmutableArray<ResourceLifetimeV1> lifetimes)
+    {
+        lock (gate)
+        {
+            admissions.Bind(lease, lifetimes);
+        }
+    }
+
+    internal void AdmitPublication(NativeRequestWorkLease lease)
+    {
+        lock (gate)
+        {
+            admissions.AdmitPublication(lease);
+        }
+    }
+
+    internal void BindPhysicalOwner(PhysicalShardRecord actualOwner)
+    {
+        lock (gate)
+        {
+            physical.Bind(actualOwner);
+        }
+    }
+
+    internal void AttachResourceLifetimeWorkFence(DatabaseEngine sameDatabase, long originalDurableLogLastIndex)
+    {
+        var startup = NativeResourceWorkPhysicalBinding.CaptureStartup(sameDatabase, originalDurableLogLastIndex);
+        lock (gate)
+        {
+            physical.Attach(sameDatabase, this, startup.Applied, startup.NodeId, startup.Generation);
+        }
+    }
+
+    IResourceLifetimeWorkSettlement IResourceLifetimeWorkFence.CloseMatching(ResourceRetirementOwnerFenceV1 fence)
+        => CloseMatching(fence);
+
+    internal IResourceLifetimeWorkSettlement CloseMatching(ResourceRetirementOwnerFenceV1 fence)
+    {
+        var fingerprint = NativeResourceWorkRetentions.Fingerprint(fence);
+        lock (gate)
+        {
+            var actual = physical.Require(fence);
+            return retentions.CloseMatching(this, fence, fingerprint, actual, admissions, physical.CanQualify(fence), retainCancellation: !admissionClosed);
+        }
+    }
+
+    internal NativeResourceWorkClosure? FindRetainedSettlement(ResourceRetirementOwnerFenceV1 fence)
+    {
+        lock (gate)
+        {
+            _ = physical.Require(fence);
+            return physical.CanQualify(fence) ? retentions.Find(fence) : null;
+        }
+    }
+
+    internal void ConsumeSettlement(ResourceRetirementOwnerFenceV1 fence, NativeResourceWorkClosure originalHandle)
+    {
+        var fingerprint = NativeResourceWorkRetentions.Fingerprint(fence);
+        lock (gate)
+        {
+            retentions.Consume(fence, fingerprint, originalHandle, admissions);
+        }
+    }
+
+    internal void ReleaseCloseObserver(NativeRequestWorkLease lease)
+        => NativeRequestWorkCompletion.ReleaseCloseObserver(gate, lease);
+
 }

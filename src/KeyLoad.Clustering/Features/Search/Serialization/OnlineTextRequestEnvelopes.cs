@@ -47,7 +47,11 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Read(actor, database.Store.Identity.Incarnation, principal,
             GrainReadKind.ProjectionBatch,
-            GrainNativePayload.Copy(NativeSerialization.Serialize(request), database.Limits.MaxBatchBytes), expiry);
+            GrainNativePayload.Copy(NativeSerialization.Serialize(request), database.Limits.MaxBatchBytes), expiry)
+            with
+        {
+            Purpose = OnlineTextRequestScope.Purpose
+        };
     }
 
     internal static GrainRequestEnvelope Checkpoint(DatabaseEngine database, DateTimeOffset now,
@@ -56,7 +60,11 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Command(actor, database.Store.Identity.Incarnation, principal,
             OperationKind.CommitProjectionBatch, request.CommandId,
-            GrainNativePayload.Copy(NativeSerialization.Serialize(request), database.Limits.MaxBatchBytes), expiry);
+            GrainNativePayload.Copy(NativeSerialization.Serialize(request), database.Limits.MaxBatchBytes), expiry)
+            with
+        {
+            Purpose = OnlineTextRequestScope.Purpose
+        };
     }
 
     internal static void RequireExpiry(DateTimeOffset now, TimeSpan lifetime, DateTimeOffset expiry)

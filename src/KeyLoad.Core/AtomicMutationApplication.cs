@@ -107,6 +107,8 @@ public sealed partial class DatabaseEngine
     private MutationReceipt ApplyNonDocumentMutation(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, TopicPurgeReadBudget? purgeBudget, ReplicatedOperation? operation) => mutation switch
         {
+            UpsertAnalyticsEvents analytics => ApplyAnalyticsUpsert(tx, principal, partition, analytics, now),
+            DeleteAnalyticsEvents analytics => ApplyAnalyticsDelete(tx, principal, partition, analytics, now),
             AppendEvents events => Append(tx, principal, partition, events, now),
             PublishTopic topic => Publish(tx, principal, partition, topic, now),
             PurgeTopic topic => PurgeTopicHistory(tx, partition, topic, purgeBudget),

@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -14,6 +15,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     private readonly AdmittedCommandInbox commands;
     private readonly CancellationTokenSource lifetime = new();
     private readonly Lock lifecycle = new();
+    private Func<ReplicaConsensus, ReplicatedOperation, ReadExecutionBudget?, IReplicaForwardedCommandWork?, CancellationToken, Task<OperationResult>>? nativeCommandExecution;
     private Task? worker;
     private Task? shutdown;
     private Task? disposal;
@@ -42,7 +44,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         this.clock = clock;
         commands = new(admission, inboxOptions);
         database.Durability = DurabilityProfile.QuorumProcessDurable;
-        consensus.ConfigureForwarding(AcceptForwardedAsync);
+        consensus.ConfigureForwardedCommandAdmission(AcceptForwardedAsync);
     }
 
     /// <inheritdoc />
@@ -56,14 +58,17 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
 
     /// <inheritdoc />
     public Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-        => AdmitAsync(database.CreateNativeOperation(kind, id, principalId, clock.GetUtcNow(), payload), cancellationToken);
+        ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
+        CancellationToken cancellationToken = default)
+        => AdmitAsync(database.CreateNativeOperation(kind, id, principalId, clock.GetUtcNow(), payload),
+            cancellationToken, sourcePlanningBudget);
 
     /// <inheritdoc />
-    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken,
+        ReadExecutionBudget? sourcePlanningBudget = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return AdmitAsync(database.VerifyOperationAuthority(operation), cancellationToken);
+        return AdmitAsync(database.VerifyOperationAuthority(operation), cancellationToken, sourcePlanningBudget);
     }
 
     internal Task<OperationResult> AdmitOnlineTextPublication(ReplicatedOperation operation,
@@ -88,9 +93,10 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         return Enqueue(database.VerifyOperationAuthority(operation), cancellationToken).Completion;
     }
 
-    private async Task<OperationResult> AdmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    private async Task<OperationResult> AdmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken,
+        ReadExecutionBudget? sourcePlanningBudget = null)
     {
-        var pending = Enqueue(operation, cancellationToken);
+        var pending = Enqueue(operation, cancellationToken, sourcePlanningBudget);
         try
         {
             return await pending.Completion.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -101,23 +107,39 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         }
     }
 
-    private AdmittedCommand Enqueue(ReplicatedOperation operation, CancellationToken cancellationToken)
-        => ClusterCoordinatorCommandAdmission.Enqueue(database, clock, commands, worker, operation, cancellationToken);
+    private AdmittedCommand Enqueue(ReplicatedOperation operation, CancellationToken cancellationToken,
+        ReadExecutionBudget? sourcePlanningBudget = null, IReplicaForwardedCommandWork? receiverWork = null)
+        => ClusterCoordinatorCommandAdmission.Enqueue(database, clock, commands, worker, operation,
+            cancellationToken, sourcePlanningBudget, receiverWork);
 
     /// <summary>Admits an authenticated forwarded operation only on a ready current leader.</summary>
     /// <param name="operation">Stable-ID operation forwarded by an authenticated replica.</param>
     /// <param name="cancellationToken">Cancellation while checking leadership and awaiting admission.</param>
     /// <returns>The persisted operation outcome after bounded leader admission.</returns>
-    public async Task<OperationResult> AcceptForwardedAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    public Task<OperationResult> AcceptForwardedAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+        => AcceptForwardedAsync(operation, null, cancellationToken);
+
+    private async Task<OperationResult> AcceptForwardedAsync(ReplicatedOperation operation,
+        IReplicaForwardedCommandWork? receiverWork, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(operation);
         if (!await consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(false))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
-
-        return await AdmitAsync(database.NormalizeOperation(operation), cancellationToken).ConfigureAwait(false);
+        if (receiverWork is null)
+        {
+            consensus.RequireLowerForwardedAdmission();
+            return await AdmitAsync(database.NormalizeOperation(operation), cancellationToken).ConfigureAwait(false);
+        }
+        receiverWork.Budget.Check();
+        var pending = Enqueue(database.NormalizeOperation(operation), cancellationToken, null, receiverWork);
+        return await ReplicaForwardedCommandCompletion.AwaitAsync(pending, receiverWork, cancellationToken).ConfigureAwait(false);
     }
+
+    internal void AttachForwardedCommandWork(
+        Func<DatabaseEngine, TimeProvider, CancellationToken, Task<IReplicaForwardedCommandWork>> factory)
+        => consensus.AttachForwardedCommandWork(factory);
 
     /// <inheritdoc />
     public async Task ReadBarrierAsync(CancellationToken cancellationToken = default)
@@ -151,37 +173,40 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         return Task.CompletedTask;
     }
 
+    internal void AttachNativeCommandExecution(
+        Func<ReplicaConsensus, ReplicatedOperation, ReadExecutionBudget?, IReplicaForwardedCommandWork?, CancellationToken, Task<OperationResult>> execution)
+    {
+        ArgumentNullException.ThrowIfNull(execution);
+        lock (lifecycle)
+        {
+            if (nativeCommandExecution is not null || worker is not null || shutdown is not null)
+            {
+                throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidPeer);
+            }
+            nativeCommandExecution = execution;
+        }
+    }
+
+    internal void RequireNativeCommandExecution()
+    {
+        if (nativeCommandExecution is null)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.InvalidPeer);
+        }
+    }
+
     private async Task RunAsync(CancellationToken stoppingToken)
     {
         try
         {
             while (await commands.ReadAsync(stoppingToken).ConfigureAwait(false) is { } pending)
             {
-                await ExecuteAsync(pending, stoppingToken).ConfigureAwait(false);
+                await ClusterCoordinatorCommandExecution.ExecuteAsync(consensus, pending, clock, commandTimeout,
+                    nativeCommandExecution, stoppingToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
         finally { commands.Stop(); }
-    }
-
-    private async Task ExecuteAsync(AdmittedCommand pending, CancellationToken stoppingToken)
-    {
-        using var timeout = new CancellationTokenSource(commandTimeout, clock);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, timeout.Token);
-        try
-        {
-            pending.Complete(await consensus.SubmitAsync(pending.Operation, deadline.Token).ConfigureAwait(false));
-        }
-        catch (KeyLoadException error) { pending.Fail(error); }
-        catch (OperationCanceledException)
-        {
-            pending.Fail(Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite));
-        }
-        catch (Exception)
-        {
-            pending.Fail(Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite));
-            throw;
-        }
     }
 
     /// <summary>Stops admission after Orleans membership shutdown, with idempotent draining.</summary>

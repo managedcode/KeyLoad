@@ -51,16 +51,16 @@ internal static class FunctionalGateRelationalAssertions
 
     internal static async Task AnchorAsync(FunctionalGateContext ctx, string id, CommitToken minimum, CancellationToken token)
     {
-        var actual = await ctx.SdkAsync(ctx.Reader.Sdk.GetAsync(new(ctx.Partition, P.Parent, id), minimum, token));
+        var actual = await ctx.SdkAsync(ctx.Reader.Sdk.GetAsync(ctx.Bind(new(ctx.Partition, P.Parent, id)), minimum, token));
         await Assert.That(actual.Document).IsNotNull();
-        await Assert.That(actual.Document!.Reference).IsEqualTo(new EntityRef(ctx.Partition, P.Parent, id));
+        await Assert.That(actual.Document!.Reference).IsEqualTo(ctx.Bind(new EntityRef(ctx.Partition, P.Parent, id)));
         await Assert.That(actual.Document.Revision).IsEqualTo(P.Initial);
         await Assert.That(actual.Document.Redacted).IsFalse();
         await Assert.That(actual.Document.RedactedFields.IsEmpty).IsTrue();
         using var json = JsonDocument.Parse(actual.Document.Json);
-        await Assert.That(json.RootElement.GetProperty(P.DocumentId).GetString()).IsEqualTo(ctx.Anchor.Id);
+        await Assert.That(json.RootElement.GetProperty(P.DocumentId).GetString()).IsEqualTo(ctx.Bind(ctx.Anchor).Id);
         await Assert.That(json.RootElement.GetProperty(P.AnchorReference).GetString())
-            .IsEqualTo(JsonSerializer.Serialize(ctx.Anchor, JsonDefaults.Options));
+            .IsEqualTo(JsonSerializer.Serialize(ctx.Bind(ctx.Anchor), JsonDefaults.Options));
     }
 
     internal static async Task BaselineAsync(FunctionalGateContext ctx, CancellationToken token)

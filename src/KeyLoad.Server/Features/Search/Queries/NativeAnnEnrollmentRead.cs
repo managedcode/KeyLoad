@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
 
@@ -12,7 +13,8 @@ internal static class NativeAnnEnrollmentRead
     internal static async Task<AnnProjectionEnrollment?> ReadAsync(DatabaseEngine database,
         PrincipalRecord principal, AnnMaintenanceRequest original, ServerRuntimeOptions configured,
         TimeProvider clock, NativeAnnMaintenanceAdmissions admissions,
-        Func<NativeAnnGenerationOwner> owningRoot, CancellationToken token)
+        Func<NativeAnnGenerationOwner> owningRoot, CancellationToken token,
+        ReadExecutionBudget? originalBudget = null, IResourceLifetimeWorkBinding? binding = null)
     {
         var failures = new List<Exception>();
         AnnProjectionEnrollment? result = null;
@@ -22,9 +24,10 @@ internal static class NativeAnnEnrollmentRead
             try
             {
                 NativeAnnMaintenanceAdmission.Request(original, original.CommandId, database.Store.Identity.NodeId);
-                var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
-                var eligible = database.ReadProjectionMaintenanceEligibility(original.Consumer,
-                    original.IndexGeneration, read);
+                var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+                var eligible = binding is null
+                    ? database.ReadProjectionMaintenanceEligibility(original.Consumer, original.IndexGeneration, read)
+                    : database.ReadProjectionMaintenanceEligibilityBound(original.Consumer, original.IndexGeneration, read, binding);
                 RequireReservation(eligible, principal, original);
                 if (!eligible.InitialAnnMaintenanceSettled)
                 {
@@ -32,7 +35,7 @@ internal static class NativeAnnEnrollmentRead
                 }
                 var owner = owningRoot();
                 result = await owner.RunAsync(stages => ReadOwned(database, principal, original,
-                    configured, clock, owner, stages, eligible, read)).ConfigureAwait(false);
+                    configured, clock, owner, stages, eligible, read, binding)).ConfigureAwait(false);
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -46,7 +49,7 @@ internal static class NativeAnnEnrollmentRead
     private static AnnProjectionEnrollment? ReadOwned(DatabaseEngine database, PrincipalRecord principal,
         AnnMaintenanceRequest original, ServerRuntimeOptions configured, TimeProvider clock,
         NativeAnnGenerationOwner owner, NativeAnnStageStore stages, ProjectionConsumerInfo eligible,
-        ReadExecutionBudget read)
+        ReadExecutionBudget read, IResourceLifetimeWorkBinding? binding)
     {
         var failures = new List<Exception>();
         AnnProjectionEnrollment? result = null;
@@ -61,7 +64,7 @@ internal static class NativeAnnEnrollmentRead
                     read.Check();
                     return null;
                 }
-                var fresh = database.Store.Read(view => database.Principal(view, principal.Id, clock.GetUtcNow()));
+                var fresh = database.Store.Read(view => database.Principal(read.CreateView(view), principal.Id, clock.GetUtcNow()));
                 RequireReservation(eligible, fresh, original);
                 var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, memory.Bytes / CaptureFrames);
                 var captured = AnnSeedCollector.CapturePinned(database, fresh.Id, candidate.LastRequest, seeds, read);
@@ -75,8 +78,9 @@ internal static class NativeAnnEnrollmentRead
                 {
                     throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
                 }
-                var current = database.ReadProjectionMaintenanceEligibility(original.Consumer,
-                    original.IndexGeneration, read);
+                var current = binding is null
+                    ? database.ReadProjectionMaintenanceEligibility(original.Consumer, original.IndexGeneration, read)
+                    : database.ReadProjectionMaintenanceEligibilityBound(original.Consumer, original.IndexGeneration, read, binding);
                 RequireReservation(current, fresh, original);
                 if (current.MaintenanceAuthority != eligible.MaintenanceAuthority
                     || current.Checkpoint != eligible.Checkpoint
@@ -86,6 +90,7 @@ internal static class NativeAnnEnrollmentRead
                 }
                 result = candidate;
                 read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(candidate));
+                read.CheckResult(candidate);
                 read.Check();
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }

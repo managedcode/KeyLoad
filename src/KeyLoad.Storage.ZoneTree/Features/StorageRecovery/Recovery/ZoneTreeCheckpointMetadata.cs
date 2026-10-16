@@ -6,7 +6,24 @@ internal sealed record ZoneTreeCheckpointMetadata(
     [property: global::Orleans.Id(1)] int CodecVersion,
     [property: global::Orleans.Id(2)] Guid Incarnation,
     [property: global::Orleans.Id(3)] long Position,
-    [property: global::Orleans.Id(4)] long AppliedPosition);
+    [property: global::Orleans.Id(4)] long AppliedPosition)
+{
+    [global::Orleans.Id(5)]
+    internal ResourceRetirementConservationFloorV1? ConservationFloor
+    {
+        get; init;
+    }
+    [global::Orleans.Id(6)]
+    internal long ConservationAuthorityRecords
+    {
+        get; init;
+    }
+    [global::Orleans.Id(7)]
+    internal ReadOnlyMemory<byte> ConservationAuthorityDigest
+    {
+        get; init;
+    }
+}
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(ZoneTreeMetadataAliases.CheckpointFooter)]
 internal sealed record ZoneTreeCheckpointFooter(

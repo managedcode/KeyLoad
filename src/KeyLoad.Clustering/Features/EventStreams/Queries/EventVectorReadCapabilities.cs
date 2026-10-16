@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
@@ -10,8 +11,9 @@ internal static class EventVectorReadCapabilities
     private const string Invalid = "The private event vector receiving read is inconsistent.";
 
     internal static object Execute(DatabaseEngine database, IServiceProvider services, PrincipalRecord principal,
-        DecodedGrainRequest request, CancellationToken originalCancellationToken)
+        DecodedGrainRequest request, CancellationToken originalCancellationToken, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         originalCancellationToken.ThrowIfCancellationRequested();
         if (!EventVectorRequestScope.HandlesRead(request.Envelope.ReadKind!.Value)
             || request.Envelope.Purpose != EventVectorRequestScope.SourcePurpose)
@@ -20,6 +22,7 @@ internal static class EventVectorReadCapabilities
         }
         var owner = services.GetRequiredService<PhysicalShardRecord>();
         var work = database.CreateEventVectorReadWork(request.Envelope.ExpiresAt, originalCancellationToken);
+        work.AttachResourceLifetimeBinding(binding);
         return request.Envelope.ReadKind.Value switch
         {
             GrainReadKind.EventVectorCoverage => Coverage(database, principal, request, owner, work,

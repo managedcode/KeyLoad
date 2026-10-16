@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.Messaging;
@@ -13,7 +14,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     private RemoteModelNativeRuntime? nativeReceiver;
 
     internal RemoteDocumentRuntime(ServerRuntimeOptions options)
-        => work = new(options.GrainRouting, options.Node, options.RemoteDocuments);
+        => work = new(options.Node, options.RemoteDocuments);
 
     private readonly Lock gate = new();
     private Task? disposal;
@@ -22,38 +23,47 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     {
         get; private set;
     }
+
     internal IRemoteBlobReadRouter? BlobRouter
     {
         get; private set;
     }
+
     internal IControlledDocumentCommandRouter? CommandRouter
     {
         get; private set;
     }
+
     internal IRemotePartitionQueryRouter? QueryRouter
     {
         get; private set;
     }
+
     internal IRemoteDistributedSearchRouter? DistributedSearchRouter
     {
         get; private set;
     }
+
     internal RemoteDocumentEndpoint? Endpoint
     {
         get; private set;
     }
+
     internal global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime? EventVectors
     {
         get; private set;
     }
+
     internal IEventVectorParent? EventVectorParent
     {
         get; private set;
     }
+
     internal global::KeyLoad.Server.Features.Search.AnnProjectionNativeReceiver? AnnObservations
     {
         get; private set;
     }
+
     internal IRemoteAnnReadRouter? AnnReadRouter
     {
         get; private set;
@@ -132,8 +142,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         => ExecuteNativeAsync(request, null, token);
 
     internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteNativeAsync(
-        RemoteModelNativeRequest request, RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken token)
-        => RemoteModelNativeDispatch.ExecuteAsync(this, request, effectBoundary, token);
+        RemoteModelNativeRequest request, RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken token,
+        IResourceLifetimeWorkBinding? binding = null)
+        => RemoteModelNativeDispatch.ExecuteAsync(this, request, effectBoundary, token, binding);
 
     public ValueTask DisposeAsync()
     {
@@ -190,6 +201,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
+
     private async Task DisposeClientAsync(List<Exception> failures)
     {
         Task terminal;

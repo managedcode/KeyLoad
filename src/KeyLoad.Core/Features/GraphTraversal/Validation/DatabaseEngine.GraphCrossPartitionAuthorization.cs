@@ -32,10 +32,17 @@ public sealed partial class DatabaseEngine
             VisibleVertex(view, principal, intent.Edge.To);
         }
         else if (intent is null && view.GetRecord<EdgeRecord>(EdgeKey(source, graph, edgeId))
-            is { } canonical && canonical.To == destination)
+            is { } canonical && (canonical.To with
+            {
+                Lifetime = null
+            }) == (destination with
+            {
+                Lifetime = null
+            }))
         {
             VisibleVertex(view, principal, canonical.From);
             VisibleVertex(view, principal, canonical.To);
+            _ = BindEntityReference(view, destination);
         }
     }
 }

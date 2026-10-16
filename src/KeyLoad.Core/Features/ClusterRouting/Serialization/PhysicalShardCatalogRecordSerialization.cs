@@ -7,11 +7,9 @@ namespace KeyLoad.Core.Features.ClusterRouting.Serialization;
 /// <summary>Owns the catalog's native record key and ZoneTree byte decoding.</summary>
 internal static class PhysicalShardCatalogRecordSerialization
 {
-    private const string CatalogSpace = "physical-shard-catalog";
-    private const string CatalogVersion = "v1";
     private const string Malformed = "The committed physical shard catalog is malformed.";
 
-    internal static byte[] CatalogKey() => KeyCodec.Encode(CatalogSpace, CatalogVersion);
+    internal static byte[] CatalogKey() => ResourceRetirementConservationCatalog.Key();
 
     internal static PhysicalShardRecord InitialRecord(BootstrapPhysicalShardCatalogRequest request)
         => new(request.PhysicalShardId, request.Incarnation, request.VoterIds,

@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -45,10 +46,22 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
 
     public Task<OnlineTextCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry, CancellationToken token)
-        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, token));
+        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, token, null, null));
+
+    public Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
+        OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry,
+        CancellationToken token, IResourceLifetimeWorkBinding binding)
+    {
+        var parent = NativeTextMaintenanceBinding.Parent(binding);
+        var budget = new ReadExecutionBudget(options.Core.DatabaseLimits, clock, parent.Cancellation);
+        budget.ConstrainLifetime(originalExpiry);
+        budget.AttachResourceLifetimeBinding(parent);
+        return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, token, budget, parent));
+    }
 
     private async Task<OnlineTextCapabilityResult> ExecuteOwnedAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token)
+        OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token,
+        ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding)
     {
         token.ThrowIfCancellationRequested();
         await catalog.ObserveCompletedRetirementsAsync().ConfigureAwait(false);
@@ -59,14 +72,19 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
         }
         if (request.Kind == OnlineTextCapabilityKind.ResolveOriginal)
         {
-            var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, token).ConfigureAwait(false);
+            var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, token, originalBudget).ConfigureAwait(false);
             if (resolved is not null)
             {
                 return resolved;
             }
         }
-        var session = RequireSession(principal, request, expiry);
-        using var stage = session.Budget.EnterStageCancellation(token);
+        var session = RequireSession(principal, request, expiry, originalBudget);
+        if (originalBinding is not null)
+        {
+            session.Budget.RequireResourceLifetimeBinding(originalBinding);
+        }
+        using var stageCancellation = session.LinkStageCancellation(token);
+        using var stage = session.Budget.EnterStageCancellation(stageCancellation.Token);
         session.Require(request.SessionId, request.Request, principal.Id, expiry);
         if (request.Kind == OnlineTextCapabilityKind.SettleCheckpoint)
         {
@@ -88,14 +106,14 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
     }
 
     private NativeTextOnlineSession RequireSession(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry)
+        OnlineTextCapabilityRequest request, DateTimeOffset expiry, ReadExecutionBudget? originalBudget)
     {
         if (request.Kind != OnlineTextCapabilityKind.ResolveOriginal)
         {
             return sessions.Require(request.SessionId);
         }
         var session = new NativeTextOnlineSession(request.SessionId, request.Request, principal.Id,
-            expiry, options, clock, shutdown.Token);
+            expiry, options, clock, shutdown.Token, originalBudget);
         try
         {
             sessions.Add(session);

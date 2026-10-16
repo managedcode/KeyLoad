@@ -86,6 +86,7 @@ internal static class LocalRf3ImageSelection
     private const string NativeImageEnrollmentFilterArgument = "--KeyLoadTests:Filter=/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*";
     private const string ControlledBlobLifetimeReadFilterArgument = "--KeyLoadTests:Filter=/*/*/ControlledBlobLifetimeReadRf3Tests/HeldNativeRepliesRequireFreshSourceAuthorityAndSettleBeforeTwoColdBlobReadWaves";
     private const string NativeBlobWholeParentFilterArgument = "--KeyLoadTests:Filter=/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*";
+    private const string DropTableLifecycleFilterArgument = "--KeyLoadTests:Filter=/*/*/DropTableLifecycleRf3Tests/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves";
     private const string ResourcePartitionInventoryFilterArgument = "--KeyLoadTests:Filter=/*/*/ResourcePartitionInventoryRf3Tests/AuthenticatedConservativeInventoryRetainsReplayRollbackAndTwoColdOwners";
     private const string PublicPartitionMovementFilterArgument = "--KeyLoadTests:Filter=/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay";
     private const string ErasedFollowerSnapshotFilterArgument = "--KeyLoadTests:Filter=/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation";
@@ -149,6 +150,7 @@ internal static class LocalRf3ImageSelection
                 or ControlledBlobLifetimeReadFilterArgument
                 or NativeBlobWholeParentFilterArgument
                 or ResourcePartitionInventoryFilterArgument
+                or DropTableLifecycleFilterArgument
                 or PublicPartitionMovementFilterArgument
                 or ErasedFollowerSnapshotFilterArgument
                 or SdkRevocationWriteFilterArgument

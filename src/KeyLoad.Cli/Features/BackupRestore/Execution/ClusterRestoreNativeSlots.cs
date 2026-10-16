@@ -27,7 +27,29 @@ internal static class ClusterRestoreNativeSlots
                 _ = ClusterRestoreCatalogReconciliation.ReconcileSlot(transaction, identity, admitted.SourcePosition, position, metadata,
                     secret, runtime.Cuts, runtime.Plan.Mappings, admitted, runtime.Limits, runtime.Clock, runtime.Work),
             (view, identity, position, admitted) => Verify(runtime, source, secret, view, identity, position, admitted),
-            runtime.Observer, runtime.Cancellation);
+            runtime.Observer, runtime.Cancellation,
+            (view, identity, position, admitted) => ResolveOwnerMapping(runtime, source, view, identity, position, admitted));
+    }
+
+    private static ClusterRestoreOwnerMapping ResolveOwnerMapping(ClusterRestoreOperationRuntime runtime,
+        ClusterRestoreSource source, IKeyValueView view, StoreIdentity identity, long sourcePosition,
+        ClusterRestoreSlotContext admitted)
+    {
+        runtime.Work.Check();
+        var row = runtime.Work.CreateView(view).GetRecord<ClusterRestoreSlotCommit>(ClusterRestoreSlotKeys.Reconciled());
+        var mapping = runtime.Plan.Mappings.Single(value => value.Source.PhysicalShardId == source.OriginalCut.Owner.PhysicalShardId);
+        if (row is null || row.Context != admitted || row.Kind != ClusterRestoreSlotCommitKind.Reconciled
+            || row.OriginalCut is null || identity.NodeId != admitted.SourceNodeId
+            || identity.Incarnation != admitted.SourceIncarnation || sourcePosition != admitted.SourcePosition
+            || row.OriginalCut.StorePosition != admitted.SourcePosition
+            || mapping.Target.Incarnation != admitted.TargetIncarnation
+            || row.MappingsDigest != ClusterRestoreMappingDigest.Compute(runtime.Plan.Mappings)
+            || !NativeSerialization.Serialize(row.OriginalCut).AsSpan().SequenceEqual(NativeSerialization.Serialize(source.OriginalCut))
+            || !NativeSerialization.Serialize(mapping.Source).AsSpan().SequenceEqual(NativeSerialization.Serialize(source.OriginalCut.Owner)))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
+        return mapping;
     }
 
     internal static NativeCatalogRestoreSlotCompletion RequireExisting(ClusterRestoreOperationRuntime runtime,

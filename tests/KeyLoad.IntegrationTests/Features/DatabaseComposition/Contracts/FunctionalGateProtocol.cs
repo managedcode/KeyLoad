@@ -4,7 +4,7 @@ internal static class FunctionalGateProtocol
 {
     internal const int ResourceCount = 3;
     internal const int UserPairs = 4;
-    internal const int ModelCount = 9;
+    internal const int ModelCount = 10;
     internal const int MinimumOperations = 10_000;
     internal const int MaximumWaves = 256;
     internal const string AnchorCollection = "gate_docs_0";

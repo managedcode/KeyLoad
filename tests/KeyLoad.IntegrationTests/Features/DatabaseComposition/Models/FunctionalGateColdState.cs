@@ -6,6 +6,8 @@ internal sealed record FunctionalGateColdState(PartitionRef Partition, EntityRef
     McpPersistedIdentity Writer, McpPersistedIdentity Reader, McpPersistedIdentity QueueOperator,
     FunctionalGateColdModel[] Models, AdminNodeSnapshot[] Analytics)
 {
+    internal FunctionalGateReferenceBindings ReferenceBindings { get; init; } = new();
+    internal FunctionalGateAnalyticsColdUser[] UserAnalytics { get; init; } = [];
     internal McpPersistedIdentity[] AdditionalIdentities { get; init; } = [];
     internal FunctionalGateColdWorkload[] Workloads { get; init; } = [];
 }

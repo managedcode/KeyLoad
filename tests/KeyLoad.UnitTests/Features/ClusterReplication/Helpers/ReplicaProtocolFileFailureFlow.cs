@@ -53,7 +53,7 @@ internal static class ReplicaProtocolFileFailureFlow
                     endpoint.Consensus.ConfigureForwarding((input, cancellation) => gate.ForwardAsync(db.Database, input, cancellation));
                     var image = QueueWholeFlowStorage.Bytes(db.Store);
                     var position = db.Store.Position;
-                    submitted = endpoint.Consensus.HandleAsync(ReplicaRpc.Forward, ReplicaProtocolCodec.Serialize(operation), token);
+                    submitted = endpoint.Consensus.HandleAsync(ReplicaRpc.Forward, ReplicaForwardTestFrame.Payload(operation), token);
                     await gate.Entered.Task.WaitAsync(token);
                     disposal = endpoint.Consensus.DisposeAsync().AsTask();
                     await gate.Cancelled.Task.WaitAsync(token);

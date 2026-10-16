@@ -8,11 +8,11 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class MultiLaneReceiveNativeFlow
 {
-    internal static Task<GrainOperationReply> ReceiveAsync(RequestCqrsClusterFixture fixture,
+    internal static Task<GrainOperationReply> ReceiveAsync(RequestCqrsHostedRuntimeFixture fixture,
         MultiLaneReceiveRequest request, string principal = "root", CancellationToken token = default)
         => InvokeAsync(fixture, OperationKind.ReceiveAcrossLanes, request.RequestId, request, principal, token);
 
-    internal static async Task<GrainOperationReply> InvokeAsync<T>(RequestCqrsClusterFixture fixture,
+    internal static async Task<GrainOperationReply> InvokeAsync<T>(RequestCqrsHostedRuntimeFixture fixture,
         OperationKind kind, Guid commandId, T request, string principalId, CancellationToken token)
     {
         var capture = MultiLaneReceiveFailureObservation.Get(fixture);
@@ -37,6 +37,20 @@ internal static class MultiLaneReceiveNativeFlow
     internal static MultiLaneReceiveResult Value(GrainOperationReply reply)
         => NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as MultiLaneReceiveResult
             ?? throw new InvalidOperationException("The native request returned no complete multi-lane outcome.");
+
+    internal static QueueLaneRef[] Seed(RequestCqrsHostedRuntimeFixture fixture, int count)
+    {
+        var prefix = "multi-" + Guid.NewGuid().ToString("N");
+        var lanes = new QueueLaneRef[count];
+        for (var index = 0; index < count; index++)
+        {
+            var queue = prefix + "-" + index;
+            fixture.Database.Configure(queue, ResourceKind.WorkQueue);
+            fixture.Database.Commit(new EnqueueMessage(queue, "message", "{\"work\":1}", "{\"kind\":\"job\"}"));
+            lanes[index] = new(fixture.Database.Partition, queue);
+        }
+        return lanes;
+    }
 
     internal static QueueLaneRef[] Seed(RequestCqrsClusterFixture fixture, int count)
     {

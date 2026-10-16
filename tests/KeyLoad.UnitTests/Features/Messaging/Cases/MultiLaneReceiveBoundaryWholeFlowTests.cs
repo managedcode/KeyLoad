@@ -12,7 +12,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
     public async Task OriginalParentExpiryRetainsCommittedLaneAndUndispatchedSuffixWithHealthyFollowup()
     {
         var clock = new MultiLaneReceiveExpiryClock();
-        await using var fixture = new RequestCqrsClusterFixture(clock);
+        await using var fixture = new RequestCqrsHostedRuntimeFixture(clock);
         await fixture.InitializeAsync();
         var lanes = MultiLaneReceiveNativeFlow.Seed(fixture, 2);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
@@ -70,7 +70,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
     public async Task SubmittedClaimReplyByteFailureIsUnknownAndNeverClaimsLaterLaneOrChangesOnReplay()
     {
         const int replyCeiling = 1024;
-        await using var fixture = new RequestCqrsClusterFixture(routing: new GrainRoutingOptions
+        await using var fixture = new RequestCqrsHostedRuntimeFixture(routing: new GrainRoutingOptions
         {
             MaximumReplyBytes = replyCeiling,
             InitialReplyBufferBytes = replyCeiling
@@ -124,7 +124,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         await HealthyAsync(fixture);
     }
 
-    private static async Task HealthyAsync(RequestCqrsClusterFixture fixture)
+    private static async Task HealthyAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var lane = MultiLaneReceiveNativeFlow.Seed(fixture, 1)[0];
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(), [new(Guid.NewGuid(), lane)]);

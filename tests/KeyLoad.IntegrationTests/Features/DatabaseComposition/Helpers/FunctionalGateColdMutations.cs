@@ -4,7 +4,7 @@ internal static class FunctionalGateColdMutations
 {
     internal static CommandRequest Command(FunctionalGateContext context, int index, BlobRef blob)
     {
-        var reference = new EntityRef(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id);
+        var reference = context.Bind(new(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id));
         var mutations = new List<Mutation>();
         if (index == 0)
         {

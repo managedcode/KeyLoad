@@ -20,7 +20,7 @@ internal static class TenantAdmissionRefusals
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         var principal = TenantAdmissionOperations.Principal(fixture, TenantAdmissionOperations.PrincipalB);
         failure = Assert.ThrowsExactly<KeyLoadException>(() => inbox.Enqueue(excessive, principal,
-            RuntimeJournalBootstrapAdmissionFlow.PayloadBytes(excessive), token));
+            RuntimeJournalBootstrapAdmissionFlow.PayloadBytes(excessive), cancellationToken: token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         using var selected = CancellationTokenSource.CreateLinkedTokenSource(token);
         await selected.CancelAsync();

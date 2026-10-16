@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Core.Features.Messaging;
 
@@ -20,6 +21,7 @@ internal static class RemoteTransferPeerShape
         {
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferPeerProtocol.Invalid);
         }
+        RequireSourceLifetime(call);
         JsonData.Identifier(call.LogicalPrincipalId);
         var intent = call.IntentClaims;
         if (intent.Purpose != RemoteTransferProtocol.IntentPurpose || intent.Incarnation != call.SourceOwner.Owner.Incarnation
@@ -29,6 +31,27 @@ internal static class RemoteTransferPeerShape
             || call.SourceCut.Position < RemoteTransferAttemptProtocol.MinimumNativePosition)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
+    }
+
+    private static void RequireSourceLifetime(RemoteQueueTransferPeerCall call)
+    {
+        if (call.SourceDefinition is null || call.SourceLifetime is null)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
+        var source = call.IntentClaims.Source;
+        if (source is null || source.Partition is null)
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferPeerProtocol.Invalid);
+        }
+        DatabaseEngine.ValidatePartition(source.Partition);
+        ResourceLifetimeIdentity.Validate(call.SourceLifetime, source.Partition.TenantId,
+            source.Partition.DatabaseId, call.SourceDefinition);
+        if (call.SourceDefinition.Name != source.Queue || call.SourceDefinition.Kind != ResourceKind.WorkQueue
+            || call.SourceDefinition.TransactionDomainId != source.Partition.TransactionDomainId)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
         }
     }
 

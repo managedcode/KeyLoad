@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
 
@@ -43,24 +44,35 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
 
     public Task<TextMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, CancellationToken cancellationToken)
-        => worker.RunAsync(() => Execute(principal, request, cancellationToken));
+        => worker.RunAsync(() => Execute(principal, request, cancellationToken, null, null));
+
+    public Task<TextMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
+        TextMaintenanceCapabilityRequest request, DateTimeOffset originalExpiry,
+        CancellationToken token, IResourceLifetimeWorkBinding binding)
+    {
+        var parent = NativeTextMaintenanceBinding.Parent(binding);
+        var budget = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, parent.Cancellation);
+        budget.ConstrainLifetime(originalExpiry);
+        budget.AttachResourceLifetimeBinding(parent);
+        return worker.RunAsync(() => Execute(principal, request, token, budget, parent));
+    }
 
     private TextMaintenanceCapabilityResult Execute(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, CancellationToken token)
+        TextMaintenanceCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding)
     {
         var failures = new List<Exception>();
         TextMaintenanceCapabilityResult? result = null;
         ServerFailureObserver.Observe(() =>
         {
             using var exclusive = new NativeTextSelectedWriteLease(selectedAdmission, token);
-            ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, token), failures);
+            ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, token, originalBudget, originalBinding), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result!;
     }
 
     private TextMaintenanceCapabilityResult ExecuteExclusive(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, CancellationToken token)
+        TextMaintenanceCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding)
     {
         RequireSelectedSettled();
         token.ThrowIfCancellationRequested();
@@ -68,7 +80,8 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         var limits = configured.Core.DatabaseLimits.Value;
         if (request.Kind == TextMaintenanceCapabilityKind.Release)
         {
-            var budget = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+            var budget = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+            using var stage = budget.EnterStageCancellation(token);
             NativeTextIncrementalRelease.Execute(database, principal.Id, request.Maintenance,
                 root, sessions, budget, configured.NativeText, resources, ReleaseGeneration);
             var released = new TextMaintenanceCapabilityResult(request.SessionId, null,
@@ -78,7 +91,8 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         }
         if (request.Kind == TextMaintenanceCapabilityKind.Begin)
         {
-            var budget = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+            var budget = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+            using var stage = budget.EnterStageCancellation(token);
             var actual = NativeTextIncrementalBegin.Capture(database, root, request.SessionId, principal, request.Maintenance,
                 budget, limits.MaxScanRecords, limits.MaxScanRecords, configured.NativeText, faultObserver, resources, RetainGeneration);
             var failures = new List<Exception>();
@@ -91,7 +105,13 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             actual.Budget.Check();
             return NativeTextIncrementalCapabilityResult.Create(actual, actual.Upper);
         }
-        return NativeTextIncrementalSessionOperations.Execute(database, sessions.Require(request.SessionId),
+        var retained = sessions.Require(request.SessionId);
+        if (originalBudget is not null)
+        {
+            retained.Budget.RequireResourceLifetimeBinding(originalBinding
+                ?? throw NativeTextErrors.Ownership());
+        }
+        return NativeTextIncrementalSessionOperations.Execute(database, retained,
             principal, request, configured.Core.QueryExecution.Value, limits.MaxScanRecords,
             limits.MaxScanRecords, configured.NativeText, token);
     }

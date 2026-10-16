@@ -11,17 +11,36 @@ internal static class ZoneTreeCheckpointReader
     private const int EmptyKeyLength = 0;
     private const int EqualKeys = 0;
 
-    internal static StorageSnapshot Read(
-        FileStream input,
-        ZoneTreeStoreOptions options,
-        Action<StorageMutation>? apply = null,
-        Action<StorageMutation>? validate = null)
+    internal static StorageSnapshot Read(FileStream input, ZoneTreeStoreOptions options,
+        Action<StorageMutation>? apply = null, Action<StorageMutation>? validate = null,
+        ResourceRetirementConservationFloorV1? requiredFloor = null, ZoneTreeConservationBudget? work = null)
     {
         if (input.Length > options.MaxSnapshotBytes && apply is null)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.SnapshotBytesExceeded);
         }
 
+        var budget = work ?? new ZoneTreeConservationBudget(options, TimeProvider.System, CancellationToken.None);
+        var index = new ZoneTreeCheckpointAuthorityIndex();
+        var start = input.Position;
+        var snapshot = ReadCore(input, budget, index, null, validate);
+        var end = input.Position;
+        ZoneTreeCheckpointConservation.Require(input, options, index, budget, requiredFloor);
+        if (apply is not null)
+        {
+            input.Position = start;
+            ReadCore(input, budget, null, apply, null);
+        }
+        input.Position = end;
+        return snapshot;
+    }
+
+    private static StorageSnapshot ReadCore(
+        FileStream input,
+        ZoneTreeConservationBudget budget, ZoneTreeCheckpointAuthorityIndex? index,
+        Action<StorageMutation>? apply = null,
+        Action<StorageMutation>? validate = null)
+    {
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         ZoneTreeCheckpointMetadata? metadata = null;
         long count = InitialRecordCount;
@@ -30,10 +49,12 @@ internal static class ZoneTreeCheckpointReader
         var appliedKey = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey);
         while (true)
         {
-            var frame = ZoneTreeCheckpointFrame.Read(input, options, long.MaxValue);
+            var frameOffset = input.Position;
+            var frame = budget.ReadFrame(input);
             if (metadata is null)
             {
                 metadata = ReadMetadata(frame);
+                index?.Metadata = metadata;
             }
             else
             {
@@ -52,7 +73,12 @@ internal static class ZoneTreeCheckpointReader
                     throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointFrameTypeInvalid);
                 }
 
-                ApplyRecords(frame.Payload, appliedKey, apply, validate, ref count, ref applied, ref previousKey);
+                ApplyRecords(frame.Payload, appliedKey, apply, mutation =>
+                {
+                    budget.Charge(InitialRecordCount);
+                    index?.Observe(mutation, frameOffset);
+                    validate?.Invoke(mutation);
+                }, ref count, ref applied, ref previousKey);
             }
 
             digest.AppendData(frame.Header);
@@ -60,7 +86,7 @@ internal static class ZoneTreeCheckpointReader
         }
     }
 
-    private static ZoneTreeCheckpointMetadata ReadMetadata(ZoneTreeCheckpointFrame frame)
+    internal static ZoneTreeCheckpointMetadata ReadMetadata(ZoneTreeCheckpointFrame frame)
     {
         if (frame.Magic != ZoneTreePersistenceFormat.CheckpointMagic)
         {
@@ -78,6 +104,7 @@ internal static class ZoneTreeCheckpointReader
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
         }
+        ZoneTreeCheckpointConservationShape.Require(metadata);
         return metadata;
     }
 
@@ -139,6 +166,7 @@ internal static class ZoneTreeCheckpointReader
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointVerificationFailed);
         }
 
+        ZoneTreeCheckpointConservationShape.RequireCount(metadata, count);
         return new(metadata.Incarnation, metadata.Position, metadata.AppliedPosition, count);
     }
 }

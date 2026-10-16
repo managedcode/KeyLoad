@@ -25,4 +25,12 @@ public sealed record ClusterRestoreSlotCommit(
     private const int MappingsDigestField = 3;
     private const int NativeCommitPositionField = 4;
     private const int KindField = 5;
+    private const int SourceOriginField = 6;
+
+    /// <summary>Original verified conservation source retained by the same reconciliation commit.</summary>
+    [Orleans.Id(SourceOriginField)]
+    internal ResourceRetirementConservationSourceOriginV1? SourceOrigin
+    {
+        get; init;
+    }
 }

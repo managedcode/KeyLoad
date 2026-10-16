@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -23,6 +24,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     private readonly ReplicaNativeDiscoveryMembership membership;
     private readonly TimeProvider clock;
     private readonly ILogger<RemoteModelNativeRuntime> logger;
+    private readonly Func<NativeRequestWorkOwner> requestWork;
     private readonly ReplicaDiscoveryLifetime lifetime;
     private readonly PartitionMovementReplayCache replay;
     private readonly SemaphoreSlim admission;
@@ -30,7 +32,8 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
 
     public RemoteModelNativeRuntime(PartitionHost partition, IOptions<NodeOptions> options,
         IOptions<OrleansMembershipOptions> membershipOptions, IOptions<GrainRoutingOptions> routing,
-        ISiloStatusOracle oracle, ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<RemoteModelNativeRuntime> logger)
+        ISiloStatusOracle oracle, ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<RemoteModelNativeRuntime> logger,
+        Func<NativeRequestWorkOwner> requestWork)
     {
         this.partition = partition;
         this.options = options.Value;
@@ -39,6 +42,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
         this.local = local;
         this.clock = clock;
         this.logger = logger;
+        this.requestWork = requestWork;
         membershipOptions.Value.Validate();
         membership = new(oracle, membershipOptions);
         replay = new(clock, membershipOptions);
@@ -82,7 +86,14 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             {
                 throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
             }
-            return await ExecuteAdmittedAsync(request, targetMac, caller, operation.ShutdownToken).ConfigureAwait(false);
+            if (NativeLifetimeReadTransportExecution.Handles(request.Channel))
+            {
+                return await NativeLifetimeReadTransportExecution.ExecuteAsync(requestWork(), partition.Database,
+                    request, caller, operation.ShutdownToken, (binding, boundToken) =>
+                        ExecuteAdmittedAsync(request, targetMac, boundToken, operation.ShutdownToken, binding))
+                    .ConfigureAwait(false);
+            }
+            return await ExecuteAdmittedAsync(request, targetMac, caller, operation.ShutdownToken, null).ConfigureAwait(false);
         }
         finally
         {
@@ -94,7 +105,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     }
 
     private async Task<RemoteModelNativeReply> ExecuteAdmittedAsync(RemoteModelNativeRequest request,
-        RemoteDocumentMac targetMac, CancellationToken caller, CancellationToken shutdown)
+        RemoteDocumentMac targetMac, CancellationToken caller, CancellationToken shutdown, IResourceLifetimeWorkBinding? binding)
     {
         var effectBoundary = new RemoteModelNativeEffectBoundary();
         RemoteModelNativeReply reply;
@@ -118,7 +129,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             var owner = Volatile.Read(ref runtime) ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable);
             RequireCurrent(request);
             token.ThrowIfCancellationRequested();
-            var actual = await owner.ExecuteNativeAsync(request, effectBoundary, token).ConfigureAwait(false);
+            var actual = await owner.ExecuteNativeAsync(request, effectBoundary, token, binding).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
             RequireCurrent(request);
             if (request.ExpiresAt <= clock.GetUtcNow())
@@ -165,6 +176,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
         }
     }
+
     private static RemoteModelNativeReply Failure(RemoteModelNativeRequest request, ErrorCode error)
         => new(ReadOnlyMemory<byte>.Empty, string.Empty, error, RemoteModelNativeProtocol.Unavailable, request.Nonce, string.Empty);
     internal Task StopAsync() => lifetime.StopAsync();

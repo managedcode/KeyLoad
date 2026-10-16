@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,8 +14,9 @@ internal static class TextMaintenanceExecution
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var request = GrainNativePayload.ReadCommand<TextIndexMaintenanceRequest>(parent.Payload);
         var database = services.GetRequiredService<DatabaseEngine>();
         var principal = GrainRequestAuthority.ReloadForRequest(database, parent.Envelope, clock);
@@ -25,7 +27,7 @@ internal static class TextMaintenanceExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         purpose.EnableTextMaintenance(request.Mode);
-        var children = new TextMaintenanceChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics);
+        var children = new TextMaintenanceChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics, binding);
         TextIndexMaintenanceResult result;
         try
         {

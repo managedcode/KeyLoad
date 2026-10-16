@@ -32,4 +32,11 @@ public interface ICommandPartitionGrain : Orleans.IGrainWithStringKey
     /// <returns>Committed result or typed safe rejection, preserving unknown-write outcomes.</returns>
     [Orleans.Alias(GrainRoutingProtocol.ExecuteAlias)]
     Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken);
+
+    /// <summary>Prepares the original authenticated command and returns its bounded target-owned claim without effects.</summary>
+    /// <param name="signedRequest">The original signed command and finite observation admission.</param>
+    /// <param name="cancellationToken">Original preparation cancellation.</param>
+    /// <returns>The opaque original-owner proof; no command has been submitted.</returns>
+    [Orleans.Alias(NativeCommandObservationPreparation.Alias)]
+    Task<GrainOperationReply> PrepareOriginalCommandAsync(string signedRequest, CancellationToken cancellationToken);
 }

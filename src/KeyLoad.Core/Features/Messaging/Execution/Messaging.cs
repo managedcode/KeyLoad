@@ -230,11 +230,14 @@ public sealed partial class DatabaseEngine
     /// <param name="lane">Queue lane identity.</param>
     /// <param name="id">Message identity.</param>
     /// <returns>Visible message details, or null when unavailable.</returns>
-    public MessageInspection? InspectMessage(string principalId, QueueLaneRef lane, string id) => Store.Read(view =>
+    public MessageInspection? InspectMessage(string principalId, QueueLaneRef lane, string id)
+        => Store.Read(view => InspectMessageRead(view, principalId, lane, id));
+
+    private MessageInspection? InspectMessageRead(IKeyValueView view, string principalId, QueueLaneRef lane, string id)
     {
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         Authorization.Require(principal, lane.Partition, lane.Queue, Capability.QueueInspect);
-        var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
+        var resource = BindAuthorizedReadResource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessagingMessageMetadataKeySpace, lane, id));
         if (metadata is null)
         {
@@ -283,5 +286,5 @@ public sealed partial class DatabaseEngine
         }
         return new MessageInspection(metadata, body is null ? null : Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _),
             body is null ? null : Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _));
-    });
+    }
 }

@@ -12,16 +12,20 @@ internal sealed class RequestCqrsNativeCommitCoordinator(TestDatabase owner) : I
     }
 
     public Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+        ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        sourcePlanningBudget?.Check();
         var original = owner.Database.CreateNativeOperation(kind, id, principalId, default, payload);
         return Task.FromResult(owner.SubmitIssuedEmbedded(original, cancellationToken));
     }
 
-    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken,
+        ReadExecutionBudget? sourcePlanningBudget = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        sourcePlanningBudget?.Check();
         var verified = owner.Database.VerifyOperationAuthority(operation);
         return Task.FromResult(owner.SubmitIssuedEmbedded(verified, cancellationToken));
     }

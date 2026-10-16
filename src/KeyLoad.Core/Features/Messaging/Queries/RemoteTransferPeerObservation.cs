@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -7,6 +8,18 @@ public sealed partial class DatabaseEngine
 {
     internal RemoteQueueTransferPeerResult ObserveRemoteTransferPeer(AdmittedRemoteTransferCall admitted,
         ReadExecutionBudget work)
+        => ObserveRemoteTransferPeerCore(admitted, work, bindResourceLifetime: false);
+
+    internal RemoteQueueTransferPeerResult ObserveRemoteTransferPeerBound(AdmittedRemoteTransferCall admitted,
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        work.AttachResourceLifetimeBinding(binding);
+        return ObserveRemoteTransferPeerCore(admitted, work, bindResourceLifetime: true);
+    }
+
+    private RemoteQueueTransferPeerResult ObserveRemoteTransferPeerCore(AdmittedRemoteTransferCall admitted,
+        ReadExecutionBudget work, bool bindResourceLifetime)
     {
         ArgumentNullException.ThrowIfNull(admitted);
         work.Check();
@@ -21,7 +34,7 @@ public sealed partial class DatabaseEngine
             var charged = work.CreateView(view);
             var principal = Principal(charged, proof.TechnicalPrincipalId, Clock.GetUtcNow());
             RequireRemoteTransferPeerOwner().Require(proof);
-            RequireRemoteTransferPeerAtView(charged, principal, proof);
+            RequireRemoteTransferPeerAtView(charged, principal, proof, bindResourceLifetime);
             if (call.Stage == RemoteQueueTransferPeerStage.Receipt)
             {
                 return new RemoteQueueTransferPeerResult(call.Stage, ReadRemoteTransferPeerReceipt(charged, principal, call), null);
@@ -36,6 +49,10 @@ public sealed partial class DatabaseEngine
         }
         work.ChargeBytes(bytes);
         work.Check();
+        if (bindResourceLifetime)
+        {
+            work.CheckResult(result);
+        }
         return result;
     }
 

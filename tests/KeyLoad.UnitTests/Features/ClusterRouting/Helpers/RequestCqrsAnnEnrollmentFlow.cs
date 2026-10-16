@@ -11,7 +11,7 @@ internal static class RequestCqrsAnnEnrollmentFlow
     private const long InitialCheckpoint = 0;
     private const string ProjectionBatchPurpose = "projection-batch";
 
-    internal static async Task<byte[]> ReserveAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task<byte[]> ReserveAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)
     {
         var configureId = AnnMaintenanceChildIdentity.Create(original.CommandId,
@@ -27,7 +27,7 @@ internal static class RequestCqrsAnnEnrollmentFlow
         {
             InitialAnnMaintenance = original
         };
-        var configured = await NativeTextMaintenanceCommit.ExecuteAsync<ProjectionConsumerInfo>(fixture.Database,
+        var configured = await RequestCqrsHostedMaintenanceData.ExecuteAsync<ProjectionConsumerInfo>(fixture.Database,
             OperationKind.ConfigureProjectionConsumer, configure, configureId, token);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
@@ -46,7 +46,7 @@ internal static class RequestCqrsAnnEnrollmentFlow
             ?? throw new InvalidOperationException());
     }
 
-    internal static async Task RequireSettledAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RequireSettledAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, AnnMaintenanceResult result, byte[] originalReservationBytes)
     {
         var current = Current(fixture, original);
@@ -93,7 +93,7 @@ internal static class RequestCqrsAnnEnrollmentFlow
         await Assert.That(page.Incarnation).IsEqualTo(fixture.Database.Store.Identity.Incarnation);
     }
 
-    private static ProjectionConsumerInfo Current(RequestCqrsClusterFixture fixture,
+    private static ProjectionConsumerInfo Current(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest request)
         => fixture.Database.Database.GetOutboxStatus(RequestCqrsAnnTestData.Principal,
             request.Consumer.Partition).Consumers.Single(row => row.Consumer == request.Consumer);

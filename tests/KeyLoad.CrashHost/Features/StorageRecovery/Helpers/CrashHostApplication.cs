@@ -75,7 +75,8 @@ internal static class CrashHostApplication
     private static async Task<bool> TryRunResourceCrashAsync(string[] args)
         => await global::KeyLoad.CrashHost.Features.ResourceExecution.D2ImportCrashScenario.TryRunAsync(args)
             || await global::KeyLoad.CrashHost.Features.ResourceExecution.D2InventoryCrashScenario.TryRunAsync(args)
-            || await global::KeyLoad.CrashHost.Features.BlobStorage.BlobCommitCutScenario.TryRunAsync(args);
+            || await global::KeyLoad.CrashHost.Features.BlobStorage.BlobCommitCutScenario.TryRunAsync(args)
+            || await global::KeyLoad.CrashHost.Features.AnalyticsStore.UserAnalyticsProcessScenario.TryRunAsync(args);
 
     private static Task RunScenarioAsync(string directory, ZoneTreeStore store,
         CanonicalCrashBoundary boundary, string mode) => mode switch

@@ -39,6 +39,10 @@ internal sealed partial class PartitionMovementGrainServiceClient : GrainService
         Action<PartitionMovementNativeObservationStage>? observeStage, CancellationToken token)
         => discovery.RequireCallerAsync(voter, address, token, observeStage);
 
+    internal Task RequireCallerAsync(RegisteredPhysicalOwnerV1 expectedOwner, string voter,
+        string address, CancellationToken token)
+        => discovery.RequireCallerAsync(expectedOwner, voter, address, token);
+
     internal Task<PartitionMovementGrainServiceDiscovery> DiscoverAsync(SiloAddress address, Guid nonce, CancellationToken token)
         => GetGrainService(address).DiscoverAsync(nonce, token);
 

@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
@@ -19,17 +20,17 @@ internal sealed class EventVectorNativeReceivingCall(OrleansNode node, Partition
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateEventVectorRead(requestId, actualPrincipal.Id,
             kind, payload, originalCall.ExpiresAt);
-        using var identity = node.OpenRequestContext(actualPrincipal, requestId, Guid.Empty, originalCancellationToken);
-        var reply = await node.ExecuteAsync(requestId, signed, command: false,
-            cancellationToken: originalCancellationToken).ConfigureAwait(false);
-        authority.Require(originalCall, originalCancellationToken);
-        if (reply.Error is { } failure)
-        {
-            throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable);
-        }
-        work.ChargeBytes(reply.Payload.Length);
-        return GrainNativePayload.Read<GrainValue>(reply.Payload).Value is T result ? result
-            : throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+        var result = await NativeLifetimeReadChildExecution.ExecuteAsync<object>(node, actualPrincipal,
+            requestId, signed, null, originalCancellationToken, work.RequireAttachedResourceLifetimeBinding(), reply =>
+            {
+                authority.Require(originalCall, originalCancellationToken);
+                if (reply.Error is { } failure)
+                {
+                    throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable);
+                }
+                work.ChargeBytes(reply.Payload.Length);
+            }).ConfigureAwait(false);
+        return result is T value ? value : throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
     }
 
     internal Task SubmitAsync(EventVectorRemoteCall originalCall, PrincipalRecord actualPrincipal,
@@ -47,10 +48,8 @@ internal sealed class EventVectorNativeReceivingCall(OrleansNode node, Partition
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateEventVectorPhase(requestId, operation,
             originalPhase.FirstExpiresAt);
-        using var identity = node.OpenRequestContext(actualPrincipal, requestId, operation.Id, originalCancellationToken);
-        boundary?.Begin(originalCancellationToken);
-        var reply = await node.ExecuteAsync(requestId, signed, command: true,
-            cancellationToken: originalCancellationToken).ConfigureAwait(false);
+        var reply = await EventVectorNativeChild.ExecuteAsync(node, actualPrincipal, requestId, operation.Id,
+            signed, work, boundary, originalCancellationToken).ConfigureAwait(false);
         authority.Require(originalCall, originalCancellationToken);
         if (reply.Error is { } failure)
         {

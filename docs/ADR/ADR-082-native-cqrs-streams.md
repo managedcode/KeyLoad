@@ -700,3 +700,47 @@ Native API correction: actual CommitProjectionBatchRequest.Effects Id3 is Immuta
 ## TASK-ANN-RETAINED-PHASE-007 — authenticated original result replay frame shape
 
 SOURCE60 R5 → owner tests R6 → external canonical18 are exact predecessors. Original fresh signed Build/Restore phase assertions remain unchanged. External retained replay first performs the SAME original authorized canonical ACK and then emits only Completed progress before returning the complete retained original result; AnnMaintenanceStreamShape explicitly admits only null→Completed for this branch. It must not falsely emit fresh Configure/Capture/Build/Publish activity. Only the existing retained original replay helper selects the closed replay assertion: exactly Started, successful Completed progress, successful Final; full RequestId/AnnPhase/safe message/null unrelated fields/EventType, exact sequence ordering, complete native result and unchanged canonical/native cuts. No absent, extra, malformed, wrong-owner or after-Final frame is accepted. Release stays its original ordinary two-frame shape. The same original two case declarations/UIDs/deadlines and native50 remain. This is test protocol conformance, not new product phases or acceptance PASS.
+
+
+## Current private request contract6 and capability contract2
+
+The current forward-only private application RPC contract is request version6
+and capability version2. The canonical constants are
+`GrainRoutingProtocol.RequestInterfaceVersion` and
+`GrainRoutingProtocol.CapabilityInterfaceVersion`; existing generated Orleans
+interfaces, discovery publication and exact-version admission use those constants.
+Earlier numbered contracts in this decision record the implementation history;
+they do not permit mixed current application contracts.
+
+This cohort introduces the ordinary-command original-outcome observation grant,
+opaque token and read/abort methods on the existing command grain, the private
+budgeted native-administrator authentication purpose, and authenticated private
+metadata accounting. Each operation retains its original bounded parent lifetime
+and separately reserved metadata/data grants. The source imports actual metadata
+read bytes, examined records and result-byte accounting into the same reserved
+grant. No reply can invent estimates, renew a deadline, borrow immutable prepared
+page data allowance or refund already performed work. The prepared phase20
+original operation, body, data grant, fingerprint and receipt remain unchanged.
+
+Deploy and qualify one homogeneous source/DLL/image cohort. The existing signed
+discovery contract must reject a reachable voter advertising another application
+version before application routing; the existing compatible-majority, readiness,
+bounded discovery-cache invalidation and identity checks remain required. A
+capability interface version does not replace discovery or RF3 authority. No
+new membership service, compatibility reader, protocol fallback or migration
+path is introduced. Existing public HTTP/SDK/MCP/SQL dialect versions, persisted
+formats, retained signed operations and frozen identity digests are unaffected.
+
+The observation token identifies the actual original node-local work owner. A
+logical grain reference or an activation migration alone does not establish that
+the original reader/abort frame has completed. Original-owner consumption and
+joined cleanup across cancellation, activation movement and shutdown remain
+required whole-operation gates. Missing or moved state fails closed; it is not
+evidence of a joined original frame.
+
+Source review is not compiler or execution evidence. Required qualification
+includes generated-interface compatibility, authenticated mixed-version refusal
+and recovery through the existing cohort tests, actual original-observation
+read/abort and cancellation joins, bounded native authentication/phase refusals
+and healthy follow-up, same-root cold recovery, and Aspire RF3 through the real
+.NET and official MCP clients. These gates remain OPEN for this prepared cohort.

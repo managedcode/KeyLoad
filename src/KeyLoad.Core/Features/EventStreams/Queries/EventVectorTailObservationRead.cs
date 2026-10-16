@@ -26,16 +26,18 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorTail);
             }
             Authorization.Require(principal, request.ControlPartition, request.Scope.Resource, Capability.SubscriptionsManage);
+            var lifetimeBinding = new EventVectorReadLifetimeBinding(this, bounded, work);
+            lifetimeBinding.Scope(request);
             _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
             var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
             _ = EventVectorCurrentSourceAuthorization.Require(bounded, principal, request,
-                ImmutableArray<EventVectorAuthorizationScope>.Empty, freshSourceWitness, admission);
+                ImmutableArray<EventVectorAuthorizationScope>.Empty, freshSourceWitness, admission, lifetimeBinding);
             var inventory = EventVectorMapInventory.Read(bounded, request.ControlPartition,
                 request.MapId, OperationLimitsOptions, cancellationToken);
             try
             {
                 var original = ReadEventVectorTailOwned(bounded, principal, request, inventory,
-                    freshSourceWitness, admission, cancellationToken);
+                    freshSourceWitness, admission, lifetimeBinding, cancellationToken);
                 RequireEventVectorOriginalPublicTokens(original.Phase, original.Outcome, principal);
                 var identity = Store.Identity;
                 var result = new EventVectorParentObservation(EventVectorTailVersion, principal.Id,
@@ -51,11 +53,11 @@ public sealed partial class DatabaseEngine
     private (Guid PublicCommandId, ReadOnlyMemory<byte> Phase, ReadOnlyMemory<byte> Outcome) ReadEventVectorTailOwned(
         IKeyValueView view, PrincipalRecord principal, EventFeedControlRequest request,
         EventVectorOwnedInventory inventory, ReadOnlyMemory<byte> freshSourceWitness,
-        EventVectorAdmissionPolicy admission, CancellationToken cancellationToken)
+        EventVectorAdmissionPolicy admission, EventVectorReadLifetimeBinding lifetimeBinding, CancellationToken cancellationToken)
     {
         var map = inventory.Header ?? throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
         RequireEventVectorTailCursor(map, Verify<EventVectorToken>(request.Cursor!), request, principal);
-        EventVectorParentInventoryAuthorization.Require(Authorization, principal, inventory, admission);
+        EventVectorParentInventoryAuthorization.Require(Authorization, principal, inventory, admission, lifetimeBinding);
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         var key = EventVectorKeys.Offer(map.ControlPartition, map.MapId);
         var row = inventory.PayloadRows.FirstOrDefault(item => item.Key.Span.SequenceEqual(key));
@@ -83,9 +85,9 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
         }
-        EventVectorParentScopes.Authorize(Authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
+        lifetimeBinding.Authorize(Authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
         _ = EventVectorCurrentSourceAuthorization.Require(view, principal, request,
-            index.OriginalAuthorizedSourceScopes, freshSourceWitness, admission);
+            index.OriginalAuthorizedSourceScopes, freshSourceWitness, admission, lifetimeBinding);
         admission.RequireEncodedBytes(index.OriginalNativeTerminalPhaseBytes.Length);
         var phase = NativeSerialization.Deserialize<EventVectorControlPhase>(index.OriginalNativeTerminalPhaseBytes.Span);
         if (phase.Action != EventVectorControlAction.Offer || phase.OriginalRequest.CommandId != offer.OriginalReadCommandId
@@ -95,7 +97,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
         }
         var original = EventVectorParentObservationRead.Read(view, Authorization, principal, phase.OriginalRequest,
-            Store.Identity.Incarnation, freshSourceWitness, OperationLimitsOptions, cancellationToken);
+            Store.Identity.Incarnation, freshSourceWitness, OperationLimitsOptions, cancellationToken, lifetimeBinding);
         if (original.Phase.IsEmpty || original.Outcome.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);

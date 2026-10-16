@@ -101,7 +101,8 @@ internal static class ReplicaSnapshotInstallBoundaryFlow
             SnapshotChunkBytes = checked((int)Math.Min(node.Configuration.SnapshotChunkBytes, bound))
         };
         var receiver = new ReplicaSnapshotStore(node.Canonical, node.Log,
-            RecoveryExecutionOptions.Configuration(configuration), RecoveryExecutionOptions.Replica());
+            RecoveryExecutionOptions.Configuration(configuration), RecoveryExecutionOptions.Replica(), replacementToken => node.Database.RequireNoRetirementForSnapshotReplacement(
+                    new(node.Database.OperationLimitsOptions, node.Database.EvaluationClock, replacementToken)));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => receiver.Begin(image));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
     }

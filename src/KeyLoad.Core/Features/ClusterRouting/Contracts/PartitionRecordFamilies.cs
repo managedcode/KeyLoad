@@ -7,6 +7,8 @@ internal static class PartitionRecordFamilies
 {
     internal const string Adjacency = "adjacency";
     internal const string AggregateSnapshot = "aggregate-snapshot-v1";
+    internal const string AnalyticsEvent = "analytics-event";
+    internal const string AnalyticsGeneration = "analytics-generation";
     internal const string BlobHead = "blob-head-v1";
     internal const string BlobPart = "blob-part-v1";
     internal const string BlobPartMetadata = "blob-partmeta-v1";
@@ -98,6 +100,8 @@ internal static class PartitionRecordFamilies
     [
         Adjacency,
         AggregateSnapshot,
+        AnalyticsEvent,
+        AnalyticsGeneration,
         BlobHead,
         BlobPart,
         BlobPartMetadata,

@@ -10,9 +10,6 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Caller cancellation; CALL cancellation can leave an unknown write outcome.</param>
     /// <returns>The canonical selected result or a typed problem.</returns>
     public Task<Result<JsonElement>> ExecuteSqlAsync(SqlOperationRequest request, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        var possibleWrite = SqlWriteClassifier.MayWrite(request.Sql, ExecutionOptions, cancellationToken);
-        return Send<JsonElement>(SqlOperationProtocol.Route, request, possibleWrite, null, cancellationToken);
-    }
+        => Send<JsonElement>(SqlOperationProtocol.Route, request,
+            SqlWriteClassifier.MayWriteRequest(request, ExecutionOptions, cancellationToken), null, cancellationToken);
 }

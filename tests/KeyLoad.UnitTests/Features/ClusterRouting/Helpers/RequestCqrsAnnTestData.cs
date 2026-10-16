@@ -37,7 +37,7 @@ internal static class RequestCqrsAnnTestData
         AnnMaintenancePhase.Verify, AnnMaintenancePhase.NativeIndex, AnnMaintenancePhase.Publish,
         AnnMaintenancePhase.Checkpoint, AnnMaintenancePhase.Completed];
 
-    internal static async Task<AnnMaintenanceRequest> SeedAsync(RequestCqrsClusterFixture fixture, CancellationToken token)
+    internal static async Task<AnnMaintenanceRequest> SeedAsync(RequestCqrsHostedRuntimeFixture fixture, CancellationToken token)
     {
         var database = fixture.Database;
         database.Configure(Collection, ResourceKind.Collection);
@@ -46,7 +46,7 @@ internal static class RequestCqrsAnnTestData
             [new PutDocument(Collection, First, FirstJson), new PutVector(Collection, First, Field, [1, 0, 0], Space, OriginalRevision),
              new PutDocument(Collection, Second, FirstJson), new PutVector(Collection, Second, Field, [0, 1, 0], Space, OriginalRevision)]);
         var journal = database.ReadJournalCut();
-        var receipt = await NativeTextMaintenanceCommit.ExecuteAsync<CommitReceipt>(database, OperationKind.Batch, command, id, token);
+        var receipt = await RequestCqrsHostedMaintenanceData.ExecuteAsync<CommitReceipt>(database, OperationKind.Batch, command, id, token);
         await RequestCqrsAnnAssertions.SeedReceiptAsync(database, command, receipt, journal.LastIndex + OneStep);
         var placement = database.Database.ReadAtomicPartitionPlacement(Principal, new(Version, database.Partition));
         return new(Guid.NewGuid(), new(database.Partition, Consumer), Collection, Field, Space, Generation,
@@ -57,7 +57,7 @@ internal static class RequestCqrsAnnTestData
         };
     }
 
-    internal static async Task ChangeAsync(RequestCqrsClusterFixture fixture, CancellationToken token)
+    internal static async Task ChangeAsync(RequestCqrsHostedRuntimeFixture fixture, CancellationToken token)
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, fixture.Database.Partition,
@@ -65,7 +65,7 @@ internal static class RequestCqrsAnnTestData
              new PutVector(Collection, First, Field, [0, 0, 1], Space, ChangedRevision),
              new DeleteDocument(Collection, Second, OriginalRevision)]);
         var journal = fixture.Database.ReadJournalCut();
-        var receipt = await NativeTextMaintenanceCommit.ExecuteAsync<CommitReceipt>(fixture.Database,
+        var receipt = await RequestCqrsHostedMaintenanceData.ExecuteAsync<CommitReceipt>(fixture.Database,
             OperationKind.Batch, command, id, token);
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         MutationReceipt[] expected = [new(PutDocumentKind, Collection, First, ChangedRevision),

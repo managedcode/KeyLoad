@@ -90,7 +90,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         long recoveredCut;
         try
         {
-            Snapshots.Recover();
+            Snapshots.Recover(lifetime.Token);
             if (Database.LastApplied > Log.State.CommittedIndex)
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
@@ -175,7 +175,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         try
         {
             Check();
-            var offset = await Task.Run(() => ReplicaCanonicalApply.Begin(Snapshots, snapshot), cancellationToken)
+            var offset = await Task.Run(() => ReplicaCanonicalApply.Begin(Snapshots, snapshot, cancellationToken), cancellationToken)
                 .ConfigureAwait(false);
             completedCut = Database.LastApplied;
             completed = true;
@@ -222,7 +222,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         try
         {
             Check();
-            snapshot = await Task.Run(() => Snapshots.Complete(transferId), cancellationToken).ConfigureAwait(false);
+            snapshot = await Task.Run(() => Snapshots.Complete(transferId, cancellationToken), cancellationToken).ConfigureAwait(false);
             installedCut = Database.LastApplied;
             work.Writer.TryWrite(true);
         }

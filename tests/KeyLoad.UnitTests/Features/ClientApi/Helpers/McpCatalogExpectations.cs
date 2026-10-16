@@ -124,12 +124,15 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
 
-    internal const int Count = 99;
+    internal const int Count = 102;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
     {
         get;
     } =
     [
+        ("keyload_analytics_read", "/v1/analytics/read", GrainReadKind.AnalyticsEvents, null),
+        ("keyload_analytics_aggregate", "/v1/analytics/aggregate", GrainReadKind.AnalyticsAggregate, null),
+        ("keyload_tables_drop", "/v1/admin/tables/drop", null, OperationKind.DropTable),
         .. McpRemoteGraphCatalogExpectations.Entries,
         .. McpPlacementCatalogExpectations.Entries,
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,

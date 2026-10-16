@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
@@ -9,9 +10,17 @@ internal static class PartitionQueryLifetimeLeafExecution
     private const string Invalid = "The partition query lifetime request is invalid.";
     private const string OwnerChanged = "The partition query receiving owner changed.";
 
+    internal static PartitionQueryLeafResultV1 ExecuteBound(QueryEngine engine, string principalId,
+        PartitionQueryOwnedLeafRequestV2 request, PhysicalShardRecord actualOwner, TimeProvider clock,
+        DateTimeOffset originalExpiry, CancellationToken token, IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        return Execute(engine, principalId, request, actualOwner, clock, originalExpiry, token, binding);
+    }
+
     internal static PartitionQueryLeafResultV1 Execute(QueryEngine engine, string principalId,
         PartitionQueryOwnedLeafRequestV2 request, PhysicalShardRecord actualOwner, TimeProvider clock,
-        DateTimeOffset originalExpiry, CancellationToken token)
+        DateTimeOffset originalExpiry, CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
         if (request is null || request.Original is null || request.Definition is null || request.Coverage is null
@@ -29,6 +38,10 @@ internal static class PartitionQueryLifetimeLeafExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChanged);
         }
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         budget.ConstrainLifetime(originalExpiry);
         var normalized = QueryValidation.Normalize(original.Plan.Request, database.Limits, engine.Execution);

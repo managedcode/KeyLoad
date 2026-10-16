@@ -40,7 +40,8 @@ internal static class PartitionHostPendingSnapshotStaging
         source.Log.Append([new(1, PartitionHostRecoveryFixture.SnapshotTerm, null), new(PartitionHostRecoveryFixture.SnapshotCut, PartitionHostRecoveryFixture.SnapshotTerm, null)]);
         source.Log.Commit(PartitionHostRecoveryFixture.SnapshotCut);
         fixture.RecordPending(source.Snapshots.Create(PartitionHostRecoveryFixture.SnapshotCut, PartitionHostRecoveryFixture.SnapshotTerm));
-        var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, UnitExecutionOptions.ReplicaConfiguration(target.Configuration), UnitExecutionOptions.ReplicaExecution(), boundary =>
+        var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, UnitExecutionOptions.ReplicaConfiguration(target.Configuration), UnitExecutionOptions.ReplicaExecution(), replacementToken => target.Database.RequireNoRetirementForSnapshotReplacement(
+                    new(target.Database.OperationLimitsOptions, target.Database.EvaluationClock, replacementToken)), boundary =>
         {
             if (boundary == ReplicaCrashBoundary.SnapshotVerified)
             {

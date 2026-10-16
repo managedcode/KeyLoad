@@ -26,8 +26,14 @@ public sealed partial class DatabaseEngine
         int maxDepth = DefaultTraversalDepth, int maxVertices = DefaultTraversalVertices, int maxEdges = DefaultTraversalEdges, string[]? labels = null,
         CancellationToken cancellationToken = default)
     {
-        const string InvalidTraversalBudget = "The graph traversal budget is invalid.";
         var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        return TraverseRead(principalId, partition, graph, start, maxDepth, maxVertices, maxEdges, labels, budget);
+    }
+
+    private GraphTraversal TraverseRead(string principalId, PartitionRef partition, string graph, EntityRef start,
+        int maxDepth, int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget)
+    {
+        const string InvalidTraversalBudget = "The graph traversal budget is invalid.";
         budget.Check();
         return Store.Read(view =>
         {
@@ -37,9 +43,10 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidTraversalBudget);
             }
-            var principal = Principal(view, principalId, Clock.GetUtcNow());
+            var metadata = budget.CreateView(view);
+            var principal = Principal(metadata, principalId, Clock.GetUtcNow());
             Authorization.Require(principal, partition, graph, Capability.GraphRead);
-            var resource = Resource(view, partition, graph, ResourceKind.Graph);
+            var resource = BindAuthorizedReadResource(metadata, partition, graph, ResourceKind.Graph);
             if (labels is { Length: > EmptyTraversalLabels })
             {
                 Authorization.RequireFieldUse(principal, resource, LabelField);
@@ -48,5 +55,4 @@ public sealed partial class DatabaseEngine
                 maxDepth, maxVertices, maxEdges, labels, budget).Read();
         });
     }
-
 }

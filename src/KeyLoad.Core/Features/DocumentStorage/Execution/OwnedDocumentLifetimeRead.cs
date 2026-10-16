@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
@@ -20,7 +21,7 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentFenceChanged);
             }
             if (frame.Version != DocumentLifetimeVersion || frame.QueryId == Guid.Empty
-                || frame.ExpiresAt <= EvaluationClock.GetUtcNow() || frame.Reference != request.Request.Reference
+                || frame.ExpiresAt <= EvaluationClock.GetUtcNow()
                 || frame.Route.PrincipalId != principal.Id || frame.Route.Tenant != principal.TenantId
                 || frame.Route.PolicyEpoch != frame.Principal.PolicyEpoch || frame.Resource.Name != frame.Reference.Collection
                 || frame.Resource.Kind != ResourceKind.Collection || frame.Resource.TransactionDomainId != frame.Reference.Partition.TransactionDomainId
@@ -30,6 +31,8 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
             }
             PartitionControlLifetimeCoverage.Require(frame.Coverage, frame.Reference.Partition, [frame.Resource], Limits.MaxBatchBytes);
+            var sourceLifetime = frame.Coverage.Lifetimes.Single();
+            EntityReferenceLifetime.RequireAdmitted(frame.Reference, request.Request.Reference, sourceLifetime);
             var placement = ReadPlacementWitness(charged, frame.Reference.Partition);
             if (placement.PhysicalShardId != request.Owner.PhysicalShardId || placement.Incarnation != request.Owner.Incarnation
                 || placement.PlacementEpoch != request.Owner.PlacementEpoch || !placement.VoterIds.SequenceEqual(request.Owner.VoterIds, StringComparer.Ordinal)
@@ -40,13 +43,15 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, DocumentOwnerNodeMismatch);
             }
-            var targetResource = Resource(charged, frame.Reference.Partition, frame.Reference.Collection, ResourceKind.Collection);
+            var targetResource = BindAuthorizedReadResource(charged, frame.Reference.Partition, frame.Reference.Collection, ResourceKind.Collection);
             Authorization.Require(frame.Principal, frame.Reference.Partition, frame.Reference.Collection, Capability.DocumentsRead);
+            work.CaptureAuthenticatedResourceLifetimes(this, charged, frame.Coverage, [frame.Resource]);
             if (request.Request.MinimumToken is not null)
             {
                 ValidateDocumentSessionToken(charged, frame.Reference.Partition, request.Request.MinimumToken);
             }
             var record = charged.GetRecord<DocumentRecord>(DocumentKey(frame.Reference.Partition, frame.Reference.Collection, frame.Reference.Id));
+            EntityReferenceLifetime.RequireDocument(record, sourceLifetime);
             var document = record is null || record.Deleted || !Authorization.CanReadRow(principal, record.Access)
                 || !Authorization.CanReadRow(frame.Principal, record.Access) ? null
                 : ProjectWithAuthorityIntersection(frame.Principal, frame.Resource, principal, targetResource, record).Value;

@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -19,6 +20,7 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
     private readonly ReplicaSiloDiscoveryState local;
     private readonly TimeProvider clock;
     private readonly ILogger<RemoteGraphNativeRuntime> logger;
+    private readonly Func<NativeRequestWorkOwner> requestWork;
     private readonly RemoteGraphNativeResources resources;
     private readonly ReplicaDiscoveryLifetime lifetime;
     private readonly RemoteGraphNativeAdmission identity;
@@ -28,7 +30,7 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
     public RemoteGraphNativeRuntime(PartitionHost partition, IOptions<NodeOptions> options,
         IOptions<OrleansMembershipOptions> membershipOptions, IOptions<GrainRoutingOptions> routing,
         ISiloStatusOracle oracle, ReplicaSiloDiscoveryState local, TimeProvider clock,
-        ILogger<RemoteGraphNativeRuntime> logger)
+        ILogger<RemoteGraphNativeRuntime> logger, Func<NativeRequestWorkOwner> requestWork)
     {
         this.partition = partition;
         this.options = options.Value;
@@ -37,6 +39,7 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
         this.local = local;
         this.clock = clock;
         this.logger = logger;
+        this.requestWork = requestWork;
         membershipOptions.Value.Validate();
         identity = new(partition, options, membershipOptions, oracle, local, clock);
         resources = new(clock, membershipOptions);
@@ -90,8 +93,6 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             var bound = remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime;
             using var deadline = new CancellationTokenSource(bound, clock);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, operation.ShutdownToken, deadline.Token);
-            var work = partition.Database.CreateRemoteGraphReadWork(original.ExpiresAt, linked.Token);
-            work.ChargeBytes(original.Payload.Length);
             var request = original with
             {
                 Payload = original.Payload.ToArray()
@@ -102,7 +103,8 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
                 throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
             }
             using var targetMac = RemoteGraphNativeMac.Create(options, partition, request.DestinationOwner);
-            return await ExecuteAdmittedAsync(request, targetMac, work, linked.Token).ConfigureAwait(false);
+            return await RemoteGraphNativeWorkExecution.ExecuteAsync(requestWork(), partition.Database, request,
+                linked.Token, (binding, token) => ExecuteBoundAsync(request, targetMac, token, binding)).ConfigureAwait(false);
         }
         finally
         {
@@ -110,8 +112,18 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
         }
     }
 
+    private Task<RemoteGraphNativeReplyV1> ExecuteBoundAsync(RemoteGraphNativeRequestV1 request,
+        PartitionMovementMac targetMac, CancellationToken token, IResourceLifetimeWorkBinding binding)
+    {
+        var work = partition.Database.CreateRemoteGraphReadWork(request.ExpiresAt, token);
+        work.AttachResourceLifetimeBinding(binding);
+        work.ChargeBytes(request.Payload.Length);
+        return ExecuteAdmittedAsync(request, targetMac, work, token, binding);
+    }
+
     private async Task<RemoteGraphNativeReplyV1> ExecuteAdmittedAsync(RemoteGraphNativeRequestV1 request,
-        PartitionMovementMac targetMac, ReadExecutionBudget work, CancellationToken token)
+        PartitionMovementMac targetMac, ReadExecutionBudget work, CancellationToken token,
+        IResourceLifetimeWorkBinding binding)
     {
         var boundary = new RemoteGraphEffectBoundary();
         RemoteGraphNativeReplyV1 reply;
@@ -125,7 +137,7 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             }
             var owner = Volatile.Read(ref runtime)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
-            var payload = await owner.ExecuteNativeAsync(request, boundary, work, token).ConfigureAwait(false);
+            var payload = await owner.ExecuteNativeAsync(request, boundary, work, token, binding).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
             identity.RequireCurrent(request);
             work.Check();

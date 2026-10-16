@@ -15,6 +15,7 @@ internal static class ResourceLifetimeGrantRefusals
 
     internal static async Task ExecuteAsync(ResourceLifetimeGrantState state, CancellationToken token)
     {
+        await ResourceLifetimeGrantAdmissionDenial.ExecuteAsync(state, token);
         await ResourceLifetimeGrantNativeFormat.ExecuteAsync(state, token);
         await ResourceLifetimeGrantTransportRefusals.LegacyTransportAsync(state, token);
         await ResourceLifetimeGrantStages.MetadataFenceAsync(state, token);

@@ -30,7 +30,7 @@ public sealed partial class DatabaseEngine
         RequireTransferAdministrator(principal);
         RequireTransferCapabilities(principal, lane, Capability.QueueInspect);
         RequireTransferCapabilities(principal, lane, Capability.QueuePublish);
-        var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
+        var resource = BindAuthorizedReadResource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, lane, resource);
         RequireTransferPublisher(principal, lane, resource);
         if (request.Purpose == RemoteTransferRepairProtocol.ReadPurpose)

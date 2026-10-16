@@ -11,6 +11,7 @@ internal static class GrainPartitionResolver
             => GrainRemoteGraphCommand.Resolve(request),
         OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => GrainEventVectorSourceCommand.Resolve(request),
         OperationKind.PartitionMovementPhase => GrainPartitionMovementCommand.Resolve(request),
+        OperationKind.ResourceRetirementPhase => GrainResourceRetirementCommand.Resolve(request),
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
         OperationKind.Bm25CorpusPublicationPhase => GrainBm25CorpusPublicationCommand.Resolve(request),
         OperationKind.PlacementIntentPhase => GrainPlacementIntentCommand.Resolve(request),
@@ -39,7 +40,7 @@ internal static class GrainPartitionResolver
         OperationKind.AbortBlobUpload => Route<AbortBlobUploadRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.DeleteBlob => Route<DeleteBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.ReclaimBlob => Route<ReclaimBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
-        OperationKind.ConfigureResource or OperationKind.CreateTable or OperationKind.SetDispatch or OperationKind.BootstrapPhysicalShardCatalog
+        OperationKind.ConfigureResource or OperationKind.CreateTable or OperationKind.DropTable or OperationKind.SetDispatch or OperationKind.BootstrapPhysicalShardCatalog
             or OperationKind.RegisterPhysicalOwner or OperationKind.BindAtomicPartitionPlacement or OperationKind.RuntimeJournal
             => GrainRoutingProtocol.CatalogPartition,
         OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey => GrainRoutingProtocol.AuthorizationPartition,

@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,8 +11,9 @@ internal static class AnnProjectionLifetimeObservationRead
 {
     internal static async Task<AnnProjectionObservationResult> ExecuteAsync(DatabaseEngine database,
         IServiceProvider services, TimeProvider clock, PrincipalRecord principal,
-        DecodedGrainRequest original, CancellationToken cancellationToken)
+        DecodedGrainRequest original, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         cancellationToken.ThrowIfCancellationRequested();
         AnnProjectionLifetimeObservationScope.Validate(original.Envelope);
         if (!services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value.EnableApproximateSearch)
@@ -21,34 +23,37 @@ internal static class AnnProjectionLifetimeObservationRead
         var wrapped = GrainNativePayload.Read<AnnProjectionObservationRequestV2>(original.Payload);
         var metadata = Require(wrapped, principal, database, clock);
         var request = wrapped.Original;
-        var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, cancellationToken);
+        var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
+        work.AttachResourceLifetimeBinding(binding);
         work.ConstrainLifetime(original.Envelope.ExpiresAt);
         work.ConstrainNativeWork(request.MaximumReadBytes, request.MaximumRecords);
         work.ChargeBytes(original.Payload.Length);
-        var admitted = AnnProjectionObservationRead.RequireScope(database, services, principal, request, work, metadata);
+        var admitted = AnnProjectionObservationRead.RequireScope(database, services, principal, request, work, metadata, binding);
         var search = services.GetRequiredService<SearchEngine>();
         WaitForAnnIndexResult? waited = null;
         AnnSearchPage? approximate = null;
         if (request.Kind == AnnProjectionObservationKind.Wait)
         {
-            waited = await search.WaitForAnnIndexAsync(principal.Id, request.Wait!, work, metadata, cancellationToken)
+            waited = await search.WaitForAnnIndexBoundAsync(principal.Id, request.Wait!, work, metadata, cancellationToken, binding)
                 .ConfigureAwait(true);
         }
         else if (request.Kind == AnnProjectionObservationKind.Approximate)
         {
-            approximate = await search.ApproximateSearchAsync(principal.Id, request.Approximate!, work, metadata, cancellationToken)
+            approximate = await search.ApproximateSearchBoundAsync(principal.Id, request.Approximate!, work, metadata, cancellationToken, binding)
                 .ConfigureAwait(true);
         }
         var current = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         if (current.Id != principal.Id || current.PolicyEpoch != principal.PolicyEpoch
-            || AnnProjectionObservationRead.RequireScope(database, services, current, request, work, metadata) != admitted)
+            || AnnProjectionObservationRead.RequireScope(database, services, current, request, work, metadata, binding) != admitted)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
         }
         var actual = database.Store.Identity;
         work.Check();
-        return new(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, waited,
+        var result = new AnnProjectionObservationResult(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, waited,
             work.ReadBytes, work.ConstrainedNativeRecords, approximate);
+        work.CheckResult(result);
+        return result;
     }
 
     private static AnnReadLifetimeMetadata Require(AnnProjectionObservationRequestV2 request,

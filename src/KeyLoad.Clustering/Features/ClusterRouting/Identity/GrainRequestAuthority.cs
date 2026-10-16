@@ -31,6 +31,40 @@ internal static class GrainRequestAuthority
         return principal;
     }
 
+    internal static PrincipalRecord Reload(DatabaseEngine database, string principalId, TimeProvider clock,
+        ReadExecutionBudget work)
+    {
+        try
+        {
+            work.Check();
+            RuntimeJournalIdentity.RequirePublicCredential(principalId);
+            var principal = database.Store.Read(raw => database.Principal(work.CreateView(raw), principalId, clock.GetUtcNow()));
+            work.Check();
+            return principal;
+        }
+        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw;
+        }
+    }
+
+    internal static PrincipalRecord ReloadForRequest(DatabaseEngine database, GrainRequestEnvelope envelope,
+        TimeProvider clock, ReadExecutionBudget work)
+    {
+        if (envelope.Purpose != GrainNativeContracts.RuntimeJournalPurpose
+            || envelope.PrincipalId != RuntimeJournalIdentity.ProtectedPrincipalId)
+        {
+            return Reload(database, envelope.PrincipalId!, clock, work);
+        }
+        work.Check();
+        var principal = database.Store.Read(raw => database.Principal(work.CreateView(raw),
+            envelope.PrincipalId, clock.GetUtcNow()));
+        RuntimeJournalIdentity.RequireProtected(principal);
+        work.Check();
+        return principal;
+    }
+
     internal static PrincipalRecord Authenticate(DatabaseEngine database, ReadOnlyMemory<byte> payload, TimeProvider clock)
     {
         try

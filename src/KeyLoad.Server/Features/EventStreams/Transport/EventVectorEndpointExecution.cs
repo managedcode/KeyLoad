@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -18,7 +19,8 @@ internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver rec
         => ExecuteAsync(originalBytes, originalSignature, null, originalCancellationToken);
 
     internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
-        ReadOnlyMemory<byte> originalBytes, string originalSignature, RemoteModelNativeEffectBoundary? boundary, CancellationToken originalCancellationToken)
+        ReadOnlyMemory<byte> originalBytes, string originalSignature, RemoteModelNativeEffectBoundary? boundary, CancellationToken originalCancellationToken,
+        IResourceLifetimeWorkBinding? binding = null)
     {
         var failures = new List<Exception>();
         RemoteDocumentWorkOwner.Operation? operation = null;
@@ -29,7 +31,7 @@ internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver rec
             {
                 operation = originalWork.Acquire(Guid.NewGuid());
                 result = await ExecuteOwnedAsync(originalBytes, originalSignature, operation, boundary,
-                    originalCancellationToken).ConfigureAwait(false);
+                    RemoteModelNativeDispatch.RequireBinding(binding), originalCancellationToken).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         finally
@@ -50,7 +52,7 @@ internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver rec
     private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteOwnedAsync(
         ReadOnlyMemory<byte> originalBytes, string originalSignature,
         RemoteDocumentWorkOwner.Operation operation, RemoteModelNativeEffectBoundary? boundary,
-        CancellationToken originalCancellationToken)
+        IResourceLifetimeWorkBinding binding, CancellationToken originalCancellationToken)
     {
         routing.Value.Validate();
         using var deadline = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
@@ -69,7 +71,7 @@ internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver rec
             using var expiry = new CancellationTokenSource(remaining, clock);
             using var original = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, expiry.Token);
             return await EventVectorEndpointReply.CreateAsync(admitted, receiver, authority,
-                originalReplyMac, encoding, boundary, original.Token).ConfigureAwait(false);
+                originalReplyMac, encoding, boundary, original.Token, binding).ConfigureAwait(false);
         }
         finally
         {

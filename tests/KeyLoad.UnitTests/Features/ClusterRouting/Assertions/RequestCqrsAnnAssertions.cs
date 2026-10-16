@@ -8,14 +8,14 @@ internal static class RequestCqrsAnnAssertions
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 
-    internal static Task SeedReceiptAsync(TestDatabase database, CommandRequest command, CommitReceipt receipt, long position)
+    internal static Task SeedReceiptAsync(RequestCqrsHostedDatabase database, CommandRequest command, CommitReceipt receipt, long position)
         => ReceiptAsync(database, command, receipt, position,
             [new(RequestCqrsAnnTestData.PutDocumentKind, RequestCqrsAnnTestData.Collection, RequestCqrsAnnTestData.First, RequestCqrsAnnTestData.OriginalRevision),
              new(RequestCqrsAnnTestData.PutVectorKind, RequestCqrsAnnTestData.Collection, RequestCqrsAnnTestData.First, RequestCqrsAnnTestData.OriginalRevision),
              new(RequestCqrsAnnTestData.PutDocumentKind, RequestCqrsAnnTestData.Collection, RequestCqrsAnnTestData.Second, RequestCqrsAnnTestData.OriginalRevision),
              new(RequestCqrsAnnTestData.PutVectorKind, RequestCqrsAnnTestData.Collection, RequestCqrsAnnTestData.Second, RequestCqrsAnnTestData.OriginalRevision)]);
 
-    internal static async Task ReceiptAsync(TestDatabase database, CommandRequest command,
+    internal static async Task ReceiptAsync(RequestCqrsHostedDatabase database, CommandRequest command,
         CommitReceipt receipt, long position, MutationReceipt[] mutations)
     {
         var placement = database.Database.ReadAtomicPartitionPlacement(RequestCqrsAnnTestData.Principal,

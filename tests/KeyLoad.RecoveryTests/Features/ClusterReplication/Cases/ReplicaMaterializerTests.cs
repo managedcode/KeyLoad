@@ -95,7 +95,8 @@ internal sealed class ReplicaMaterializerTests
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             Log = new(replica, RecoveryExecutionOptions.Configuration(Configuration));
             Database = new(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-            Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
+            Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica(), replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken))), RecoveryExecutionOptions.Replica());
         }
 
         public async ValueTask DisposeAsync()

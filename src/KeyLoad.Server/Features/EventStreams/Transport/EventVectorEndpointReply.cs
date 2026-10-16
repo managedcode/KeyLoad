@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -16,7 +17,8 @@ internal static class EventVectorEndpointReply
     internal static async Task<(ReadOnlyMemory<byte> Payload, string Signature)> CreateAsync(
         EventVectorAdmittedCall admitted, EventVectorRemoteReceiver receiver, EventVectorRemoteCallValidation authority,
         RemoteDocumentMac originalReplyMac, EventVectorRemoteEncoding encoding,
-        RemoteModelNativeEffectBoundary? boundary, CancellationToken originalCancellationToken)
+        RemoteModelNativeEffectBoundary? boundary, CancellationToken originalCancellationToken,
+        IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(admitted);
         ArgumentNullException.ThrowIfNull(receiver);
@@ -24,7 +26,7 @@ internal static class EventVectorEndpointReply
         ArgumentNullException.ThrowIfNull(originalReplyMac);
         ArgumentNullException.ThrowIfNull(encoding);
         var call = admitted.Original.Call;
-        var work = receiver.CreateWork(admitted, originalCancellationToken);
+        var work = receiver.CreateWork(admitted, originalCancellationToken, RemoteModelNativeDispatch.RequireBinding(binding));
         var result = ReadOnlyMemory<byte>.Empty;
         ErrorCode? errorCode = null;
         try

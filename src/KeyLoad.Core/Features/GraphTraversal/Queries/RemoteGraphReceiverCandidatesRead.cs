@@ -27,8 +27,11 @@ public sealed partial class DatabaseEngine
     {
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
         Authorization.Require(principal, request.Target.Partition, request.Graph, Capability.GraphRead);
-        var graph = Resource(view, request.Target.Partition, request.Graph, ResourceKind.Graph);
-        _ = VisibleVertex(view, principal, request.Target);
+        var graph = BindAuthorizedReadResource(view, request.Target.Partition, request.Graph, ResourceKind.Graph);
+        var admitted = request with
+        {
+            Target = VisibleVertex(view, principal, request.Target).Reference
+        };
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
         var cut = CaptureRemoteGraphOwnerCut(view, principal, request.Target.Partition,
@@ -41,7 +44,7 @@ public sealed partial class DatabaseEngine
         {
             work.Check();
             var state = GraphCrossPartitionRecords.Decode<RemoteGraphReceiverStateV1>(bytes);
-            RequireRemoteGraphIncomingState(view, request, state, work);
+            RequireRemoteGraphIncomingState(view, admitted, state, work);
             if (!key.SequenceEqual(RemoteGraphKeys.Receiver(request.Target, request.Graph,
                 state.Content.SourcePartition, state.Content.EdgeId)))
             {

@@ -16,24 +16,32 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     PhysicalShardRecord physicalOwner,
     Func<INativeAnnMaintenance> borrowNative, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal,
-    IOptions<DatabaseLimits> limits)
+    IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal)
     : global::Orleans.Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
 {
     private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly AnnProjectionJobStateOwner owner = new(state, journal, database.Limits.MaxBatchBytes);
-    private readonly AnnProjectionJobExecution execution = new(database, borrowNative(), limits, clock,
+    private readonly AnnProjectionJobExecution execution = new(database, borrowNative(),
         new(codec, services, clock, serializer, routing));
 
-    public async Task ScheduleAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId, CancellationToken cancellationToken)
+    public Task ScheduleAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId, CancellationToken cancellationToken)
+        => AnnProjectionJobOperation.RunAsync(services, database, cancellationToken,
+            (binding) => ScheduleCoreAsync(consumer, generation, nodeId, binding));
+
+    private async Task ScheduleCoreAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId,
+        NativeCapabilityWorkLifetime binding)
     {
         RequireKey(consumer, generation, nodeId);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, runtime.SchedulingToken);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
+        var expiry = clock.GetUtcNow() + routing.Value.ExecutionLifetime;
         using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        budget.ConstrainLifetime(expiry);
+        budget.AttachResourceLifetimeBinding(binding);
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-        var work = execution.Read(consumer, generation, token);
+        var work = execution.Read(consumer, generation, budget, binding);
         RequireHost(work.Placement);
         if (work.NodeId != nodeId)
         {
@@ -42,21 +50,21 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         var current = owner.Current;
         if (current is null)
         {
-            current = await execution.InitializeAsync(work, token).ConfigureAwait(true);
+            current = await execution.InitializeAsync(work, budget, token, binding).ConfigureAwait(true);
             if (current is null)
             {
                 return;
             }
-            await WriteAsync(current, token).ConfigureAwait(true);
+            await WriteAsync(current, token, binding).ConfigureAwait(true);
         }
-        var next = await execution.NextAsync(current, work, token).ConfigureAwait(true);
+        var next = await execution.NextAsync(current, work, budget, token, binding).ConfigureAwait(true);
         if (next is null)
         {
             return;
         }
         if (next != current)
         {
-            await WriteAsync(next, token).ConfigureAwait(true);
+            await WriteAsync(next, token, binding).ConfigureAwait(true);
             current = next;
         }
         if (current.JobId is not null)
@@ -65,19 +73,22 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         }
         var request = current.PendingRequest
             ?? throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid);
+        binding.OriginalProducer.AdmitPublication();
         var scheduled = await jobs.ScheduleJobAsync(AnnProjectionJobMetadata.Create(this.GetGrainId(),
             clock.GetUtcNow(), request, journal.Value), token).ConfigureAwait(true);
         await WriteAsync(current with
         {
             JobId = scheduled.Id
-        }, token).ConfigureAwait(true);
+        }, token, binding).ConfigureAwait(true);
     }
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
         => RequestContextHelper.RunWithCurrentCallerAsync(typeof(AnnProjectionCoordinatorGrain).FullName!,
-            nameof(IDurableJobHandler.ExecuteJobAsync), () => ExecuteOriginalAsync(context, cancellationToken));
+            nameof(IDurableJobHandler.ExecuteJobAsync), () => AnnProjectionJobOperation.RunAsync(
+                services, database, cancellationToken,
+                (binding) => ExecuteOriginalAsync(context, binding)));
 
-    private async Task ExecuteOriginalAsync(IJobRunContext context, CancellationToken cancellationToken)
+    private async Task ExecuteOriginalAsync(IJobRunContext context, NativeCapabilityWorkLifetime binding)
     {
         owner.RequireOpen();
         var original = owner.Current
@@ -87,15 +98,19 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         {
             return;
         }
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, runtime.SchedulingToken);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
+        var expiry = clock.GetUtcNow() + routing.Value.ExecutionLifetime;
         using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        budget.ConstrainLifetime(expiry);
+        budget.AttachResourceLifetimeBinding(binding);
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         AnnMaintenanceResult result;
         try
         {
-            result = await execution.ExecuteAsync(GrainFactory, original, token).ConfigureAwait(true);
+            result = await execution.ExecuteAsync(GrainFactory, original, budget, expiry, token, binding).ConfigureAwait(true);
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated
             or ErrorCode.TokenInvalidated)
@@ -106,7 +121,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
                 {
                     JobId = context.Job.Id,
                     BlockedError = failure.Code
-                }, token)
+                }, token, binding)
                     .ConfigureAwait(true);
             }
             catch (Exception cleanup) { throw new AggregateException(failure, cleanup); }
@@ -118,13 +133,15 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             LastRequest = original.PendingRequest,
             PendingRequest = null,
             LastResult = result
-        }, token).ConfigureAwait(true);
+        }, token, binding).ConfigureAwait(true);
     }
 
-    private async Task WriteAsync(AnnProjectionJobState value, CancellationToken token)
+    private async Task WriteAsync(AnnProjectionJobState value, CancellationToken token,
+        NativeCapabilityWorkLifetime binding)
     {
         try
         {
+            binding.OriginalProducer.AdmitPublication();
             await owner.WriteAsync(value, token).ConfigureAwait(true);
         }
         catch (Exception) { DeactivateOnIdle(); throw; }

@@ -7,7 +7,7 @@ internal static class FunctionalGateColdAuthorization
 {
     internal static async Task RunAsync(FunctionalGateContext context, FunctionalGateColdState state, CancellationToken token)
     {
-        var reference = new EntityRef(context.Partition, context.MutableDocumentCollection, "healthy-after-cold");
+        var reference = context.Bind(new(context.Partition, context.MutableDocumentCollection, "healthy-after-cold"));
         var command = new CommandRequest(Guid.NewGuid(), context.Partition,
             [new PutDocument(reference.Collection, reference.Id, "{\"stage\":\"healthy-after-cold\"}", 0)]);
         await RefuseAsync(context.Reader, command with

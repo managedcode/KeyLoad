@@ -14,12 +14,16 @@ internal static class OnlineTextRequestScope
         {
             return false;
         }
-        if (request.Purpose != Purpose || !privateKind
-            || (request.ReadKind == GrainReadKind.OnlineTextMaintenance && request.CommandKind is not null)
-            || (request.CommandKind == OperationKind.OnlineTextPublicationPhase && request.ReadKind is not null))
+        if (!IsSelected(request))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         return true;
     }
+
+    internal static bool IsSelected(GrainRequestEnvelope request)
+        => request.Purpose == Purpose && (request.ReadKind is (GrainReadKind.OnlineTextMaintenance or GrainReadKind.ProjectionBatch)
+                && request.CommandKind is null && request.CommandId == Guid.Empty
+            || request.CommandKind is (OperationKind.OnlineTextPublicationPhase or OperationKind.CommitProjectionBatch)
+                && request.ReadKind is null && request.CommandId != Guid.Empty);
 }

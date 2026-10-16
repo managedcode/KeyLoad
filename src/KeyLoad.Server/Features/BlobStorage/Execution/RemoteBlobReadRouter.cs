@@ -1,5 +1,7 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -10,7 +12,7 @@ internal sealed class RemoteBlobReadRouter(OrleansNode node, PartitionHost parti
     RemoteDocumentWorkOwner owner, TimeProvider clock) : IRemoteBlobReadRouter
 {
     public async Task<object?> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
         object? result = null;
         var failures = new List<Exception>();
@@ -26,9 +28,10 @@ internal sealed class RemoteBlobReadRouter(OrleansNode node, PartitionHost parti
                 {
                     var purpose = RequirePurpose(envelope.ReadKind);
                     var bytes = NativeRequest(purpose, payload);
+                    var work = new ReadExecutionBudget(limits, clock, original.Token);
                     var read = new ControlledBlobSourceRead(node, partition, options, limits, client, clock);
-                    var controlled = await read.TryReadAsync(envelope, principal.Id, purpose, bytes, original.Token).ConfigureAwait(false);
-                    result = controlled.Routed ? controlled.Value : ReadLocal(purpose, principal.Id, payload, original.Token);
+                    var controlled = await read.TryReadAsync(envelope, principal.Id, purpose, bytes, work, original.Token, binding).ConfigureAwait(false);
+                    result = controlled.Routed ? controlled.Value : ReadLocal(purpose, principal.Id, payload, work, binding);
                 }, failures).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
@@ -37,15 +40,15 @@ internal sealed class RemoteBlobReadRouter(OrleansNode node, PartitionHost parti
     }
 
     private object? ReadLocal(ControlledBlobReadPurpose purpose, string principal, ReadOnlyMemory<byte> payload,
-        CancellationToken token)
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
     {
         var blobs = new BlobStorageOperations(partition.Database);
         return purpose switch
         {
-            ControlledBlobReadPurpose.Metadata => blobs.Metadata(principal, GrainNativePayload.Read<BlobMetadataRequest>(payload), token),
-            ControlledBlobReadPurpose.UploadInfo => blobs.UploadInfo(principal, GrainNativePayload.Read<BlobUploadInfoRequest>(payload), token),
-            ControlledBlobReadPurpose.Range => blobs.Read(principal, GrainNativePayload.Read<BlobReadRequest>(payload), token),
-            ControlledBlobReadPurpose.List => blobs.List(principal, GrainNativePayload.Read<BlobListRequest>(payload), token),
+            ControlledBlobReadPurpose.Metadata => blobs.MetadataBound(principal, GrainNativePayload.Read<BlobMetadataRequest>(payload), work, binding),
+            ControlledBlobReadPurpose.UploadInfo => blobs.UploadInfoBound(principal, GrainNativePayload.Read<BlobUploadInfoRequest>(payload), work, binding),
+            ControlledBlobReadPurpose.Range => blobs.ReadBound(principal, GrainNativePayload.Read<BlobReadRequest>(payload), work, binding),
+            ControlledBlobReadPurpose.List => blobs.ListBound(principal, GrainNativePayload.Read<BlobListRequest>(payload), work, binding),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable)
         };
     }

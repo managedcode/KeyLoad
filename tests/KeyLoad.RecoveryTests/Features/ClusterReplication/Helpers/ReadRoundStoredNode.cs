@@ -39,7 +39,8 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
             }, DatabaseEngine.Credential(Principal, Principal,
                     Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
             RecoveryPhysicalShardBootstrap.Bootstrap(Database, Principal, Configuration.VoterIds);
-            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, validatedConfiguration, RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
+            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, validatedConfiguration, RecoveryExecutionOptions.Replica(), replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken))), RecoveryExecutionOptions.Replica());
             Consensus = new(Materializer, validatedConfiguration, RecoveryExecutionOptions.Replica(), TimeProvider.System);
         }
         catch (Exception error)

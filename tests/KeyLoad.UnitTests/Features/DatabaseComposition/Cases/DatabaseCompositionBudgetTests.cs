@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
@@ -16,9 +15,6 @@ internal sealed class DatabaseCompositionBudgetTests
     private const string Prefix = "derived-";
     private const string Label = "related";
     private const string EdgeSpace = "edge";
-    private const string MessageMetadataSpace = "message-meta";
-    private const string MessageBodySpace = "message-body";
-    private const string ReadySpace = "ready";
     private const long TinyByteBudget = 1;
 
     [Test]
@@ -73,15 +69,8 @@ internal sealed class DatabaseCompositionBudgetTests
         await Assert.That(absent).IsNull();
     }
 
-    private static long SingleProjectionReadBytes(TestDatabase db) => db.Store.Read(view =>
-    {
-        long Size(byte[] key) => key.LongLength + (view.ReadOwnedValue(key)?.LongLength ?? 0);
-        return Size(KeySpace.Partition(ReadySpace, db.Partition, Queue, 1L, Message))
-            + Size(KeySpace.Partition(MessageMetadataSpace, db.Partition, Queue, Message))
-            + Size(KeySpace.Partition(MessageBodySpace, db.Partition, Queue, Message))
-            + Size(DocumentStorageKeys.RecordKey(Vertex(db, From)))
-            + Size(DocumentStorageKeys.RecordKey(Vertex(db, To)));
-    });
+    private static long SingleProjectionReadBytes(TestDatabase db)
+        => DatabaseCompositionReadCost.SingleUntyped(db, Queue, Message, Vertex(db, From), Vertex(db, To));
 
     private static TestDatabase NewDatabase()
     {

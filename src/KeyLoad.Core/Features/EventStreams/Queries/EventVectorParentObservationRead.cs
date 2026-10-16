@@ -16,11 +16,12 @@ internal static class EventVectorParentObservationRead
 
     internal static (ReadOnlyMemory<byte> Phase, ReadOnlyMemory<byte> Outcome) Read(IKeyValueView view,
         IAuthorizationPolicy authorization, PrincipalRecord principal, EventFeedControlRequest request, Guid incarnation,
-        ReadOnlyMemory<byte> freshSourceAuthorizationWitness, IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
+        ReadOnlyMemory<byte> freshSourceAuthorizationWitness, IOptions<DatabaseLimits> options, CancellationToken cancellationToken,
+        EventVectorReadLifetimeBinding? lifetimeBinding = null)
     {
         var admission = new EventVectorAdmissionPolicy(options);
         var terminal = EventVectorParentLookup.ReadTerminalDetails(view, authorization, principal, request, incarnation,
-            freshSourceAuthorizationWitness, options, cancellationToken);
+            freshSourceAuthorizationWitness, options, cancellationToken, lifetimeBinding);
         if (terminal is { } actual)
         {
             return (actual.PhaseBytes, OutcomeBytes(view, principal, request, actual.PhaseId, admission));
@@ -47,9 +48,16 @@ internal static class EventVectorParentObservationRead
         }
         var call = EventVectorParentValidation.Read(map, actualRow, admission);
         EventVectorParentValidation.RequireRequest(call, request, admission);
-        EventVectorParentScopes.Authorize(authorization, principal, call.OriginalAuthorizedSourceScopes, admission);
+        if (lifetimeBinding is null)
+        {
+            EventVectorParentScopes.Authorize(authorization, principal, call.OriginalAuthorizedSourceScopes, admission);
+        }
+        else
+        {
+            lifetimeBinding.Authorize(authorization, principal, call.OriginalAuthorizedSourceScopes, admission);
+        }
         var fresh = freshSourceAuthorizationWitness.IsEmpty ? null : EventVectorCurrentSourceAuthorization.Require(view, principal, request,
-            call.OriginalAuthorizedSourceScopes, freshSourceAuthorizationWitness, admission);
+            call.OriginalAuthorizedSourceScopes, freshSourceAuthorizationWitness, admission, lifetimeBinding);
         cancellationToken.ThrowIfCancellationRequested();
         var inventory = EventVectorMapInventory.Read(view, request.ControlPartition, request.MapId,
             options, cancellationToken);
@@ -63,6 +71,7 @@ internal static class EventVectorParentObservationRead
             EventVectorParentScopes.Derive(phase, inventory, admission));
         _ = EventVectorParentOutcome.Require(view, principal, phase, call.LastAdmittedControlPhaseId,
             null, incarnation, admission);
+        lifetimeBinding?.Phase(call.OriginalAdmittedControlPhaseBytes, admission);
         return (call.OriginalAdmittedControlPhaseBytes,
             OutcomeBytes(view, principal, request, call.LastAdmittedControlPhaseId, admission));
     }

@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
@@ -21,6 +22,20 @@ internal sealed class GrainBlobReadCapabilities(DatabaseEngine database)
             GrainReadKind.BlobUploadInfo => blobs.UploadInfo(principal, GrainNativePayload.Read<BlobUploadInfoRequest>(payload), cancellationToken),
             GrainReadKind.BlobRange => blobs.Read(principal, GrainNativePayload.Read<BlobReadRequest>(payload), cancellationToken),
             GrainReadKind.BlobList => blobs.List(principal, GrainNativePayload.Read<BlobListRequest>(payload), cancellationToken),
+            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
+        };
+    }
+
+    internal object? Execute(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload,
+        ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
+    {
+        budget.Check();
+        return kind switch
+        {
+            GrainReadKind.BlobMetadata => blobs.MetadataBound(principal, GrainNativePayload.Read<BlobMetadataRequest>(payload), budget, binding),
+            GrainReadKind.BlobUploadInfo => blobs.UploadInfoBound(principal, GrainNativePayload.Read<BlobUploadInfoRequest>(payload), budget, binding),
+            GrainReadKind.BlobRange => blobs.ReadBound(principal, GrainNativePayload.Read<BlobReadRequest>(payload), budget, binding),
+            GrainReadKind.BlobList => blobs.ListBound(principal, GrainNativePayload.Read<BlobListRequest>(payload), budget, binding),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

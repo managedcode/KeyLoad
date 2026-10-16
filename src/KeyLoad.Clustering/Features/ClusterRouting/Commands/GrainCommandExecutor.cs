@@ -7,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
     IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null,
     IGrainPartitionMovementSealedOperationObserver? sealedObserver = null, INativeOnlineTextMaintenance? onlineText = null,
-    IPlacementIntentPersistence? placementPersistence = null)
+    IPlacementIntentPersistence? placementPersistence = null, INativeDropTableExecution? dropTable = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
@@ -16,52 +16,62 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         var stage = GrainFailureStage.PartitionResolution;
         NativeCapabilityWorkLifetime? work = null;
         Exception? primaryError = null;
+        var coreEntered = false;
         try
         {
             ValidateRoute(request, actorKey, cancellationToken);
             stage = GrainFailureStage.CapabilityExecution;
             work = NativeCapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
-                NativeRequestWorkKind.CommandCapability, cancellationToken);
-            var operationToken = work?.Token ?? cancellationToken;
-            stage = GrainFailureStage.QuorumRead;
-            await coordinator.ReadBarrierAsync(operationToken).ConfigureAwait(true);
-            ValidateFreshRequest(request, operationToken);
-            var envelope = request.Envelope;
-            stage = GrainFailureStage.Authorization;
-            await ObserveAndValidateRequestAsync(request, GrainRequestPhase.AuthorizationReload, context,
-                operationToken).ConfigureAwait(true);
-            var principal = GrainRequestAuthority.ReloadForRequest(database, envelope, clock);
-            if (physical is not null)
-            {
-                database.VerifyPhysicalCommandOwner(physical.Owner,
-                request.Envelope.CommandKind == OperationKind.BootstrapPhysicalShardCatalog, operationToken);
-            }
-            var kind = envelope.CommandKind ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-            stage = GrainFailureStage.CapabilityExecution;
-            await ObserveAndValidateRequestAsync(request, GrainRequestPhase.BeforeSubmit, context,
-                operationToken).ConfigureAwait(true);
-            var result = await SubmitCommandAsync(kind, request, principal, context, operationToken)
-                .ConfigureAwait(true);
-            stage = GrainFailureStage.ReplyEncoding;
-            GrainPartitionMovementJournalObservation.CaptureReturned(codec, request, result, context);
-            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)
-                .ConfigureAwait(true);
-            return GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
+                NativeRequestWorkKind.CommandCapability, cancellationToken, database.OperationLimitsOptions);
+            coreEntered = true;
+            return await ExecuteCoreAsync(request, work, work?.Token ?? cancellationToken,
+                context).ConfigureAwait(true);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            primaryError = MarkFailure(error, stage);
+            primaryError = coreEntered ? error : MarkFailure(error, stage);
+            NativeRequestWorkSettlement.Rethrow(primaryError);
             throw;
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             primaryError = error;
+            NativeRequestWorkSettlement.Rethrow(primaryError);
             throw;
         }
         finally
         {
-            using var cleanup = work;
-            NativeCapabilityWorkLifetime.Settle(primaryError, work, null, null);
+            await NativeCapabilityWorkLifetime.SettleAsync(primaryError, work, null, null).ConfigureAwait(true);
+        }
+    }
+
+    private async Task<GrainOperationReply> ExecuteCoreAsync(DecodedGrainRequest request,
+        NativeCapabilityWorkLifetime? work, CancellationToken operationToken, IGrainContext? context)
+    {
+        var stage = GrainFailureStage.CapabilityExecution;
+        try
+        {
+            var principal = await NativeCommandCapabilityAuthorization.AuthorizeAsync(database, coordinator,
+                clock, settings, codec, physical, request, null, context, operationToken).ConfigureAwait(true);
+            var kind = request.Envelope.CommandKind
+                ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+            await NativeCommandCapabilityAuthorization.ObserveAndValidateAsync(database, clock, settings,
+                codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
+            NativeCommandWorkAdmission.Bind(database, request, principal, clock, work);
+            var result = await SubmitCommandAsync(kind, request, principal, context, operationToken).ConfigureAwait(true);
+            stage = GrainFailureStage.ReplyEncoding;
+            GrainPartitionMovementJournalObservation.CaptureReturned(codec, request, result, context);
+            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
+            var reply = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
+            return work is null || reply.Error is not null ? reply : reply with
+            {
+                WorkProof = NativeCommandWorkAdmission.Capture(request, work, principal.PolicyEpoch)
+            };
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            NativeRequestWorkSettlement.Rethrow(MarkFailure(error, stage));
+            throw;
         }
     }
 
@@ -70,6 +80,10 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     {
         return kind switch
         {
+            OperationKind.DropTable => await (dropTable
+                ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))
+                .ExecuteAsync(request.Envelope.RequestId, request.Envelope.CommandId, principal.Id,
+                    GrainNativePayload.Read<DropTableRequest>(request.Payload), request.Envelope.ExpiresAt, operationToken).ConfigureAwait(true),
             OperationKind.PersistPlacementIntent => await GrainPlacementIntentPersistence.SubmitAsync(
                 placementPersistence ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest),
                 coordinator, request, operationToken).ConfigureAwait(true),
@@ -89,7 +103,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             OperationKind.Bm25CorpusPublicationPhase => await GrainBm25CorpusPublicationCommand.SubmitAsync(
                 database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             _ => await coordinator.SubmitNativeAsync(kind, request.Envelope.CommandId, principal.Id,
-                request.Payload, operationToken).ConfigureAwait(true)
+                request.Payload, cancellationToken: operationToken).ConfigureAwait(true)
         };
     }
 
@@ -98,14 +112,14 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         => request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose
             ? GrainRemoteTransferCommand.SubmitAsync(database, coordinator, request, principal, token)
             : coordinator.SubmitNativeAsync(OperationKind.Batch, request.Envelope.CommandId,
-                principal.Id, request.Payload, token);
+                principal.Id, request.Payload, cancellationToken: token);
 
     private Task<OperationResult> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken cancellationToken)
         => GrainOnlineTextCheckpointCommand.TrySubmit(database, coordinator, request, principal,
             onlineText, clock, cancellationToken)
             ?? coordinator.SubmitNativeAsync(OperationKind.CommitProjectionBatch, request.Envelope.CommandId,
-                principal.Id, request.Payload, cancellationToken);
+                principal.Id, request.Payload, cancellationToken: cancellationToken);
 
     private static Exception MarkFailure(Exception error, GrainFailureStage stage)
     {
@@ -123,27 +137,13 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     private void ValidateRoute(DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (request.Envelope.Observation is not null || request.Envelope.Metadata is not null
+            || request.Envelope.CommandKind == OperationKind.ResourceRetirementPhase)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+        }
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
         PhysicalCommandActorKey.Validate(request, actorKey, physical);
-    }
-
-    private void ValidateFreshRequest(DecodedGrainRequest request, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        GrainRequestScope.Validate(request.Envelope, database.Store.Identity.Incarnation, clock.GetUtcNow(), settings.MaximumFuture);
-        GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
-    }
-
-    private async ValueTask ObserveAndValidateRequestAsync(DecodedGrainRequest request, GrainRequestPhase phase,
-        IGrainContext? context, CancellationToken cancellationToken)
-    {
-        if (codec is not { HasPhaseObserver: true } observerCodec)
-        {
-            return;
-        }
-
-        await observerCodec.ObservePhaseAsync(request, phase, context, cancellationToken).ConfigureAwait(true);
-        ValidateFreshRequest(request, cancellationToken);
     }
 
     private ValueTask ObservePhaseAsync(DecodedGrainRequest request, GrainRequestPhase phase,

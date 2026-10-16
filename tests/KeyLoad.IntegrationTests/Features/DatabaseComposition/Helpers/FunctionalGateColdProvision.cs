@@ -27,10 +27,11 @@ internal static class FunctionalGateColdProvision
         var reader = await IdentityAsync(administrator, partition, read, false, token);
         var queueOperator = await IdentityAsync(administrator, partition,
             Capability.QueueInspect | Capability.DeadLettersRead | Capability.DeadLettersRedrive, true, token);
-        return new(partition, anchor, writer, reader, queueOperator, [], [])
+        var state = new FunctionalGateColdState(partition, anchor, writer, reader, queueOperator, [], [])
         {
             AdditionalIdentities = await FunctionalGateColdWorkloadProvision.CreateAsync(administrator, partition, read, token)
         };
+        return await FunctionalGateAnalyticsProvision.RunAsync(administrator, state, token);
     }
 
     internal static async Task<McpPersistedIdentity> IdentityAsync(RequestCqrsRf3Callers administrator,

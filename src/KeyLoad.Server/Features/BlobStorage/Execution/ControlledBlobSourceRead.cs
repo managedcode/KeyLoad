@@ -2,6 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -17,15 +18,15 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
     private const string NonceFormat = "N";
 
     internal async Task<(bool Routed, object? Value)> TryReadAsync(GrainRequestEnvelope envelope,
-        string principalId, ControlledBlobReadPurpose purpose, ReadOnlyMemory<byte> nativeRequest, CancellationToken token)
+        string principalId, ControlledBlobReadPurpose purpose, ReadOnlyMemory<byte> nativeRequest,
+        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
-        var work = new ReadExecutionBudget(limits, clock, token);
         var expiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (expiry > envelope.ExpiresAt)
         {
             expiry = envelope.ExpiresAt;
         }
-        var frame = partition.Database.TryCaptureControlledBlobReadV2(principalId, purpose, nativeRequest, expiry, work);
+        var frame = partition.Database.TryCaptureControlledBlobReadV2Bound(principalId, purpose, nativeRequest, expiry, work, binding);
         if (frame is null)
         {
             return (false, null);
@@ -38,8 +39,10 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
     }
 
     internal async Task<OperationResult> ObserveOutcomeAsync(Guid ingressRequestId,
-        ControlledBlobReadFrameV2 frame, ReadExecutionBudget work, CancellationToken token)
+        ControlledBlobReadFrameV2 frame, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
+        work.AttachResourceLifetimeBinding(binding);
         var observed = await ReadOutcomeFrameAsync(ingressRequestId, frame, work, token).ConfigureAwait(false);
         if (!observed.OutcomeValidated || observed.NativeValue is not null || frame.Original.OriginalOutcome is null)
         {

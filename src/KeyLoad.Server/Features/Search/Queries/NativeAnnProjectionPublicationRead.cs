@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
 
@@ -12,7 +13,8 @@ internal static class NativeAnnProjectionPublicationRead
     internal static async Task<AnnProjectionPublication> ReadAsync(DatabaseEngine database,
         PrincipalRecord principal, AnnMaintenanceRequest request, ServerRuntimeOptions configured,
         TimeProvider clock, NativeAnnMaintenanceAdmissions admissions,
-        Func<NativeAnnGenerationOwner> owningRoot, CancellationToken token)
+        Func<NativeAnnGenerationOwner> owningRoot, CancellationToken token,
+        ReadExecutionBudget? originalBudget = null, IResourceLifetimeWorkBinding? binding = null)
     {
         var failures = new List<Exception>();
         AnnProjectionPublication? result = null;
@@ -21,7 +23,7 @@ internal static class NativeAnnProjectionPublicationRead
             using var operation = admissions.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
             try
             {
-                result = await ReadOwnedAsync(database, principal, request, configured, clock, owningRoot, token)
+                result = await ReadOwnedAsync(database, principal, request, configured, clock, owningRoot, token, originalBudget, binding)
                     .ConfigureAwait(false);
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -35,20 +37,24 @@ internal static class NativeAnnProjectionPublicationRead
 
     private static Task<AnnProjectionPublication> ReadOwnedAsync(DatabaseEngine database,
         PrincipalRecord principal, AnnMaintenanceRequest request, ServerRuntimeOptions configured,
-        TimeProvider clock, Func<NativeAnnGenerationOwner> owningRoot, CancellationToken token)
+        TimeProvider clock, Func<NativeAnnGenerationOwner> owningRoot, CancellationToken token,
+        ReadExecutionBudget? originalBudget = null, IResourceLifetimeWorkBinding? binding = null)
     {
         NativeAnnMaintenanceAdmission.Request(request, request.CommandId, database.Store.Identity.NodeId);
-        var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
-        var eligible = database.ReadProjectionMaintenanceEligibility(request.Consumer, request.IndexGeneration, read);
+        var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+        var eligible = binding is null
+            ? database.ReadProjectionMaintenanceEligibility(request.Consumer, request.IndexGeneration, read)
+            : database.ReadProjectionMaintenanceEligibilityBound(request.Consumer, request.IndexGeneration, read, binding);
         RequireCaller(eligible, principal, request);
         var owner = owningRoot();
         return owner.RunAsync(stages => Read(database, principal, request, configured, owner,
-            stages, eligible, read));
+            stages, eligible, read, binding));
     }
 
     private static AnnProjectionPublication Read(DatabaseEngine database, PrincipalRecord principal,
         AnnMaintenanceRequest request, ServerRuntimeOptions configured, NativeAnnGenerationOwner owner,
-        NativeAnnStageStore stages, ProjectionConsumerInfo eligible, ReadExecutionBudget read)
+        NativeAnnStageStore stages, ProjectionConsumerInfo eligible, ReadExecutionBudget read,
+        IResourceLifetimeWorkBinding? binding)
     {
         var failures = new List<Exception>();
         AnnProjectionPublication? result = null;
@@ -62,7 +68,9 @@ internal static class NativeAnnProjectionPublicationRead
                 var remaining = owner.MaintenanceMemory.Remaining(captured.OwnedBytesUpperBound);
                 var budget = new AnnWorkBudget(read, seeds.Value.MaxWorkUnits);
                 var published = stages.ReadPublished(request, captured, seeds.Value, remaining, budget, read);
-                var current = database.ReadProjectionMaintenanceEligibility(request.Consumer, request.IndexGeneration, read);
+                var current = binding is null
+                    ? database.ReadProjectionMaintenanceEligibility(request.Consumer, request.IndexGeneration, read)
+                    : database.ReadProjectionMaintenanceEligibilityBound(request.Consumer, request.IndexGeneration, read, binding);
                 RequireCaller(current, principal, request);
                 if (current.MaintenanceAuthority != eligible.MaintenanceAuthority
                     || current.Checkpoint != eligible.Checkpoint
@@ -73,6 +81,7 @@ internal static class NativeAnnProjectionPublicationRead
                 result = new(published.Consumer, published.IndexGeneration, published.Source, published.Count,
                     Convert.ToHexStringLower(published.IndexSha256));
                 read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(result));
+                read.CheckResult(result);
                 read.Check();
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }

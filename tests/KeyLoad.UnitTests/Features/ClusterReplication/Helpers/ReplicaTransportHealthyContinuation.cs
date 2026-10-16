@@ -56,11 +56,11 @@ internal static class ReplicaTransportHealthyContinuation
         await Assert.That(reply.Payload.Span.SequenceEqual(NativeSerialization.Serialize(state.Read()))).IsTrue();
         var originalIdentity = db.Store.Identity;
         var expectedPosition = db.Store.Position + NextCommit;
-        var submitted = endpoint.Consensus.HandleAsync(ReplicaRpc.Forward, ReplicaProtocolCodec.Serialize(operation), token);
+        var submitted = endpoint.Consensus.HandleAsync(ReplicaRpc.Forward, ReplicaForwardTestFrame.Payload(operation), token);
         retain(submitted);
         await gate.Entered.Task.WaitAsync(token);
         gate.Release();
-        var receipt = ReplicaProtocolCodec.Deserialize<OperationResult>((await submitted).Span).Get<CommitReceipt>();
+        var receipt = ReplicaForwardTestFrame.ReadResult(await submitted).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
         var expectedReceipt = new CommitReceipt(operation.Id,
             new(originalIdentity.Incarnation, db.Partition.AtomicPartitionId, expectedPosition, InitialOwnershipEpoch),
@@ -74,8 +74,8 @@ internal static class ReplicaTransportHealthyContinuation
         await Assert.That(db.Database.GetOutboxStatus(Root, db.Partition).Head.Tail).IsEqualTo(InitialTail);
         var image = QueueWholeFlowStorage.Bytes(db.Store);
         var cut = db.Store.Position;
-        var replay = ReplicaProtocolCodec.Deserialize<OperationResult>((await endpoint.Consensus.HandleAsync(
-            ReplicaRpc.Forward, ReplicaProtocolCodec.Serialize(operation), token)).Span).Get<CommitReceipt>();
+        var replay = ReplicaForwardTestFrame.ReadResult(await endpoint.Consensus.HandleAsync(
+            ReplicaRpc.Forward, ReplicaForwardTestFrame.Payload(operation), token)).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await ReplicaTransportShutdownFlow.UnchangedAsync(db, image, cut);
     }

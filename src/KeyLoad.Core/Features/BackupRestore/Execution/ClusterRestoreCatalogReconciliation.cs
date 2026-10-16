@@ -34,6 +34,11 @@ public static class ClusterRestoreCatalogReconciliation
         ImmutableArray<ClusterRestoreOwnerMapping> mappings, IOptions<DatabaseLimits> limits,
         TimeProvider clock, ReadExecutionBudget work)
     {
+        ArgumentNullException.ThrowIfNull(limits);
+        ArgumentNullException.ThrowIfNull(work);
+        ResourceRetirementStorage.RequireNoRetirement(work.CreateView(transaction), limits.Value);
+        ResourceRetirementPreparationStorage.RequireNoPreparation(work.CreateView(transaction), limits.Value);
+        ResourceRetirementPreparedOperationStorage.RequireNoReplacement(work.CreateView(transaction), limits.Value);
         var original = ClusterBackupNativeCutVerification.Require(transaction, identity, position, metadata,
             secret, limits, clock, work);
         ClusterRestoreMappingValidation.Require(original.CaptureId, cuts, mappings);

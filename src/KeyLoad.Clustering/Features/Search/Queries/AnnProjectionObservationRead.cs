@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,12 +11,13 @@ internal static class AnnProjectionObservationRead
 {
     internal static async Task<AnnProjectionObservationResult> ExecuteAsync(DatabaseEngine database,
         IServiceProvider services, TimeProvider clock, PrincipalRecord principal,
-        DecodedGrainRequest original, CancellationToken cancellationToken)
+        DecodedGrainRequest original, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         if (original.Envelope.ReadKind == GrainReadKind.AnnProjectionObservationV2)
         {
             return await AnnProjectionLifetimeObservationRead.ExecuteAsync(database, services, clock,
-                principal, original, cancellationToken).ConfigureAwait(true);
+                principal, original, cancellationToken, binding).ConfigureAwait(true);
         }
         cancellationToken.ThrowIfCancellationRequested();
         if (!services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value.EnableApproximateSearch)
@@ -28,24 +30,27 @@ internal static class AnnProjectionObservationRead
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
         }
-        var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, cancellationToken);
+        var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
+        work.AttachResourceLifetimeBinding(binding);
         work.ConstrainLifetime(original.Envelope.ExpiresAt);
         work.ConstrainNativeWork(request.MaximumReadBytes, request.MaximumRecords);
         work.ChargeBytes(original.Payload.Length);
-        var admitted = RequireScope(database, services, principal, request, work);
+        var admitted = RequireScope(database, services, principal, request, work, binding: binding);
         var current = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         if (current.Id != principal.Id || current.PolicyEpoch != principal.PolicyEpoch)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
         }
-        if (RequireScope(database, services, current, request, work) != admitted)
+        if (RequireScope(database, services, current, request, work, binding: binding) != admitted)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
         }
         var actual = database.Store.Identity;
         work.Check();
-        return new(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, null,
+        var result = new AnnProjectionObservationResult(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, null,
             work.ReadBytes, work.ConstrainedNativeRecords, null);
+        work.CheckResult(result);
+        return result;
     }
 
     internal static void RequireRequest(AnnProjectionObservationRequest request)
@@ -81,7 +86,7 @@ internal static class AnnProjectionObservationRead
 
     internal static LocalAnnObservationFence RequireScope(DatabaseEngine database, IServiceProvider services,
         PrincipalRecord principal, AnnProjectionObservationRequest request, ReadExecutionBudget work,
-        AnnReadLifetimeMetadata? metadata = null)
+        AnnReadLifetimeMetadata? metadata = null, IResourceLifetimeWorkBinding? binding = null)
     {
         var original = request.OriginalRequest;
         var expected = services.GetRequiredService<PhysicalShardRecord>();
@@ -90,6 +95,7 @@ internal static class AnnProjectionObservationRead
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionObservationProtocol.Invalid);
         }
-        return database.CaptureLocalAnnObservation(principal.Id, original, work, metadata);
+        return binding is null ? database.CaptureLocalAnnObservation(principal.Id, original, work, metadata)
+            : database.CaptureLocalAnnObservationBound(principal.Id, original, work, metadata, binding);
     }
 }

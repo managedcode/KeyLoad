@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.Messaging;
@@ -41,7 +42,8 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         => ExecuteAsync(request, null, caller);
 
     internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
-        RemoteModelNativeRequest request, RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken caller)
+        RemoteModelNativeRequest request, RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken caller,
+        IResourceLifetimeWorkBinding? binding = null)
     {
         if (!options.PhysicalGroupTrust.RemoteDocumentReads
             || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Destination)
@@ -56,7 +58,7 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 operation = owner.Acquire(Guid.NewGuid());
-                result = await ExecuteOwnedAsync(request, operation, effectBoundary, caller).ConfigureAwait(false);
+                result = await ExecuteOwnedAsync(request, operation, effectBoundary, caller, binding).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         finally
@@ -72,7 +74,8 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
 
     private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteOwnedAsync(
         RemoteModelNativeRequest request, RemoteDocumentWorkOwner.Operation operation,
-        RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken caller)
+        RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken caller,
+        IResourceLifetimeWorkBinding? binding)
     {
         using var deadline = new CancellationTokenSource(routing.ExecutionLifetime, clock);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, operation.ShutdownToken, deadline.Token);
@@ -85,14 +88,14 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         if (request.Channel == RemoteModelNativeChannel.ResourceLifetimeRead)
         {
             return await (lifetime ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteResourceLifetimeReadProtocol.Unavailable))
-                .ExecuteAsync(request, replay, token).ConfigureAwait(false);
+                .ExecuteAsync(request, replay, token, RemoteModelNativeDispatch.RequireBinding(binding)).ConfigureAwait(false);
         }
         if (request.Channel == RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
         {
             var outcome = NativeSerialization.Deserialize<RemoteControlledBlobOutcomeCallV2>(request.Payload.Span);
             RemoteControlledBlobOutcomeEndpointV2.RequireEnvelope(request, outcome);
             return await RemoteControlledBlobOutcomeEndpointV2.ExecuteAsync(outcome, controlledBlob,
-                options, replay, clock, effectBoundary, token).ConfigureAwait(false);
+                options, replay, clock, effectBoundary, token, RemoteModelNativeDispatch.RequireBinding(binding)).ConfigureAwait(false);
         }
         var transport = RemoteDocumentWire.DecodeCall(request.Payload.Span);
         RequireEnvelope(request, transport);

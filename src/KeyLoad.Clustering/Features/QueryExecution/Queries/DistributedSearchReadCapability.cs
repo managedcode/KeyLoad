@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
@@ -8,8 +9,9 @@ internal static class DistributedSearchReadCapability
 
     internal static Task<DistributedSearchPageV1> ExecuteAsync(IServiceProvider services, PrincipalRecord principal,
         DecodedGrainRequest request, Guid requestId, GrainRequestCodec codec, IGrainContext context,
-        CancellationToken token)
+        CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var router = services.GetService<IRemoteDistributedSearchRouter>()
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, NotConfigured);
         Func<CancellationToken, Task>? observed = null;
@@ -18,6 +20,6 @@ internal static class DistributedSearchReadCapability
             observed = new DistributedSearchStatisticsObservation(codec, request, requestId, context).ObserveAsync;
         }
         return router.ReadAsync(request.Envelope, principal,
-            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), token, observed);
+            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), token, observed, binding);
     }
 }

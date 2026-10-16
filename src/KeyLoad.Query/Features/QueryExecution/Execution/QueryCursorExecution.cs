@@ -10,28 +10,19 @@ internal static class QueryCursorExecution
     private const string QueryCursorIsInvalidDetail = "The query cursor is invalid.";
     private const int InitialCursorOffset = 0;
     private const string QueryCursorNoLongerHasAValidAuthorizedReadCutDetail = "The query cursor no longer has a valid authorized read cut.";
-    private const string CursorPurpose = "query-page";
 
-    internal readonly record struct State(int Offset, long Cut, long SourceEpoch);
+    internal readonly record struct State(int Offset, long Cut, long SourceEpoch, ResourceLifetimeV1 Lifetime);
 
     internal static State Resolve(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
-        AstQueryRequest request, string hash, TimeProvider clock)
+        AstQueryRequest request, string hash, TimeProvider clock, ResourceLifetimeV1 lifetime)
     {
         var offset = request.Query.Offset;
         var cut = database.Store.Position;
+        var claims = ReadClaims(database, request.Cursor, lifetime);
         var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
-        if (request.Cursor is { } cursor)
+        if (claims is not null)
         {
-            QueryCursorClaims claims;
-            try
-            {
-                claims = database.Verify<QueryCursorClaims>(cursor);
-            }
-            catch (KeyLoadException exception) when (exception.Code == ErrorCode.TokenInvalidated)
-            {
-                throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorIsInvalidDetail);
-            }
-            if (claims.Purpose != CursorPurpose || claims.Incarnation != database.Store.Identity.Incarnation
+            if (claims.Incarnation != database.Store.Identity.Incarnation
                 || claims.NodeId != database.Store.Identity.NodeId || claims.ReadGeneration != database.Store.Identity.ReadGeneration
                 || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
                 || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < InitialSequence || claims.CutPosition > database.Store.Position
@@ -43,15 +34,38 @@ internal static class QueryCursorExecution
             offset = claims.Offset;
             cut = claims.CutPosition;
         }
-        return new(offset, cut, sourceEpoch);
+        return new(offset, cut, sourceEpoch, lifetime);
+    }
+
+    private static QueryCursorClaims? ReadClaims(DatabaseEngine database, string? token, ResourceLifetimeV1 lifetime)
+    {
+        if (token is null)
+        {
+            return null;
+        }
+        QueryCursorClaims claims;
+        try
+        {
+            claims = database.Verify<QueryCursorClaims>(token);
+        }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.TokenInvalidated)
+        {
+            throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorIsInvalidDetail);
+        }
+        if (claims.Version != QueryCursorContract.CurrentVersion || claims.Lifetime != lifetime
+            || claims.Purpose != QueryCursorContract.Purpose)
+        {
+            throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);
+        }
+        return claims;
     }
 
     internal static string? SignNext(DatabaseEngine database, TimeSpan cursorLifetime,
         PrincipalRecord principal, ResourceDefinition resource, string hash, State cursor,
         int next, int eligibleCount, TimeProvider clock)
-        => next < eligibleCount ? database.Sign(new QueryCursorClaims(CursorPurpose, database.Store.Identity.Incarnation,
+        => next < eligibleCount ? database.Sign(new QueryCursorClaims(QueryCursorContract.Purpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch, next,
-            clock.GetUtcNow().Add(cursorLifetime))) : null;
+            clock.GetUtcNow().Add(cursorLifetime), cursor.Lifetime, QueryCursorContract.CurrentVersion)) : null;
 }
 

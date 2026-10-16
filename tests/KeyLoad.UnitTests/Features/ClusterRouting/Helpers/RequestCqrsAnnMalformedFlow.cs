@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsAnnMalformedFlow
 {
-    internal static async Task RefuseAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    internal static async Task RefuseAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         GrainOperationReply original, RequestCqrsAnnFault fault, CancellationToken token)
     {
         var id = Guid.NewGuid();

@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
@@ -8,7 +9,7 @@ internal static class ControlledBlobOutcomeReadExecutionV2
 {
     internal static ControlledBlobReadResult Execute(DatabaseEngine database, IOptions<DatabaseLimits> limits,
         TimeProvider clock, PrincipalRecord principal, GrainRequestEnvelope envelope,
-        ControlledBlobReadRequestV2 request, CancellationToken cancellationToken)
+        ControlledBlobReadRequestV2 request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         GrainRequestAuthority.RequireAdministrator(principal);
@@ -27,7 +28,7 @@ internal static class ControlledBlobOutcomeReadExecutionV2
         var work = new ReadExecutionBudget(limits, clock, cancellationToken);
         work.ConstrainResultBytes(request.MaximumResultBytes);
         var grant = work.CreateReadGrant(request.MaximumReadBytes, request.MaximumExaminedRecords);
-        var value = database.ReadControlledBlobOutcomeV2(principal.Id, request.Frame, work, grant, cancellationToken);
+        var value = database.ReadControlledBlobOutcomeV2Bound(principal.Id, request.Frame, work, grant, binding, cancellationToken);
         if (value is not null)
         {
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);

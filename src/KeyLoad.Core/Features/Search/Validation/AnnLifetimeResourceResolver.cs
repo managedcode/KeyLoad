@@ -1,24 +1,29 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Search;
 
 internal sealed class AnnLifetimeResourceResolver(AnnReadLifetimeMetadata metadata, AnnSeedWork work, PrincipalRecord targetPrincipal)
 {
-    private const string Invalid = "The target ANN lineage resource lifetime is invalid.";
-
-    internal ResourceDefinition? Resolve(IKeyValueView raw, PartitionRef partition,
+    internal ResourceDefinition? Resolve(DatabaseEngine database, IKeyValueView raw, PartitionRef partition,
         ResourceDefinition target, ReadExecutionBudget budget)
     {
         work.Check();
-        _ = ResourceLifetimeCatalog.Read(budget.CreateView(raw), partition.TenantId, partition.DatabaseId, target.Name, target)
-            ?? throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        var view = budget.CreateView(raw);
+        _ = budget.CaptureResourceLifetimes(database, view, partition, [target]);
         foreach (var definition in metadata.Definitions)
         {
             work.Charge(checked((long)definition.Name.Length + target.Name.Length));
             if (string.Equals(definition.Name, target.Name, StringComparison.Ordinal))
             {
-                return definition.Kind == target.Kind ? definition : null;
+                if (definition.Kind != target.Kind)
+                {
+                    return null;
+                }
+                var lifetime = metadata.Coverage.Lifetimes.Single(value => value.ResourceName == definition.Name);
+                budget.CaptureAuthenticatedResourceLifetimes(database, view,
+                    new ResourceLifetimeCoverageV1(partition, [lifetime]), [definition]);
+                return definition;
             }
         }
         return null;

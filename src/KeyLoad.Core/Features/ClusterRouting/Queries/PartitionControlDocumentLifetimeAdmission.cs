@@ -21,6 +21,7 @@ public sealed partial class DatabaseEngine
             }
             var frame = CaptureControlledDocumentReadView(charged, principalId, reference, minimumToken, expiry, Guid.NewGuid());
             var coverage = PartitionControlLifetimeCoverage.Capture(charged, reference.Partition, [frame.Resource], Limits.MaxBatchBytes);
+            work.CaptureAuthenticatedResourceLifetimes(this, charged, coverage, [frame.Resource]);
             return new(frame, coverage);
         });
         work.CheckResult(result);
@@ -36,6 +37,7 @@ public sealed partial class DatabaseEngine
             var frame = CaptureControlledDocumentReadView(charged, original.Original.Principal.Id,
                 original.Original.Reference, original.Original.MinimumToken, original.Original.ExpiresAt, original.Original.QueryId);
             var coverage = PartitionControlLifetimeCoverage.Capture(charged, frame.Reference.Partition, [frame.Resource], Limits.MaxBatchBytes);
+            work.CaptureAuthenticatedResourceLifetimes(this, charged, coverage, [frame.Resource]);
             return new PartitionControlDocumentReadFrameV2(frame, coverage);
         });
         if (!NativeSerialization.Serialize(current).AsSpan().SequenceEqual(NativeSerialization.Serialize(original)))

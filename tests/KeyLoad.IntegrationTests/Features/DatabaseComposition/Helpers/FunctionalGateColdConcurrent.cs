@@ -93,6 +93,7 @@ internal static class FunctionalGateColdConcurrent
                 {
                     context = new(original.Administrator, caller, caller, original.Partition, original.Anchor, original.ResourceCount)
                     {
+                        ReferenceBindings = original.ReferenceBindings,
                         QueueAdministrator = caller,
                         WriterPrincipalId = identity.Principal.Id,
                         ReaderPrincipalId = identity.Principal.Id,

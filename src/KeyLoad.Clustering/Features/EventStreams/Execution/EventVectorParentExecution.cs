@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -10,7 +11,7 @@ internal static class EventVectorParentExecution
     private const int AdvisoryVersion = 1;
     internal static async Task<GrainOperationReply> ExecuteAdmitAsync(DecodedGrainRequest original,
         IServiceProvider services, TimeProvider clock, GrainRequestCodec codec, global::Orleans.Runtime.IGrainContext context,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
         var token = writer.CancellationToken;
         token.ThrowIfCancellationRequested();
@@ -25,15 +26,17 @@ internal static class EventVectorParentExecution
         var parent = services.GetService<IEventVectorParent>()
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest);
         var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, token);
+        work.ConstrainLifetime(original.Envelope.ExpiresAt);
+        work.AttachResourceLifetimeBinding(binding);
         var request = GrainNativePayload.ReadCommand<EventFeedControlRequest>(original.Payload);
         var limits = services.GetRequiredService<IOptions<DatabaseLimits>>();
         var routing = services.GetRequiredService<IOptions<GrainRoutingOptions>>();
         if (request.Action == EventFeedControlAction.Tail)
         {
             return await EventFeedTailExecution.ExecuteAsync(parent, original, request, context,
-                work, limits, routing, writer).ConfigureAwait(true);
+                work, limits, routing, writer, binding).ConfigureAwait(true);
         }
-        var result = await parent.ExecuteAdmitAsync(original, codec, context, work, token).ConfigureAwait(true);
+        var result = await parent.ExecuteAdmitAsync(original, codec, context, work, binding, token).ConfigureAwait(true);
         if (result.Error is null)
         {
             work.ChargeBytes(result.Payload.Length);

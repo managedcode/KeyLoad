@@ -48,6 +48,17 @@ public sealed partial class DatabaseEngine
         var witness = IssueCredentialWitness(secret);
         return Store.Read(view => RevalidateCredential(view, witness, null, now).Id);
     }
+    /// <summary>Verifies the same persisted credential on the caller's original bounded read frame.</summary>
+    internal PrincipalRecord Authenticate(string secret, DateTimeOffset now, ReadExecutionBudget work)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+        work.Check();
+        var witness = IssueCredentialWitness(secret);
+        var principal = Store.Read(raw => RevalidateCredential(work.CreateView(raw), witness, null, now));
+        work.Check();
+        return principal;
+    }
+
     /// <summary>Creates a credential record containing only the secret's SHA-256 verifier.</summary>
     /// <param name="id">Credential identifier.</param>
     /// <param name="principal">Owning principal identifier.</param>

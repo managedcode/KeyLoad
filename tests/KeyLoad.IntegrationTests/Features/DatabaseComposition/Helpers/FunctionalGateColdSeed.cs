@@ -7,6 +7,11 @@ internal static class FunctionalGateColdSeed
     internal static async Task<FunctionalGateColdState> RunAsync(FunctionalGateContext context,
         FunctionalGateColdState state, CancellationToken token)
     {
+        await FunctionalGateColdReferenceSeeds.InitializeAsync(context, token);
+        context = context with
+        {
+            Anchor = context.Bind(context.Anchor)
+        };
         var models = new List<FunctionalGateColdModel>();
         for (var index = 0; index < FunctionalGateColdProtocol.Resources; index++)
         {
@@ -26,7 +31,7 @@ internal static class FunctionalGateColdSeed
             var command = FunctionalGateColdMutations.Command(context, index, blob.Begin.Blob);
             var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
             await FunctionalGateColdMutations.ReceiptAsync(context, index, command, receipt);
-            var reference = new EntityRef(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id);
+            var reference = context.Bind(new(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id));
             var insert = FunctionalGateColdProtocol.Insert(context.Partition, index, reference);
             var inserted = await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context, context.Writer, insert, token);
             await FunctionalGateRelationalAssertions.ReceiptAsync(inserted, insert.CommandId!.Value, context.Partition,
@@ -43,6 +48,7 @@ internal static class FunctionalGateColdSeed
         }
         var retained = state with
         {
+            Anchor = context.Anchor,
             Models = [.. models]
         };
         foreach (var model in retained.Models)

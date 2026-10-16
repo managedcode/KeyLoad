@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Core;
 
 /// <summary>Bounds logical storage work, output bytes and elapsed time within one consistent read cut.</summary>
-public sealed class ReadExecutionBudget
+public sealed partial class ReadExecutionBudget
 {
 
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
@@ -19,11 +20,13 @@ public sealed class ReadExecutionBudget
     private readonly TimeProvider clock;
     private readonly long started;
     private TimeSpan lifetimeBound;
+    private DateTimeOffset expiresAt;
     private long bytes;
     private ReadExecutionBudgetNativeWork nativeWork;
     private int resultBytesLimit;
     private long textTokens;
     private ReadExecutionBudgetStageCancellation? stageCancellation;
+    private ExceptionDispatchInfo? indeterminateMetadata;
 
     /// <summary>Starts a budget for one operation; the clock does not alter the hosting runtime.</summary>
     /// <param name="options">Native centrally validated operation limits, captured once for this read.</param>
@@ -40,10 +43,21 @@ public sealed class ReadExecutionBudget
         this.cancellationToken = cancellationToken;
         clock = timeProvider ?? TimeProvider.System;
         started = clock.GetTimestamp();
+        expiresAt = clock.GetUtcNow() + lifetimeBound;
     }
 
     /// <summary>Gets accepted logical key/value bytes; this is not physical disk I/O.</summary>
     public long ReadBytes => bytes;
+
+    /// <summary>Gets the earliest original absolute deadline without reminting it from remaining monotonic time.</summary>
+    internal DateTimeOffset ExpiresAt
+    {
+        get
+        {
+            Check();
+            return expiresAt;
+        }
+    }
 
     internal TimeSpan RemainingLifetime
     {
@@ -72,10 +86,15 @@ public sealed class ReadExecutionBudget
         {
             lifetimeBound = bounded;
         }
+        if (absoluteExpiry < expiresAt)
+        {
+            expiresAt = absoluteExpiry;
+        }
     }
 
     internal CancellationToken Cancellation => cancellationToken;
-    internal int MaximumResultBytes => resultBytesLimit;
+    internal int MaximumResultBytes => lifetimeBindings?.AvailableResultBytes(resultBytesLimit) ?? resultBytesLimit;
+    internal int LifetimeResultBytesLimit => resultBytesLimit;
     internal long MaximumNativeReadBytes => nativeWork.MaximumBytes;
     internal int MaximumNativeScanRecords => nativeWork.MaximumRecords;
     internal int ConstrainedNativeRecords => nativeWork.ExaminedRecords + (readGrants?.ExaminedRecords ?? EmptyClaimedRecords);
@@ -116,12 +135,22 @@ public sealed class ReadExecutionBudget
     /// <summary>Throws when cancellation or the operation deadline prevents further work.</summary>
     public void Check()
     {
+        Volatile.Read(ref indeterminateMetadata)?.Throw();
         cancellationToken.ThrowIfCancellationRequested();
         Volatile.Read(ref stageCancellation)?.Check();
         if (clock.GetElapsedTime(started) > lifetimeBound)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
         }
+    }
+
+    internal bool HasIndeterminateMetadata => Volatile.Read(ref indeterminateMetadata) is not null;
+
+    /// <summary>Retains an uncertain dispatched frame failure without inventing observed work or renewing this ledger.</summary>
+    internal void FailIndeterminateMetadata(Exception original)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        _ = Interlocked.CompareExchange(ref indeterminateMetadata, ExceptionDispatchInfo.Capture(original), null);
     }
 
     internal ReadExecutionBudgetStageCancellationLease EnterStageCancellation(CancellationToken stageToken)
@@ -160,14 +189,7 @@ public sealed class ReadExecutionBudget
     /// <param name="key">Lookup key.</param>
     /// <returns>An independent value buffer or null for an absent record.</returns>
     public byte[]? Read(IKeyValueView view, byte[] key)
-    {
-        ArgumentNullException.ThrowIfNull(view);
-        Check();
-        byte[]? value = null;
-        view.ReadValue(key, borrowed => value = borrowed.ToArray(), ChargeNativeReadRecord);
-        Check();
-        return value;
-    }
+        => ReadExecutionBudgetStorageReads.Read(this, view, key);
 
     /// <summary>Decodes a record directly from gate-scoped bytes after accepting its work.</summary>
     /// <typeparam name="T">Owned decoded record type.</typeparam>
@@ -175,14 +197,7 @@ public sealed class ReadExecutionBudget
     /// <param name="key">Lookup key.</param>
     /// <returns>The decoded record or null for an absent key.</returns>
     public T? ReadRecord<T>(IKeyValueView view, byte[] key) where T : class
-    {
-        ArgumentNullException.ThrowIfNull(view);
-        Check();
-        T? record = null;
-        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), ChargeNativeReadRecord);
-        Check();
-        return record;
-    }
+        => ReadExecutionBudgetStorageReads.ReadRecord<T>(this, view, key);
 
     /// <summary>Visits ordered borrowed records with one cumulative operation budget.</summary>
     /// <param name="view">Storage view inside its read or transaction gate.</param>
@@ -194,13 +209,7 @@ public sealed class ReadExecutionBudget
     /// <returns>Delivered count, stop reason and examined logical storage bytes.</returns>
     public StorageScanResult VisitRange(IKeyValueView view, byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null)
-    {
-        ArgumentNullException.ThrowIfNull(view);
-        Check();
-        var result = view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, ChargeNativeReadRecord, cancellationToken);
-        Check();
-        return result;
-    }
+        => ReadExecutionBudgetStorageReads.VisitRange(this, view, prefix, maxRecords, visitor, afterKey, untilKey);
 
     /// <summary>Materializes only records whose raw work passed the shared budget.</summary>
     /// <param name="view">Storage view inside its read or transaction gate.</param>
@@ -209,15 +218,7 @@ public sealed class ReadExecutionBudget
     /// <param name="afterKey">Optional exclusive lower bound.</param>
     /// <returns>Independent key/value copies and the record-limit lookahead result.</returns>
     public ScanPage Scan(IKeyValueView view, byte[] prefix, int maxRecords, byte[]? afterKey = null)
-    {
-        var records = new List<KeyValueRecord>();
-        var result = VisitRange(view, prefix, maxRecords, (key, value) =>
-        {
-            records.Add(new(key.ToArray(), value.ToArray()));
-            return true;
-        }, afterKey);
-        return new([.. records], result.HasMore);
-    }
+        => ReadExecutionBudgetStorageReads.Scan(this, view, prefix, maxRecords, afterKey);
 
     /// <summary>Checks exact JSON output bytes without allocating the complete serialized result.</summary>
     /// <typeparam name="T">Response type using the current wire serializer options.</typeparam>

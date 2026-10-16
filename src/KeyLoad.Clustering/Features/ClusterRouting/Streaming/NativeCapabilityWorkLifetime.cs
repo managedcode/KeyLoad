@@ -1,20 +1,28 @@
+using System.Collections.Immutable;
 using System.Runtime.ExceptionServices;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Tracks a verified capability phase and joins its exact silo-local work lease.</summary>
-internal sealed class NativeCapabilityWorkLifetime : IDisposable
+internal sealed class NativeCapabilityWorkLifetime : IDisposable, IAsyncDisposable, INativeRequestWorkBinding
 {
     private const int NoPhaseStarted = -1;
 
-    private readonly CancellationToken requestToken;
-    private NativeRequestWorkLease? lease;
-    private CancellationTokenSource? linkedCancellation;
-    private bool settled;
+    private readonly NativeCapabilityWorkRegistration registration;
+    private readonly Lock settlementGate = new();
+    private Task? settlement;
 
-    internal NativeCapabilityWorkLifetime(CancellationToken requestToken) => this.requestToken = requestToken;
+    public NativeRequestWorkLease OriginalProducer => registration.OriginalProducer;
+    public ResourceLifetimeWorkResultRetention ResultRetention => registration.ResultRetention;
+    public void Bind(ResourceLifetimeCoverageV1 coverage) => registration.Bind(coverage);
+    public void Bind(ImmutableArray<ResourceLifetimeV1> lifetimes) => registration.Bind(lifetimes);
+
+    internal NativeCapabilityWorkLifetime(CancellationToken requestToken) => registration = new(requestToken);
 
     internal GrainFailureStage Stage { get; set; } = GrainFailureStage.EnvelopeVerification;
     internal Guid RequestId
@@ -31,29 +39,13 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
     {
         get; set;
     }
-    internal CancellationToken Token => linkedCancellation?.Token ?? requestToken;
+    internal CancellationToken Token => registration.Token;
 
-    internal void Admit(NativeRequestWorkOwner owner, Guid requestId, NativeRequestWorkKind kind)
-    {
-        lease = owner.Acquire(requestId, kind);
-        try
-        {
-            linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(requestToken, owner.ShutdownToken);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            ThrowAdmissionFailure(error);
-            throw;
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            ThrowAdmissionFailure(error);
-            throw;
-        }
-    }
+    internal void Admit(NativeRequestWorkOwner owner, Guid requestId, NativeRequestWorkKind kind,
+        IResourceLifetimeWorkBinding? binding = null) => registration.Admit(owner, requestId, kind, binding);
 
     internal static NativeCapabilityWorkLifetime? Acquire(NativeRequestWorkOwner? owner, Guid requestId,
-        NativeRequestWorkKind kind, CancellationToken requestToken)
+        NativeRequestWorkKind kind, CancellationToken requestToken, IOptions<DatabaseLimits> limits)
     {
         if (owner is null)
         {
@@ -61,8 +53,21 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
         }
 
         var lifetime = new NativeCapabilityWorkLifetime(requestToken);
-        lifetime.Admit(owner, requestId, kind);
-        return lifetime;
+        try
+        {
+            lifetime.registration.Admit(owner, requestId, kind, ownedLimits: limits);
+            return lifetime;
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            lifetime.ThrowAdmissionFailure(error);
+            throw;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            lifetime.ThrowAdmissionFailure(error);
+            throw;
+        }
     }
 
     internal void BeginPhase(DatabasePhaseKind phase)
@@ -92,6 +97,21 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
 
     public void Dispose() => Settle(null, this, null, null);
 
+    public ValueTask DisposeAsync() => new(SettleAsync(PrimaryError, this, null, null));
+
+    internal static Task SettleAsync(Exception? primary, NativeCapabilityWorkLifetime? lifetime,
+        Action? telemetry, Action? activation)
+    {
+        if (lifetime is null)
+        {
+            return NativeCapabilityWorkSettlement.SettleAsync(primary, null, telemetry, activation);
+        }
+        lock (lifetime.settlementGate)
+        {
+            return lifetime.settlement ??= NativeCapabilityWorkSettlement.SettleAsync(primary, lifetime, telemetry, activation);
+        }
+    }
+
     internal static Exception CombinePrimary(Exception? primary, Exception additional)
     {
         if (primary is null || ReferenceEquals(primary, additional))
@@ -109,12 +129,12 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
         const int FailuresCountValidationBoundary = 0;
 
         var failures = default(NativeCapabilityCleanupFailures);
-        Capture(telemetry, ref failures);
-        Capture(activation, ref failures);
+        NativeCapabilityWorkSettlement.Capture(telemetry, ref failures);
+        NativeCapabilityWorkSettlement.Capture(activation, ref failures);
         lifetime?.CaptureRelease(ref failures);
         if (failures.Count > FailuresCountValidationBoundary)
         {
-            ThrowCombined(primary, failures);
+            NativeCapabilityWorkSettlement.ThrowCombined(primary, failures);
         }
     }
 
@@ -132,160 +152,18 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
         const int NoCleanupFailures = 0;
         if (failures.Count > NoCleanupFailures)
         {
-            ThrowCombined(primary, failures);
+            NativeCapabilityWorkSettlement.ThrowCombined(primary, failures);
         }
 
         ExceptionDispatchInfo.Capture(primary).Throw();
     }
 
-    private void CaptureRelease(ref NativeCapabilityCleanupFailures failures)
-    {
-        if (settled)
-        {
-            return;
-        }
+    private void CaptureRelease(ref NativeCapabilityCleanupFailures failures) => registration.Release(ref failures);
 
-        settled = true;
-        if (linkedCancellation is not null)
-        {
-            try
-            {
-                linkedCancellation.Dispose();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            linkedCancellation = null;
-        }
-        if (lease is not null)
-        {
-            try
-            {
-                lease.Dispose();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            lease = null;
-        }
-    }
+    internal NativeRequestWorkLease? CaptureAsyncRelease(ref NativeCapabilityCleanupFailures failures)
+        => registration.ReleaseAsyncState(ref failures);
 
-    private static void Capture(Action? operation, ref NativeCapabilityCleanupFailures failures)
-    {
-        if (operation is null)
-        {
-            return;
-        }
+    internal Task PrepareOwnedReleaseAsync() => registration.PrepareOwnedReleaseAsync();
+    internal Exception? ReleaseOwnedRetention() => registration.ReleaseOwnedRetention();
 
-        try
-        {
-            operation();
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-    }
-
-    private static void ThrowCombined(Exception? primary, NativeCapabilityCleanupFailures cleanup)
-    {
-        const int EmptyFailuresCount = 1;
-        const int IndexEmptyCount = 0;
-
-        var fatal = CqrsRuntimeFailures.FindFatal(primary) ?? cleanup.FindFatal();
-        if (fatal is not null)
-        {
-            ExceptionDispatchInfo.Capture(fatal).Throw();
-        }
-
-        const int NoPrimaryFailure = 0;
-        const int SinglePrimaryFailure = 1;
-        var failures = new List<Exception>(cleanup.Count + (primary is null ? NoPrimaryFailure : SinglePrimaryFailure));
-        if (primary is not null)
-        {
-            failures.Add(primary);
-        }
-        cleanup.AppendDistinct(primary, failures);
-        if (failures.Count == EmptyFailuresCount)
-        {
-            ExceptionDispatchInfo.Capture(failures[IndexEmptyCount]).Throw();
-        }
-        throw new AggregateException(failures);
-    }
-}
-
-/// <summary>Retains the four ordered cleanup failures possible for one capability settlement.</summary>
-internal struct NativeCapabilityCleanupFailures
-{
-    private const string CleanupOverflowMessage = "Capability cleanup exceeded its fixed stages.";
-
-    private Exception? first;
-    private Exception? second;
-    private Exception? third;
-    private Exception? fourth;
-
-    internal int Count
-    {
-        get; private set;
-    }
-
-    internal void Add(Exception error)
-    {
-        const int FirstCleanupFailureIndex = 0;
-        const int SecondCleanupFailureIndex = 1;
-        const int ThirdCleanupFailureIndex = 2;
-        const int FourthCleanupFailureIndex = 3;
-
-        switch (Count++)
-        {
-            case FirstCleanupFailureIndex:
-                first = error;
-                break;
-            case SecondCleanupFailureIndex:
-                second = error;
-                break;
-            case ThirdCleanupFailureIndex:
-                third = error;
-                break;
-            case FourthCleanupFailureIndex:
-                fourth = error;
-                break;
-            default:
-                throw new InvalidOperationException(CleanupOverflowMessage);
-        }
-    }
-
-    internal readonly Exception? FindFatal()
-        => CqrsRuntimeFailures.FindFatal(first) ?? CqrsRuntimeFailures.FindFatal(second)
-            ?? CqrsRuntimeFailures.FindFatal(third) ?? CqrsRuntimeFailures.FindFatal(fourth);
-
-    internal readonly void AppendDistinct(Exception? primary, List<Exception> failures)
-    {
-        Append(first, primary, failures);
-        Append(second, primary, failures);
-        Append(third, primary, failures);
-        Append(fourth, primary, failures);
-    }
-
-    private static void Append(Exception? error, Exception? primary, List<Exception> failures)
-    {
-        if (error is not null && !ReferenceEquals(error, primary))
-        {
-            failures.Add(error);
-        }
-    }
 }

@@ -1,4 +1,3 @@
-using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
@@ -11,8 +10,6 @@ namespace KeyLoad.Storage.ZoneTree;
 /// </summary>
 public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogBackupStore
 {
-    private const int NextJournalSequenceIncrement = 1;
-    private const int NoMutations = 0;
     private const string InvalidNativeReadCutContextMessage = "A native read cut must be captured inside this store's gated read callback.";
 
     private readonly ZoneTreeStoreRuntime runtime;
@@ -103,32 +100,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     /// <param name="compile">Synchronous compiler receiving the staged transaction and proposed position.</param>
     /// <returns>The compiler result after the journal and materialized tree are published.</returns>
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile)
-    {
-        ArgumentNullException.ThrowIfNull(compile);
-        var holdStarted = ZoneTreePhaseGate.EnterCommit(runtime);
-        var holdOutcome = DatabasePhaseOutcome.Faulted;
-        try
-        {
-            runtime.Check();
-            var tx = new ZoneTreeTransaction(runtime);
-            var nextPosition = checked(runtime.Position + NextJournalSequenceIncrement);
-            var result = compile(tx, nextPosition);
-            var changes = tx.PrepareChanges();
-            if (changes.Length == NoMutations)
-            {
-                holdOutcome = DatabasePhaseOutcome.Completed;
-                return result;
-            }
-
-            ZoneTreeJournalPublication.Publish(runtime, tx, changes, nextPosition);
-            holdOutcome = DatabasePhaseOutcome.Completed;
-            return result;
-        }
-        finally
-        {
-            ZoneTreePhaseGate.ExitCommit(runtime, holdStarted, holdOutcome);
-        }
-    }
+        => ZoneTreeStoreCommitExecution.Commit(runtime, compile);
 
     internal ZoneTreeReadCutLease CaptureNativeReadCut(IKeyValueView view, ZoneTreeReadCutLimits limits,
         CancellationToken cancellationToken)
@@ -272,6 +244,47 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
         ZoneTreeCatalogRestoreEntry.Restore(backup, destination, executionOptions, verifyCatalog,
             newIncarnation, newSigningKey, cancellationToken);
 
+    /// <summary>Restores a conserved archive to an explicitly configured genuinely fresh physical owner.</summary>
+    /// <param name="backup">Original complete archive.</param>
+    /// <param name="destination">Empty unpublished destination.</param>
+    /// <param name="executionOptions">Validated original storage budgets.</param>
+    /// <param name="newIncarnation">Explicit target incarnation.</param>
+    /// <param name="newSigningKey">Distinct target signing identity.</param>
+    /// <param name="targetOwner">Actual target owner configuration, never derived from an incarnation.</param>
+    /// <param name="cancellationToken">Original workflow cancellation.</param>
+    /// <returns>The new paused identity after conserved publication.</returns>
+    public static StoreIdentity Restore(string backup, string destination,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid newIncarnation,
+        byte[] newSigningKey, PhysicalShardRecord targetOwner, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(targetOwner);
+        return ZoneTreeBackupRestoreRestore.Restore(backup, destination, executionOptions, newIncarnation,
+            newSigningKey, cancellationToken: cancellationToken, targetOwner: targetOwner);
+    }
+
+    /// <summary>Restores a catalog archive with explicit verified original-to-target conservation provenance.</summary>
+    /// <param name="backup">Original catalog archive.</param>
+    /// <param name="destination">Empty unpublished target.</param>
+    /// <param name="executionOptions">Validated original storage budgets.</param>
+    /// <param name="verifyCatalog">Original synchronous credential and complete-cut validator.</param>
+    /// <param name="newIncarnation">Explicit new group incarnation.</param>
+    /// <param name="newSigningKey">Distinct new signing identity.</param>
+    /// <param name="cancellationToken">Original owning workflow cancellation.</param>
+    /// <param name="resolveOwnerMapping">Actual verified mapping resolved after catalog validation on the same source transaction.</param>
+    /// <returns>The new paused identity after conserved publication.</returns>
+    public static StoreIdentity RestoreCatalogBackup(string backup, string destination,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
+        Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>> verifyCatalog,
+        Guid newIncarnation, byte[] newSigningKey,
+        Func<IKeyValueView, StoreIdentity, long, ClusterRestoreOwnerMapping> resolveOwnerMapping,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(verifyCatalog);
+        ArgumentNullException.ThrowIfNull(resolveOwnerMapping);
+        return ZoneTreeBackupRestoreRestore.Restore(backup, destination, executionOptions, newIncarnation,
+            newSigningKey, verifyCatalog, resolveOwnerMapping, cancellationToken: cancellationToken);
+    }
+
     /// <summary>Returns cumulative logical read work for this store's nonpersisted diagnostics session.</summary>
     /// <remarks>
     /// Fields are observed independently; exact operation deltas require an isolated, quiescent window.
@@ -322,15 +335,17 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     /// <param name="verifyRecovered">Actual complete recovered-state and fresh persisted operator verification.</param>
     /// <param name="observer">Optional internal post-barrier process-cut observation; supplies no authority.</param>
     /// <param name="cancellationToken">Original downward cancellation.</param>
+    /// <param name="resolveOwnerMapping">Verified explicit original-to-target mapping resolved after reconciliation on the same transaction.</param>
     /// <returns>Genuine native rows independently observed after stores/readers have joined.</returns>
     public static NativeCatalogRestoreSlotCompletion RestoreCatalogBackupSlot(string backup, string destination,
         string stage, Microsoft.Extensions.Options.IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
         TimeProvider clock, ClusterRestoreSlotContext context, ReadOnlyMemory<byte> targetSigningKey,
         Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>, ClusterRestoreSlotContext> verifyOrReconcile,
         Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verifyRecovered,
-        Action<NativeClusterRestoreStage>? observer, CancellationToken cancellationToken)
+        Action<NativeClusterRestoreStage>? observer, CancellationToken cancellationToken,
+        Func<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext, ClusterRestoreOwnerMapping>? resolveOwnerMapping = null)
         => ZoneTreeRestoreSlotDriver.Restore(backup, destination, stage, executionOptions, clock, context,
-            targetSigningKey, verifyOrReconcile, verifyRecovered, observer, cancellationToken);
+            targetSigningKey, verifyOrReconcile, verifyRecovered, observer, cancellationToken, resolveOwnerMapping);
 
     /// <summary>Requires the exact existing original completed slot without copy, reconciliation or authority reset.</summary>
     /// <param name="backup">The unchanged verified native source archive.</param>

@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
@@ -10,7 +11,7 @@ internal static class PartitionQueryPublicExecution
 
     internal static PartitionQueryPageV1 Execute(QueryEngine engine, string principalId,
         PartitionQueryRequestV1 request, PhysicalShardRecord expectedOwner,
-        TimeProvider? timeProvider, CancellationToken cancellationToken)
+        TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
@@ -18,6 +19,10 @@ internal static class PartitionQueryPublicExecution
         var owner = engine.PartitionQueryOwner;
         var budget = new ReadExecutionBudget(owner.OperationLimitsOptions, timeProvider ?? owner.EvaluationClock,
             cancellationToken);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         budget.Check();
         using var admission = owner.AdmitQuery(cancellationToken);
         budget.Check();

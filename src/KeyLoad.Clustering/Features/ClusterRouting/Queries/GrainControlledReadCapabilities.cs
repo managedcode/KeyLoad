@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -11,7 +12,7 @@ internal static class GrainControlledReadCapabilities
 
     internal static object Execute(DatabaseEngine database, IServiceProvider services,
         TimeProvider clock, PrincipalRecord principal, DecodedGrainRequest request,
-        CancellationToken cancellationToken)
+        IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         var limits = services.GetRequiredService<IOptions<DatabaseLimits>>();
         return request.Envelope.ReadKind switch
@@ -20,15 +21,15 @@ internal static class GrainControlledReadCapabilities
                 GrainNativePayload.Read<global::KeyLoad.Core.Features.ClusterRouting.Contracts.OwnerCapacityReadRequestV1>(request.Payload),
                 services.GetRequiredService<ReplicaSiloDiscoveryState>(), limits, clock, cancellationToken),
             GrainReadKind.OwnedDocumentV2 or GrainReadKind.ControlledDocumentV2 => DocumentLifetimeReadCapabilities.Execute(
-                database, services, clock, principal, request, cancellationToken),
+                database, services, clock, principal, request, binding, cancellationToken),
             GrainReadKind.PartitionQueryLeafV2 or GrainReadKind.DistributedSearchLeafV2 => QueryLifetimeReadCapability.Execute(
-                database, services, clock, principal, request, cancellationToken),
+                database, services, clock, principal, request, cancellationToken, binding),
             GrainReadKind.ControlledBlobOutcomeV2 => ControlledBlobOutcomeReadExecutionV2.Execute(database,
                 limits, clock, principal, request.Envelope,
-                GrainNativePayload.Read<ControlledBlobReadRequestV2>(request.Payload), cancellationToken),
+                GrainNativePayload.Read<ControlledBlobReadRequestV2>(request.Payload), binding, cancellationToken),
             GrainReadKind.ControlledBlobV2 => ControlledBlobReadExecutionV2.Execute(database,
                 limits, clock, principal, request.Envelope,
-                GrainNativePayload.Read<ControlledBlobReadRequestV2>(request.Payload), cancellationToken),
+                GrainNativePayload.Read<ControlledBlobReadRequestV2>(request.Payload), binding, cancellationToken),
             GrainReadKind.PartitionMovementOutcome => PartitionMovementOutcomeExecution.Execute(database,
                 principal, GrainNativePayload.Read<PartitionMovementOutcomeQuery>(request.Payload),
                 limits, clock, cancellationToken),

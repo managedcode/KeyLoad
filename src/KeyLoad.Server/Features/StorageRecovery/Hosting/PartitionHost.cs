@@ -95,7 +95,8 @@ internal sealed class PartitionHost : IAsyncDisposable
         log = new(stores.Replica, replicaOptions,
             faultObserver: options.RequestCqrsProbe.Enabled ? ObserveReplicaLog : null, canonicalDatabase: Database);
         ownership.Host.NativeConstructorReturned();
-        var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
+        var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions, replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken)));
         snapshots.Recover();
         new BlobStorageOperations(Database).NormalizeRestoredStore();
         PartitionDatabaseComposition.BootstrapFreshNode(stores, Database, options);

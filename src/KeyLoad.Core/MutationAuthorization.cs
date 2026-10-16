@@ -27,6 +27,11 @@ public sealed partial class DatabaseEngine
     private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect,
         BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
     {
+        if (effect is UpsertAnalyticsEvents or DeleteAnalyticsEvents)
+        {
+            AuthorizeAnalyticsMutation(view, principal, partition, effect);
+            return;
+        }
         if (effect is AdvanceQueueDeadline deadline)
         {
             AuthorizeQueueDeadline(view, principal, partition, deadline);

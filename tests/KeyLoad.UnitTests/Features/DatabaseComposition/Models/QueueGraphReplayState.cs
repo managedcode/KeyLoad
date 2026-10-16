@@ -4,7 +4,8 @@ internal sealed record QueueGraphReplayState(
     QueueGraphIdentityState Source,
     ReplicatedOperation Reverse,
     byte[] ReverseReceipt,
-    ReplicatedOperation Next)
+    ReplicatedOperation Next,
+    EntityRef ContinuationReference)
 {
     internal byte[] NextReceipt { get; set; } = [];
     internal const string OtherEndpoint = "other";

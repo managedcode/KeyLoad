@@ -17,7 +17,7 @@ internal static class TextIndexWaitExecution
         WaitForIndexRequest request, ReadExecutionBudget budget)
     {
         WaitForIndexReadCutObservation? observation = null;
-        var completed = database.WithQueryView(principalId, request.Partition, request.Collection, (view, principal, resource) =>
+        var completed = database.WithQueryView(principalId, request.Partition, request.Collection, Capability.None, (view, principal, resource) =>
         {
             FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
             if (string.IsNullOrEmpty(request.TextField) || request.MinimumToken is null)
@@ -65,7 +65,7 @@ internal static class TextIndexWaitExecution
             observation = readCutObserver is null ? null
                 : WaitForIndexReadCutObservationDispatch.Capture(database, principal, resource, request, result, budget);
             return result;
-        });
+        }, budget);
         WaitForIndexReadCutObservationDispatch.Observe(readCutObserver, observation, budget);
         return completed;
     }

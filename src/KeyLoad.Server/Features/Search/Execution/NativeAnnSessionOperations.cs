@@ -21,10 +21,10 @@ internal static class NativeAnnSessionOperations
 
     internal static AnnMaintenanceCapabilityResult Execute(DatabaseEngine database, NativeAnnGenerationOwner owner,
         NativeAnnStageStore stages, NativeAnnMaintenanceSession session, PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock, CancellationToken token)
+        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
         token.ThrowIfCancellationRequested();
-        var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+        var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
         owner.MaintenanceMemory.Expand(session.Memory);
         var available = owner.MaintenanceMemory.Remaining(checked(session.RetainedBytes
             + (session.Replay?.MaximumStagePeakBytes ?? Empty)));

@@ -63,6 +63,8 @@ internal static class SqlOperationCompiler
                 execute, maximumPayloadBytes, positionalParameterCount, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement insert => Composition(request, insert,
                 maximumPayloadBytes, limitsOptions, positionalParameterCount, budget.Check, token),
+            global::Microsoft.SqlServer.TransactSql.ScriptDom.DropTableStatement drop => ScriptDomDropTableOperation.Compile(
+                request, drop, limitsOptions, maximumPayloadBytes, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table => ScriptDomCreateTableOperation.Compile(
                 request, table, limitsOptions, maximumPayloadBytes, budget.Check, token),
             _ => throw ScriptDomOperationErrors.Unsupported()

@@ -539,6 +539,46 @@ AC-IS-TYPE-FRAMING-002: representative CommandRequest and QueueCounters operatio
 
 Implementation: UnitTests InternalSerialization Cases/NativeEncodedTypeMeasureTests.cs owns three complete scenarios; Fixtures/NativeEncodedTypeFrameFixture.cs owns real native writer/reader APIs and literal payloads. Related ADR060, REQ/AC-IS-TYPE-FRAMING-001 and TASK-KL036-NATIVE-TYPE-FRAMING-001 remain unchanged. Root owns guarded source join/full build/normal+scalar native metadata and runtime qualification. These tests qualify framing/serializer operations only; current63-schema parent capacity, operational+1, arbitrary future SafeDetail, and genuine parent/RF3 gates remain OPEN. Rollback removes only these additive tests/docs; no persistence/alias/ID/format/API/default changes. Source-authored cases are not observed discovery or PASS.
 
+
+## Approved immutable analytics maps, 2026-10-16
+
+AnalyticsStore's public `ImmutableDictionary<string, string/double/long>` values
+use the current centrally pinned Orleans 10.4.0 `ImmutableDictionaryCodec<TKey,TValue>`
+(package-declared source `d114d7522a53b8cce4c6b97d44293e5c7273d766`).
+KeyLoad admits only that exact built-in outer type and its generated surrogate:
+field0 is one nonnull freshly encoded `Dictionary<TKey,TValue>` Values, field1 is
+an optional default-null or already supported well-known string value comparer.
+The same strict comparer rule applies to the surrogate Values dictionary key
+comparer; ordinary standalone Dictionary admission remains unchanged.
+The existing dictionary walker still validates count, complete key/value pairs,
+types, references, UTF-8 and depth before generated allocation. Unknown members,
+base scopes, missing/duplicate/null Values, custom comparers and other unverified
+system surrogates remain refused. Postdecode required-member, graph, cycle and
+work validation is unchanged. Native binary map output remains noncanonical.
+
+This repairs KeyLoad-owned admission of an already selected generated codec.
+The existing Orleans wire encoding, native envelope, persisted field IDs/aliases,
+public immutable DTOs, built-in codec, format identity, authority, capacity and
+public JSON contract remain unchanged. The supported native type inventory is
+additive: older KeyLoad admission rejects immutable-map frames and the new
+AnalyticsStore DTO aliases. This is not mixed-reader compatibility.
+
+Before adoption or writes of the newly admitted types, deploy one homogeneous
+current Orleans 10.4.0 exact-source, DLL and pinned-native-codec reader cohort and qualify its existing
+current-format cold, process-recovery and public RF3 paths. Older readers must
+fail closed; no reader fallback, automatic migration or compatibility rewriting
+is allowed. Historical 10.3.1 package inspection is not current-reader evidence
+and establishes no support for 10.3.1 readers or mixed-version operation. The current
+package DLL/XML, declared source commit and native writer APIs require their own
+source-bound compiler and runtime qualification; source matching alone is not PASS. No wire provider or version bump is introduced by this admission
+repair. The original byte, count, lifetime and persisted-authority budgets remain
+mandatory. Focused qualification includes malformed/oversized native map
+frames, native JSON batch normalization and ordered Analytics apply, complete raw
+rows and all five actual native aggregates through GrainValue and public JSON,
+original receipt replay, cancellation/read/result limits and two joined cold
+reopens of the same canonical and replica journals. Source preparation alone does
+not qualify compilation, recovery, public RF3 or Linux execution.
+
 ## Movement native identity representation repair (R612, source-only)
 
 The homogeneous current movement path retains its complete generated

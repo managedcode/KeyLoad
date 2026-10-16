@@ -12,10 +12,7 @@ public sealed partial class KeyLoadClient
     /// <param name="streamingOptions">The central native frame/failure/total streaming policy.</param>
     public KeyLoadClient(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> executionOptions,
         IOptions<CqrsStreamClientOptions> streamingOptions)
-    {
-        ArgumentNullException.ThrowIfNull(streamingOptions);
-        transport = new Features.ClientApi.KeyLoadClientTransport(http, apiKey, executionOptions, streamingOptions);
-    }
+        => transport = Features.ClientApi.KeyLoadClientTransport.CreateStreaming(http, apiKey, executionOptions, streamingOptions);
 
     internal Features.ClientApi.KeyLoadClientTransport HttpTransport => transport;
 }

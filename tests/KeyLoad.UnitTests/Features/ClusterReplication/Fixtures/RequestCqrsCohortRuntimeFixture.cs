@@ -33,6 +33,11 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly RequestCqrsCohortCheckpointScenario? checkpoints;
     private readonly ReplicaBarrierDeadlineScenario? barrierDeadline;
     private readonly byte[]? canonicalKey;
+    internal global::KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsHostedProfile? Hosted
+    {
+        get;
+    }
+    internal TestCluster Cluster => cluster;
     internal bool HasBarrierDeadline => barrierDeadline is not null;
     private readonly Lock lifecycle = new();
     private Task? disposal;
@@ -42,16 +47,23 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     internal IReadOnlyList<string> RuntimeAddresses { get; private set; } = [];
 
     internal RequestCqrsCohortRuntimeFixture(RequestCqrsCohortCheckpointScenario? checkpoints = null,
-        ReplicaBarrierDeadlineScenario? barrierDeadline = null)
+        ReplicaBarrierDeadlineScenario? barrierDeadline = null,
+        global::KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsHostedProfile? hosted = null)
     {
         if (checkpoints is not null && barrierDeadline is not null)
         {
             CryptographicOperations.ZeroMemory(secret);
             throw new ArgumentException("Native checkpoint and barrier observers require separate fixture ownership.");
         }
+        if (hosted is not null && (checkpoints is not null || barrierDeadline is not null))
+        {
+            CryptographicOperations.ZeroMemory(secret);
+            throw new ArgumentException(global::KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsHostedProtocol.ProfileRequired);
+        }
+        Hosted = hosted;
         this.checkpoints = checkpoints;
         this.barrierDeadline = barrierDeadline;
-        canonicalKey = barrierDeadline is null ? null : RandomNumberGenerator.GetBytes(ReplicaBarrierDeadlineScenario.CanonicalKeyBytes);
+        canonicalKey = barrierDeadline is null && hosted is null ? null : RandomNumberGenerator.GetBytes(ReplicaBarrierDeadlineScenario.CanonicalKeyBytes);
         try
         {
             RequestCqrsCohortOwners.Register(ownerId, this);
@@ -65,6 +77,10 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         builder.Options.ConnectionTransport = ConnectionTransportType.TcpSocket;
         builder.Properties[RequestCqrsCohortOwners.Key] = ownerId;
         builder.AddSiloBuilderConfigurator<RequestCqrsCohortNativeConfigurator>();
+        if (Hosted is not null)
+        {
+            builder.AddClientBuilderConfigurator<global::KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsHostedClientConfigurator>();
+        }
         return builder.Build();
     }
     internal RequestCqrsCohortNativeNode CreateNode(string voter, ILocalSiloDetails local, IServiceProvider services)
@@ -77,7 +93,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         var node = new RequestCqrsCohortNativeNode(voter, local, services,
             ReplicaBarrierDeadlineScenario.Configuration(voter, Voters, Incarnation, barrierDeadline is not null),
             secret, checkpoints, barrierDeadline,
-            canonicalKey is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(canonicalKey));
+            canonicalKey is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(canonicalKey), Hosted);
         if (nodes.TryAdd(voter, node))
         {
             return node;
@@ -89,12 +105,14 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     private static readonly System.Collections.Immutable.ImmutableArray<string> Voters =
         [RequestCqrsCohortScenario.LocalVoter, RequestCqrsCohortScenario.FirstRemote, RequestCqrsCohortScenario.SecondRemote];
     internal RequestCqrsCohortNativeNode Node(string voter) => nodes[voter];
-    public async Task InitializeAsync()
+    public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
+    internal async Task InitializeAsync(CancellationToken cancellationToken)
     {
         using var deadline = new CancellationTokenSource(StartupBound, TimeProvider.System);
+        using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         try
         {
-            await cluster.DeployAsync(deadline.Token);
+            await cluster.DeployAsync(startup.Token);
             var silos = cluster.Silos.OfType<InProcessSiloHandle>().ToArray();
             if (silos.Length != Voters.Length)
             {
@@ -104,6 +122,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
             LocalServices = silos.Single(s => s.ServiceProvider.GetRequiredService<ILocalSiloDetails>().Name == RequestCqrsCohortScenario.LocalVoter).ServiceProvider;
             LocalSilo = LocalServices.GetRequiredService<ILocalSiloDetails>();
             RuntimeAddresses = Voters.Select(v => Node(v).Discovery.RuntimeAddress).ToArray();
+            Hosted?.BindLocalServices(LocalServices);
         }
         catch (Exception primary)
         {
@@ -171,36 +190,13 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
             throw new InvalidOperationException("The genuine native restart retained its previous generation.");
         }
     }
-    private async Task StopClusterAsync()
-    {
-        checkpoints?.Release();
-        barrierDeadline?.Release();
-        using var deadline = new CancellationTokenSource(ShutdownBound, TimeProvider.System);
-        var failures = new List<Exception>();
-        foreach (var node in nodes.Values)
+    private Task StopClusterAsync()
+        => RequestCqrsCohortShutdown.StopAsync(cluster, nodes.Values, () =>
         {
-            node.Observation.ReleaseAll();
-            if (node.Runtime is { } runtime)
-            {
-                await ServerFailureObserver.ObserveAsync(runtime.StopAsync, failures);
-            }
+            checkpoints?.Release();
+            barrierDeadline?.Release();
+        }, ShutdownBound);
 
-            await ServerFailureObserver.ObserveAsync(() => node.Journal.Consensus.StopAsync(deadline.Token), failures);
-        }
-        await ServerFailureObserver.ObserveAsync(() => cluster.StopAllSilosAsync(deadline.Token), failures);
-        try
-        {
-            await cluster.DisposeAsync();
-        }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        foreach (var node in nodes.Values)
-        {
-            await ServerFailureObserver.ObserveAsync(() => node.DisposeAsync().AsTask(), failures);
-        }
-
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
     public ValueTask DisposeAsync()
     {
         lock (lifecycle)
@@ -221,10 +217,18 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
 
     private async Task DisposeCoreAsync()
     {
+        var joined = false;
         try
         {
             await StopClusterAsync();
+            joined = true;
         }
-        finally { ReleaseIdentity(); }
+        finally
+        {
+            if (Hosted is null || joined)
+            {
+                ReleaseIdentity();
+            }
+        }
     }
 }

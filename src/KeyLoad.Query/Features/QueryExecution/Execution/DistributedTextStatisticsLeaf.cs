@@ -35,7 +35,7 @@ internal static class DistributedTextStatisticsLeaf
             (view, principal, resource, digest) => Capture(database, view, principal, resource, digest,
                 request, owner, tenant, execution, budget, grant, metadata);
         return metadata is null
-            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read)
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read, budget)
             : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
                 grant, budget, metadata, read);
     }

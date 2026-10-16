@@ -12,8 +12,10 @@ internal static class RemoteQueryLifetimeSource
         PrincipalRecord principal, ResourceDefinition resource, string digest, PartitionRef partition,
         ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget)
     {
-        var coverage = PartitionControlLifetimeCoverage.Capture(budget.CreateView(view, grant), partition,
+        var charged = budget.CreateView(view, grant);
+        var coverage = PartitionControlLifetimeCoverage.Capture(charged, partition,
             [resource], database.Limits.MaxBatchBytes);
+        budget.CaptureAuthenticatedResourceLifetimes(database, charged, coverage, [resource]);
         var original = new PartitionQuerySourceFence(database.CaptureRemotePartitionQuery(view, principal,
             partition, resource.Name, grant), digest);
         return new(original, new(resource, coverage, principal));

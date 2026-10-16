@@ -53,8 +53,11 @@ internal sealed class GraphSearchReachabilityReader(
             {
                 continue;
             }
-            visibility.RequireStart(seed);
-            AddVertex(seed, SeedDepth);
+            var admitted = visibility.RequireStart(seed);
+            if (!shortestHops.ContainsKey(admitted))
+            {
+                AddVertex(admitted, SeedDepth);
+            }
         }
     }
 
@@ -86,6 +89,7 @@ internal sealed class GraphSearchReachabilityReader(
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace, partition, walk.Graph, edgeId))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        _ = visibility.CanVisit(edge.From);
         budget.Check();
         if (edge.Id != edgeId || edge.From != current.Reference || edge.To.Partition != partition
             || !key.SequenceEqual(KeySpace.Partition(AdjacencySpace, partition, walk.Graph,

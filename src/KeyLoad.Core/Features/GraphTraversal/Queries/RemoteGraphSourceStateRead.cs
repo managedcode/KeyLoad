@@ -58,7 +58,7 @@ public sealed partial class DatabaseEngine
     {
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
         Authorization.Require(principal, request.SourcePartition, request.Graph, Capability.GraphWrite);
-        var graph = Resource(view, request.SourcePartition, request.Graph, ResourceKind.Graph);
+        var graph = BindAuthorizedReadResource(view, request.SourcePartition, request.Graph, ResourceKind.Graph);
         var cut = CaptureRemoteGraphOwnerCut(view, principal, request.SourcePartition,
             request.SourceOwner, graph.SchemaVersion);
         var edge = view.GetRecord<EdgeRecord>(EdgeKey(request.SourcePartition, request.Graph, request.EdgeId));
@@ -85,6 +85,7 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
             }
+            ObserveRemoteGraphReadIntent(view, intent, work, target: false);
             intents.Add(intent);
             return true;
         });

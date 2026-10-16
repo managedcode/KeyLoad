@@ -7,7 +7,7 @@ internal static class SqlCreateTableRefusals
     private const string UnsupportedType = "CREATE TABLE [never-created] (id NVARCHAR(MAX) NOT NULL PRIMARY KEY, value FLOAT NOT NULL)";
     private const string UnsupportedDefault = "CREATE TABLE [never-created] (id NVARCHAR(MAX) NOT NULL PRIMARY KEY, value BIGINT NOT NULL DEFAULT 1)";
     private const string UnsupportedAlter = "ALTER TABLE [never-created] ADD value BIGINT NOT NULL";
-    private const string UnsupportedDrop = "DROP TABLE [never-created]";
+    private const string UnsupportedDrop = "DROP TABLE IF EXISTS [never-created]";
     private const string InvalidPrimary = "CREATE TABLE [never-created] (id NVARCHAR(MAX) NULL PRIMARY KEY)";
     private const string Malformed = "CREATE TABLE [never-created] (id NVARCHAR(MAX) NOT NULL PRIMARY KEY,";
     internal static async Task<Guid> RunAsync(TestDatabase fixture, CancellationToken token)

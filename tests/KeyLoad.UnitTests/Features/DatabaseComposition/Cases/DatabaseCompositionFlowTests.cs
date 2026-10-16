@@ -28,6 +28,8 @@ internal sealed class DatabaseCompositionFlowTests
         using var db = NewDatabase();
         var from = Vertex(db, First);
         var to = Vertex(db, Second);
+        var expectedFrom = DatabaseCompositionExpectedReferences.Capture(db, from);
+        var expectedTo = DatabaseCompositionExpectedReferences.Capture(db, to);
         var payload = JsonSerializer.Serialize(new QueueGraphLink(from, to, Label), JsonDefaults.Options);
         db.Commit(new EnqueueMessage(Queue, Message, payload));
         var sourceBefore = db.Database.InspectMessage(Root, new(db.Partition, Queue), Message);
@@ -39,8 +41,8 @@ internal sealed class DatabaseCompositionFlowTests
         await Assert.That(projected.Mutations).HasSingleItem();
         await Assert.That(graph.Edges).HasSingleItem();
         await Assert.That(graph.Edges[0].Id).IsEqualTo(EdgePrefix + Message);
-        await Assert.That(graph.Edges[0].From).IsEqualTo(from);
-        await Assert.That(graph.Edges[0].To).IsEqualTo(to);
+        await Assert.That(graph.Edges[0].From).IsEqualTo(expectedFrom);
+        await Assert.That(graph.Edges[0].To).IsEqualTo(expectedTo);
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(source.PayloadJson).IsEqualTo(sourceBefore!.PayloadJson);
 
@@ -49,8 +51,8 @@ internal sealed class DatabaseCompositionFlowTests
         var link = JsonSerializer.Deserialize<QueueGraphLink>(derived!.PayloadJson!, JsonDefaults.Options);
         await Assert.That(reverse.Mutations).HasSingleItem();
         await Assert.That(derived.Metadata.State).IsEqualTo(MessageState.Ready);
-        await Assert.That(link!.From).IsEqualTo(from);
-        await Assert.That(link.To).IsEqualTo(to);
+        await Assert.That(link!.From).IsEqualTo(expectedFrom);
+        await Assert.That(link.To).IsEqualTo(expectedTo);
         await Assert.That(link.Label).IsEqualTo(Label);
     }
 

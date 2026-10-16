@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using Orleans.Streams;
@@ -15,7 +16,7 @@ internal static class EventFeedTailExecution
         DecodedGrainRequest original, EventFeedControlRequest request,
         global::Orleans.Runtime.IGrainContext context, ReadExecutionBudget work,
         IOptions<DatabaseLimits> limits, IOptions<GrainRoutingOptions> routing,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
         var token = writer.CancellationToken;
         token.ThrowIfCancellationRequested();
@@ -49,16 +50,16 @@ internal static class EventFeedTailExecution
             subscription = await stream.SubscribeAsync(observer).ConfigureAwait(true);
             token.ThrowIfCancellationRequested();
             terminal = await ReadAsync(actualParent, original, request.Limit, observer,
-                work, routing, writer).ConfigureAwait(true);
+                work, routing, writer, binding).ConfigureAwait(true);
         }
     }
 
     private static async Task<EventFeedControlResult?> RecheckAsync(IEventVectorParent actualParent,
         DecodedGrainRequest original, EventFeedTailSignalOwner observer,
-        ReadExecutionBudget work, CancellationToken cancellationToken)
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         var before = observer.State().OriginalFailure;
-        var read = new EventFeedTailReadAttempt(actualParent, original, work, cancellationToken);
+        var read = new EventFeedTailReadAttempt(actualParent, original, work, binding, cancellationToken);
         var readFailure = await NativeRequestWorkSettlement.JoinAsync(read.ReadAsync()).ConfigureAwait(true);
         var after = observer.State().OriginalFailure;
         var failure = before is null
@@ -76,19 +77,19 @@ internal static class EventFeedTailExecution
     private static async Task<GrainOperationReply> ReadAsync(IEventVectorParent actualParent,
         DecodedGrainRequest original, int maximum, EventFeedTailSignalOwner observer,
         ReadExecutionBudget work, IOptions<GrainRoutingOptions> routing,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
         EventFeedControlResult? last = null;
         var delivered = NoDeliveries;
         while (delivered < maximum)
         {
             var signal = observer.CaptureSignal();
-            var value = await RecheckAsync(actualParent, original, observer, work, writer.CancellationToken)
+            var value = await RecheckAsync(actualParent, original, observer, work, binding, writer.CancellationToken)
                 .ConfigureAwait(true);
             var state = observer.State();
             if (state.OriginalFailure is not null)
             {
-                _ = await RecheckAsync(actualParent, original, observer, work, writer.CancellationToken)
+                _ = await RecheckAsync(actualParent, original, observer, work, binding, writer.CancellationToken)
                     .ConfigureAwait(true);
             }
             if (value is not null && value.PublicCommandId != last?.PublicCommandId)

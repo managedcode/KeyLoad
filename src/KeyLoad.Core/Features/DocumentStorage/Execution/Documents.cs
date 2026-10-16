@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -142,7 +143,7 @@ public sealed partial class DatabaseEngine
             Authorization.Require(principal, partition, collection, additionalRequiredCapabilities);
         }
         beforeResourceAdmission?.Invoke(view);
-        var resource = Resource(view, partition, collection, ResourceKind.Collection);
+        var resource = BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
         return read(raw, principal, resource);
     });
     /// <summary>Reads one visible document from the caller's existing storage cut.</summary>
@@ -155,7 +156,13 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(reference);
+        var resource = Resource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
+        reference = EntityReferenceLifetime.Bind(view, reference, resource);
         var document = view.GetRecord<DocumentRecord>(DocumentKey(reference.Partition, reference.Collection, reference.Id));
+        if (document is not null)
+        {
+            EntityReferenceLifetime.RequireStored(view, document.Reference, resource);
+        }
         return document is { Deleted: false } && Authorization.CanReadRow(principal, document.Access) ? document : null;
     }
     /// <summary>Runs a callback over visible documents after resource authorization.</summary>
@@ -206,5 +213,8 @@ public sealed partial class DatabaseEngine
     /// <param name="visitor">Synchronous callback; it cannot escape or mutate the read view.</param>
     public void VisitVisibleDocuments(IKeyValueView view, PrincipalRecord principal, PartitionRef partition,
         string collection, ReadExecutionBudget budget, Action<DocumentRecord> visitor)
-        => VisibleDocumentReads.Visit(this, view, principal, partition, collection, budget, visitor);
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+        VisibleDocumentReads.Visit(this, view, principal, partition, collection, budget, visitor);
+    }
 }

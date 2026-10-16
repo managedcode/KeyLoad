@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -11,8 +12,9 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
     RemoteDocumentWorkOwner owner, TimeProvider clock)
 {
     internal async Task<RemoteQueueTransferReceiptRead> ReadAsync(GrainRequestEnvelope envelope,
-        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken)
+        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var failures = new List<Exception>();
         RemoteQueueTransferReceiptRead? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -23,7 +25,7 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
                 using var expiry = OriginalExpiry(envelope.ExpiresAt);
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, expiry.Token);
-                result = await ReadAtCutAsync(envelope, principal, request, linked.Token).ConfigureAwait(false);
+                result = await ReadAtCutAsync(envelope, principal, request, linked.Token, binding).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -31,7 +33,7 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
     }
 
     private async Task<RemoteQueueTransferReceiptRead> ReadAtCutAsync(GrainRequestEnvelope envelope,
-        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken token)
+        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken token, IResourceLifetimeWorkBinding binding)
     {
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         node.CatalogRequestCodec().ValidateScope(envelope);
@@ -40,29 +42,37 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
         }
-        var work = new ReadExecutionBudget(limits, clock, token);
-        var context = partition.Database.CaptureRemoteTransferReceiptDispatch(principal.Id, request, work);
+        var work = new ReadExecutionBudget(partition.Database.OperationLimitsOptions, clock, token);
+        work.AttachResourceLifetimeBinding(binding);
+        work.ConstrainLifetime(envelope.ExpiresAt);
+        var context = partition.Database.CaptureRemoteTransferReceiptDispatchBound(principal.Id, request, work, binding);
         if (context is null)
         {
-            return new(false, null);
+            return CheckedResult(work, new(false, null));
         }
         var call = RemoteTransferSourceCall.Create(node, partition, options.Value, envelope,
             context, RemoteQueueTransferPeerStage.Receipt, limits.Value.MaxBatchBytes);
         var result = await client.TransferAsync(call, token).ConfigureAwait(false);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         currentPrincipal = GrainRequestAuthority.ReloadForRequest(partition.Database, envelope, clock);
-        var current = partition.Database.CaptureRemoteTransferReceiptDispatch(currentPrincipal.Id, request, work)
+        var current = partition.Database.CaptureRemoteTransferReceiptDispatchBound(currentPrincipal.Id, request, work, binding)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable);
         DatabaseEngine.RequireRemoteTransferSameDispatch(context, current);
         RemoteTransferPeerShape.RequireResult(result, RemoteQueueTransferPeerStage.Receipt);
         if (result.Receipt is null)
         {
-            return new(true, null);
+            return CheckedResult(work, new(true, null));
         }
-        var receipt = partition.Database.MintRemoteTransferReceiptInspection(currentPrincipal.Id, request,
-            context, call.SourceOwner, result.Receipt, work);
+        var receipt = partition.Database.MintRemoteTransferReceiptInspectionBound(currentPrincipal.Id, request,
+            context, call.SourceOwner, result.Receipt, work, binding);
         work.Check();
-        return new(true, receipt);
+        return CheckedResult(work, new(true, receipt));
+    }
+
+    private static RemoteQueueTransferReceiptRead CheckedResult(ReadExecutionBudget work, RemoteQueueTransferReceiptRead result)
+    {
+        work.CheckResult(result);
+        return result;
     }
 
     private CancellationTokenSource OriginalExpiry(DateTimeOffset expiresAt)

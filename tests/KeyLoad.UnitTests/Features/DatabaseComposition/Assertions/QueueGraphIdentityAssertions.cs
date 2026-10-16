@@ -43,18 +43,18 @@ internal static class QueueGraphIdentityAssertions
             await Assert.That(JsonDefaults.Serialize(engine.GetDocument(QueueGraphIdentityState.Root, expected.Reference))
                 .AsSpan().SequenceEqual(JsonDefaults.Serialize(publicExpected))).IsTrue();
         }
-        var marker = new EntityRef(state.Fixture.Partition, QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker);
+        var marker = state.MarkerReference;
         var expectedMarker = healthy ? new DocumentRecord(marker, 1, QueueGraphIdentityState.MarkerJson,
             new(), state.Healthy.EvaluatedAt) : null;
         await Assert.That(JsonDefaults.Serialize(store.Read(view => view.GetRecord<DocumentRecord>(
             global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(marker))))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedMarker))).IsTrue();
-        var edge = new EdgeRecord(QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, state.From,
-            state.To, QueueGraphIdentityState.Label, QueueGraphIdentityState.AttributesJson, 1);
+        var edge = new EdgeRecord(QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, state.BoundFrom,
+            state.BoundTo, QueueGraphIdentityState.Label, QueueGraphIdentityState.AttributesJson, 1);
         await Assert.That(JsonDefaults.Serialize(store.Read(view => view.GetRecord<EdgeRecord>(KeySpace.Partition(
             "edge", state.Fixture.Partition, QueueGraphIdentityState.Graph, edge.Id))))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(healthy ? edge : null))).IsTrue();
-        var expectedGraph = new global::KeyLoad.GraphTraversal(healthy ? [state.From, state.To] : [state.From], healthy ? [edge] : []);
+        var expectedGraph = new global::KeyLoad.GraphTraversal(healthy ? [state.BoundFrom, state.BoundTo] : [state.BoundFrom], healthy ? [edge] : []);
         await Assert.That(JsonDefaults.Serialize(engine.Traverse(QueueGraphIdentityState.Root, state.Fixture.Partition,
             QueueGraphIdentityState.Graph, state.From)).AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedGraph))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(engine.InspectMessage(QueueGraphIdentityState.Root,
@@ -74,7 +74,7 @@ internal static class QueueGraphIdentityAssertions
             state.SeedReceipt.Durability);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(receipt.Mutations[0].CompositionReferences).IsEmpty();
-        await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.From, state.To])).IsTrue();
+        await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.BoundFrom, state.BoundTo])).IsTrue();
         state.HealthyReceipt = NativeSerialization.Serialize(receipt);
         var before = QueueWholeFlowStorage.Bytes(store);
         var replay = engine.Apply(state.Healthy).Get<CommitReceipt>();
@@ -94,17 +94,26 @@ internal static class QueueGraphIdentityAssertions
         to = Reference(link.To)
     }, JsonDefaults.Options);
 
-    private static object Reference(EntityRef reference) => new
+    private static object Reference(EntityRef reference)
     {
-        collection = reference.Collection,
-        id = reference.Id,
-        partition = new
+        var result = new Dictionary<string, object>(StringComparer.Ordinal)
+        {
+            ["collection"] = reference.Collection,
+            ["id"] = reference.Id
+        };
+        if (reference.Lifetime is { } lifetime)
+        {
+            result.Add("lifetime", lifetime);
+        }
+
+        result.Add("partition", new
         {
             atomicPartitionId = reference.Partition.AtomicPartitionId,
             databaseId = reference.Partition.DatabaseId,
             partitionKey = reference.Partition.PartitionKey,
             tenantId = reference.Partition.TenantId,
             transactionDomainId = reference.Partition.TransactionDomainId
-        }
-    };
+        });
+        return result;
+    }
 }

@@ -1,6 +1,6 @@
-using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -8,33 +8,22 @@ namespace KeyLoad.Server;
 internal sealed class PhysicalOwnerStartupRequests(OrleansNode node, IOptions<NodeOptions> nodeOptions,
     IOptions<McpExecutionOptions> authenticationOptions)
 {
-    private const string AdministratorRequired = "Physical owner registration requires a persisted cluster administrator.";
     private const string InvalidStatus = "The native physical owner status reply is invalid.";
 
-    internal async Task<PrincipalRecord> AuthenticateAsync(CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var requestId = Guid.NewGuid();
-        var payload = NativeSerialization.Serialize(nodeOptions.Value.AdminKey);
-        string signed;
-        try
-        {
-            signed = node.CatalogRequestCodec().CreateRead(requestId, null, GrainReadKind.Authenticate, payload);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(payload);
-        }
-        using var identity = node.OpenRequestContext(null, requestId, Guid.Empty, cancellationToken);
-        var reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
-        var principal = McpNativeAuthentication.ReadPrincipal(reply.Payload.Span, authenticationOptions, cancellationToken);
-        if (!principal.ClusterAdministrator)
-        {
-            throw Errors.Fail(ErrorCode.PermissionDenied, AdministratorRequired);
-        }
-        return principal;
-    }
+    internal Task<PrincipalRecord> AuthenticateAsync(CancellationToken cancellationToken)
+        => NativeAdministratorAuthenticationRequests.StartupAsync(node, nodeOptions.Value.AdminKey,
+            authenticationOptions, cancellationToken);
+
+    internal Task<PrincipalRecord> AuthenticateAsync(KeyLoad.Core.ReadExecutionBudget work,
+        DateTimeOffset originalExpiry, CancellationToken cancellationToken)
+        => NativeAdministratorAuthenticationRequests.AuthenticateAsync(node, nodeOptions.Value.AdminKey,
+            authenticationOptions, work, originalExpiry, cancellationToken);
+
+    internal Task<PrincipalRecord> AuthenticateAsync(KeyLoad.Core.ReadExecutionBudget work,
+        ReadExecutionBudgetReadGrant metadataGrant, DateTimeOffset originalExpiry,
+        CancellationToken cancellationToken)
+        => NativeAdministratorAuthenticationRequests.AuthenticateAsync(node, nodeOptions.Value.AdminKey,
+            authenticationOptions, work, metadataGrant, originalExpiry, cancellationToken);
 
     internal async Task<NodeStatus> ReadStatusAsync(PrincipalRecord principal, CancellationToken cancellationToken)
     {

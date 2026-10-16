@@ -3,103 +3,103 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
 
-internal sealed class RemoteDocumentWorkOwner(IOptions<GrainRoutingOptions> routingOptions,
-    IOptions<NodeOptions> nodeOptions, IOptions<RemoteDocumentExecutionOptions> executionOptions) : IAsyncDisposable
+/// <summary>Retains runtime-private admission and original scopes; database work belongs to the enclosing shared native leases.</summary>
+internal sealed class RemoteDocumentWorkOwner : IAsyncDisposable
 {
     private readonly Lock gate = new();
-    private readonly NativeRequestWorkOwner? work = nodeOptions.Value.PhysicalGroupTrust.RemoteDocumentReads ? new(routingOptions) : null;
-    private readonly SemaphoreSlim? admissions = nodeOptions.Value.PhysicalGroupTrust.RemoteDocumentReads
-        ? new(executionOptions.Value.MaximumAdmissions, executionOptions.Value.MaximumAdmissions) : null;
-    internal bool IsJoined => work is null || work.IsJoined;
-    private bool closed;
+    private readonly CancellationTokenSource stopping = new();
+    private readonly ReplicaDiscoveryLifetime lifetime;
+    private readonly SemaphoreSlim? admissions;
     private Task? disposal;
+    private int joined;
+    private const int NotJoined = 0;
+    private const int Joined = 1;
+
+    internal RemoteDocumentWorkOwner(IOptions<NodeOptions> nodeOptions, IOptions<RemoteDocumentExecutionOptions> options)
+    {
+        admissions = nodeOptions.Value.PhysicalGroupTrust.RemoteDocumentReads
+            ? new(options.Value.MaximumAdmissions, options.Value.MaximumAdmissions) : null;
+        lifetime = new(stopping, MarkJoined);
+    }
+
+    internal bool IsJoined => admissions is null || Volatile.Read(ref joined) == Joined;
 
     internal Operation Acquire(Guid requestId)
     {
+        if (requestId == Guid.Empty)
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteDocumentProtocol.InvalidProof);
+        }
         lock (gate)
         {
-            if (work is null || admissions is null)
+            if (admissions is null)
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable);
             }
-            if (closed)
-            {
-                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
-            }
-            if (!admissions.Wait(TimeSpan.Zero))
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteDocumentProtocol.Unavailable);
-            }
+            var original = lifetime.TryEnter()
+                ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+            var admitted = false;
             try
             {
-                return new(ReleaseAdmission, work.Acquire(requestId, NativeRequestWorkKind.ReadCapability), work.ShutdownToken);
-            }
-            catch (Exception error)
-            {
-                var failures = new List<Exception> { error };
-                try
+                admitted = admissions.Wait(TimeSpan.Zero);
+                if (!admitted)
                 {
-                    admissions.Release();
+                    throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteDocumentProtocol.Unavailable);
                 }
-                catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-                catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-                ServerFailureObserver.ThrowIfAny(failures);
+                return new(ReleaseAdmission, original);
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                ThrowAcquisitionFailure(original, admitted, error);
+                throw;
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                ThrowAcquisitionFailure(original, admitted, error);
                 throw;
             }
         }
     }
 
-    internal Task StopAsync()
-    {
-        lock (gate)
-        {
-            closed = true;
-            return work?.DrainAsync() ?? Task.CompletedTask;
-        }
-    }
+    internal Task StopAsync() => lifetime.StopAsync();
 
     public ValueTask DisposeAsync()
     {
         lock (gate)
         {
-            disposal ??= DisposeCoreAsync();
-            return new ValueTask(disposal);
+            return new(disposal ??= DisposeCoreAsync());
         }
     }
 
     private async Task DisposeCoreAsync()
     {
+        await Task.Yield();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(StopAsync, failures).ConfigureAwait(false);
-        if (work is not null)
-        {
-            try
-            {
-                await work.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        }
-        if (admissions is not null)
-        {
-            try
-            {
-                admissions.Dispose();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        }
+        ServerFailureObserver.Observe(stopping.Dispose, failures);
+        ServerFailureObserver.Observe(() => admissions?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
+    private void ThrowAcquisitionFailure(ReplicaDiscoveryLifetime.Operation original, bool admitted, Exception primary)
+    {
+        var failures = new List<Exception> { primary };
+        if (admitted)
+        {
+            ServerFailureObserver.Observe(ReleaseAdmission, failures);
+        }
+        ServerFailureObserver.Observe(original.Dispose, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private void MarkJoined() => Volatile.Write(ref joined, Joined);
     private void ReleaseAdmission() => admissions!.Release();
 
-    internal sealed class Operation(Action releaseAdmission, NativeRequestWorkLease lease,
-        CancellationToken shutdownToken) : IDisposable
+    internal sealed class Operation(Action releaseAdmission, ReplicaDiscoveryLifetime.Operation original) : IDisposable
     {
         private Action? release = releaseAdmission;
-        private NativeRequestWorkLease? workLease = lease;
-        internal CancellationToken ShutdownToken { get; } = shutdownToken;
+        internal CancellationToken ShutdownToken => original.ShutdownToken;
+
         public void Dispose()
         {
             var returnPermit = Interlocked.Exchange(ref release, null);
@@ -109,13 +109,7 @@ internal sealed class RemoteDocumentWorkOwner(IOptions<GrainRoutingOptions> rout
             }
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(returnPermit, failures);
-            try
-            {
-                workLease?.Dispose();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            finally { workLease = null; }
+            ServerFailureObserver.Observe(original.Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }

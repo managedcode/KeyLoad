@@ -38,6 +38,7 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             await McpDiscoveryAssertions.VerifyAsync(tool);
         }
         await McpDiscoveryAssertions.VerifyInventoryAsync(discovered);
+        await McpAnalyticsDropDiscoveryFlow.RunAsync(fixture, deadline.Token);
     }
 
     /// <summary>Removed direct names, unknown targets and recursive targets fail before an operation is dispatched.</summary>

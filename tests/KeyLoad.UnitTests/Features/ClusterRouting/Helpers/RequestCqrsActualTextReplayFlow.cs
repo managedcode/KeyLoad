@@ -13,7 +13,7 @@ internal static class RequestCqrsActualTextReplayFlow
     private const long FinalRevision = 3;
     private const string ChangedJson = "{\"text\":\"оновлено changed\"}";
 
-    internal static async Task ReplayAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task ReplayAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, TextIndexMaintenanceResult original, CancellationToken token)
     {
         var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -34,7 +34,7 @@ internal static class RequestCqrsActualTextReplayFlow
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
     }
 
-    internal static async Task OriginalBuildAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task OriginalBuildAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest originalBuild, TextIndexMaintenanceRequest current,
         TextIndexMaintenanceResult completed, CancellationToken token)
     {
@@ -48,14 +48,14 @@ internal static class RequestCqrsActualTextReplayFlow
         await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, changed: true, token);
     }
 
-    internal static async Task PriorParentAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task PriorParentAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest previous, CancellationToken token)
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, fixture.Database.Partition,
             [new PutDocument(previous.Collection, NativeTextBilingualAudit.UkrainianId,
                 ChangedJson, ExpectedRevision: PreviousRevision)]);
-        var receipt = await NativeTextMaintenanceCommit.ExecuteAsync<CommitReceipt>(fixture.Database,
+        var receipt = await RequestCqrsHostedMaintenanceData.ExecuteAsync<CommitReceipt>(fixture.Database,
             OperationKind.Batch, command, id, token);
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(SingleMutation);
@@ -82,7 +82,7 @@ internal static class RequestCqrsActualTextReplayFlow
         await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, changed: true, FinalRevision, token);
     }
 
-    internal static async Task ReleaseAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task ReleaseAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest original, CancellationToken token)
     {
         var release = original with

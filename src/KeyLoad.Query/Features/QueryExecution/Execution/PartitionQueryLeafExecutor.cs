@@ -20,9 +20,9 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         PartitionQueryLeafResultV1 Read(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource)
             => Capture(view, principal, resource, plan, normalized, leafGrant, retention);
         return expectedTenant is null
-            ? database.WithQueryView(principalId, plan.Partition, normalized.Query.Collection, Read)
+            ? database.WithQueryView(principalId, plan.Partition, normalized.Query.Collection, Capability.None, Read, budget)
             : database.WithPartitionQueryView(principalId, plan.Partition, normalized.Query.Collection,
-                grant, Read);
+                grant, Read, budget);
     }
 
     internal PartitionQueryLeafResultV1 ExecuteLifetime(string principalId, PartitionQueryLeafPlanV1 plan,

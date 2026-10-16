@@ -163,6 +163,8 @@ internal static class ServerConfiguration
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();
         services.AddSingleton<OperationalAnalyticsRuntime>();
+        services.AddSingleton<UserAnalyticsRuntime>();
+        services.AddSingleton<INativeUserAnalytics>(provider => provider.GetRequiredService<UserAnalyticsRuntime>());
         services.AddSingleton(provider => ActivatorUtilities.CreateInstance<AdminNodeObserver>(provider,
             provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();

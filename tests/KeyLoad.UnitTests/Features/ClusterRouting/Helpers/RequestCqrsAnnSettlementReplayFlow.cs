@@ -13,7 +13,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
     private const string AlteredProofSuffix = "-changed";
     private const int EmptyPayload = 0;
 
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, AnnMaintenanceResult result, CancellationToken token)
     {
         var root = Path.Combine(fixture.Database.Directory, NativeAnnProtocol.RootDirectory, NativeAnnProtocol.RootReceipt);
@@ -35,7 +35,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, original, result, token);
     }
 
-    private static async Task ReplayAsync(RequestCqrsClusterFixture fixture,
+    private static async Task ReplayAsync(RequestCqrsHostedRuntimeFixture fixture,
         CommitProjectionBatchRequest request, ProjectionBatchResult expected, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -52,7 +52,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         await UnchangedAsync(fixture, image, cut, files);
     }
 
-    private static async Task RefuseAsync(RequestCqrsClusterFixture fixture,
+    private static async Task RefuseAsync(RequestCqrsHostedRuntimeFixture fixture,
         CommitProjectionBatchRequest changed, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -64,7 +64,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         await UnchangedAsync(fixture, image, cut, files);
     }
 
-    private static async Task<GrainOperationReply> InvokeAsync(RequestCqrsClusterFixture fixture,
+    private static async Task<GrainOperationReply> InvokeAsync(RequestCqrsHostedRuntimeFixture fixture,
         CommitProjectionBatchRequest request, CancellationToken token)
     {
         var id = Guid.NewGuid();
@@ -81,7 +81,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
             id, fixture.Clock, fixture.RoutingOptions, token);
     }
 
-    private static async Task UnchangedAsync(RequestCqrsClusterFixture fixture,
+    private static async Task UnchangedAsync(RequestCqrsHostedRuntimeFixture fixture,
         string[] image, long cut, (string Path, string Bytes)[] files)
     {
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);

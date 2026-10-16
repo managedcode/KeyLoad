@@ -16,7 +16,8 @@ internal static class ReplicaNativeInspection
         typeof(VoteRequest), typeof(AppendRequest), typeof(ReplicatedOperation), typeof(ReplicaEntry),
         typeof(ReplicaEntryBatch), typeof(ReplicaSnapshot), typeof(SnapshotBeginRequest),
         typeof(SnapshotChunkRequest), typeof(SnapshotCompleteRequest), typeof(string),
-        typeof(ReplicaHardState), typeof(ReplicaBenchmarkMembershipRecord), typeof(NativeCommandPayload)
+        typeof(ReplicaHardState), typeof(ReplicaBenchmarkMembershipRecord), typeof(NativeCommandPayload),
+        typeof(ReplicaForwardRequestV1), typeof(ReplicaForwardReplyV1)
     ];
 
     internal static ReplicaInspectedValue<T> Inspect<T>(ReadOnlyMemory<byte> message, int maximumEntries, string? expectedSender = null)
@@ -71,6 +72,10 @@ internal static class ReplicaNativeInspection
         Register<ReplicaHardStateInspectionCodec>(builder);
         Register<ReplicaMembershipInspectionCodec>(builder);
         Register<ReplicaNativeCommandInspectionCodec>(builder);
+        Register<ReplicaForwardRequestInspectionCodec>(builder);
+        Register<ReplicaForwardGrantInspectionCodec>(builder);
+        Register<ReplicaForwardReplyInspectionCodec>(builder);
+        Register<ReplicaForwardStatsInspectionCodec>(builder);
     }
 
     private static void Register<TCodec>(ISerializerBuilder builder) where TCodec : class

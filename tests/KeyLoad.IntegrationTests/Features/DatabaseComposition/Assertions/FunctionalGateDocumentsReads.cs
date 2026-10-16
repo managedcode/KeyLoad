@@ -12,21 +12,22 @@ internal static class FunctionalGateDocumentsReads
         long cut, CancellationToken token)
     {
         await DocumentAsync(context, state.Independent, independentRevision,
-            state.IndependentJson(context.Anchor, status, independentLinked), token);
-        await DocumentAsync(context, state.Related, relatedRevision, state.RelatedJson(context.Anchor, relatedLinked), token);
+            state.IndependentJson(context.Bind(context.Anchor), status, independentLinked), token);
+        await DocumentAsync(context, state.Related, relatedRevision, state.RelatedJson(context.Bind(context.Anchor), relatedLinked), token);
         await FunctionalGateDocumentsQueries.RequireAsync(context, state.Independent, independentRevision,
-            state.IndependentJson(context.Anchor, status, independentLinked), cut, token);
+            state.IndependentJson(context.Bind(context.Anchor), status, independentLinked), cut, token);
         await FunctionalGateDocumentsQueries.RequireAsync(context, state.Related, relatedRevision,
-            state.RelatedJson(context.Anchor, relatedLinked), cut, token);
+            state.RelatedJson(context.Bind(context.Anchor), relatedLinked), cut, token);
         await AnchorAsync(context, token);
     }
 
     internal static Task AnchorAsync(FunctionalGateContext context, CancellationToken token)
-        => DocumentAsync(context, context.Anchor, 1, FunctionalGateDocumentsState.AnchorJson, token);
+        => DocumentAsync(context, context.Bind(context.Anchor), 1, FunctionalGateDocumentsState.AnchorJson, token);
 
     internal static async Task DocumentAsync(FunctionalGateContext context, EntityRef reference, long revision,
         string json, CancellationToken token)
     {
+        reference = context.Bind(reference);
         await EqualAsync(context.Partition, reference.Partition);
         var expected = new DocumentReadResult(new(reference, revision, json, false, []));
         await EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));

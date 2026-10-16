@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,8 +15,9 @@ internal static class OnlineTextExecution
         Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild, IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics, global::Orleans.Runtime.IGrainContext context,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var request = GrainNativePayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(parent.Payload);
         var database = services.GetRequiredService<DatabaseEngine>();
         var principal = GrainRequestAuthority.ReloadForRequest(database, parent.Envelope, clock);
@@ -26,7 +28,7 @@ internal static class OnlineTextExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         var frames = new OnlineTextFrameAccounting(routing);
-        var children = new OnlineTextChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics, frames, context);
+        var children = new OnlineTextChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics, frames, context, binding);
         OnlineTextIndexMaintenanceResult result;
         try
         {

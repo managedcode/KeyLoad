@@ -62,7 +62,8 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             Log = new(replica, configuration, replicaObserver, canonicalDatabase: database);
             try
             {
-                var snapshots = new ReplicaSnapshotStore(database.Store, Log, configuration, execution);
+                var snapshots = new ReplicaSnapshotStore(database.Store, Log, configuration, execution, replacementToken => database.RequireNoRetirementForSnapshotReplacement(
+                    new(database.OperationLimitsOptions, database.EvaluationClock, replacementToken)));
                 materializer = new(database, Log, snapshots, execution);
             }
             catch (Exception primary)

@@ -22,6 +22,9 @@ internal static class PartitionMoveParentKeys
         => KeySpace.Partition(PhaseSpace, partition, moveId, originalPhaseId);
     internal static byte[] PrincipalActive(string principalId)
         => KeyCodec.Encode(QuotaSpace, PrincipalActiveMarker, principalId);
+    internal static byte[] HeaderPrefix() => KeyCodec.Encode(HeaderSpace);
+    internal static bool IsActiveMarker(object? value) => value is string marker && marker == ActiveMarker;
+    internal static byte[] ActiveDatabasePrefix() => KeyCodec.Encode(QuotaSpace, DatabaseActiveMarker);
     internal static byte[] DatabaseActive(PartitionRef partition)
         => KeyCodec.Encode(QuotaSpace, DatabaseActiveMarker, partition.TenantId, partition.DatabaseId);
     internal static byte[] DatabaseTerminalCount(PartitionRef partition)

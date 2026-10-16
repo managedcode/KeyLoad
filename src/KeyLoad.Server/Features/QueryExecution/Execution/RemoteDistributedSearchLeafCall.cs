@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.QueryExecution;
 
 internal sealed class RemoteDistributedSearchLeafCall(OrleansNode node, PartitionHost partition,
-    IOptions<NodeOptions> nodeOptions, RemoteDocumentClient client)
+    IOptions<NodeOptions> nodeOptions, RemoteDocumentClient client, IResourceLifetimeWorkBinding binding)
 {
     private const string NonceFormat = "N";
 
@@ -38,7 +39,7 @@ internal sealed class RemoteDistributedSearchLeafCall(OrleansNode node, Partitio
         CancellationToken token)
         => call is null
             ? await RemoteQueryLifetimeLocalRead.SearchAsync(node, partition, principalId, request, metadata,
-                expiresAt, token).ConfigureAwait(false)
+                expiresAt, token, binding).ConfigureAwait(false)
             : await RemoteQueryLifetimeExchange.ReadAsync<DistributedSearchLeafResultV1>(client, call, metadata,
                 PartitionQueryParallelRetention.ReplyBytes(request.MaxResultBytes), token).ConfigureAwait(false);
 

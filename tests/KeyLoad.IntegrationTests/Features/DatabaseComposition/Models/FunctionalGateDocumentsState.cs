@@ -52,6 +52,7 @@ internal sealed record FunctionalGateDocumentsState(EntityRef Independent, Entit
     {
         collection = reference.Collection,
         id = reference.Id,
+        lifetime = reference.Lifetime,
         partition = new
         {
             atomicPartitionId = reference.Partition.AtomicPartitionId,

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 
@@ -6,7 +7,8 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class SafeProjectorOperationCursor
 {
-    private const string Purpose = "query-page";
+    private const string Purpose = "query-page-v2";
+    private const int CursorVersion = 2;
     private const string FullScan = "bounded-full-scan";
     private const string MissingCursor = "The real safe projector bounded query cursor is absent.";
     private const string InvalidQueryCursor = "The query cursor no longer has a valid authorized read cut.";
@@ -21,7 +23,8 @@ internal static class SafeProjectorOperationCursor
         var query = new QueryEngine(owner.Database, UnitExecutionOptions.QueryExecution());
         await SafeProjectorOperationImages.ObserveAsync(owner, async () =>
         {
-            var cut = owner.Store.Position;
+            var admitted = ExpectedLifetime(owner);
+            var cut = admitted.Cut;
             var before = owner.Database.EvaluationClock.GetUtcNow();
             var page = query.Execute(SafeProjectorOperationProtocol.Reader,
                 new(owner.Source.Partition, SafeProjectorOperationRequests.PageSql, AllowFullScan: true), cancellationToken: token);
@@ -32,7 +35,7 @@ internal static class SafeProjectorOperationCursor
             await Assert.That(claims.ExpiresAt >= before.Add(lifetime) && claims.ExpiresAt <= after.Add(lifetime)).IsTrue();
             var expected = new QueryCursorClaims(Purpose, owner.Store.Identity.Incarnation, owner.Store.Identity.NodeId,
                 owner.Store.Identity.ReadGeneration, SafeProjectorOperationProtocol.Reader, policyEpoch, ResourceSchema,
-                QueryEngine.QueryHash(PageRequest(owner)), cut, documentEpoch, NextOffset, claims.ExpiresAt);
+                QueryEngine.QueryHash(PageRequest(owner)), cut, documentEpoch, NextOffset, claims.ExpiresAt, admitted.Lifetime, CursorVersion);
             await SafeProjectorOperationSeed.EqualAsync(claims, expected);
             var paths = raw ? ImmutableArray<string>.Empty : SafeProjectorOperationProtocol.RedactedPaths;
             await SafeProjectorOperationSeed.EqualAsync(page, new QueryPage(
@@ -74,6 +77,21 @@ internal static class SafeProjectorOperationCursor
             await SafeProjectorOperationSeed.EqualAsync(page, new QueryPage(
                 [new(SafeProjectorOperationProtocol.Second, SafeProjectorOperationProtocol.InitialRevision,
                     SafeProjectorOperationProtocol.SecondJson, !raw, paths)], null, cut, FullScan));
+        });
+
+    private static (long Cut, ResourceLifetimeV1 Lifetime) ExpectedLifetime(SafeProjectorOperationDatabase owner)
+        => owner.Store.Read(view =>
+        {
+            var partition = owner.Source.Partition;
+            var principal = owner.Database.Principal(view, SafeProjectorOperationProtocol.Reader,
+                owner.Database.EvaluationClock.GetUtcNow());
+            owner.Database.Authorization.Require(principal, partition, SafeProjectorOperationProtocol.Collection,
+                Capability.Query | Capability.DocumentsRead);
+            var resource = owner.Database.Resource(view, partition, SafeProjectorOperationProtocol.Collection,
+                ResourceKind.Collection);
+            var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+                resource.Name, resource) ?? throw Errors.Fail(ErrorCode.Corruption, MissingCursor);
+            return (owner.Store.Position, lifetime);
         });
 
     private static AstQueryRequest PageRequest(SafeProjectorOperationDatabase owner)

@@ -46,6 +46,14 @@ internal static class PostgresPreparedDecoder
             }
             _ = ScriptDomCreateTableSyntax.Read(table, limitsOptions, token.ThrowIfCancellationRequested, token);
         }
+        else if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.DropTableStatement drop)
+        {
+            if (positionalParameterCount != PostgresProtocol.AllRows)
+            {
+                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+            }
+            _ = ScriptDomDropTableSyntax.Read(drop, limitsOptions, token.ThrowIfCancellationRequested, token);
+        }
         else if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
             if (positionalParameterCount != PostgresProtocol.AllRows)

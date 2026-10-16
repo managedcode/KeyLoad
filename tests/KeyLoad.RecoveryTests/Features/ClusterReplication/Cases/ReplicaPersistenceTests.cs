@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
 using KeyLoad.Security;
@@ -376,7 +377,7 @@ internal sealed class ReplicaSnapshotTrial : IDisposable
         Sender = new(source, sourceLog, RecoveryExecutionOptions.Configuration(Configuration with
         {
             Directory = Path.Combine(directory, SourceDirectory)
-        }), RecoveryExecutionOptions.Replica());
+        }), RecoveryExecutionOptions.Replica(), replacementToken => RequireReplacement(source, replacementToken));
         Image = Sender.Create(1, 1);
     }
 
@@ -385,7 +386,15 @@ internal sealed class ReplicaSnapshotTrial : IDisposable
         => new(Target, TargetLog, RecoveryExecutionOptions.Configuration(Configuration with
         {
             Directory = Path.Combine(directory, TargetDirectory)
-        }), RecoveryExecutionOptions.Replica(), observer);
+        }), RecoveryExecutionOptions.Replica(), replacementToken => RequireReplacement(Target, replacementToken), observer);
+
+    private static void RequireReplacement(IAtomicStore store, CancellationToken cancellationToken)
+    {
+        var limits = RecoveryExecutionOptions.DatabaseLimits();
+        ResourceRetirementSnapshotReplacement.Require(store, limits.Value,
+            new ReadExecutionBudget(limits, TimeProvider.System, cancellationToken));
+    }
+
     internal void Transfer(ReplicaSnapshotStore receiver, ReplicaSnapshot? image = null)
     {
         var snapshot = image ?? Image;

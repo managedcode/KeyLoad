@@ -76,7 +76,7 @@ internal static class NativeWireSupported
             || type == typeof(Guid) || type == typeof(JsonElement) || type == typeof(WellKnownStringComparerCodec);
 
     private static bool IsCollection(Type definition)
-        => definition == typeof(ImmutableArray<>) || definition == typeof(List<>) || definition == typeof(Dictionary<,>)
+        => definition == typeof(ImmutableArray<>) || definition == typeof(ImmutableDictionary<,>) || definition == typeof(List<>) || definition == typeof(Dictionary<,>)
             || definition == typeof(KeyValuePair<,>) || definition == typeof(Memory<>) || definition == typeof(ReadOnlyMemory<>);
 
     private static bool IsOwned(Type type)

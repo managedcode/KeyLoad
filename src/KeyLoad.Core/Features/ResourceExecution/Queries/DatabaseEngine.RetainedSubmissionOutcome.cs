@@ -8,11 +8,27 @@ public sealed partial class DatabaseEngine
 {
     /// <summary>Reads an actual retained result after the owner's applied quorum cut without changing new-command denials.</summary>
     internal OperationResult? ReadRetainedSubmissionOutcome(ReplicatedOperation operation)
+        => ReadRetainedSubmissionOutcomeCore(operation, null);
+
+    /// <summary>Charges retained lookup to the same original admission work without changing canonical denial semantics.</summary>
+    /// <param name="operation">Unchanged original native identity and payload.</param>
+    /// <param name="work">Required original admission budget, cancellation and lifetime.</param>
+    /// <returns>The actual retained result, or null only at the existing absent-outcome boundary.</returns>
+    internal OperationResult? ReadRetainedSubmissionOutcome(ReplicatedOperation operation, ReadExecutionBudget work)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+        return ReadRetainedSubmissionOutcomeCore(operation, work);
+    }
+
+    private OperationResult? ReadRetainedSubmissionOutcomeCore(ReplicatedOperation operation, ReadExecutionBudget? work)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        var normalized = NormalizeOperation(operation);
-        return Store.Read<OperationResult?>(view =>
+        work?.Check();
+        var normalized = work is null ? NormalizeOperation(operation) : VerifyOperationAuthority(operation);
+        work?.Check();
+        var result = Store.Read<OperationResult?>(raw =>
         {
+            var view = work is null ? raw : work.CreateView(raw);
             try
             {
                 return ReadValidatedSubmissionOutcome(view, normalized, allowStoredDocumentDenial: true);
@@ -20,11 +36,14 @@ public sealed partial class DatabaseEngine
             catch (KeyLoadException missing) when (missing.Code == ErrorCode.RecoveryRequired
                 && string.Equals(missing.Message, MissingDurableOutcomeMessage, StringComparison.Ordinal))
             {
+                work?.Check();
                 return null;
             }
             catch (KeyLoadException refusal) when (refusal.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
-                or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
+                or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome)
+                && (work is null || refusal.Code != ErrorCode.BudgetExceeded))
             {
+                work?.Check();
                 if (HasRetainedSubmissionOutcome(view, normalized))
                 {
                     throw;
@@ -33,6 +52,8 @@ public sealed partial class DatabaseEngine
                 return null;
             }
         });
+        work?.Check();
+        return result;
     }
 
     private static bool HasRetainedSubmissionOutcome(IKeyValueView view, ReplicatedOperation operation)

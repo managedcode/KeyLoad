@@ -1,8 +1,10 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaRequestDispatcher
 {
+    private const string ResultExceeded = "The forwarded command result byte budget is exceeded.";
     private readonly ReplicaElection election;
     private readonly ReplicaAppendReceiver appends;
     private readonly ReplicaLeader leader;
@@ -20,9 +22,9 @@ internal sealed class ReplicaRequestDispatcher
         this.leader = leader;
         this.snapshots = snapshots;
     }
-    private Func<ReplicatedOperation, CancellationToken, Task<OperationResult>>? forwarded;
+    private Func<ReplicatedOperation, IReplicaForwardedCommandWork?, CancellationToken, Task<OperationResult>>? forwarded;
 
-    internal void ConfigureForwarding(Func<ReplicatedOperation, CancellationToken, Task<OperationResult>> accept)
+    internal void ConfigureForwarding(Func<ReplicatedOperation, IReplicaForwardedCommandWork?, CancellationToken, Task<OperationResult>> accept)
     {
         if (Interlocked.CompareExchange(ref forwarded, accept, null) is not null)
         {
@@ -35,7 +37,7 @@ internal sealed class ReplicaRequestDispatcher
         {
             ReplicaRpc.RequestVote => ReplicaProtocolCodec.Serialize(await election.ReceiveAsync(ReplicaProtocolCodec.Deserialize<VoteRequest>(payload.Span), token).ConfigureAwait(false)),
             ReplicaRpc.Append => ReplicaProtocolCodec.Serialize(await appends.ReceiveAsync(ReplicaProtocolCodec.Deserialize<AppendRequest>(payload.Span), token).ConfigureAwait(false)),
-            ReplicaRpc.Forward => ReplicaProtocolCodec.Serialize(await ForwardAsync(ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(payload.Span), token).ConfigureAwait(false)),
+            ReplicaRpc.Forward => throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.InvalidPeer),
             ReplicaRpc.ReadBarrier => await ReadAsync(payload, ReplicaReadRoundPurpose.Application, token).ConfigureAwait(false),
             ReplicaRpc.ControlReadBarrier => await ReadAsync(payload, ReplicaReadRoundPurpose.Control, token).ConfigureAwait(false),
             ReplicaRpc.ReadProbe => ReplicaProtocolCodec.Serialize(await appends.ReceiveAsync(ReplicaReadRoundGuard.Probe(payload, configuration), token).ConfigureAwait(false)),
@@ -51,6 +53,25 @@ internal sealed class ReplicaRequestDispatcher
         return ReplicaProtocolCodec.Serialize(await leader.BarrierAsync(purpose, token).ConfigureAwait(false));
     }
 
-    private Task<OperationResult> ForwardAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
-        => (Volatile.Read(ref forwarded) ?? throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader))(operation, cancellationToken);
+    internal async Task<ReadOnlyMemory<byte>> HandleForwardAsync(ReplicaForwardRequestV1 frame,
+        IReplicaForwardedCommandWork? receiverWork, CancellationToken cancellationToken)
+    {
+        ReplicaForwardFrameValidation.RequireRequest(frame);
+        var result = await ForwardAsync(ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(frame.Operation.Span),
+            cancellationToken, receiverWork).ConfigureAwait(false);
+        if (receiverWork is not null)
+        {
+            receiverWork.Budget.CheckResult(result);
+            if (ReplicaProtocolCodec.Measure(result) > receiverWork.Budget.MaximumResultBytes)
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ResultExceeded);
+            }
+        }
+        return ReplicaProtocolCodec.Serialize(result);
+    }
+
+    private Task<OperationResult> ForwardAsync(ReplicatedOperation operation, CancellationToken cancellationToken,
+        IReplicaForwardedCommandWork? receiverWork = null)
+        => (Volatile.Read(ref forwarded) ?? throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader))
+            (operation, receiverWork, cancellationToken);
 }

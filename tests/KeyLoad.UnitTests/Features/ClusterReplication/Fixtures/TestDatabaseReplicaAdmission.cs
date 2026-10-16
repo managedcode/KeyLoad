@@ -46,7 +46,8 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
             log = new(replica, configuration, canonicalDatabase: database);
             try
             {
-                snapshots = new ReplicaSnapshotStore(canonicalStore, log, configuration, options);
+                snapshots = new ReplicaSnapshotStore(canonicalStore, log, configuration, options, replacementToken => database.RequireNoRetirementForSnapshotReplacement(
+                    new(database.OperationLimitsOptions, database.EvaluationClock, replacementToken)));
                 materializer = new(database, log, snapshots, options);
             }
             catch (Exception primary)

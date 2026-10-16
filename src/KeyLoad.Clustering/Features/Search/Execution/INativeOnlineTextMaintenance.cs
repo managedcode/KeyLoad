@@ -1,4 +1,5 @@
 using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
@@ -10,5 +11,9 @@ internal interface INativeOnlineTextMaintenance
         OnlineTextIndexMaintenanceRequest request, string principalId);
     OnlineTextPublicationWork? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
         string principalId, DateTimeOffset originalExpiry);
+    Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
+        OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry,
+        CancellationToken token, IResourceLifetimeWorkBinding binding);
+
     Task AbortAsync(Guid sessionId);
 }

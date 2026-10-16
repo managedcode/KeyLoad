@@ -28,7 +28,9 @@ internal enum GrainRequestPhase
     EventVectorFirstAdmitPrepared,
     MovementParentStateExecuting,
     MovementParentStateReturned,
-    ResourceOwnerInventoryOwnerValidation
+    ResourceOwnerInventoryOwnerValidation,
+    OriginalClaimReturned = 26,
+    OriginalBusinessReplyReturned = 27
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

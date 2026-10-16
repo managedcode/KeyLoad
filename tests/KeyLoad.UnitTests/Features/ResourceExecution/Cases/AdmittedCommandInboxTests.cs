@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class AdmittedCommandInboxTests
 {
     private static AdmittedCommand Enqueue(AdmittedCommandInbox queue, ReplicatedOperation operation, PrincipalRecord principal, int bytes)
-        => queue.Enqueue(operation, principal, bytes, TestContext.Current!.Execution.CancellationToken);
+        => queue.Enqueue(operation, principal, bytes, cancellationToken: TestContext.Current!.Execution.CancellationToken);
     private static PrincipalRecord Principal() => new("p", "tenant", [], []);
     private static ReplicatedOperation Operation(OperationKind kind = OperationKind.Batch)
         => new(Guid.NewGuid(), kind, "p", TimeProvider.System.GetUtcNow(), "{}");

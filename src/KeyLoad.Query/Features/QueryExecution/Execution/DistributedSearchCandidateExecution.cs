@@ -35,7 +35,7 @@ internal static class DistributedSearchCandidateExecution
             (view, principal, resource, digest) => Capture(database, view, principal, resource, digest,
                 request, tenant, witness, statistics, scope, sourceWindowId, execution, eligibility, budget, grant, metadata);
         return metadata is null
-            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read)
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read, budget)
             : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
                 grant, budget, metadata, read);
     }

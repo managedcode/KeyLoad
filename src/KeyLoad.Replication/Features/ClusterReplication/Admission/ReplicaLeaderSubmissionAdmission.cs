@@ -1,3 +1,6 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
+
 namespace KeyLoad.Replication;
 
 internal static class ReplicaLeaderSubmissionAdmission
@@ -5,8 +8,9 @@ internal static class ReplicaLeaderSubmissionAdmission
     private const int ContiguousIndexStep = 1;
 
     internal static async Task ValidateAsync(ReplicaState state, ReplicatedOperation operation,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, ReadExecutionBudget? sourcePlanningBudget = null)
     {
+        sourcePlanningBudget?.Check();
         if (operation.Kind == OperationKind.PartitionMovementPhase)
         {
             await ReplicaMovementSubmissionAdmission.ValidateAsync(state, operation, cancellationToken)
@@ -21,7 +25,14 @@ internal static class ReplicaLeaderSubmissionAdmission
             }, cancellationToken).ConfigureAwait(false);
             try
             {
-                state.Materializer.Database.ValidateSubmissionAdmission(operation, command);
+                if (sourcePlanningBudget is null)
+                {
+                    state.Materializer.Database.ValidateSubmissionAdmission(operation, command);
+                }
+                else
+                {
+                    state.Materializer.Database.ValidateSubmissionAdmission(operation, command, sourcePlanningBudget);
+                }
             }
             catch (KeyLoadException refusal) when (refusal.Code == ErrorCode.Conflict)
             {
@@ -37,9 +48,21 @@ internal static class ReplicaLeaderSubmissionAdmission
     }
 
     internal static (ReplicaEntry? Entry, OperationResult? Outcome, Guid OriginalRequestId, Guid SourcePhaseId)
-        AppendOwned(ReplicaState state, ReplicatedOperation operation, ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
+        AppendOwned(ReplicaState state, ReplicatedOperation operation, ReplicaSubmissionBoundary boundary,
+            CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null,
+            ReadExecutionBudget? sourcePlanningBudget = null)
     {
         state.RequireReadyLeader();
+        var evaluatedAt = state.Clock.GetUtcNow();
+        sourcePlanningBudget?.Check();
+        if (sourcePlanningBudget is null)
+        {
+            state.Materializer.Database.ValidateResourceEffectSubmission(operation, evaluatedAt, binding);
+        }
+        else
+        {
+            state.Materializer.Database.ValidateResourceEffectSubmission(operation, evaluatedAt, binding, sourcePlanningBudget);
+        }
         using var firstAdmit = state.Materializer.Database.OpenEventVectorFirstAdmitProbe(operation, cancellationToken);
         if (firstAdmit?.OriginalOutcome is { } original)
         {
@@ -50,17 +73,26 @@ internal static class ReplicaLeaderSubmissionAdmission
         {
             return (null, sourceOriginal, Guid.Empty, Guid.Empty);
         }
-        var retained = state.Materializer.Database.ReadRetainedSubmissionOutcome(operation);
+        var retained = sourcePlanningBudget is null
+            ? state.Materializer.Database.ReadRetainedSubmissionOutcome(operation)
+            : state.Materializer.Database.ReadRetainedSubmissionOutcome(operation, sourcePlanningBudget);
         if (retained is not null)
         {
             return (null, retained, Guid.Empty, Guid.Empty);
         }
         ReplicaFirstEventVectorAdmit.RequireAbsent(state, firstAdmit, operation);
         ReplicaEventVectorSourceAdmit.RequireAbsent(state, sourceAdmit, operation);
-        var admitted = state.Materializer.Database.PrepareQueueRetryOperation(operation with
+        sourcePlanningBudget?.Check();
+        var preserveEvaluation = sourcePlanningBudget is null
+            ? state.Materializer.Database.PreservePreparedResourceRetirementEvaluation(operation, evaluatedAt)
+            : state.Materializer.Database.PreservePreparedResourceRetirementEvaluation(operation, evaluatedAt, sourcePlanningBudget);
+        var evaluated = preserveEvaluation ? operation : operation with
         {
-            EvaluatedAt = state.Clock.GetUtcNow()
-        });
+            EvaluatedAt = evaluatedAt
+        };
+        var admitted = sourcePlanningBudget is null
+            ? state.Materializer.Database.PrepareQueueRetryOperation(evaluated)
+            : state.Materializer.Database.PrepareQueueRetryOperation(evaluated, sourcePlanningBudget);
         var next = new ReplicaEntry(checked(state.Log.State.LastIndex + ContiguousIndexStep), state.Log.State.Term, admitted);
         var nativeLog = state.Log as DurableReplicaLog
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);

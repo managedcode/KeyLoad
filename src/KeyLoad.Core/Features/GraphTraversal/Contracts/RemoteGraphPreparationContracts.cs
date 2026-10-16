@@ -23,6 +23,12 @@ internal sealed record RemoteGraphTargetPreparationV1(
     [property: global::Orleans.Id(4)] long? DocumentRevision)
 {
     internal const string Alias = "keyload.core.remote-graph.targetpreparation.v1";
+    internal const int ResourceLifetimesField = 5;
+    [global::Orleans.Id(ResourceLifetimesField), System.Text.Json.Serialization.JsonIgnore]
+    public System.Collections.Immutable.ImmutableArray<ResourceLifetimeV1> ResourceLifetimes
+    {
+        get; init;
+    }
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RemoteGraphPreparationClaimsV1.Alias)]

@@ -30,6 +30,7 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
         var token = StoppedCancellationTokenSource.Token;
         await serviceProvider.GetRequiredService<Func<IPartitionStoragePublication>>()().WaitForOpenAsync(token).ConfigureAwait(true);
         await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(token).ConfigureAwait(true);
+        commandObservation = serviceProvider.GetRequiredService<CommandObservationNativeEndpoint>();
         discoveryState = serviceProvider.GetRequiredService<ReplicaSiloDiscoveryState>();
         authenticator = serviceProvider.GetRequiredService<ReplicaEnvelopeAuthenticator>();
         receiver = serviceProvider.GetService<PartitionMovementNativeReceiver>();

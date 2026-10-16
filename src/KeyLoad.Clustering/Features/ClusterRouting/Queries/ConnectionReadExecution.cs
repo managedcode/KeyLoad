@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,17 +28,20 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
     /// <param name="request">The verified operation whose native identity remains current.</param>
     /// <param name="cancellationToken">Cancellation for quorum barrier and read execution.</param>
     /// <returns>A bounded safe reply from the requested persisted-authorized capability.</returns>
-    internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, CancellationToken cancellationToken)
+    internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding originalBinding, Action<Exception> observeOriginalFailure)
     {
-        using var work = new NativeCapabilityWorkLifetime(cancellationToken);
+        ArgumentNullException.ThrowIfNull(originalBinding);
+        ArgumentNullException.ThrowIfNull(observeOriginalFailure);
+        await using var work = new NativeCapabilityWorkLifetime(cancellationToken);
         try
         {
-            AdmitRead(request, work);
+            AdmitRead(request, work, originalBinding);
             return await ExecuteReadAsync(request, work).ConfigureAwait(true);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
             work.PrimaryError = error;
+            observeOriginalFailure(error);
             try
             {
                 return GrainReplyFactory.Failure(error: error, command: false, diagnostics: diagnostics, requestId: work.RequestId, stage: work.Stage,
@@ -57,21 +61,23 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             work.PrimaryError = error;
+            observeOriginalFailure(error);
             throw;
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             work.PrimaryError = error;
+            observeOriginalFailure(error);
             throw;
         }
         finally
         {
-            NativeCapabilityWorkLifetime.Settle(work.PrimaryError, work, work.FailureTelemetry(),
-                null);
+            await NativeCapabilityWorkLifetime.SettleAsync(work.PrimaryError, work, work.FailureTelemetry(),
+                null).ConfigureAwait(true);
         }
     }
 
-    private void AdmitRead(DecodedGrainRequest request, NativeCapabilityWorkLifetime work)
+    private void AdmitRead(DecodedGrainRequest request, NativeCapabilityWorkLifetime work, IResourceLifetimeWorkBinding originalBinding)
     {
         work.Token.ThrowIfCancellationRequested();
         work.RequestId = request.Envelope.RequestId;
@@ -81,7 +87,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         }
         GrainIdentityContext.Validate(request.Envelope, work.RequestId);
         work.Stage = GrainFailureStage.CapabilityExecution;
-        work.Admit(requestWorkOwner, work.RequestId, NativeRequestWorkKind.ReadCapability);
+        work.Admit(requestWorkOwner, work.RequestId, NativeRequestWorkKind.ReadCapability, originalBinding);
     }
 
     private async Task<GrainOperationReply> ExecuteReadAsync(DecodedGrainRequest request,
@@ -91,7 +97,8 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         {
             var execution = new FollowerDocumentReadExecution(localDatabase, coordinator,
                 services.GetRequiredService<Func<KeyLoad.Replication.ReplicaConsensus>>()(),
-                services.GetRequiredService<PhysicalShardRecord>(), codec);
+                services.GetRequiredService<PhysicalShardRecord>(), codec,
+                localDatabase.OperationLimitsOptions, clock);
             var follower = await execution.ExecuteAsync(request, context, work)
                 .ConfigureAwait(true);
             work.Stage = GrainFailureStage.ReplyEncoding;
@@ -106,7 +113,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         ValidateFreshRequest(codec, request, work.RequestId, work.Token);
         work.Stage = GrainFailureStage.CapabilityExecution;
         work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);
-        var result = await capabilities.ReadAsync(request, work.RequestId, work.Token).ConfigureAwait(true);
+        var result = await capabilities.ReadAsync(request, work.RequestId, work.Token, work).ConfigureAwait(true);
         work.CompletePhase();
         work.Stage = GrainFailureStage.ReplyEncoding;
         return GrainReplyFactory.Value(value: result, cancellationToken: work.Token, options: codec.ExecutionOptions);

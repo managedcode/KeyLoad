@@ -1,5 +1,6 @@
 using System.Text;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
@@ -108,8 +109,15 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
         log.Append([new(1, 1, null), new(2, 2, null)]);
         log.Commit(2);
         WriteAppliedCut(canonical, 2);
-        var snapshots = new ReplicaSnapshotStore(canonical, log, RecoveryExecutionOptions.Configuration(configuration), RecoveryExecutionOptions.Replica());
+        var snapshots = new ReplicaSnapshotStore(canonical, log, RecoveryExecutionOptions.Configuration(configuration), RecoveryExecutionOptions.Replica(), replacementToken => RequireReplacement(canonical, replacementToken));
         return snapshots.Create(2, 2);
+    }
+
+    private static void RequireReplacement(IAtomicStore store, CancellationToken cancellationToken)
+    {
+        var limits = RecoveryExecutionOptions.DatabaseLimits();
+        ResourceRetirementSnapshotReplacement.Require(store, limits.Value,
+            new ReadExecutionBudget(limits, TimeProvider.System, cancellationToken));
     }
 
     public void Dispose()

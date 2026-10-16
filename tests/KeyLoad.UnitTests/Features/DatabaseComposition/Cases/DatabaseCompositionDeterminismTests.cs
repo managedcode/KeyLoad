@@ -25,48 +25,57 @@ internal sealed class DatabaseCompositionDeterminismTests
     [Test]
     public async Task AcComp006IdenticalReplicatedCommandIgnoresDivergentLocalClocks()
     {
-        using var left = Seed();
-        using var right = Seed();
-        var fixedEvaluation = TimeProvider.System.GetUtcNow().AddMinutes(EvaluationDelayMinutes);
-        var commandId = Guid.NewGuid();
-        var request = new CommandRequest(commandId, left.Partition,
-            [new QueueToGraph(Graph, Queue, EdgePrefix),
-                new GraphToQueueMutation(Queue, Graph, Vertex(left, From), MessagePrefix)]);
-        var operation = new ReplicatedOperation(commandId, OperationKind.Batch, "root", fixedEvaluation,
-            JsonSerializer.Serialize(request, JsonDefaults.Options));
-        var limits = new DatabaseLimits { QueryDeadlineSeconds = OneSecondDeadline };
-        var steady = new DivergentClock(DateTimeOffset.UnixEpoch, timestampStep: 0);
-        var jumping = new DivergentClock(DateTimeOffset.UnixEpoch.AddYears(50), TimeSpan.TicksPerHour);
-        var leftEngine = new DatabaseEngine(left.Store, left.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, steady);
-        var rightEngine = new DatabaseEngine(right.Store, right.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, jumping);
+        await DatabaseCompositionReplicaCut.RunAsync(Seed, async (left, right) =>
+        {
+            var expectedFrom = DatabaseCompositionExpectedReferences.Capture(left, Vertex(left, From));
+            var expectedTo = DatabaseCompositionExpectedReferences.Capture(left, Vertex(left, To));
+            var fixedEvaluation = TimeProvider.System.GetUtcNow().AddMinutes(EvaluationDelayMinutes);
+            var commandId = Guid.NewGuid();
+            var request = new CommandRequest(commandId, left.Partition,
+                [new QueueToGraph(Graph, Queue, EdgePrefix),
+                    new GraphToQueueMutation(Queue, Graph, Vertex(left, From), MessagePrefix)]);
+            var work = left.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
+            var operation = left.Database.CreateNativeOperation(OperationKind.Batch, commandId, "root", fixedEvaluation,
+                NativeSerialization.Serialize(request), work);
+            var limits = new DatabaseLimits { QueryDeadlineSeconds = OneSecondDeadline };
+            var steady = new DivergentClock(DateTimeOffset.UnixEpoch, timestampStep: 0);
+            var jumping = new DivergentClock(DateTimeOffset.UnixEpoch.AddYears(50), TimeSpan.TicksPerHour);
+            var leftEngine = new DatabaseEngine(left.Store, left.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, steady);
+            var rightEngine = new DatabaseEngine(right.Store, right.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, jumping);
 
-        var probe = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), jumping);
-        var elapsedFailure = Assert.ThrowsExactly<KeyLoadException>(probe.Check);
-        await Assert.That(elapsedFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var leftReceipt = leftEngine.Apply(operation, ReplicationIndex).Get<CommitReceipt>();
-        var rightReceipt = rightEngine.Apply(operation, ReplicationIndex).Get<CommitReceipt>();
+            var probe = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), jumping);
+            var elapsedFailure = Assert.ThrowsExactly<KeyLoadException>(probe.Check);
+            await Assert.That(elapsedFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+            var leftReceipt = leftEngine.Apply(operation, ReplicationIndex).Get<CommitReceipt>();
+            var rightReceipt = rightEngine.Apply(operation, ReplicationIndex).Get<CommitReceipt>();
 
-        await Assert.That(leftReceipt.Mutations.Length).IsEqualTo(2);
-        await Assert.That(rightReceipt.Mutations.Select(Effect).SequenceEqual(leftReceipt.Mutations.Select(Effect))).IsTrue();
-        await Assert.That(SameStored<EdgeRecord>(left, right, EdgeSpace, Graph, EdgePrefix + SourceId)).IsTrue();
-        await Assert.That(SameStored<MessageMetadata>(left, right, MessageMetadataSpace, Queue,
-            MessagePrefix + EdgePrefix + SourceId)).IsTrue();
-        await Assert.That(SameStored<MessageBody>(left, right, MessageBodySpace, Queue,
-            MessagePrefix + EdgePrefix + SourceId)).IsTrue();
-        await Assert.That(leftEngine.LastApplied).IsEqualTo(ReplicationIndex);
-        await Assert.That(rightEngine.LastApplied).IsEqualTo(ReplicationIndex);
+            await Assert.That(leftReceipt.Mutations.Length).IsEqualTo(2);
+            foreach (var effect in leftReceipt.Mutations)
+            {
+                await Assert.That(effect.CompositionReferences.SequenceEqual([expectedFrom, expectedTo])).IsTrue();
+            }
+            await Assert.That(NativeSerialization.Serialize(rightReceipt).SequenceEqual(NativeSerialization.Serialize(leftReceipt))).IsTrue();
+            await Assert.That(rightReceipt.Mutations.Select(Effect).SequenceEqual(leftReceipt.Mutations.Select(Effect))).IsTrue();
+            await Assert.That(SameStored<EdgeRecord>(left, right, EdgeSpace, Graph, EdgePrefix + SourceId)).IsTrue();
+            await Assert.That(SameStored<MessageMetadata>(left, right, MessageMetadataSpace, Queue,
+                MessagePrefix + EdgePrefix + SourceId)).IsTrue();
+            await Assert.That(SameStored<MessageBody>(left, right, MessageBodySpace, Queue,
+                MessagePrefix + EdgePrefix + SourceId)).IsTrue();
+            await Assert.That(leftEngine.LastApplied).IsEqualTo(ReplicationIndex);
+            await Assert.That(rightEngine.LastApplied).IsEqualTo(ReplicationIndex);
+        });
     }
 
     private static (string Kind, string Resource, string Id, long Revision) Effect(MutationReceipt receipt)
         => (receipt.Kind, receipt.Resource, receipt.Id, receipt.Revision);
 
-    private static bool SameStored<T>(TestDatabase left, TestDatabase right, string space, string resource, string id)
+    private static bool SameStored<T>(TestDatabase left, DatabaseCompositionReplicaCut right, string space, string resource, string id)
         where T : class
     {
-        T Read(TestDatabase db) => db.Store.Read(view => view.GetRecord<T>(
-            KeySpace.Partition(space, db.Partition, resource, id)))!;
-        return NativeSerialization.Serialize(Read(left)).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(Read(right)));
+        T Read(IAtomicStore store) => store.Read(view => view.GetRecord<T>(
+            KeySpace.Partition(space, left.Partition, resource, id)))!;
+        return NativeSerialization.Serialize(Read(left.Store)).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(Read(right.Store)));
     }
 
     private static TestDatabase Seed()

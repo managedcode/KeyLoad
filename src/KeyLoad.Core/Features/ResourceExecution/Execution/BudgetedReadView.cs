@@ -5,11 +5,15 @@ using KeyLoad.Storage;
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Charges one read operation before borrowed storage data is copied or consumed.</summary>
-internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadScope
+internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadScope, IResourceLifetimeReadBindingView
 {
     private readonly IKeyValueView view;
     private readonly ReadExecutionBudget budget;
     private readonly ReadExecutionBudgetReadGrant? grant;
+
+    void IResourceLifetimeReadBindingView.BindResourceLifetime(PartitionRef partition,
+        ResourceDefinition definition, ResourceLifetimeV1 lifetime)
+        => budget.ObserveResourceLifetime(partition, definition, lifetime);
 
     private bool movementAuthorityAbsent;
     bool IPartitionMovementReadScope.MovementAuthorityAbsent

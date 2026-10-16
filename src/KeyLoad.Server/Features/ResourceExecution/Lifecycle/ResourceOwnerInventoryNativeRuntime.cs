@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ResourceExecution;
 
-internal sealed class ResourceOwnerInventoryNativeRuntime : IAsyncDisposable
+internal sealed partial class ResourceOwnerInventoryNativeRuntime : IAsyncDisposable
 {
     private readonly NativeRequestWorkOwner work;
     private readonly ResourceOwnerInventoryReceiver receiver;
@@ -14,42 +14,52 @@ internal sealed class ResourceOwnerInventoryNativeRuntime : IAsyncDisposable
     private Task? shutdown;
 
     internal ResourceOwnerInventoryNativeRuntime(IOptions<GrainRoutingOptions> routing,
-        ResourceOwnerInventoryReceiver receiver, ResourceOwnerInventoryNativeClient client, TimeProvider clock)
+        ResourceOwnerInventoryReceiver receiver, ResourceRetirementReceiver retirement,
+        ResourceOwnerInventoryNativeClient client, TimeProvider clock)
     {
         this.routing = routing.Value;
         this.receiver = receiver;
+        this.retirement = retirement;
         this.client = client;
         this.clock = clock;
         work = new(routing);
     }
 
-    internal async Task<ResourceOwnerInventoryNativeReply> ReadAsync(ResourceOwnerInventoryNativeRequest request,
+    internal Task<ResourceOwnerInventoryNativeReply> ReadAsync(ResourceOwnerInventoryNativeRequest request,
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(request);
+        return ExecuteAsync(request.RequestId, request.ExpiresAt, NativeRequestWorkKind.ReadCapability,
+            ResourceOwnerInventoryNativeProtocol.Unavailable,
+            caller => receiver.ReadAsync(request, caller), token);
+    }
+
+    private async Task<T> ExecuteAsync<T>(Guid requestId, DateTimeOffset expiresAt, NativeRequestWorkKind kind, string unavailable,
+        Func<CancellationToken, Task<T>> operation, CancellationToken token) where T : class
+    {
         var failures = new List<Exception>();
         NativeRequestWorkLease? lease = null;
         CancellationTokenSource? deadline = null;
         CancellationTokenSource? linked = null;
-        ResourceOwnerInventoryNativeReply? result = null;
+        T? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            lease = work.Acquire(request.RequestId, NativeRequestWorkKind.ReadCapability);
-            var remaining = request.ExpiresAt - clock.GetUtcNow();
+            lease = work.Acquire(requestId, kind);
+            var remaining = expiresAt - clock.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
             {
-                result = await receiver.ReadAsync(request, token).ConfigureAwait(false);
+                result = await operation(token).ConfigureAwait(false);
                 return;
             }
             deadline = new(remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime, clock);
             linked = CancellationTokenSource.CreateLinkedTokenSource(token, work.ShutdownToken, deadline.Token);
-            result = await receiver.ReadAsync(request, linked.Token).ConfigureAwait(false);
+            result = await operation(linked.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => linked?.Dispose(), failures);
         ServerFailureObserver.Observe(() => deadline?.Dispose(), failures);
         ServerFailureObserver.Observe(() => lease?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        return result ?? throw Errors.Fail(ErrorCode.Corruption, ResourceOwnerInventoryNativeProtocol.Unavailable);
+        return result ?? throw Errors.Fail(ErrorCode.Corruption, unavailable);
     }
 
     internal ResourceOwnerInventoryNativeClient Client => client;

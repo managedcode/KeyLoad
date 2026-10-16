@@ -16,9 +16,9 @@ internal sealed partial class NativeTextOnlineSession
 
     internal NativeTextOnlineSession(Guid id, OnlineTextIndexMaintenanceRequest request,
         string principalId, DateTimeOffset originalExpiry, ServerRuntimeOptions options,
-        TimeProvider clock, CancellationToken shutdown)
+        TimeProvider clock, CancellationToken shutdown, ReadExecutionBudget? originalBudget = null)
     {
-        (deadline, lifetime, Budget, immutableRequest) = NativeTextOnlineSessionWork.Open(id, request, originalExpiry, options, clock, shutdown);
+        (deadline, lifetime, Budget, immutableRequest) = NativeTextOnlineSessionWork.Open(id, request, originalExpiry, options, clock, shutdown, originalBudget);
         Id = id;
         Request = request;
         PrincipalId = principalId;
@@ -127,6 +127,9 @@ internal sealed partial class NativeTextOnlineSession
     {
         get; private set;
     }
+
+    internal CancellationTokenSource LinkStageCancellation(CancellationToken token)
+        => CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token, token);
 
     internal void Require(Guid id, OnlineTextIndexMaintenanceRequest request, string principalId, DateTimeOffset expiry)
         => NativeTextOnlineSessionWork.Require(this, disposed, immutableRequest, id, request, principalId, expiry);

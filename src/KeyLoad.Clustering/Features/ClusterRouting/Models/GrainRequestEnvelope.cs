@@ -58,4 +58,16 @@ public sealed record GrainRequestEnvelope
     {
         get; init;
     }
+    /// <summary>Pre-effect bounds for the original command's separate readonly observation.</summary>
+    [Orleans.Id(GrainNativeContracts.ObservationField)]
+    internal NativeCommandObservationAdmissionV1? Observation
+    {
+        get; init;
+    }
+    /// <summary>Private retirement command metadata bounds, absent for every other purpose.</summary>
+    [Orleans.Id(GrainNativeContracts.MetadataField)]
+    internal NativeCommandMetadataAdmissionV1? Metadata
+    {
+        get; init;
+    }
 }

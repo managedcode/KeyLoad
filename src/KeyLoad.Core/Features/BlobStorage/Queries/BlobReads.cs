@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -10,6 +11,22 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
     internal T Cut<T>(string principalId, Func<IKeyValueView, PrincipalRecord, T> read, CancellationToken cancellationToken)
     {
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
+        return Cut(principalId, read, budget);
+    }
+
+    internal T CutBound<T>(string principalId, Func<IKeyValueView, PrincipalRecord, T> read,
+        ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(binding);
+        budget.AttachResourceLifetimeBinding(binding);
+        budget.Check();
+        return Cut(principalId, read, budget);
+    }
+
+    private T Cut<T>(string principalId, Func<IKeyValueView, PrincipalRecord, T> read,
+        ReadExecutionBudget budget)
+    {
         return database.Store.Read(view =>
         {
             var bounded = budget.CreateView(view);
@@ -24,7 +41,7 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
     {
         const int EmptyRevision = 0;
 
-        _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead);
+        _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead, read: true);
         var head = Reader.Head(view, request.Blob);
         if (head is null)
         {
@@ -44,7 +61,7 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
         {
             throw BlobErrors.Validation();
         }
-        _ = Authority.Scope(view, principal, request.Blob, Capability.BlobWrite);
+        _ = Authority.Scope(view, principal, request.Blob, Capability.BlobWrite, read: true);
         var head = Reader.Head(view, request.Blob);
         var state = Reader.State(view, request.Blob, request.UploadId);
         if (head is null && state is not null)
@@ -65,7 +82,7 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
         {
             throw BlobErrors.Validation();
         }
-        _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead);
+        _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead, read: true);
         var head = Reader.Head(view, request.Blob);
         if (head is null || head.Metadata.VersionId is null)
         {
@@ -118,7 +135,7 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
             JsonData.Identifier(request.AfterId);
         }
         var scope = new BlobRef(request.Partition, request.Resource, request.AfterId ?? BlobListAccumulator.ScopeId);
-        _ = Authority.Scope(view, principal, scope, Capability.BlobRead);
+        _ = Authority.Scope(view, principal, scope, Capability.BlobRead, read: true);
         var accumulator = new BlobListAccumulator(database, principal, request.Limit);
         var after = request.AfterId is null ? null : BlobKeys.Head(scope);
         var scan = view.VisitRange(BlobKeys.Heads(request.Partition, request.Resource), request.Limit * BlobListAccumulator.CandidateMultiplier,

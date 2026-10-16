@@ -19,6 +19,11 @@ public sealed partial class DatabaseEngine
         Guid scheduleId, CancellationToken cancellationToken = default)
     {
         var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        return InspectRecurringScheduleRead(principalId, lane, scheduleId, budget);
+    }
+
+    private RecurringScheduleInspection? InspectRecurringScheduleRead(string principalId, QueueLaneRef lane, Guid scheduleId, ReadExecutionBudget budget)
+    {
         var request = new InspectRecurringScheduleRequest(lane, scheduleId);
         ChargeRecurringRequest(budget, principalId, request);
         return Store.Read(view =>
@@ -26,7 +31,7 @@ public sealed partial class DatabaseEngine
             var read = budget.CreateView(view);
             var principal = Principal(read, principalId, Clock.GetUtcNow());
             RequireQueueInspector(principal, lane);
-            var resource = Resource(read, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
+            var resource = BindAuthorizedReadResource(read, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
             var record = read.GetRecord<RecurringScheduleRecord>(RecurringSagaStorage.ScheduleKey(lane, scheduleId));
             var result = record is null ? null : ProjectSchedule(read, principal, resource, record, lane, scheduleId);
             budget.CheckResult(result);
@@ -39,6 +44,11 @@ public sealed partial class DatabaseEngine
         CancellationToken cancellationToken = default)
     {
         var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        return InspectSagaRead(principalId, lane, sagaId, budget);
+    }
+
+    private SagaInspection? InspectSagaRead(string principalId, QueueLaneRef lane, Guid sagaId, ReadExecutionBudget budget)
+    {
         var request = new InspectSagaRequest(lane, sagaId);
         ChargeRecurringRequest(budget, principalId, request);
         return Store.Read(view =>
@@ -46,7 +56,7 @@ public sealed partial class DatabaseEngine
             var read = budget.CreateView(view);
             var principal = Principal(read, principalId, Clock.GetUtcNow());
             RequireQueueInspector(principal, lane);
-            var resource = Resource(read, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
+            var resource = BindAuthorizedReadResource(read, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
             var record = read.GetRecord<SagaRecord>(RecurringSagaStorage.SagaKey(lane, sagaId));
             var result = record is null ? null : ProjectSaga(read, principal, resource, record, lane, sagaId);
             budget.CheckResult(result);

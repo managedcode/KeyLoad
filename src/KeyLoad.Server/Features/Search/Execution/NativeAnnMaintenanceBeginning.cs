@@ -13,12 +13,12 @@ internal static class NativeAnnMaintenanceBeginning
         PrincipalRecord principal, AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured,
         TimeProvider clock, Lock originalGate, Func<NativeAnnGenerationOwner?> existingRoot,
         Func<NativeAnnGenerationOwner> owningRoot, Action<NativeAnnMaintenanceSession> publishSession,
-        CancellationToken token)
+        CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
         NativeAnnMaintenanceMemoryLease? memory = null;
         try
         {
-            var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+            var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
             long available;
             lock (originalGate)
             {

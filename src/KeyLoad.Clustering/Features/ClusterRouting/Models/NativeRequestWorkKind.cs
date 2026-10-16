@@ -8,5 +8,7 @@ internal enum NativeRequestWorkKind
     /// <summary>A verified read capability invocation.</summary>
     ReadCapability,
     /// <summary>A verified command capability invocation.</summary>
-    CommandCapability
+    CommandCapability,
+    /// <summary>The actual authenticated outer native transport and its reply publication.</summary>
+    NativeTransport
 }

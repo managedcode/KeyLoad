@@ -14,7 +14,7 @@ internal sealed class RequestCqrsCohortNativeConfigurator : ISiloConfigurator
     {
         var fixture = RequestCqrsCohortOwners.Resolve(silo.Configuration);
         var services = silo.Services;
-        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton(fixture.Hosted?.Clock ?? TimeProvider.System);
         services.AddSingleton<ReplicaTransportLifecycle>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider =>
             provider.GetRequiredService<ReplicaTransportLifecycle>());
@@ -57,15 +57,17 @@ internal sealed class RequestCqrsCohortNativeConfigurator : ISiloConfigurator
         services.AddSingleton(provider => new ReplicaSiloDiscoveryClient(
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<Func<ReplicaEnvelopeAuthenticator>>()(),
-            provider.GetRequiredService<TimeProvider>(), provider, provider.GetRequiredService<ISiloStatusOracle>(),
+            TimeProvider.System, provider, provider.GetRequiredService<ISiloStatusOracle>(),
             provider.GetRequiredService<IOptions<OrleansMembershipOptions>>()));
         services.AddSingleton(provider => new ReplicaGrainServiceClient(provider,
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<ReplicaSiloDiscoveryClient>(),
             provider.GetRequiredService<Func<ReplicaEnvelopeAuthenticator>>()(),
             provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(),
             provider.GetRequiredService<RequestCqrsCohortNativeNode>().Journal.ExecutionOptions,
-            provider.GetRequiredService<TimeProvider>()));
+            TimeProvider.System));
         services.AddSerializer(builder => builder.AddAssembly(typeof(ReplicaPeerEnvelope).Assembly));
         silo.AddGrainService<PartitionReplicaGrainService>();
+        fixture.Hosted?.Register(silo);
+
     }
 }

@@ -165,6 +165,8 @@ internal static class GraphCrossPartitionValidation
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
         }
+        EntityReferenceLifetime.RequireBound(edge.From);
+        EntityReferenceLifetime.RequireBound(edge.To);
         try
         {
             DatabaseEngine.ValidatePartition(edge.From.Partition);

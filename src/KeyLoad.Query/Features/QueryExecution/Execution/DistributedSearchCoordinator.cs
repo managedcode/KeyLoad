@@ -1,10 +1,11 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-internal static class DistributedSearchCoordinator
+internal static partial class DistributedSearchCoordinator
 {
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
 
@@ -12,7 +13,8 @@ internal static class DistributedSearchCoordinator
         DistributedSearchRequestV1 request, IOptions<QueryExecutionOptions> options,
         Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, DistributedSearchPreparedLeaf> prepare,
         Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,
-        CancellationToken original, Func<CancellationToken, Task>? statisticsCaptured = null)
+        CancellationToken original, Func<CancellationToken, Task>? statisticsCaptured = null,
+        IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(request);
@@ -21,6 +23,10 @@ internal static class DistributedSearchCoordinator
         ArgumentNullException.ThrowIfNull(sourceBarrier);
         ArgumentNullException.ThrowIfNull(clock);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, original);
+        if (binding is not null)
+        {
+            budget.AttachResourceLifetimeBinding(binding);
+        }
         QueryResultBudgetPolicy.Constrain(budget, options.Value);
         budget.ConstrainLifetime(originalExpiry);
         using var admission = database.AdmitQuery(original);

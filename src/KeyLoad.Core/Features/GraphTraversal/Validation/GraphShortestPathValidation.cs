@@ -161,6 +161,7 @@ internal static class GraphShortestPathValidation
         {
             ValidateStoredIdentifier(edge.Id, budget);
             ValidateStoredIdentifier(edge.Label, budget);
+            ValidateStoredEntity(edge.From, budget);
             ValidateStoredEntity(edge.To, budget);
         }
         catch (KeyLoadException exception) when (exception.Code == ErrorCode.Validation)
@@ -171,6 +172,7 @@ internal static class GraphShortestPathValidation
 
     private static void ValidateStoredEntity(EntityRef entity, ReadExecutionBudget budget)
     {
+        EntityReferenceLifetime.RequireBound(entity);
         if (entity is null || entity.Partition is null || entity.Collection is null || entity.Id is null)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);

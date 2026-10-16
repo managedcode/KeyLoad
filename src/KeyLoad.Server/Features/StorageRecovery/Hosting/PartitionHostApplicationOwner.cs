@@ -8,7 +8,7 @@ namespace KeyLoad.Server;
 internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options, IAuthorizationPolicy authorization,
     CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger, OrleansNode? node = null,
     ServerConnectionRegistry? connections = null, ReplicaTransportLifecycle? transport = null,
-    OperationalAnalyticsRuntime? analytics = null)
+    OperationalAnalyticsRuntime? analytics = null, UserAnalyticsRuntime? userAnalytics = null)
     : IPartitionStoragePublication, IAsyncDisposable
 {
     private const string NativeBorrowersUnjoined = "The original native storage borrowers have not joined; retain the physical owner.";
@@ -53,7 +53,8 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
 
     internal bool CanReleaseRoot => Volatile.Read(ref connectionsJoined)
         && Volatile.Read(ref transportJoined) && Volatile.Read(ref storageProducersJoined)
-        && (analytics?.CanReleasePhysical ?? true) && (node?.HasJoinedRequestWork ?? true) && ownership.CanReleaseRoot;
+        && (analytics?.CanReleasePhysical ?? true) && (userAnalytics?.CanReleasePhysical ?? true)
+        && (node?.HasJoinedRequestWork ?? true) && ownership.CanReleaseRoot;
 
     internal IReadOnlyList<Task>? StorageProducerJoins => Volatile.Read(ref storageProducerJoins);
 
@@ -115,6 +116,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         {
             await analytics.OpenAsync(opened).ConfigureAwait(false);
         }
+        userAnalytics?.Open(opened);
         lock (lifecycle)
         {
             published = true;
@@ -167,7 +169,11 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         {
             await ServerFailureObserver.ObserveAsync(() => analytics.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
-        if (!(analytics?.CanReleasePhysical ?? true)
+        if (userAnalytics is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => userAnalytics.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
+        if (!(analytics?.CanReleasePhysical ?? true) || !(userAnalytics?.CanReleasePhysical ?? true)
             || !Volatile.Read(ref connectionsJoined) || !Volatile.Read(ref transportJoined)
             || !Volatile.Read(ref storageProducersJoined) || node is { HasJoinedRequestWork: false })
         {

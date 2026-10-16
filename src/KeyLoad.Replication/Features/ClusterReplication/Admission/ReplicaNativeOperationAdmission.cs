@@ -26,7 +26,8 @@ internal static class ReplicaNativeOperationAdmission
         var value = wrapper.Value;
         var detail = Detail(wrapper, value.SafeDetail);
         database.VerifyNativeAuthority(operation.Id, operation.Kind, principal, inspected.Utf8(operation.PayloadJson).Span,
-            value.Value, value.Error, detail, value.Authority, value.Signature, value.RetryDecisions, value.TransferProof);
+            value.Value, value.Error, detail, value.Authority, value.Signature, value.RetryDecisions, value.TransferProof,
+            value.ResourceAdmission);
         if (value.Error is null)
         {
             var type = DatabaseEngine.NativeOperationPayloadType(operation.Kind)

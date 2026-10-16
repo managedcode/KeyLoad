@@ -47,6 +47,7 @@ internal static class McpToolNames
     internal const string MessagesComplete = "keyload_messages_complete";
     internal const string InboxCommit = "keyload_inbox_commit";
     internal const string MessagesProcess = "keyload_messages_process";
+    internal const string TablesDrop = "keyload_tables_drop";
     internal const string ResourcesConfigure = "keyload_resources_configure";
     internal const string PrincipalsConfigure = "keyload_principals_configure";
     internal const string CredentialsConfigure = "keyload_credentials_configure";

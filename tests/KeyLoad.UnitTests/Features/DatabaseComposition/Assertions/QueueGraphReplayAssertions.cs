@@ -75,7 +75,7 @@ internal static class QueueGraphReplayAssertions
             state.Source.SeedReceipt.Durability);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(receipt.Mutations[0].CompositionReferences).IsEmpty();
-        await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.Source.From, state.Source.To])).IsTrue();
+        await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.Source.BoundFrom, state.Source.BoundTo])).IsTrue();
         state.NextReceipt = NativeSerialization.Serialize(receipt);
         await ReplaysAsync(state, engine, store, continued: true);
     }
@@ -89,17 +89,18 @@ internal static class QueueGraphReplayAssertions
             [new("enqueue", QueueGraphIdentityState.Queue, QueueGraphReplayState.ReversePrefix +
                 QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)], source.SeedReceipt.Durability);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(actual.Mutations[0].CompositionReferences.SequenceEqual([source.From, source.To])).IsTrue();
+        await Assert.That(actual.Mutations[0].CompositionReferences.SequenceEqual([source.BoundFrom, source.BoundTo])).IsTrue();
     }
 
     internal static async Task ModelsAsync(QueueGraphReplayState state, DatabaseEngine engine, ZoneTreeStore store,
         bool continued)
     {
         await QueueGraphIdentityAssertions.ModelsAsync(state.Source, engine, store, healthy: true);
-        var original = state.Source.Source;
+        var payload = QueueGraphIdentityAssertions.Payload(new(state.Source.BoundFrom, state.Source.BoundTo,
+            QueueGraphIdentityState.Label, QueueGraphIdentityState.AttributesJson));
         var derived = new MessageInspection(new(QueueGraphReplayState.ReversePrefix +
             QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, MessageState.Ready,
-            0, 1, 2, null, null), original.PayloadJson, "{}");
+            0, 1, 2, null, null), payload, "{}");
         await Assert.That(JsonDefaults.Serialize(engine.InspectMessage(QueueGraphIdentityState.Root,
             new(state.Source.Fixture.Partition, QueueGraphIdentityState.Queue), derived.Metadata.Id))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(derived))).IsTrue();
@@ -112,8 +113,7 @@ internal static class QueueGraphReplayAssertions
             new(state.Source.Fixture.Partition, QueueGraphIdentityState.Queue),
             QueueGraphReplayState.NextPrefix + QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(next))).IsTrue();
-        var reference = new EntityRef(state.Source.Fixture.Partition, QueueGraphIdentityState.Collection,
-            QueueGraphReplayState.Continuation);
+        var reference = state.ContinuationReference;
         var expected = continued ? new DocumentRecord(reference, 1, QueueGraphReplayState.ContinuationJson,
             new(), state.Next.EvaluatedAt) : null;
         await Assert.That(JsonDefaults.Serialize(store.Read(view => view.GetRecord<DocumentRecord>(

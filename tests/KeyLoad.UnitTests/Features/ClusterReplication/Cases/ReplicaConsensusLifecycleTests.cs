@@ -85,7 +85,8 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
 
     internal ReplicaLifecycleFixture(ReplicaExecutionOptions? executionSettings = null, int? maximumAppendEntries = null,
         Action<CommitStage, long, int>? canonicalObserver = null, ReplicaConfiguration? configuration = null,
-        ReadOnlyMemory<byte>? canonicalSigningKey = null)
+        ReadOnlyMemory<byte>? canonicalSigningKey = null,
+        Func<ZoneTreeStore, DatabaseEngine>? canonicalDatabaseFactory = null, TimeProvider? evaluationClock = null)
     {
         directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
         Configuration = (configuration ?? new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid()))
@@ -110,14 +111,28 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         {
             Incarnation = Configuration.Incarnation
         }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        try
+        {
+            Database = canonicalDatabaseFactory?.Invoke(canonical) ?? new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
+                UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        }
+        catch (Exception primary)
+        {
+            var failures = new List<Exception> { primary };
+            KeyLoad.Server.ServerFailureObserver.Observe(ReplicaStore.Dispose, failures);
+            KeyLoad.Server.ServerFailureObserver.Observe(canonical.Dispose, failures);
+            KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
         Log = new(ReplicaStore, ReplicaExecutionTestOptions.Configuration(Configuration), canonicalDatabase: Database);
         ExecutionOptions = ReplicaExecutionTestOptions.Execution(executionSettings);
         Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log,
-            ReplicaExecutionTestOptions.Configuration(Configuration), ExecutionOptions), ExecutionOptions);
-        Consensus = new(Materializer, ReplicaExecutionTestOptions.Configuration(Configuration), ExecutionOptions, TimeProvider.System);
+            ReplicaExecutionTestOptions.Configuration(Configuration), ExecutionOptions, replacementToken => Database.RequireNoRetirementForSnapshotReplacement(
+                    new(Database.OperationLimitsOptions, Database.EvaluationClock, replacementToken))), ExecutionOptions);
+        Consensus = new(Materializer, ReplicaExecutionTestOptions.Configuration(Configuration), ExecutionOptions, evaluationClock ?? TimeProvider.System);
     }
+
+    internal string CanonicalDirectoryPath => Path.Combine(directory, CanonicalDirectory);
 
     internal Microsoft.Extensions.Options.IOptions<ReplicaExecutionOptions> ExecutionOptions
     {

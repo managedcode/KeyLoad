@@ -14,7 +14,7 @@ internal static class NativeAnnOriginalOperationExecution
         PrincipalRecord principal, AnnMaintenanceRequest request, ProjectionConsumerInfo? originalConfigure,
         AnnMaintenanceResult? originalResult, ServerRuntimeOptions configured, TimeProvider clock,
         NativeAnnMaintenanceAdmissions admission, Func<NativeAnnGenerationOwner> owningRoot, CancellationToken token,
-        NativeAnnMaintenanceSession? originalSession = null)
+        NativeAnnMaintenanceSession? originalSession = null, ReadExecutionBudget? originalBudget = null)
     {
         var failures = new List<Exception>();
         (AnnMaintenanceResult? Result, CommitProjectionBatchRequest? Intent) result = default;
@@ -26,7 +26,7 @@ internal static class NativeAnnOriginalOperationExecution
                 NativeAnnMaintenanceAdmission.Request(request, request.CommandId, database.Store.Identity.NodeId);
                 var owner = owningRoot();
                 result = await owner.RunAsync(stages => Run(database, principal, request, originalConfigure,
-                    originalResult, configured, clock, owner, stages, originalSession, token)).ConfigureAwait(false);
+                    originalResult, configured, clock, owner, stages, originalSession, token, originalBudget)).ConfigureAwait(false);
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -40,7 +40,7 @@ internal static class NativeAnnOriginalOperationExecution
     private static (AnnMaintenanceResult? Result, CommitProjectionBatchRequest? Intent) Run(DatabaseEngine database, PrincipalRecord principal,
         AnnMaintenanceRequest request, ProjectionConsumerInfo? originalConfigure, AnnMaintenanceResult? originalResult,
         ServerRuntimeOptions configured, TimeProvider clock, NativeAnnGenerationOwner owner,
-        NativeAnnStageStore stages, NativeAnnMaintenanceSession? originalSession, CancellationToken token)
+        NativeAnnStageStore stages, NativeAnnMaintenanceSession? originalSession, CancellationToken token, ReadExecutionBudget? originalBudget)
     {
         var failures = new List<Exception>();
         AnnMaintenanceResult? result = null;
@@ -50,7 +50,7 @@ internal static class NativeAnnOriginalOperationExecution
             using var memory = originalSession is null ? owner.MaintenanceMemory.Reserve() : null;
             try
             {
-                var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+                var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
                 var fresh = database.Store.Read(view => database.Principal(view, principal.Id, clock.GetUtcNow()));
                 if (!fresh.ClusterAdministrator || fresh.Revoked || fresh.PolicyEpoch != principal.PolicyEpoch)
                 {

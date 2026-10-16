@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.RelationalStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -42,7 +43,7 @@ public partial class DatabaseEngine
         return schema.PrimaryKey;
     }
 
-    private bool SelectTypedEndpointPair(IKeyValueView view, PrincipalRecord principal,
+    private QueueGraphLink? SelectTypedEndpointPair(IKeyValueView view, PrincipalRecord principal,
         QueueToGraph command, QueueGraphLink link, ReadExecutionBudget budget,
         string fromPrimaryKey, string toPrimaryKey)
     {
@@ -54,7 +55,11 @@ public partial class DatabaseEngine
         // Both genuine probes are charged, including absent and row-denied endpoints.
         var from = ReadTypedEndpoint(view, principal, link.From, budget, fromPrimaryKey);
         var to = ReadTypedEndpoint(view, principal, link.To, budget, toPrimaryKey);
-        return from is not null && to is not null;
+        return from is null || to is null ? null : link with
+        {
+            From = from.Reference,
+            To = to.Reference
+        };
     }
 
     private DocumentRecord? ReadTypedEndpoint(IKeyValueView view, PrincipalRecord principal,
@@ -66,14 +71,12 @@ public partial class DatabaseEngine
         {
             return null;
         }
-        if (record.Reference != reference)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
-        }
         if (record.Deleted || !Authorization.CanReadRow(principal, record.Access))
         {
             return null;
         }
+        // Resource and row authority were checked before resolving the caller's explicit lookup.
+        _ = BindCompositionInputRecord(budget.CreateView(view), reference, record);
         RequireTypedEndpointPrimaryIdentity(record, primaryKey);
         return record;
     }
@@ -110,6 +113,8 @@ public partial class DatabaseEngine
             foreach (var reference in references)
             {
                 ValidateCompositionReference(reference, partition);
+                EntityReferenceLifetime.RequireBound(reference);
+                // A saved typed authority is never rebound from its collection name.
                 // The budgeted view charges the resource and document once; no second source scan.
                 var document = VisibleVertex(chargedView, principal, reference);
                 if (document.Reference != reference)

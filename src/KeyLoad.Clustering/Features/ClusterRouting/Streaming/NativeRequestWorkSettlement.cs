@@ -5,6 +5,23 @@ namespace KeyLoad.Clustering;
 /// <summary>Preserves cancellation, join and disposal failures while settling one work owner.</summary>
 internal static class NativeRequestWorkSettlement
 {
+    internal static Exception? Observe(Action action)
+    {
+        try
+        {
+            action();
+            return null;
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return error;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return error;
+        }
+    }
+
     internal static async Task<Exception?> CancelAsync(CancellationTokenSource source)
     {
         try

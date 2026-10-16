@@ -12,11 +12,11 @@ internal static class EventVectorFirstIssuanceLookup
     internal static EventVectorFirstIssuanceObservation Read(IKeyValueView boundedView,
         PrincipalRecord principal, EventFeedControlRequest request, PhysicalShardRecord owner,
         StoreIdentity identity, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> options,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, EventVectorReadLifetimeBinding? lifetimeBinding = null)
     {
         var admission = new EventVectorAdmissionPolicy(options);
         var admit = EventVectorFirstAdmitOutcome.Observe(boundedView, principal, request,
-            identity.Incarnation, authorization, admission);
+            identity.Incarnation, authorization, admission, lifetimeBinding);
         var active = EventVectorFirstLookupRows.Active(boundedView, principal, request, admission);
         var terminal = EventVectorFirstLookupRows.Terminal(boundedView, principal, request, admission);
         var map = EventVectorFirstLookupRows.Read(boundedView,
@@ -46,12 +46,20 @@ internal static class EventVectorFirstIssuanceLookup
         }
         cancellationToken.ThrowIfCancellationRequested();
         var proof = map.IsEmpty && index.IsEmpty
-            ? IssuanceProof(boundedView, principal, request, !terminal.IsEmpty, identity.Incarnation, authorization, admission)
+            ? IssuanceProof(boundedView, principal, request, !terminal.IsEmpty, identity.Incarnation, authorization, admission, lifetimeBinding)
             : PublishedProof(boundedView, principal, request, identity.Incarnation,
-                authorization, options, cancellationToken);
+                authorization, options, lifetimeBinding, cancellationToken);
         var originalOutcome = EventVectorFirstOpenOutcomeBytes.Read(boundedView, principal, proof.Phase,
             proof.CommandId, identity.Incarnation, proof.Scopes, authorization, admission);
-        EventVectorParentScopes.Authorize(authorization, principal, proof.Scopes, admission);
+        if (lifetimeBinding is null)
+        {
+            EventVectorParentScopes.Authorize(authorization, principal, proof.Scopes, admission);
+        }
+        else
+        {
+            lifetimeBinding.Authorize(authorization, principal, proof.Scopes, admission);
+            lifetimeBinding.Phase(proof.Phase, admission);
+        }
         parent = OriginalParent(parent, request.CommandId);
         if ((!map.IsEmpty || !index.IsEmpty) && originalOutcome.IsEmpty)
         {
@@ -65,11 +73,18 @@ internal static class EventVectorFirstIssuanceLookup
     private static (ReadOnlyMemory<byte> Phase, Guid CommandId,
         ImmutableArray<EventVectorAuthorizationScope> Scopes, bool Abandoned) IssuanceProof(
         IKeyValueView view, PrincipalRecord principal, EventFeedControlRequest request, bool terminal, Guid incarnation,
-        IAuthorizationPolicy authorization, EventVectorAdmissionPolicy admission)
+        IAuthorizationPolicy authorization, EventVectorAdmissionPolicy admission, EventVectorReadLifetimeBinding? lifetimeBinding)
     {
         var row = EventVectorFirstIssuanceValidation.Read(view, request.ControlPartition,
             principal.Id, request.CommandId, terminal, admission);
-        EventVectorParentScopes.Authorize(authorization, principal, row.OriginalAuthorizedSourceScopes, admission);
+        if (lifetimeBinding is null)
+        {
+            EventVectorParentScopes.Authorize(authorization, principal, row.OriginalAuthorizedSourceScopes, admission);
+        }
+        else
+        {
+            lifetimeBinding.Authorize(authorization, principal, row.OriginalAuthorizedSourceScopes, admission);
+        }
         _ = EventVectorFirstIssuanceValidation.RequireRequest(row, request, admission);
         if (terminal)
         {
@@ -91,7 +106,8 @@ internal static class EventVectorFirstIssuanceLookup
     private static (ReadOnlyMemory<byte> Phase, Guid CommandId,
         ImmutableArray<EventVectorAuthorizationScope> Scopes, bool Abandoned) PublishedProof(
         IKeyValueView view, PrincipalRecord principal, EventFeedControlRequest request, Guid incarnation,
-        IAuthorizationPolicy authorization, IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
+        IAuthorizationPolicy authorization, IOptions<DatabaseLimits> options, EventVectorReadLifetimeBinding? lifetimeBinding,
+        CancellationToken cancellationToken)
     {
         var admission = new EventVectorAdmissionPolicy(options);
         var indexKey = EventVectorKeys.ParentOutcome(request.ControlPartition, principal.Id, request.CommandId);
@@ -99,7 +115,7 @@ internal static class EventVectorFirstIssuanceLookup
         if (index is not null)
         {
             _ = EventVectorParentLookup.ReadTerminalDetails(view, authorization, principal, request,
-                incarnation, options, cancellationToken) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+                incarnation, ReadOnlyMemory<byte>.Empty, options, cancellationToken, lifetimeBinding) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
             RequirePublishedPair(index.OriginalFirstOpenPhaseBytes, index.OriginalFirstOpenNativeCommandId);
             return (index.OriginalFirstOpenPhaseBytes, index.OriginalFirstOpenNativeCommandId,
                 index.OriginalAuthorizedSourceScopes, false);
@@ -112,10 +128,10 @@ internal static class EventVectorFirstIssuanceLookup
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
         }
-        EventVectorParentInventoryAuthorization.Require(authorization, principal, inventory, admission);
+        EventVectorParentInventoryAuthorization.Require(authorization, principal, inventory, admission, lifetimeBinding);
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         _ = EventVectorParentObservationRead.Read(view, authorization, principal, request,
-            incarnation, options, cancellationToken);
+            incarnation, ReadOnlyMemory<byte>.Empty, options, cancellationToken, lifetimeBinding);
         var call = EventVectorRowStorage.Read<EventVectorParentCall>(view,
             EventVectorKeys.ParentCall(request.ControlPartition, request.MapId), admission)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
@@ -123,6 +139,7 @@ internal static class EventVectorFirstIssuanceLookup
         return (call.OriginalFirstOpenPhaseBytes, call.OriginalFirstOpenNativeCommandId,
             call.OriginalAuthorizedSourceScopes, false);
     }
+
     private static ReadOnlyMemory<byte> OriginalParent(ReadOnlyMemory<byte> bytes, Guid publicCommandId)
     {
         if (bytes.IsEmpty)

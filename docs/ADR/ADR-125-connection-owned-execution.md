@@ -540,3 +540,18 @@ flowchart LR
     Int16 --> Refusal[Validation]
     Refusal --> Sync[Same owner Sync and healthy Bind]
 ```
+
+
+## D4 selective resource-lifetime settlement
+
+Owner-selected D4 extends these SAME native owners with explicit exact-D1 binding, per-item publication admission, targeted cancellation and original settlement. The [canonical D4 contract](../Features/ResourceExecution/ResourceLifetimeSettlement.md) owns REQ/AC-D4SET-001..008, cursor versioning, bounded retention/refusal/consumption and its test matrix. It preserves the actual physical store and unrelated operations on the SAME connection. A postcommit exact stored-fence read closes matching publication under original apply ownership; cancel/join runs outside every storage/replica gate. D3 durable fence/RF3 ACK and D4 ACK are separate. No new manager, scheduler, provider or RPC is selected. Complete hosted integration, native owner/producer tests, D6 durable handoff, recovery and real SDK/MCP RF3 qualification remain OPEN.
+
+```mermaid
+flowchart LR
+    Auth[Original authorized cut and exact D1] --> Lease[Existing native operation lease]
+    Fence[Actual committed owner fence] --> Close[Atomic matching publication close]
+    Lease --> Close
+    Close --> Join[Original cancel and join outside gates]
+    Join --> Receipt[Retained original report or explicit refusal]
+    Receipt --> Ack[Separate D4 settlement ACK]
+```

@@ -38,13 +38,15 @@ internal sealed record BlobCommandScope(
 internal sealed class BlobAuthority(DatabaseEngine database)
 {
     private BlobRecordReader Reader => new(database.Store.Identity.Incarnation);
-    internal ResourceDefinition Scope(IKeyValueView view, PrincipalRecord principal, BlobRef blob, Capability capability)
+    internal ResourceDefinition Scope(IKeyValueView view, PrincipalRecord principal, BlobRef blob, Capability capability, bool read = false)
     {
         BlobKeys.Validate(blob);
         BlobRestoreFence.RequireOpen(view);
         global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, OperationKind.BeginBlobUpload);
         database.Authorization.Require(principal, blob.Partition, blob.Resource, capability);
-        var resource = database.Resource(view, blob.Partition, blob.Resource, ResourceKind.BlobStore);
+        var resource = read
+            ? database.BindAuthorizedReadResource(view, blob.Partition, blob.Resource, ResourceKind.BlobStore)
+            : database.Resource(view, blob.Partition, blob.Resource, ResourceKind.BlobStore);
         BlobQuotaOperations.ValidatePolicy(resource);
         var quota = BlobQuotaOperations.Read(view, BlobKeys.Quota(blob), database.Store.Identity.Incarnation);
         var global = BlobQuotaOperations.Read(view, BlobKeys.Global, database.Store.Identity.Incarnation);

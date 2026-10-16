@@ -15,7 +15,10 @@ internal static class GraphCrossPartitionFingerprintInput
             Copy(partition.TransactionDomainId), Copy(partition.PartitionKey));
 
     private static EntityRef Copy(EntityRef entity)
-        => new(Copy(entity.Partition), Copy(entity.Collection), Copy(entity.Id));
+        => new(Copy(entity.Partition), Copy(entity.Collection), Copy(entity.Id))
+        {
+            Lifetime = entity.Lifetime is { } lifetime ? new(Copy(lifetime.Incarnation)) : null
+        };
 
     private static string Copy(string value) => new(value.AsSpan());
 }

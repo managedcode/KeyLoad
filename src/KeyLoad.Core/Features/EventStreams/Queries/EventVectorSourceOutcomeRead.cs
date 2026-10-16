@@ -39,7 +39,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ChangedEventVectorObservation);
         }
-        var resource = SourceResource(bounded, mutation.Source);
+        var resource = SourceResource(bounded, mutation.Source, authorizedRead: true);
         if (resource.SchemaVersion != mutation.SourceSchemaVersion)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ChangedEventVectorObservation);

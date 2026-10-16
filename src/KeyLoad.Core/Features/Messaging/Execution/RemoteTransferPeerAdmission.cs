@@ -35,7 +35,7 @@ public sealed partial class DatabaseEngine
     }
 
     private void RequireRemoteTransferPeerAtView(IKeyValueView view, PrincipalRecord principal,
-        RemoteTransferNativeProof proof)
+        RemoteTransferNativeProof proof, bool bindResourceLifetime = false)
     {
         var call = proof.Call;
         RemoteTransferPeerShape.Require(call);
@@ -56,7 +56,9 @@ public sealed partial class DatabaseEngine
         }
         RequireTransferCapabilities(principal, destination, call.Stage == RemoteQueueTransferPeerStage.Accept
             ? Capability.QueuePublish : Capability.QueueInspect);
-        var resource = Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
+        var resource = bindResourceLifetime
+            ? BindAuthorizedReadResource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue)
+            : Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         if (call.Stage == RemoteQueueTransferPeerStage.Accept)
         {
             RequireTransferPublisher(principal, destination, resource);

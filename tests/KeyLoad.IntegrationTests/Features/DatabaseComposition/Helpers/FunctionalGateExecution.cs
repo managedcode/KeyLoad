@@ -106,6 +106,7 @@ internal static class FunctionalGateExecution
             6 => FunctionalGateGraphs.ExerciseAsync(context, iteration, token),
             7 => FunctionalGateSearch.ExerciseAsync(context, iteration, token),
             8 => FunctionalGateAnalytics.ExerciseAsync(context, iteration, token),
+            9 => FunctionalGateUserAnalytics.ExerciseAsync(context, iteration, token),
             _ => throw new ArgumentOutOfRangeException(nameof(model))
         };
 

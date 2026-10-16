@@ -42,6 +42,7 @@ public sealed partial class DatabaseEngine
             OperationKind.CommitProjectionBatch => ExecuteProjectionBatch(transaction, principal, operation, position),
             OperationKind.ReleaseProjectionConsumer => ExecuteReleaseProjection(transaction, operation),
             OperationKind.PurgeOutbox => ExecutePurgeOutbox(transaction, operation),
+            OperationKind.ResourceRetirementPhase => ExecuteResourceRetirementPhase(transaction, principal, operation, position),
             OperationKind.ConfigureResource => ExecuteConfigureResource(transaction, operation),
             OperationKind.CreateTable => ExecuteCreateTable(transaction, operation),
             OperationKind.SetQueueDispatch => ExecuteQueueDispatchControl(transaction, operation),

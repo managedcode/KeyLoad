@@ -64,6 +64,9 @@ public sealed partial class DatabaseEngine
 
         var invalid = mutation switch
         {
+            UpsertAnalyticsEvents analytics => analytics.Events.IsDefault || analytics.Events.Any(item => item is null)
+                || analytics.ExpectedRevisions is null,
+            DeleteAnalyticsEvents analytics => analytics.ExpectedRevisions is null,
             PatchDocument patch => patch.Patches.IsDefault || patch.Patches.Any(item => item is null || item.Kind is not (PatchKind.Set or PatchKind.Remove)),
             AppendEvents append => append.Events.IsDefault || append.Events.Any(item => item is null)
                 || append.ExpectedRevision.State is not (ExpectedStreamState.Any or ExpectedStreamState.Exact or ExpectedStreamState.NoStream),
@@ -82,6 +85,8 @@ public sealed partial class DatabaseEngine
     private static string CanonicalMutationOwner(Mutation mutation)
         => mutation switch
         {
+            UpsertAnalyticsEvents analytics => analytics.Store,
+            DeleteAnalyticsEvents analytics => analytics.Store,
             InsertTypedRow insert => insert.Collection,
             PutDocument put => put.Collection,
             PatchDocument patch => patch.Collection,

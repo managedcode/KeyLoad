@@ -16,6 +16,7 @@ public sealed partial class DatabaseEngine
             var view = work.CreateView(raw);
             var principal = RequireInventoryAdministrator(view, principalId);
             ResourceOwnerInventoryReadValidation.Control(control, Limits);
+            ResourceRetirementInventoryAdmission.RequireOwnerContext(view, control, Limits);
             ResourceOwnerInventoryReadValidation.Expiry(control.Request.ExpiresAt, EvaluationClock.GetUtcNow(), work);
             if (continuation is not null)
             {
@@ -44,6 +45,7 @@ public sealed partial class DatabaseEngine
             var view = work.CreateView(raw);
             _ = RequireInventoryAdministrator(view, principalId);
             ResourceOwnerInventoryReadValidation.Control(control, Limits);
+            ResourceRetirementInventoryAdmission.RequireOwnerContext(view, control, Limits);
             ResourceOwnerInventoryReadValidation.Expiry(control.Request.ExpiresAt, EvaluationClock.GetUtcNow(), work);
             ResourceOwnerInventoryReadValidation.OwnerCut(cut, Limits);
             var observed = control.Directory.Owners.SingleOrDefault(entry =>

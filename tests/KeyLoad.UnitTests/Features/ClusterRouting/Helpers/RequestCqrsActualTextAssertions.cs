@@ -16,11 +16,11 @@ internal static class RequestCqrsActualTextAssertions
     private const long ChangedRevision = 2;
     private const double Score = 1d / 61d;
 
-    internal static Task VerifyAsync(RequestCqrsClusterFixture fixture,
+    internal static Task VerifyAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, bool changed, CancellationToken token)
         => VerifyAsync(fixture, request, changed, ChangedRevision, token);
 
-    internal static async Task VerifyAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task VerifyAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, bool changed, long changedRevision, CancellationToken token)
     {
         var runtime = fixture.NativeMaintenance ?? throw new InvalidOperationException();
@@ -30,7 +30,7 @@ internal static class RequestCqrsActualTextAssertions
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var projection = new NativeTextSelectedProjection(NativeTextBilingualAudit.Open(database),
+            using var projection = new NativeTextSelectedProjection(RequestCqrsHostedMaintenanceData.Open(database),
                 runtime.Owner, runtime.Owner);
             var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
             var selection = new TextIndexSelectionV1(request.Consumer, request.IndexGeneration);

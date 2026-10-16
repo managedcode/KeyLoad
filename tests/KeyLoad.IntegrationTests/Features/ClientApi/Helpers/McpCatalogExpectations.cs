@@ -38,6 +38,12 @@ internal static class McpCatalogExpectations
         get;
     } =
     [
+        Read(AnalyticsStoreProtocol.ReadTool, ["partition", "store", "fromInclusive", "toExclusive", "limit", "afterId"],
+            ["events", "hasMore", "nextAfterId"]),
+        Read(AnalyticsStoreProtocol.AggregateTool, ["partition", "store", "fromInclusive", "toExclusive", "groupBy", "metrics", "maxGroups"],
+            ["rows", "eventCount"]),
+        new("keyload_tables_drop", false, true, true, McpExpectedBody.Object, true,
+            ["tenantId", "databaseId", "resourceName"], ["tenantId", "databaseId", "resourceName", "receipt"]),
         .. McpBlobCatalogExpectations.Entries,
         .. McpEventFeedDiscoveryExpectations.Entries,
         .. McpRemoteGraphDiscoveryExpectations.Entries,
@@ -137,7 +143,7 @@ internal static class McpCatalogExpectations
             ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"],
             ["name", "kind", "transactionDomainId", "indexes", "fieldPolicies", "headerPolicies",
                 "queuePolicy", "eventRetention", "authority", "schemaVersion", "paused", "blobPolicy",
-                "relationalSchema", "vectorProfiles", "inboxPolicy"],
+                "relationalSchema", "vectorProfiles", "inboxPolicy", "analyticsSchema"],
             BodyPropertyFields: ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"]),
         new(McpCallerTools.ResourcesConfigure, false, true, false, McpExpectedBody.Object, true,
             [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId, McpDiscoveryProtocol.Definition]),

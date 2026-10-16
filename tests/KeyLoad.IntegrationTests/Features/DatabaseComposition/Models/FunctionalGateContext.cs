@@ -18,6 +18,8 @@ internal sealed record FunctionalGateContext(
     private long mcpOperations;
 
     internal RequestCqrsRf3Callers QueueAdministrator { get; init; } = null!;
+    internal FunctionalGateReferenceBindings ReferenceBindings { get; init; } = new();
+    internal EntityRef Bind(EntityRef reference) => ReferenceBindings.Bind(reference);
     internal string WriterPrincipalId { get; init; } = string.Empty;
     internal string ReaderPrincipalId { get; init; } = string.Empty;
     internal string MutableDocumentCollection { get; init; } = FunctionalGateProtocol.OpenDocumentCollection;
@@ -25,6 +27,7 @@ internal sealed record FunctionalGateContext(
     {
         get; init;
     }
+    internal Dictionary<string, long> AnalyticsGenerations { get; } = new(StringComparer.Ordinal);
     internal long SdkOperations => Interlocked.Read(ref sdkOperations);
     internal long McpOperations => Interlocked.Read(ref mcpOperations);
     internal long CompletedOperations => SdkOperations + McpOperations;

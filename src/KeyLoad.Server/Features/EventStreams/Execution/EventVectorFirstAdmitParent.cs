@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -13,8 +14,9 @@ internal sealed class EventVectorFirstAdmitParent(OrleansNode node, PartitionHos
     private const int FirstOrdinal = 0;
 
     public async Task<GrainOperationReply> ExecuteAdmitAsync(DecodedGrainRequest original,
-        GrainRequestCodec codec, global::Orleans.Runtime.IGrainContext context, ReadExecutionBudget work, CancellationToken originalCancellationToken)
+        GrainRequestCodec codec, global::Orleans.Runtime.IGrainContext context, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken originalCancellationToken)
     {
+        work.RequireResourceLifetimeBinding(binding);
         var database = partition.Database;
         var principal = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         var request = GrainNativePayload.ReadCommand<EventFeedControlRequest>(original.Payload);
@@ -59,8 +61,9 @@ internal sealed class EventVectorFirstAdmitParent(OrleansNode node, PartitionHos
     }
 
     public Task<EventFeedControlResult?> ReadTailOfferAsync(DecodedGrainRequest original,
-        ReadExecutionBudget work, CancellationToken originalCancellationToken)
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken originalCancellationToken)
     {
+        work.RequireResourceLifetimeBinding(binding);
         var database = partition.Database;
         var principal = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         var request = GrainNativePayload.ReadCommand<EventFeedControlRequest>(original.Payload);

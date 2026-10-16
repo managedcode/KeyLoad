@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
@@ -49,9 +50,23 @@ public sealed class AdmittedCommandInbox : IAsyncDisposable
     /// <param name="principal">The verified principal associated with the operation.</param>
     /// <param name="payloadBytes">The operation payload size in bytes.</param>
     /// <param name="cancellationToken">Cancels admission before the command is queued.</param>
+    /// <param name="sourcePlanningBudget">Original call-local planning budget retained without replacement.</param>
     /// <returns>The admitted command whose outcome must be completed, failed, or disposed by its consumer.</returns>
     public AdmittedCommand Enqueue(ReplicatedOperation operation, PrincipalRecord principal, int payloadBytes,
-        CancellationToken cancellationToken = default)
+        ReadExecutionBudget? sourcePlanningBudget = null, CancellationToken cancellationToken = default)
+        => EnqueueCore(operation, principal, payloadBytes, sourcePlanningBudget, null, cancellationToken);
+
+    internal AdmittedCommand EnqueueForwarded(ReplicatedOperation operation, PrincipalRecord principal,
+        int payloadBytes, IReplicaForwardedCommandWork receiverWork, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(receiverWork);
+        receiverWork.Budget.Check();
+        return EnqueueCore(operation, principal, payloadBytes, null, receiverWork, cancellationToken);
+    }
+
+    private AdmittedCommand EnqueueCore(ReplicatedOperation operation, PrincipalRecord principal, int payloadBytes,
+        ReadExecutionBudget? sourcePlanningBudget, IReplicaForwardedCommandWork? receiverWork,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(operation);
         ArgumentNullException.ThrowIfNull(principal);
@@ -60,19 +75,23 @@ public sealed class AdmittedCommandInbox : IAsyncDisposable
             throw Errors.Fail(ErrorCode.PermissionDenied, PrincipalMismatchDetail);
         }
 
+        sourcePlanningBudget?.Check();
+        receiverWork?.Budget.Check();
         var lease = governor.Reserve(operation, principal, payloadBytes, cancellationToken);
         try
         {
             lock (gate)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                sourcePlanningBudget?.Check();
+                receiverWork?.Budget.Check();
                 ThrowIfUnavailable();
                 if (stopped)
                 {
                     throw Errors.Fail(ErrorCode.ResourceExhausted, StoppedDetail);
                 }
 
-                var command = new AdmittedCommand(operation, lease);
+                var command = new AdmittedCommand(operation, lease, sourcePlanningBudget, receiverWork);
                 lanes.Enqueue(command);
                 available.Release();
                 lease = null;

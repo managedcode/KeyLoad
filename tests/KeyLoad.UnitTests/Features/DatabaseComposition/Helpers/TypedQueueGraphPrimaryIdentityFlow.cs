@@ -53,19 +53,21 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                 await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store))
                     .IsEquivalentTo(source.ColdImage, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 var engine = source.Fixture.CreateConfiguredDatabase(store);
-                var reverse = await QueueGraphIdentityFlow.CompileAsync(new(Guid.NewGuid(), source.Fixture.Partition,
+                var reverse = await QueueGraphIdentityFlow.CompileAsync(engine, new(Guid.NewGuid(), source.Fixture.Partition,
                     [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.ReversePrefix)]),
                     source.Healthy.EvaluatedAt.AddSeconds(NextOffsetSeconds));
                 var receipt = engine.Apply(reverse).Get<CommitReceipt>();
                 await QueueGraphReplayAssertions.ReverseReceiptAsync(source, store, reverse.Id, receipt);
-                var next = await QueueGraphIdentityFlow.CompileAsync(new(Guid.NewGuid(), source.Fixture.Partition,
+                var continuation = store.Read(view => DatabaseCompositionExpectedReferences.Capture(view,
+                    new(source.Fixture.Partition, QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation)));
+                var next = await QueueGraphIdentityFlow.CompileAsync(engine, new(Guid.NewGuid(), source.Fixture.Partition,
                     [new PutDocument(QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation,
                         QueueGraphReplayState.ContinuationJson),
                      new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.NextPrefix)]),
                     reverse.EvaluatedAt.AddSeconds(NextOffsetSeconds));
-                replay = new(source, reverse, NativeSerialization.Serialize(receipt), next);
+                replay = new(source, reverse, NativeSerialization.Serialize(receipt), next, continuation);
                 await QueueGraphReplayAssertions.ContinueAsync(replay, engine, store);
                 source.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
                 source.ColdPosition = store.Position;

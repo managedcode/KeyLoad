@@ -20,7 +20,7 @@ internal static class ZoneTreeCatalogRestoreEntry
             throw Errors.Fail(ErrorCode.Validation, InvalidIdentity);
         }
         return ZoneTreeBackupRestoreRestore.Restore(backup, destination, executionOptions,
-            newIncarnation, newSigningKey, verifyCatalog, cancellationToken);
+            newIncarnation, newSigningKey, verifyCatalog, cancellationToken: cancellationToken);
     }
 
     internal static void RequireFreshIdentity(StoreIdentity original, Guid? incarnation, byte[]? signingKey)

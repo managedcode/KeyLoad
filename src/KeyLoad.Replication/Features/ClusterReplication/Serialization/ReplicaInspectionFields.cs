@@ -24,11 +24,13 @@ internal static class ReplicaInspectionFields
         [typeof(string[])] = typeof(ReplicaVoterArrayInspectionCodec),
         [typeof(string)] = typeof(ReplicaBorrowedStringCodec),
         [typeof(ReplicaSnapshot)] = typeof(ReplicaSnapshotInspectionCodec),
-        [typeof(ReplicatedOperation)] = typeof(ReplicaOperationInspectionCodec)
+        [typeof(ReplicatedOperation)] = typeof(ReplicaOperationInspectionCodec),
+        [typeof(ReplicaForwardReadGrantV1)] = typeof(ReplicaForwardGrantInspectionCodec),
+        [typeof(ReplicaForwardReadStatsV1)] = typeof(ReplicaForwardStatsInspectionCodec)
     };
     private static readonly HashSet<Type> Scalars =
     [
-        typeof(int), typeof(long), typeof(Guid), typeof(DateTimeOffset),
+        typeof(int), typeof(long), typeof(Guid), typeof(DateTimeOffset), typeof(DateTimeOffset?),
         typeof(OperationKind), typeof(ErrorCode), typeof(ErrorCode?)
     ];
 
@@ -58,7 +60,8 @@ internal static class ReplicaInspectionFields
     // These two current ungenerated contracts use Orleans' backing-integer codec.
     // Generated/custom enum contracts must retain their own declared metadata policy.
     private static Type ExpectedFieldType<T>()
-        => typeof(T) == typeof(OperationKind) ? Enum.GetUnderlyingType(typeof(OperationKind))
+        => typeof(T) == typeof(DateTimeOffset?) ? typeof(DateTimeOffset)
+            : typeof(T) == typeof(OperationKind) ? Enum.GetUnderlyingType(typeof(OperationKind))
             : typeof(T) == typeof(ErrorCode) || typeof(T) == typeof(ErrorCode?)
                 ? Enum.GetUnderlyingType(typeof(ErrorCode)) : typeof(T);
 

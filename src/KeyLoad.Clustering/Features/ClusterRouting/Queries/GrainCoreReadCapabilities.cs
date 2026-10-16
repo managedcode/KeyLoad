@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
@@ -46,11 +47,13 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainNativePayload.Read<ReadProjectionBatchRequest>(payload)),
             GrainReadKind.AtomicPartitionPlacement => database.ReadAtomicPartitionPlacement(principal,
                 GrainNativePayload.ReadPublicInput<AtomicPartitionPlacementReadRequest>(payload)),
-            GrainReadKind.OwnedDocument => OwnedDocument(principal,
-                GrainNativePayload.Read<OwnedDocumentReadRequestV1>(payload), cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }
+
+    internal object? ExecuteBound(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload,
+        ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding, PhysicalShardRecord? streamOwner)
+        => GrainBoundCoreReadCapabilities.Execute(database, kind, principal, payload, budget, binding, streamOwner);
 
     internal static bool Handles(GrainReadKind kind) => kind is >= GrainReadKind.Document and <= GrainReadKind.Samples
         or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch
@@ -58,11 +61,7 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         or GrainReadKind.SampleRetention or GrainReadKind.SampleRollup or GrainReadKind.SampleChunkWindow or GrainReadKind.AggregateReplay
         or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt or GrainReadKind.QueueTransferCoordination
         or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath
-        or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.GraphIncomingEdges or GrainReadKind.OwnedDocument;
-
-    private OwnedDocumentReadResultV1 OwnedDocument(string principal,
-        OwnedDocumentReadRequestV1 request, CancellationToken cancellationToken)
-        => database.ReadOwnedDocument(principal, request.Tenant, request.Request, request.Owner, cancellationToken);
+        or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.GraphIncomingEdges;
 
     private DocumentResult? Document(string principal, GetDocumentRequest request, CancellationToken cancellationToken)
         => database.GetDocument(principal, request.Reference, request.MinimumToken, cancellationToken);

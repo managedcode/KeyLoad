@@ -29,7 +29,8 @@ internal static class CoordinatorShutdownNativeAdmission
             }, db.StorageExecution, UnitExecutionOptions.PointCacheExecution());
             log = new(replica, configuration, canonicalDatabase: db.Database);
             var execution = UnitExecutionOptions.ReplicaExecution();
-            applying = new(db.Database, log, new ReplicaSnapshotStore(db.Store, log, configuration, execution), execution);
+            applying = new(db.Database, log, new ReplicaSnapshotStore(db.Store, log, configuration, execution, replacementToken => db.Database.RequireNoRetirementForSnapshotReplacement(
+                    new(db.Database.OperationLimitsOptions, db.Database.EvaluationClock, replacementToken))), execution);
             consensus = new(applying, configuration, execution, TimeProvider.System);
             var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
             coordinator = new(consensus, db.Database, governor, TimeProvider.System, execution, UnitAdmissionOptions.Inbox());

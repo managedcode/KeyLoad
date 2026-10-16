@@ -2,7 +2,9 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class QueryCursorContract
 {
-    internal const string Alias = "keyload.query.cursor.claims.v1";
+    internal const string Alias = "keyload.query.cursor.claims.v2";
+    internal const int CurrentVersion = 2;
+    internal const string Purpose = "query-page-v2";
     internal const int PurposeField = 0;
     internal const int IncarnationField = 1;
     internal const int NodeIdField = 2;
@@ -15,6 +17,8 @@ internal static class QueryCursorContract
     internal const int SourceEpochField = 9;
     internal const int OffsetField = 10;
     internal const int ExpiresAtField = 11;
+    internal const int LifetimeField = 12;
+    internal const int VersionField = 13;
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(QueryCursorContract.Alias)]
@@ -30,4 +34,6 @@ internal sealed record QueryCursorClaims(
     [property: global::Orleans.Id(QueryCursorContract.CutPositionField)] long CutPosition,
     [property: global::Orleans.Id(QueryCursorContract.SourceEpochField)] long SourceEpoch,
     [property: global::Orleans.Id(QueryCursorContract.OffsetField)] int Offset,
-    [property: global::Orleans.Id(QueryCursorContract.ExpiresAtField)] DateTimeOffset ExpiresAt);
+    [property: global::Orleans.Id(QueryCursorContract.ExpiresAtField)] DateTimeOffset ExpiresAt,
+    [property: global::Orleans.Id(QueryCursorContract.LifetimeField)] ResourceLifetimeV1 Lifetime,
+    [property: global::Orleans.Id(QueryCursorContract.VersionField)] int Version);

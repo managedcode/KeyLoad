@@ -19,6 +19,11 @@ public sealed partial class DatabaseEngine
         CancellationToken cancellationToken = default)
     {
         var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        return InspectQueueTransferRead(principalId, source, transferId, budget);
+    }
+
+    private QueueTransferInspection? InspectQueueTransferRead(string principalId, QueueLaneRef source, Guid transferId, ReadExecutionBudget budget)
+    {
         budget.Check();
         JsonData.Identifier(principalId);
         ValidateTransferLane(source);
@@ -46,9 +51,14 @@ public sealed partial class DatabaseEngine
     public QueueTransferReceiptInspection? InspectQueueTransferReceipt(string principalId,
         QueueLaneRef destination, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        return InspectQueueTransferReceiptRead(principalId, destination, source, transferId, budget);
+    }
+
+    private QueueTransferReceiptInspection? InspectQueueTransferReceiptRead(string principalId, QueueLaneRef destination, QueueLaneRef source, Guid transferId, ReadExecutionBudget budget)
+    {
         ArgumentNullException.ThrowIfNull(destination);
         ArgumentNullException.ThrowIfNull(source);
-        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         budget.Check();
         JsonData.Identifier(principalId);
         ValidateTransferPair(source, destination);
@@ -80,7 +90,7 @@ public sealed partial class DatabaseEngine
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         RequireTransferAdministrator(principal);
         RequireTransferCapabilities(principal, source, Capability.QueueInspect);
-        var resource = Resource(view, source.Partition, source.Queue, ResourceKind.WorkQueue);
+        var resource = BindAuthorizedReadResource(view, source.Partition, source.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, source, resource);
         var record = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(source, transferId));
         if (record is null)
@@ -103,7 +113,7 @@ public sealed partial class DatabaseEngine
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         RequireTransferAdministrator(principal);
         RequireTransferCapabilities(principal, destination, Capability.QueueInspect);
-        var resource = Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
+        var resource = BindAuthorizedReadResource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, destination, resource);
         var record = view.GetRecord<RemoteTransferTargetReceiptRecord>(
             RemoteTransferStorage.TargetReceiptKey(source, transferId, destination));

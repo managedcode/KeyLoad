@@ -31,7 +31,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(collection);
         Authorization.Require(principal, partition, collection, Capability.ChangesRead | Capability.DocumentsRead);
-        var resource = Resource(view, partition, collection, ResourceKind.Collection);
+        var resource = BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
         var tail = ReadOutboxHead(view, partition).Tail;
         return (ChangeCursor(view, principal, resource, partition, tail), tail);
     }
@@ -53,6 +53,12 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(principalId);
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        return ReadChangeFeedRead(principalId, request, budget);
+    }
+
+    private ChangeFeedPage ReadChangeFeedRead(string principalId, ReadChangeFeedRequest request,
+        ReadExecutionBudget budget)
+    {
         budget.Check();
         return Store.Read<ChangeFeedPage>(original =>
         {
@@ -108,7 +114,7 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(request.Collection);
         var now = Clock.GetUtcNow();
         Authorization.Require(principal, request.Partition, request.Collection, Capability.ChangesRead | Capability.DocumentsRead);
-        var resource = Resource(view, request.Partition, request.Collection, ResourceKind.Collection);
+        var resource = BindAuthorizedReadResource(view, request.Partition, request.Collection, ResourceKind.Collection);
         if (request.Limit < LimitValidationBoundary || request.Limit > Limits.MaxResults || request.MaxBytes < MaxBytesValidationBoundary || request.MaxBytes > Limits.MaxBatchBytes
             || request.Start is not (ChangeFeedStart.Beginning or ChangeFeedStart.Now))
         {

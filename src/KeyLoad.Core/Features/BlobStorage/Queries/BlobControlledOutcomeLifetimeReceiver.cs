@@ -29,6 +29,8 @@ public sealed partial class DatabaseEngine
             var blob = BlobControlledReadScope.Require(original);
             PartitionControlLifetimeCoverage.Require(frame.Coverage, blob.Partition,
                 [original.Resource], Limits.MaxBatchBytes);
+            BindAuthenticatedReadResourceLifetime(charged, blob.Partition, original.Resource,
+                frame.Coverage.Lifetimes.Single());
             var controlled = new PartitionControlResourceView(charged, blob.Partition,
                 [original.Resource], frame.Coverage, Limits.MaxBatchBytes, work, grant);
             cancellationToken.ThrowIfCancellationRequested();

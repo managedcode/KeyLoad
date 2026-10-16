@@ -18,6 +18,9 @@ public sealed partial class DatabaseEngine
     private const string DomainJsonProperty = "transactionDomainId";
     private const string PartitionKeyJsonProperty = "partitionKey";
     private const string AtomicPartitionIdJsonProperty = "atomicPartitionId";
+    private const string LifetimeJsonProperty = "lifetime";
+    private const string IncarnationJsonProperty = "incarnation";
+    private const int ReferenceLifetimeCharacters = 64;
 
     private List<Mutation> ExpandQueueToGraphSelection(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget,
@@ -60,20 +63,17 @@ public sealed partial class DatabaseEngine
             var link = ReadLink(body.PayloadJson, partition);
             if (command.FromCollection is not null)
             {
-                if (!SelectTypedEndpointPair(tx, principal, command, link, budget,
-                    typedPrimaryKeys!.Value.FromPrimaryKey, typedPrimaryKeys.Value.ToPrimaryKey))
+                var selected = SelectTypedEndpointPair(tx, principal, command, link, budget,
+                    typedPrimaryKeys!.Value.FromPrimaryKey, typedPrimaryKeys.Value.ToPrimaryKey);
+                if (selected is null)
                 {
                     continue;
                 }
+                link = selected;
             }
             else
             {
-                var from = VisibleVertex(tx, principal, link.From, budget);
-                var to = VisibleVertex(tx, principal, link.To, budget);
-                if (from.Reference != link.From || to.Reference != link.To)
-                {
-                    throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
-                }
+                link = BindVisibleCompositionEndpoints(tx, principal, link, budget);
             }
             var edgeId = command.EdgeIdPrefix + id;
             JsonData.Identifier(edgeId);
@@ -83,13 +83,28 @@ public sealed partial class DatabaseEngine
         return effects;
     }
 
+    private QueueGraphLink BindVisibleCompositionEndpoints(IKeyValueView view, PrincipalRecord principal,
+        QueueGraphLink link, ReadExecutionBudget budget)
+    {
+        var chargedEndpoints = budget.CreateView(view);
+        var from = VisibleVertex(chargedEndpoints, principal, link.From);
+        var to = VisibleVertex(chargedEndpoints, principal, link.To);
+        // Keep the opaque queue payload unchanged; only the authorized derived effect is bound.
+        return link with
+        {
+            From = from.Reference,
+            To = to.Reference
+        };
+    }
+
     private List<Mutation> ExpandGraphToQueue(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, GraphToQueueMutation command, ReadExecutionBudget budget)
     {
         AuthorizeComposition(tx, principal, partition, command);
         var resource = Resource(tx, partition, command.Graph, ResourceKind.Graph);
+        var start = VisibleVertex(budget.CreateView(tx), principal, command.Start).Reference;
         var traversal = new GraphTraversalReader(this, tx, principal, resource, partition, command.Graph,
-            command.Start, command.MaxDepth, command.MaxVertices, command.MaxEdges, null, budget).Read();
+            start, command.MaxDepth, command.MaxVertices, command.MaxEdges, null, budget).Read();
         var effects = new List<Mutation>(traversal.Edges.Length);
         foreach (var edge in traversal.Edges)
         {
@@ -131,7 +146,15 @@ public sealed partial class DatabaseEngine
 
     private static bool ValidEntityJson(JsonElement element)
     {
-        if (!HasExactProperties(element, [PartitionJsonProperty, CollectionJsonProperty, IdJsonProperty], []))
+        if (!HasExactProperties(element, [PartitionJsonProperty, CollectionJsonProperty, IdJsonProperty], [LifetimeJsonProperty]))
+        {
+            return false;
+        }
+        if (element.TryGetProperty(LifetimeJsonProperty, out var lifetime)
+            && (!HasExactProperties(lifetime, [IncarnationJsonProperty], [])
+                || lifetime.GetProperty(IncarnationJsonProperty).ValueKind != JsonValueKind.String
+                || lifetime.GetProperty(IncarnationJsonProperty).GetString() is not { Length: ReferenceLifetimeCharacters } incarnation
+                || !incarnation.All(char.IsAsciiHexDigitLower)))
         {
             return false;
         }

@@ -35,7 +35,7 @@ internal static class ResourceLifetimeCatalog
 
     /// <summary>Stages a new server-derived lifetime; the caller stages its definition in this same transaction.</summary>
     internal static ResourceLifetimeV1 Create(IAtomicTransaction transaction, ReplicatedOperation original,
-        string tenantId, string databaseId, ResourceDefinition definition)
+        string tenantId, string databaseId, ResourceDefinition definition, DatabaseLimits limits)
     {
         ArgumentNullException.ThrowIfNull(transaction);
         ArgumentNullException.ThrowIfNull(definition);
@@ -45,6 +45,7 @@ internal static class ResourceLifetimeCatalog
             throw Errors.Fail(ErrorCode.Conflict, AlreadyCreated);
         }
         var created = ResourceLifetimeIdentity.Create(original, tenantId, databaseId, definition);
+        ResourceRetirementFinalizationStorage.RequireCreation(transaction, created, limits);
         transaction.PutRecord(Key(tenantId, databaseId, definition.Name), created);
         ResourceOwnerInventoryCreation.Record(transaction, created);
         return created;

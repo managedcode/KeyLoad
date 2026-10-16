@@ -7,7 +7,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ClusterRouting.Execution;
 
-internal class PartitionControlResourceView : IKeyValueView
+internal class PartitionControlResourceView : IKeyValueView, IResourceEffectObservation
 {
     private readonly IKeyValueView inner;
     private readonly ImmutableArray<(byte[] Key, byte[] Value)> resources;
@@ -71,6 +71,22 @@ internal class PartitionControlResourceView : IKeyValueView
     internal PartitionRef Partition
     {
         get;
+    }
+
+    void IResourceEffectObservation.ObserveLifetime(ResourceLifetimeV1 lifetime)
+    {
+        if (inner is IResourceEffectObservation observation)
+        {
+            observation.ObserveLifetime(lifetime);
+        }
+    }
+
+    void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime)
+    {
+        if (inner is IResourceEffectObservation observation)
+        {
+            observation.ObserveResource(partition, lifetime);
+        }
     }
 
     public byte[]? ReadOwnedValue(byte[] key)

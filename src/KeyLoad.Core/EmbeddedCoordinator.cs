@@ -14,17 +14,21 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
 
     /// <inheritdoc />
     public Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+        ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        sourcePlanningBudget?.Check();
         return Task.FromResult(database.ApplyEmbedded(database.CreateNativeOperation(kind, id, principalId,
             default, payload), cancellationToken));
     }
 
     /// <inheritdoc />
-    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken,
+        ReadExecutionBudget? sourcePlanningBudget = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        sourcePlanningBudget?.Check();
         var verified = database.VerifyOperationAuthority(operation);
         return Task.FromResult(database.ApplyEmbedded(verified, cancellationToken));
     }

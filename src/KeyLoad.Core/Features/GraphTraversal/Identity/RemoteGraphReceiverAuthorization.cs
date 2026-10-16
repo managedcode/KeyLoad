@@ -2,6 +2,7 @@ using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.GraphTraversal;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -39,8 +40,12 @@ public sealed partial class DatabaseEngine
         }
         var content = proof.Intent.Content;
         Authorization.Require(principal, content.Destination.Partition, content.Graph, Capability.GraphWrite);
-        _ = Resource(view, content.Destination.Partition, content.Graph, ResourceKind.Graph);
-        _ = Resource(view, content.Destination.Partition, content.Destination.Collection, ResourceKind.Collection);
+        _ = view is IResourceLifetimeReadBindingView
+            ? BindAuthorizedReadResource(view, content.Destination.Partition, content.Graph, ResourceKind.Graph)
+            : Resource(view, content.Destination.Partition, content.Graph, ResourceKind.Graph);
+        _ = view is IResourceLifetimeReadBindingView
+            ? BindAuthorizedReadResource(view, content.Destination.Partition, content.Destination.Collection, ResourceKind.Collection)
+            : Resource(view, content.Destination.Partition, content.Destination.Collection, ResourceKind.Collection);
         if (!content.Deleted)
         {
             _ = VisibleVertex(view, principal, content.Destination, work);

@@ -98,9 +98,9 @@ internal static class FunctionalGateColdRelationalClosure
         {
             left_value = OriginalValue,
             right_value = OriginalValue,
-            left_reference = JsonSerializer.Serialize(new EntityRef(context.Partition,
-                FunctionalGateColdProtocol.Resource("docs", left), FunctionalGateColdProtocol.Id), JsonDefaults.Options),
-            right_reference = JsonSerializer.Serialize(new EntityRef(context.Partition,
-                FunctionalGateColdProtocol.Resource("docs", right), FunctionalGateColdProtocol.Id), JsonDefaults.Options)
+            left_reference = JsonSerializer.Serialize(context.Bind(new EntityRef(context.Partition,
+                FunctionalGateColdProtocol.Resource("docs", left), FunctionalGateColdProtocol.Id)), JsonDefaults.Options),
+            right_reference = JsonSerializer.Serialize(context.Bind(new EntityRef(context.Partition,
+                FunctionalGateColdProtocol.Resource("docs", right), FunctionalGateColdProtocol.Id)), JsonDefaults.Options)
         }, JsonDefaults.Options);
 }

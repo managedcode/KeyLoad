@@ -9,7 +9,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private static ImmutableArray<RemoteGraphIntentV1> BuildRemoteGraphSourceIntents(IKeyValueView view,
+    private ImmutableArray<RemoteGraphIntentV1> BuildRemoteGraphSourceIntents(IKeyValueView view,
         PrincipalRecord principal, RemoteGraphSourceMutationV1 command, EdgeRecord? previous,
         EdgeRecord? next, CommitToken sourceCommit, long revision)
     {
@@ -25,7 +25,7 @@ public sealed partial class DatabaseEngine
         var result = ImmutableArray.CreateBuilder<RemoteGraphIntentV1>(targets.Length);
         foreach (var (target, image, deleted) in targets)
         {
-            var prepared = command.Preparations.Where(value => value.Preparation.Request.Destination == target
+            var prepared = command.Preparations.Where(value => RemoteGraphLifetimeAdmission.BindDestination(value.Preparation) == target
                 && value.Preparation.Request.Deleted == deleted).ToArray();
             if (prepared.Length != RemoteGraphSinglePreparation)
             {
@@ -51,7 +51,12 @@ public sealed partial class DatabaseEngine
                 principal.Id, principal.PolicyEpoch, GraphCrossPartitionRecords.Fingerprint(
                     command.Original.SourcePartition, graph, edgeId, target, revision, deleted, image));
             result.Add(new(RemoteGraphProtocol.Version, content, catalog.DefaultShard, destination,
-                sourceCommit, command.Original.CommandId));
+                sourceCommit, command.Original.CommandId)
+            {
+                ResourceLifetimes = RemoteGraphLifetimeAdmission.Capture(view, command.Original.SourcePartition,
+                    graph, image.From.Collection, Limits).AddRange(
+                        prepared[RemoteGraphFirstPreparation].Preparation.ResourceLifetimes).Distinct().ToImmutableArray()
+            });
         }
         return result.MoveToImmutable();
     }

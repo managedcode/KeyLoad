@@ -1,15 +1,15 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INativeAnnMaintenance native,
-    IOptions<DatabaseLimits> limits, TimeProvider clock, AnnProjectionJobDispatch dispatch)
+    AnnProjectionJobDispatch dispatch)
 {
-    internal AnnProjectionWork Read(ProjectionConsumerRef consumer, long generation, CancellationToken token)
-        => database.ReadAnnProjectionWork(consumer, generation,
-            new ReadExecutionBudget(limits, clock, token));
+    internal AnnProjectionWork Read(ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget,
+        IResourceLifetimeWorkBinding binding)
+        => database.ReadAnnProjectionWorkBound(consumer, generation, budget, binding);
 
     internal static AnnMaintenanceRequest Initial(AnnProjectionWork work)
     {
@@ -23,7 +23,8 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
         };
     }
 
-    internal async Task<AnnProjectionJobState?> InitializeAsync(AnnProjectionWork work, CancellationToken token)
+    internal async Task<AnnProjectionJobState?> InitializeAsync(AnnProjectionWork work, ReadExecutionBudget budget, CancellationToken token,
+        IResourceLifetimeWorkBinding binding)
     {
         var authority = work.Consumer.MaintenanceAuthority
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionJobProtocol.Invalid);
@@ -41,7 +42,7 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
                 var ownInitial = Initial(work);
                 return new(authority, ownInitial, ownInitial, null, null, null, work.ThroughSequence, null);
             }
-            var enrollment = await native.ReadEnrollmentAsync(work.Principal, reserved, token).ConfigureAwait(true);
+            var enrollment = await native.ReadEnrollmentBoundAsync(work.Principal, reserved, budget, token, binding).ConfigureAwait(true);
             if (enrollment is null)
             {
                 return null;
@@ -76,7 +77,8 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
     }
 
     internal async Task<AnnProjectionJobState?> NextAsync(AnnProjectionJobState original,
-        AnnProjectionWork work, CancellationToken token)
+        AnnProjectionWork work, ReadExecutionBudget budget, CancellationToken token,
+        IResourceLifetimeWorkBinding binding)
     {
         RequireCurrent(original, work);
         if (original.BlockedError is { } blocked)
@@ -87,7 +89,7 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
         {
             return original;
         }
-        var publication = await native.ReadPublishedAsync(work.Principal, original.InitialRequest, token)
+        var publication = await native.ReadPublishedBoundAsync(work.Principal, original.InitialRequest, budget, token, binding)
             .ConfigureAwait(true);
         if (publication.Source.ThroughSequence >= work.ThroughSequence)
         {
@@ -107,16 +109,17 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
     }
 
     internal async Task<AnnMaintenanceResult> ExecuteAsync(global::Orleans.IGrainFactory grains,
-        AnnProjectionJobState original, CancellationToken token)
+        AnnProjectionJobState original, ReadExecutionBudget budget, DateTimeOffset expiry, CancellationToken token,
+        IResourceLifetimeWorkBinding binding)
     {
         var request = original.PendingRequest
             ?? throw Errors.Fail(ErrorCode.Validation, AnnProjectionJobProtocol.Invalid);
-        var before = Read(request.Consumer, request.IndexGeneration, token);
+        var before = Read(request.Consumer, request.IndexGeneration, budget, binding);
         RequireCurrent(original, before);
-        var result = await dispatch.ExecuteAsync(grains, before.Principal, request, token).ConfigureAwait(true);
-        var after = Read(request.Consumer, request.IndexGeneration, token);
+        var result = await dispatch.ExecuteAsync(grains, before.Principal, request, expiry, token, binding).ConfigureAwait(true);
+        var after = Read(request.Consumer, request.IndexGeneration, budget, binding);
         RequireCurrent(original, after);
-        var publication = await native.ReadPublishedAsync(after.Principal, request, token).ConfigureAwait(true);
+        var publication = await native.ReadPublishedBoundAsync(after.Principal, request, budget, token, binding).ConfigureAwait(true);
         RequireResult(request, original.RequiredThroughSequence, result, publication);
         return result;
     }

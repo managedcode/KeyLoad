@@ -20,7 +20,7 @@ internal static class FunctionalGateOperationalAnalytics
 
     internal static async Task ExerciseAsync(FunctionalGateContext ctx, CancellationToken token)
     {
-        var reference = new EntityRef(ctx.Partition, ctx.MutableDocumentCollection, "native-analytics-" + Guid.NewGuid().ToString("N"));
+        var reference = ctx.Bind(new(ctx.Partition, ctx.MutableDocumentCollection, "native-analytics-" + Guid.NewGuid().ToString("N")));
         var command = new CommandRequest(Guid.NewGuid(), ctx.Partition,
             [new PutDocument(reference.Collection, reference.Id, Json, Empty)]);
         var receipt = await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(command, token));

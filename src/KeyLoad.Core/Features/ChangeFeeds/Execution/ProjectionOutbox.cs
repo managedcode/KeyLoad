@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using KeyLoad.Core.Features.ChangeFeeds;
 using KeyLoad.Storage;
 
@@ -64,37 +63,12 @@ public sealed partial class DatabaseEngine
     private ProjectionConsumerInfo ConfigureProjectionConsumer(IAtomicTransaction tx, ConfigureProjectionConsumerRequest request,
         ProjectionMaintenanceAuthority? authority)
     {
-        const int IndexGenerationValidationBoundary = 1;
-        const string InvalidProjectionFilterDetail = "The projection generation or filter is invalid.";
-        const string UnsupportedProjectionMutationDetail = "The projection mutation kind is unsupported.";
         const int FirstAvailableStep = 1;
 
         ValidatePartition(request.Consumer.Partition);
         JsonData.Identifier(request.Consumer.Name);
         var definition = request.Definition;
-        if (definition.Resources.IsDefault || definition.MutationKinds.IsDefault
-            || definition.IndexGeneration < IndexGenerationValidationBoundary || definition.Resources.Length > changeFeedExecution.MaximumProjectionResources || definition.MutationKinds.Length > changeFeedExecution.MaximumProjectionMutationKinds)
-        {
-            throw Errors.Fail(ErrorCode.Validation, InvalidProjectionFilterDetail);
-        }
-
-        foreach (var resource in definition.Resources)
-        {
-            JsonData.Identifier(resource);
-            Resource(tx, request.Consumer.Partition, resource);
-        }
-        foreach (var kind in definition.MutationKinds)
-        {
-            if (kind is not (MutationDiscriminatorNames.PutDocument or MutationDiscriminatorNames.PatchDocument
-                or MutationDiscriminatorNames.DeleteDocument or MutationDiscriminatorNames.AppendEvents
-                or MutationDiscriminatorNames.PublishTopic or MutationDiscriminatorNames.EnqueueMessage
-                or MutationDiscriminatorNames.UpsertEdge or MutationDiscriminatorNames.DeleteEdge
-                or MutationDiscriminatorNames.AppendSamples or MutationDiscriminatorNames.PutVector
-                or MutationDiscriminatorNames.ApplyVectorProjection))
-            {
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedProjectionMutationDetail);
-            }
-        }
+        ValidateProjectionConsumerDefinition(tx, request.Consumer.Partition, definition);
 
         var key = ConsumerKey(request.Consumer);
         if (tx.GetRecord<ProjectionConsumerInfo>(key) is { } previous)
@@ -130,6 +104,39 @@ public sealed partial class DatabaseEngine
         tx.PutRecord(key, state);
         return state;
     }
+    private void ValidateProjectionConsumerDefinition(IAtomicTransaction tx, PartitionRef partition,
+        ProjectionConsumerDefinition definition)
+    {
+        const int IndexGenerationValidationBoundary = 1;
+        const string InvalidProjectionFilterDetail = "The projection generation or filter is invalid.";
+        const string UnsupportedProjectionMutationDetail = "The projection mutation kind is unsupported.";
+
+        if (definition.Resources.IsDefault || definition.MutationKinds.IsDefault
+            || definition.IndexGeneration < IndexGenerationValidationBoundary || definition.Resources.Length > changeFeedExecution.MaximumProjectionResources || definition.MutationKinds.Length > changeFeedExecution.MaximumProjectionMutationKinds)
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidProjectionFilterDetail);
+        }
+
+        foreach (var resource in definition.Resources)
+        {
+            JsonData.Identifier(resource);
+            Resource(tx, partition, resource);
+        }
+        foreach (var kind in definition.MutationKinds)
+        {
+            if (kind is not (AnalyticsStoreProtocol.UpsertKind or AnalyticsStoreProtocol.DeleteKind
+                or MutationDiscriminatorNames.PutDocument or MutationDiscriminatorNames.PatchDocument
+                or MutationDiscriminatorNames.DeleteDocument or MutationDiscriminatorNames.AppendEvents
+                or MutationDiscriminatorNames.PublishTopic or MutationDiscriminatorNames.EnqueueMessage
+                or MutationDiscriminatorNames.UpsertEdge or MutationDiscriminatorNames.DeleteEdge
+                or MutationDiscriminatorNames.AppendSamples or MutationDiscriminatorNames.PutVector
+                or MutationDiscriminatorNames.ApplyVectorProjection))
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedProjectionMutationDetail);
+            }
+        }
+    }
+
     private static void RequireProjectionAdministrator(PrincipalRecord principal)
     {
         const string RequireProjectionAdministratorDetailText = "System projection administration is required.";
@@ -171,54 +178,9 @@ public sealed partial class DatabaseEngine
     /// <param name="principalId">Persisted principal identifier.</param>
     /// <param name="request">Consumer and byte/count budget.</param>
     /// <returns>The ordered batch and signed continuation token.</returns>
-    public ProjectionBatch ReadProjectionBatch(string principalId, ReadProjectionBatchRequest request) => Store.Read<ProjectionBatch>(view =>
-    {
-        var now = Clock.GetUtcNow();
-        var principal = Principal(view, principalId, now);
-        RequireProjectionAdministrator(principal);
-        if (request.Limit < MinimumProjectionReadCount || request.Limit > Limits.MaxResults || request.MaxBytes < MinimumProjectionReadCount || request.MaxBytes > Limits.MaxProjectionBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ProjectionBatchBudgetDetail);
-        }
+    public ProjectionBatch ReadProjectionBatch(string principalId, ReadProjectionBatchRequest request)
+        => Store.Read(view => ReadProjectionBatchRead(view, principalId, request));
 
-        var state = ProjectionConsumer(view, request.Consumer);
-        if (state.Released)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, ReleasedProjectionGenerationDetail);
-        }
-
-        var head = ReadOutboxHead(view, request.Consumer.Partition);
-        CheckOutboxPosition(head, state.Checkpoint);
-        var upper = ProjectionUpperSequence(request, state, head);
-        var entries = new List<OutboxEntry>();
-        var through = state.Checkpoint;
-        var bytes = InitialProjectionPageBytes;
-        foreach (var stored in StoredOutboxReader.ReadRange(view, request.Consumer.Partition, through, upper, request.Limit))
-        {
-            var entry = stored.Entry;
-            if (!ProjectionAccepts(state.Definition, entry))
-            {
-                through = entry.Sequence;
-                continue;
-            }
-
-            var size = stored.StoredBytes;
-            if (size > request.MaxBytes - bytes)
-            {
-                if (through == state.Checkpoint)
-                {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, FirstProjectionEntryExceedsBudgetDetail);
-                }
-
-                break;
-            }
-            entries.Add(entry);
-            bytes += size;
-            through = entry.Sequence;
-        }
-        return new(state, entries.ToImmutableArray(), through, Sign(new ProjectionBatchClaims(ProjectionBatchTokenPurpose, Store.Identity.Incarnation,
-            request.Consumer, state.Definition.IndexGeneration, state.Checkpoint, through, now.Add(changeFeedExecution.ProjectionBatchLifetime))), through < upper);
-    });
     private const string InvalidProjectionUpperSequence = "The projection upper sequence is outside the current consumer checkpoint and retained head.";
 
     private static long ProjectionUpperSequence(ReadProjectionBatchRequest request,
@@ -393,16 +355,7 @@ public sealed partial class DatabaseEngine
     /// <param name="principalId">Persisted administrator identifier.</param>
     /// <param name="partition">Owning atomic partition.</param>
     /// <returns>Current outbox head and immutable consumer states.</returns>
-    public OutboxStatus GetOutboxStatus(string principalId, PartitionRef partition) => Store.Read<OutboxStatus>(view =>
-    {
-        RequireProjectionAdministrator(Principal(view, principalId, Clock.GetUtcNow()));
-        ValidatePartition(partition);
-        var head = ReadOutboxHead(view, partition);
-        var consumers = ProjectionConsumers(view, partition);
-        foreach (var consumer in consumers)
-        {
-            RequireProjectionRetentionCheckpoint(consumer, head);
-        }
-        return new(head, consumers);
-    });
+    public OutboxStatus GetOutboxStatus(string principalId, PartitionRef partition)
+        => Store.Read(view => GetOutboxStatusRead(view, principalId, partition));
+
 }

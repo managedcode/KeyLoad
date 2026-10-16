@@ -10,21 +10,20 @@ public sealed partial class DatabaseEngine
     /// <param name="cancellationToken">The owning caller token for the complete read.</param>
     public StreamPage ReadStream(string principalId, ReadStreamRequest request,
         CancellationToken cancellationToken = default)
-        => ReadStreamTraversal(principalId, request, null, cancellationToken);
+        => ReadStreamTraversal(principalId, request, null, new(OperationLimitsOptions, Clock, cancellationToken));
 
     internal StreamPage ReadStream(string principalId, ReadStreamRequest request,
         PhysicalShardRecord configuredOwner, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(configuredOwner);
-        return ReadStreamTraversal(principalId, request, configuredOwner, cancellationToken);
+        return ReadStreamTraversal(principalId, request, configuredOwner, new(OperationLimitsOptions, Clock, cancellationToken));
     }
 
     private StreamPage ReadStreamTraversal(string principalId, ReadStreamRequest request,
-        PhysicalShardRecord? configuredOwner, CancellationToken cancellationToken)
+        PhysicalShardRecord? configuredOwner, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Stream);
-        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         if (request.AfterRevision < StreamTraversalProtocol.EmptyRevision || request.Direction is not (StreamReadDirection.Forward or StreamReadDirection.Backward)
             || request.MaxBytes < StreamTraversalProtocol.UnspecifiedBytes || request.MaxBytes > Limits.MaxBatchBytes
             || request.Cursor is not null && request.AfterRevision != StreamTraversalProtocol.EmptyRevision)
@@ -42,11 +41,11 @@ public sealed partial class DatabaseEngine
     {
         budget.Check();
         var now = Clock.GetUtcNow();
-        var principal = Principal(view, principalId, now);
+        var bounded = budget.CreateView(view);
+        var principal = Principal(bounded, principalId, now);
         var stream = request.Stream;
         Authorization.Require(principal, stream.Partition, stream.StreamSet, Capability.EventsRead);
-        var resource = Resource(view, stream.Partition, stream.StreamSet, ResourceKind.StreamSet);
-        var bounded = budget.CreateView(view);
+        var resource = BindAuthorizedReadResource(bounded, stream.Partition, stream.StreamSet, ResourceKind.StreamSet);
         var placement = StreamTraversalPlacement(bounded, stream.Partition, configuredOwner);
         var head = ReadStreamHead(view, stream, budget);
         ValidateStreamHead(head, stream, request.Cursor is null && request.Direction == StreamReadDirection.Forward

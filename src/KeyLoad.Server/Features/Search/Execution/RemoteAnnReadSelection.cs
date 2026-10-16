@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 
@@ -36,13 +37,14 @@ internal sealed record RemoteAnnReadSelection(ProjectionConsumerRef Consumer, st
     }
 
     internal async Task<object> ExecuteLocalAsync(SearchEngine actual, string principal,
-        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, CancellationToken cancellationToken)
+        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, CancellationToken cancellationToken,
+        IResourceLifetimeWorkBinding binding)
     {
         if (Wait is not null)
         {
-            return await actual.WaitForAnnIndexAsync(principal, Wait, budget, metadata, cancellationToken).ConfigureAwait(false);
+            return await actual.WaitForAnnIndexBoundAsync(principal, Wait, budget, metadata, cancellationToken, binding).ConfigureAwait(false);
         }
-        return await actual.ApproximateSearchAsync(principal, Approximate!, budget, metadata, cancellationToken).ConfigureAwait(false);
+        return await actual.ApproximateSearchBoundAsync(principal, Approximate!, budget, metadata, cancellationToken, binding).ConfigureAwait(false);
     }
 
     internal AnnProjectionObservationRequest ForOriginal(AnnMaintenanceRequest original, ReadExecutionBudget budget)

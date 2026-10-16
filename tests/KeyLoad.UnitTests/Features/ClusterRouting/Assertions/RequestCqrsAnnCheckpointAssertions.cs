@@ -7,7 +7,7 @@ internal static class RequestCqrsAnnCheckpointAssertions
     private const long MaintenanceCommitCount = 2;
     private const int EmptyEffects = 0;
 
-    internal static async Task RequireAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest request, AnnMaintenanceResult actual, long beforeJournalIndex)
     {
         // The initial Build configuration was already reserved before the caller captured its journal cut.

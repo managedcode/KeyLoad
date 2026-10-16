@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -10,8 +11,9 @@ internal sealed class RemotePartitionQueryRouter(OrleansNode node, PartitionHost
     : IRemotePartitionQueryRouter
 {
     public async Task<PartitionQueryPageV1> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        PartitionQueryRequestV1 request, CancellationToken cancellationToken)
+        PartitionQueryRequestV1 request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
     {
+        ArgumentNullException.ThrowIfNull(binding);
         var failures = new List<Exception>();
         PartitionQueryPageV1? page = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -28,10 +30,10 @@ internal sealed class RemotePartitionQueryRouter(OrleansNode node, PartitionHost
                 using var original = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, expiry.Token);
                 var queries = node.BorrowPartitionQueries();
-                var reads = new RemotePartitionQueryLeafRead(node, partition, options, client);
-                page = await PartitionQueryRemoteExecution.ExecuteAsync(queries, request,
+                var reads = new RemotePartitionQueryLeafRead(node, partition, options, client, binding);
+                page = await PartitionQueryRemoteExecution.ExecuteBoundAsync(queries, request,
                     (plan, grant, budget) => reads.Prepare(envelope, principal.Id, plan, grant, budget),
-                    token => reads.RevalidateAsync(principal.Id, token), clock, original.Token).ConfigureAwait(false);
+                    token => reads.RevalidateAsync(principal.Id, token), clock, original.Token, binding).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

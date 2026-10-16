@@ -25,6 +25,12 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail);
         }
         Authorization.Require(metadata.Principal, partition, collection, Capability.Query | Capability.DocumentsRead);
-        return Store.Read(view => ReadPartitionQueryFenceView(view, principalId, partition, collection, grant, read));
+        return Store.Read(view => ReadPartitionQueryFenceView(view, principalId, partition, collection, grant,
+            (raw, principal, resource, digest) =>
+            {
+                budget.CaptureAuthenticatedResourceLifetimes(this, budget.CreateView(raw, grant),
+                    metadata.Coverage, [metadata.Definition]);
+                return read(raw, principal, resource, digest);
+            }, budget));
     }
 }

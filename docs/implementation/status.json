@@ -3,7 +3,7 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "R624/R625 native repair and R628/R631/R632/R633/R635 coherent compiler/test corrections adopted. Last complete attempt R636 exit1 with zero logged diagnostics/no project output; contemporaneous native MSBuild sidecars report denied worker IPC, parent attribution unproven. R634 previously compiled all product and Unit/Recovery projects, failing only the Integration import repaired in R635. Full strict build/runtime remain open; last passing complete Release R619. Exact original current46764194 Unit38/42 and Recovery20/20 remain terminal; public R614/R615 failed later gates; accepted R600/R602 normal pair retains its original cohort.",
+    "implementation": "R638 all-model source adopted; R640/R646 compiler repairs and approved analytics restore complete. R648 strict build failed262 diagnostics; R650 native braces/var fixes and matchingverification passed, R65146native/Analytics/CT/typedDROP source files adopted. Remaining ResourceExecution and downstream lifetimebinding CT closure are inparallel. Expanded normal/cold/DROP execution OPEN; R600/R602PASSbelongsoriginaloldercohort; original105taskacceptanceunchanged.",
     "strictBuild": {
       "label": "root-r619-hosted-cold-full-release",
       "result": "passed",
@@ -15,7 +15,7 @@
       "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold-full-release.completion.original.json",
       "scope": "Complete strict Release after R609 native35, R617 hosted/cold21 and R620 structured wave join. All original processes/readers joined, source drift zero; rebuilt DLL changes expected. New runtime selections remain pending."
     },
-    "format": "R626 scoped27-file whitespace apply exited0 in7.855s and made1 verified whitespace-only source change, with no DLL change. This is not full canonical formatter qualification. Earlier R619 scoped20 canonical verification passed on its prior cohort.",
+    "format": "Native R641scope1509whitespaceapply child0/306intentionalchanges/noDLLdrift; matchingR641vverifyPASS13.2867s source/DLL0. R64727fileapply/verifybothPASSwithsource/DLL0. OptionaladditionalPowerShell native-tokenproof exited2 atparserload andremainsOPEN; no tokenequality claim. Fullrepo canonicalall-analyzergate remainsOPEN.",
     "focusedRuntime": {
       "cohort": "root-r597-600-unit-recovery-analyzers-functional-one",
       "sourceCommit": "afee683468c447670a3d911e29a195ede7377e3f",
@@ -50,8 +50,9 @@
     },
     "publicQualification": "Accepted local normal R600/R602 ONE/RF3 retains its matched afee6834 cohort. Current inventory/movement RF3 failed before movement/cold. New DROP/recreate, user AnalyticsStore and refreshed eight-user cold require complete exact-source actual SDK/official MCP scenarios.",
     "remaining": [
-      "Full public resource DROP/recreate lifecycle",
-      "User-addressable analytics stores (current native integration is node operational analytics only)",
+      "Qualify full public resource DROP/recreate lifecycle and linked stale/current references",
+      "Qualify newly adopted user-addressable AnalyticsStore through actual SDK/official MCP/T-SQL and native/process/physical-owner lifecycle",
+      "Qualify expanded ten-model normal ONE thenRF3 with eight workload users/three resources/at least10000 actual successful SDK+MCP operations and updatedeight-user same-root cold pair",
       "Exact-source Linux fault/endurance/security/performance/release gates"
     ],
     "limits": "No full SQL, power-loss, performance, production or original105 task completion claim.",
@@ -66,7 +67,7 @@
     },
     "currentSourceRepairs": {
       "stage": "R601",
-      "state": "source_adopted_latest_full_build_failed_import_successor_pending",
+      "state": "coherent_all_model_source_adopted_combined_compiler_and_runtime_open",
       "scope": [
         "Original native transport injection removes the inventory startup dependency cycle",
         "Verified restored new-history local applied cut zero without restoring old authority",
@@ -179,19 +180,93 @@
           "TestResults/stage61-native-join/root-r633-parent-reply-ownership2.adoption.original.json",
           "TestResults/stage61-native-join/root-r635-integration-protocol-import.adoption.original.json"
         ]
+      },
+      "coherentAllModelAdoption": {
+        "stage": "R638",
+        "state": "canonical_source_adopted_not_compiled_not_run",
+        "sourceHead": "ca20432c2218d8442376442e9b83e0a2b355b972",
+        "fullSelectedPaths": 1650,
+        "fullChangedPaths": 1513,
+        "causalFaultTestRows": 13,
+        "finalBoundPaths": 1662,
+        "evidence": "TestResults/stage61-native-join/root-r638-full-model-foundation-source.adoption.original.json",
+        "evidenceSha256": "f61a7284e8ccfcfc3a8a6b9d3733df766e68c4c535700ded58b53bdd5c6dbffa",
+        "reviewedFullSnapshotSha256": "0ac357239832ad1d64ab46d321dd1ed85d55df56ed9ab8c52bf727ca790859c6",
+        "faultSnapshotSha256": "2b886b5da0742bb84644b8453ebf74b8517131b432c9edb1c10f684856588475",
+        "scope": [
+          "Actual native DROP preparation, authority/quiescence/cleanup and recreation with different lifetime identity",
+          "Canonical user AnalyticsStore and bounded node-owned derived ZoneTree.Analytics generations",
+          "Lifetime-bound graph/vector/analytics/queue composition and stale-reference refusal",
+          "One original bounded native operation with finite META/PHASE and authenticated replica Forward cost settlement",
+          "Actual expanded normal10model SDK/officialMCP/TSQL and fixed8identity cold scenarios; no old-scenario PASS reused",
+          "Real native lost-reply and signed-payload tamper whole-flow tests with exact original effects/receipts/retry/noeffects evidence"
+        ],
+        "openGates": [
+          "Combined strict compiler/analyzers/format and whole-operation native/process/public RF3 execution",
+          "Known verified-afterVerify-beforeImport cancellation seam and raw replica nonce observer remain unavailable; not claimed covered",
+          "Complete exact-source Linux and original105 qualification remain open"
+        ]
+      },
+      "compilerRepairAfterR638": {
+        "stage": "R640",
+        "state": "source_adopted_fullbuild_pending",
+        "sourcePackets": 3,
+        "files": 68,
+        "scope": "Actual KeyCodec namespace, two unused imports, cohesive ordered classifier dispatch, all60 native Alias strings moved to namedconst without changing resolvedbytes/Ids/GenerateSerializer or provider contracts. No analyzer suppression/limit change.",
+        "evidence": [
+          "TestResults/stage61-native-join/root-r640-abstractions-native4.adoption.original.json",
+          "TestResults/stage61-native-join/root-r640-native-alias10-in12.adoption.original.json",
+          "TestResults/stage61-native-join/root-r640-native-abstraction-alias50-in52.adoption.original.json"
+        ]
+      },
+      "compilerRepairAfterR643": {
+        "stage": "R646",
+        "state": "source_adopted_fullbuild_pending",
+        "files": 27,
+        "evidence": [
+          "TestResults/stage61-native-join/root-r646-sdk-ownership5.adoption.original.json",
+          "TestResults/stage61-native-join/root-r646-native-storage17.adoption.original.json",
+          "TestResults/stage61-native-join/root-r646-forward-original-cause5.adoption.original.json"
+        ],
+        "scope": "Preserve instanceSDK API through realsharedtransport/classifierownership; fullorderedstorageCommit/restorevalidation andeveryCTcaller; retainactualtransportcause inexistingUnknown flow andaddactualpostMAC Timeout wholeflow case."
+      },
+      "approvedAnalyticsRestore": {
+        "label": "root-r644-approved-analytics-solution-restore",
+        "result": "passed",
+        "elapsedSeconds": 2.341551542049274,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "evidence": "TestResults/stage61-native-join/root-r644-approved-analytics-solution-restore.completion.original.json",
+        "scope": "RequiredrestoreafterapprovedCoreprojectreferencealreadyadoptedbyMainR638; noexternalwriter/newpin/library."
+      },
+      "compilerRepairAfterR648": {
+        "stage": "R650/R651",
+        "state": "partial_source_adopted_remaining_parallel_semantic_repairs",
+        "files": 46,
+        "scope": "R65146 adopted source files: actual native operands/imports/guards and cohesive ownership, Analytics five defects in6files, all9Core CT signatures plus actual25file caller/atomic closure, and typed DROP replies onbothfirstcompletion/replay. Separately R650 native braces/var241sourcechanges withmatchingverifyPASS. Remaining ResourceExecution options/validation and same-pattern downstream lifetime-binding CT closure are inparallel; no new compiler/runtime acceptance.",
+        "evidence": [
+          "TestResults/stage61-native-join/root-r650-existing-native-commit-gate-import.adoption.original.json",
+          "TestResults/stage61-native-join/root-r650-adopted-native-braces-var-style-apply.completion.original.json",
+          "TestResults/stage61-native-join/root-r650v-adopted-native-braces-var-style-verify.completion.original.json",
+          "TestResults/stage61-native-join/root-r651-core-native-bindings7.adoption.original.json",
+          "TestResults/stage61-native-join/root-r651-core-operation-ownership5.adoption.original.json",
+          "TestResults/stage61-native-join/root-r651-blob-restore-page-reader2.adoption.original.json",
+          "TestResults/stage61-native-join/root-r651-analytics-five-in-six.adoption.original.json",
+          "TestResults/stage61-native-join/root-r651-native-ct-atomic25.adoption.original.json",
+          "TestResults/stage61-native-join/root-r651-native-drop-typed-result1.adoption.original.json"
+        ]
       }
     },
     "latestCompilerAttempt": {
-      "label": "root-r636-native-full-release",
-      "result": "failed_without_logged_compiler_diagnostics",
+      "label": "root-r648-combined-models-full-release",
+      "result": "failed",
       "warnings": 0,
-      "errors": 0,
-      "elapsedSeconds": 271.1687912091147,
+      "errors": 262,
+      "elapsedSeconds": 28.643378249835223,
       "sourceDrift": 0,
-      "compiledDrift": 0,
-      "stdoutSha256": "cc03fe2a9d9687af1153ded7aacdd7067717d08c9465fb4e5f7813bf8ec0b775",
-      "evidence": "TestResults/stage61-native-join/root-r636-native-full-release.completion.original.json",
-      "scope": "Exit1 with only Build FAILED, zero logged warnings/errors and no project outputs; not a successful build. Native MSBuild worker sidecars in the exact interval report SocketException13 Permission denied creating named-pipe IPC endpoints. Sidecars do not themselves record parent PID attribution. Next combined source build requires permitted native worker IPC and binary log."
+      "stdoutSha256": "b48e80aff525cee43278db8f1b10b51d46181e176169e68be4686785c4050c3b",
+      "evidence": "TestResults/stage61-native-join/root-r648-combined-models-full-release.completion.original.json",
+      "scope": "Restored dependency graph reached deeper Core analysis. Includes178IDE0011/2IDE0007, original Core/Storage compiler bindings and bounded ownership/options/validation diagnostics. R650 style and R65114 source repairs adopted; other semantic repairs pending. Counts across different blocked compilation layers are not a regression trend or acceptance result."
     },
     "latestPublicFunctionalAttempt": {
       "label": "R600 ONE then R602 RF3 normal public pair",
@@ -200,15 +275,15 @@
       "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
     },
     "previousCompilerAttempt": {
-      "label": "root-r634-native-full-release",
+      "label": "root-r643-combined-models-full-release",
       "result": "failed",
       "warnings": 0,
-      "errors": 1,
-      "elapsedSeconds": 423.0168257500045,
+      "errors": 31,
+      "elapsedSeconds": 21.246417665854096,
       "sourceDrift": 0,
-      "stdoutSha256": "5a6616123dd6171e8587cd39428740bd9e224c4c09520a0451dcffb80f06258c",
-      "evidence": "TestResults/stage61-native-join/root-r634-native-full-release.completion.original.json",
-      "scope": "All product projects and Unit/Recovery projects compiled; IntegrationTests failed only missing PartitionMoveProtocol namespace import. R635 corrected actual import after original process and both output readers joined; no current complete-build/runtime pass inferred."
+      "stdoutSha256": "d7fe0e509b4559ee2371fc5b6546e881bdc85bec045b1bc844ce5148dbbc9d5c",
+      "evidence": "TestResults/stage61-native-join/root-r643-combined-models-full-release.completion.original.json",
+      "scope": "Abstractions compiled;31uniqueCore14missingAnalytics reference assets/Client1type-size/Storage16orderedCT+ownership+checkpointstyle diagnostics. R644actualrestorePASS andR64627cohesiverepairsadopted. Freshcombinedfullbuildpending."
     },
     "latestFocusedRuntime": {
       "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",

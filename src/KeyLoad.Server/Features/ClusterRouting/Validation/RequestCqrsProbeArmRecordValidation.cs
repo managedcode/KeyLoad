@@ -15,6 +15,8 @@ internal static class RequestCqrsProbeArmRecordValidation
             || !Enum.IsDefined(value.Action) || !Enum.IsDefined(value.Phase)
             || value.Phase is RequestCqrsProbePhase.MovementParentStateExecuting or RequestCqrsProbePhase.MovementParentStateReturned
                 or RequestCqrsProbePhase.WaitForIndexReadCutCaptured or RequestCqrsProbePhase.QueryReadCutCaptured or RequestCqrsProbePhase.ReplicaEntryObserverDisposed or RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
+            || value.Phase is (RequestCqrsProbePhase.OriginalClaimReturned or RequestCqrsProbePhase.OriginalBusinessReplyReturned)
+                && (value.ReadKind is not null || value.CommandId == Guid.Empty)
             || value.Phase == RequestCqrsProbePhase.TransferPageReturned
                 && (value.ReadKind != KeyLoad.Clustering.GrainReadKind.PartitionMovementTransferData
                     || value.Action != RequestCqrsProbeAction.Hold)

@@ -35,7 +35,9 @@ internal static class ReplicaReplayClassifier
     private static ReplicaReplayPool Forward(ReadOnlyMemory<byte> payload, ReplicaConfiguration configuration,
         int maximumControlPayloadBytes, DatabaseEngine? canonicalDatabase)
     {
-        var inspected = ReplicaNativeAdmissionPolicy.Inspect<ReplicatedOperation>(payload, configuration.MaxAppendEntries);
+        var frame = ReplicaNativeAdmissionPolicy.Inspect<ReplicaForwardRequestV1>(payload, configuration.MaxAppendEntries).Value;
+        ReplicaForwardFrameValidation.RequireRequest(frame);
+        var inspected = ReplicaNativeAdmissionPolicy.Inspect<ReplicatedOperation>(frame.Operation, configuration.MaxAppendEntries);
         return ReplicaNativeOperationAdmission.Validate(inspected, inspected.Value, canonicalDatabase, maximumControlPayloadBytes)
             ? ReplicaReplayPool.Critical : ReplicaReplayPool.Forward;
     }

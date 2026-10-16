@@ -23,7 +23,7 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
     : Grain, ICommandPartitionGrain
 {
     private readonly GrainCommandExecutor commands = new(database, borrowCoordinator(), clock, options, codec, borrowWorkOwner(), services.GetService<IPhysicalRequestPlacement>(),
-        services.GetService<IGrainPartitionMovementSealedOperationObserver>(), services.GetService<Func<INativeOnlineTextMaintenance>>()?.Invoke(), services.GetService<IPlacementIntentPersistence>());
+        services.GetService<IGrainPartitionMovementSealedOperationObserver>(), services.GetService<Func<INativeOnlineTextMaintenance>>()?.Invoke(), services.GetService<IPlacementIntentPersistence>(), services.GetRequiredService<INativeDropTableExecution>());
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>
@@ -63,6 +63,46 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
             return GrainReplyFactory.Failure(error: error, command: true, diagnostics: diagnostics, requestId: requestId, stage: stage, cancellationToken: cancellationToken, options: options);
         }
     }
+    /// <inheritdoc />
+    public async Task<GrainOperationReply> PrepareOriginalCommandAsync(string signedRequest,
+        CancellationToken cancellationToken)
+    {
+        var requestId = Guid.Empty;
+        var stage = GrainFailureStage.EnvelopeVerification;
+        try
+        {
+            var request = codec.Verify(signedRequest);
+            requestId = request.Envelope.RequestId;
+            stage = GrainFailureStage.CapabilityExecution;
+            var context = codec.HasPhaseObserver ? ((IGrainBase)this).GrainContext : null;
+            var reply = await NativeCommandObservationPreparation.ExecuteAsync(database, borrowCoordinator(),
+                clock, options, codec, borrowWorkOwner(), services.GetService<IPhysicalRequestPlacement>(),
+                services.GetService<ReplicaSiloDiscoveryState>(), request, this.GetPrimaryKeyString(),
+                context, () => MigratePreparedAsync(request, context, cancellationToken),
+                cancellationToken).ConfigureAwait(true);
+            return reply;
+        }
+        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        {
+            return GrainReplyFactory.Failure(error: error, command: false, diagnostics: diagnostics,
+                options: options, requestId: requestId, stage: stage, cancellationToken: cancellationToken);
+        }
+    }
+
+    private async Task MigratePreparedAsync(DecodedGrainRequest request, IGrainContext? context,
+        CancellationToken cancellationToken)
+    {
+        if (context is not null && services.GetService<IGrainActivationMigrationObserver>() is { } migration)
+        {
+            var target = await migration.PrepareMigrationAsync(GrainRequestProbeIdentity.From(request.Envelope),
+                context, cancellationToken).ConfigureAwait(true);
+            if (target is not null)
+            {
+                MigrateTo(target, cancellationToken);
+            }
+        }
+    }
+
     private void MigrateTo(SiloAddress target, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

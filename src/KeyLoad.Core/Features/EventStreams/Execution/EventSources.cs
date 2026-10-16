@@ -23,7 +23,7 @@ public sealed partial class DatabaseEngine
     private const string SourceReadStartInvalidMessage = "The event source read budget or start position is invalid.";
     private const string SourceReadResultExceededMessage = "The event source result exceeds its byte budget.";
     private static Capability SourceReadCapability(EventSourceRef source) => source.Kind == EventSourceKind.Topic ? Capability.TopicsRead : Capability.EventsRead;
-    private ResourceDefinition SourceResource(IKeyValueView view, EventSourceRef source)
+    private ResourceDefinition SourceResource(IKeyValueView view, EventSourceRef source, bool authorizedRead = false)
     {
         const int GenerationValidationBoundary = 1;
         const string SourceResourceDetailText = "The event source identity is invalid.";
@@ -42,7 +42,9 @@ public sealed partial class DatabaseEngine
             JsonData.Identifier(source.StreamId);
         }
 
-        return Resource(view, source.Partition, source.Resource, source.Kind == EventSourceKind.Topic ? ResourceKind.Topic : ResourceKind.StreamSet);
+        var kind = source.Kind == EventSourceKind.Topic ? ResourceKind.Topic : ResourceKind.StreamSet;
+        return authorizedRead ? BindAuthorizedReadResource(view, source.Partition, source.Resource, kind)
+            : Resource(view, source.Partition, source.Resource, kind);
     }
     private EventSourceHead SourceHead(IKeyValueView view, EventSourceRef source)
     {
@@ -164,7 +166,7 @@ public sealed partial class DatabaseEngine
         var now = Clock.GetUtcNow();
         var principal = Principal(view, principalId, now);
         Authorization.Require(principal, request.Source.Partition, request.Source.Resource, SourceReadCapability(request.Source));
-        var resource = SourceResource(view, request.Source);
+        var resource = SourceResource(view, request.Source, authorizedRead: true);
         var head = SourceHead(view, request.Source, resource);
         var after = request.Cursor is null ? request.AfterPosition
             : SourceCursorPosition(principal, request.Source, request.Cursor, now, resource);
