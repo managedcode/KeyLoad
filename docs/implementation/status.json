@@ -1,50 +1,205 @@
 {
+  "FUNCTIONAL-COLD-20261016": {
+    "title": "Native all-model same-root cold-reopen functional pair",
+    "status": "done",
+    "scope": "Local authoritative-model recovery gate only. Original105, Linux/fullsecurity/endurance/performance/release and DROP/resource catalog lifecycle remain open.",
+    "contract": "docs/Features/DatabaseComposition/FunctionalDatabaseColdReopen.md",
+    "sourceCommit": "57cea6244b78b8f8663ca5e48bfea8e36ca9c91e",
+    "orchestration": "Original Aspire application owns actual1/3nodes, native AzureTable membership throughAzurite, nativefaultcommands, image/readiness/endpoints, samephysicalroots andjoinedcleanup. No independent Docker nodes.",
+    "resourcesPerCatalogModel": 3,
+    "models": [
+      "relational",
+      "documents",
+      "event-streams",
+      "queues",
+      "topics",
+      "graphs",
+      "vectors",
+      "full-text",
+      "time-series",
+      "blobs"
+    ],
+    "coldOnlyPersistedIdentities": 3,
+    "normalEightUserConcurrencyReference": "FUNCTIONAL-GATES-20261016; not8-user coldconcurrencyqualification",
+    "singleNode": {
+      "lane": "root-r516-all-model-1-node-native-cold-reopen",
+      "result": "passed",
+      "sourceCommit": "57cea6244b78b8f8663ca5e48bfea8e36ca9c91e",
+      "nodes": 1,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 104.61409041681327,
+      "processJoined": true,
+      "bothOutputFilesClosed": true,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "actualOwnedRestartReceipts": 1,
+      "allOriginalKillsBeforeFirstRestart": true,
+      "cohortBinding": {
+        "sourceCohortDigest": "f47c36a5028a817b7f1a8e209ff0b31d5fdb0d0e4a7cd17210d8404cac6abcb4",
+        "compiledCohortDigest": "4f45fe5228f07266b7fffd67323fff2cf809327124faf95d427194b26c2bd2bd",
+        "imageInputDigest": "sha256:030330e733e334c8b4c308bee89a8e6dc57204d4ba5ae555cbbb92040328f72d"
+      },
+      "terminalEvaluation": "TestResults/stage61-native-join/root-r516-all-model-1-node-native-cold-reopen.terminal-evaluation.original.json",
+      "terminalEvaluationSha256": "1b856730af9ebf75c52336f4b52bd9a815900f2f9d255b7bfc59ae3d8cb2f86f",
+      "analyticsObservations": [
+        {
+          "scenario": "functional-cold-reopen",
+          "node": "node1",
+          "analyticsHistory": "OBSERVED_SAME_WINDOW",
+          "reason": "SamePublicWindowRowsRetained",
+          "originalFrom": "2026-10-16T06:00:00+00:00",
+          "originalTo": "2026-10-16T07:00:00+00:00",
+          "currentFrom": "2026-10-16T06:00:00+00:00",
+          "currentTo": "2026-10-16T07:00:00+00:00"
+        }
+      ]
+    },
+    "rf3": {
+      "lane": "root-r517-all-model-3-node-native-cold-reopen",
+      "result": "passed",
+      "sourceCommit": "57cea6244b78b8f8663ca5e48bfea8e36ca9c91e",
+      "nodes": 3,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 118.72686237492599,
+      "processJoined": true,
+      "bothOutputFilesClosed": true,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "actualOwnedRestartReceipts": 3,
+      "allOriginalKillsBeforeFirstRestart": true,
+      "cohortBinding": {
+        "sourceCohortDigest": "f47c36a5028a817b7f1a8e209ff0b31d5fdb0d0e4a7cd17210d8404cac6abcb4",
+        "compiledCohortDigest": "4f45fe5228f07266b7fffd67323fff2cf809327124faf95d427194b26c2bd2bd",
+        "imageInputDigest": "sha256:030330e733e334c8b4c308bee89a8e6dc57204d4ba5ae555cbbb92040328f72d"
+      },
+      "terminalEvaluation": "TestResults/stage61-native-join/root-r517-all-model-3-node-native-cold-reopen.terminal-evaluation.original.json",
+      "terminalEvaluationSha256": "2e72a40efda3100f9b2174d4c5bf54fb31045558c7dc82ce93e0e92c50ea2369",
+      "analyticsObservations": [
+        {
+          "scenario": "functional-cold-reopen",
+          "node": "node1",
+          "analyticsHistory": "OBSERVED_SAME_WINDOW",
+          "reason": "SamePublicWindowRowsRetained",
+          "originalFrom": "2026-10-16T06:00:00+00:00",
+          "originalTo": "2026-10-16T07:00:00+00:00",
+          "currentFrom": "2026-10-16T06:00:00+00:00",
+          "currentTo": "2026-10-16T07:00:00+00:00"
+        },
+        {
+          "scenario": "functional-cold-reopen",
+          "node": "node2",
+          "analyticsHistory": "OBSERVED_SAME_WINDOW",
+          "reason": "SamePublicWindowRowsRetained",
+          "originalFrom": "2026-10-16T06:00:00+00:00",
+          "originalTo": "2026-10-16T07:00:00+00:00",
+          "currentFrom": "2026-10-16T06:00:00+00:00",
+          "currentTo": "2026-10-16T07:00:00+00:00"
+        },
+        {
+          "scenario": "functional-cold-reopen",
+          "node": "node3",
+          "analyticsHistory": "OBSERVED_SAME_WINDOW",
+          "reason": "SamePublicWindowRowsRetained",
+          "originalFrom": "2026-10-16T06:00:00+00:00",
+          "originalTo": "2026-10-16T07:00:00+00:00",
+          "currentFrom": "2026-10-16T06:00:00+00:00",
+          "currentTo": "2026-10-16T07:00:00+00:00"
+        }
+      ]
+    },
+    "strictFullBuild": "root-r511-cold-final-native-full-release:0warnings/0errors",
+    "focusedIntegrationBuildAfterTestInputCorrection": "root-r514-cold-insert-native-integration-release:0warnings/0errors;onlyownDLL/PDBchanged",
+    "originalSelectedUnit": {
+      "lane": "root-r503-cold-profile-selection-and-foundation-unit",
+      "passed": 45,
+      "failed": 0,
+      "skipped": 0,
+      "elapsedSeconds": 33.181736500002444,
+      "coldProfileControls": 6,
+      "selectorControls": 4
+    },
+    "originalSelectedRecovery": {
+      "lane": "root-r504-cold-profile-native-recovery",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "elapsedSeconds": 18.72232308308594
+    },
+    "selectedContributorEvidence": {
+      "path": "TestResults/stage61-native-join/root-r512-cold-build-unit-recovery-contributor-evidence.original.json",
+      "sha256": "175dde3e3c3794476a32dbe81b89aa9d8c121635be85bb8386069212ba18d701",
+      "unchangedContributorSources": 8125,
+      "unchangedContributorDllPdb": 238
+    },
+    "nativeOperationalAnalytics": {
+      "enginesPerNode": 1,
+      "derivedNotUserCatalogAuthority": true,
+      "actualSameHourInvariantObservations": 4,
+      "exactHistoricalRowRetentionQualifiedByThisPublicGate": false,
+      "separateCapturedRangeComponent": "OperationalAnalyticsRootReopenTests in actualR503 selectedUnit45"
+    },
+    "originalFailuresRetained": [
+      "R502 fullbuild7testsource/analyzererrors",
+      "R509 fullbuild1auto-propertyerror",
+      "R505 single-node test-input VALUESINSERT dialect2 unsupported beforecold; nativeversion1 correctionpreservedalloracles"
+    ],
+    "linuxQualification": "OPEN. Existingmanual BuildandTests task=functional-gates nowchains normal1/normalRF3/nativeUnit10/cold1/coldRF3 withstrictoriginalTRX/image/source/cleanupreceipts; current-sourceGitHubresultsrequired."
+  },
   "RESOURCE-LIFETIME-D1-20261016": {
     "title": "Atomic resource creation lifetime and focused authorization/cold regression checkpoint",
     "status": "in_progress",
     "scope": "D1 active resource lifetime producer plus authored authorization/cross-tenant regressions; not completed DROP, global inventory, full READ proof or original105 acceptance.",
     "strictBuild": {
-      "label": "root-r496-complete-native-functional-rotation-full-release",
+      "label": "root-r511-cold-final-native-full-release",
       "result": "passed",
-      "elapsedSeconds": 233.72071900009178,
+      "elapsedSeconds": 115.31071058288217,
       "sourceDrift": 0,
-      "compiledDrift": 4,
       "processJoined": true,
       "bothReadersJoined": true,
-      "stdoutSha256": "74d881df7162772af97f8be2aabd2ce191a8f046770b6beb4619bf06f9d18e5c",
+      "stdoutSha256": "cee6b867af19c6917a637a7cb38cd265a71a28e6477d1d004f7de4c5af91a96d",
       "errors": 0,
-      "warnings": 0
+      "warnings": 0,
+      "scope": "FullR511followedbyfocusedIntegration-onlyR514foroneSQLfixtureinputcorrection; allproduction/Unit/Recoverycontributorsunchanged."
     },
     "nativeWholeOperationDevelopment": {
-      "label": "root-r500-actual-host-analytics-query-whole-unit",
+      "label": "root-r503-cold-profile-selection-and-foundation-unit",
       "result": "passed",
-      "elapsedSeconds": 32.36187220783904,
+      "elapsedSeconds": 33.181736500002444,
       "sourceDrift": 0,
       "compiledDrift": 0,
       "processJoined": true,
       "bothReadersJoined": true,
-      "stdoutSha256": "b9bf6ce067e2b10f885c8ea4cbdec23a72be5f8aa5ce205a902bbdf9dce28420",
-      "total": 39,
-      "passed": 39,
+      "stdoutSha256": "2bfabeda2b433a3ddb943a01f96249eef5a15f07a678e1c4a93a370a9ae19073",
+      "total": 45,
+      "passed": 45,
       "failed": 0,
       "skipped": 0,
-      "trx": "TestResults/stage61-native-join/root-r500-actual-host-analytics-query-whole-unit/KeyLoad.UnitTests_net10.0_arm64.trx",
-      "trxSha256": "6eb5d99d7c6ba9ae5d43f7faa782fc4681f87ac6b7cd1e49d4a37b55fbc13703",
+      "trx": "TestResults/stage61-native-join/root-r503-cold-profile-selection-and-foundation-unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "trxSha256": "3bf86b1c704f7b93d0e11d56cbd314de384aef040e886bada8e93aa4dd7bc64f",
+      "contributorsUnchangedAfterFinalBuild": true,
       "coverage": {
-        "path": "TestResults/stage61-native-join/root-r500-actual-host-analytics-query-whole-unit/functional.cobertura.xml",
-        "sha256": "61d66e2024cae4e9c4fa3b7eb6d49e093de60d40086e23af1ab3810c1fdb49a0",
+        "path": "TestResults/stage61-native-join/root-r503-cold-profile-selection-and-foundation-unit/functional.cobertura.xml",
+        "sha256": "71d86f772f146a76fd71b6ed4d14b53710caf0c72a88dd939ed1b13d9a3d47d3",
         "counts": {
-          "line-rate": "0.1116326924313549",
-          "branch-rate": "0.07790871273064602",
-          "complexity": "71702",
-          "version": "1.9",
-          "timestamp": "1792127303",
-          "lines-covered": "12152",
+          "lines-covered": "12145",
           "lines-valid": "108857",
-          "branches-covered": "5375",
-          "branches-valid": "68991"
+          "branches-covered": "5377",
+          "branches-valid": "68991",
+          "line-rate": "0.11156838788502348",
+          "branch-rate": "0.07793770201910394"
         },
-        "selectedRunOnly": true
+        "selectedRunOnly": true,
+        "loadAndBenchmarksExcluded": true
       }
     },
     "actualRf3ColdFailure": {
@@ -58,8 +213,8 @@
       "sourceConfirmedCause": "Native OperationalAnalyticsOwner creates derived-operational-analytics after initial admission; current root-directory inventory omits this owned directory. Exact original offending entry was not retained/observed.",
       "repairQualification": "Repaired known native analytics-directory admission; original R491 complete public authorization/all3 same-root restart passes. Original failure remains historical."
     },
-    "gate1Gate2HistoricalProof": "FUNCTIONAL-GATES-20261016 binds original86834e8a local pair, not these newer product binaries. Fresh combined gates and exact-source Linux qualification remain open.",
-    "next": "Qualify separateall-authoritative-model coldreopen through explicitAspire profile and currentquery/cross-tenant failures; integratecomplete mandatoryCOMMAND/READlifetime sourcebatches aftercurrentfoundation, retain originalqualificationgates.",
+    "gate1Gate2HistoricalProof": "Currentcorrectednormalpair e292c1c1 passedR477/R478; separatecurrent57cea624 allmodelcoldpair passedR516/R517. Keeporiginalcohorts distinct; fulloriginal105/Linuxqualificationopen.",
+    "next": "Integratecomplete mandatoryCOMMAND/READ/localpair/ANN/sourcecoverage batches onlyafteractualreadyprerequisites; liveBlobOutcome nativeeffectfulV2+DocV1orphanclosure remainSourceN HOLD. Currentworkingandcoldbasepassed; originalacceptancegatesretained.",
     "historicalStrictBuild": {
       "label": "root-r486-fresh-admission-cross-tenant-full-release",
       "result": "passed",
@@ -104,20 +259,21 @@
       }
     },
     "nativeRecoveryDevelopment": {
-      "label": "root-r497-complete-native-analytics-recovery",
+      "label": "root-r504-cold-profile-native-recovery",
       "result": "passed",
-      "elapsedSeconds": 11.710340291960165,
+      "elapsedSeconds": 18.72232308308594,
       "sourceDrift": 0,
       "compiledDrift": 0,
       "processJoined": true,
       "bothReadersJoined": true,
-      "stdoutSha256": "500a047440290e7328b23b7469e06e2fbcc4600b3cbcde9b0441fe9ec4e6086f",
+      "stdoutSha256": "2104ffae337d036bf7e1808a72d7ad5f21f1d089c9ab3786cd35ae5651677721",
       "total": 3,
       "passed": 3,
       "failed": 0,
       "skipped": 0,
-      "trx": "TestResults/stage61-native-join/root-r497-complete-native-analytics-recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
-      "trxSha256": "15593a249f28a17b4008cceb97519160ffe124ae4e4283c376e02cfdbefe77ee"
+      "trx": "TestResults/stage61-native-join/root-r504-cold-profile-native-recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+      "trxSha256": "7bf6a61c150c08a64075bf2bf3b315a6cfb472c86bd20dfe74c641a4d0ae8f71",
+      "contributorsUnchangedAfterFinalBuild": true
     },
     "actualRf3ColdRepair": {
       "label": "root-r491-principal-expiry-after-analytics-cold-repair",
@@ -232,6 +388,67 @@
         "boundary": "Accepted updated local functional scenario with independentlyrotated3resource flows, complete native result, owned shutdown/releasedstorage/imagechecks. Not full105/Linux/endurance/security/performance/release."
       },
       "scope": "WorkingbaseandcurrentD1producer scope; fullmandatoryCOMMAND/READproof, DROP, SQLconformanceandoriginal105qualification remain open."
+    },
+    "currentColdQualificationReference": "FUNCTIONAL-COLD-20261016",
+    "historicalStrictBuildR496": {
+      "label": "root-r496-complete-native-functional-rotation-full-release",
+      "result": "passed",
+      "elapsedSeconds": 233.72071900009178,
+      "sourceDrift": 0,
+      "compiledDrift": 4,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "74d881df7162772af97f8be2aabd2ce191a8f046770b6beb4619bf06f9d18e5c",
+      "errors": 0,
+      "warnings": 0
+    },
+    "historicalNativeWholeOperationDevelopmentR500": {
+      "label": "root-r500-actual-host-analytics-query-whole-unit",
+      "result": "passed",
+      "elapsedSeconds": 32.36187220783904,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "b9bf6ce067e2b10f885c8ea4cbdec23a72be5f8aa5ce205a902bbdf9dce28420",
+      "total": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "trx": "TestResults/stage61-native-join/root-r500-actual-host-analytics-query-whole-unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "trxSha256": "6eb5d99d7c6ba9ae5d43f7faa782fc4681f87ac6b7cd1e49d4a37b55fbc13703",
+      "coverage": {
+        "path": "TestResults/stage61-native-join/root-r500-actual-host-analytics-query-whole-unit/functional.cobertura.xml",
+        "sha256": "61d66e2024cae4e9c4fa3b7eb6d49e093de60d40086e23af1ab3810c1fdb49a0",
+        "counts": {
+          "line-rate": "0.1116326924313549",
+          "branch-rate": "0.07790871273064602",
+          "complexity": "71702",
+          "version": "1.9",
+          "timestamp": "1792127303",
+          "lines-covered": "12152",
+          "lines-valid": "108857",
+          "branches-covered": "5375",
+          "branches-valid": "68991"
+        },
+        "selectedRunOnly": true
+      }
+    },
+    "historicalNativeRecoveryDevelopmentR497": {
+      "label": "root-r497-complete-native-analytics-recovery",
+      "result": "passed",
+      "elapsedSeconds": 11.710340291960165,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "500a047440290e7328b23b7469e06e2fbcc4600b3cbcde9b0441fe9ec4e6086f",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "trx": "TestResults/stage61-native-join/root-r497-complete-native-analytics-recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+      "trxSha256": "15593a249f28a17b4008cceb97519160ffe124ae4e4283c376e02cfdbefe77ee"
     }
   },
   "FUNCTIONAL-GATES-20261016": {
@@ -652,7 +869,8 @@
       "sourceEvidence": "TestResults/stage61-native-join/functional-model-inventory-sourceN-r2/independent-schedule-enumeration.json",
       "runtimeStatus": "Closed by correctedR477/R478 matchedpair:41completewaves each,10302/10306 successfuloperations, original native PASS/cleanup/0sourceDLLimagedrift. Historicalearlierpairretainsnarrowerscenario.",
       "analyticsBoundary": "Three persisted TimeSeries sets serve data/aggregate operations; native operational analytics is one derived engine pernode, not3 catalog stores."
-    }
+    },
+    "additionalColdQualificationReference": "FUNCTIONAL-COLD-20261016; separate57cea624 matchednativecoldpair passed, original normalpair/counters/e292cohortunchanged"
   },
   "NATIVE-FOUNDATION-20261015": {
     "status": "in_progress",

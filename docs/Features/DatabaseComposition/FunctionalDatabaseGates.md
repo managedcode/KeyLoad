@@ -6,6 +6,12 @@ plan with these two functional gates. The six-hour working window starts at
 unchanged. Broad audits, comparative benchmarks, coverage qualification and
 unrelated task expansion follow a working database.
 
+The additional [all-model cold-reopen gate](FunctionalDatabaseColdReopen.md) also
+passed locally on its separate `57cea624` cohort: one actual node, then all three
+RF3 nodes, with original command/SQL/blob replay, persisted authorization and
+joined cleanup. Its native results supplement the normal operation gates below;
+operation counts and source cohorts are not merged.
+
 ## Requirements and acceptance
 
 REQ-DBGATE-001 requires one shared, real-client model scenario on one Aspire

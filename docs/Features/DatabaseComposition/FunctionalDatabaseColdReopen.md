@@ -5,11 +5,42 @@ exposes the current hour only: its fresh-report checks are mandatory, while a
 changed public window leaves retained derived history explicitly UNQUALIFIED.
 An overall case PASS does not qualify durable public analytics history.
 
+## Current local results
+
+The corrected native pair passed on source `57cea6244b78b8f8663ca5e48bfea8e36ca9c91e`.
+Single-node cold completed in **104.61 seconds**; RF3 cold completed in
+**118.73 seconds** after the accepted single-node result. Each original native
+case passed once with zero failures/skips, joined caller/process/resource cleanup,
+unchanged source/DLL hashes and the same image-input digest. All original nodes
+were killed before any restart; actual restart receipts confirm one and three
+new runtime generations.
+
+Both runs preserve all three resources in each catalog model, original
+SQL/mixed-command/blob-stage envelopes, full receipts and values, same credentials,
+fresh grant revocation/repair and a new healthy write. The native public analytics
+reports remained in the same hour on all observed nodes and passed their original
+invariants; this does not prove exact historical-row retention or old-hour public
+history. The separate native captured-range component remains its own proof.
+
+Original local evaluations under `TestResults/stage61-native-join`:
+
+| Topology | Original terminal evaluation | SHA256 |
+| --- | --- | --- |
+| One node | `root-r516-all-model-1-node-native-cold-reopen.terminal-evaluation.original.json` | `1b856730af9ebf75c52336f4b52bd9a815900f2f9d255b7bfc59ae3d8cb2f86f` |
+| RF3 | `root-r517-all-model-3-node-native-cold-reopen.terminal-evaluation.original.json` | `2e72a40efda3100f9b2174d4c5bf54fb31045558c7dc82ce93e0e92c50ea2369` |
+
+The complete Linux functional lane now includes the original normal pair, native
+profile/selector controls and this cold pair, but its actual current-source
+execution remains unqualified until original GitHub results pass. These local
+results do not close DROP/resource catalog lifecycle, the 105-task plan,
+power-loss, security/endurance, performance or release gates.
+
 REQ-DBCOLD-001 defines a separate selected recovery gate after the working
 single-instance/RF3 pair. It does not change either existing FunctionalDatabaseGateTests
 case, their 10,000-success minimum, their three-resource rotation or their current
 execution flow. Both optional cases use the existing 30-minute cancellation bound.
-The new cold cases remain unqualified until their original compiler and runtime gates pass.
+The original current local compiler and runtime gates passed as recorded above;
+exact-source Linux delivery remains a separate open gate.
 
 REQ-DBCOLD-002 requires the same original Aspire application, physical roots,
 container names and verified source/image selection. ContainerRuntimeControl owns
@@ -35,7 +66,8 @@ native-command selection regressions. F1 found that the r3 fixture omitted nativ
 command registration while the prior functional validator also rejected ContainerFaults;
 r3 and its earlier clean source-review claims are superseded for that blocker. Adding
 only ContainerFaults, bypassing the validator or invoking Docker directly does not repair
-that original integration seam. Compile and runtime acceptance remain open.
+that original integration seam. The corrected local compiler/runtime evidence
+above supersedes that blocker; current-source Linux delivery remains open.
 
 REQ-DBCOLD-008 extends the existing manual Build and Tests workflow task
 functional-gates, preserving the original normal single-instance case then its
@@ -133,8 +165,8 @@ and four selector controls. All contributing production, UnitTests, RecoveryTest
 and CrashHost source and DLL/PDB hashes remained exact after the final build, so
 those original results are retained without a repeated run. Their original local
 evidence is root-r512-cold-build-unit-recovery-contributor-evidence.original.json
-under TestResults/stage61-native-join. The new local cold runtime and exact-source
-Linux qualification remain OPEN until their actual original outcomes. Process-kill proof does not establish power-loss durability, the complete
+under TestResults/stage61-native-join. The corrected local cold pair passed as recorded above; exact-source Linux
+qualification remains OPEN. Process-kill proof does not establish power-loss durability, the complete
 105-task plan, production readiness or performance.
 
 The first original single-node R505 run failed before any cold action because the
@@ -143,8 +175,8 @@ requires SqlOperationProtocol.DefaultQueryDialectVersion (1) for this operation.
 The fixture now uses that existing constant; SELECT remains dialect 2, and no
 production parser, supported-version check, request payload or result oracle was
 relaxed. The focused R514 IntegrationTests build passed with zero warnings/errors;
-only its DLL/PDB changed. The original failed report is retained, and a fresh
-single-node cold PASS remains required before RF3 cold execution.
+only its DLL/PDB changed. The original failed report is retained. Corrected R516 passed before the matched
+R517 RF3 cold run; both original outcomes are recorded above.
 
 The owning contracts remain ADR-117 native test entry, ADR-125 connection execution
 and ADR-136 physical partition ownership. No new product provider, topology, library,
