@@ -60,6 +60,8 @@ Qualification requires build, TUnit normal/scalar, real process recovery and
 Docker/Aspire RF3 via .NET and official MCP. Local development results remain local;
 no performance acceleration, power-loss or production-readiness claim is inferred.
 
+See [all-model cold-reopen contract](DatabaseComposition/FunctionalDatabaseColdReopen.md) for its requirements, test mapping and qualification boundaries.
+
 ## Source stage acceptance contract
 
 In scope: requirements/ADR/product copy; QueueToGraph and GraphToQueue typed

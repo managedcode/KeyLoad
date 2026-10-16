@@ -19,7 +19,7 @@ internal sealed class DistributedSearchRf3DeadlineProbe(RequestCqrsProbeFixture 
         parentArm = controls.WriteArm(principal, Guid.Empty, GrainReadKind.DistributedSearch,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
         childArm = controls.WriteArm(principal, Guid.Empty, GrainReadKind.DistributedSearchLeaf,
-            RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold, RemotePartitionQueryRf3Seed.Local);
+            RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
     }
 
     internal async Task ObserveNaturalDeadlineAsync(CancellationToken token)

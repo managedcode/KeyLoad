@@ -95,6 +95,10 @@ internal sealed class AppHostControlOptions
     {
         get; set;
     }
+    internal bool FunctionalColdReopen
+    {
+        get; set;
+    }
     internal int? FunctionalNodeCount
     {
         get; set;

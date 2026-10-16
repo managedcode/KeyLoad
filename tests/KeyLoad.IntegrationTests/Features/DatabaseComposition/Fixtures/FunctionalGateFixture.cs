@@ -2,6 +2,7 @@ using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Server;
@@ -16,6 +17,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     private const int SingleVoter = 1;
     private const int ThreeVoters = 3;
     private readonly Lock disposalGate = new();
+    private readonly bool coldReopen;
     private IDistributedApplicationTestingBuilder? builder;
     private LocalRf3ImageTestSession? imageSession;
     private Task? disposal;
@@ -23,6 +25,10 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     private string[] diagnosticSecrets = [];
     private Action<string>? saveStartupEvidence;
     private bool started;
+    internal ContainerRuntimeControl? ColdRuntime
+    {
+        get; private set;
+    }
     internal DistributedApplication App { get; private set; } = null!;
     internal string AdminKey { get; private set; } = string.Empty;
     internal string[] NodeNames
@@ -35,17 +41,26 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         get; set;
     }
 
-    private FunctionalGateFixture(int nodes)
-        => NodeNames = Enumerable.Range(SingleVoter, nodes).Select(ClusterFixtureProtocol.NodeName).ToArray();
+    private FunctionalGateFixture(int nodes, bool coldReopen)
+    {
+        this.coldReopen = coldReopen;
+        NodeNames = Enumerable.Range(SingleVoter, nodes).Select(ClusterFixtureProtocol.NodeName).ToArray();
+    }
 
-    internal static async Task<FunctionalGateFixture> StartAsync(int nodes, CancellationToken token)
+    internal static Task<FunctionalGateFixture> StartAsync(int nodes, CancellationToken token)
+        => StartCoreAsync(nodes, false, token);
+
+    internal static Task<FunctionalGateFixture> StartColdAsync(int nodes, CancellationToken token)
+        => StartCoreAsync(nodes, true, token);
+
+    private static async Task<FunctionalGateFixture> StartCoreAsync(int nodes, bool coldReopen, CancellationToken token)
     {
         if (nodes is not (SingleVoter or ThreeVoters))
         {
             throw new ArgumentOutOfRangeException(nameof(nodes));
         }
         token.ThrowIfCancellationRequested();
-        var owner = new FunctionalGateFixture(nodes);
+        var owner = new FunctionalGateFixture(nodes, coldReopen);
         try
         {
             await owner.InitializeAsync(nodes, token).ConfigureAwait(false);
@@ -78,6 +93,11 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
             ClusterFixtureProtocol.EphemeralArgument,
             "--KeyLoadTests:FunctionalNodeCount=" + nodes.ToString(CultureInfo.InvariantCulture)
         };
+        if (coldReopen)
+        {
+            arguments.Add(FunctionalColdReopenProfile.EnabledArgument);
+            arguments.Add(ContainerFaultCommandProtocol.EnabledArgument);
+        }
         if (selection is not null)
         {
             arguments.AddRange(selection.CreateWaveArguments());
@@ -96,6 +116,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         diagnostics = new(App);
         diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
+        ColdRuntime = new(App, containers, repository, selection);
         var identity = selection is null ? null
             : await LocalRf3ImageIdentity.VerifyBeforeStartAsync(App, repository, selection, NodeNames, startup.Token)
                 .ConfigureAwait(false);

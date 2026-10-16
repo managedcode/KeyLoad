@@ -1,5 +1,4 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -57,7 +56,7 @@ internal sealed partial class FunctionalGateFixture
         }
         if (stopped && started && failures.Count == 0)
         {
-            ServerFailureObserver.Observe(RequireReleasedStorage, failures);
+            ServerFailureObserver.Observe(() => FunctionalGateStorageOwnership.RequireReleased(this), failures);
         }
         if (imageSession is { } ownedImage)
         {
@@ -87,16 +86,6 @@ internal sealed partial class FunctionalGateFixture
                 ServerFailureObserver.Observe(() => failure.Data[FailureRootDataKey] = Root, failures);
             }
             ServerFailureObserver.Observe(() => Console.Error.WriteLine("Original functional gate root retained at " + Root), failures);
-        }
-    }
-
-    private void RequireReleasedStorage()
-    {
-        foreach (var node in NodeNames)
-        {
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(Root, node, "node.owner.lock"));
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(Root, node, "database", "owner.lock"));
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(Root, node, "replica", "owner.lock"));
         }
     }
 }

@@ -1,0 +1,155 @@
+# Optional authoritative-model cold-reopen gate
+
+This gate covers the authoritative database models. Public operational analytics
+exposes the current hour only: its fresh-report checks are mandatory, while a
+changed public window leaves retained derived history explicitly UNQUALIFIED.
+An overall case PASS does not qualify durable public analytics history.
+
+REQ-DBCOLD-001 defines a separate selected recovery gate after the working
+single-instance/RF3 pair. It does not change either existing FunctionalDatabaseGateTests
+case, their 10,000-success minimum, their three-resource rotation or their current
+execution flow. Both optional cases use the existing 30-minute cancellation bound.
+The new cold cases remain unqualified until their original compiler and runtime gates pass.
+
+REQ-DBCOLD-002 requires the same original Aspire application, physical roots,
+container names and verified source/image selection. ContainerRuntimeControl owns
+native fault-command kill receipts, exited identities, native Start acceptance,
+changed process generation and health settlement. All nodes exit before any starts;
+all native starts are accepted before quorum-health waits. Existing joined shutdown,
+retained failure evidence and released-storage checks remain mandatory. One voter is
+its actual development acknowledgement topology; three voters are actual RF3.
+The native ContainerRuntimeOwnedReceipt scenario namespace is reused unchanged;
+no new public, persisted or Orleans serializer alias is introduced.
+
+REQ-DBCOLD-007 requires the explicit cold-only test profile. StartColdAsync passes
+both --KeyLoadTests:FunctionalColdReopen=true and the existing
+--KeyLoadTests:ContainerFaults=true argument with FunctionalNodeCount exactly 1 or 3.
+The owning AppHost validator admits only the exact value true without nested children;
+it rejects a cold selection without faults or an admitted functional node count. All
+existing ephemeral=true, absolute owned data-root and exclusive-profile restrictions
+remain. Ordinary StartAsync selects cold=false and supplies neither argument, so the
+existing working single-instance/RF3 gates retain their no-fault profiles.
+
+This profile depends on the exact selected owning AppHost source correction and its
+native-command selection regressions. F1 found that the r3 fixture omitted native fault
+command registration while the prior functional validator also rejected ContainerFaults;
+r3 and its earlier clean source-review claims are superseded for that blocker. Adding
+only ContainerFaults, bypassing the validator or invoking Docker directly does not repair
+that original integration seam. Compile and runtime acceptance remain open.
+
+REQ-DBCOLD-008 extends the existing manual Build and Tests workflow task
+functional-gates, preserving the original normal single-instance case then its
+original receipt, followed by the normal RF3 case then its original receipt. The
+same task must next run the six native FunctionalColdReopenProfileTests controls
+and four native NativeTUnitSelectionTests controls with strict TRX evaluation and
+no skips. It then runs the exact single-instance cold case with a strict native
+one-case result and original receipt, followed by the exact RF3 cold case and its
+receipt. Existing source/executable/image verification, joined cleanup and every
+other mandatory suite remain unchanged. No ignored SourceN helper, new workflow
+or fabricated 10,000-operation cold counter is an execution substitute. Linux CI
+runtime qualification remains OPEN until the actual original workflow outcomes.
+
+
+REQ-DBCOLD-003 provisions three real resources in each advertised model family.
+Cold-only persisted writer, reader and tenant-local queue operator identities retain
+their original private secrets in memory. All original SDK and official MCP caller
+scopes join disposal before kill; new discovered public sessions use those same
+credentials after restart. No identity or fixture is replaced and no store is copied.
+These three cold-only identities supplement the existing eight-user working gate;
+they do not qualify eight-user cold concurrency.
+
+| Model family | Actual native request and original retained result |
+| --- | --- |
+| Documents | PutDocument in CommandRequest, full CommitReceipt, GetDocumentRequest |
+| Typed tables | ScriptDOM CREATE TABLE SqlOperationRequest -> complete ResourceDefinition; original INSERT SqlOperationRequest with GUID and parameters -> full CommitReceipt; actual SDK/MCP SELECT -> complete projected rows |
+| Event stream sets | AppendEvents; ReadStreamRequest with literal head/data and retained complete EventRecord |
+| Work queues | EnqueueMessage; InspectMessageRequest with literal state/payload/header and retained complete metadata |
+| Topics | PublishTopic; ReadEventSourceRequest with literal head/data and retained complete SourceEventRecord |
+| Graphs | UpsertEdge and TraverseRequest; complete literal edge, canonical endpoints and vertex set |
+| Time series | AppendSamples, ReadSamplesRequest and AggregateSamplesRequest; two samples, canonical anchor tags and literal count/sum/extrema/average |
+| Blobs | Original BeginBlobUploadRequest, two WriteBlobPartRequest and CompleteBlobUploadRequest envelopes and full result/receipt ledger; complete bytes plus boundary/EOF partial BlobReadRequest oracles |
+| Vectors | Authoritative VectorFieldProfile, PutVector and native exact SearchRequest; literal complete ranked document |
+| Full text | Native collection text field, PutDocument, WaitForIndexRequest and SearchRequest; original acknowledged minimum, current schema/policy and literal complete ranked document |
+
+REQ-DBCOLD-004 retains original mixed-command GUIDs, actual SQL statements and
+parameters, blob stage GUIDs and every complete public receipt. After all-node cold
+reopen both public clients replay these exact envelopes and compare complete original
+results. Read oracles independently verify full model contents and canonical links.
+Variable server-recorded event timestamps/sequences and queue sequence metadata are
+validated initially and retained exactly for post-cold comparison. Read cuts may advance;
+source heads, complete records, expected contents and minimum acknowledged cuts remain
+required. Text freshness uses the original token; exact vector search uses its native
+canonical read contract. No ANN consumer/generation is provisioned here, so this gate
+makes no approximate-search generation recovery claim.
+
+REQ-DBCOLD-005 verifies fresh persisted authorization after cold, including denied
+reader writes and denial of an original writer command after persisted grant revocation.
+A persisted grant repair admits a new healthy command; its cross-client replay and exact
+reads pass, and every original model baseline is checked again. This does not claim
+resource catalog deletion, DROP TABLE or complete model-specific lifecycle coverage.
+
+REQ-DBCOLD-006 checks native operational analytics separately: each actual node owns
+one derived native engine. Both real SDK and official MCP dashboard reads always
+verify complete fresh plans, counter consistency, same node/incarnation identity
+and changed process instance after cold. Retained sample count, AppliedSum and
+CommittedSum are compared only when both actual From and To equal the original
+public window. Otherwise one bounded structured scenario observation per node records
+analyticsHistory=UNQUALIFIED and PublicDashboardWindowChanged with both original and
+current windows. A changed current-hour window is an observability limitation, not a
+database failure or a TUnit skip. All three authoritative TimeSeries sets and every
+other model, original replay, authorization, healthy-write and cleanup assertion remain
+mandatory. This gate does not qualify unobservable old-hour public history; explicit
+captured-range native engine recovery belongs to the separate
+OperationalAnalyticsRootReopenFlow component scope and its own original evidence.
+Derived analytics is not a user catalog model, three independent analytics stores,
+authoritative database state or a replacement for native OpenTelemetry.
+
+AC-DBCOLD-001 maps to
+`FunctionalDatabaseColdReopenTests.SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands`.
+AC-DBCOLD-002 maps to
+`FunctionalDatabaseColdReopenTests.ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands`.
+Each requires its native case PASS without skips, all original receipts, complete
+model/read/authentication assertions, cold process receipts and joined cleanup.
+AC-DBCOLD-004 maps the existing workflow's fail-closed step/outcome, source/image
+and strict TRX bindings to all six native FunctionalColdReopenProfileTests controls,
+all four native NativeTUnitSelectionTests controls and the exact two cold methods
+named above. A failed, skipped, missing or mismatched original control/case or
+receipt cannot qualify its corresponding stage.
+
+AC-DBCOLD-003 keeps either optional gate open after any original failure, unexpected
+effect, missing authoritative record, replay mismatch, invalid fresh analytics report
+or unknown cleanup result. A changed analytics public window leaves only that derived
+history observation UNQUALIFIED and cannot satisfy a retained-history claim.
+
+The original R502 strict solution build failed with seven test-source/analyzer
+errors and zero warnings: four named machine-key violations, two unused imports
+and the aggregate 233-code-line fixture limit violation. The scoped source repair
+uses named protocol constants, removes unused imports and moves cold coordination
+and storage-lock assertions to distinct feature-local helpers. It preserves all
+original operation and recovery oracles. The repaired R511 full solution build passed locally with zero warnings and zero
+errors. The original parallel R503/R504 native runs passed 45 unit cases and three
+process/native recovery cases without skips; this includes all six cold-profile
+and four selector controls. All contributing production, UnitTests, RecoveryTests
+and CrashHost source and DLL/PDB hashes remained exact after the final build, so
+those original results are retained without a repeated run. Their original local
+evidence is root-r512-cold-build-unit-recovery-contributor-evidence.original.json
+under TestResults/stage61-native-join. The new local cold runtime and exact-source
+Linux qualification remain OPEN until their actual original outcomes. Process-kill proof does not establish power-loss durability, the complete
+105-task plan, production readiness or performance.
+
+The owning contracts remain ADR-117 native test entry, ADR-125 connection execution
+and ADR-136 physical partition ownership. No new product provider, topology, library,
+resource limit or compatibility fallback is introduced.
+
+```mermaid
+flowchart LR
+    A[Existing Aspire 1 or 3 voters] --> B[Persist credentials and original model ledgers]
+    B --> C[SDK MCP SQL complete reads]
+    C --> D[Join original caller disposal]
+    D --> E[Native kill every original node]
+    E --> F[Accept every native Start]
+    F --> G[Join health and original runtime receipts]
+    G --> H[Reconnect same credentials and replay originals]
+    H --> I[Verify all models and fresh authorization]
+    I --> J[Healthy new write and joined shutdown]
+```

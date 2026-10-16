@@ -15,7 +15,9 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
               "/*/*/PartitionQueryPublicValidationTests/*",
               "/*/*/CrossTenantRf3WholeFlowTests/Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
-              "/*/*/RemotePartitionQueryRf3Tests/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart"
+              "/*/*/RemotePartitionQueryRf3Tests/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart",
+              "/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands",
+              "/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -23,6 +25,15 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              '/*/*/FunctionalDatabaseColdReopenTests/*',
+              '/*/*/FunctionalDatabaseColdReopenTests*/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands',
+              currentModelFilters[12] + '*',
+              currentModelFilters[12] + ' ',
+              '/*/*/FunctionalDatabaseColdReopenTests*/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands',
+              currentModelFilters[13] + '*',
+              currentModelFilters[13] + ' ',
+              '/*/*/FunctionalDatabaseColdReopenTests/OtherMethod',
+              '/*/*/(FunctionalDatabaseColdReopenTests|FunctionalDatabaseGateTests)/*',
               '/*/*/RemotePartitionQueryRf3Tests/*',
               '/*/*/RemotePartitionQueryRf3Tests*/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart',
               currentModelFilters[11] + '*',

@@ -72,6 +72,7 @@ internal static class AppHostControlOptionsRegistration
                 value.EventVectorReservedProbe = EventVectorReservedProbeProfile.Read(configuration, value);
                 value.NativeBlobWireProbe = ReadNativeBlobWireProbe(configuration, value);
                 value.ProtectedMovementProbe = ProtectedMovementProbeProfile.Read(configuration, value);
+                value.FunctionalColdReopen = FunctionalColdReopenProfile.Read(configuration, value);
                 value.FunctionalNodeCount = ReadFunctionalNodeCount(configuration, value);
             })], [], []));
         _ = options.Value;
@@ -92,7 +93,8 @@ internal static class AppHostControlOptionsRegistration
             || !Path.IsPathFullyQualified(configuration[DataRootSetting]!)
             || options.Tests is not null || options.TwoRf3 || options.BenchmarksEnabled
             || options.TargetSelected || options.ComparisonSelectorsPresent || options.ScaleSelected
-            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.ContainerFaults
+            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured
+            || options.ContainerFaults && !options.FunctionalColdReopen
             || options.LoggerModelControl || options.RequestProbe is not null
             || options.MovementFrameObservation is not null || options.NativeDiscoveryOmission is not null
             || options.EventVectorReservedProbe || options.NativeBlobWireProbe is not null || options.ProtectedMovementProbe
