@@ -31,14 +31,41 @@ internal sealed class ConnectionNativeServerEvidence
         var directory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, actual + "_" + Role(index) + ".log");
-        var provider = new FileLoggerProvider(path);
+        FileLoggerProvider? pending = null;
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => host.Application.Services.GetRequiredService<ILoggerFactory>().AddProvider(provider), failures);
-        if (failures.Count != FirstNode)
+        try
         {
-            ServerFailureObserver.Observe(provider.Dispose, failures);
-            ServerFailureObserver.ThrowIfAny(failures);
+            pending = new FileLoggerProvider(path);
+            host.Application.Services.GetRequiredService<ILoggerFactory>().AddProvider(pending);
+            pending = null;
         }
+        catch (Exception primary) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
+        {
+            failures.Add(primary);
+        }
+        catch (Exception primary) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
+        {
+            failures.Add(primary);
+        }
+        finally
+        {
+            if (pending is not null)
+            {
+                try
+                {
+                    pending.Dispose();
+                }
+                catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+                {
+                    failures.Add(cleanup);
+                }
+                catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+                {
+                    failures.Add(cleanup);
+                }
+            }
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
         // The actual host ILoggerFactory owns and disposes the successfully added provider.
         paths[index] = path;
     }

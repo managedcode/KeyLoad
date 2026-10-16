@@ -40,13 +40,25 @@ internal static class DocumentLifetimePublicBoundaryAssertions
             await Assert.That(refused.Code).IsEqualTo(ErrorCode.Unauthenticated);
             await Assert.That(refused.Message).IsEqualTo(RemoteDocumentProtocol.InvalidProof);
         }
+        await RequireTargetReferenceAsync(result, frame, expected);
+        await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourcePosition);
+        await Assert.That(fixture.Destination.Store.Position).IsEqualTo(targetPosition);
+        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(source)).IsTrue();
+        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(target)).IsTrue();
+    }
+
+    private static async Task RequireTargetReferenceAsync(OwnedDocumentReadResultV1 result,
+        RemoteDocumentReadFrameV2 frame, EntityRef expected)
+    {
+        var document = result.Document;
+        ArgumentNullException.ThrowIfNull(document);
         EntityRef[] changed = [expected with { Id = OtherId }, expected with { Collection = OtherCollection },
             expected with { Partition = expected.Partition with { PartitionKey = OtherPartition } }];
         foreach (var reference in changed)
         {
             var reply = result with
             {
-                Document = result.Document with
+                Document = document with
                 {
                     Reference = reference
                 }
@@ -57,7 +69,7 @@ internal static class DocumentLifetimePublicBoundaryAssertions
         }
         var unbound = result with
         {
-            Document = result.Document with
+            Document = document with
             {
                 Reference = expected with
                 {
@@ -69,10 +81,6 @@ internal static class DocumentLifetimePublicBoundaryAssertions
         await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(unsupported.Message).IsEqualTo(RemoteDocumentProtocol.Unavailable);
         OrdinaryDocumentLifetimeSourceRead.RequireResult(result, frame);
-        await Assert.That(result.Document.Reference).IsEqualTo(expected);
-        await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourcePosition);
-        await Assert.That(fixture.Destination.Store.Position).IsEqualTo(targetPosition);
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(source)).IsTrue();
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(target)).IsTrue();
+        await Assert.That(document.Reference).IsEqualTo(expected);
     }
 }

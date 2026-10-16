@@ -9,6 +9,7 @@ internal sealed class NativeClusterStartupEvidenceTests
     private const string MissingNativeFilesKey = "missingNativeFiles";
     private const string EventsKey = "events";
     private const int ExpectedServerFiles = 6;
+    private const int FirstServerFile = 0;
 
     [Test]
     public async Task OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy()
@@ -120,7 +121,7 @@ internal sealed class NativeClusterStartupEvidenceTests
         {
             await Assert.That(file.InspectedBytes).IsGreaterThan(0);
         }
-        await Assert.That(trace.Events.Any(item => item.Role == files.First().Role && item.Event == "LogSiloStartingWithGC"
+        await Assert.That(trace.Events.Any(item => item.Role == files[FirstServerFile].Role && item.Event == "LogSiloStartingWithGC"
             && item.Category == "Orleans.Runtime.Silo")).IsTrue();
         await Assert.That(JsonSerializer.Serialize(trace.Events).Contains(
             ConnectionNativeProtocol.FirstJson, StringComparison.Ordinal)).IsFalse();

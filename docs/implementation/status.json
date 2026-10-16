@@ -7,6 +7,21 @@
       "sha256": "d2a3f345efe45c7982811817d1597f17214737e6e107a3800c403f076f05fca1",
       "sourceCount": 118
     },
+    "linuxCompilerFollowUp": {
+      "sourceCommit": "abc0a1dbdd8087c9b902da0084b844f4513b8e92",
+      "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38977009684",
+      "jobId": 117228829198,
+      "result": "failed_before_tests",
+      "diagnosticCount": 8,
+      "diagnostics": "CS0103 x3, KLD0001, IDE0005, KLD0032, CA2000, CA1826",
+      "originalDiagnostics": "TestResults/c1-r723-abc-ci-watch-r1/a/snapshot-02-first-compiler-block.original.txt",
+      "originalDiagnosticsSha256": "35e5cf4e637efec95bf698d9cb6483238c09e6728622c8fda335c009cf05bbb1",
+      "sourceRepairFiles": 6,
+      "sourceRepairEvidence": "TestResults/stage61-native-join/root-r728-main-ci6-source.original.json",
+      "sourceRepairSha256": "daaab72358b90b57eb1cee14ecb0bb7c4b22ff3cf3189765266d7c3ea7b0b28b",
+      "sourceRepairStatus": "Integrated and independently source-reviewed; existing API imports/constants, target-reference assertion responsibility and native logging-provider ownership are preserved. Current Unit/public runtime and repeated Linux qualification remain OPEN.",
+      "localIntegrationCompiler": "R728 joined after16.940249874955043 seconds with zero warnings and one CA2025 error in the separately owned benchmark Session library; whole-source drift0. Unit/Integration compilation was blocked by that real dependency, not qualified as passing."
+    },
     "strictRecoveryCompiler": {
       "label": "root-r720-foundation-recovery-release",
       "result": "passed",
@@ -125,6 +140,14 @@
       "done": 20,
       "in_progress": 85
     }
+  },
+  "BENCHMARK-SOURCE-REDESIGN-20261017": {
+    "status": "in_progress",
+    "implementation": "Separate source redesign retires the old per-cell dispatch, exclusive runners/schemas/readers/fixtures in favor of11 database targets x native1/3 nodes =22 shared sessions. The initial7 document cases measure the actual1m-record initial load without warmup/reseed; native bounded concurrency and joined cleanup remain required.",
+    "qualification": "Source checkpoint only. Full vector/graph/queue/event/time-series workloads, ingestion at1/10/500 clients, complete comparable workload inventory and exact-source Linux benchmark qualification remain OPEN. Foundation integration compilation does not qualify benchmark behavior or performance.",
+    "contract": "docs/Features/BenchmarkComparisons/SessionExecution.md",
+    "adr": "docs/ADR/ADR-142-shared-live-benchmark-sessions.md",
+    "taskAcceptance": "Original105 tasks remain20 done/85 in_progress; no acceptance promotion."
   },
   "RESOURCE-OWNER-INVENTORY-20261016": {
     "title": "Native resource-owner inventory and all-model recovery development stage",

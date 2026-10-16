@@ -1,11 +1,12 @@
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Storage;
 using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class CompositionPrefixPrepareSeed
 {
+    private const string IdColumn = "id";
+
     internal static async Task ConfigureAsync(CompositionPrefixPrepareOwner owner)
     {
         foreach (var (name, kind) in new[] { (D.From, ResourceKind.Collection), (D.To, ResourceKind.Collection),
@@ -14,7 +15,7 @@ internal static class CompositionPrefixPrepareSeed
             var definition = new ResourceDefinition(name, kind, owner.Source.Partition.TransactionDomainId)
             {
                 RelationalSchema = kind == ResourceKind.Collection
-                    ? new("id", [new("id", RelationalColumnType.Text)]) : null
+                    ? new(IdColumn, [new(IdColumn, RelationalColumnType.Text)]) : null
             };
             var request = new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition);
             var original = owner.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), D.Root,
