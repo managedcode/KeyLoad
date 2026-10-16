@@ -124,15 +124,14 @@ internal static class PartitionMovementClientDispatchOperations
     {
         PartitionMovementTransportAdmission.Require(request);
         RequireEncodedSize(owner, NativeSerialization.Measure(request));
-        var original = NativeSerialization.Serialize(request);
         if (request.Envelope.Stage != PartitionMovePeerStage.ControlApplyCommand)
         {
-            return original;
+            return NativeSerialization.Serialize(request);
         }
         await owner.partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var proof = owner.partition.Database.CaptureControlledCommandLifetimeProof(request.Envelope, cancellationToken);
-        var transport = new PartitionControlLifetimeTransportV1(original, proof);
+        var transport = PartitionControlLifetimeTransportV2.Create(request, proof);
         RequireEncodedSize(owner, NativeSerialization.Measure(transport));
         return NativeSerialization.Serialize(transport);
     }

@@ -23,11 +23,11 @@ internal static class ControlledLifetimeReplayMutation
         {
             return requestBytes;
         }
-        var source = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(carrier);
+        var source = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(carrier);
         var proof = variation == ControlledLifetimeReplayVariation.Foreign
-            ? NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(donor ?? throw InvalidProof()).Proof
+            ? NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(donor ?? throw InvalidProof()).Proof
             : Substitute(source.Proof);
-        return NativeSerialization.Serialize(new PartitionControlLifetimeTransportV1(requestBytes, proof));
+        return NativeSerialization.Serialize(PartitionControlLifetimeTransportV2.Create(request, proof));
     }
 
     internal static PartitionMoveLifetimeProofV1 Substitute(PartitionMoveLifetimeProofV1 proof)

@@ -52,10 +52,16 @@ internal static class ResourcePartitionInventoryModelsClosure
                 var before = await ResourcePartitionInventoryModelsInventoryAssertions.CaptureAsync(
                     wave, seed, membership, definitions, token);
                 await ResourcePartitionInventoryModelsInventoryAssertions.SameAsync(state.Inventory, before);
-                await ResourcePartitionInventoryModelsReplay.VerifyAsync(context, state, token);
+                await ResourcePartitionInventoryModelsPolicyReplay.VerifyAsync(context, state, token);
                 var after = await ResourcePartitionInventoryModelsInventoryAssertions.CaptureAsync(
                     wave, seed, membership, definitions, token);
                 await ResourcePartitionInventoryModelsInventoryAssertions.SameAsync(before, after);
+                foreach (var original in before)
+                {
+                    await ResourcePartitionInventoryPolicyRefusal.UnchangedAsync(original.Result,
+                        after.Single(item => item.Definition.Name == original.Definition.Name).Result);
+                }
+                await FunctionalGateColdReadAssertions.VerifyAsync(context, state.Model, token);
                 return true;
             }, token);
 }

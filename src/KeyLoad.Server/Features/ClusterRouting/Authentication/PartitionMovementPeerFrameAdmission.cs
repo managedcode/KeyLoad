@@ -93,12 +93,12 @@ internal static class PartitionMovementPeerFrameAdmission
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
         }
-        var carrier = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(ownedBody);
-        if (carrier.OriginalRequest.IsEmpty || carrier.Proof is null)
+        var carrier = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(ownedBody);
+        if (carrier.OriginalRequest is null || carrier.Proof is null)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
         }
-        var request = NativeSerialization.Deserialize<PartitionMovementTransportRequest>(carrier.OriginalRequest.Span);
+        var request = carrier.OriginalRequest;
         if (request.Action != PartitionMovementTransportAction.Apply
             || request.Envelope.Stage != PartitionMovePeerStage.ControlApplyCommand)
         {

@@ -19,8 +19,16 @@ internal static class NativePathMapCompiler
         ["-nologo", "-noconfig", "-nostdlib+", "-target:library", "-debug:portable",
             "-deterministic+", "-checksumalgorithm:SHA256", "-optimize-"];
 
-    internal static async Task CompileAsync(NativePathMapFixture fixture, string mappedRoot,
+    internal static Task CompileAsync(NativePathMapFixture fixture, string mappedRoot,
         CancellationToken cancellationToken)
+        => CompileCoreAsync(fixture, mappedRoot, [], cancellationToken);
+
+    internal static Task CompileAdditionalAsync(NativePathMapFixture fixture, string additionalSource,
+        CancellationToken cancellationToken)
+        => CompileCoreAsync(fixture, NativePathMapFixture.CanonicalMap, [additionalSource], cancellationToken);
+
+    private static async Task CompileCoreAsync(NativePathMapFixture fixture, string mappedRoot,
+        IReadOnlyList<string> additionalSources, CancellationToken cancellationToken)
     {
         await File.WriteAllBytesAsync(fixture.SourcePath, NativePathMapFixture.OriginalSourceBytes, cancellationToken);
         var versionStart = CreateStartInfo(ProductionSourceManifestProcess.RepositoryRoot);
@@ -41,10 +49,17 @@ internal static class NativePathMapCompiler
         start.ArgumentList.Add("-pdb:" + fixture.PdbPath);
         start.ArgumentList.Add("-pathmap:" + fixture.Root + "=" + mappedRoot);
         start.ArgumentList.Add(fixture.SourcePath);
+        foreach (var source in additionalSources)
+        {
+            start.ArgumentList.Add(source);
+        }
         var compiled = await ProductionSourceManifestProcess.RunAsync(fixture.ExecutionOptions, start, cancellationToken);
         await NativePathMapAssertions.SuccessfulProcessAsync(compiled);
         await NativePathMapAssertions.RegularCompilerFilesAsync(fixture);
-        await NativePathMapAssertions.NativeDocumentAsync(fixture, mappedRoot);
+        if (additionalSources.Count == 0)
+        {
+            await NativePathMapAssertions.NativeDocumentAsync(fixture, mappedRoot);
+        }
     }
 
     private static string ResolveCompiler(string version)

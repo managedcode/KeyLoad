@@ -3,18 +3,18 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "Native canonical enrollment, authenticated cross-voter inventory and verified restore origins are integrated. Current R591 source repairs remove an eager Orleans startup dependency cycle, accept the intentional restored new-history watermark zero without promoting origin, preserve original retained replay and fresh policy checks, and bound supporting-journal lookup. These successor repairs await compilation and runtime verification.",
+    "implementation": "Native canonical inventory enrollment, authenticated voter reads and verified restore origins are integrated. Startup/replay/archive repairs passed strict R592. Current source adds full V2 native carriers, genuine8192-byte owners, public inventory policy/move/cold oracles, strict compiled-PDB category accounting, independent roster admission and bounded failure-only original child evidence. These successors passed the R601 complete strict build; actual runtime qualification remains open.",
     "strictBuild": {
-      "label": "root-r592-native-startup-replay-archive-full-release",
+      "label": "root-r601-native-carrier-inventory-roster-recovery-pdb-full-release",
       "result": "passed",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 374.6380145419389,
+      "elapsedSeconds": 381.4587200419046,
       "sourceDrift": 0,
-      "stdoutSha256": "a210921e2e21ea35469bc05085fe18a2c31e09f300e83edb54b590f501f9515c",
-      "scope": "Complete strict Release solution after R591 startup/archive/replay/setup/supporting-journal repairs. Compiled outputs changed as expected; original full source snapshot unchanged. Native Unit/recovery/ONE rerun pending; this build is not acceptance."
+      "stdoutSha256": "f9ab85c9da5f8f3c04b2be5ec03c5ca34a2981fbe3682977ad5751b9f27d1c54",
+      "scope": "Complete strict Release solution with V2 full native carrier/actual8192owner scenario, current-policy inventory and actual movement/cold oracles, separate PDB authored/generated category limits, roster admission and async exact journal checks, bounded original child recovery evidence. No runtime acceptance claim; full focused cohort and public ONE/RF3 refresh pending."
     },
-    "format": "R586 current modified/new C# whitespace apply+verify and structural governance passed. R585 full format revealed observed whitespace/import and native analyzer diagnostics; those were repaired and strict R590 passed. Final full formatter verification remains pending.",
+    "format": "R595 scoped current modified/new C# whitespace apply+verify passed, followed by exact async roster correction verification. Final full-solution formatter verification remains pending.",
     "focusedRuntime": {
       "cohort": "root-r588-589-functional-one",
       "sourceDrift": 0,
@@ -51,30 +51,38 @@
       "scope": "CrashHost and actual production dependencies including the targetAbort checkpoint repair. New10body Abort regression and exactQ1admission19 joined afterward; fullsolution/runtime qualification remains open."
     },
     "currentSourceRepairs": {
-      "stage": "R591",
-      "state": "strict_build_passed_runtime_pending",
+      "stage": "R601",
+      "state": "compiled_runtime_pending",
       "scope": [
         "Original native transport injection removes the inventory startup dependency cycle",
         "Verified restored new-history local applied cut zero without restoring old authority",
         "Strict original replay receipts and current-policy refusals on all three voters",
         "Independent persisted setup issuer for the intended target-root policy change",
-        "Bounded committed-prefix supporting-journal index with native revalidation and original terminal Abort replay"
+        "Bounded committed-prefix supporting-journal index with native revalidation and original terminal Abort replay",
+        "Typed V2 native request/full-proof carrier in one generated Orleans reference graph with new alias/MAC purpose and no V1 fallback",
+        "Separate complete issuer/carrier control and genuine8192-byte native-owner/peer/cold scenarios with unchanged corpus/oracles",
+        "Public inventory post-policy original-outcome denials, signed no-effect cuts and genuine current-policy healthy replay",
+        "Actual SDK partition movement, conservative source/destination inventory and original receipt replay through two cold reopens",
+        "Independently derived imported origin revision increment and existing native API namespace imports",
+        "Separate bounded native PDB authored/generated document budgets retaining every checksum/duplicate/path check, with actual native csc/pwsh refusal and healthy-binding regression",
+        "Independent roster count/encoded-key admission before any staged mutation, genuine empty-placement byte-budget regression and exact original journal/store no-effect checks",
+        "Bounded secret-free original recovery-child phase witness written only before arming; same-handle bounded failure evidence read only after actual child/readers join, original exception retained"
       ],
       "unresolved": [
-        "Controlled native carrier is9172bytes against the unchanged8192byte profile; coherent native transport repair in progress"
+        "Actual V2 carrier fit and complete genuine8192-byte owner movement must pass their executable whole-operation assertions"
       ],
       "publicFunctionalRefresh": "Repeat actual ONE after a new strict build; accept its complete original scenario/image/cleanup evidence before RF3. Public DROP/recreate and user AnalyticsStore remain open.",
-      "verification": "R592 strict full solution build:0warnings0errors,sourceDrift0. Exact original runtime rerun remains pending; earlier R588/R589 and failed ONE evidence remains unchanged."
+      "verification": "R601 full strict Release passed with zero warnings/errors and unchanged full source snapshot. R594 formatting/import and R596 four CA1849 diagnostics are repaired; original failure receipts retained. New actual native Unit/recovery/analyzers/ONE cohort is the next gate. Bounded recovery child evidence is diagnosis, not a speculative product repair."
     },
     "latestCompilerAttempt": {
-      "label": "root-r592-native-startup-replay-archive-full-release",
+      "label": "root-r601-native-carrier-inventory-roster-recovery-pdb-full-release",
       "result": "passed",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 374.6380145419389,
+      "elapsedSeconds": 381.4587200419046,
       "sourceDrift": 0,
-      "stdoutSha256": "a210921e2e21ea35469bc05085fe18a2c31e09f300e83edb54b590f501f9515c",
-      "scope": "Complete strict Release solution after R591 startup/archive/replay/setup/supporting-journal repairs. Compiled outputs changed as expected; original full source snapshot unchanged. Native Unit/recovery/ONE rerun pending; this build is not acceptance."
+      "stdoutSha256": "f9ab85c9da5f8f3c04b2be5ec03c5ca34a2981fbe3682977ad5751b9f27d1c54",
+      "scope": "Complete strict Release solution with V2 full native carrier/actual8192owner scenario, current-policy inventory and actual movement/cold oracles, separate PDB authored/generated category limits, roster admission and async exact journal checks, bounded original child recovery evidence. No runtime acceptance claim; full focused cohort and public ONE/RF3 refresh pending."
     },
     "latestPublicFunctionalAttempt": {
       "label": "root-r583-functional-normal-one",

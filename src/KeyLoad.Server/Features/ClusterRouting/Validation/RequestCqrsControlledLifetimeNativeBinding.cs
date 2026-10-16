@@ -8,8 +8,8 @@ internal static class RequestCqrsControlledLifetimeNativeBinding
 {
     internal static PartitionMovementTransportRequest RequireCarrier(RequestCqrsControlledLifetimeStepWitness witness, byte[] bytes)
     {
-        var carrier = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(bytes);
-        var original = NativeSerialization.Deserialize<PartitionMovementTransportRequest>(carrier.OriginalRequest.Span);
+        var carrier = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(bytes);
+        var original = carrier.OriginalRequest;
         var delegation = carrier.Proof.ControlProof.OriginalDelegation;
         if (original.Envelope.Stage != PartitionMovePeerStage.ControlApplyCommand || original.Action != PartitionMovementTransportAction.Apply
             || original.CommandId != witness.EffectCommandId || delegation.EffectId != original.CommandId
@@ -41,8 +41,8 @@ internal static class RequestCqrsControlledLifetimeNativeBinding
         {
             throw InvalidProof();
         }
-        var carrier = missing ? null : NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(request.Payload.Span);
-        var changed = NativeSerialization.Deserialize<PartitionMovementTransportRequest>(missing ? request.Payload.Span : carrier!.OriginalRequest.Span);
+        var carrier = missing ? null : NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(request.Payload.Span);
+        var changed = missing ? NativeSerialization.Deserialize<PartitionMovementTransportRequest>(request.Payload.Span) : carrier!.OriginalRequest;
         if (changed.Envelope.Nonce == Guid.Empty || changed.Envelope.Nonce == original.Envelope.Nonce
             || !NativeSerialization.Serialize(changed with
             {
@@ -51,15 +51,15 @@ internal static class RequestCqrsControlledLifetimeNativeBinding
                     Nonce = original.Envelope.Nonce
                 }
             })
-                .AsSpan().SequenceEqual(NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(carrierBytes).OriginalRequest.Span))
+                .AsSpan().SequenceEqual(NativeSerialization.Serialize(NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(carrierBytes).OriginalRequest)))
         {
             throw InvalidProof();
         }
         if (!missing)
         {
             var expected = witness.Variation == ControlledLifetimeReplayVariation.Substituted
-                ? ControlledLifetimeReplayMutation.Substitute(NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(carrierBytes).Proof)
-                : NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(donorBytes ?? throw InvalidProof()).Proof;
+                ? ControlledLifetimeReplayMutation.Substitute(NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(carrierBytes).Proof)
+                : NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(donorBytes ?? throw InvalidProof()).Proof;
             if (!NativeSerialization.Serialize(expected).AsSpan().SequenceEqual(NativeSerialization.Serialize(carrier!.Proof)))
             {
                 throw InvalidProof();

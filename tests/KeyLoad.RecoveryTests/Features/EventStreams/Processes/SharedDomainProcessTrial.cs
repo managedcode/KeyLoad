@@ -4,6 +4,7 @@ using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.EventStreams;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
@@ -13,6 +14,7 @@ internal static class SharedDomainProcessTrial
     private const string RootPrefix = "keyload-shared-domain-crash-";
     private const string Dotnet = "dotnet";
     private const string RetainedRootKey = "KeyLoad.SharedDomainCrash.RetainedRoot";
+    private const int FirstFailureIndex = 0;
     private const string UnsettledChild = "The original shared-domain child or readers did not settle.";
 
     internal static async Task RunAsync(CommitStage stage, int index, CancellationToken callerToken)
@@ -60,6 +62,12 @@ internal static class SharedDomainProcessTrial
         foreach (var failure in failures)
         {
             failure.Data[RetainedRootKey] = root;
+        }
+        if (child.IsSettled && child.IsDisposed && (primary is not null || failures.Count > FirstFailureIndex))
+        {
+            var original = primary ?? failures[FirstFailureIndex];
+            await ServerFailureObserver.ObserveAsync(() => SharedDomainChildFailureObservation.ReportAsync(
+                root, stage, index, original, cleanup.Token), failures).ConfigureAwait(false);
         }
         CommandIdempotencyProcess.ThrowFailures(primary, failures);
     }

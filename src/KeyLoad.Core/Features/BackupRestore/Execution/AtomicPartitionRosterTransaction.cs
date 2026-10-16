@@ -56,18 +56,18 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
 
     public void Put(byte[] key, byte[] value)
     {
+        var candidate = PrepareCandidate(key, value, hasValue: true);
         ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
         movementViewChanged = true;
-        var candidate = PrepareCandidate(key, value, hasValue: true);
         inner.Put(key, value);
         RetainCandidate(candidate);
     }
 
     public void Delete(byte[] key)
     {
+        var candidate = PrepareCandidate(key, [], hasValue: false);
         ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
         movementViewChanged = true;
-        var candidate = PrepareCandidate(key, [], hasValue: false);
         inner.Delete(key);
         RetainCandidate(candidate);
     }
@@ -145,18 +145,15 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
             return null;
         }
 
-        inventory.Observe(key, partition);
         var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
-        if (candidates.ContainsKey(partition))
-        {
-            return null;
-        }
-        if (candidates.Count >= limits.Value.MaxBatchMutations || rosterKey.Length > limits.Value.MaxBatchBytes
-            || rosterKey.Length > limits.Value.MaxBatchBytes - retainedKeyBytes)
+        var retained = candidates.ContainsKey(partition);
+        if (!retained && (candidates.Count >= limits.Value.MaxBatchMutations || rosterKey.Length > limits.Value.MaxBatchBytes
+            || rosterKey.Length > limits.Value.MaxBatchBytes - retainedKeyBytes))
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, AtomicPartitionRosterProtocol.CandidateBudgetExhausted);
         }
-        return new(partition, rosterKey);
+        inventory.Observe(key, partition);
+        return retained ? null : new(partition, rosterKey);
     }
 
     private void RetainCandidate(Candidate? candidate)

@@ -76,8 +76,7 @@ internal static class ControlledPartitionMovementVerifiedSubmit
             using var mac = admission.CreateControlMac();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var originalBytes = NativeSerialization.Serialize(original);
-                var body = NativeSerialization.Serialize(new PartitionControlLifetimeTransportV1(originalBytes, proof));
+                var body = NativeSerialization.Serialize(PartitionControlLifetimeTransportV2.Create(original, proof));
                 var verified = await admission.VerifyControlledLifetimeAsync(body, mac.SignControlledLifetime(body), cancellationToken);
                 var request = verified.Request;
                 if (request.Action != PartitionMovementTransportAction.Apply)

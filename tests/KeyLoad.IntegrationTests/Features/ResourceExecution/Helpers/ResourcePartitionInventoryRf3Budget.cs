@@ -67,7 +67,7 @@ internal static class ResourcePartitionInventoryRf3Budget
             Originals = writes.ToImmutableArray()
         };
         await ResourcePartitionInventoryRf3PublicAssertions.ReplayAsync(wave, expanded, token).ConfigureAwait(false);
-        await ResourcePartitionInventoryRf3PublicAssertions.ReplayAsync(wave, original, token).ConfigureAwait(false);
+        await ResourcePartitionInventoryRf3PolicyReplay.VerifyAsync(wave, original, token).ConfigureAwait(false);
         var healthy = await ResourcePartitionInventoryRf3Assertions.SuccessAsync(
             await ResourcePartitionInventoryRf3Bridge.ReadAsync(wave, original, membership,
                 ResourcePartitionInventoryRf3Protocol.Unused, token).ConfigureAwait(false));

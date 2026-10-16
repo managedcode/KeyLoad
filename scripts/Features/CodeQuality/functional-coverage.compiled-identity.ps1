@@ -1,6 +1,7 @@
 $script:FcCompiledIdentity = [ordered]@{
     MaximumArtifactBytes = 67108864L
     MaximumDocuments = 5000
+    MaximumGeneratedDocuments = 5000
     MaximumPathCharacters = 4096
     Sha256Algorithm = [Guid] '8829d00f-11b8-4213-878b-770e8597ac16'
     InvalidArtifact = 'The compiled coverage identity is absent, oversized or unsupported.'
@@ -97,10 +98,9 @@ function Get-FcPdbSourcePath([string] $Root, [string] $Name, [string] $Compilati
 function Read-FcPdbDocuments([string] $Root, [object] $Reader, [string] $CompilationRoot) {
     $documents = [Collections.Generic.List[object]]::new()
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $sourceDocuments = 0
+    $generatedDocuments = 0
     foreach ($handle in $Reader.Documents) {
-        if ($documents.Count -ge $script:FcCompiledIdentity.MaximumDocuments) {
-            throw $script:FcCompiledIdentity.InvalidDocument
-        }
         $document = $Reader.GetDocument($handle)
         $path = Get-FcPdbSourcePath $Root $Reader.GetString($document.Name) $CompilationRoot
         $checksum = [byte[]] $Reader.GetBlobBytes($document.Hash)
@@ -108,6 +108,18 @@ function Read-FcPdbDocuments([string] $Root, [object] $Reader, [string] $Compila
             $checksum.Length -ne 32) { throw $script:FcCompiledIdentity.InvalidDocument }
         $external = $path.StartsWith('external/', [StringComparison]::Ordinal)
         $generated = $external -or $path.Split('/') -contains 'obj' -or $path.Split('/') -contains 'bin'
+        if ($generated) {
+            $generatedDocuments++
+            if ($generatedDocuments -gt $script:FcCompiledIdentity.MaximumGeneratedDocuments) {
+                throw $script:FcCompiledIdentity.InvalidDocument
+            }
+        }
+        else {
+            $sourceDocuments++
+            if ($sourceDocuments -gt $script:FcCompiledIdentity.MaximumDocuments) {
+                throw $script:FcCompiledIdentity.InvalidDocument
+            }
+        }
         $disposition = if ($external) { 'external PDB document; retained native checksum, path replaced by bounded digest' }
             elseif ($generated) { $script:FcCompiledIdentity.GeneratedDisposition }
             else { 'native source document' }

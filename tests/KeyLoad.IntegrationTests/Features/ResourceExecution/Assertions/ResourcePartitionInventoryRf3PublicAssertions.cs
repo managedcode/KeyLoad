@@ -58,7 +58,7 @@ internal static class ResourcePartitionInventoryRf3PublicAssertions
         }
     }
 
-    private static async Task DocumentAsync(RequestCqrsRf3Callers callers, EntityRef reference,
+    internal static async Task DocumentAsync(RequestCqrsRf3Callers callers, EntityRef reference,
         DocumentResult? expected, CancellationToken token)
     {
         await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(

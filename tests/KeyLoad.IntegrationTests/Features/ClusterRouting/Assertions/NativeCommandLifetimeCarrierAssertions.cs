@@ -34,8 +34,8 @@ internal static class NativeCommandLifetimeCarrierAssertions
         await Assert.That(witness.ReceiverSiloAddress).IsEqualTo(owners.Single(owner => owner.VoterId == witness.ReceiverVoter).SiloAddress);
         var carrierBytes = NativeCommandLifetimeStepFiles.Parts(wave, witness, P.CarrierRole, P.BaselineStep,
             witness.CarrierBytes, witness.CarrierParts, witness.CarrierSha256);
-        var carrier = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(carrierBytes);
-        var request = NativeSerialization.Deserialize<PartitionMovementTransportRequest>(carrier.OriginalRequest.Span);
+        var carrier = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(carrierBytes);
+        var request = carrier.OriginalRequest;
         await Assert.That(request.CommandId).IsEqualTo(witness.EffectCommandId);
         await Assert.That(request.Envelope.Stage).IsEqualTo(PartitionMovePeerStage.ControlApplyCommand);
         await Assert.That(request.Envelope.Partition).IsEqualTo(original.Command.Partition);
@@ -61,7 +61,7 @@ internal static class NativeCommandLifetimeCarrierAssertions
 
     private static async Task NegativeAsync(TwoRf3MembershipWave wave, PartitionMovementLifetimeProofRf3Original state,
         RequestCqrsControlledLifetimeStepWitness witness,
-        PartitionControlLifetimeTransportV1 original, PartitionMovementLifetimeProofRf3Original? donor)
+        PartitionControlLifetimeTransportV2 original, PartitionMovementLifetimeProofRf3Original? donor)
     {
         var requestBytes = NativeCommandLifetimeStepFiles.Parts(wave, witness, P.RequestRole, witness.Step,
             witness.RequestBytes, witness.RequestParts, witness.RequestSha256);
@@ -95,17 +95,18 @@ internal static class NativeCommandLifetimeCarrierAssertions
         if (variation == ControlledLifetimeReplayVariation.Missing)
         {
             await Assert.That(request.Channel).IsEqualTo(PartitionMovementGrainServiceChannel.Phase);
-            await RequestAsync(state, original.OriginalRequest, request.Payload);
+            await RequestAsync(state, NativeSerialization.Serialize(original.OriginalRequest), request.Payload);
             return;
         }
         await Assert.That(request.Channel).IsEqualTo(PartitionMovementGrainServiceChannel.ControlledLifetime);
-        var changed = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(request.Payload.Span);
-        await RequestAsync(state, original.OriginalRequest, changed.OriginalRequest);
+        var changed = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(request.Payload.Span);
+        await RequestAsync(state, NativeSerialization.Serialize(original.OriginalRequest),
+            NativeSerialization.Serialize(changed.OriginalRequest));
         if (variation == ControlledLifetimeReplayVariation.Foreign)
         {
             await Assert.That(donor!.Producer.IsCompletedSuccessfully).IsTrue();
             await Assert.That(donor.Receipt).IsNotNull();
-            var genuineDonor = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(donor.Carrier!);
+            var genuineDonor = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(donor.Carrier!);
             await BytesAsync(NativeSerialization.Serialize(genuineDonor.Proof), NativeSerialization.Serialize(changed.Proof));
             await Assert.That(changed.Proof.OriginalGrant.GrantId).IsNotEqualTo(original.Proof.OriginalGrant.GrantId);
             return;
@@ -131,7 +132,7 @@ internal static class NativeCommandLifetimeCarrierAssertions
         await BytesAsync(NativeSerialization.Serialize(expected), after);
     }
 
-    private static async Task SubstitutedAsync(PartitionControlLifetimeTransportV1 original, PartitionControlLifetimeTransportV1 changed)
+    private static async Task SubstitutedAsync(PartitionControlLifetimeTransportV2 original, PartitionControlLifetimeTransportV2 changed)
     {
         var coverage = original.Proof.ControlProof.Coverage;
         var first = coverage.Lifetimes[P.FirstIndex];

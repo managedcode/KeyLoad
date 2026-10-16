@@ -19,9 +19,12 @@ internal static class ResourcePartitionInventoryRf3Flow
             var models = await ResourcePartitionInventoryModelsClosure.InitializeAsync(wave, seed, caller.Token).ConfigureAwait(false);
             var baseline = await ResourcePartitionInventoryRf3Warm.RunAsync(wave, seed, caller.Token).ConfigureAwait(false);
             await ResourcePartitionInventoryModelsClosure.VerifyAsync(wave, seed, models, caller.Token).ConfigureAwait(false);
+            var movement = await ResourcePartitionInventoryRf3Move.RunAsync(wave, seed, baseline, caller.Token).ConfigureAwait(false);
+            models = await ResourcePartitionInventoryModelsMovedCut.CaptureAsync(
+                wave, seed, models, movement, caller.Token).ConfigureAwait(false);
             for (var cold = 0; cold < ResourcePartitionInventoryRf3Protocol.ColdCount; cold++)
             {
-                await ColdAsync(wave, seed, baseline, models, caller.Token).ConfigureAwait(false);
+                await ColdAsync(wave, seed, movement, models, caller.Token).ConfigureAwait(false);
             }
             using var membership = await RemoteTransferNativeMembership.ReadAsync(wave, caller.Token).ConfigureAwait(false);
             await ResourcePartitionInventoryRf3Budget.RunAsync(wave, seed, membership, caller.Token).ConfigureAwait(false);
@@ -38,7 +41,7 @@ internal static class ResourcePartitionInventoryRf3Flow
     }
 
     private static async Task ColdAsync(TwoRf3MembershipWave wave, ResourcePartitionInventoryRf3Seed seed,
-        ResourcePartitionInventoryRf3Baseline baseline, ResourcePartitionInventoryModelsState models, CancellationToken token)
+        ResourcePartitionInventoryRf3MoveState movement, ResourcePartitionInventoryModelsState models, CancellationToken token)
     {
         Dictionary<string, string> prior;
         using (var membership = await RemoteTransferNativeMembership.ReadAsync(wave, token).ConfigureAwait(false))
@@ -51,10 +54,16 @@ internal static class ResourcePartitionInventoryRf3Flow
         {
             await Assert.That(current.Owners[node].SiloAddress).IsNotEqualTo(prior[node]);
         }
-        await ResourcePartitionInventoryRf3PublicAssertions.ReplayAsync(wave, seed, token).ConfigureAwait(false);
-        await ResourcePartitionInventoryRf3PublicAssertions.LateFailureAsync(wave, seed, token).ConfigureAwait(false);
-        await ResourcePartitionInventoryRf3Warm.SameAsync(wave, seed, current, baseline,
-            ResourcePartitionInventoryRf3Warm.RestoredEpoch, token).ConfigureAwait(false);
+        await ResourcePartitionInventoryRf3PolicyReplay.VerifyAsync(wave, seed, token).ConfigureAwait(false);
+        await ResourcePartitionInventoryRf3PublicAssertions.LateFailureAsync(wave,
+            seed with
+            {
+                LateFailure = seed.LateFailure with
+                {
+                    CommandId = Guid.NewGuid()
+                }
+            }, token).ConfigureAwait(false);
+        await ResourcePartitionInventoryRf3MoveReplay.VerifyAsync(wave, seed, movement, token).ConfigureAwait(false);
         await ResourcePartitionInventoryModelsClosure.VerifyAsync(wave, seed, models, token).ConfigureAwait(false);
     }
 }

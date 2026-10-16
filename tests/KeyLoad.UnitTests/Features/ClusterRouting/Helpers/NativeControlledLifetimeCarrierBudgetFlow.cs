@@ -5,11 +5,12 @@ using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Owns genuine configured native peer admissions through command refusal, completion and cold continuation.</summary>
+/// <summary>Checks the 8KiB issuer and full carrier while retaining original supporting movement owner limits.</summary>
 internal static class NativeControlledLifetimeCarrierBudgetFlow
 {
     private const int KeyBytes = 32;
-    private const string WitnessKind = "NativeControlledLifetimeCarrierFit";
+    private const string WitnessKind = "NativeControlledLifetimeIssuerAndCarrierBudget";
+    private const string OwnersQualification = "OPEN";
 
     internal static async Task ExecuteAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
@@ -45,9 +46,12 @@ internal static class NativeControlledLifetimeCarrierBudgetFlow
                 await NativeControlledLifetimePayloadBoundary.AssertAsync(source, target, token);
                 var state = await ResourceLifetimeGrantStages.AdmitAsync(source, target, listeners, corpus,
                     sourceOptions, targetOptions, sourceAdmission, admission, token);
-                var carrier = NativeSerialization.Serialize(new PartitionControlLifetimeTransportV1(
-                    NativeSerialization.Serialize(state.Request), state.Proof));
+                var carrier = NativeSerialization.Serialize(PartitionControlLifetimeTransportV2.Create(
+                    state.Request, state.Proof));
                 await Assert.That(carrier.Length).IsLessThanOrEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+                var received = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(carrier);
+                await ResourceLifetimeGrantAssertions.EqualAsync(state.Request, received.OriginalRequest);
+                await ResourceLifetimeGrantAssertions.EqualAsync(state.Proof, received.Proof);
                 var issuer = source.BorrowLifetimeIssuer(NativeControlledLifetimePayloadBoundary.MaximumBytes);
                 var originalRequest = global::KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(state.Original);
                 var issued = issuer.CreateNativeOperation(state.Original.Kind, state.Original.Id,
@@ -67,8 +71,14 @@ internal static class NativeControlledLifetimeCarrierBudgetFlow
                     Kind = WitnessKind,
                     MaximumBytes = NativeControlledLifetimePayloadBoundary.MaximumBytes,
                     CarrierBytes = carrier.Length,
+                    OriginalRequestBytes = NativeSerialization.Measure(state.Request),
+                    FullProofBytes = NativeSerialization.Measure(state.Proof),
                     SignedCommandBytes = issued.NativePayload.Length,
-                    SupportingMoveMaximumBytes = source.Database.Limits.MaxBatchBytes
+                    SupportingMoveMaximumBytes = source.Database.Limits.MaxBatchBytes,
+                    SupportingTargetMaximumBytes = target.Database.Limits.MaxBatchBytes,
+                    SourcePeerMaximumBytes = sourceOptions.Core.DatabaseLimits.Value.MaxBatchBytes,
+                    TargetPeerMaximumBytes = targetOptions.Core.DatabaseLimits.Value.MaxBatchBytes,
+                    EightKiBOwnersQualification = OwnersQualification
                 }));
                 completed = state;
             }, failures);

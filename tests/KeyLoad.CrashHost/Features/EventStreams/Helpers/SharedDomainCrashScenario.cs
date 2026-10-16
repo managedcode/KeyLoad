@@ -9,7 +9,10 @@ internal static class SharedDomainCrashScenario
 {
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
+        var progress = new SharedDomainChildProgress(directory, store);
+        progress.Record(SharedDomainChildProgressPhase.DatabaseBootstrap);
         var database = CrashDatabase.Create(store);
+        progress.Record(SharedDomainChildProgressPhase.ResourceConfiguration);
         SharedDomainCrashOperations.Configure(database);
         var scopes = SharedDomainCorpus.Create(Tenant, Database);
         var time = TimeProvider.System.GetUtcNow();
@@ -17,6 +20,7 @@ internal static class SharedDomainCrashScenario
         List<OperationResult> results = [];
         foreach (var scope in scopes.Skip(SecondIndex))
         {
+            progress.Record(SharedDomainChildProgressPhase.SeedProducer, operations.Count + SecondIndex);
             var command = SharedDomainCorpus.Producer(scope, CommandId, Item);
             var operation = SharedDomainCrashOperations.Create(OperationKind.Batch, command.CommandId, command, time);
             var result = database.Apply(operation);
@@ -27,33 +31,43 @@ internal static class SharedDomainCrashScenario
         var lane = new QueueLaneRef(scopes[SecondIndex].Partition, SecondQueue);
         var receive = new ReceiveRequest(Guid.NewGuid(), lane);
         var receivedOperation = SharedDomainCrashOperations.Create(OperationKind.Receive, receive.RequestId, receive, time);
+        progress.Record(SharedDomainChildProgressPhase.QueueReceive);
         var received = database.Apply(receivedOperation);
         var delivery = received.Get<ReceiveResult>().Deliveries.Single();
         operations.Add(receivedOperation);
         results.Add(received);
         var acknowledgement = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
         var acknowledgedOperation = SharedDomainCrashOperations.Create(OperationKind.Delivery, acknowledgement.CommandId, acknowledgement, time);
+        progress.Record(SharedDomainChildProgressPhase.QueueAcknowledgement);
         var acknowledged = database.Apply(acknowledgedOperation);
         _ = acknowledged.Get<CommitReceipt>();
         operations.Add(acknowledgedOperation);
         results.Add(acknowledged);
         var original = SharedDomainCorpus.Producer(scopes[FirstIndex], CommandId, Item);
         var originalOperation = SharedDomainCrashOperations.Create(OperationKind.Batch, original.CommandId, original, time);
-        await SaveAsync(directory, store, originalOperation, operations.ToArray(), results.ToArray());
+        await SaveAsync(directory, store, progress, originalOperation, operations.ToArray(), results.ToArray());
+        progress.Record(SharedDomainChildProgressPhase.ArmingOriginalBoundary);
         boundary.Position = store.Position + FirstRevision;
         boundary.Armed = true;
         _ = database.Apply(originalOperation).Get<CommitReceipt>();
         await CrashHostPause.WaitForKillAsync();
     }
 
-    private static async Task SaveAsync(string directory, ZoneTreeStore store, ReplicatedOperation original,
+    private static async Task SaveAsync(string directory, ZoneTreeStore store, SharedDomainChildProgress progress,
+        ReplicatedOperation original,
         ReplicatedOperation[] operations, OperationResult[] results)
     {
+        progress.Record(SharedDomainChildProgressPhase.SaveOriginalOperation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.OperationFile, original);
+        progress.Record(SharedDomainChildProgressPhase.SaveSeedOperations);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedOperationsFile, operations);
+        progress.Record(SharedDomainChildProgressPhase.SaveSeedResults);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedResultsFile, results);
+        progress.Record(SharedDomainChildProgressPhase.SaveSeedImage);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedImageFile, SharedDomainStoredImage.Capture(store));
+        progress.Record(SharedDomainChildProgressPhase.SaveSeedPosition);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedPositionFile, store.Position);
+        progress.Record(SharedDomainChildProgressPhase.SaveIdentityDigest);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.IdentityDigestFile,
             store.Identity with
             {

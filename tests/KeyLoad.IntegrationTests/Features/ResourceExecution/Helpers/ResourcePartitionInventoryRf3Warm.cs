@@ -39,7 +39,8 @@ internal static class ResourcePartitionInventoryRf3Warm
             await Assert.That(restarted.Owners[node].Incarnation).IsEqualTo(membership.Owners[node].Incarnation);
         }
         await SameAsync(wave, seed, restarted, baseline, RestoredEpoch, token).ConfigureAwait(false);
-        await ResourcePartitionInventoryRf3PublicAssertions.ReplayAsync(wave, seed, token).ConfigureAwait(false);
+        await ResourcePartitionInventoryRf3PolicyReplay.VerifyAsync(wave, seed, token).ConfigureAwait(false);
+        await ResourcePartitionInventoryRf3PolicyReplay.HealthyAsync(wave, seed, token).ConfigureAwait(false);
         return baseline;
     }
 

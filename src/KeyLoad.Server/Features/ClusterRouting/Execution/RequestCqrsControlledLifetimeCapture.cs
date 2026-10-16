@@ -8,9 +8,9 @@ internal static class RequestCqrsControlledLifetimeCapture
         RequestCqrsControlledLifetimePlan plan, PartitionMovementTransportRequest original,
         ControlledLifetimeReplayExchange owner, byte[] carrier, int maximumPartBytes)
     {
-        var transport = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV1>(carrier);
+        var transport = NativeSerialization.Deserialize<PartitionControlLifetimeTransportV2>(carrier);
         var delegation = transport.Proof.ControlProof.OriginalDelegation;
-        if (!NativeSerialization.Serialize(original).AsSpan().SequenceEqual(transport.OriginalRequest.Span)
+        if (!NativeSerialization.Serialize(original).AsSpan().SequenceEqual(NativeSerialization.Serialize(transport.OriginalRequest))
             || delegation.Identity.CommandId != claim.Identity.CommandId || delegation.Identity.PrincipalId != claim.Identity.PrincipalId
             || delegation.EffectId != original.CommandId || transport.Proof.OriginalGrant.PhaseCommandId != original.CommandId
             || delegation.Identity.Partition != original.Envelope.Partition || claim.Arm.Record.Partition?.ToPartition() != original.Envelope.Partition)

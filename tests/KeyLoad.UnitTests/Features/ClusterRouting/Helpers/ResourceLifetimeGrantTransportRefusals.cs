@@ -39,8 +39,8 @@ internal static class ResourceLifetimeGrantTransportRefusals
                 using var mac = state.TargetAdmission.CreateControlMac();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    var bytes = NativeSerialization.Serialize(new PartitionControlLifetimeTransportV1(
-                        NativeSerialization.Serialize(state.Request), state.Proof));
+                    var bytes = NativeSerialization.Serialize(PartitionControlLifetimeTransportV2.Create(
+                        state.Request, state.Proof));
                     var signature = mac.SignControlledLifetime(bytes);
                     bytes[^LastByteOffset] ^= TamperMask;
                     await state.TargetAdmission.VerifyControlledLifetimeAsync(bytes, signature, token);
