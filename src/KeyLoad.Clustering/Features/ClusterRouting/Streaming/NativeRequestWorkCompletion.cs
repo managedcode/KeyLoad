@@ -19,15 +19,16 @@ internal static class NativeRequestWorkCompletion
         {
             if (lease.CompletionDriver is null)
             {
+                lease.FreezeContext(original, cleanup);
                 start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-                lease.CompletionDriver = lease.FinishAsync(start.Task, lease.BeginCompletion(), original, cleanup);
+                lease.CompletionDriver = lease.FinishAsync(start.Task, lease.BeginCompletion());
             }
         }
         start?.TrySetResult();
         return lease.Settlement;
     }
 
-    internal static void CompleteUnbound(Lock gate, NativeRequestWorkLease lease, Action disposeCancellation)
+    internal static bool TryBeginUnbound(Lock gate, NativeRequestWorkLease lease)
     {
         lock (gate)
         {
@@ -37,14 +38,23 @@ internal static class NativeRequestWorkCompletion
             }
             if (lease.Completing)
             {
-                return;
+                return false;
             }
+            lease.FreezeContext(null, null);
             _ = lease.BeginCompletion();
+            lease.CompletionDriver = lease.Settlement;
+            return true;
         }
-        var outcome = lease.Finish(null, null, disposeCancellation);
-        NativeRequestWorkSettlement.Rethrow(outcome.CleanupOrJoinFailure);
     }
     private const int EmptyDependencies = 0;
+
+    internal static void PrepareDisposal(Lock gate, NativeRequestWorkLease lease, Exception? original, Exception? cleanup)
+    {
+        lock (gate)
+        {
+            lease.FreezeContext(original, cleanup);
+        }
+    }
 
     internal static void ReleaseCloseObserver(Lock gate, NativeRequestWorkLease lease)
     {

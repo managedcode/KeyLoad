@@ -14,7 +14,7 @@ internal static class NativeCommandObservationPreparation
         ReplicaSiloDiscoveryState? runtime, DecodedGrainRequest request, string actorKey,
         IGrainContext? context, Func<Task> beforeReply, CancellationToken token)
     {
-        NativeCapabilityWorkLifetime? work = null;
+        var preparation = default(NativeCommandObservationPreparationWork);
         NativeCommandObservation? observation = null;
         Exception? primary = null;
         try
@@ -26,14 +26,15 @@ internal static class NativeCommandObservationPreparation
             }
             GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
             PhysicalCommandActorKey.Validate(request, actorKey, physical);
-            work = NativeCapabilityWorkLifetime.Acquire(owner, request.Envelope.RequestId,
-                NativeRequestWorkKind.CommandCapability, database.OperationLimitsOptions, token)
-                ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+            preparation.Acquire(owner, request.Envelope.RequestId,
+                database.OperationLimitsOptions, token);
+            var work = preparation.Work;
             observation = await NativeCommandObservationSubmission.ReserveAsync(database, clock, request,
                 owner, work, physical, runtime, token).ConfigureAwait(true)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             var reply = await PrepareAsync(database, coordinator, clock, options, codec, physical, request,
                 context, work, observation).ConfigureAwait(true);
+            preparation.TransferTo(observation);
             await beforeReply().ConfigureAwait(true);
             observation.Budget.Check();
             observation.Lease.AdmitPublication();
@@ -42,6 +43,7 @@ internal static class NativeCommandObservationPreparation
         }
         catch (Exception error)
         {
+            preparation.TransferTo(observation);
             observation?.FinishPreparation();
             primary = await NativeCommandObservationSubmission.AbortAsync(observation, error).ConfigureAwait(true);
             NativeRequestWorkSettlement.Rethrow(primary);
@@ -50,15 +52,8 @@ internal static class NativeCommandObservationPreparation
         finally
         {
             observation?.FinishPreparation();
-            if (work is not null && observation is not null && observation.OwnsCommandWork(work))
-            {
-                work = null;
-            }
-            if (work is not null)
-            {
-                work.PrimaryError = primary;
-                await work.DisposeAsync().ConfigureAwait(true);
-            }
+            preparation.PrimaryError = primary;
+            await preparation.DisposeAsync().ConfigureAwait(true);
         }
     }
 

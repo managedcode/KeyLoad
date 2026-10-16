@@ -30,24 +30,26 @@ internal static class NativeRequestWorkDrain
         NativeRequestWorkSettlement.Rethrow(failure);
     }
 
-    internal static async Task DisposeAsync(Task start, Func<Task> drain, Action dispose)
+    internal static Task Start(Lock gate, ref Task? original, ref bool admissionClosed,
+        CancellationTokenSource shutdown, NativeRequestWorkAdmissions admissions, NativeResourceWorkRetentions retentions, NativeRequestWorkOwner owner)
     {
-        await start.ConfigureAwait(false);
-        var drainFailure = await NativeRequestWorkSettlement.JoinAsync(drain()).ConfigureAwait(false);
-        Exception? disposeFailure = null;
-        try
+        TaskCompletionSource start;
+        Task task;
+        lock (gate)
         {
-            dispose();
+            if (original is not null)
+            {
+                return original;
+            }
+            admissionClosed = true;
+            var frames = admissions.Settlements;
+            var retirements = retentions.Outstanding;
+            start = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            task = JoinAndPublishAsync(start.Task, shutdown, frames, retirements, owner.MarkJoined);
+            original = task;
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            disposeFailure = error;
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            disposeFailure = error;
-        }
-        NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(drainFailure, disposeFailure));
+        start.TrySetResult();
+        return task;
     }
 
     private static async Task<Exception?> ObserveFrameAsync(Task<NativeRequestWorkOriginalSettlement> original)

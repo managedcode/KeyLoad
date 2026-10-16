@@ -5,13 +5,16 @@ using KeyLoad.Core.Features.ResourceExecution;
 namespace KeyLoad.Clustering;
 
 /// <summary>Owns an original admission, its selective token, and its original async settlement.</summary>
-internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBinding
+internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, INativeRequestWorkBinding
 {
     private readonly NativeRequestWorkOwner owner;
     private ResourceLifetimeWorkResultRetention? resultRetention;
     private readonly CancellationTokenSource cancellation = new();
     private readonly TaskCompletionSource<NativeRequestWorkOriginalSettlement> settlement = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private NativeRequestWorkLeasePublication publication = new([]);
+    private bool contextFrozen;
+    private Exception? originalFailure;
+    private Exception? cleanupFailure;
     internal NativeRequestWorkChildReservation? ChildReservation
     {
         get; set;
@@ -108,21 +111,21 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
     internal Task<NativeRequestWorkOriginalSettlement> CompleteAsync(Exception? original, Exception? cleanup)
         => owner.CompleteAsync(this, original, cleanup);
 
-    internal async Task FinishAsync(Task start, Task observers, Exception? original, Exception? cleanup)
+    internal async Task FinishAsync(Task start, Task observers)
     {
         await start.ConfigureAwait(false);
         await observers.ConfigureAwait(false);
-        Finish(original, cleanup, cancellation.Dispose);
+        Finish();
     }
 
-    internal NativeRequestWorkOriginalSettlement Finish(Exception? original, Exception? cleanup, Action disposeCancellation)
+    internal NativeRequestWorkOriginalSettlement Finish()
     {
         var failures = ImmutableArray.CreateBuilder<Exception>();
-        Add(cleanup, failures);
+        Add(cleanupFailure, failures);
         failures.AddRange(ChildCleanupFailures);
-        Add(DisposeCancellation(disposeCancellation), failures);
+        Add(DisposeCancellation(), failures);
         Add(ReleaseAdmission(), failures);
-        var outcome = new NativeRequestWorkOriginalSettlement(original, failures.ToImmutable());
+        var outcome = new NativeRequestWorkOriginalSettlement(originalFailure, failures.ToImmutable());
         Volatile.Write(ref resultRetention, null);
         settlement.TrySetResult(outcome);
         return outcome;
@@ -136,11 +139,11 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
         }
     }
 
-    private static Exception? DisposeCancellation(Action disposeCancellation)
+    private Exception? DisposeCancellation()
     {
         try
         {
-            disposeCancellation();
+            cancellation.Dispose();
             return null;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
@@ -172,7 +175,30 @@ internal sealed class NativeRequestWorkLease : IDisposable, INativeRequestWorkBi
 
     internal NativeResourceWorkSnapshot Snapshot()
         => new(RequestId, Kind, AdmissionGeneration, LastPublicationGeneration);
-    public void Dispose() => owner.CompleteUnbound(this, cancellation.Dispose);
+    internal void PrepareDisposal(Exception? original, Exception? cleanup)
+        => owner.PrepareDisposal(this, original, cleanup);
+
+    internal void FreezeContext(Exception? original, Exception? cleanup)
+    {
+        if (contextFrozen)
+        {
+            return;
+        }
+        contextFrozen = true;
+        originalFailure = original;
+        cleanupFailure = cleanup;
+    }
+
+    public ValueTask DisposeAsync() => new(owner.CompleteAsync(this, null, null));
+
+    public void Dispose()
+    {
+        if (owner.TryBeginUnbound(this))
+        {
+            var outcome = Finish();
+            NativeRequestWorkSettlement.Rethrow(outcome.CleanupOrJoinFailure);
+        }
+    }
 }
 
 internal sealed record NativeRequestWorkOriginalSettlement(Exception? OriginalFailure, ImmutableArray<Exception> CleanupFailures)

@@ -188,8 +188,8 @@ internal static class NativeBoundCqrsStreamLifetime
         }
         finally
         {
-            var failure = await work.SettleAsync(enumerator, settled, primary).ConfigureAwait(true);
-            NativeRequestWorkSettlement.Rethrow(failure);
+            work.PrepareSettlement(enumerator, settled, primary);
+            await work.DisposeAsync().ConfigureAwait(true);
         }
         NativeRequestWorkSettlement.Rethrow(primary);
     }

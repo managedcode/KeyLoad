@@ -33,6 +33,8 @@ internal static class MaintenanceChildDispatch
         {
             failures.Add(failure);
         }
+        admission.PrepareCleanup(failures);
+        admission.Dispose();
         await admission.CompleteAsync(failures).ConfigureAwait(true);
         ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);

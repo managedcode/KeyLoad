@@ -25,8 +25,6 @@ internal static class AnnMaintenanceChildDispatch
         var failures = new List<Exception>();
         var cleanup = new List<Exception>();
         NativeRequestWorkChildReservation? reservation = null;
-        CancellationTokenSource? cancellation = null;
-        GrainRequestIdentityScope? identity = null;
         TResult? result = null;
         try
         {
@@ -42,17 +40,14 @@ internal static class AnnMaintenanceChildDispatch
             var producer = RequireParent(binding);
             reservation = producer.ReserveLocalChild(verified, services.GetRequiredService<PhysicalShardRecord>(),
                 services.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
-            cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, reservation.Cancellation);
-            identity = new(services, principal, actorId, commandId, cancellation.Token,
-                connectionId: NativeConnectionExecutionIdentity.Resolve(services));
-            result = await ReadAsync<TResult>(executeChild, signed, serializer, actorId, parent.Envelope.RequestId,
-                clock, routing, diagnostics, command, cancellation.Token).ConfigureAwait(true);
+            result = await AnnMaintenanceChildLifetime.RunAsync(services, principal, actorId, commandId,
+                reservation, scopeToken => ReadAsync<TResult>(executeChild, signed, serializer, actorId,
+                    parent.Envelope.RequestId, clock, routing, diagnostics, command, scopeToken),
+                failures, cleanup, token).ConfigureAwait(true);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         var original = failures.Count == NoFailures ? null : failures[NoFailures];
-        Capture(() => identity?.Dispose(), cleanup);
-        Capture(() => cancellation?.Dispose(), cleanup);
         Capture(() => CryptographicOperations.ZeroMemory(payload), cleanup);
         failures.AddRange(cleanup);
         if (reservation is not null)

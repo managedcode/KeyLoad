@@ -12,7 +12,7 @@ internal static class AnnProjectionJobDispatchSettlement
         NativeRequestWorkChildReservation reservation, Func<CancellationToken, Task<AnnMaintenanceResult>> execute,
         List<Exception> failures, List<Exception> cleanup, CancellationToken token)
     {
-        CancellationTokenSource? cancellation = null;
+        CancellationTokenSource cancellation;
         var created = false;
         try
         {
@@ -25,7 +25,7 @@ internal static class AnnProjectionJobDispatchSettlement
             }
             finally
             {
-                cancellation?.Dispose();
+                cancellation.Dispose();
             }
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
@@ -44,7 +44,7 @@ internal static class AnnProjectionJobDispatchSettlement
         Func<CancellationToken, Task<AnnMaintenanceResult>> execute,
         List<Exception> failures, List<Exception> cleanup, CancellationToken token)
     {
-        GrainRequestIdentityScope? identity = null;
+        GrainRequestIdentityScope identity;
         var created = false;
         try
         {
@@ -65,7 +65,7 @@ internal static class AnnProjectionJobDispatchSettlement
             }
             finally
             {
-                identity?.Dispose();
+                identity.Dispose();
             }
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))

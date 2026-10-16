@@ -24,46 +24,8 @@ internal static class NativeCommandObservationRead
         IOptions<GrainRoutingOptions> options, Func<CancellationToken, Task> admitPeer,
         NativeCommandObservationPublication<T> publication, CancellationToken token)
     {
-        CancellationTokenSource? linked = null;
-        ReadExecutionBudgetStageCancellationLease? stage = null;
-        Exception? primary = null;
-        Exception? cleanup = null;
-        KeyLoadException? refusal = null;
-        try
-        {
-            linked = CancellationTokenSource.CreateLinkedTokenSource(original.Token, token);
-            stage = original.Budget.EnterStageCancellation(linked.Token);
-            original.Budget.Check();
-            await admitPeer(linked.Token).ConfigureAwait(true);
-            original.Budget.Check();
-            await coordinator.ReadBarrierAsync(linked.Token).ConfigureAwait(true);
-            original.Budget.Check();
-            PublishOutcome(database, original, options, publication, ref refusal, linked.Token);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            primary = NativeCommandObservationCompletion.Retain(refusal, error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            primary = NativeCommandObservationCompletion.Retain(refusal, error);
-        }
-        finally
-        {
-            cleanup = Dispose(stage, cleanup);
-            try
-            {
-                linked?.Dispose();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                cleanup = NativeCommandObservationCompletion.Retain(cleanup, error);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                cleanup = NativeCommandObservationCompletion.Retain(cleanup, error);
-            }
-        }
+        var (primary, cleanup, refusal) = await ExecuteReadLifetimeAsync(database, coordinator, original,
+            options, admitPeer, publication, token).ConfigureAwait(true);
         var failure = await NativeCommandObservationCompletion.CompleteAsync(original,
             primary ?? refusal, cleanup, refusal).ConfigureAwait(true);
         if (failure is not null)
@@ -73,6 +35,60 @@ internal static class NativeCommandObservationRead
         }
         return publication.Value;
     }
+
+    private static async Task<(Exception? Primary, Exception? Cleanup, KeyLoadException? Refusal)> ExecuteReadLifetimeAsync<T>(
+        DatabaseEngine database, ICommitCoordinator coordinator, NativeCommandObservation original,
+        IOptions<GrainRoutingOptions> options, Func<CancellationToken, Task> admitPeer,
+        NativeCommandObservationPublication<T> publication, CancellationToken token)
+    {
+        ReadExecutionBudgetStageCancellationLease? stage = null;
+        Exception? primary = null;
+        Exception? cleanup = null;
+        KeyLoadException? refusal = null;
+        var linkedAcquired = false;
+        try
+        {
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(original.Token, token);
+            linkedAcquired = true;
+            try
+            {
+                stage = original.Budget.EnterStageCancellation(linked.Token);
+                original.Budget.Check();
+                await admitPeer(linked.Token).ConfigureAwait(true);
+                original.Budget.Check();
+                await coordinator.ReadBarrierAsync(linked.Token).ConfigureAwait(true);
+                original.Budget.Check();
+                PublishOutcome(database, original, options, publication, ref refusal, linked.Token);
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                primary = NativeCommandObservationCompletion.Retain(refusal, error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                primary = NativeCommandObservationCompletion.Retain(refusal, error);
+            }
+            finally
+            {
+                cleanup = Dispose(stage, cleanup);
+            }
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            (primary, cleanup) = RetainLifetimeFailure(linkedAcquired, primary, cleanup, error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            (primary, cleanup) = RetainLifetimeFailure(linkedAcquired, primary, cleanup, error);
+        }
+        return (primary, cleanup, refusal);
+    }
+
+    private static (Exception? Primary, Exception? Cleanup) RetainLifetimeFailure(bool linkedAcquired,
+        Exception? primary, Exception? cleanup, Exception error)
+        => linkedAcquired
+            ? (primary, NativeCommandObservationCompletion.Retain(cleanup, error))
+            : (NativeCommandObservationCompletion.Retain(primary, error), cleanup);
 
     private static void PublishOutcome<T>(DatabaseEngine database, NativeCommandObservation original,
         IOptions<GrainRoutingOptions> options, NativeCommandObservationPublication<T> publication,
@@ -96,7 +112,7 @@ internal static class NativeCommandObservationRead
         original.Lease.AdmitPublication();
     }
 
-    private static Exception? Dispose(IDisposable? owned, Exception? previous)
+    private static Exception? Dispose(ReadExecutionBudgetStageCancellationLease? owned, Exception? previous)
     {
         try
         {

@@ -3,7 +3,7 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "All R659 Clustering source repair packets are adopted with exact source guards. R662 full strict solution completed in 55.60 seconds with 27 Clustering diagnostics; true owner-mediated disposal consumers are being repaired as a combined batch. Core and Query earlier project passes remain scoped. Native file-profile operation tests now include 16 refused configurations and a genuine healthy Aspire model. No new runtime or whole-task acceptance pass.",
+    "implementation": "The complete R666 strict solution attempt completed in 62.51 seconds with two remaining Clustering diagnostics. Both now have reviewed source repairs: native readonly code fix and a value-type preparation owner retaining exact conditional ownership transfer and joined disposal. Genuine generic async lease disposal, original first-context settlement semantics and four new whole-operation regressions are adopted. Native Ready27/27 inspection additionally exposed 433 downstream errors on its recorded earlier source snapshot; this partial semantic inventory is being collected and split into disjoint source repair batches before another strict build. No current complete solution or new runtime acceptance pass.",
     "strictBuild": {
       "label": "root-r619-hosted-cold-full-release",
       "result": "passed",
@@ -260,6 +260,27 @@
       }
     },
     "latestCompilerAttempt": {
+      "label": "root-r666-genuine-disposal-filecases-full-release",
+      "result": "failed",
+      "errors": 2,
+      "warnings": 0,
+      "elapsedSeconds": 62.50799858290702,
+      "sourceDrift": 0,
+      "compiledDrift": 88,
+      "compiledDriftClassification": "Expected rebuilt Release outputs during full compilation; not runtime execution.",
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "9766170b91a3891f2e9a870acc5506d8a8bf21961c2d61d8f555919276918bd4",
+      "evidence": "TestResults/stage61-native-join/root-r666-genuine-disposal-filecases-full-release.completion.original.json",
+      "diagnostics": "TestResults/stage61-native-join/root-r666-compiler-diagnostics.prepared.json",
+      "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
+    },
+    "latestPublicFunctionalAttempt": {
+      "label": "R600 ONE then R602 RF3 normal public pair",
+      "result": "accepted_local_normal_pair",
+      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
+      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
+    },
+    "previousCompilerAttempt": {
       "label": "root-r662-combined-clustering-filecases-full-release",
       "result": "failed",
       "errors": 27,
@@ -273,26 +294,6 @@
       "evidence": "TestResults/stage61-native-join/root-r662-combined-clustering-filecases-full-release.completion.original.json",
       "diagnostics": "TestResults/stage61-native-join/root-r662-compiler-diagnostics.prepared.json",
       "scope": "Complete strict build remains failed; original 105 task acceptance unchanged."
-    },
-    "latestPublicFunctionalAttempt": {
-      "label": "R600 ONE then R602 RF3 normal public pair",
-      "result": "accepted_local_normal_pair",
-      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
-      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
-    },
-    "previousCompilerAttempt": {
-      "label": "root-r659-combined-models-filecases-full-release",
-      "result": "failed",
-      "errors": 75,
-      "warnings": 0,
-      "elapsedSeconds": 12.999856082955375,
-      "sourceDrift": 0,
-      "compiledDrift": 0,
-      "allProcessesAndReadersJoined": true,
-      "stdoutSha256": "4481772a6e7f8d076106dee1cd3b752f0336305ae8ce8e442ce15e5289e84186",
-      "evidence": "TestResults/stage61-native-join/root-r659-combined-models-filecases-full-release.completion.original.json",
-      "diagnostics": "TestResults/stage61-native-join/root-r659-compiler-diagnostics.prepared.json",
-      "scope": "Actual Clustering compiler/analyzer layer; Core and Query project passes do not establish a full solution or runtime pass."
     },
     "latestFocusedRuntime": {
       "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
@@ -444,6 +445,50 @@
         "TestResults/stage61-native-join/root-r661-clustering-observation-codec28.adoption.original.json"
       ],
       "reviewCorrection": "Main removed an introduced double CTS disposal before adoption; exact stage cancellation then single CTS disposal order is retained."
+    },
+    "earlierCompilerAttemptR659": {
+      "label": "root-r659-combined-models-filecases-full-release",
+      "result": "failed",
+      "errors": 75,
+      "warnings": 0,
+      "elapsedSeconds": 12.999856082955375,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "4481772a6e7f8d076106dee1cd3b752f0336305ae8ce8e442ce15e5289e84186",
+      "evidence": "TestResults/stage61-native-join/root-r659-combined-models-filecases-full-release.completion.original.json",
+      "diagnostics": "TestResults/stage61-native-join/root-r659-compiler-diagnostics.prepared.json",
+      "scope": "Actual Clustering compiler/analyzer layer; Core and Query project passes do not establish a full solution or runtime pass."
+    },
+    "postR666Repair": {
+      "state": "source_adopted_semantic_and_strict_gates_open",
+      "sourceEvidence": [
+        "TestResults/stage61-native-join/root-r663-observation-owned-lifetimes3.adoption.original.json",
+        "TestResults/stage61-native-join/root-r664-replica-search-residual5.adoption.original.json",
+        "TestResults/stage61-native-join/root-r665-genuine-owned-disposal11.adoption.original.json",
+        "TestResults/stage61-native-join/root-r665-bound-async-operation-tests6.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-preparation-lifetime2.adoption.original.json",
+        "TestResults/stage61-native-join/root-r668-native-readonly-fix.original.json"
+      ],
+      "nativeSemanticObservation": {
+        "loadedProjects": 27,
+        "ready": true,
+        "errors": 433,
+        "warnings": 0,
+        "classification": "Original partial cached all-solution semantic observation begun before the final preparation2 repair; neither a current clean-workspace result nor a strict compiler pass. Continuation and disjoint downstream repairs in progress.",
+        "evidence": "TestResults/stage61-native-join/root-r668-native-diagnostics-page1.original.json"
+      },
+      "nativeWhitespace": {
+        "label": "root-r668-preparation-lifetime-whitespace-verify",
+        "result": "passed",
+        "files": 26,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "evidence": "TestResults/stage61-native-join/root-r668-preparation-lifetime-whitespace-verify.completion.original.json",
+        "scope": "Native whitespace only, not the complete analyzer/format qualification."
+      },
+      "focusedRuntimeSelection": "TestResults/root-r667-related-foundation-selection-r1/combined-related-native-r2.config.prepared.json",
+      "runtimeStatus": "not_run_pending_current_complete_strict_solution"
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {

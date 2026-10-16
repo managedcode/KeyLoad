@@ -29,7 +29,9 @@ internal static class NativeCapabilityWorkSettlement
         {
             try
             {
-                var report = await lease.CompleteAsync(primary, cleanup).ConfigureAwait(true);
+                lease.PrepareDisposal(primary, cleanup);
+                await lease.DisposeAsync().ConfigureAwait(true);
+                var report = await lease.Settlement.ConfigureAwait(true);
                 terminal = report.CleanupOrJoinFailure;
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
@@ -299,7 +301,23 @@ internal sealed class NativeCapabilityWorkRegistration(CancellationToken request
     {
         var original = ownedRetention;
         ownedRetention = null;
-        return original is null ? null : NativeRequestWorkSettlement.Observe(original.Dispose);
+        if (original is null)
+        {
+            return null;
+        }
+        try
+        {
+            original.Dispose();
+            return null;
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return error;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return error;
+        }
     }
 
     private void CaptureCancellation(ref NativeCapabilityCleanupFailures failures)

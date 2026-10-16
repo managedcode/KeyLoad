@@ -103,7 +103,9 @@ internal sealed class NativeReplicaForwardedCommandWork : IReplicaForwardedComma
         cleanup = DisposeOwned(cleanup);
         try
         {
-            var outcome = await lease.CompleteAsync(original, cleanup).ConfigureAwait(false);
+            lease.PrepareDisposal(original, cleanup);
+            await lease.DisposeAsync().ConfigureAwait(false);
+            var outcome = await lease.Settlement.ConfigureAwait(false);
             return NativeRequestWorkSettlement.Preserve(outcome.OriginalFailure, outcome.CleanupOrJoinFailure);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))

@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
@@ -13,7 +12,7 @@ internal struct NativeRequestWorkLeasePublication(Dictionary<ResourceLifetimeV1,
     private int observerCount;
     private bool publicationClosed;
 
-    internal bool HasRetirementHolds => retirements.Count != NoRetirements;
+    internal readonly bool HasRetirementHolds => retirements.Count != NoRetirements;
     internal bool Completing
     {
         get; private set;
@@ -30,14 +29,14 @@ internal struct NativeRequestWorkLeasePublication(Dictionary<ResourceLifetimeV1,
         retirements.Add(fence.Control.Lifetime, new(fingerprint, lease.Snapshot()));
     }
 
-    internal NativeResourceWorkSnapshot RetirementSnapshot(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
+    internal readonly NativeResourceWorkSnapshot RetirementSnapshot(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
     {
         var original = retirements[fence.Control.Lifetime];
         NativeResourceWorkRetentions.RequireFingerprint(original.Fingerprint, fingerprint);
         return original.Snapshot;
     }
 
-    internal void ConsumeRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
+    internal readonly void ConsumeRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
     {
         _ = RetirementSnapshot(fence, fingerprint);
         retirements.Remove(fence.Control.Lifetime);
@@ -78,7 +77,7 @@ internal struct NativeRequestWorkLeasePublication(Dictionary<ResourceLifetimeV1,
     internal TaskCompletionSource? ReleaseCloseObserver()
         => --observerCount == NoObservers ? cancelObservers : null;
 
-    internal void RequirePublicationOpen()
+    internal readonly void RequirePublicationOpen()
     {
         if (publicationClosed || Completing)
         {

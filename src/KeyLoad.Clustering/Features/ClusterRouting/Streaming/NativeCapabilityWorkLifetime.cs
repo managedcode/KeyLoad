@@ -95,7 +95,7 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable, IAsyncDisposab
             : () => DatabasePhaseTelemetry.End(Phase, DatabasePhaseOutcome.Faulted, PhaseStarted);
     }
 
-    public void Dispose() => Settle(null, this, null, null);
+    public void Dispose() => registration.Dispose();
 
     public ValueTask DisposeAsync() => new(SettleAsync(PrimaryError, this, null, null));
 

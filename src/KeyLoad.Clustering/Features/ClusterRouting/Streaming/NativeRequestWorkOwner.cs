@@ -116,28 +116,9 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
     /// <summary>Closes admission, cancels work, and returns the shared original drain task.</summary>
     /// <returns>The same task to every caller.</returns>
     internal Task DrainAsync()
-    {
-        TaskCompletionSource start;
-        Task task;
-        lock (gate)
-        {
-            if (drainTask is not null)
-            {
-                return drainTask;
-            }
+        => NativeRequestWorkDrain.Start(gate, ref drainTask, ref admissionClosed, shutdown, admissions, retentions, this);
 
-            admissionClosed = true;
-            var frames = admissions.Settlements;
-            var retirements = retentions.Outstanding;
-            start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            task = NativeRequestWorkDrain.JoinAndPublishAsync(start.Task, shutdown, frames, retirements,
-                () => Volatile.Write(ref isJoined, Joined));
-            drainTask = task;
-        }
-
-        start.TrySetResult();
-        return task;
-    }
+    internal void MarkJoined() => Volatile.Write(ref isJoined, Joined);
 
     /// <summary>Returns the one disposal task through the asynchronous-disposal contract.</summary>
     public ValueTask DisposeAsync() => new(GetDisposeTask());
@@ -154,12 +135,32 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
             }
 
             start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            task = NativeRequestWorkDrain.DisposeAsync(start.Task, DrainAsync, shutdown.Dispose);
+            task = DisposeCoreAsync(start.Task);
             disposeTask = task;
         }
 
         start.TrySetResult();
         return task;
+    }
+
+    private async Task DisposeCoreAsync(Task start)
+    {
+        await start.ConfigureAwait(false);
+        var drainFailure = await NativeRequestWorkSettlement.JoinAsync(DrainAsync()).ConfigureAwait(false);
+        Exception? disposeFailure = null;
+        try
+        {
+            shutdown.Dispose();
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            disposeFailure = error;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            disposeFailure = error;
+        }
+        NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(drainFailure, disposeFailure));
     }
 
     internal void Release(NativeRequestWorkLease lease)
@@ -177,8 +178,11 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
         Exception? original, Exception? cleanup)
         => NativeRequestWorkCompletion.CompleteAsync(gate, lease, original, cleanup);
 
-    internal void CompleteUnbound(NativeRequestWorkLease lease, Action disposeCancellation)
-        => NativeRequestWorkCompletion.CompleteUnbound(gate, lease, disposeCancellation);
+    internal bool TryBeginUnbound(NativeRequestWorkLease lease)
+        => NativeRequestWorkCompletion.TryBeginUnbound(gate, lease);
+
+    internal void PrepareDisposal(NativeRequestWorkLease lease, Exception? original, Exception? cleanup)
+        => NativeRequestWorkCompletion.PrepareDisposal(gate, lease, original, cleanup);
 
     internal void Bind(NativeRequestWorkLease lease, ImmutableArray<ResourceLifetimeV1> lifetimes)
     {

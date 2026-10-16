@@ -111,7 +111,7 @@ internal static class NativeCommandObservationCommandExecution
         original.Lease.AdmitPublication();
     }
 
-    private static Exception? Dispose(IDisposable? resource, Exception? previous)
+    private static Exception? Dispose(ReadExecutionBudgetStageCancellationLease? resource, Exception? previous)
     {
         try
         {

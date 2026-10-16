@@ -64,19 +64,13 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             var primaryError = MarkFailure(error, stage);
-            if (work is not null)
-            {
-                work.PrimaryError = primaryError;
-            }
+            work?.PrimaryError = primaryError;
             NativeRequestWorkSettlement.Rethrow(primaryError);
             throw;
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            if (work is not null)
-            {
-                work.PrimaryError = error;
-            }
+            work?.PrimaryError = error;
             NativeRequestWorkSettlement.Rethrow(error);
             throw;
         }
