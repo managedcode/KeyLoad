@@ -24,7 +24,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     private readonly CancellationToken stoppingToken;
     private readonly ReplicaRequestDispatcher dispatcher;
     private readonly ReplicaReadRoundExecutor reads;
-    private readonly TimeSpan commandTimeout;
+    private readonly ReplicaExecutionOptions execution;
     private Task? worker;
     private Task? shutdown;
     private Task? disposal;
@@ -43,21 +43,20 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(configurationOptions);
         var configuration = configurationOptions.Value;
         ArgumentNullException.ThrowIfNull(options);
-        var settings = options.Value;
-        settings.Validate();
-        commandTimeout = settings.CommandTimeout;
+        execution = options.Value;
+        execution.Validate();
         configuration.Validate();
         stoppingToken = lifetime.Token;
         state = new(materializer, configurationOptions, clock ?? TimeProvider.System);
-        rpc = new(configurationOptions, state.Clock, stoppingToken);
+        rpc = new(configurationOptions, options, state.Clock, stoppingToken);
         election = new(state, rpc);
-        followers = new(state, rpc, settings.MaximumSnapshotChunksPerRound);
+        followers = new(state, rpc, execution.MaximumSnapshotChunksPerRound);
         leader = new(state, followers);
         appends = new(state);
         snapshots = new(state);
         maintenance = new(state, election, leader, logger);
         dispatcher = new(election, appends, leader, snapshots, configurationOptions);
-        reads = new(state, rpc, leader, activity, transportReady.Task, settings.ReadBarrierTimeout, stoppingToken);
+        reads = new(state, rpc, leader, activity, transportReady.Task, execution.ReadBarrierTimeout, stoppingToken);
     }
 
     /// <inheritdoc />
@@ -125,7 +124,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(operation);
         using var active = activity.Enter();
         operation = ReplicaOperationAuthority.Verify(operation, state.Materializer.Database)!;
-        using var deadline = new CancellationTokenSource(commandTimeout, state.Clock);
+        using var deadline = new CancellationTokenSource(execution.CommandTimeout, state.Clock);
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token, deadline.Token);
         await TransportReady.WaitAsync(request.Token).ConfigureAwait(false);
         var route = await state.LockedAsync(() => (state.Role, state.LeaderId), request.Token).ConfigureAwait(false);
@@ -170,7 +169,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     public async Task<ReadOnlyMemory<byte>> HandleAsync(ReplicaRpc method, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         using var active = activity.Enter();
-        using var deadline = new CancellationTokenSource(commandTimeout, state.Clock);
+        using var deadline = new CancellationTokenSource(ReplicaRpcDeadline.SelectIncoming(method, execution), state.Clock);
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token, deadline.Token);
         request.Token.ThrowIfCancellationRequested();
         if (!state.Ready)

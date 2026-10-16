@@ -20,12 +20,18 @@ internal sealed class RequestCqrsCohortNativeConfigurator : ISiloConfigurator
             provider.GetRequiredService<ReplicaTransportLifecycle>());
         services.AddSingleton(provider => fixture.CreateNode(
             provider.GetRequiredService<IOptions<SiloOptions>>().Value.SiloName,
-            provider.GetRequiredService<ILocalSiloDetails>()));
+            provider.GetRequiredService<ILocalSiloDetails>(), provider));
         services.AddSingleton<IOptions<ReplicaConfiguration>>(provider => UnitExecutionOptions.ReplicaConfiguration(
             provider.GetRequiredService<RequestCqrsCohortNativeNode>().Journal.Configuration));
         services.AddSingleton<IOptions<ReplicaPeerOptions>>(provider => UnitRoutingOptions.Peers(
             provider.GetRequiredService<RequestCqrsCohortNativeNode>().Journal.Configuration,
             provider.GetRequiredService<RequestCqrsCohortNativeNode>().Peers));
+        if (fixture.HasBarrierDeadline)
+        {
+            services.AddSingleton<IReplicaTransportObservation>(provider =>
+                provider.GetRequiredService<RequestCqrsCohortNativeNode>().BarrierObservation
+                ?? throw new InvalidOperationException("The native barrier observation owner is absent."));
+        }
         services.AddSingleton(UnitRoutingOptions.Membership());
         services.AddSingleton(UnitRoutingOptions.Transport());
         services.AddSingleton(provider => provider.GetRequiredService<RequestCqrsCohortNativeNode>().Discovery);
@@ -56,7 +62,9 @@ internal sealed class RequestCqrsCohortNativeConfigurator : ISiloConfigurator
         services.AddSingleton(provider => new ReplicaGrainServiceClient(provider,
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<ReplicaSiloDiscoveryClient>(),
             provider.GetRequiredService<Func<ReplicaEnvelopeAuthenticator>>()(),
-            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(), provider.GetRequiredService<TimeProvider>()));
+            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(),
+            provider.GetRequiredService<RequestCqrsCohortNativeNode>().Journal.ExecutionOptions,
+            provider.GetRequiredService<TimeProvider>()));
         services.AddSerializer(builder => builder.AddAssembly(typeof(ReplicaPeerEnvelope).Assembly));
         silo.AddGrainService<PartitionReplicaGrainService>();
     }

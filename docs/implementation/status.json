@@ -24,7 +24,7 @@
     "minimumSuccessfulOperationsPerTopology": 10000,
     "orchestration": "Aspire AppHost owns native Azure Table membership through local Azurite, actual one/three-node resources, readiness, endpoints and joined shutdown",
     "gate1": "PASSED for the recorded R446 original-cut-authority source/executable cohort: genuine one-instance Aspire topology, 10258 successful SDK/MCP public operations, all model scenarios and joined cleanup, zero source/compiled/image identity drift. Repeat after any gate-affecting repair.",
-    "gate2": "OPEN: original R447 three-node RF3 scenario failed two operations at wave4 with OwnershipLost, while later operations continued. The R441 captured full-text scope defect is repaired; current RF3 quorum/read-deadline failure remains to be repaired and matched Gate1/Gate2 repeated.",
+    "gate2": "OPEN: original R447 three-node RF3 scenario failed two operations at wave4 with OwnershipLost. Source review confirmed nested operation/constituent deadline mismatches and premature false-round refusal; the correction requires a fresh matched Gate1/Gate2 run. No RF3 pass is claimed.",
     "latestLocalExecution": {
       "lane": "Root R447",
       "result": "failed",
@@ -164,12 +164,21 @@
         "compiledDrift": 0,
         "evidence": "TestResults/stage61-native-join/root-r450-functional-read-cut-repair-evidence.original.json",
         "evidenceSha256": "c09fbaddda72569575bf746809e2dc50640abe1b01cc1427b3da2794904fda4f"
+      },
+      "coordinatorCompilerCheckpoint": {
+        "lane": "Root R460",
+        "result": "passed",
+        "warnings": 0,
+        "errors": 0,
+        "elapsedSeconds": 360.1140812919475,
+        "sourceDrift": 0,
+        "boundary": "Compiler checkpoint before the separately prepared receiving-endpoint correction and native fixture bootstrap/replay correction; no runtime gate promotion."
       }
     },
     "knownFunctionalScopeLimits": [
       "DROP TABLE/resource deletion is not implemented; SQLC-DDL/REQ-SQLC-006/AC-SQLC-006 remains open. Entity/row/blob/edge deletion does not qualify resource deletion.",
       "Current gate links models and uses selected native T-SQL operations, but does not qualify complete unified SQL, cross-partition transactions, failover/restart or multiple tenants.",
-      "Current gate has no server-side QueueToGraph/GraphToQueue roundtrip; existing native composition coverage is being integrated separately."
+      "The recorded R446/R447 executions predate the newly integrated server-side QueueToGraph/GraphToQueue SQL roundtrip; that extended public scenario still requires a fresh matched one-node/RF3 run."
     ]
   },
   "NATIVE-FOUNDATION-20261015": {

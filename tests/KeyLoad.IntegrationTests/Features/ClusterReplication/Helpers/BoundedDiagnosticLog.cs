@@ -22,6 +22,42 @@ internal static class BoundedDiagnosticLog
             MaximumUtf8Bytes / ClusterFixtureProtocol.NodeCount)));
     }
 
+    /// <summary>Formats each actual node's original status, priority failures and newest tail before fair clipping.</summary>
+    internal static string[] FormatOwnedNodeLogs(IEnumerable<string> names,
+        IEnumerable<NativeLogSubscriptionEvidence> evidence, Func<string, string[]> readFailures,
+        Func<string, string[]> readTail)
+        => BoundOwnedNodeLogs(names.Select(name => (
+            Head: evidence.Where(entry => entry.NodeName == name).OrderByDescending(entry => entry.StartedAt)
+                .Take(1).Select(entry => entry.Snapshot()).DefaultIfEmpty(name + ": native log subscription Unobserved.")
+                .Concat(readFailures(name).Select(line => name + ": " + line)),
+            Tail: readTail(name).Reverse().Select(line => name + ": " + line))));
+
+    /// <summary>Reserves head and tail shares for every actual owned node within the unchanged total limits.</summary>
+    internal static string[] BoundOwnedNodeLogs(IEnumerable<(IEnumerable<string> Head, IEnumerable<string> Tail)> nodes)
+    {
+        ArgumentNullException.ThrowIfNull(nodes);
+        var groups = nodes.ToArray();
+        if (groups.Length == 0)
+        {
+            return [];
+        }
+        if (groups.Length > ClusterFixtureProtocol.NodeCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(nodes));
+        }
+        var nodeLines = MaximumLines / groups.Length;
+        var nodeBytes = MaximumUtf8Bytes / groups.Length;
+        var headLines = nodeLines / 2;
+        var headBytes = nodeBytes / 2;
+        var result = new List<string>();
+        foreach (var group in groups)
+        {
+            result.AddRange(BoundCore(group.Head, headLines, headBytes));
+            result.AddRange(BoundCore(group.Tail, nodeLines - headLines, nodeBytes - headBytes));
+        }
+        return result.ToArray();
+    }
+
     private static string[] BoundCore(IEnumerable<string> source, int maximumLines, int maximumBytes)
     {
         ArgumentNullException.ThrowIfNull(source);

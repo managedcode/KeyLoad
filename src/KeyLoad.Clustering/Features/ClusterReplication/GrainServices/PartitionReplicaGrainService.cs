@@ -47,6 +47,7 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
     /// <returns>A signed success or typed failure reply bound to <paramref name="request"/>.</returns>
     public async Task<ReplicaPeerReply> ExchangeAsync(ReplicaPeerEnvelope request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
         try
         {
             request = authentication.VerifyRequest(request);
@@ -68,7 +69,10 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
         }
         catch (OperationCanceledException)
         {
-            return authentication.CreateReply(request, ReadOnlyMemory<byte>.Empty, ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite);
+            var forwardedWrite = request.Method == ReplicaRpc.Forward;
+            return authentication.CreateReply(request, ReadOnlyMemory<byte>.Empty,
+                forwardedWrite ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost,
+                forwardedWrite ? ReplicaProtocol.InterruptedWrite : ReplicaProtocol.NoLeader);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {

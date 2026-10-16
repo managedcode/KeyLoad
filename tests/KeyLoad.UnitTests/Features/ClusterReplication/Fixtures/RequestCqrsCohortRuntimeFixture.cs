@@ -31,6 +31,9 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly ConcurrentDictionary<string, RequestCqrsCohortNativeNode> nodes = new(StringComparer.Ordinal);
     private TestCluster cluster;
     private readonly RequestCqrsCohortCheckpointScenario? checkpoints;
+    private readonly ReplicaBarrierDeadlineScenario? barrierDeadline;
+    private readonly byte[]? canonicalKey;
+    internal bool HasBarrierDeadline => barrierDeadline is not null;
     private readonly Lock lifecycle = new();
     private Task? disposal;
     internal Guid Incarnation { get; } = Guid.NewGuid();
@@ -38,15 +41,23 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     internal IServiceProvider LocalServices { get; private set; } = null!;
     internal IReadOnlyList<string> RuntimeAddresses { get; private set; } = [];
 
-    internal RequestCqrsCohortRuntimeFixture(RequestCqrsCohortCheckpointScenario? checkpoints = null)
+    internal RequestCqrsCohortRuntimeFixture(RequestCqrsCohortCheckpointScenario? checkpoints = null,
+        ReplicaBarrierDeadlineScenario? barrierDeadline = null)
     {
+        if (checkpoints is not null && barrierDeadline is not null)
+        {
+            CryptographicOperations.ZeroMemory(secret);
+            throw new ArgumentException("Native checkpoint and barrier observers require separate fixture ownership.");
+        }
         this.checkpoints = checkpoints;
-        RequestCqrsCohortOwners.Register(ownerId, this);
+        this.barrierDeadline = barrierDeadline;
+        canonicalKey = barrierDeadline is null ? null : RandomNumberGenerator.GetBytes(ReplicaBarrierDeadlineScenario.CanonicalKeyBytes);
         try
         {
+            RequestCqrsCohortOwners.Register(ownerId, this);
             cluster = CreateCluster();
         }
-        catch (Exception) { RequestCqrsCohortOwners.Release(ownerId); CryptographicOperations.ZeroMemory(secret); throw; }
+        catch (Exception) { ReleaseIdentity(); throw; }
     }
     private TestCluster CreateCluster()
     {
@@ -56,20 +67,17 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         builder.AddSiloBuilderConfigurator<RequestCqrsCohortNativeConfigurator>();
         return builder.Build();
     }
-    internal RequestCqrsCohortNativeNode CreateNode(string voter, ILocalSiloDetails local)
+    internal RequestCqrsCohortNativeNode CreateNode(string voter, ILocalSiloDetails local, IServiceProvider services)
     {
         if (!Voters.Contains(voter, StringComparer.Ordinal))
         {
             throw new InvalidOperationException("The native silo name is outside the configured cohort.");
         }
 
-        var node = new RequestCqrsCohortNativeNode(voter, local,
-            new(voter, Voters, Path.GetTempPath(), Incarnation)
-            {
-                RpcTimeout = RequestCqrsCohortScenario.RpcTimeout,
-                LowerElectionTimeout = RequestCqrsCohortScenario.LowerElectionTimeout,
-                UpperElectionTimeout = RequestCqrsCohortScenario.UpperElectionTimeout
-            }, secret, checkpoints);
+        var node = new RequestCqrsCohortNativeNode(voter, local, services,
+            ReplicaBarrierDeadlineScenario.Configuration(voter, Voters, Incarnation, barrierDeadline is not null),
+            secret, checkpoints, barrierDeadline,
+            canonicalKey is null ? null : new ReadOnlyMemory<byte>(canonicalKey));
         if (nodes.TryAdd(voter, node))
         {
             return node;
@@ -166,6 +174,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     private async Task StopClusterAsync()
     {
         checkpoints?.Release();
+        barrierDeadline?.Release();
         using var deadline = new CancellationTokenSource(ShutdownBound, TimeProvider.System);
         var failures = new List<Exception>();
         foreach (var node in nodes.Values)
@@ -200,12 +209,22 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         }
     }
 
+    private void ReleaseIdentity()
+    {
+        RequestCqrsCohortOwners.Release(ownerId);
+        CryptographicOperations.ZeroMemory(secret);
+        if (canonicalKey is not null)
+        {
+            CryptographicOperations.ZeroMemory(canonicalKey);
+        }
+    }
+
     private async Task DisposeCoreAsync()
     {
         try
         {
             await StopClusterAsync();
         }
-        finally { RequestCqrsCohortOwners.Release(ownerId); CryptographicOperations.ZeroMemory(secret); }
+        finally { ReleaseIdentity(); }
     }
 }

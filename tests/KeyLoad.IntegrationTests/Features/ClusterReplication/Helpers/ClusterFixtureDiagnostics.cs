@@ -109,10 +109,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     }
 
     internal string[] SnapshotResourceLogs(IEnumerable<string> names)
-        => BoundedDiagnosticLog.Bound(names.SelectMany(name =>
-            logEvidence.Values.Where(entry => entry.NodeName == name).Select(entry => entry.Snapshot())
-                .Concat(ReadFailures(name).Select(line => name + ": " + line))
-                .Concat(ReadTail(name).Reverse().Select(line => name + ": " + line))));
+        => BoundedDiagnosticLog.FormatOwnedNodeLogs(names, logEvidence.Values, ReadFailures, ReadTail);
 
     /// <summary>Locates the solution root for the bounded qualification artifact.</summary>
     /// <returns>The nearest directory containing the solution marker.</returns>

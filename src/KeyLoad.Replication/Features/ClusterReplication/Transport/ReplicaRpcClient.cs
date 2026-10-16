@@ -6,14 +6,19 @@ namespace KeyLoad.Replication;
 internal sealed class ReplicaRpcClient
 {
     private readonly ReplicaConfiguration configuration;
+    private readonly ReplicaExecutionOptions execution;
     private readonly CancellationToken stoppingToken;
     private readonly TimeProvider clock;
 
-    internal ReplicaRpcClient(IOptions<ReplicaConfiguration> configurationOptions, TimeProvider clock, CancellationToken stoppingToken)
+    internal ReplicaRpcClient(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaExecutionOptions> executionOptions,
+        TimeProvider clock, CancellationToken stoppingToken)
     {
         ArgumentNullException.ThrowIfNull(configurationOptions);
         configuration = configurationOptions.Value;
         configuration.Validate();
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        execution = executionOptions.Value;
+        execution.Validate();
         this.stoppingToken = stoppingToken;
         this.clock = clock;
     }
@@ -32,7 +37,7 @@ internal sealed class ReplicaRpcClient
     {
         var active = Volatile.Read(ref transport) ?? throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         var payload = EncodeRequest(request, configuration);
-        using var timeout = new CancellationTokenSource(configuration.RpcTimeout, clock);
+        using var timeout = new CancellationTokenSource(ReplicaRpcDeadline.Select(method, configuration, execution), clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stoppingToken, timeout.Token);
         try
         {
@@ -58,7 +63,9 @@ internal sealed class ReplicaRpcClient
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+            throw method == ReplicaRpc.Forward
+                ? Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite)
+                : Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
     }
 

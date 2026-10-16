@@ -6,9 +6,17 @@ namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
 internal sealed class RequestCqrsCohortNativeNode : IAsyncDisposable
 {
+    internal IServiceProvider Services
+    {
+        get;
+    }
     private readonly Lock lifecycle = new();
     private Task? disposal;
     internal ReplicaLifecycleFixture Journal
+    {
+        get;
+    }
+    internal IReplicaTransportObservation? BarrierObservation
     {
         get;
     }
@@ -30,11 +38,14 @@ internal sealed class RequestCqrsCohortNativeNode : IAsyncDisposable
         get; set;
     }
 
-    internal RequestCqrsCohortNativeNode(string voter, ILocalSiloDetails local,
+    internal RequestCqrsCohortNativeNode(string voter, ILocalSiloDetails local, IServiceProvider services,
         ReplicaConfiguration configuration, ReadOnlyMemory<byte> secret,
-        RequestCqrsCohortCheckpointScenario? checkpoints = null)
+        RequestCqrsCohortCheckpointScenario? checkpoints = null,
+        ReplicaBarrierDeadlineScenario? barrierDeadline = null, ReadOnlyMemory<byte>? canonicalKey = null)
     {
-        Journal = new(canonicalObserver: checkpoints?.Observer(voter),
+        Services = services;
+        Journal = new(executionSettings: barrierDeadline?.ExecutionSettings, canonicalObserver: checkpoints?.Observer(voter) ?? barrierDeadline?.Observer(voter),
+            canonicalSigningKey: canonicalKey,
             configuration: configuration with
             {
                 LocalId = voter
@@ -42,6 +53,11 @@ internal sealed class RequestCqrsCohortNativeNode : IAsyncDisposable
         try
         {
             checkpoints?.Prepare(voter, Journal);
+            if (barrierDeadline is not null)
+            {
+                ReplicaBarrierDeadlineScenario.Prepare(Journal.Database, Journal.Configuration);
+            }
+            BarrierObservation = barrierDeadline?.Observe(voter);
             Peers = new(new(StringComparer.Ordinal), secret, RequestCqrsCohortScenario.ClusterId)
             {
                 ConnectTimeout = RequestCqrsCohortScenario.ConnectTimeout
@@ -50,7 +66,8 @@ internal sealed class RequestCqrsCohortNativeNode : IAsyncDisposable
             var peers = UnitRoutingOptions.Peers(Journal.Configuration, Peers);
             Discovery = new(configured, peers, local, StoreReaderContract.RuntimeJournal);
             Authentication = new(configured, peers, Discovery, TimeProvider.System,
-                UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Peers.ReplayLimits));
+                UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Peers.ReplayLimits),
+                canonicalDatabase: barrierDeadline is null ? null : Journal.Database);
         }
         catch (Exception primary)
         {

@@ -65,6 +65,7 @@ internal static class FunctionalGateScenario
         await users.VerifyAsync(contexts[0], token);
         await FunctionalGateOperationalAnalytics.ExerciseAsync(contexts[0], token);
         await FunctionalGateExecution.RunAsync(contexts, token);
+        await FunctionalGateQueueGraph.RunAsync(contexts[0], token);
         await FunctionalGateQueues.VerifyBaselineAsync(contexts[0], token);
         await FunctionalGateDocumentsReads.AnchorAsync(contexts[0], token);
         await FunctionalGateNodeAssertions.VerifyAsync(fixture, contexts[0], token);

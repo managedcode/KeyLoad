@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 
@@ -8,14 +9,17 @@ internal static class PhysicalShardTestBootstrap
     private static readonly Guid ShardId = Guid.Parse("11223344-5566-7788-99aa-bbccddeeff00");
 
     internal static void Bootstrap(DatabaseEngine database, string principalId)
+        => Bootstrap(database, principalId, PhysicalShardCatalogVoterIds.Standard);
+
+    internal static void Bootstrap(DatabaseEngine database, string principalId, ImmutableArray<string> voters)
     {
         if (database.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)) is not null)
         {
-            RequireExisting(database);
+            RequireExisting(database, voters);
             return;
         }
         var request = new BootstrapPhysicalShardCatalogRequest(1, 0, ShardId, database.Store.Identity.Incarnation,
-            PhysicalShardCatalogVoterIds.Standard);
+            voters);
         var operation = database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
             PhysicalShardCatalogIdentity.CreateBootstrapCommandId(ShardId), principalId,
             DateTimeOffset.UnixEpoch, NativeSerialization.Serialize(request));
@@ -24,17 +28,20 @@ internal static class PhysicalShardTestBootstrap
         {
             throw new InvalidOperationException("The unit test physical shard catalog did not bootstrap.");
         }
-        RequireExisting(database);
+        RequireExisting(database, voters);
     }
 
     internal static void RequireExisting(DatabaseEngine database)
+        => RequireExisting(database, PhysicalShardCatalogVoterIds.Standard);
+
+    internal static void RequireExisting(DatabaseEngine database, ImmutableArray<string> voters)
     {
         var catalog = database.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view));
         if (catalog is null || catalog.Version != 1 || catalog.Revision != 1
             || catalog.DefaultShard.PhysicalShardId != ShardId
             || catalog.DefaultShard.Incarnation != database.Store.Identity.Incarnation
             || catalog.DefaultShard.PlacementEpoch != 1
-            || !catalog.DefaultShard.VoterIds.SequenceEqual(PhysicalShardCatalogVoterIds.Standard, StringComparer.Ordinal))
+            || !catalog.DefaultShard.VoterIds.SequenceEqual(voters, StringComparer.Ordinal))
         {
             throw new InvalidOperationException("The persisted unit test physical shard catalog changed.");
         }

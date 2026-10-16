@@ -84,7 +84,8 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
     private readonly ZoneTreeStore canonical;
 
     internal ReplicaLifecycleFixture(ReplicaExecutionOptions? executionSettings = null, int? maximumAppendEntries = null,
-        Action<CommitStage, long, int>? canonicalObserver = null, ReplicaConfiguration? configuration = null)
+        Action<CommitStage, long, int>? canonicalObserver = null, ReplicaConfiguration? configuration = null,
+        ReadOnlyMemory<byte>? canonicalSigningKey = null)
     {
         directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
         Configuration = (configuration ?? new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid()))
@@ -102,19 +103,25 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         canonical = new(new(Path.Combine(directory, CanonicalDirectory))
         {
             Incarnation = Configuration.Incarnation,
+            SigningKey = canonicalSigningKey,
             FaultObserver = canonicalObserver
         }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory))
         {
             Incarnation = Configuration.Incarnation
         }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Log = new(ReplicaStore, ReplicaExecutionTestOptions.Configuration(Configuration));
         Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-        var execution = ReplicaExecutionTestOptions.Execution(executionSettings);
+        Log = new(ReplicaStore, ReplicaExecutionTestOptions.Configuration(Configuration), canonicalDatabase: Database);
+        ExecutionOptions = ReplicaExecutionTestOptions.Execution(executionSettings);
         Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log,
-            ReplicaExecutionTestOptions.Configuration(Configuration), execution), execution);
-        Consensus = new(Materializer, ReplicaExecutionTestOptions.Configuration(Configuration), execution, TimeProvider.System);
+            ReplicaExecutionTestOptions.Configuration(Configuration), ExecutionOptions), ExecutionOptions);
+        Consensus = new(Materializer, ReplicaExecutionTestOptions.Configuration(Configuration), ExecutionOptions, TimeProvider.System);
+    }
+
+    internal Microsoft.Extensions.Options.IOptions<ReplicaExecutionOptions> ExecutionOptions
+    {
+        get;
     }
 
     internal ReplicaConfiguration Configuration

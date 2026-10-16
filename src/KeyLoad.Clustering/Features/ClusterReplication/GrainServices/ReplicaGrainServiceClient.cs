@@ -5,20 +5,42 @@ using Orleans.Runtime.Services;
 namespace KeyLoad.Clustering;
 
 /// <summary>Direct-address Orleans RPC transport with bounded generation rediscovery.</summary>
-/// <param name="services">The active Orleans service provider used by the grain-service client.</param>
-/// <param name="configurationOptions">The local voter identity and bounded RPC timeout.</param>
-/// <param name="discovery">The authenticated fixed-voter runtime-address resolver.</param>
-/// <param name="authentication">The request/reply envelope signer and verifier.</param>
-/// <param name="transportOptions">Centrally validated attempt and envelope bounds.</param>
-/// <param name="clock">Borrowed runtime clock for the bounded RPC deadline.</param>
-public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOptions<ReplicaConfiguration> configurationOptions,
-    ReplicaSiloDiscoveryClient discovery, ReplicaEnvelopeAuthenticator authentication,
-    IOptions<ReplicaTransportOptions> transportOptions, TimeProvider? clock = null)
-    : GrainServiceClient<IPartitionReplicaGrainService>(services), IReplicaTransport
+public sealed class ReplicaGrainServiceClient : GrainServiceClient<IPartitionReplicaGrainService>, IReplicaTransport
 {
-    private readonly TimeProvider time = clock ?? TimeProvider.System;
-    private readonly ReplicaConfiguration configuration = configurationOptions.Value;
-    private readonly ReplicaTransportOptions settings = transportOptions.Value;
+    private readonly TimeProvider time;
+    private readonly ReplicaConfiguration configuration;
+    private readonly ReplicaTransportOptions settings;
+    private readonly ReplicaExecutionOptions execution;
+    private readonly ReplicaSiloDiscoveryClient discovery;
+    private readonly ReplicaEnvelopeAuthenticator authentication;
+
+    /// <summary>Captures the existing typed replica policies for this native transport owner.</summary>
+    /// <param name="services">The active Orleans service provider used by the grain-service client.</param>
+    /// <param name="configurationOptions">The local voter identity and bounded RPC timeout.</param>
+    /// <param name="discovery">The authenticated fixed-voter runtime-address resolver.</param>
+    /// <param name="authentication">The request/reply envelope signer and verifier.</param>
+    /// <param name="transportOptions">Centrally validated attempt and envelope bounds.</param>
+    /// <param name="executionOptions">Existing validated whole-operation command and read coordinator deadlines.</param>
+    /// <param name="clock">Borrowed runtime clock for the bounded RPC deadline.</param>
+    public ReplicaGrainServiceClient(IServiceProvider services, IOptions<ReplicaConfiguration> configurationOptions,
+        ReplicaSiloDiscoveryClient discovery, ReplicaEnvelopeAuthenticator authentication,
+        IOptions<ReplicaTransportOptions> transportOptions, IOptions<ReplicaExecutionOptions> executionOptions, TimeProvider? clock = null)
+        : base(services)
+    {
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        ArgumentNullException.ThrowIfNull(discovery);
+        ArgumentNullException.ThrowIfNull(authentication);
+        ArgumentNullException.ThrowIfNull(transportOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        execution = executionOptions.Value;
+        execution.Validate();
+        configuration = configurationOptions.Value;
+        settings = transportOptions.Value;
+        time = clock ?? TimeProvider.System;
+        this.discovery = discovery;
+        this.authentication = authentication;
+    }
+
     /// <summary>Transports exact native bytes and retries only fenced/unavailable generation failures.</summary>
     /// <param name="voterId">The configured destination voter.</param>
     /// <param name="method">The replica operation to send.</param>
@@ -33,7 +55,7 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOption
 
         ReplicaCanonicalApplyObservation.ObserveOutbound();
         var payload = EncodePayload(payloadBytes);
-        using var timeout = new CancellationTokenSource(configuration.RpcTimeout, time);
+        using var timeout = new CancellationTokenSource(ReplicaRpcDeadline.Select(method, configuration, execution), time);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {

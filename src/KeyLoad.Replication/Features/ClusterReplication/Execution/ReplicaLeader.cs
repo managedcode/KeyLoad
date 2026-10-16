@@ -128,9 +128,9 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
                     return state.Log.State.Term;
                 }, cancellationToken).ConfigureAwait(false);
                 diagnosticStage = ReplicaReadFailureMetadata.LeaderQuorum;
-                if (!await RoundAsync(term, purpose, cancellationToken).ConfigureAwait(false))
+                while (!await RoundAsync(term, purpose, cancellationToken).ConfigureAwait(false))
                 {
-                    throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+                    await Task.Delay(state.Configuration.HeartbeatInterval, state.Clock, cancellationToken).ConfigureAwait(false);
                 }
                 diagnosticStage = ReplicaReadFailureMetadata.LeaderTerm;
                 cut = await state.LockedAsync(() =>

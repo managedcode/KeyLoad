@@ -6,6 +6,39 @@ plan with these two functional gates. The six-hour working window starts at
 unchanged. Broad audits, comparative benchmarks, coverage qualification and
 unrelated task expansion follow a working database.
 
+## Requirements and acceptance
+
+REQ-DBGATE-001 requires one shared, real-client model scenario on one Aspire
+instance followed by the same scenario on three RF3 nodes, with three resources
+per model, eight workload users, one queue operator and at least 10,000
+successful public operations per topology.
+
+- AC-DBGATE-001: the single-instance native TUnit case executes once without
+  skips and passes its complete state, authorization and joined-cleanup checks.
+- AC-DBGATE-002: the three-node case passes after Gate1 on the same source,
+  executable and image-input cohort, including native SQL Queue-to-Graph and
+  Graph-to-Queue effects and stable-command SDK/MCP replay.
+- AC-DBGATE-003: an original failed operation, wrong result, unauthorized effect
+  or failed cleanup keeps the corresponding gate open.
+
+These criteria map to both cases in
+[FunctionalDatabaseGateTests](../../../tests/KeyLoad.IntegrationTests/Features/DatabaseComposition/Cases/FunctionalDatabaseGateTests.cs),
+under [ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md).
+Original local results below retain their original scenario identities; a
+scenario or product repair requires a new matched pair.
+
+```mermaid
+flowchart LR
+    A[Aspire single instance] --> B[SDK, official MCP and T-SQL scenario]
+    B --> C{Gate1 terminal PASS}
+    C -->|Yes| D[Aspire three-node RF3]
+    D --> E[Same model and composition scenario]
+    E --> F{Gate2 terminal PASS}
+    C -->|No| G[Repair original failure]
+    F -->|No| G
+    G --> A
+```
+
 ## Shared operation scenario
 
 The same real .NET SDK and official MCP C# SDK scenario must run first against
@@ -32,6 +65,13 @@ query, update, link, unlink and delete, with literal expected values, reference
 integrity and current persisted authorization assertions. The document initializer
 creates `gate_docs_0/anchor` before dependent models initialize. Iteration IDs are
 unique across workers; each topology owns fresh storage and credentials.
+
+After the parallel model workers join, a native T-SQL request derives a graph
+edge from a ready queue message. A reverse request derives a message in a
+second queue from that edge. SDK and official MCP clients replay both stable
+commands and verify complete receipts, payloads and links. Both messages are
+consumed and acknowledged before the edge and its documents are removed;
+the original queue baselines are checked afterward.
 
 Captured search must retain its original-cut movement-authority proof while
 other model operations commit. Advancing the live store must neither force an

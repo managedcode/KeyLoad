@@ -53,7 +53,8 @@ internal sealed class PeerDiscoveryNativeConfigurator : ISiloConfigurator
         services.AddSingleton(provider => new ReplicaGrainServiceClient(provider,
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<ReplicaSiloDiscoveryClient>(),
             provider.GetRequiredService<Func<ReplicaEnvelopeAuthenticator>>()(),
-            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(), provider.GetRequiredService<TimeProvider>()));
+            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(), RecoveryExecutionOptions.Replica(),
+            provider.GetRequiredService<TimeProvider>()));
         services.AddSerializer(builder => builder.AddAssembly(typeof(ReplicaPeerEnvelope).Assembly));
         silo.AddGrainService<PartitionReplicaGrainService>();
     }
