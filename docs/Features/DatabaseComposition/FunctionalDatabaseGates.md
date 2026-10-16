@@ -103,28 +103,56 @@ defects while the other modules continue.
 
 ## Current local execution evidence
 
-R446 Gate1 passed the original native single-instance case with 10,258 successful
-public operations (5,288 SDK and 4,970 official MCP), 41 waves, eight persisted
-workload users and one queue operator. Its terminal evaluator accepted the
-joined runner/readers, original passing TRX, fixture cleanup and zero
-source/executable/image identity drift. The evaluator is
-`TestResults/stage61-native-join/root-r446-gate1-terminal-evaluation.original.json`
-(SHA-256 `1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea`).
+Both original native cases passed on commit
+`86834e8a68d54c8c749221a373bb38b94b5d8436`:
 
-R447 Gate2 failed after 2,332 successful public operations in nine waves.
-Queue inspection through SDK and blob metadata through official MCP failed
-with `OwnershipLost` at wave 4. A further 1,237 operations succeeded, but both
-original failures keep Gate2 open. The captured full-text scope error from
-R441 was not observed in this run. Its direct regression and seven related
-whole-operation cases passed in R450; the full Release build passed without
-warnings or errors. R440/R441 remain immutable historical evidence.
+| Gate | Genuine nodes | Successful SDK operations | Successful MCP operations | Total | Native result |
+| --- | --- | --- | --- | --- | --- |
+| R456 single instance | 1 | 5,315 | 4,987 | 10,302 | 1 passed, 0 failed, 0 skipped |
+| R457 RF3 | 3 | 5,317 | 4,989 | 10,306 | 1 passed, 0 failed, 0 skipped |
 
-The gate deletes data, rows, blobs and edges. `DROP TABLE` and resource
-catalog deletion are not implemented and remain part of open SQLC-DDL
-requirements. Selected T-SQL and verified cross-model references do not
-qualify complete unified SQL or cross-partition/failover behavior.
+Both executions completed 41 waves, eight persisted workload users, one queue
+operator and three resources per model. The selected T-SQL QueueToGraph and
+GraphToQueue operations, cross-client replay and cleanup are included. The
+terminal evaluators accepted original TRX, joined caller/Aspire ownership,
+released storage and exact image identity checks. Source and executable drift
+were zero in both runs; the complete source, executable and image-input cohort
+bindings match between gates.
 
-These are local functional gates. Original task acceptance remains 20 done and
-85 in progress; complete Linux, recovery, fault/endurance, security, coverage,
-performance and release qualification remain open. Neither gate alone declares
-the complete product accepted or production ready.
+The original local evaluators are retained under
+`TestResults/stage61-native-join/`: R456 SHA-256
+`9b9633b26aff5e784df4bcd4504b4866a22b222078f06ba94dc08d5c6a856961`
+and R457 SHA-256
+`23be0aa36526661a65ea53622d2c07c322547e797b1f633cb0ac9be81b3125af`.
+These local artifacts are ignored outputs; this is not a claim of published
+GitHub or full-product qualification. Detailed original report and cohort
+identities are recorded in `docs/implementation/status.json`.
+
+The subsequent strict R465 build passed with zero warnings/errors. R466 passed
+all nine selected native whole-operation cases, including both purposes in all
+four new deadline flows; R467 passed all three selected process/native recovery
+cases. The default fixture correction changes one nullable-key expression only;
+product and public functional-test source remains unchanged from the recorded
+local pair. R466 collects production coverage for its nine cases only, not a
+full-product coverage result.
+
+## Historical repair evidence
+
+R446 passed the earlier one-node scenario with 10,258 operations. R447 failed
+its original RF3 scenario after 2,332 operations: SDK queue inspection and MCP
+blob metadata returned OwnershipLost. Subsequent successes do not alter that
+failed original report. R456/R457 qualify the corrected, extended scenario;
+the prior reports remain separate historical evidence.
+
+R441's captured full-text scope error was repaired, with eight related
+whole-operation cases passing R450. The later coordinator deadline and bounded
+quorum repair preserves fresh majority confirmation, original cancellation,
+write uncertainty and configured operation bounds. Exact original R447 runtime
+branch attribution remains limited to its retained evidence.
+
+The gate deletes data, rows, blobs and edges. `DROP TABLE` and resource catalog
+deletion remain open SQLC-DDL requirements. Selected T-SQL and cross-model
+references do not qualify complete unified SQL, cross-partition or failover
+behavior. Original task acceptance remains 20 done and 85 in progress; full
+Linux, fault/endurance, security, coverage, performance and release gates remain
+separate. Neither local gate declares production readiness.

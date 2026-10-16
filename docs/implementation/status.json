@@ -1,6 +1,6 @@
 {
   "FUNCTIONAL-GATES-20261016": {
-    "status": "in_progress",
+    "status": "done",
     "ownerPriority": "One actual working Aspire instance, then the same canonical functional scenario on three genuine RF3 nodes before unrelated 105-task expansion",
     "workingWindowStartUtc": "2026-10-15T22:18:00Z",
     "workingWindowEndUtc": "2026-10-16T04:18:00Z",
@@ -23,42 +23,15 @@
     "persistedQueueOperators": 1,
     "minimumSuccessfulOperationsPerTopology": 10000,
     "orchestration": "Aspire AppHost owns native Azure Table membership through local Azurite, actual one/three-node resources, readiness, endpoints and joined shutdown",
-    "gate1": "PASSED for the recorded R446 original-cut-authority source/executable cohort: genuine one-instance Aspire topology, 10258 successful SDK/MCP public operations, all model scenarios and joined cleanup, zero source/compiled/image identity drift. Repeat after any gate-affecting repair.",
-    "gate2": "OPEN: original R447 three-node RF3 scenario failed two operations at wave4 with OwnershipLost. Source review confirmed nested operation/constituent deadline mismatches and premature false-round refusal; the correction requires a fresh matched Gate1/Gate2 run. No RF3 pass is claimed.",
+    "gate1": "PASSED R456: one genuine Aspire instance, 10302 successful public SDK/MCP/SQL operations, every model and server-side QueueGraph roundtrip, joined cleanup and zero source/executable/image drift.",
+    "gate2": "PASSED R457 after accepted R456: genuine RF3 completed 10306 successful operations and every original cleanup check on the exact same frozen source/executable/image input cohort.",
     "latestLocalExecution": {
-      "lane": "Root R447",
-      "result": "failed",
-      "nodes": 3,
-      "elapsedSeconds": 306.3209691669326,
-      "successfulPublicOperations": 2332,
-      "completedInitialWaves": 9,
-      "failedModels": [
-        "queue inspection through SDK",
-        "blob metadata through official MCP"
-      ],
-      "sourceDrift": 0,
-      "compiledDrift": 0,
-      "processJoined": true,
-      "bothReadersJoined": true,
-      "stdoutSha256": "ca02e6abea1c131dacba3a2ead21d7313557537611c4626a01067f60b86d7e68",
-      "originalReport": "TestResults/stage61-native-join/root-r447-three-node-original-cut-authority-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
-      "originalReportSha256": "3cdd11f0d142e4efdc8a715ac1014bdbe38690c3045e6320c775bdcb1d307e96",
-      "requiredGate1TerminalEvaluationSha256": "1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea",
-      "boundary": "Both original operations failed with no current leader/reachable-majority. Later1237 successfuloperations do not turn failures into PASS. PeerRound Stage4 Flags0 and runtime stalls are retained observations, not proof of membership death. No secondary cleanup exception was reported. Whole Gate2 remains OPEN."
-    },
-    "qualification": "No gate pass, full-task promotion, RF3 durability inference from RF1, throughput claim or production readiness follows from source, package presence or build alone",
-    "originalTaskStatusCounts": {
-      "done": 20,
-      "in_progress": 85,
-      "total": 105
-    },
-    "gate1Evidence": {
-      "lane": "Root R446",
+      "lane": "Root R457",
       "result": "passed",
-      "nodes": 1,
-      "successfulPublicOperations": 10258,
-      "sdkOperations": 5288,
-      "mcpOperations": 4970,
+      "nodes": 3,
+      "successfulPublicOperations": 10306,
+      "sdkOperations": 5317,
+      "mcpOperations": 4989,
       "completedWaves": 41,
       "persistedWorkloadUsers": 8,
       "persistedQueueOperators": 1,
@@ -69,22 +42,66 @@
         "failed": 0,
         "skipped": 0
       },
-      "elapsedSeconds": 359.3232375411317,
+      "elapsedSeconds": 404.29009641706944,
       "sourceDrift": 0,
       "compiledDrift": 0,
+      "imageIdentityDrift": 0,
       "processJoined": true,
-      "stdoutSha256": "9cd510b2117b9c7065a0a059e6213de1c892785e8a406e6b7714305b0c255faa",
-      "originalReport": "TestResults/stage61-native-join/root-r446-single-instance-original-cut-authority-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
-      "terminalEvaluation": "TestResults/stage61-native-join/root-r446-gate1-terminal-evaluation.original.json",
-      "terminalEvaluationSha256": "1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea",
-      "boundary": "Native TUnit passed after caller/Aspire shutdown and storage lock release assertions. Local functional evidence only; single-instance acknowledgement is not RF3 durability or Linux production qualification.",
       "bothReadersJoined": true,
+      "stdoutSha256": "fce364b77d35db2d6cca6cd42da15871a42bea11f1086a97258b8ac9e1be8daf",
+      "originalReport": "TestResults/stage61-native-join/root-r457-three-node-coordinator-deadline-queuegraph-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "originalReportSha256": "641535aa45b9acf5e7b6bdd59a64667a01553c815cb3af289249e5db5dd47c1f",
+      "terminalEvaluation": "TestResults/stage61-native-join/root-r457-gate2-terminal-evaluation.original.json",
+      "terminalEvaluationSha256": "23be0aa36526661a65ea53622d2c07c322547e797b1f633cb0ac9be81b3125af",
       "cohortBinding": {
-        "sourceCohortDigest": "b508a94a55a19bda7f84705df7deec7cac0ca725c76d7865613bcce45d1e8438",
-        "compiledCohortDigest": "dbdd8dc86a52bc1b5132f1e2f0bc7be19c1dca53c166712ed4ee0c3dd6dd3bbe",
-        "imageInputDigest": "sha256:70485eeed7e1eb04d091d05db20438d4b990cb4810f7e6eb3484053a27fdfc84"
+        "sourceCohortDigest": "5eeab71cd682db9829a281c18426769d8bac817f2f765a9e550ce7ac67c50edb",
+        "compiledCohortDigest": "b99a1b4ab070aec7e711ec295694a5321cfaa10c2f235f4bb37e404fe3b17316",
+        "imageInputDigest": "sha256:75c6e4e439a044bdb28f4d9f1932280cf529fac28fd4840530de26aa04454b97"
       },
-      "imageIdentityDrift": 0
+      "sourceCommit": "86834e8a68d54c8c749221a373bb38b94b5d8436",
+      "boundary": "Accepted local native functional proof after original caller/Aspire shutdown, exact image checks and released storage ownership. Not full-product/Linux/endurance/performance qualification."
+    },
+    "qualification": "Both local functional gates passed. Full original-task acceptance, complete Linux/fault/endurance/security/performance/release qualification remain separate; RF1 proves no replica fault tolerance.",
+    "originalTaskStatusCounts": {
+      "done": 20,
+      "in_progress": 85,
+      "total": 105
+    },
+    "gate1Evidence": {
+      "lane": "Root R456",
+      "result": "passed",
+      "nodes": 1,
+      "successfulPublicOperations": 10302,
+      "sdkOperations": 5315,
+      "mcpOperations": 4987,
+      "completedWaves": 41,
+      "persistedWorkloadUsers": 8,
+      "persistedQueueOperators": 1,
+      "resourcesPerModel": 3,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 652.4692641249858,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "imageIdentityDrift": 0,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "0995ca121eb81e8b2f0e10134227238b4d35515be885c1ff00c677e70644b67a",
+      "originalReport": "TestResults/stage61-native-join/root-r456-single-instance-coordinator-deadline-queuegraph-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "originalReportSha256": "bdd2c03192b50c3babdcb2d6425f290db5a89070f0ac94e30d289ce22969cd28",
+      "terminalEvaluation": "TestResults/stage61-native-join/root-r456-gate1-terminal-evaluation.original.json",
+      "terminalEvaluationSha256": "9b9633b26aff5e784df4bcd4504b4866a22b222078f06ba94dc08d5c6a856961",
+      "cohortBinding": {
+        "sourceCohortDigest": "5eeab71cd682db9829a281c18426769d8bac817f2f765a9e550ce7ac67c50edb",
+        "compiledCohortDigest": "b99a1b4ab070aec7e711ec295694a5321cfaa10c2f235f4bb37e404fe3b17316",
+        "imageInputDigest": "sha256:75c6e4e439a044bdb28f4d9f1932280cf529fac28fd4840530de26aa04454b97"
+      },
+      "sourceCommit": "86834e8a68d54c8c749221a373bb38b94b5d8436",
+      "boundary": "Accepted local native functional proof after original caller/Aspire shutdown, exact image checks and released storage ownership. Not full-product/Linux/endurance/performance qualification."
     },
     "historicalLocalExecutions": [
       {
@@ -140,14 +157,71 @@
         "stdoutSha256": "101d5d84b73ea12bfa6d164f97e954b14e4d12a7bec815b66b17820137e94fb6",
         "originalReport": "TestResults/stage61-native-join/root-r441-three-node-working-database-functional-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
         "boundary": "Initial full-model RF3 cycles are partial evidence; HistoryUnavailable from full-text search fails the whole gate before 10000 operations. All original errors and native cleanup retained. No full-task or performance promotion."
+      },
+      {
+        "lane": "Root R446",
+        "result": "passed",
+        "nodes": 1,
+        "successfulPublicOperations": 10258,
+        "sdkOperations": 5288,
+        "mcpOperations": 4970,
+        "completedWaves": 41,
+        "persistedWorkloadUsers": 8,
+        "persistedQueueOperators": 1,
+        "resourcesPerModel": 3,
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        "elapsedSeconds": 359.3232375411317,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "processJoined": true,
+        "stdoutSha256": "9cd510b2117b9c7065a0a059e6213de1c892785e8a406e6b7714305b0c255faa",
+        "originalReport": "TestResults/stage61-native-join/root-r446-single-instance-original-cut-authority-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+        "terminalEvaluation": "TestResults/stage61-native-join/root-r446-gate1-terminal-evaluation.original.json",
+        "terminalEvaluationSha256": "1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea",
+        "boundary": "Native TUnit passed after caller/Aspire shutdown and storage lock release assertions. Local functional evidence only; single-instance acknowledgement is not RF3 durability or Linux production qualification.",
+        "bothReadersJoined": true,
+        "cohortBinding": {
+          "sourceCohortDigest": "b508a94a55a19bda7f84705df7deec7cac0ca725c76d7865613bcce45d1e8438",
+          "compiledCohortDigest": "dbdd8dc86a52bc1b5132f1e2f0bc7be19c1dca53c166712ed4ee0c3dd6dd3bbe",
+          "imageInputDigest": "sha256:70485eeed7e1eb04d091d05db20438d4b990cb4810f7e6eb3484053a27fdfc84"
+        },
+        "imageIdentityDrift": 0
+      },
+      {
+        "lane": "Root R447",
+        "result": "failed",
+        "nodes": 3,
+        "elapsedSeconds": 306.3209691669326,
+        "successfulPublicOperations": 2332,
+        "completedInitialWaves": 9,
+        "failedModels": [
+          "queue inspection through SDK",
+          "blob metadata through official MCP"
+        ],
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "processJoined": true,
+        "bothReadersJoined": true,
+        "stdoutSha256": "ca02e6abea1c131dacba3a2ead21d7313557537611c4626a01067f60b86d7e68",
+        "originalReport": "TestResults/stage61-native-join/root-r447-three-node-original-cut-authority-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+        "originalReportSha256": "3cdd11f0d142e4efdc8a715ac1014bdbe38690c3045e6320c775bdcb1d307e96",
+        "requiredGate1TerminalEvaluationSha256": "1c6502074f705ec35f44b6984c3cbbc8d6df9319b858c587b3d3071e6e77c7ea",
+        "boundary": "Both original operations failed with no current leader/reachable-majority. Later1237 successfuloperations do not turn failures into PASS. PeerRound Stage4 Flags0 and runtime stalls are retained observations, not proof of membership death. No secondary cleanup exception was reported. Whole Gate2 remains OPEN."
       }
     ],
     "focusedRepairVerification": {
       "releaseBuild": {
-        "lane": "Root R448",
+        "lane": "Root R465",
         "result": "passed",
         "warnings": 0,
-        "errors": 0
+        "errors": 0,
+        "elapsedSeconds": 369.39664145815186,
+        "sourceDrift": 0
       },
       "unitBuild": {
         "lane": "Root R449",
@@ -173,13 +247,99 @@
         "elapsedSeconds": 360.1140812919475,
         "sourceDrift": 0,
         "boundary": "Compiler checkpoint before the separately prepared receiving-endpoint correction and native fixture bootstrap/replay correction; no runtime gate promotion."
+      },
+      "nativeDeadlineRegression": {
+        "lane": "Root R466",
+        "result": "passed",
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0,
+        "allFourNewDeadlineCases": "passed",
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "elapsedSeconds": 31.961026665987447,
+        "evidence": "TestResults/stage61-native-join/root-r466-native-whole-operation-and-selected-coverage.original.json",
+        "evidenceSha256": "9f136aa8af5c8c55d7d2d6aca61984cb036982b8720b20da51d1123a9ce5f94c",
+        "priorFailedLane": "Root R454 retained separately",
+        "repair": "Explicit nullable-null optional signing key in shared Unit fixture; strict storage identity validation preserved."
+      },
+      "recovery": {
+        "lane": "Root R467",
+        "result": "passed",
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 11.333794166101143,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "originalReport": "TestResults/stage61-native-join/root-r467-current-binaries-native-recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+        "originalReportSha256": "8106b23c0752a9b8d3e484cafe89128edd80c9297adbae479f1935dcf584a3b2",
+        "boundary": "Same actual process/native recovery flows on current rebuilt binaries; no power-loss claim."
+      },
+      "selectedNativeCoverage": {
+        "scope": "Only the nine meaningful whole-operation native tests in R466; not complete product coverage and no load/benchmark tests",
+        "linesCovered": 6438,
+        "linesValid": 108783,
+        "lineRate": 0.059182041311602,
+        "branchesCovered": 2578,
+        "branchesValid": 68931,
+        "branchRate": 0.03739971855913885,
+        "artifact": "TestResults/stage61-native-join/root-r466-aligned-native-cohort-whole-unit/functional.cobertura.xml",
+        "sha256": "c1d7f446bd71fcd87d31796aac61eca13a5212b8145423d258e8f8d523729afe"
       }
     },
     "knownFunctionalScopeLimits": [
       "DROP TABLE/resource deletion is not implemented; SQLC-DDL/REQ-SQLC-006/AC-SQLC-006 remains open. Entity/row/blob/edge deletion does not qualify resource deletion.",
-      "Current gate links models and uses selected native T-SQL operations, but does not qualify complete unified SQL, cross-partition transactions, failover/restart or multiple tenants.",
-      "The recorded R446/R447 executions predate the newly integrated server-side QueueToGraph/GraphToQueue SQL roundtrip; that extended public scenario still requires a fresh matched one-node/RF3 run."
-    ]
+      "Current gate links models and uses selected native T-SQL operations, but does not qualify complete unified SQL, cross-partition transactions, failover/restart or multiple tenants."
+    ],
+    "gate2Evidence": {
+      "lane": "Root R457",
+      "result": "passed",
+      "nodes": 3,
+      "successfulPublicOperations": 10306,
+      "sdkOperations": 5317,
+      "mcpOperations": 4989,
+      "completedWaves": 41,
+      "persistedWorkloadUsers": 8,
+      "persistedQueueOperators": 1,
+      "resourcesPerModel": 3,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 404.29009641706944,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "imageIdentityDrift": 0,
+      "processJoined": true,
+      "bothReadersJoined": true,
+      "stdoutSha256": "fce364b77d35db2d6cca6cd42da15871a42bea11f1086a97258b8ac9e1be8daf",
+      "originalReport": "TestResults/stage61-native-join/root-r457-three-node-coordinator-deadline-queuegraph-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "originalReportSha256": "641535aa45b9acf5e7b6bdd59a64667a01553c815cb3af289249e5db5dd47c1f",
+      "terminalEvaluation": "TestResults/stage61-native-join/root-r457-gate2-terminal-evaluation.original.json",
+      "terminalEvaluationSha256": "23be0aa36526661a65ea53622d2c07c322547e797b1f633cb0ac9be81b3125af",
+      "cohortBinding": {
+        "sourceCohortDigest": "5eeab71cd682db9829a281c18426769d8bac817f2f765a9e550ce7ac67c50edb",
+        "compiledCohortDigest": "b99a1b4ab070aec7e711ec295694a5321cfaa10c2f235f4bb37e404fe3b17316",
+        "imageInputDigest": "sha256:75c6e4e439a044bdb28f4d9f1932280cf529fac28fd4840530de26aa04454b97"
+      },
+      "sourceCommit": "86834e8a68d54c8c749221a373bb38b94b5d8436",
+      "boundary": "Accepted local native functional proof after original caller/Aspire shutdown, exact image checks and released storage ownership. Not full-product/Linux/endurance/performance qualification."
+    },
+    "localGateResult": "passed",
+    "delivery": {
+      "checkpointCommit": "86834e8a68d54c8c749221a373bb38b94b5d8436",
+      "runtimeSourceConservationEvidence": "TestResults/stage61-native-join/root-r465-public-qualified-source-conservation.original.json",
+      "runtimeSourceConservationSha256": "beb06e9bf4ec8be2476d3d33620a041c5371c1e49b1371556e1ec4f611e18790",
+      "focusedLinuxWorkflow": "https://github.com/managedcode/KeyLoad/actions/workflows/build-and-tests.yml",
+      "focusedLinuxTask": "functional-gates",
+      "boundary": "This record asserts the retained local proofs. Exact-source Linux execution and original artifacts are reported by the independent GitHub Actions run; full original-task Linux qualification is separate."
+    },
+    "completionScope": "Owner-selected local working-base objective only: same whole-model public scenario passed on one Aspire node then genuine RF3. Original 105 acceptance statuses and complete product qualification remain independent."
   },
   "NATIVE-FOUNDATION-20261015": {
     "status": "in_progress",

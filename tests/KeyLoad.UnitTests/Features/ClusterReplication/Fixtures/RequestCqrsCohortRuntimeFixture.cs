@@ -77,7 +77,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         var node = new RequestCqrsCohortNativeNode(voter, local, services,
             ReplicaBarrierDeadlineScenario.Configuration(voter, Voters, Incarnation, barrierDeadline is not null),
             secret, checkpoints, barrierDeadline,
-            canonicalKey is null ? null : new ReadOnlyMemory<byte>(canonicalKey));
+            canonicalKey is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(canonicalKey));
         if (nodes.TryAdd(voter, node))
         {
             return node;
