@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -17,8 +16,8 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
     /// <summary>Frozen mathematical terminal fixture history; native per-append ceilings remain unchanged.</summary>
     public const long TerminalHistoryEntries = 426;
     private readonly long maximumFixtureEntries;
-    private const long FirstEntry = 1;
-    private const string MissingEntry = "The original movement fixture replica entry is missing.";
+    private const string MissingEntry = ControlledPartitionMovementNativeCommandIndex.MissingEntry;
+    private readonly ControlledPartitionMovementNativeCommandIndex originalEntries;
     private readonly Lock gate = new();
     private readonly DatabaseEngine database;
     private readonly ZoneTreeStore replica;
@@ -42,6 +41,7 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries));
         }
         this.maximumFixtureEntries = maximumFixtureEntries;
+        originalEntries = new(maximumFixtureEntries);
         this.database = database;
         voter = physical.VoterIds.First();
         configuration = CrashExecutionOptions.Configuration(voter, physical.VoterIds.ToArray(), directory, physical.Incarnation);
@@ -108,7 +108,7 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             using var original = CancellationTokenSource.CreateLinkedTokenSource(caller, deadline.Token);
             original.Token.ThrowIfCancellationRequested();
             var actual = database.NormalizeOperation(operation);
-            var index = FindOriginal(actual, original.Token);
+            var index = originalEntries.Find(Log, configuration.Value, actual, original.Token);
             if (index is null)
             {
                 if (Log.State.Term < FirstTerm)
@@ -129,43 +129,6 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             materializer.WaitForApplyAsync(index.Value, original.Token).GetAwaiter().GetResult();
             return database.ResolveOutcome(actual);
         }
-    }
-
-    private long? FindOriginal(ReplicatedOperation actual, CancellationToken cancellationToken)
-    {
-        var lastIndex = Log.State.LastIndex;
-        if (lastIndex > maximumFixtureEntries)
-        {
-            throw new InvalidOperationException(MissingEntry);
-        }
-        var scope = CommandOutcomePartitionIdentity.Resolve(actual);
-        var firstIndex = FirstEntry;
-        while (firstIndex <= lastIndex)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var page = Log.Read(firstIndex, configuration.Value.MaxAppendEntries,
-                configuration.Value.MaxAppendBytes);
-            if (page.IsDefaultOrEmpty)
-            {
-                throw new InvalidOperationException(MissingEntry);
-            }
-            foreach (var entry in page)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (entry.Index != firstIndex || entry.Index > lastIndex)
-                {
-                    throw new InvalidOperationException(MissingEntry);
-                }
-                if (entry.Operation is { } previous && previous.Id == actual.Id
-                    && previous.PrincipalId == actual.PrincipalId
-                    && CommandOutcomePartitionIdentity.Resolve(previous) == scope)
-                {
-                    return entry.Index;
-                }
-                firstIndex = checked(entry.Index + IndexStep);
-            }
-        }
-        return null;
     }
 
     /// <summary>Joins original materialization and disposes every independently owned native journal resource.</summary>

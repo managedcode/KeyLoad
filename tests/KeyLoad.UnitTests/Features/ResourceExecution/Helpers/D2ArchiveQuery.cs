@@ -22,6 +22,7 @@ internal static class D2ArchiveQuery
             var page = Read(database, source, lifetime, currentOwner, token);
             await Assert.That(page.Entries.Length).IsEqualTo(D2ArchiveData.Single);
             await Assert.That(page.Continuation).IsNull();
+            await Assert.That(page.Cut.AppliedIndex).IsEqualTo(database.LastApplied);
             var owner = currentOwner.Owner;
             var placement = new AtomicPartitionPlacementResolution(D2ArchiveData.Version, source.Partition,
                 owner.PhysicalShardId, owner.Incarnation, owner.VoterIds, owner.PlacementEpoch,

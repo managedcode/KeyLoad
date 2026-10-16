@@ -56,6 +56,7 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         await placement.InitializeAsync(node, partition, options, Movement, clock, token).ConfigureAwait(false);
         // Retain ownership before release publication; later initialization failures join DisposeCoreAsync.
         resourceInventory = await ResourceOwnerInventoryNativeFactory.CreateAsync(node, partition, options,
+            services.GetRequiredService<PartitionMovementGrainServiceClient>(),
             services.GetRequiredService<ReplicaSiloDiscoveryState>(), clock).ConfigureAwait(false);
         Volatile.Write(ref resourceInventory, resourceInventory);
         Volatile.Write(ref discovery, services.GetRequiredService<ReplicaSiloDiscoveryState>());

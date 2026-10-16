@@ -10,6 +10,7 @@ namespace KeyLoad.UnitTests.Features.BlobStorage;
 internal static class ControlledBlobOutcomeLifetimeNativeFlow
 {
     private const int KeyBytes = 32;
+    private const string TargetPolicyAdministrator = "outcome-lifetime-target-policy-administrator";
 
     internal static async Task ExecuteAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
@@ -74,12 +75,28 @@ internal static class ControlledBlobOutcomeLifetimeNativeFlow
     private static async Task ConfigureTargetAsync(ControlledPartitionMovementNode target, CancellationToken token)
     {
         var principal = target.Store.Read(view => target.Database.Principal(view, "root", target.Database.EvaluationClock.GetUtcNow()));
+        var administrator = new PrincipalRecord(TargetPolicyAdministrator, principal.TenantId, [], [])
+        {
+            ClusterAdministrator = true
+        };
+        await ConfigurePrincipalAsync(target, principal.Id, administrator, token);
         var differentEpoch = principal with
         {
             PolicyEpoch = checked(principal.PolicyEpoch + 1)
         };
-        var original = target.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), "root",
-            target.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(differentEpoch)));
-        await Assert.That(target.Journal.Submit(original, token).Error).IsNull();
+        await ConfigurePrincipalAsync(target, administrator.Id, differentEpoch, token);
+    }
+
+    private static async Task ConfigurePrincipalAsync(ControlledPartitionMovementNode target, string issuer,
+        PrincipalRecord expected, CancellationToken token)
+    {
+        var original = target.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), issuer,
+            target.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(expected)));
+        var result = target.Journal.Submit(original, token);
+        await Assert.That(result.Error).IsNull();
+        await ControlledBlobOutcomeLifetimeNativeAssertions.EqualAsync(expected, result.Get<PrincipalRecord>());
+        var persisted = target.Store.Read(view => target.Database.Principal(view, expected.Id,
+            target.Database.EvaluationClock.GetUtcNow()));
+        await ControlledBlobOutcomeLifetimeNativeAssertions.EqualAsync(expected, persisted);
     }
 }

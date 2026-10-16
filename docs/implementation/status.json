@@ -3,42 +3,36 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "Native canonical enrollment, authenticated cross-voter inventory, verified restore-origin handling and overlapping-import recovery flows are integrated. Current successor repairs preserve imported-inventory origin during authenticated target Abort, compare complete inventory values independently of serializer object-reference aliasing, and verify actual process-owner roots. Runtime verification of those repairs remains open.",
+    "implementation": "Native canonical enrollment, authenticated cross-voter inventory and verified restore origins are integrated. Current R591 source repairs remove an eager Orleans startup dependency cycle, accept the intentional restored new-history watermark zero without promoting origin, preserve original retained replay and fresh policy checks, and bound supporting-journal lookup. These successor repairs await compilation and runtime verification.",
     "strictBuild": {
-      "label": "root-r590-native-replay-import-full-release",
+      "label": "root-r592-native-startup-replay-archive-full-release",
       "result": "passed",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 207.95170391607098,
+      "elapsedSeconds": 374.6380145419389,
       "sourceDrift": 0,
-      "stdoutSha256": "a788f5138c0fa2672914312e404fd0cff7bc01a6cc25a223dd24d2103ef55a6b",
-      "scope": "Complete Release solution after all integrated R583-R590 Unit/recovery/CLI/selector/fresh-quorum retained-replay repairs. Runtime rerun pending; this build is not acceptance."
+      "stdoutSha256": "a210921e2e21ea35469bc05085fe18a2c31e09f300e83edb54b590f501f9515c",
+      "scope": "Complete strict Release solution after R591 startup/archive/replay/setup/supporting-journal repairs. Compiled outputs changed as expected; original full source snapshot unchanged. Native Unit/recovery/ONE rerun pending; this build is not acceptance."
     },
     "format": "R586 current modified/new C# whitespace apply+verify and structural governance passed. R585 full format revealed observed whitespace/import and native analyzer diagnostics; those were repaired and strict R590 passed. Final full formatter verification remains pending.",
     "focusedRuntime": {
-      "cohort": "root-r577-579-current-ci-native",
+      "cohort": "root-r588-589-functional-one",
       "sourceDrift": 0,
       "compiledDrift": 0,
       "unit": {
-        "total": 101,
-        "passed": 77,
-        "failed": 24,
+        "total": 30,
+        "passed": 25,
+        "failed": 5,
         "skipped": 0
       },
       "recovery": {
         "total": 13,
-        "passed": 3,
-        "failed": 10,
+        "passed": 11,
+        "failed": 2,
         "skipped": 0
       },
-      "analyzers": {
-        "total": 391,
-        "passed": 391,
-        "failed": 0,
-        "skipped": 0
-      },
-      "evidence": "TestResults/stage61-native-join/root-r583-prior-native-cohort-terminal.original.json",
-      "scope": "Selected whole-operation Unit and process-recovery flows plus complete analyzer suite. All processes and output readers joined; successor fixes await a focused rerun."
+      "evidence": "TestResults/stage61-native-join/root-r588-589-functional-one.cohort-after.original.json",
+      "scope": "Selected actual whole-operation Unit and process-recovery flows on 615d813b. All original processes and readers joined. This is a different focused Unit selection from the preceding101-case cohort; no coverage or total-suite improvement claim."
     },
     "publicQualification": "OPEN: native SDK/official MCP RF3 inventory and fresh same-source ONE/RF3 functional+cold pair. Historical e292 normal and57cea624 cold results retain their original scope.",
     "remaining": [
@@ -57,34 +51,40 @@
       "scope": "CrashHost and actual production dependencies including the targetAbort checkpoint repair. New10body Abort regression and exactQ1admission19 joined afterward; fullsolution/runtime qualification remains open."
     },
     "currentSourceRepairs": {
-      "stage": "R583-R590",
+      "stage": "R591",
       "state": "strict_build_passed_runtime_pending",
       "scope": [
-        "Authenticated target-Abort inventory origin",
-        "D2 full-value and archive/credential fixture assertions",
-        "Exact complete partition-family inventory",
-        "Native statistics grant/result budget allocation",
-        "Actual receiver-clock expiry witness",
-        "Original connection deactivation before final native consumer cleanup",
-        "Bounded original Abort cancellation discriminator",
-        "Strict bounded CLI restore permission refusal",
-        "Native selector exact unsupported-union regression",
-        "Fresh-quorum captured-tail retained replay without another append"
+        "Original native transport injection removes the inventory startup dependency cycle",
+        "Verified restored new-history local applied cut zero without restoring old authority",
+        "Strict original replay receipts and current-policy refusals on all three voters",
+        "Independent persisted setup issuer for the intended target-root policy change",
+        "Bounded committed-prefix supporting-journal index with native revalidation and original terminal Abort replay"
       ],
       "unresolved": [
-        "Before-page Abort original whole-flow cancellation requires original phase evidence"
+        "Controlled native carrier is9172bytes against the unchanged8192byte profile; coherent native transport repair in progress"
       ],
-      "publicFunctionalRefresh": "Fresh one-node then RF3 SDK/official MCP/T-SQL pair remains pending; historical e292c1c1 and 57cea624 proofs retain their original source scope.",
-      "verification": "R590 full strict Release:0warnings0errors, sourceDrift0. Current-source native selected Unit/recovery and ONE→RF3 functional checks remain pending."
+      "publicFunctionalRefresh": "Repeat actual ONE after a new strict build; accept its complete original scenario/image/cleanup evidence before RF3. Public DROP/recreate and user AnalyticsStore remain open.",
+      "verification": "R592 strict full solution build:0warnings0errors,sourceDrift0. Exact original runtime rerun remains pending; earlier R588/R589 and failed ONE evidence remains unchanged."
     },
     "latestCompilerAttempt": {
-      "label": "root-r587-confirmed-native-repairs-full-release",
-      "result": "failed",
-      "elapsedSeconds": 420.87072379118763,
+      "label": "root-r592-native-startup-replay-archive-full-release",
+      "result": "passed",
       "warnings": 0,
-      "errors": 1,
+      "errors": 0,
+      "elapsedSeconds": 374.6380145419389,
       "sourceDrift": 0,
-      "scope": "All production, RecoveryTests and IntegrationTests compiled. New Unit replica replay helper lacked the existing KeyLoad.Storage extension namespace; exact import repaired; full R590 rerun pending."
+      "stdoutSha256": "a210921e2e21ea35469bc05085fe18a2c31e09f300e83edb54b590f501f9515c",
+      "scope": "Complete strict Release solution after R591 startup/archive/replay/setup/supporting-journal repairs. Compiled outputs changed as expected; original full source snapshot unchanged. Native Unit/recovery/ONE rerun pending; this build is not acceptance."
+    },
+    "latestPublicFunctionalAttempt": {
+      "label": "root-r583-functional-normal-one",
+      "result": "failed",
+      "phase": "Aspire node startup before workload",
+      "cause": "ResourceOwnerInventoryNativeFactory eagerly borrowed OrleansNode.RuntimeServices while native GrainService initialization was still preparing that runtime.",
+      "evidence": "TestResults/root-r583-functional-execution-r1/root-r583-functional-normal-one.stdout.original.txt",
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "rf3Continuation": "Not run after this failed ONE gate."
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {

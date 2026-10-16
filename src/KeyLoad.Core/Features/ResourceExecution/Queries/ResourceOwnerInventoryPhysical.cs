@@ -53,9 +53,9 @@ public sealed partial class DatabaseEngine
         }
         var identity = Store.Identity;
         var enrollment = ResourceOwnerInventoryCatalog.RequireRevision(view, identity.Incarnation, Limits);
-        var bytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
-            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryReadValidation.Missing);
-        var applied = NativeSerialization.Deserialize<long>(bytes);
+        var bytes = view.ReadOwnedValue(KeySpace.AppliedBytes);
+        var applied = bytes is null ? ResourceOwnerInventoryReadValidation.EmptyRevision
+            : NativeSerialization.Deserialize<long>(bytes);
         if (applied < ResourceOwnerInventoryReadValidation.EmptyRevision)
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceOwnerInventoryReadValidation.Malformed);

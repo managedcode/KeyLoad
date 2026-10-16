@@ -6,7 +6,8 @@ namespace KeyLoad.RecoveryTests.Features.ResourceExecution;
 
 internal static class D2ImportAbortCleanup
 {
-    internal static async Task<(PartitionMovePhaseResult State, PartitionMovePhaseResult Terminal, Guid GrantId, ReadOnlyMemory<byte> Body)> ExecuteAsync(
+    internal static async Task<(PartitionMovePhaseResult State, PartitionMovePhaseResult Terminal, Guid GrantId, ReadOnlyMemory<byte> Body,
+        ReplicatedOperation Original, OperationResult Outcome)> ExecuteAsync(
         D2ImportSession session, D2ImportImage aborted, D2ImportImage remaining, bool unknown, CancellationToken token)
     {
         var state = await D2ImportPhases.LocalAsync(session, D2ImportPhases.Phase(session, aborted.Captured,
@@ -43,7 +44,7 @@ internal static class D2ImportAbortCleanup
                 await D2ImportAbortAssertions.MarkerAsync(session, aborted, null);
                 await D2ImportAbortAssertions.DocumentAbsentAsync(session, aborted);
                 await D2ImportInventory.BlockedAsync(session, token);
-                return (state, applied.Result, applied.GrantId, body);
+                return (state, applied.Result, applied.GrantId, body, applied.Original, applied.Outcome);
             }
             await D2ImportAbortAssertions.MarkerAsync(session, aborted, marker);
             await D2ImportInventory.BlockedAsync(session, token);

@@ -1,4 +1,6 @@
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ClusterRouting.Execution;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.UnitTests.Features.Messaging;
 using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
 
@@ -45,18 +47,20 @@ internal static class ReplicaRetainedReplayAssertions
     }
 
     internal static async Task ModelsAsync(RequestCqrsCohortRuntimeFixture fixture,
-        ReplicaRetainedReplaySeed seed, CancellationToken token)
+        ReplicaRetainedReplaySeed seed, bool originalPolicyCurrent, CancellationToken token)
     {
         foreach (var voter in ReplicaBarrierDeadlineFlow.Voters)
         {
             var node = fixture.Node(voter);
             var cut = Capture(node);
+            await OriginalOutcomesAsync(node, seed, originalPolicyCurrent);
             var document = node.Journal.Database.GetDocument(P.Root,
                 new(P.Partition, P.Collection, P.DocumentId), cancellationToken: token);
             var expected = new DocumentResult(new(P.Partition, P.Collection, P.DocumentId),
                 ReplicaRetainedReplayProducer.Single, P.Json, false, []);
+            await Assert.That(document).IsNotNull();
             await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(expected),
-                NativeSerialization.Serialize(document));
+                NativeSerialization.Serialize(document!));
             var blobs = new BlobStorageOperations(node.Journal.Database);
             var read = blobs.Read(P.Root, new(seed.Blob, ReplicaRetainedReplayProducer.Single,
                 ReplicaRetainedReplayProducer.Empty, ReplicaRetainedReplayProducer.Bytes.Length), token);
@@ -64,6 +68,30 @@ internal static class ReplicaRetainedReplayAssertions
                 NativeSerialization.Serialize(read.Metadata));
             await Assert.That(read.Bytes.Span.SequenceEqual(ReplicaRetainedReplayProducer.Bytes)).IsTrue();
             await UnchangedAsync(node, cut, sameTerm: true);
+        }
+    }
+
+    private static async Task OriginalOutcomesAsync(RequestCqrsCohortNativeNode node, ReplicaRetainedReplaySeed seed,
+        bool originalPolicyCurrent)
+    {
+        foreach (var command in seed.Commands)
+        {
+            var original = command.Operation;
+            var stored = node.Journal.Database.Store.Read(view => CommandOutcomeKeyResolver.Select(view,
+                original.PrincipalId, original.Id, CommandOutcomePartitionIdentity.Resolve(original)).Outcome);
+            await Assert.That(stored).IsNotNull();
+            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(command.Result, stored!.Result);
+            if (originalPolicyCurrent)
+            {
+                await ReplicaSubmissionOutcomeFlow.RequireResultAsync(command.Result,
+                    node.Journal.Database.ResolveSubmissionOutcome(original));
+            }
+            else
+            {
+                var denied = Assert.ThrowsExactly<KeyLoadException>(() =>
+                    node.Journal.Database.ResolveSubmissionOutcome(original));
+                await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
+            }
         }
     }
 }

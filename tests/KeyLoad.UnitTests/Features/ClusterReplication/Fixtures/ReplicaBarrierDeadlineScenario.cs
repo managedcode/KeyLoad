@@ -81,9 +81,10 @@ internal sealed class ReplicaBarrierDeadlineScenario
         PhysicalShardTestBootstrap.Bootstrap(database, Root, configuration.VoterIds);
         var request = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
             new(Collection, ResourceKind.Collection, Partition.TransactionDomainId));
+        // This pre-log baseline must precede the original history when a fresh peer catches up.
         var operation = database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), Root,
-            TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(request));
-        _ = database.ApplyEmbedded(operation, default).Get<ResourceDefinition>();
+            DateTimeOffset.UnixEpoch, NativeSerialization.Serialize(request));
+        _ = database.Apply(operation).Get<ResourceDefinition>();
     }
 
     internal IReplicaTransportObservation Observe(string voter) => new Incoming(this, voter);

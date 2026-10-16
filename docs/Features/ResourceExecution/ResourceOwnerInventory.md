@@ -92,6 +92,8 @@ Each original target image install persists an active-import checkpoint before r
 
 Verified archive restore uses the existing native source cut and mapping proof. A proven exact source origin may be rebound to the mapped target incarnation in the same reconciliation transaction with a new local monotonic revision. Missing/unproven source remains Unknown. Original full-image verification retains unrelated canonical bytes, including pending-import markers; no approximate backfill or format fallback is provided.
 
+The restored target starts a new replication history: authority reset removes AppliedBytes and ClockBytes and keeps dispatch paused. A local owner observation reports AppliedIndex zero for that absent new-history watermark, consistently with DatabaseEngine.LastApplied; malformed or negative stored watermarks still refuse. This does not restore the old applied index, promote Unknown origin, resume dispatch, or replace the coordinator's required fresh RF3 barriers before a global Complete result.
+
 Enrollment staging retains the original canonical command failure boundary, including ResourceExhausted for bounded command expansion. The inventory read/native-output path uses the frozen BudgetExceeded contract. Neither failure yields a successful partial inventory.
 
 ## Dependency and completion gates

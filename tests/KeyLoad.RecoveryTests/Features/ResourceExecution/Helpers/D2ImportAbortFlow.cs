@@ -34,6 +34,7 @@ internal static class D2ImportAbortFlow
         await D2ImportAbortAssertions.DocumentAbsentAsync(session, aborted);
         await D2ImportReceipts.ImportedAsync(session, remaining);
         await D2ImportAbortAssertions.InventoryAsync(session, unknown, token);
+        writes.Add((cleanup.Original, cleanup.Outcome));
         await D2ImportAbortCold.ExecuteAsync(session, aborted, remaining, writes, unknown, token);
     }
 

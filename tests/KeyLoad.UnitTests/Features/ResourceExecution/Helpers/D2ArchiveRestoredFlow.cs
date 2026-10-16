@@ -37,6 +37,9 @@ internal static class D2ArchiveRestoredFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await IdentityAsync(store, slot);
+                await Assert.That(database.LastApplied).IsEqualTo(D2ArchiveData.Empty);
+                await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))).IsNull();
+                await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))).IsNull();
                 await D2ArchiveAssertions.DataAsync(database, slot.Archive.Source, false);
                 var refusal = await D2ArchiveAssertions.GenerationAsync(database, store, slot.Archive.Source);
                 await D2ArchiveQuery.VerifyAsync(database, store, slot.Archive.Source,
@@ -77,6 +80,8 @@ internal static class D2ArchiveRestoredFlow
     private static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, D2ArchiveSlot slot,
         D2ArchiveHealthy healthy, CancellationToken token)
     {
+        await Assert.That(database.LastApplied).IsEqualTo(D2ArchiveData.Empty);
+        await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))).IsNull();
         await Assert.That(store.Position).IsEqualTo(healthy.Position);
         await Assert.That(ControlledPartitionMovementRawImage.Bytes(store)
             .SequenceEqual(healthy.Image, StringComparer.Ordinal)).IsTrue();

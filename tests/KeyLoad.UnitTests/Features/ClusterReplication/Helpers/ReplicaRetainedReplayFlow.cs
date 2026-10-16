@@ -28,7 +28,7 @@ internal static class ReplicaRetainedReplayFlow
         await ReplicaBarrierDeadlineAssertions.SettingsAsync(fixture);
         var seed = await ReplicaRetainedReplayProducer.CreateAsync(leader, token);
         await SyncAsync(fixture, token);
-        await ReplicaRetainedReplayAssertions.ModelsAsync(fixture, seed, token);
+        await ReplicaRetainedReplayAssertions.ModelsAsync(fixture, seed, originalPolicyCurrent: true, token);
         foreach (var command in seed.Commands)
         {
             var cuts = ReplicaRetainedReplayAssertions.Capture(fixture);
@@ -42,7 +42,8 @@ internal static class ReplicaRetainedReplayFlow
             ReplicaRetainedReplayProducer.HealthyDocument, ReplicaRetainedReplayProducer.HealthyJson, token);
         await SyncAsync(fixture, token);
         await ReplicaRetainedReplayQuorum.RefuseThenRepairAsync(fixture, leader, healthy, token);
-        await ReplicaRetainedReplayAssertions.ModelsAsync(fixture, seed, token);
+        // RestartVoterAsync replaces both peer roots and replays leader history; this is not same-root cold proof.
+        await ReplicaRetainedReplayAssertions.ModelsAsync(fixture, seed, originalPolicyCurrent: false, token);
     }
 
     internal static async Task SyncAsync(RequestCqrsCohortRuntimeFixture fixture, CancellationToken token)
