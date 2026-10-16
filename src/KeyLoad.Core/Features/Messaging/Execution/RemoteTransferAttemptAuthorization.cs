@@ -14,6 +14,8 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid);
         }
         RequireTransferAdministrator(principal);
+        RequireTransferCapabilities(principal, request.SourceQueue, Capability.QueueInspect);
+        RequireTransferCapabilities(principal, request.SourceQueue, Capability.QueuePublish);
         var resource = Resource(view, partition, request.SourceQueue.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, request.SourceQueue, resource);
         RequireTransferPublisher(principal, request.SourceQueue, resource);

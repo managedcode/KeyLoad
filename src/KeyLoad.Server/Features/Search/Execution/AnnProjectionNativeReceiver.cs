@@ -8,6 +8,10 @@ namespace KeyLoad.Server.Features.Search;
 internal sealed class AnnProjectionNativeReceiver(OrleansNode node, PartitionHost partition,
     ServerRuntimeOptions options, TimeProvider clock)
 {
+    internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteLifetimeAsync(
+        RemoteModelNativeRequest original, CancellationToken cancellationToken)
+        => new AnnProjectionNativeLifetimeReceiver(node, partition, options, clock).ExecuteAsync(original, cancellationToken);
+
     internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
         RemoteModelNativeRequest original, CancellationToken cancellationToken)
     {

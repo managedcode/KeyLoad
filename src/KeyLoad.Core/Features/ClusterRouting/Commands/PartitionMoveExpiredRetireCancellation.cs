@@ -51,7 +51,7 @@ public sealed partial class DatabaseEngine
         work.Check();
         return IssueNativeOperation(new(owned.CancellationCommandId, OperationKind.PartitionMovementPhase,
             principal.Id, EvaluationClock.GetUtcNow(), MovementPhaseIdentityJson(phase)),
-            new NativeCommandPayload(NativeSerialization.Serialize(phase)));
+            new NativeCommandPayload(NativeSerialization.Serialize(new PartitionMovementAuthenticatedCommandV1(phase, ImmutableArray<PartitionMoveLifetimeProofV1>.Empty))));
     }
     private PartitionMovePhaseResult ExecuteExpiredRetireCancellation(IAtomicTransaction transaction,
         PrincipalRecord principal, ReplicatedOperation operation, PartitionMovePhaseCommand phase, long position)

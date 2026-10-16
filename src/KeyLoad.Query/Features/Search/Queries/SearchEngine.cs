@@ -99,8 +99,9 @@ public sealed partial class SearchEngine
         FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
         var eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
         var original = database.WithQueryView(principalId, request.Partition, request.Collection,
+            request.Vector is null ? Capability.None : Capability.VectorSearch,
             (view, principal, resource) => SearchCapturedExecution.Start(database, textProjection, view,
-                principal, resource, request, budget, execution, similarity, eligibility));
+                principal, resource, request, budget, execution, similarity, eligibility), budget);
         return SearchCapturedExecution.Complete(database, original, request, budget, similarity, eligibility);
     }
 

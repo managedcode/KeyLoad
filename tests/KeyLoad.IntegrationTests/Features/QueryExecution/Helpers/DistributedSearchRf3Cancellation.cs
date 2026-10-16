@@ -45,7 +45,7 @@ internal sealed class DistributedSearchRf3Cancellation
     {
         parentArm = controls.WriteArm(seed.Original.Destination.Principal.Id, Guid.Empty, GrainReadKind.DistributedSearch,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
-        arm = controls.WriteArm(seed.Original.Destination.Principal.Id, Guid.Empty, GrainReadKind.DistributedSearchLeaf,
+        arm = controls.WriteArm(seed.Original.Destination.Principal.Id, Guid.Empty, GrainReadKind.DistributedSearchLeafV2,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
         caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         if (useMcp)

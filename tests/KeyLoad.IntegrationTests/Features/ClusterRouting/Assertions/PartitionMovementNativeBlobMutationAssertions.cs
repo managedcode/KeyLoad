@@ -6,13 +6,14 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class PartitionMovementNativeBlobMutationAssertions
 {
-    internal static void Require(RemoteControlledBlobCall original, NativeControlledBlobFaultPayload fault)
+    internal static void Require(RemoteControlledBlobOutcomeCallV2 original, NativeControlledBlobFaultPayload fault)
     {
-        var actual = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(fault.Payload.Span);
-        var expected = fault.Variation == NativeControlledBlobFaultVariation.MissingEnvelope
-            ? new RemoteDocumentTransportEnvelope(null, null, null)
-            : new RemoteDocumentTransportEnvelope(null, null, Change(original,
-                actual.ControlledBlob ?? throw Missing(), fault.Variation));
+        var actual = NativeSerialization.Deserialize<RemoteControlledBlobOutcomeCallV2>(fault.Payload.Span);
+        var expected = original with
+        {
+            Original = fault.Variation == NativeControlledBlobFaultVariation.MissingEnvelope
+                ? null! : Change(original.Original, actual.Original ?? throw Missing(), fault.Variation)
+        };
         if (!RemoteDocumentWire.Encode(expected).AsSpan().SequenceEqual(fault.Payload.Span))
         {
             throw Missing();

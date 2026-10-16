@@ -8,7 +8,7 @@ namespace KeyLoad.Server;
 
 /// <summary>Acquires and retains one node's local native runtime, including partial initialization, through joined shutdown.</summary>
 internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerRuntimeOptions options,
-    TimeProvider clock, IControlledBlobWireBorrowObserver? blobWireObserver) : IAsyncDisposable
+    TimeProvider clock) : IAsyncDisposable
 {
     private const int NoCloseFailures = 0;
     private readonly TenantPlacementNodeOwner placement = new();
@@ -46,7 +46,7 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         partition.TransferVerification?.AttachRequests(work);
         PhysicalOwnerRegistrationRuntime.RequireProbeWork(nodeOptions, physicalOwnerWork);
         Volatile.Write(ref documents, await RemoteDocumentRuntime.CreateAsync(node, partition,
-            options, clock, blobWireObserver).ConfigureAwait(false));
+            options, clock).ConfigureAwait(false));
         await Graphs.InitializeAsync(node, partition, options, clock).ConfigureAwait(false);
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(node, partition,
             options, work, clock).ConfigureAwait(false));

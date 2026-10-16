@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -28,5 +29,31 @@ internal static class ControlledPartitionMovementFreshAdmission
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return verified ?? throw new InvalidOperationException("The original process phase was not admitted.");
+    }
+
+    internal static async Task<(PartitionMovementTransportRequest Request, PartitionMoveLifetimeProofV1 Proof)>
+        VerifyControlledLifetimeAsync(ControlledPartitionMovementNode node, ServerRuntimeOptions runtime,
+            PartitionMovementTransportRequest original, PartitionMoveLifetimeProofV1 proof, CancellationToken token)
+    {
+        (PartitionMovementTransportRequest Request, PartitionMoveLifetimeProofV1 Proof)? verified = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var admission = new PartitionMovementPeerAdmission(runtime.Node, node.Database,
+                runtime.ReplicaConfiguration, runtime.GrainRouting, runtime.Membership,
+                runtime.PartitionMovement, node.Database.EvaluationClock);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                using var mac = admission.CreateControlMac();
+                await ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    var originalBytes = NativeSerialization.Serialize(original);
+                    var body = NativeSerialization.Serialize(new PartitionControlLifetimeTransportV1(originalBytes, proof));
+                    verified = await admission.VerifyControlledLifetimeAsync(body, mac.SignControlledLifetime(body), token);
+                }, failures);
+            }, failures);
+        }, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return verified ?? throw new InvalidOperationException("The original process controlled effect was not admitted.");
     }
 }

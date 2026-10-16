@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
@@ -28,8 +29,12 @@ internal static class GraphIncomingReadScope
         ReadExecutionBudgetReadGrant grant, PartitionRef partition, string graph)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
-            KeySpace.Resource(partition.TenantId, partition.DatabaseId, graph), grant)
-            ?? throw Errors.Fail(ErrorCode.NotFound, MissingResource);
+            KeySpace.Resource(partition.TenantId, partition.DatabaseId, graph), grant);
+        _ = ResourceLifetimeCatalog.Read(grant.CreateView(view), partition.TenantId, partition.DatabaseId, graph, resource);
+        if (resource is null)
+        {
+            throw Errors.Fail(ErrorCode.NotFound, MissingResource);
+        }
         if (resource.TransactionDomainId != partition.TransactionDomainId)
         {
             throw Errors.Fail(ErrorCode.Conflict, ResourceDomainConflict);
@@ -45,8 +50,12 @@ internal static class GraphIncomingReadScope
         ReadExecutionBudgetReadGrant grant, PartitionRef partition, string collection)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
-            KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection), grant)
-            ?? throw Errors.Fail(ErrorCode.NotFound, MissingResource);
+            KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection), grant);
+        _ = ResourceLifetimeCatalog.Read(grant.CreateView(view), partition.TenantId, partition.DatabaseId, collection, resource);
+        if (resource is null)
+        {
+            throw Errors.Fail(ErrorCode.NotFound, MissingResource);
+        }
         if (resource.TransactionDomainId != partition.TransactionDomainId)
         {
             throw Errors.Fail(ErrorCode.Conflict, ResourceDomainConflict);

@@ -8,7 +8,7 @@ internal static class QueryProjectionRedactions
 {
     internal static (bool Redacted, ImmutableArray<string> Fields) Selected(DatabaseEngine database,
         ResourceDefinition resource, DocumentResult safe, ImmutableArray<string> completeOmittedPaths,
-        ImmutableArray<Selection> selections, string? sourceAlias = null)
+        ImmutableArray<Selection> selections, string? sourceAlias = null, ResourceDefinition? additionalResource = null)
     {
         if (completeOmittedPaths.IsEmpty)
         {
@@ -29,7 +29,12 @@ internal static class QueryProjectionRedactions
             {
                 continue;
             }
-            foreach (var policy in database.Authorization.GetEffectiveFieldPolicies(resource, selection.Path))
+            var policies = database.Authorization.GetEffectiveFieldPolicies(resource, selection.Path);
+            if (additionalResource is not null)
+            {
+                policies = policies.Concat(database.Authorization.GetEffectiveFieldPolicies(additionalResource, selection.Path));
+            }
+            foreach (var policy in policies)
             {
                 relevant.Add(policy.Path);
             }

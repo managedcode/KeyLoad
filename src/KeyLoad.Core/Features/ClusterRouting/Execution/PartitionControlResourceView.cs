@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
@@ -9,6 +11,7 @@ internal class PartitionControlResourceView : IKeyValueView
 {
     private readonly IKeyValueView inner;
     private readonly ImmutableArray<(byte[] Key, byte[] Value)> resources;
+    private readonly byte[] lifetimePrefix;
     private readonly ReadExecutionBudget? work;
     private readonly ReadExecutionBudgetReadGrant? grant;
 
@@ -26,6 +29,7 @@ internal class PartitionControlResourceView : IKeyValueView
         this.work = work;
         this.grant = grant;
         Partition = partition;
+        lifetimePrefix = ResourceLifetimeCatalog.Prefix();
         var entries = ImmutableArray.CreateBuilder<(byte[] Key, byte[] Value)>(definitions.Length);
         long retained = PartitionMoveProtocol.EmptyCount;
         foreach (var definition in definitions)
@@ -40,6 +44,28 @@ internal class PartitionControlResourceView : IKeyValueView
             entries.Add((key, value));
         }
         resources = entries.MoveToImmutable();
+    }
+
+    internal PartitionControlResourceView(IKeyValueView inner, PartitionRef partition,
+        ImmutableArray<ResourceDefinition> definitions, ResourceLifetimeCoverageV1 coverage, int maximumBytes,
+        ReadExecutionBudget? work = null, ReadExecutionBudgetReadGrant? grant = null)
+        : this(inner, partition, definitions, maximumBytes, work, grant)
+    {
+        PartitionControlLifetimeCoverage.Require(coverage, partition, definitions, maximumBytes);
+        var entries = resources.ToBuilder();
+        var retained = resources.Sum(entry => (long)entry.Key.Length + entry.Value.Length);
+        foreach (var lifetime in coverage.Lifetimes)
+        {
+            var key = ResourceLifetimeCatalog.Key(partition.TenantId, partition.DatabaseId, lifetime.ResourceName);
+            var value = NativeSerialization.Serialize(lifetime);
+            retained = checked(retained + key.Length + value.Length);
+            if (retained > maximumBytes)
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
+            entries.Add((key, value));
+        }
+        resources = entries.ToImmutable();
     }
 
     internal PartitionRef Partition
@@ -72,6 +98,10 @@ internal class PartitionControlResourceView : IKeyValueView
             observer?.Invoke(count);
             reader(resource.Value);
             return true;
+        }
+        if (key.AsSpan().StartsWith(lifetimePrefix))
+        {
+            return false;
         }
         return inner.ReadValue(key, reader, observer);
     }

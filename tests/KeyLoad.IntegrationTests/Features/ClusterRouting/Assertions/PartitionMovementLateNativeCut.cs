@@ -2,7 +2,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,7 +16,7 @@ internal sealed record PartitionMovementLateNativeCut(long Position, Dictionary<
     private const long GenerationStep = 1;
     internal static PartitionMovementLateNativeCut Read(PartitionMovementLateNativeNode owner, ReplicatedOperation operation)
     {
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
         var limits = owner.Application.Services.GetRequiredService<ServerRuntimeOptions>().Core.DatabaseLimits.Value;
         var database = owner.Partition.Database;
         return database.Store.Read(view =>
@@ -43,7 +42,7 @@ internal sealed record PartitionMovementLateNativeCut(long Position, Dictionary<
     internal static async Task RequireFailureDeltaAsync(PartitionMovementLateNativeCut before,
         PartitionMovementLateNativeCut after, ReplicatedOperation operation, OperationResult result)
     {
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
         await Assert.That(before.Outcome).IsNull();
         await RequireActualCancellationAsync(before, phase, operation);
 

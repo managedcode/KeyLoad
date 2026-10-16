@@ -40,9 +40,11 @@ internal sealed class ControlledDocumentNativePhaseFlow(ControlledPartitionMovem
             corpus.Control.Owner.VoterIds[FirstOrdinal], callerAddress, PartitionMovementTransportAction.Apply,
             Guid.Empty, FirstOrdinal);
         var targetPhase = stage == PartitionMovePeerStage.ControlApplyCommand;
-        var actual = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(targetPhase ? target : source,
-            targetPhase ? targetOptions : sourceOptions, targetPhase ? targetAdmission : sourceAdmission,
-            request, token);
+        var actual = targetPhase
+            ? await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(target, targetOptions, targetAdmission,
+                request, source.Database.CaptureControlledCommandLifetimeProof(envelope, token), token)
+            : await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, sourceOptions, sourceAdmission,
+                request, token);
         await Assert.That(actual.Error).IsNull();
         var result = actual.Get<PartitionMovePhaseResult>();
         await Assert.That(result.Journal.CommandId).IsEqualTo(commandId);

@@ -39,6 +39,8 @@ internal sealed class PartitionMovementTransportContext : IDisposable
         Clock = clock;
     }
 
+    internal IControlledLifetimeReplayObserver? ControlledLifetimeObserver => node.CanonicalCutObserver?.ControlledLifetime;
+
     private PartitionMovementGrainServiceClient Native
     {
         get
@@ -63,13 +65,14 @@ internal sealed class PartitionMovementTransportContext : IDisposable
 
     internal async Task<PartitionMovementGrainServiceReply> ExchangeAsync(SiloAddress address,
         string voter, PartitionMovementGrainServiceChannel channel, bool query,
-        ReadOnlyMemory<byte> body, string signature, bool readOnly, CancellationToken token)
+        ReadOnlyMemory<byte> body, string signature, bool readOnly, CancellationToken token,
+        Action<PartitionMovementGrainServiceRequest, PartitionMovementGrainServiceReply>? observed = null)
     {
         var client = Native;
         var request = client.CreateRequest(channel, query, body, signature, voter, address);
         try
         {
-            return await client.ExchangeAsync(address, request, token).ConfigureAwait(false);
+            return await client.ExchangeAsync(address, request, token, observed).ConfigureAwait(false);
         }
         catch (Exception failure) when (readOnly && (failure is OrleansException or TimeoutException))
         {
@@ -87,6 +90,20 @@ internal sealed class PartitionMovementTransportContext : IDisposable
                 ? mac.SignOutcome(body, reply: false) : mac.Sign(body, reply: false);
         }
         finally { CryptographicOperations.ZeroMemory(key); }
+    }
+
+    internal string SignControlledLifetime(byte[] body)
+    {
+        var key = Convert.FromBase64String(Options.PeerSecret);
+        try
+        {
+            using var mac = new PartitionMovementMac(key, Partition.Database.Limits.MaxBatchBytes);
+            return mac.SignControlledLifetime(body);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
     }
 
     public void Dispose() => Volatile.Write(ref closed, Closed);

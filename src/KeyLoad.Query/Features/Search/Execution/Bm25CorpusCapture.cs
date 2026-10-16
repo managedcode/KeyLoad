@@ -21,21 +21,22 @@ internal static class Bm25CorpusCapture
             throw Errors.Fail(ErrorCode.Validation, Bm25CorpusProtocol.Invalid);
         }
         work.ConstrainLifetime(originalExpiry);
-        var phase = database.WithQueryView(subjectId, request.Partition, request.Collection,
+        var phase = database.WithQueryView(subjectId, request.Partition, request.Collection, Capability.None,
             (raw, subject, resource) =>
             {
-                var view = work.CreateView(raw);
-                var administrator = database.Principal(view, administratorId, database.EvaluationClock.GetUtcNow());
-                if (!administrator.ClusterAdministrator)
-                {
-                    throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
-                }
                 database.Authorization.RequireFieldUse(subject, resource, request.TextField);
                 var ranker = TextRanker.ForStatistics(request.Text, request.TextField, work,
                     execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters);
                 database.VisitVisibleDocuments(raw, subject, request.Partition, request.Collection, work, ranker.Visit);
                 return database.CaptureBm25CorpusMetadata(raw, subject, resource, request, ranker.CaptureStatistics(),
                     TextProjectionProtocol.TokenizerVersion, commandId, expectedGeneration, originalExpiry, work);
+            }, work, metadata =>
+            {
+                var administrator = database.Principal(metadata, administratorId, database.EvaluationClock.GetUtcNow());
+                if (!administrator.ClusterAdministrator)
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
+                }
             });
         return database.CreateVerifiedBm25CorpusPublication(administratorId, phase, work);
     }

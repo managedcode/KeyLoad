@@ -68,6 +68,10 @@ internal static class RequestCqrsProbeNameValidation
 
     private static bool IsNativeOperationName(string name)
     {
+        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsControlledLifetimeNames.IsName(name))
+        {
+            return true;
+        }
         if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsMovementJournalInventory.IsName(name))
         {
             return true;

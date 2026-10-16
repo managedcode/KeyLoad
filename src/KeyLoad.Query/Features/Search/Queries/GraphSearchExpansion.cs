@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.GraphTraversal;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
 
@@ -58,8 +59,13 @@ internal static class GraphSearchExpansion
             return cached;
         }
         var resource = budget.ReadRecord<ResourceDefinition>(view,
-                KeySpace.Resource(reference.Partition.TenantId, reference.Partition.DatabaseId, reference.Collection))
-            ?? throw Errors.Fail(ErrorCode.Corruption, ResourceMissing);
+                KeySpace.Resource(reference.Partition.TenantId, reference.Partition.DatabaseId, reference.Collection));
+        _ = ResourceLifetimeCatalog.Read(budget.CreateView(view), reference.Partition.TenantId,
+            reference.Partition.DatabaseId, reference.Collection, resource);
+        if (resource is null)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ResourceMissing);
+        }
         if (resource.Kind != ResourceKind.Collection || resource.TransactionDomainId != reference.Partition.TransactionDomainId)
         {
             throw Errors.Fail(ErrorCode.Corruption, DomainMismatch);

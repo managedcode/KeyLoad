@@ -172,5 +172,19 @@ public enum GrainReadKind
     /// <summary>Plans complete supplied whole partitions from six genuine owner samples.</summary>
     PlacementPlan = 83,
     /// <summary>Reads an authorized durable placement intent.</summary>
-    PlacementIntent = 84
+    PlacementIntent = 84,
+    /// <summary>Privately reads an owned document under exact authenticated D1 coverage.</summary>
+    OwnedDocumentV2 = 85,
+    /// <summary>Privately reads a controlled document under exact authenticated D1 coverage.</summary>
+    ControlledDocumentV2 = 86,
+    /// <summary>Privately reads controlled blob data under exact authenticated D1 coverage.</summary>
+    ControlledBlobV2 = 87,
+    /// <summary>Privately executes a partition query leaf under mandatory exact metadata and principal proof.</summary>
+    PartitionQueryLeafV2 = 88,
+    /// <summary>Privately executes one distributed search phase under mandatory exact metadata and principal proof.</summary>
+    DistributedSearchLeafV2 = 89,
+    /// <summary>Privately observes native ANN publication and data under mandatory lifetime coverage.</summary>
+    AnnProjectionObservationV2 = 90,
+    /// <summary>Privately validates an original blob command outcome under mandatory lifetime coverage.</summary>
+    ControlledBlobOutcomeV2 = 91
 }

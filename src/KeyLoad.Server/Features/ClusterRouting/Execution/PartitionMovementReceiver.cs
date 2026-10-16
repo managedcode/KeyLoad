@@ -90,6 +90,17 @@ internal sealed class PartitionMovementReceiver
     internal PhysicalShardRecord LocalOwner()
         => context.LocalOwner();
 
+    internal Task<GrainOperationReply> ExecuteControlledLifetimeAsync(PartitionMovementTransportRequest verified,
+        PartitionMoveLifetimeProofV1 proof, CancellationToken cancellationToken)
+    {
+        if (verified.Action != PartitionMovementTransportAction.Apply
+            || verified.Envelope.Stage != PartitionMovePeerStage.ControlApplyCommand)
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.Invalid);
+        }
+        return context.ApplyWithLifetimeAsync(verified.CommandId, verified.Envelope, proof, cancellationToken);
+    }
+
     internal async Task<GrainOperationReply> ExecuteAsync(PartitionMovementTransportRequest verified,
         CancellationToken cancellationToken)
     {

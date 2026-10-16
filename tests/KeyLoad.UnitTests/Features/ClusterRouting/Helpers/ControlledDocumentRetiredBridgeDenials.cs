@@ -57,7 +57,7 @@ internal static class ControlledDocumentRetiredBridgeDenials
         var sourceBefore = ControlledPartitionMovementExpiryOwnerState.Capture(source);
         var targetBefore = ControlledPartitionMovementExpiryOwnerState.Capture(target);
         var reference = Reference();
-        var readFailure = Assert.ThrowsExactly<KeyLoadException>(() => source.Database.TryCaptureControlledDocumentRead(
+        var readFailure = Assert.ThrowsExactly<KeyLoadException>(() => source.Database.TryCaptureControlledDocumentReadV2(
             DeniedPrincipalId, reference, null, Expiry(source), Work(source, token)));
         await Assert.That(readFailure.Code).IsEqualTo(expected);
         var commandId = Guid.NewGuid();
@@ -76,31 +76,38 @@ internal static class ControlledDocumentRetiredBridgeDenials
     private static async Task ChangedFrameAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, CancellationToken token)
     {
-        var frame = source.Database.CaptureControlledDocumentRead(PhysicalShardCatalogFixture.RootPrincipalId,
-            Reference(), null, Expiry(source), Work(source, token));
+        var frame = source.Database.TryCaptureControlledDocumentReadV2(PhysicalShardCatalogFixture.RootPrincipalId,
+            Reference(), null, Expiry(source), Work(source, token))
+            ?? throw new InvalidOperationException("The authenticated source lifetime frame is absent.");
         var sourceBefore = ControlledPartitionMovementExpiryOwnerState.Capture(source);
         var targetBefore = ControlledPartitionMovementExpiryOwnerState.Capture(target);
-        var changed = frame with
+        var publication = frame.Original.Publication;
+        var placement = publication.Placement with
         {
-            Publication = frame.Publication with
+            Revision = checked(publication.Placement.Revision + EpochStep)
+        };
+        var changedOriginal = frame.Original with
+        {
+            Publication = publication with
             {
-                Placement = frame.Publication.Placement with
-                {
-                    Revision = checked(frame.Publication.Placement.Revision + EpochStep)
-                }
+                Placement = placement
             }
         };
+        var changed = frame with
+        {
+            Original = changedOriginal
+        };
         var sourceFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            source.Database.ValidateControlledDocumentRead(changed, Work(source, token)));
+            source.Database.ValidateControlledDocumentReadV2(changed, Work(source, token)));
         await Assert.That(sourceFailure.Code).IsEqualTo(ErrorCode.OwnershipLost);
         var receiver = Work(target, token);
         var grant = receiver.CreateReadGrant(target.Database.Limits.MaxQueryReadBytes, target.Database.Limits.MaxScanRecords);
-        var targetFailure = Assert.ThrowsExactly<KeyLoadException>(() => target.Database.ReadControlledDocument(
+        var targetFailure = Assert.ThrowsExactly<KeyLoadException>(() => target.Database.ReadControlledDocumentV2(
             PhysicalShardCatalogFixture.RootPrincipalId, changed, receiver, grant, token));
         await Assert.That(targetFailure.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await sourceBefore.AssertUnchangedAsync(source);
         await targetBefore.AssertUnchangedAsync(target);
-        source.Database.ValidateControlledDocumentRead(frame, Work(source, token));
+        source.Database.ValidateControlledDocumentReadV2(frame, Work(source, token));
     }
 
     private static EntityRef Reference() => new(ControlledPartitionMovementCorpus.Partition,

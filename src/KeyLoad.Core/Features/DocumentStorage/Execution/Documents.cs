@@ -124,13 +124,26 @@ public sealed partial class DatabaseEngine
     /// <param name="read">Gate-scoped read callback.</param>
     /// <returns>The callback's owned result.</returns>
     public T WithQueryView<T>(string principalId, PartitionRef partition, string collection,
-        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read) => Store.Read(view =>
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read)
+        => WithQueryView(principalId, partition, collection, Capability.None, read);
+
+    /// <summary>Checks additional native query capabilities before reading private resource metadata in the same cut.</summary>
+    internal T WithQueryView<T>(string principalId, PartitionRef partition, string collection,
+        Capability additionalRequiredCapabilities, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read,
+        ReadExecutionBudget? budget = null, Action<IKeyValueView>? beforeResourceAdmission = null)
+        => Store.Read(raw =>
     {
         ValidatePartition(partition);
+        var view = budget?.CreateView(raw) ?? raw;
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         Authorization.Require(principal, partition, collection, Capability.Query | Capability.DocumentsRead);
+        if (additionalRequiredCapabilities != Capability.None)
+        {
+            Authorization.Require(principal, partition, collection, additionalRequiredCapabilities);
+        }
+        beforeResourceAdmission?.Invoke(view);
         var resource = Resource(view, partition, collection, ResourceKind.Collection);
-        return read(view, principal, resource);
+        return read(raw, principal, resource);
     });
     /// <summary>Reads one visible document from the caller's existing storage cut.</summary>
     /// <param name="view">Current gated storage view.</param>

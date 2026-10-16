@@ -108,7 +108,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
     private async Task<object?> ReadNativeCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
         DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
     {
-        if (kind == GrainReadKind.AnnProjectionObservation)
+        if (kind is GrainReadKind.AnnProjectionObservation or GrainReadKind.AnnProjectionObservationV2)
         {
             return await AnnProjectionObservationRead.ExecuteAsync(localDatabase, services, runtimeClock,
                 principal, request, cancellationToken).ConfigureAwait(true);

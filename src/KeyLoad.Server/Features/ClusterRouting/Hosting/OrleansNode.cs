@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -13,12 +12,11 @@ namespace KeyLoad.Server;
 /// <param name="runtimeOptions">The shared validated options snapshots.</param>
 /// <param name="clock">Borrowed runtime clock.</param>
 /// <param name="physicalOwnerWork">Borrowed physical-owner probe work joined before native teardown.</param>
-/// <param name="blobWireObserver">Optional original fixture observation.</param>
 /// <param name="discoveryOmission">Optional native discovery observation.</param>
 /// <param name="partitionMovementNativeObserver">Optional original native movement observation.</param>
 internal sealed partial class OrleansNode(IServiceProvider applicationServices, IOptions<NodeOptions> nodeOptions,
     ILoggerFactory loggerFactory, ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null,
-    PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null, IControlledBlobWireBorrowObserver? blobWireObserver = null,
+    PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null,
     NativeDiscoveryOmissionOwner? discoveryOmission = null,
     IPartitionMovementNativeObserver? partitionMovementNativeObserver = null) : IAsyncDisposable
 {
@@ -27,7 +25,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     private readonly Lock lifecycle = new();
     private readonly OrleansNodeRequestLifetime requestLifetime = new(runtimeOptions.GrainRouting);
     private readonly OrleansNodeLocalRuntime localRuntime = new(applicationServices, runtimeOptions,
-        clock ?? TimeProvider.System, blobWireObserver);
+        clock ?? TimeProvider.System);
     private readonly OrleansNodeRequestExecutor requests = new(runtimeOptions.GrainRouting,
         loggerFactory.CreateLogger<OrleansNode>());
     private readonly NativeConnectionOwnerIdentity connectionOwner = new();

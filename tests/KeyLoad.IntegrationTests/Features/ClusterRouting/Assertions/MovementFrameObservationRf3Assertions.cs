@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage.ZoneTree;
@@ -43,7 +42,7 @@ internal static class MovementFrameObservationRf3Assertions
     {
         var original = entry.Operation
             ?? throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid);
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(original);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(original);
         var admission = phase.ReceiverEffectAdmission
             ?? throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid);
         await Assert.That(observed.SessionId).IsEqualTo(fixture.SessionId);

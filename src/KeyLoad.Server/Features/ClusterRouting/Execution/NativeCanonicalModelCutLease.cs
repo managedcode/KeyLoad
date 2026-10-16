@@ -65,6 +65,18 @@ internal sealed class NativeCanonicalModelCutLease : IDisposable
             RequestCqrsProbePhase.RetireOperationSealed);
     }
 
+    internal void Bind(NativeCommandLifetimeCutRequest request)
+    {
+        NativeCommandLifetimeCutCodec.Validate(request);
+        BindCore(request.ArmId, request.SessionId, request.CommandId, request.PrincipalId,
+            RequestCqrsProbePhase.ControlledLifetimeReplayBeforeDispatch);
+        if (arm?.Record.Partition?.ToPartition() != request.Partition)
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
+        RequireCurrent();
+    }
+
     private void BindCore(Guid armId, string sessionId, Guid commandId, string principalId,
         RequestCqrsProbePhase? requiredPhase)
     {

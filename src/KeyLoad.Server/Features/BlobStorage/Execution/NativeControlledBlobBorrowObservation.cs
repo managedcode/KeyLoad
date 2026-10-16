@@ -11,51 +11,80 @@ internal static class NativeControlledBlobBorrowObservation
         RemoteModelNativeRequest original, RemoteDocumentMac borrowedSourceMac,
         long maximumReplyBytes, CancellationToken originalToken)
     {
-        if (observer is null || original.Channel != RemoteModelNativeChannel.DocumentEnvelope)
+        if (observer is null)
+        {
+            return;
+        }
+        if (original.Channel == RemoteModelNativeChannel.ResourceLifetimeRead)
+        {
+            var call = NativeSerialization.Deserialize<RemoteResourceLifetimeReadCallV2>(original.Payload.Span);
+            if (call.Kind != RemoteResourceLifetimeReadKindV2.ControlledBlob)
+            {
+                return;
+            }
+            originalToken.ThrowIfCancellationRequested();
+            RemoteResourceLifetimeReadValidation.RequireEnvelope(original, call);
+            RequireCanonical(original, RemoteDocumentWire.Encode(call), borrowedSourceMac);
+            if (!observer.Select(call, originalToken))
+            {
+                return;
+            }
+            await ObserveSelectedAsync(client, destination, actualAddress, original, borrowedSourceMac,
+                maximumReplyBytes,
+                dispatcher => new(call, original.Signature, dispatcher, originalToken),
+                catalog => observer.ObserveAsync(call, original, catalog, originalToken), originalToken).ConfigureAwait(false);
+            return;
+        }
+        if (original.Channel != RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
         {
             return;
         }
         originalToken.ThrowIfCancellationRequested();
-        var envelope = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span);
-        if (envelope.ControlledBlob is not { } call)
+        var outcome = NativeSerialization.Deserialize<RemoteControlledBlobOutcomeCallV2>(original.Payload.Span);
+        RemoteControlledBlobOutcomeEndpointV2.RequireEnvelope(original, outcome);
+        RequireCanonical(original, RemoteDocumentWire.Encode(outcome), borrowedSourceMac);
+        if (!observer.Select(outcome, originalToken))
         {
             return;
         }
-        if (envelope.Document is not null || envelope.Controlled is not null || envelope.QueueTransfer is not null
-            || !borrowedSourceMac.Verify(original.Payload.Span, original.Signature, reply: false)
-            || !original.Payload.Span.SequenceEqual(RemoteDocumentWire.Encode(envelope).AsSpan()))
+        await ObserveSelectedAsync(client, destination, actualAddress, original, borrowedSourceMac,
+            maximumReplyBytes,
+            dispatcher => new(outcome, original.Signature, dispatcher, originalToken),
+            catalog => observer.ObserveAsync(outcome, original, catalog, originalToken), originalToken).ConfigureAwait(false);
+    }
+
+    private static void RequireCanonical(RemoteModelNativeRequest original, byte[] canonical, RemoteDocumentMac mac)
+    {
+        if (!mac.Verify(original.Payload.Span, original.Signature, reply: false)
+            || !original.Payload.Span.SequenceEqual(canonical))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
         }
-        if (!observer.Select(call, originalToken))
-        {
-            return;
-        }
+    }
+
+    private static async Task ObserveSelectedAsync(RemoteModelNativeClient client,
+        RegisteredPhysicalOwnerV1 destination, SiloAddress actualAddress, RemoteModelNativeRequest original,
+        RemoteDocumentMac borrowedSourceMac, long maximumReplyBytes,
+        Func<NativeControlledBlobFaultDispatcher, NativeControlledBlobBorrowedCatalog> createCatalog,
+        Func<NativeControlledBlobBorrowedCatalog, ValueTask> observe, CancellationToken originalToken)
+    {
         var dispatcher = new NativeControlledBlobFaultDispatcher(client, destination, actualAddress,
             original, borrowedSourceMac, maximumReplyBytes, originalToken);
         var failures = new List<Exception>();
         try
         {
             NativeControlledBlobBorrowedCatalog catalog;
-            await using ((catalog = new NativeControlledBlobBorrowedCatalog(
-                call, original.Signature, dispatcher, originalToken)).ConfigureAwait(false))
+            await using ((catalog = createCatalog(dispatcher)).ConfigureAwait(false))
             {
-                await ServerFailureObserver.ObserveAsync(
-                    () => observer.ObserveAsync(call, original, catalog, originalToken).AsTask(), failures).ConfigureAwait(false);
+                await ServerFailureObserver.ObserveAsync(() => observe(catalog).AsTask(), failures).ConfigureAwait(false);
             }
             if (failures.Count == NoRecordedFailures)
             {
                 catalog.RequireComplete();
             }
         }
-        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
+        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
         await client.RequireBeforeDispatchAsync(destination, original, borrowedSourceMac, originalToken).ConfigureAwait(false);
     }

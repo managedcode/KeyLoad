@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -18,7 +17,7 @@ internal sealed class Bm25PortableMovementBorrow : IGrainPartitionMovementSealed
 
     public async ValueTask BorrowAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
     {
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
         if (phase.Stage != PartitionMovePeerStage.Retire || phase.ReceiverEffectAdmission is null)
         {
             throw new InvalidOperationException("The original native Retire authority is absent.");

@@ -1,6 +1,7 @@
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
+using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -8,8 +9,9 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private PartitionControlEffectPayload ApplyControlledDocumentEffect(IAtomicTransaction transaction,
-        PartitionMovePhaseCommand phase, Guid effectId, long appliedPosition, DateTimeOffset evaluatedAt)
+        PartitionMovePhaseCommand phase, PartitionMoveLifetimeProofV1 proof, Guid effectId, long appliedPosition, DateTimeOffset evaluatedAt)
     {
+        var coverage = PartitionControlLifetimeProofValidation.Require(phase, proof, Limits.MaxBatchBytes);
         var body = NativeSerialization.Deserialize<PartitionControlApplyBody>(phase.Body.Span);
         var placement = ReadPlacementWitness(transaction, phase.Partition);
         OperationResult originalResult;
@@ -18,7 +20,7 @@ public sealed partial class DatabaseEngine
         {
             var admitted = RequireControlledDocumentTarget(transaction, phase, body, effectId, evaluatedAt);
             var controlled = new PartitionControlEffectTransaction(transaction, phase.Partition,
-                body.Delegation.Resources, Limits.MaxBatchBytes);
+                body.Delegation.Resources, coverage, Limits.MaxBatchBytes);
             var original = admitted.Original with
             {
                 EvaluatedAt = evaluatedAt

@@ -5,6 +5,28 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private void RequireRecurringSagaCapabilities(PrincipalRecord principal, Mutation mutation)
+    {
+        switch (mutation)
+        {
+            case ConfigureRecurringSchedule configure:
+                RequireScheduleCapability(principal, configure.Definition.Lane);
+                break;
+            case EmitRecurringOccurrences emit:
+                RequireScheduleCapability(principal, emit.Lane);
+                break;
+            case CancelRecurringSchedule cancel:
+                RequireScheduleCapability(principal, cancel.Lane);
+                break;
+            case CompareExchangeSaga saga:
+                RequireScheduleCapability(principal, saga.Lane);
+                break;
+            case ExpireSaga expire:
+                RequireScheduleCapability(principal, expire.Lane);
+                break;
+        }
+    }
+
     internal void AuthorizeRecurringSagaRequest(IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, Mutation mutation)
     {
@@ -13,11 +35,13 @@ public sealed partial class DatabaseEngine
             case ConfigureRecurringSchedule configure:
                 var definition = NormalizeScheduleDefinition(configure.Definition);
                 ValidateScheduleScope(definition.Lane, definition.ScheduleId, partition);
+                RequireScheduleCapability(principal, definition.Lane);
                 RequireScheduleWriteAuthority(principal, definition.Lane, Resource(view, partition,
                     definition.Lane.Queue, ResourceKind.WorkQueue));
                 break;
             case EmitRecurringOccurrences emit:
                 ValidateScheduleScope(emit.Lane, emit.ScheduleId, partition);
+                RequireScheduleCapability(principal, emit.Lane);
                 RequireScheduleWriteAuthority(principal, emit.Lane, Resource(view, partition,
                     emit.Lane.Queue, ResourceKind.WorkQueue));
                 break;
@@ -35,6 +59,7 @@ public sealed partial class DatabaseEngine
                 var sagaRecord = RequireSaga(view, expire.Lane, expire.SagaId);
                 if (sagaRecord.Timeout is { } timeout)
                 {
+                    RequireScheduleCapability(principal, timeout.Queue);
                     var destination = Resource(view, partition, timeout.Queue.Queue, ResourceKind.WorkQueue);
                     RequireScheduleWriteAuthority(principal, timeout.Queue, destination);
                 }
@@ -137,8 +162,8 @@ public sealed partial class DatabaseEngine
     {
         var record = RequireSchedule(view, lane, scheduleId);
         var creator = Principal(view, record.CreatorPrincipalId, now);
-        var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireScheduleCapability(creator, lane);
+        var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireQueueFieldUses(creator, resource);
     }
 
@@ -158,8 +183,8 @@ public sealed partial class DatabaseEngine
     {
         var record = RequireSchedule(view, lane, scheduleId);
         var creator = Principal(view, record.CreatorPrincipalId, now);
-        var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireScheduleCapability(creator, lane);
+        var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireQueueFieldWrites(creator, resource);
     }
 
@@ -180,11 +205,12 @@ public sealed partial class DatabaseEngine
     {
         var creator = Principal(view, record.CreatorPrincipalId, now);
         var lane = record.Lane;
-        var source = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireScheduleCapability(creator, lane);
+        var source = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireQueueFieldWrites(creator, source);
         if (timeout is not null)
         {
+            RequireScheduleCapability(creator, timeout.Queue);
             var destination = Resource(view, lane.Partition, timeout.Queue.Queue, ResourceKind.WorkQueue);
             RequireScheduleWriteAuthority(creator, timeout.Queue, destination);
         }
@@ -195,11 +221,12 @@ public sealed partial class DatabaseEngine
     {
         var record = RequireSaga(view, lane, sagaId);
         var creator = Principal(view, record.CreatorPrincipalId, now);
-        var source = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireScheduleCapability(creator, lane);
+        var source = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireQueueFieldUses(creator, source);
         if (timeout && record.Timeout is { } definition)
         {
+            RequireScheduleCapability(creator, definition.Queue);
             var destination = Resource(view, lane.Partition, definition.Queue.Queue, ResourceKind.WorkQueue);
             RequireScheduleWriteAuthority(creator, definition.Queue, destination);
         }

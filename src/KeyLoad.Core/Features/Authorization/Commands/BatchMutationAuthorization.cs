@@ -22,6 +22,8 @@ public sealed partial class DatabaseEngine
             }
             JsonData.Identifier(mutation.Resource);
             Authorization.Require(principal, request.Partition, mutation.Resource, BatchMutationCapability(mutation));
+            RequireQueueTransferCapabilities(principal, mutation);
+            RequireRecurringSagaCapabilities(principal, mutation);
             var resource = BatchResource(view, request.Partition, mutation.Resource, admission);
             if (mutation is StoreAggregateSnapshot)
             {
@@ -43,17 +45,7 @@ public sealed partial class DatabaseEngine
         {
             return Resource(view, partition, name, kind);
         }
-        var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, name))
-            ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
-        if (resource.TransactionDomainId != partition.TransactionDomainId)
-        {
-            throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail);
-        }
-        if (kind is { } required && resource.Kind != required)
-        {
-            throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
-        }
-        return resource;
+        return BindResourceDefinition(view, partition, name, kind);
     }
 
     private static Capability BatchMutationCapability(Mutation mutation)
@@ -96,6 +88,8 @@ public sealed partial class DatabaseEngine
         foreach (var mutation in command.Mutations)
         {
             Authorization.Require(principal, command.Partition, mutation.Resource, BatchMutationCapability(mutation));
+            RequireQueueTransferCapabilities(principal, mutation);
+            RequireRecurringSagaCapabilities(principal, mutation);
             if (mutation is QueueToGraph forward)
             {
                 ValidateForward(forward);

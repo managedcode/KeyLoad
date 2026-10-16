@@ -1,11 +1,10 @@
-using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 internal static class NativeDiscoveryOmissionComposition
 {
-    internal static OrleansNode CreateNode(IServiceProvider provider, IControlledBlobWireBorrowObserver? blobObserver)
+    internal static OrleansNode CreateNode(IServiceProvider provider)
     {
         var options = provider.GetRequiredService<IOptions<NodeOptions>>();
         if (options.Value.NativeDiscoveryOmission.Enabled)
@@ -14,10 +13,8 @@ internal static class NativeDiscoveryOmissionComposition
                 provider.GetRequiredService<IOptions<KeyLoad.Server.Features.ClusterRouting.RequestProbeExecutionOptions>>(),
                 provider.GetRequiredService<IHttpContextAccessor>());
             owner.AttachPurposeObserver(provider.GetRequiredService<IOptions<KeyLoad.Server.Features.ClusterRouting.RequestProbeExecutionOptions>>());
-            return blobObserver is null ? ActivatorUtilities.CreateInstance<OrleansNode>(provider, owner)
-                : ActivatorUtilities.CreateInstance<OrleansNode>(provider, owner, blobObserver);
+            return ActivatorUtilities.CreateInstance<OrleansNode>(provider, owner);
         }
-        return blobObserver is null ? ActivatorUtilities.CreateInstance<OrleansNode>(provider)
-            : ActivatorUtilities.CreateInstance<OrleansNode>(provider, blobObserver);
+        return ActivatorUtilities.CreateInstance<OrleansNode>(provider);
     }
 }

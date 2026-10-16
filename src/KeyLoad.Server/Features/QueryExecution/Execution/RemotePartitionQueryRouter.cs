@@ -28,7 +28,7 @@ internal sealed class RemotePartitionQueryRouter(OrleansNode node, PartitionHost
                 using var original = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, expiry.Token);
                 var queries = node.BorrowPartitionQueries();
-                var reads = new RemotePartitionQueryLeafRead(node, partition, options, client, queries);
+                var reads = new RemotePartitionQueryLeafRead(node, partition, options, client);
                 page = await PartitionQueryRemoteExecution.ExecuteAsync(queries, request,
                     (plan, grant, budget) => reads.Prepare(envelope, principal.Id, plan, grant, budget),
                     token => reads.RevalidateAsync(principal.Id, token), clock, original.Token).ConfigureAwait(false);

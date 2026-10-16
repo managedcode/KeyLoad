@@ -25,36 +25,36 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
         {
             expiry = envelope.ExpiresAt;
         }
-        var frame = partition.Database.TryCaptureControlledBlobRead(principalId, purpose, nativeRequest, expiry, work);
+        var frame = partition.Database.TryCaptureControlledBlobReadV2(principalId, purpose, nativeRequest, expiry, work);
         if (frame is null)
         {
             return (false, null);
         }
-        var observed = await ReadFrameAsync(envelope.RequestId, frame, work, token).ConfigureAwait(false);
+        var observed = await ReadDataFrameAsync(envelope.RequestId, frame, work, token).ConfigureAwait(false);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        partition.Database.ValidateControlledBlobRead(frame, work);
+        partition.Database.ValidateControlledBlobReadV2(frame, work);
         work.Check();
         return (true, observed.NativeValue);
     }
 
     internal async Task<OperationResult> ObserveOutcomeAsync(Guid ingressRequestId,
-        ControlledBlobReadFrame frame, ReadExecutionBudget work, CancellationToken token)
+        ControlledBlobReadFrameV2 frame, ReadExecutionBudget work, CancellationToken token)
     {
-        var observed = await ReadFrameAsync(ingressRequestId, frame, work, token).ConfigureAwait(false);
-        if (!observed.OutcomeValidated || observed.NativeValue is not null || frame.OriginalOutcome is null)
+        var observed = await ReadOutcomeFrameAsync(ingressRequestId, frame, work, token).ConfigureAwait(false);
+        if (!observed.OutcomeValidated || observed.NativeValue is not null || frame.Original.OriginalOutcome is null)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
         }
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        partition.Database.ValidateControlledBlobOutcome(frame, work);
+        partition.Database.ValidateControlledBlobOutcomeV2(frame, work);
         work.Check();
-        return frame.OriginalOutcome.Result;
+        return frame.Original.OriginalOutcome.Result;
     }
 
-    private async Task<ControlledBlobReadResult> ReadFrameAsync(Guid ingressRequestId,
-        ControlledBlobReadFrame frame, ReadExecutionBudget work, CancellationToken token)
+    private async Task<ControlledBlobReadResult> ReadOutcomeFrameAsync(Guid ingressRequestId,
+        ControlledBlobReadFrameV2 frame, ReadExecutionBudget work, CancellationToken token)
     {
-        var destination = RequireDestination(frame);
+        var destination = RequireDestination(frame.Original);
         var metadata = work.ReadBytes;
         var maximumBytes = Math.Min(limits.Value.MaxBatchBytes,
             limits.Value.MaxQueryReadBytes - checked(metadata * RevalidationPasses));
@@ -65,17 +65,66 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
         var maximumRecords = Math.Min(limits.Value.MaxBatchMutations, limits.Value.MaxScanRecords);
         var grant = work.CreateReadGrant(maximumBytes, maximumRecords);
         var maximumReply = Math.Min(limits.Value.MaxBatchBytes, RemoteDocumentProtocol.MaximumBodyBytes);
-        var capability = new ControlledBlobReadRequest(frame, maximumBytes, maximumRecords, maximumReply);
+        var capability = new ControlledBlobReadRequest(frame.Original, maximumBytes, maximumRecords, maximumReply);
         var discovery = node.Discovery?.Read() ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
         var call = new RemoteControlledBlobCall(RemoteDocumentProtocol.Version, ingressRequestId,
             Guid.NewGuid().ToString(NonceFormat), partition.Configuration.LocalId, discovery.SiloAddress,
             PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition).Owner, destination, capability, maximumReply);
-        var observed = await client.ReadControlledBlobAsync(call, token).ConfigureAwait(false);
+        var wrapped = new RemoteControlledBlobOutcomeCallV2(call, frame.Coverage);
+        if (NativeSerialization.Measure(wrapped) > limits.Value.MaxBatchBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.Unavailable);
+        }
+        work.MeasureResult(wrapped);
+        var observed = await client.ReadControlledBlobOutcomeV2Async(wrapped, token).ConfigureAwait(false);
         work.ImportReadGrant(grant, observed.ReadBytes, observed.ExaminedRecords);
         work.MeasureResult(observed);
         work.Check();
         return observed;
     }
+
+    private async Task<ControlledBlobReadResultV2> ReadDataFrameAsync(Guid ingressRequestId,
+        ControlledBlobReadFrameV2 frame, ReadExecutionBudget work, CancellationToken token)
+    {
+        var original = frame.Original;
+        var destination = RequireDestination(original);
+        var maximumBytes = Math.Min(limits.Value.MaxBatchBytes,
+            limits.Value.MaxQueryReadBytes - checked(work.ReadBytes * RevalidationPasses));
+        if (maximumBytes <= MinimumBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.Unavailable);
+        }
+        var maximumRecords = Math.Min(limits.Value.MaxBatchMutations, limits.Value.MaxScanRecords);
+        var grant = work.CreateReadGrant(maximumBytes, maximumRecords);
+        var maximumReply = Math.Min(limits.Value.MaxBatchBytes, RemoteDocumentProtocol.MaximumBodyBytes);
+        var capability = new ControlledBlobReadRequestV2(frame, maximumBytes, maximumRecords, maximumReply);
+        var discovery = node.Discovery?.Read() ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        var call = new RemoteResourceLifetimeReadCallV2(RemoteResourceLifetimeReadProtocol.Version,
+            RemoteResourceLifetimeReadKindV2.ControlledBlob, ingressRequestId, Guid.NewGuid().ToString(NonceFormat),
+            original.ExpiresAt, partition.Configuration.LocalId, discovery.SiloAddress,
+            PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition).Owner, destination,
+            NativeSerialization.Serialize(capability), maximumReply);
+        var bytes = await client.ReadLifetimeAsync(call, token).ConfigureAwait(false);
+        var observed = NativeSerialization.Deserialize<ControlledBlobReadResultV2>(bytes.Span);
+        if (observed is null || !ValidDataResult(original.Purpose, observed.NativeValue))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
+        }
+        work.ImportReadGrant(grant, observed.ReadBytes, observed.ExaminedRecords);
+        work.MeasureResult(observed);
+        work.Check();
+        return observed;
+    }
+
+    private static bool ValidDataResult(ControlledBlobReadPurpose purpose, object? value)
+        => purpose switch
+        {
+            ControlledBlobReadPurpose.Metadata => value is null or BlobMetadata,
+            ControlledBlobReadPurpose.UploadInfo => value is null or BlobUploadInfo,
+            ControlledBlobReadPurpose.Range => value is BlobReadResult,
+            ControlledBlobReadPurpose.List => value is BlobListPage,
+            _ => false
+        };
 
     private RegisteredPhysicalOwnerV1 RequireDestination(ControlledBlobReadFrame frame)
     {

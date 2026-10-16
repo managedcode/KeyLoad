@@ -7,9 +7,14 @@ internal static class RemoteModelNativeEffects
 {
     internal static bool MayHaveEffects(RemoteModelNativeChannel channel, ReadOnlyMemory<byte> original)
     {
-        if (channel == RemoteModelNativeChannel.AnnProjectionObservation)
+        if (channel is RemoteModelNativeChannel.AnnProjectionObservation or RemoteModelNativeChannel.ResourceLifetimeRead
+            or RemoteModelNativeChannel.ResourceLifetimeAnnRead)
         {
             return false;
+        }
+        if (channel == RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
+        {
+            return true;
         }
         if (channel == RemoteModelNativeChannel.EventVector)
         {
@@ -24,7 +29,6 @@ internal static class RemoteModelNativeEffects
         {
             return queue.Stage == RemoteQueueTransferPeerStage.Accept;
         }
-        // Controlled reads can durably issue or consume grants. Their uncertain cleanup is an effect boundary.
-        return call.Controlled is not null || call.ControlledBlob is not null;
+        return false;
     }
 }

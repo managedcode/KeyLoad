@@ -40,7 +40,7 @@ internal static class RequestCqrsProbeArmRecordValidation
                     || value.Partition is not null || value.SourceRequestId is not null || value.SourceArmId is not null
                     || value.TargetVoter is not null)
             || value.Phase is (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
-                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
+                && !RequestCqrsLifetimeReadProbe.ValidArm(value)
             || !RequestCqrsCanonicalArmValidation.Valid(value)
             || value.TargetVoter is { } target && strictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
             || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))

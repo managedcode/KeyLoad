@@ -24,6 +24,8 @@ public sealed partial class DatabaseEngine
     {
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         RequireTransferAdministrator(principal);
+        RequireTransferCapabilities(principal, request.SourceQueue, Capability.QueueInspect);
+        RequireTransferCapabilities(principal, request.DestinationQueue, Capability.QueueInspect);
         var source = Resource(view, request.SourceQueue.Partition, request.SourceQueue.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, request.SourceQueue, source);
         var current = CaptureRemoteTransferTarget(view, request.DestinationQueue);

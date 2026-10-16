@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -56,7 +55,7 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Assertions
             await Assert.That(operation.PrincipalId).IsEqualTo(source ? grant.OperatorPrincipalId : PartitionStoreProtocol.AdministratorId);
             await Assert.That(expected.ContainsKey(operation.Id)).IsTrue();
             await Assert.That(seen.Add(operation.Id)).IsTrue();
-            var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+            var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
             await Assert.That(phase.Stage).IsEqualTo(expected[operation.Id]);
             await SqlRf3Protocol.EqualAsync(seed.Partition, phase.Partition);
             await Assert.That(phase.MoveId).IsEqualTo(seed.FirstRequest.MoveId);

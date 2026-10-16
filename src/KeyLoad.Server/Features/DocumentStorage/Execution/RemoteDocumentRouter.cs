@@ -1,6 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
@@ -9,7 +7,6 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
     IOptions<NodeOptions> nodeOptions, IOptions<DatabaseLimits> limits, RemoteDocumentClient client,
     RemoteDocumentWorkOwner owner, TimeProvider clock) : IRemoteDocumentReadRouter, IRemoteQueueTransferReceiptRouter
 {
-    private const string NonceFormat = "N";
 
     public async Task<DocumentResult?> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
         GetDocumentRequest request, CancellationToken cancellationToken)
@@ -31,29 +28,10 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
                     document = controlled.Document;
                     return;
                 }
-                var fence = partition.Database.CaptureRemoteDocumentRead(principal.Id, request.Reference, original.Token);
-                if (fence is null)
-                {
-                    document = partition.Database.GetDocument(principal.Id, request.Reference, request.MinimumToken, original.Token);
-                    return;
-                }
-                var settings = nodeOptions.Value.PhysicalGroupTrust;
-                if (!settings.RemoteDocumentReads || settings.Role != PhysicalGroupTrustRole.Control
-                    || !PhysicalOwnerEntryValidation.Same(fence.Destination,
-                        PhysicalOwnerConfiguredTuples.Destination(nodeOptions.Value, partition)))
-                {
-                    throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
-                }
-                var discovery = node.Discovery?.Read()
-                    ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
-                var call = new RemoteDocumentCallV1(RemoteDocumentProtocol.Version, envelope.RequestId,
-                    Guid.NewGuid().ToString(NonceFormat), envelope.ExpiresAt, partition.Configuration.LocalId,
-                    discovery.SiloAddress, PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition).Owner, fence, request);
-                var result = await client.ReadAsync(call, original.Token).ConfigureAwait(false);
-                await partition.Coordinator.ReadBarrierAsync(original.Token).ConfigureAwait(false);
-                partition.Database.ValidateRemoteDocumentRead(fence, request.Reference, original.Token);
-                original.Token.ThrowIfCancellationRequested();
-                document = result.Document;
+                var ordinary = await new OrdinaryDocumentLifetimeSourceRead(node, partition, nodeOptions, limits, client, clock)
+                    .TryReadAsync(envelope, principal.Id, request, original.Token).ConfigureAwait(false);
+                document = ordinary.Routed ? ordinary.Document
+                    : partition.Database.GetDocument(principal.Id, request.Reference, request.MinimumToken, original.Token);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

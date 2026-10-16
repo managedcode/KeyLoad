@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.BlobStorage;
@@ -10,12 +11,13 @@ internal sealed class NativeBlobWireClaims(IOptions<OrleansMembershipOptions> me
     private const string CompactNonceFormat = "N";
 
     internal static NativeBlobWireClaim Create(NativeBlobWireOwner owner, string ownerDigest,
-        string armsDigest, NativeBlobWireArm arm, RemoteControlledBlobCall call)
+        string armsDigest, NativeBlobWireArm arm, RemoteControlledBlobOutcomeCallV2 original)
     {
+        var call = original.Original;
         var frame = call.Request.Frame;
         return new(NativeBlobWireProbeProtocol.Version, owner.SessionId, ownerDigest, armsDigest,
             arm.ArmId, arm.Identity, call.CallerVoter, call.CallerSiloAddress, call.RequestId,
-            frame.QueryId, call.Nonce, frame.ExpiresAt, Digest(call));
+            frame.QueryId, call.Nonce, frame.ExpiresAt, Digest(original));
     }
 
     internal void Require(NativeBlobWireOwner owner, string ownerDigest, string armsDigest,
@@ -34,7 +36,7 @@ internal sealed class NativeBlobWireClaims(IOptions<OrleansMembershipOptions> me
         shape.Text(claim.CallerVoter);
     }
 
-    internal static string Digest(RemoteControlledBlobCall call)
+    internal static string Digest(RemoteControlledBlobOutcomeCallV2 call)
     {
         if (NativeSerialization.Measure(call) > RequestCqrsProbeProtocol.MaximumRecordBytes)
         {
@@ -43,9 +45,10 @@ internal sealed class NativeBlobWireClaims(IOptions<OrleansMembershipOptions> me
         return NativeBlobWireCodec.Digest(NativeSerialization.Serialize(call));
     }
 
-    internal static void RequireOwn(NativeBlobWireClaim claim, RemoteControlledBlobCall call)
+    internal static void RequireOwn(NativeBlobWireClaim claim, RemoteControlledBlobOutcomeCallV2 original)
     {
-        if (claim.OriginalCallDigest != Digest(call) || claim.CallerVoter != call.CallerVoter
+        var call = original.Original;
+        if (claim.OriginalCallDigest != Digest(original) || claim.CallerVoter != call.CallerVoter
             || claim.CallerSiloAddress != call.CallerSiloAddress || claim.RequestId != call.RequestId
             || claim.QueryId != call.Request.Frame.QueryId || claim.Nonce != call.Nonce
             || claim.ExpiresAt != call.Request.Frame.ExpiresAt)
@@ -53,5 +56,34 @@ internal sealed class NativeBlobWireClaims(IOptions<OrleansMembershipOptions> me
             throw Invalid();
         }
     }
+    internal static NativeBlobWireClaim Create(NativeBlobWireOwner owner, string ownerDigest,
+        string armsDigest, NativeBlobWireArm arm, RemoteResourceLifetimeReadCallV2 call)
+    {
+        var frame = NativeControlledBlobLifetimeCall.Require(call).Frame.Original;
+        return new(NativeBlobWireProbeProtocol.Version, owner.SessionId, ownerDigest, armsDigest,
+            arm.ArmId, arm.Identity, call.CallerVoter, call.CallerSiloAddress, call.RequestId,
+            frame.QueryId, call.Nonce, call.ExpiresAt, Digest(call));
+    }
+
+    internal static string Digest(RemoteResourceLifetimeReadCallV2 call)
+    {
+        if (NativeSerialization.Measure(call) > RequestCqrsProbeProtocol.MaximumRecordBytes)
+        {
+            throw Invalid();
+        }
+        return NativeBlobWireCodec.Digest(NativeSerialization.Serialize(call));
+    }
+
+    internal static void RequireOwn(NativeBlobWireClaim claim, RemoteResourceLifetimeReadCallV2 call)
+    {
+        var frame = NativeControlledBlobLifetimeCall.Require(call).Frame.Original;
+        if (claim.OriginalCallDigest != Digest(call) || claim.CallerVoter != call.CallerVoter
+            || claim.CallerSiloAddress != call.CallerSiloAddress || claim.RequestId != call.RequestId
+            || claim.QueryId != frame.QueryId || claim.Nonce != call.Nonce || claim.ExpiresAt != call.ExpiresAt)
+        {
+            throw Invalid();
+        }
+    }
+
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);
 }

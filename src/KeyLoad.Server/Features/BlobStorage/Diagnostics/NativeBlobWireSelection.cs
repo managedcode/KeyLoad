@@ -1,11 +1,12 @@
 using KeyLoad.Clustering;
+using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.BlobStorage;
 
 internal sealed class NativeBlobWireSelection(NativeBlobWireFiles files, NativeBlobWireCodec codec,
     NativeBlobWireState state, NativeBlobWireClaims claims)
 {
-    internal bool Select(RemoteControlledBlobCall call, CancellationToken token)
+    internal bool Select(RemoteControlledBlobOutcomeCallV2 call, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var snapshot = state.Read();
@@ -19,6 +20,29 @@ internal sealed class NativeBlobWireSelection(NativeBlobWireFiles files, NativeB
             return false;
         }
         var expected = NativeBlobWireClaims.Create(snapshot.Owner, snapshot.OwnerDigest, armsDigest, arm, call);
+        return Publish(snapshot, armsDigest, arm, expected, token);
+    }
+
+    internal bool Select(RemoteResourceLifetimeReadCallV2 call, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        var snapshot = state.Read();
+        if (snapshot.Arms is not { } arms || snapshot.ArmsDigest is not { } armsDigest)
+        {
+            return false;
+        }
+        var arm = NativeBlobWireScope.Match(snapshot.Owner, arms, call);
+        if (arm is null)
+        {
+            return false;
+        }
+        var expected = NativeBlobWireClaims.Create(snapshot.Owner, snapshot.OwnerDigest, armsDigest, arm, call);
+        return Publish(snapshot, armsDigest, arm, expected, token);
+    }
+
+    private bool Publish(NativeBlobWireSnapshot snapshot, string armsDigest, NativeBlobWireArm arm,
+        NativeBlobWireClaim expected, CancellationToken token)
+    {
         claims.Require(snapshot.Owner, snapshot.OwnerDigest, armsDigest, arm, expected);
         var name = NativeBlobWireNames.Claim(arm.Identity);
         var failures = new List<Exception>();
@@ -62,7 +86,24 @@ internal sealed class NativeBlobWireSelection(NativeBlobWireFiles files, NativeB
     }
 
     internal (NativeBlobWireSnapshot Snapshot, NativeBlobWireClaim Claim, string Digest) RequireSelected(
-        RemoteControlledBlobCall call, CancellationToken token)
+        RemoteControlledBlobOutcomeCallV2 call, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        var snapshot = state.Read();
+        if (snapshot.Arms is not { } arms || snapshot.ArmsDigest is not { } armsDigest)
+        {
+            throw Invalid();
+        }
+        var arm = NativeBlobWireScope.Match(snapshot.Owner, arms, call) ?? throw Invalid();
+        var bytes = files.Read(NativeBlobWireNames.Claim(arm.Identity));
+        var claim = codec.Read<NativeBlobWireClaim>(bytes);
+        claims.Require(snapshot.Owner, snapshot.OwnerDigest, armsDigest, arm, claim);
+        NativeBlobWireClaims.RequireOwn(claim, call);
+        return (snapshot, claim, NativeBlobWireCodec.Digest(bytes));
+    }
+
+    internal (NativeBlobWireSnapshot Snapshot, NativeBlobWireClaim Claim, string Digest) RequireSelected(
+        RemoteResourceLifetimeReadCallV2 call, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var snapshot = state.Read();

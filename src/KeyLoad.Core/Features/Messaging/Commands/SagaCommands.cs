@@ -56,6 +56,7 @@ public sealed partial class DatabaseEngine
         }
         _ = Resource(tx, partition, request.Lane.Queue, ResourceKind.WorkQueue);
         RequireSagaCreator(tx, record.Lane, record.SagaId, now, true);
+        RequireScheduleCapability(principal, timeout.Queue);
         var destination = Resource(tx, partition, timeout.Queue.Queue, ResourceKind.WorkQueue);
         RequireScheduleWriteAuthority(principal, timeout.Queue, destination);
         var message = SagaTimeoutMessage(record, timeout, deadline);
@@ -76,12 +77,13 @@ public sealed partial class DatabaseEngine
     private CompareExchangeSaga AuthorizeSagaWrite(IKeyValueView view, PrincipalRecord principal,
         CompareExchangeSaga request, PartitionRef partition)
     {
-        var source = Resource(view, partition, request.Lane.Queue, ResourceKind.WorkQueue);
         RequireScheduleCapability(principal, request.Lane);
+        var source = Resource(view, partition, request.Lane.Queue, ResourceKind.WorkQueue);
         RequireQueueFieldWrites(principal, source);
         var normalized = NormalizeSagaRequest(request, partition, DateTimeOffset.MinValue);
         if (normalized.Timeout is { } timeout)
         {
+            RequireScheduleCapability(principal, timeout.Queue);
             var destination = Resource(view, partition, timeout.Queue.Queue, ResourceKind.WorkQueue);
             RequireScheduleWriteAuthority(principal, timeout.Queue, destination);
         }

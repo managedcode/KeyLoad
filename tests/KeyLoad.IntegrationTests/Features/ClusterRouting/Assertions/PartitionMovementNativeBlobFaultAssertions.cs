@@ -12,7 +12,7 @@ internal static class PartitionMovementNativeBlobFaultAssertions
         IReadOnlyList<ReplicaSiloDiscovery> destination, string sourceSecret, string destinationSecret, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (original.Channel != RemoteModelNativeChannel.DocumentEnvelope || original.Payload.IsEmpty
+        if (original.Channel is not (RemoteModelNativeChannel.ResourceLifetimeBlobOutcome or RemoteModelNativeChannel.ResourceLifetimeRead) || original.Payload.IsEmpty
             || fault.Payload.IsEmpty || fault.Payload.Length > RemoteDocumentProtocol.MaximumBodyBytes
             || !fault.Payload.Span.SequenceEqual(actual.Payload.Span) || fault.Signature != original.Signature
             || actual.Signature != original.Signature || actual.Nonce == Guid.Empty || actual.Nonce == original.Nonce
@@ -26,16 +26,27 @@ internal static class PartitionMovementNativeBlobFaultAssertions
         {
             throw Missing();
         }
-        var envelope = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span);
-        var call = envelope.ControlledBlob ?? throw Missing();
-        if (envelope.Document is not null || envelope.Controlled is not null || envelope.QueueTransfer is not null
-            || call.CallerVoter != original.CallerVoter || call.CallerSiloAddress != original.CallerSiloAddress
-            || !Exact(call.Source, original.SourceOwner) || !Exact(call.Destination.Owner, original.DestinationOwner)
-            || call.Request.Frame.ExpiresAt != original.ExpiresAt || reply.Payload.Length > call.MaximumReplyBytes)
+        if (original.Channel == RemoteModelNativeChannel.ResourceLifetimeRead)
         {
-            throw Missing();
+            var call = NativeSerialization.Deserialize<RemoteResourceLifetimeReadCallV2>(original.Payload.Span);
+            _ = NativeControlledBlobLifetimeCall.Require(call);
+            RemoteResourceLifetimeReadValidation.RequireEnvelope(original, call);
+            if (reply.Payload.Length > call.MaximumReplyBytes)
+            {
+                throw Missing();
+            }
+            PartitionMovementNativeBlobLifetimeMutationAssertions.Require(call, fault);
         }
-        PartitionMovementNativeBlobMutationAssertions.Require(call, fault);
+        else
+        {
+            var call = NativeSerialization.Deserialize<RemoteControlledBlobOutcomeCallV2>(original.Payload.Span);
+            RemoteControlledBlobOutcomeEndpointV2.RequireEnvelope(original, call);
+            if (reply.Payload.Length > call.Original.MaximumReplyBytes)
+            {
+                throw Missing();
+            }
+            PartitionMovementNativeBlobMutationAssertions.Require(call, fault);
+        }
         RemoteTransferNativeGenerationAssertions.Require(original, source, destination);
         RemoteTransferNativeGenerationAssertions.Require(actual, source, destination);
         using var sender = RemoteDocumentMac.FromConfiguredSecret(sourceSecret);
@@ -45,34 +56,14 @@ internal static class PartitionMovementNativeBlobFaultAssertions
         await Assert.That(sender.Verify(actual.Payload.Span, actual.Signature, reply: false)).IsFalse();
         using var receiver = RemoteDocumentMac.FromConfiguredSecret(destinationSecret);
         await Assert.That(receiver.VerifyNativeReply(reply)).IsTrue();
-        RequireRefusal(reply, receiver, fault, actual, destination);
+        RequireRefusal(reply);
         token.ThrowIfCancellationRequested();
     }
 
-    private static void RequireRefusal(RemoteModelNativeReply reply, RemoteDocumentMac receiver,
-        NativeControlledBlobFaultPayload fault, RemoteModelNativeRequest actual, IReadOnlyList<ReplicaSiloDiscovery> destination)
+    private static void RequireRefusal(RemoteModelNativeReply reply)
     {
-        if (reply.Error is not null)
-        {
-            if (reply.Error != ErrorCode.Unauthenticated || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable
-                || !reply.Payload.IsEmpty || reply.Signature is not { Length: 0 })
-            {
-                throw Missing();
-            }
-            return;
-        }
-        if (reply.SafeDetail is not null || reply.Payload.IsEmpty || !receiver.Verify(reply.Payload.Span, reply.Signature, reply: true))
-        {
-            throw Missing();
-        }
-        var changed = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(fault.Payload.Span).ControlledBlob
-            ?? throw Missing();
-        var inner = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);
-        var current = destination.Single(value => value.VoterId == actual.DestinationVoter);
-        if (inner.RequestId != changed.RequestId || inner.Nonce != changed.Nonce || inner.Error != ErrorCode.Unauthenticated
-            || inner.SafeDetail != RemoteDocumentProtocol.InvalidProof || !Exact(inner.EndpointDiscovery, current)
-            || inner.Result is not null || inner.QueryLeaf is not null || inner.Controlled is not null
-            || inner.ControlledBlob is not null || inner.SearchLeaf is not null || inner.QueueTransfer is not null)
+        if (reply.Error != ErrorCode.Unauthenticated || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable
+            || !reply.Payload.IsEmpty || reply.Signature is not { Length: 0 })
         {
             throw Missing();
         }

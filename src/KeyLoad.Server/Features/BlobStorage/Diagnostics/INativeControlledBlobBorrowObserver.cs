@@ -4,7 +4,10 @@ namespace KeyLoad.Server.Features.BlobStorage;
 
 internal interface INativeControlledBlobBorrowObserver
 {
-    bool Select(RemoteControlledBlobCall original, CancellationToken originalCancellationToken);
-    ValueTask ObserveAsync(RemoteControlledBlobCall original, RemoteModelNativeRequest signedOriginal,
+    bool Select(RemoteControlledBlobOutcomeCallV2 original, CancellationToken originalCancellationToken);
+    ValueTask ObserveAsync(RemoteControlledBlobOutcomeCallV2 original, RemoteModelNativeRequest signedOriginal,
+        NativeControlledBlobBorrowedCatalog borrowedCatalog, CancellationToken originalCancellationToken);
+    bool Select(RemoteResourceLifetimeReadCallV2 original, CancellationToken originalCancellationToken);
+    ValueTask ObserveAsync(RemoteResourceLifetimeReadCallV2 original, RemoteModelNativeRequest signedOriginal,
         NativeControlledBlobBorrowedCatalog borrowedCatalog, CancellationToken originalCancellationToken);
 }

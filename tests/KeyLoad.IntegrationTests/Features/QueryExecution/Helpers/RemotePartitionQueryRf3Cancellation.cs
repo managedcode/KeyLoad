@@ -45,7 +45,7 @@ internal sealed class RemotePartitionQueryRf3Cancellation
     {
         parentArm = controls.WriteArm(seed.Destination.Principal.Id, Guid.Empty, GrainReadKind.PartitionQuery,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
-        arm = controls.WriteArm(seed.Destination.Principal.Id, Guid.Empty, GrainReadKind.PartitionQueryLeaf,
+        arm = controls.WriteArm(seed.Destination.Principal.Id, Guid.Empty, GrainReadKind.PartitionQueryLeafV2,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
         caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         if (useMcp)

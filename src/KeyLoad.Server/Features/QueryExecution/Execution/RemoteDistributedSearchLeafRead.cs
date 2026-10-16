@@ -13,7 +13,7 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
     private const int EmptyGrant = 0;
     private const int CurrentVersion = 1;
     private const int MetadataPassesRemaining = 2;
-    private readonly Dictionary<PartitionRef, PartitionQuerySourceFence> original = [];
+    private readonly Dictionary<PartitionRef, PartitionQuerySourceFenceV2> original = [];
     private readonly RemoteDistributedSearchLeafCall calls = new(node, partition, nodeOptions, client);
 
     internal DistributedSearchPreparedLeaf Prepare(GrainRequestEnvelope envelope, string principalId,
@@ -22,10 +22,10 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
         budget.Check();
         var beforeBytes = grant.ReadBytes;
         var beforeRecords = grant.ExaminedRecords;
-        var captured = Capture(principalId, work.Search, grant);
+        var captured = Capture(principalId, work.Search, grant, budget);
         if (original.TryGetValue(work.Search.Partition, out var initial))
         {
-            RemoteDistributedSearchSourceFence.RequireSame(initial, captured);
+            RemoteQueryLifetimeSource.RequireSame(initial, captured, RemoteDistributedSearchSourceFence.Changed);
         }
         else
         {
@@ -44,9 +44,9 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
             captured.Authority.Destination.Owner, captured.Authority.Tenant, remainingBytes, remainingRecords,
             work.MaxResultBytes, work.Witness, work.Statistics, work.Scope, work.SourceWindowId, work.Selected);
         var call = calls.Prepare(envelope, request, captured.Authority);
-        var wireBytes = call is null ? NativeSerialization.Measure(request) : NativeSerialization.Measure(call);
+        var wireBytes = RemoteDistributedSearchLeafCall.Measure(request, call, captured.Metadata);
         var childBytes = PartitionQueryParallelRetention.ChildBytes(work.MaxResultBytes, wireBytes,
-            NativeSerialization.Measure(request));
+            NativeSerialization.Measure(new DistributedSearchOwnedLeafV2(request, captured.Metadata.Definition, captured.Metadata.Coverage, captured.Metadata.Principal)));
         request = request with
         {
             MaxResultBytes = checked((int)childBytes)
@@ -55,18 +55,19 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
         {
             SearchLeaf = request
         };
-        if ((call is null ? NativeSerialization.Measure(request) : NativeSerialization.Measure(call)) > wireBytes)
+        if (RemoteDistributedSearchLeafCall.Measure(request, call, captured.Metadata) > wireBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDistributedSearchSourceFence.Changed);
         }
         return new(request,
-            token => calls.RunAsync(envelope.ExpiresAt, principalId, request, call, token),
+            token => calls.RunAsync(envelope.ExpiresAt, principalId, request, call, captured.Metadata, token),
             (result, token) =>
             {
                 token.ThrowIfCancellationRequested();
                 DistributedSearchLeafResultValidation.Require(request, result, budget);
                 budget.ImportReadGrant(grant, result.ReadBytes, result.ExaminedRecords);
-                RemoteDistributedSearchSourceFence.RequireSame(captured, Capture(principalId, work.Search, grant));
+                RemoteQueryLifetimeSource.RequireSame(captured, Capture(principalId, work.Search, grant, budget),
+                    RemoteDistributedSearchSourceFence.Changed);
                 return Task.CompletedTask;
             });
     }
@@ -74,13 +75,13 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
     internal Task RevalidateAsync(CancellationToken token)
         => partition.Coordinator.ReadBarrierAsync(token);
 
-    private PartitionQuerySourceFence Capture(string principalId, SearchRequest request,
-        ReadExecutionBudgetReadGrant grant)
-        => partition.Database.WithPartitionQueryFenceView<PartitionQuerySourceFence>(principalId, request.Partition, request.Collection, grant,
+    private PartitionQuerySourceFenceV2 Capture(string principalId, SearchRequest request,
+        ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget)
+        => partition.Database.WithPartitionQueryFenceView<PartitionQuerySourceFenceV2>(principalId, request.Partition, request.Collection, grant,
             (view, principal, resource, digest) =>
             {
-                DistributedSearchFieldAuthorization.Require(partition.Database, principal, resource, request);
-                return new(partition.Database.CaptureRemotePartitionQuery(view, principal, request.Partition,
-                    request.Collection, grant), digest);
+                partition.Database.Authorization.RequireSchemaVisibility(principal, resource);
+                return RemoteQueryLifetimeSource.Capture(partition.Database, view, principal, resource, digest,
+                    request.Partition, grant, budget);
             });
 }

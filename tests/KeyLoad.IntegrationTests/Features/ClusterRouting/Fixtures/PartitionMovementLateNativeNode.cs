@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -58,10 +57,10 @@ internal sealed partial class PartitionMovementLateNativeNode : IAsyncDisposable
     }
 
     internal static async Task<PartitionMovementLateNativeNode> CreateAsync(string[] arguments,
-        IGrainPartitionMovementSealedOperationObserver? observer, IControlledBlobWireBorrowObserver? blobWireObserver = null,
+        IGrainPartitionMovementSealedOperationObserver? observer,
         NativeLocalhostClusteringOptions? localhostClustering = null, CancellationToken startupCancellation = default)
     {
-        var application = await ServerConfiguration.BuildAsync(arguments, observer, blobWireObserver, localhostClustering,
+        var application = await ServerConfiguration.BuildAsync(arguments, observer, localhostClustering,
             startupCancellation: startupCancellation).ConfigureAwait(false);
         try
         {

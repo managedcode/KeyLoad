@@ -18,10 +18,11 @@ public sealed partial class DatabaseEngine
         PartitionRef partition, ApplyVectorProjection request)
     {
         ValidateProjectionRequest(partition, request);
-        var streamResource = Resource(transaction, partition, request.SourceStream.StreamSet, ResourceKind.StreamSet);
-        Authorization.Require(principal, partition, streamResource.Name, Capability.EventsRead);
+        Authorization.Require(principal, partition, request.SourceStream.StreamSet, Capability.EventsRead);
+        Authorization.Require(principal, partition, request.SourceDocument.Collection, Capability.DocumentsRead);
+        Authorization.Require(principal, partition, request.Target.Collection, Capability.DocumentsWrite);
+        _ = Resource(transaction, partition, request.SourceStream.StreamSet, ResourceKind.StreamSet);
         var sourceResource = Resource(transaction, partition, request.SourceDocument.Collection, ResourceKind.Collection);
-        Authorization.Require(principal, partition, sourceResource.Name, Capability.DocumentsRead);
         Authorization.RequireFieldUse(principal, sourceResource, request.InputField);
         var sourceDocument = VisibleVertex(transaction, principal, request.SourceDocument);
         if (sourceDocument.Reference != request.SourceDocument)
@@ -62,15 +63,15 @@ public sealed partial class DatabaseEngine
         PartitionRef partition, ApplyVectorProjection request)
     {
         ValidateProjectionRequest(partition, request);
-        var streamResource = Resource(view, partition, request.SourceStream.StreamSet, ResourceKind.StreamSet);
-        Authorization.Require(principal, partition, streamResource.Name, Capability.EventsRead);
+        Authorization.Require(principal, partition, request.SourceStream.StreamSet, Capability.EventsRead);
+        Authorization.Require(principal, partition, request.SourceDocument.Collection, Capability.DocumentsRead);
+        Authorization.Require(principal, partition, request.Target.Collection, Capability.DocumentsWrite);
+        _ = Resource(view, partition, request.SourceStream.StreamSet, ResourceKind.StreamSet);
         var sourceResource = Resource(view, partition, request.SourceDocument.Collection, ResourceKind.Collection);
-        Authorization.Require(principal, partition, sourceResource.Name, Capability.DocumentsRead);
         Authorization.RequireFieldUse(principal, sourceResource, request.InputField);
         _ = VisibleVertex(view, principal, request.SourceDocument);
 
         var targetResource = Resource(view, partition, request.Target.Collection, ResourceKind.Collection);
-        Authorization.Require(principal, partition, targetResource.Name, Capability.DocumentsWrite);
         Authorization.RequireFieldUse(principal, targetResource, request.Target.Field);
         Authorization.RequireFieldWrite(principal, targetResource, request.Target.Field);
         var target = VisibleVertex(view, principal,

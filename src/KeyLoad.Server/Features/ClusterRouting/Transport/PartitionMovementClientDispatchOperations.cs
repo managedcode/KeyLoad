@@ -107,13 +107,7 @@ internal static class PartitionMovementClientDispatchOperations
         var request = new PartitionMovementTransportRequest(phaseCommandId, admittedEnvelope, authorization,
             owner.partition.Configuration.LocalId, discovery.SiloAddress,
             (PartitionMovementTransportAction)action, handleId, ordinal);
-        PartitionMovementTransportAdmission.Require(request);
-        var size = NativeSerialization.Measure(request);
-        if (size < PartitionMovementClient.MinimumBodyBytes || size > owner.partition.Database.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
-        }
-        var encoded = NativeSerialization.Serialize(request);
+        var encoded = await EncodeAdmittedRequestAsync(owner, request, cancellationToken).ConfigureAwait(false);
         var reply = await owner.transport.ExchangeAsync(index, selected, request, encoded, local, cancellationToken).ConfigureAwait(false);
         var witness = action == PartitionMovementPeerAction.Capture
             ? new PartitionMoveCaptureWitness(PartitionMoveProtocol.Version, phaseCommandId,
@@ -123,6 +117,32 @@ internal static class PartitionMovementClientDispatchOperations
                 PartitionMoveOutcomeProofPurpose.EffectReply, phaseCommandId, request.Envelope.Nonce,
                 reply.OriginalBytes, reply.Signature) : null;
         return new(reply.Value.Discovery.VoterId, reply.Value.Reply, witness, outcome);
+    }
+
+    private static async Task<byte[]> EncodeAdmittedRequestAsync(PartitionMovementClient owner,
+        PartitionMovementTransportRequest request, CancellationToken cancellationToken)
+    {
+        PartitionMovementTransportAdmission.Require(request);
+        RequireEncodedSize(owner, NativeSerialization.Measure(request));
+        var original = NativeSerialization.Serialize(request);
+        if (request.Envelope.Stage != PartitionMovePeerStage.ControlApplyCommand)
+        {
+            return original;
+        }
+        await owner.partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        var proof = owner.partition.Database.CaptureControlledCommandLifetimeProof(request.Envelope, cancellationToken);
+        var transport = new PartitionControlLifetimeTransportV1(original, proof);
+        RequireEncodedSize(owner, NativeSerialization.Measure(transport));
+        return NativeSerialization.Serialize(transport);
+    }
+
+    private static void RequireEncodedSize(PartitionMovementClient owner, long size)
+    {
+        if (size < PartitionMovementClient.MinimumBodyBytes || size > owner.partition.Database.Limits.MaxBatchBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
     }
 
     internal static int SelectVoter(RegisteredPhysicalOwnerV1 receiver, PartitionMovementPeerAction action,

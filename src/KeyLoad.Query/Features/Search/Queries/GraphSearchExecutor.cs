@@ -23,8 +23,9 @@ internal static class GraphSearchExecutor
             ? PreparedSimilarity.Create(vector.AsMemory(), request.Search.Space!.Metric) : null;
         var eligibility = FilteredSearchEligibility.Create(request.Search.AllowedIds, budget);
         return database.WithQueryView(principalId, request.Search.Partition, request.Search.Collection,
+            request.Search.Vector is null ? Capability.None : Capability.VectorSearch,
             (view, principal, resource) => ExecuteInCut(database, textProjection, principal, resource, view,
-                request, similarity, eligibility, budget, execution));
+                request, similarity, eligibility, budget, execution), budget);
     }
 
     private static GraphSearchResult ExecuteInCut(DatabaseEngine database, ITextProjection? textProjection,

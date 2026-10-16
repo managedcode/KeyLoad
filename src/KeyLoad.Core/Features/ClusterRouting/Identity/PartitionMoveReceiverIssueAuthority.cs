@@ -84,6 +84,6 @@ public sealed partial class DatabaseEngine
             PartitionMovePeerStage.ReceiverIssue, original.PageOrdinal, payload, Resources: ImmutableArray<ResourceDefinition>.Empty);
         work.Check();
         return IssueNativeOperation(new(commandId, OperationKind.PartitionMovementPhase, principal.Id,
-            EvaluationClock.GetUtcNow(), MovementPhaseIdentityJson(phase)), new NativeCommandPayload(NativeSerialization.Serialize(phase)));
+            EvaluationClock.GetUtcNow(), MovementPhaseIdentityJson(phase)), new NativeCommandPayload(NativeSerialization.Serialize(new PartitionMovementAuthenticatedCommandV1(phase, ImmutableArray<PartitionMoveLifetimeProofV1>.Empty))));
     }
 }

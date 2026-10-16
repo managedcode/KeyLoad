@@ -168,19 +168,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(partition);
         RequireNoUnpublishedPartitionMoveTarget(view, partition);
         RequireLocalResourceOwner(view, partition);
-        var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, name))
-            ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
-        if (resource.TransactionDomainId != partition.TransactionDomainId)
-        {
-            throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail);
-        }
-
-        if (kind is { } required && resource.Kind != required)
-        {
-            throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
-        }
-
-        return resource;
+        return BindResourceDefinition(view, partition, name, kind);
     }
 
     /// <summary>Creates a commit token from the placement witness in the command's existing native view.</summary>

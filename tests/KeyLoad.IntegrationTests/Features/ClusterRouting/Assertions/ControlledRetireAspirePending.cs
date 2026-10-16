@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using P = KeyLoad.IntegrationTests.Features.ClusterRouting.ControlledRetireAspireProtocol;
@@ -16,7 +15,7 @@ internal static class ControlledRetireAspirePending
         var captured = cuts.Single(pair => pair.Value.OriginalSealedOperation is not null);
         var raw = captured.Value.OriginalSealedOperation!.Value.ToArray();
         var original = NativeSerialization.Deserialize<ReplicatedOperation>(raw);
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(original);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(original);
         var admission = phase.ReceiverEffectAdmission ?? throw new InvalidOperationException(P.Missing);
         var body = NativeSerialization.Deserialize<PartitionMoveCleanupBody>(phase.Body.Span);
         var publication = body.Publication ?? throw new InvalidOperationException(P.Missing);
@@ -112,7 +111,7 @@ internal static class ControlledRetireAspirePending
         {
             var entry = cut.ReceiptEntry ?? throw new InvalidOperationException(P.Missing);
             var operation = entry.Operation ?? throw new InvalidOperationException(P.Missing);
-            var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+            var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
             await Assert.That(cut.Request.ReceiptToken).IsEqualTo(token);
             await Assert.That(token.Position <= cut.CommittedIndex).IsTrue();
             await Assert.That(entry.Term).IsGreaterThan(P.InitialCleanup);

@@ -33,7 +33,7 @@ public sealed partial class DatabaseEngine
         OperationKind.RemoteGraphComplete => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphCompletionMutationV1),
         OperationKind.Bm25CorpusPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand),
         OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand),
-        OperationKind.PartitionMovementPhase => typeof(PartitionMovePhaseCommand),
+        OperationKind.PartitionMovementPhase => typeof(PartitionMovementAuthenticatedCommandV1),
         OperationKind.Batch => typeof(CommandRequest),
         OperationKind.Receive => typeof(ReceiveRequest),
         OperationKind.Delivery => typeof(DeliveryCommand),
@@ -81,7 +81,7 @@ public sealed partial class DatabaseEngine
         return kind switch
         {
             OperationKind.OnlineTextPublicationPhase => NativeTypedFingerprint<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload.Value),
-            OperationKind.PartitionMovementPhase => NativeTypedFingerprint<PartitionMovePhaseCommand>(payload.Value),
+            OperationKind.PartitionMovementPhase => NativeTypedFingerprint<PartitionMovementAuthenticatedCommandV1>(payload.Value),
             OperationKind.Batch => NativeTypedFingerprint<CommandRequest>(payload.Value),
             OperationKind.Receive => NativeTypedFingerprint<ReceiveRequest>(payload.Value),
             OperationKind.Delivery => NativeTypedFingerprint<DeliveryCommand>(payload.Value),

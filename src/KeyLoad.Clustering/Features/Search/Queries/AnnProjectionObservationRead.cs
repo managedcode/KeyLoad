@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,11 @@ internal static class AnnProjectionObservationRead
         IServiceProvider services, TimeProvider clock, PrincipalRecord principal,
         DecodedGrainRequest original, CancellationToken cancellationToken)
     {
+        if (original.Envelope.ReadKind == GrainReadKind.AnnProjectionObservationV2)
+        {
+            return await AnnProjectionLifetimeObservationRead.ExecuteAsync(database, services, clock,
+                principal, original, cancellationToken).ConfigureAwait(true);
+        }
         cancellationToken.ThrowIfCancellationRequested();
         if (!services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value.EnableApproximateSearch)
         {
@@ -18,24 +24,15 @@ internal static class AnnProjectionObservationRead
         }
         var request = GrainNativePayload.Read<AnnProjectionObservationRequest>(original.Payload);
         RequireRequest(request);
+        if (request.Kind != AnnProjectionObservationKind.Identity)
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
+        }
         var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, cancellationToken);
         work.ConstrainLifetime(original.Envelope.ExpiresAt);
         work.ConstrainNativeWork(request.MaximumReadBytes, request.MaximumRecords);
         work.ChargeBytes(original.Payload.Length);
         var admitted = RequireScope(database, services, principal, request, work);
-        WaitForAnnIndexResult? waited = null;
-        AnnSearchPage? approximate = null;
-        var search = services.GetRequiredService<SearchEngine>();
-        if (request.Kind == AnnProjectionObservationKind.Wait)
-        {
-            waited = await search.WaitForAnnIndexAsync(principal.Id, request.Wait!, work, cancellationToken)
-                .ConfigureAwait(true);
-        }
-        else if (request.Kind == AnnProjectionObservationKind.Approximate)
-        {
-            approximate = await search.ApproximateSearchAsync(principal.Id, request.Approximate!, work, cancellationToken)
-                .ConfigureAwait(true);
-        }
         var current = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         if (current.Id != principal.Id || current.PolicyEpoch != principal.PolicyEpoch)
         {
@@ -47,11 +44,11 @@ internal static class AnnProjectionObservationRead
         }
         var actual = database.Store.Identity;
         work.Check();
-        return new(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, waited,
-            work.ReadBytes, work.ConstrainedNativeRecords, approximate);
+        return new(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, null,
+            work.ReadBytes, work.ConstrainedNativeRecords, null);
     }
 
-    private static void RequireRequest(AnnProjectionObservationRequest request)
+    internal static void RequireRequest(AnnProjectionObservationRequest request)
     {
         if (request is null || request.Version != AnnProjectionObservationProtocol.Version
             || !Enum.IsDefined(request.Kind) || request.OriginalRequest is null
@@ -82,8 +79,9 @@ internal static class AnnProjectionObservationRead
         }
     }
 
-    private static LocalAnnObservationFence RequireScope(DatabaseEngine database, IServiceProvider services,
-        PrincipalRecord principal, AnnProjectionObservationRequest request, ReadExecutionBudget work)
+    internal static LocalAnnObservationFence RequireScope(DatabaseEngine database, IServiceProvider services,
+        PrincipalRecord principal, AnnProjectionObservationRequest request, ReadExecutionBudget work,
+        AnnReadLifetimeMetadata? metadata = null)
     {
         var original = request.OriginalRequest;
         var expected = services.GetRequiredService<PhysicalShardRecord>();
@@ -92,6 +90,6 @@ internal static class AnnProjectionObservationRead
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionObservationProtocol.Invalid);
         }
-        return database.CaptureLocalAnnObservation(principal.Id, original, work);
+        return database.CaptureLocalAnnObservation(principal.Id, original, work, metadata);
     }
 }

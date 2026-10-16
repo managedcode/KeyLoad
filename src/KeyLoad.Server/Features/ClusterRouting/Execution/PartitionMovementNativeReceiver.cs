@@ -146,6 +146,7 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
         CancellationToken cancellationToken) => request.Channel switch
         {
             PartitionMovementGrainServiceChannel.Phase => PartitionMovementNativePhaseOperations.PhaseAsync(this, request, cancellationToken),
+            PartitionMovementGrainServiceChannel.ControlledLifetime => PartitionMovementNativePhaseOperations.ControlledLifetimeAsync(this, request, cancellationToken),
             PartitionMovementGrainServiceChannel.Outcome => PartitionMovementNativePhaseOperations.OutcomeAsync(this, request, cancellationToken),
             PartitionMovementGrainServiceChannel.ReceiverIssue => PartitionMovementNativeIssuanceOperations.ExecuteAsync(this, request, cancellationToken),
             PartitionMovementGrainServiceChannel.RetireCancellation => PartitionMovementNativeRetireOperations.ExecuteAsync(this, request, cancellationToken),

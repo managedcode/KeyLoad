@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -67,7 +67,7 @@ internal static class NativeRetireCutCapture
         {
             throw NativeRetireCutWire.Invalid();
         }
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(original);
+        var phase = PartitionMovementNativePayload.Read(original);
         if (phase.Stage != PartitionMovePeerStage.Retire || phase.ReceiverEffectAdmission is null)
         {
             throw NativeRetireCutWire.Invalid();

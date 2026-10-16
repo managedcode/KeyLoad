@@ -18,7 +18,7 @@ internal sealed class DistributedSearchRf3DeadlineProbe(RequestCqrsProbeFixture 
     {
         parentArm = controls.WriteArm(principal, Guid.Empty, GrainReadKind.DistributedSearch,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
-        childArm = controls.WriteArm(principal, Guid.Empty, GrainReadKind.DistributedSearchLeaf,
+        childArm = controls.WriteArm(principal, Guid.Empty, GrainReadKind.DistributedSearchLeafV2,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
     }
 

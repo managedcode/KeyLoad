@@ -29,7 +29,8 @@ internal static class GrainRequestScope
 
         if (!TenantPlacementRequestScope.Validate(request) && !Bm25RequestScope.Validate(request) && !RemoteGraphRequestScope.Validate(request) && !AnnProjectionObservationScope.Validate(request)
             && !EventVectorRequestScope.Validate(request) && !OnlineTextRequestScope.Validate(request) && !PartitionMovementRequestScope.Validate(request)
-            && !ControlledDocumentReadScope.Validate(request) && !ControlledBlobReadScope.Validate(request)
+            && !DocumentLifetimeReadScope.Validate(request) && !ControlledBlobReadScopeV2.Validate(request) && !ControlledBlobOutcomeReadScopeV2.Validate(request)
+            && !QueryLifetimeReadScope.Validate(request) && !AnnProjectionLifetimeObservationScope.Validate(request)
             && !RemoteTransferRequestScope.Validate(request))
         {
             RuntimeJournalRequestScope.Validate(request);

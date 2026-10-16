@@ -62,20 +62,40 @@ internal static class NativeBlobWireEvidenceReader
             var original = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.OriginalNativeRequest);
             var request = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.NativeRequest);
             var reply = NativeSerialization.Deserialize<RemoteModelNativeReply>(result.NativeReply);
-            var call = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span).ControlledBlob
-                ?? throw Invalid();
-            if (NativeBlobWireScope.Match(fixture.Owner, fixture.Arms, call)?.ArmId != arm.ArmId
-                || claim.OriginalCallDigest != NativeBlobWireCodec.Digest(NativeSerialization.Serialize(call))
-                || claim.CallerVoter != call.CallerVoter || claim.CallerSiloAddress != call.CallerSiloAddress
-                || claim.RequestId != call.RequestId || claim.QueryId != call.Request.Frame.QueryId
-                || claim.Nonce != call.Nonce || claim.ExpiresAt != call.Request.Frame.ExpiresAt)
-            {
-                throw Invalid();
-            }
+            RequireCall(fixture, arm, claim, original);
             await PartitionMovementNativeBlobFaultAssertions.RequireAsync(original,
                 new(result.Variation, request.Payload, original.Signature), request, reply,
                 actualSourceAtCapture, actualDestinationAtCapture, sourceSecret, destinationSecret, token).ConfigureAwait(false);
         }
+    }
+
+    private static void RequireCall(NativeBlobWireProbeFixture fixture, NativeBlobWireArm arm,
+        NativeBlobWireClaim claim, RemoteModelNativeRequest original)
+    {
+        if ((int)arm.Identity >= (int)NativeBlobWireIdentity.Metadata)
+        {
+            if (original.Channel != RemoteModelNativeChannel.ResourceLifetimeRead)
+            {
+                throw Invalid();
+            }
+            var call = NativeSerialization.Deserialize<RemoteResourceLifetimeReadCallV2>(original.Payload.Span);
+            if (NativeBlobWireScope.Match(fixture.Owner, fixture.Arms, call)?.ArmId != arm.ArmId)
+            {
+                throw Invalid();
+            }
+            NativeBlobWireClaims.RequireOwn(claim, call);
+            return;
+        }
+        if (original.Channel != RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
+        {
+            throw Invalid();
+        }
+        var outcome = NativeSerialization.Deserialize<RemoteControlledBlobOutcomeCallV2>(original.Payload.Span);
+        if (NativeBlobWireScope.Match(fixture.Owner, fixture.Arms, outcome)?.ArmId != arm.ArmId)
+        {
+            throw Invalid();
+        }
+        NativeBlobWireClaims.RequireOwn(claim, outcome);
     }
 
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);

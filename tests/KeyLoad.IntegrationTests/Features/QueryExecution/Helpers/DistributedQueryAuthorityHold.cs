@@ -1,8 +1,10 @@
 using KeyLoad.Client;
 using KeyLoad.Clustering;
+using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
@@ -12,14 +14,12 @@ internal sealed class DistributedQueryAuthorityHold
 {
     private const string McpOwnerChanged = "The database operation could not be completed.";
     private const string SourceOwnerChanged = "The remote partition query authority changed.";
-
     private readonly List<Exception> failures = [];
     private Task<Result<PartitionQueryPageV1>>? sdk;
     private Task<CallToolResult>? mcp;
-    private Guid parentArm;
-    private Guid leafArm;
-    private RequestCqrsProbeMarkerRecord? parent;
-    private RequestCqrsProbeMarkerRecord? leaf;
+    private Guid arm;
+    private RequestCqrsProbeMarkerRecord? held;
+
     internal static async Task RunAsync(TwoRf3MembershipWave wave, DistributedQueryAuthorityContext context,
         DistributedQueryAuthorityState state, bool useMcp, CancellationToken token)
     {
@@ -38,14 +38,12 @@ internal sealed class DistributedQueryAuthorityHold
         await owner.CleanupAsync(wave.QueryControls, discovery, selected);
         ServerFailureObserver.ThrowIfAny(owner.failures);
     }
+
     private async Task ExecuteAsync(RequestCqrsProbeFixture controls, List<ReplicaSiloDiscovery> discovery,
         DistributedQueryAuthorityContext context, DistributedQueryAuthorityState state, bool useMcp, CancellationToken token)
     {
-        var principal = state.Seed.Destination.Principal.Id;
-        parentArm = controls.WriteArm(principal, Guid.Empty, GrainReadKind.PartitionQuery,
-            RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
-        leafArm = controls.WriteArm(principal, Guid.Empty, GrainReadKind.PartitionQueryLeaf,
-            RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold, RemotePartitionQueryRf3Seed.Local);
+        arm = controls.WriteArm(state.Seed.Destination.Principal.Id, Guid.Empty, GrainReadKind.PartitionQuery,
+            RequestCqrsProbePhase.NativeModelAfterDispatch, RequestCqrsProbeAction.Hold);
         if (useMcp)
         {
             mcp = context.Official.CallAsync(RemotePartitionQueryRf3Seed.Tool, RemotePartitionQueryRf3Seed.Request(), token);
@@ -54,18 +52,16 @@ internal sealed class DistributedQueryAuthorityHold
         {
             sdk = context.Reader.PartitionQueryAsync(RemotePartitionQueryRf3Seed.Request(), token);
         }
-        var capturedParent = await MarkerAsync(controls, discovery, parentArm, token);
-        parent = capturedParent;
-        controls.WriteRelease(parentArm, capturedParent.RequestId);
-        var capturedLeaf = await MarkerAsync(controls, discovery, leafArm, token);
-        leaf = capturedLeaf;
-        await Assert.That(capturedParent.RequestId).IsNotEqualTo(capturedLeaf.RequestId);
-        await Assert.That(useMcp ? mcp!.IsCompleted : sdk!.IsCompleted).IsFalse();
+        var marker = await QueryLifetimeNativeHoldBoundary.WaitAsync(controls, arm, discovery,
+            useMcp ? mcp! : sdk!, () => ObserveEarlyAsync(useMcp), token);
+        held = marker;
+        await QueryLifetimeNativeWitness.RequireAsync(controls, marker, RemoteResourceLifetimeReadKindV2.PartitionQuery,
+            state.Seed.Destination.Principal.Id);
         await DistributedQueryAuthorityPolicy.ResourceAsync(context.Source, DistributedQueryAuthorityProtocol.ChangedSchema, true, token);
         state.SourceSchema = DistributedQueryAuthorityProtocol.ChangedSchema;
         await DistributedQueryAuthorityCurrent.ObserveAsync(context, state, async () =>
         {
-            controls.WriteRelease(leafArm, capturedLeaf.RequestId);
+            controls.WriteRelease(arm, marker.RequestId);
             if (useMcp)
             {
                 await DistributedQueryAuthorityProblems.McpAsync(await mcp!, ErrorCode.OwnershipLost, McpOwnerChanged);
@@ -76,15 +72,19 @@ internal sealed class DistributedQueryAuthorityHold
             }
         }, token);
     }
-    private static async Task<RequestCqrsProbeMarkerRecord> MarkerAsync(RequestCqrsProbeFixture controls,
-        List<ReplicaSiloDiscovery> discovery, Guid arm, CancellationToken token)
+
+    private async Task ObserveEarlyAsync(bool useMcp)
     {
-        var marker = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.AuthorizationReload,
-            RequestCqrsProbeOutcome.Observed, discovery, token);
-        await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, arm, Guid.Empty,
-            RequestCqrsProbePhase.AuthorizationReload, discovery);
-        return marker;
+        if (useMcp)
+        {
+            _ = await McpCallerAssertions.SuccessAsync<PartitionQueryPageV1>(await mcp!);
+        }
+        else
+        {
+            _ = await McpCallerAssertions.SdkSuccessAsync(await sdk!);
+        }
     }
+
     private async Task CleanupAsync(RequestCqrsProbeFixture controls, List<ReplicaSiloDiscovery> discovery,
         CancellationTokenSource selected)
     {
@@ -96,35 +96,20 @@ internal sealed class DistributedQueryAuthorityHold
         }
         if (sdk is { } originalSdk)
         {
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                _ = await originalSdk;
-            }, failures);
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await originalSdk; }, failures);
         }
         if (mcp is { } originalMcp)
         {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await originalMcp; }, failures);
+        }
+        if (held is { } marker && discovery.Count == TwoRf3MembershipProtocol.MembersPerGroup)
+        {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                _ = await originalMcp;
+                await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(controls, arm, marker.RequestId,
+                    Guid.Empty, discovery, cleanup.Token);
+                await controls.RetireArmAsync(arm, cleanup.Token);
             }, failures);
         }
-        foreach (var marker in new[]
-        {
-            parent,
-            leaf
-        })
-        {
-            if (marker is { } captured && discovery.Count == TwoRf3MembershipProtocol.MembersPerGroup)
-            {
-                await ServerFailureObserver.ObserveAsync(() => SettleAsync(controls, discovery, captured, cleanup.Token), failures);
-            }
-        }
-    }
-    private static async Task SettleAsync(RequestCqrsProbeFixture controls, List<ReplicaSiloDiscovery> discovery,
-        RequestCqrsProbeMarkerRecord marker, CancellationToken token)
-    {
-        await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(controls, marker.ArmId, marker.RequestId,
-            Guid.Empty, discovery, token);
-        await controls.RetireArmAsync(marker.ArmId, token);
     }
 }

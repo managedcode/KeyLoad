@@ -20,6 +20,7 @@ internal static class PartitionMovementGrainServiceProtocol
     internal const int RetireCancellationChannel = 3;
     internal const int TransferDataChannel = 4;
     internal const int PhysicalOwnerProbeChannel = 5;
+    internal const int ControlledLifetimeChannel = 6;
     internal const uint RequestChannel = 0;
     internal const uint RequestQuery = 1;
     internal const uint RequestPayload = 2;

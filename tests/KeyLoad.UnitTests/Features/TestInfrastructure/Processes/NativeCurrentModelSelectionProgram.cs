@@ -18,7 +18,9 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/RemotePartitionQueryRf3Tests/AcPqueryRemote001To005DestinationDenialLiteralMergeReceiptReplayAndOwnedRestart",
               "/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands",
               "/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands",
-              "/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*"
+              "/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*",
+              "/*/*/ControlledBlobLifetimeReadRf3Tests/HeldNativeRepliesRequireFreshSourceAuthorityAndSettleBeforeTwoColdBlobReadWaves",
+              "/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -26,6 +28,20 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              currentModelFilters[16] + ' ',
+              currentModelFilters[16] + '*',
+              '/*/*/(NativeBlobWholeParentQualificationCases|PartitionMovementBlobWireNativeTests)/*',
+              '/*/*/PartitionMovementBlobWireNativeTests/*',
+              '/*/*/NativeBlobWholeParentQualificationCases/*',
+              currentModelFilters[16].replace('PartitionMovementBlobWireNativeTests|', 'PartitionMovementBlobWireNativeTests*|'),
+              currentModelFilters[16].replace(')/*', ')/OtherMethod'),
+              currentModelFilters[16].replace(')/*', '|OtherCase)/*'),
+              currentModelFilters[15] + ' ',
+              currentModelFilters[15] + '*',
+              currentModelFilters[15].replace('ControlledBlobLifetimeReadRf3Tests/', 'ControlledBlobLifetimeReadRf3Tests*/'),
+              '/*/*/ControlledBlobLifetimeReadRf3Tests/*',
+              '/*/*/ControlledBlobLifetimeReadRf3Tests/OtherMethod',
+              '/*/*/HeldNativeRepliesRequireFreshSourceAuthorityAndSettleBeforeTwoColdBlobReadWaves/ControlledBlobLifetimeReadRf3Tests',
               currentModelFilters[14] + ' ',
               currentModelFilters[14] + '*',
               currentModelFilters[14].replace('PhysicalOwnerRegistrationRf3Tests|', 'PhysicalOwnerRegistrationRf3Tests*|'),
@@ -102,6 +118,12 @@ internal static class NativeCurrentModelSelectionProgram
                 rejected = true;
               }
               if (!rejected) throw new Error('Unsupported current model cohort selector was accepted.');
+            }
+            for (const addedIndex of [15, 16]) {
+              const currentModelHealthy = nativeSelection(currentModelArgs[addedIndex], publicCohortEnvironment);
+              if (JSON.stringify(currentModelHealthy) !== JSON.stringify(currentModels[addedIndex])) {
+                throw new Error('Exact current model selection changed after refused selectors.');
+              }
             }
             if (JSON.stringify(currentModelArgs) !== currentModelInputBytes
               || JSON.stringify(publicCohortEnvironment) !== publicCohortEnvironmentBytes

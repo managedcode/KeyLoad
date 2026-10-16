@@ -18,6 +18,23 @@ internal static class PartitionMovementNativePhaseOperations
         }, cancellationToken).ConfigureAwait(false);
     }
 
+    internal static async Task<PartitionMovementGrainServiceReply> ControlledLifetimeAsync(PartitionMovementNativeReceiver owner,
+        PartitionMovementGrainServiceRequest packet, CancellationToken cancellationToken)
+    {
+        var verified = await owner.Admission.VerifyControlledLifetimeAsync(packet.Payload, packet.Signature,
+            cancellationToken).ConfigureAwait(false);
+        var request = verified.Request;
+        return await PartitionMovementNativeLifetime.WithinExpiryAsync(owner, request.Envelope.ExpiresAt, async token =>
+        {
+            var terminal = await PartitionMovementNativeReplies.ExecuteAsync(() => owner.Receiver.ExecuteControlledLifetimeAsync(
+                request, verified.Proof, token)).ConfigureAwait(false);
+            var reply = new PartitionMovementTransportReply(request.CommandId, request.Envelope.Nonce,
+                owner.Receiver.LocalOwner(), owner.Receiver.Discovery(), terminal,
+                PartitionMoveOriginalDispatchIdentity.Digest(request.CommandId, request.Envelope));
+            return PartitionMovementNativeReplies.Encode(owner, reply, static (mac, bytes) => mac.Sign(bytes, reply: true));
+        }, cancellationToken).ConfigureAwait(false);
+    }
+
     internal static async Task<PartitionMovementGrainServiceReply> OutcomeAsync(PartitionMovementNativeReceiver owner,
         PartitionMovementGrainServiceRequest packet, CancellationToken cancellationToken)
     {

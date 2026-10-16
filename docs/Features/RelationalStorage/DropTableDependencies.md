@@ -1,6 +1,6 @@
 # DROP TABLE foundation dependencies
 
-This is a dependency contract proposal for REQ-SQLC-006 / AC-SQLC-006, SQLC-DDL. It records why the current primitives cannot implement complete resource removal. Resource-lifetime choices remain unfrozen, and the required primitives remain unimplemented. `DROP TABLE` remains unsupported by the current canonical SQL compiler. The existing public functional scenario remains unchanged.
+This is the dependency inventory for REQ-SQLC-006 / AC-SQLC-006, SQLC-DDL. The owner selected reusable resource names with distinct persisted creation incarnations; the [D1 creation contract](../ResourceExecution/ResourceLifetime.md) records that decision and its implemented catalog/lifetime pair. Complete owner inventory, retirement, settlement, cleanup and public removal still require their separate implementation and qualification. `DROP TABLE` remains unsupported by the current canonical SQL compiler. The existing public functional scenario remains unchanged.
 
 The active [SQL conformance inventory](../../implementation/sql-client-conformance.json) describes SQLC-DDL as “database, schema, table, type, index, view and sequence DDL”, owned by the Microsoft ScriptDOM T-SQL AST. Its current execution is “SOURCE CANDIDATE: bounded canonical CREATE TABLE only; full DDL family remains OPEN”. Its acceptance text is:
 
@@ -28,11 +28,11 @@ No complete resource-to-partition/physical-owner inventory, resource retirement 
 
 ## Required dependency order
 
-D1–D6 are proposed native implementation prerequisites, each with focused native correctness and recovery checks. D7 adds the canonical API and SQL lowering after those prerequisites exist. Q is the separate final public qualification after D7; public DROP tests are not prerequisites for implementing the API they exercise. These nodes are not completed tasks or a selected architecture.
+D1 supplies the selected creation identity. D2–D6 remain native implementation prerequisites, each with focused native correctness and recovery checks. D7 adds the canonical API and SQL lowering after those prerequisites exist. Q is the separate final public qualification after D7; public DROP tests are not prerequisites for implementing the API they exercise. D1 source or creation evidence does not complete retirement, cleanup or DROP.
 
 ```mermaid
 flowchart TD
-    D1[Choose resource lifetime and name reuse contract]
+    D1[Selected creation identity and reusable name contract]
     D2[Authoritative partition and physical owner inventory]
     D3[Durable retirement and admission barrier]
     D4[Read cut and original task settlement]
@@ -107,4 +107,4 @@ Q depends on D1–D7. After the canonical API and lowering exist, completion of 
 6. Genuine Aspire-owned RF3 repeats the same operation with explicit membership and actual node-local owners, including faulted owner/recovery paths. Two actual joined cold continuations preserve retirement, exact cleanup progress or completion and its recoverable continuation, unrelated data and the frozen replay/name-reuse behavior, followed by a fresh healthy operation.
 7. Required build, native TUnit, recovery and exact-source Linux RF3 evidence bind source, DLL/PDB, image, original task/report and cleanup identities. Local development results, syntax acceptance, compilation or this dependency review do not qualify those gates or establish power-loss durability.
 
-Focused native regressions accompany D1–D6; complete public operation cases exercise D7 during Q. Resource-lifetime choices still require a defined contract. No new test declaration or shortened substitute is introduced in this documentation stage. DROP API/compiler/engine implementation, status promotion and README/conformance changes remain outside this document-only stage.
+Focused native regressions accompany D1–D6; complete public operation cases exercise D7 during Q. The selected D1 creation identity does not yet define implemented retirement, reference, continuation or name-reuse fencing. DROP API/compiler/engine implementation and its public qualification remain open; this dependency inventory promotes no acceptance status.

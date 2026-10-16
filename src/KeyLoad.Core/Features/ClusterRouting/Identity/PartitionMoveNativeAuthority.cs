@@ -10,7 +10,7 @@ public sealed partial class DatabaseEngine
     internal ReplicatedOperation CreateVerifiedPartitionMovementOperation(Guid commandId,
         string localPrincipalId, DateTimeOffset evaluatedAt, PartitionMovePeerEnvelope verified)
     {
-        if (verified.Stage is PartitionMovePeerStage.ControlCheckpoint or PartitionMovePeerStage.ReceiverIssue
+        if (verified.Stage is PartitionMovePeerStage.ControlApplyCommand or PartitionMovePeerStage.ControlCheckpoint or PartitionMovePeerStage.ReceiverIssue
             or PartitionMovePeerStage.RetireCancel
             || verified.Grant is { RequireReceiverIssuance: true }
             || verified.ReceiverIssuanceProof is not null || verified.SourceDispatchWitness is not null)
@@ -18,6 +18,20 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
         }
         return CreateMovementOperationCore(commandId, localPrincipalId, evaluatedAt, verified);
+    }
+
+    internal ReplicatedOperation CreateVerifiedPartitionMovementOperation(Guid commandId,
+        string localPrincipalId, DateTimeOffset evaluatedAt, PartitionMovePeerEnvelope verified,
+        PartitionMoveLifetimeProofV1 proof)
+    {
+        if (verified.Stage != PartitionMovePeerStage.ControlApplyCommand
+            || verified.Grant is { RequireReceiverIssuance: true }
+            || verified.ReceiverIssuanceProof is not null || verified.SourceDispatchWitness is not null)
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
+        PartitionControlLifetimeProofValidation.RequireEnvelope(verified, proof, Limits.MaxBatchBytes);
+        return CreateMovementOperationCore(commandId, localPrincipalId, evaluatedAt, verified, lifetimeProof: proof);
     }
 
     internal ReplicatedOperation CreateVerifiedPartitionMovementCheckpointOperation(Guid commandId,
@@ -47,7 +61,8 @@ public sealed partial class DatabaseEngine
     }
 
     private ReplicatedOperation CreateMovementOperationCore(Guid commandId, string localPrincipalId,
-        DateTimeOffset evaluatedAt, PartitionMovePeerEnvelope verified, PartitionMoveReceiverEffectAdmission? admission = null)
+        DateTimeOffset evaluatedAt, PartitionMovePeerEnvelope verified, PartitionMoveReceiverEffectAdmission? admission = null,
+        PartitionMoveLifetimeProofV1? lifetimeProof = null)
     {
         PartitionMovePeerEnvelopeValidation.RequireStructure(verified, Limits.MaxBatchBytes);
         if (commandId == Guid.Empty || string.IsNullOrWhiteSpace(localPrincipalId))
@@ -72,6 +87,20 @@ public sealed partial class DatabaseEngine
             verified.ControlOwner, verified.SourcePlacement, verified.DestinationOwner,
             verified.ControlIntentDigest, verified.Stage, verified.PageOrdinal, verified.Body, verified.Grant?.GrantId, verified.Grant?.Resources
                 ?? System.Collections.Immutable.ImmutableArray<ResourceDefinition>.Empty, admission);
+        RequireMovementCommandAdmission(commandId, localPrincipalId, evaluatedAt, command);
+        var identity = MovementPhaseIdentityJson(command);
+        var authenticated = new PartitionMovementAuthenticatedCommandV1(command,
+            lifetimeProof is null ? System.Collections.Immutable.ImmutableArray<PartitionMoveLifetimeProofV1>.Empty : [lifetimeProof]);
+        PartitionMovementNativePayload.Require(authenticated);
+        var payload = NativeSerialization.Serialize(authenticated);
+        RequireNativeBudget(payload.Length);
+        return IssueNativeOperation(new(commandId, OperationKind.PartitionMovementPhase, localPrincipalId,
+            evaluatedAt, identity), new NativeCommandPayload(payload));
+    }
+
+    private void RequireMovementCommandAdmission(Guid commandId, string localPrincipalId,
+        DateTimeOffset evaluatedAt, PartitionMovePhaseCommand command)
+    {
         if (PartitionMoveGrantValidation.IsLocalControl(command.Stage)
             && command.Stage != PartitionMovePeerStage.ControlCheckpoint)
         {
@@ -104,10 +133,6 @@ public sealed partial class DatabaseEngine
                 return true;
             });
         }
-        var identity = MovementPhaseIdentityJson(command);
-        var payload = NativeSerialization.Serialize(command);
-        return IssueNativeOperation(new(commandId, OperationKind.PartitionMovementPhase, localPrincipalId,
-            evaluatedAt, identity), new NativeCommandPayload(payload));
     }
 
     private void RequireMovementReceiver(PartitionMovePeerEnvelope request)

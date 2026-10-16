@@ -6,50 +6,6 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal PartitionControlDocumentReadFrame? TryCaptureControlledDocumentRead(string principalId,
-        EntityRef reference, CommitToken? minimumToken, DateTimeOffset requestExpiry, ReadExecutionBudget work)
-    {
-        work.Check();
-        var frame = Store.Read<PartitionControlDocumentReadFrame?>(view =>
-        {
-            var charged = work.CreateView(view);
-            var principal = Principal(charged, principalId, EvaluationClock.GetUtcNow());
-            Authorization.Require(principal, reference.Partition, reference.Collection, Capability.DocumentsRead);
-            if (PartitionMovePublishedPlacementStorage.Read(charged, reference.Partition) is null)
-            {
-                return null;
-            }
-            return CaptureControlledDocumentReadView(charged, principalId, reference, minimumToken,
-                requestExpiry, Guid.NewGuid());
-        });
-        work.MeasureResult(frame);
-        work.Check();
-        return frame;
-    }
-
-    internal PartitionControlDocumentReadFrame CaptureControlledDocumentRead(string principalId,
-        EntityRef reference, CommitToken? minimumToken, DateTimeOffset requestExpiry, ReadExecutionBudget work)
-    {
-        work.Check();
-        var frame = Store.Read(view => CaptureControlledDocumentReadView(work.CreateView(view), principalId,
-            reference, minimumToken, requestExpiry, Guid.NewGuid()));
-        work.MeasureResult(frame);
-        work.Check();
-        return frame;
-    }
-
-    internal void ValidateControlledDocumentRead(PartitionControlDocumentReadFrame original, ReadExecutionBudget work)
-    {
-        work.Check();
-        var current = Store.Read(view => CaptureControlledDocumentReadView(work.CreateView(view), original.Principal.Id,
-            original.Reference, original.MinimumToken, original.ExpiresAt, original.QueryId));
-        if (JsonData.Fingerprint(current) != JsonData.Fingerprint(original))
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
-        }
-        work.Check();
-    }
-
     private PartitionControlDocumentReadFrame CaptureControlledDocumentReadView(IKeyValueView view,
         string principalId, EntityRef reference, CommitToken? minimumToken, DateTimeOffset expiry, Guid queryId)
     {

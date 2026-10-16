@@ -15,5 +15,7 @@ internal enum PartitionMovementGrainServiceChannel
     /// <summary>A bounded transfer-data operation.</summary>
     TransferData = PartitionMovementGrainServiceProtocol.TransferDataChannel,
     /// <summary>The original bounded native physical-owner probe.</summary>
-    PhysicalOwnerProbe = PartitionMovementGrainServiceProtocol.PhysicalOwnerProbeChannel
+    PhysicalOwnerProbe = PartitionMovementGrainServiceProtocol.PhysicalOwnerProbeChannel,
+    /// <summary>A controlled command with an authenticated complete resource lifetime proof.</summary>
+    ControlledLifetime = PartitionMovementGrainServiceProtocol.ControlledLifetimeChannel
 }

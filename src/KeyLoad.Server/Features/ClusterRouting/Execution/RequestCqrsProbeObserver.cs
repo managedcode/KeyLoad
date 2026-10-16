@@ -34,8 +34,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         get;
     }
     private readonly RequestCqrsReceiverIssueAdjunct receiverIssueAdjunct;
-    private readonly RequestCqrsNativeModelObservation nativeModel;
-    private readonly RequestCqrsNativeReplayObservation nativeReplay;
+    private readonly RequestCqrsNativeObservations native;
+    internal IControlledLifetimeReplayObserver ControlledLifetime => native.Controlled;
     private readonly Lazy<ConnectionProbeCapture> connections;
     internal RequestCqrsProbeProducerDisposal ProducerDisposal
     {
@@ -54,8 +54,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         RetireSealed = new(files, executionOptions);
         canonicalCuts = new(files, lifecycle, applicationLifetime, executionOptions, clock ?? TimeProvider.System, stopping.Token);
         QueryCuts = new(files, lifecycle, replica.LocalId, siloAddress);
-        nativeModel = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, hold.RunAsync);
-        nativeReplay = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, hold.RunAsync);
+        native = new(files, lifecycle, executionOptions, clock ?? TimeProvider.System, replica.LocalId,
+            siloAddress, CreateMarker, hold.RunAsync, stopping.Token, applicationLifetime.ApplicationStopping);
         ReplicaSnapshot = new(files, lifecycle, replicaOptions, executionOptions, clock ?? TimeProvider.System,
             CreateMarker, hold.RunAsync, stopping.Token, applicationLifetime.ApplicationStopping);
         Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => hold.RunAsync(claim, phase, null, token));
@@ -67,19 +67,19 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
 
     public ValueTask BeforeDispatchAsync(global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original,
         CancellationToken cancellationToken)
-        => nativeModel.ObserveAsync(original, null, RequestCqrsProbePhase.NativeModelBeforeDispatch, cancellationToken);
+        => native.Model.ObserveAsync(original, null, RequestCqrsProbePhase.NativeModelBeforeDispatch, cancellationToken);
 
     public ValueTask AfterDispatchAsync(global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original,
         global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReply actual, CancellationToken cancellationToken)
-        => nativeModel.ObserveAsync(original, actual, RequestCqrsProbePhase.NativeModelAfterDispatch, cancellationToken);
+        => native.Model.ObserveAsync(original, actual, RequestCqrsProbePhase.NativeModelAfterDispatch, cancellationToken);
 
     public global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReplayVariation? Select(
         global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original, CancellationToken token)
-        => nativeReplay.Select(original, token);
+        => native.Replay.Select(original, token);
 
     public ValueTask ObserveAsync(global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original,
         global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReplayExchange owner, CancellationToken token)
-        => nativeReplay.ObserveAsync(original, owner, token);
+        => native.Replay.ObserveAsync(original, owner, token);
 
     internal NativeCanonicalModelCutLease OpenCanonicalCut(CancellationToken requestCancellation)
         => canonicalCuts.Open(requestCancellation);

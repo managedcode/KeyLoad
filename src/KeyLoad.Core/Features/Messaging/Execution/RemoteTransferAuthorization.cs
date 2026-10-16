@@ -11,6 +11,39 @@ public sealed partial class DatabaseEngine
         }
     }
 
+    private void RequireQueueTransferCapabilities(PrincipalRecord principal, Mutation mutation)
+    {
+        switch (mutation)
+        {
+            case CreateQueueTransfer create:
+                RequireTransferAdministrator(principal);
+                RequireTransferCapabilities(principal, create.SourceQueue, Capability.QueuePublish);
+                RequireTransferCapabilities(principal, create.Destination, Capability.QueuePublish);
+                break;
+            case AcceptQueueTransfer accept:
+                RequireTransferAdministrator(principal);
+                RequireTransferCapabilities(principal, accept.DestinationQueue, Capability.QueuePublish);
+                break;
+            case CompleteQueueTransfer complete:
+                RequireTransferAdministrator(principal);
+                RequireTransferCapabilities(principal, complete.SourceQueue, Capability.QueuePublish);
+                break;
+            case AdvanceQueueTransferAttempt advance:
+                RequireTransferAdministrator(principal);
+                RequireTransferCapabilities(principal, advance.SourceQueue, Capability.QueueInspect);
+                RequireTransferCapabilities(principal, advance.SourceQueue, Capability.QueuePublish);
+                break;
+            case AdvanceQueueTransferRepair repair:
+                RequireTransferAdministrator(principal);
+                RequireTransferCapabilities(principal, repair.SourceQueue, Capability.QueueInspect);
+                RequireTransferCapabilities(principal, repair.SourceQueue, Capability.QueuePublish);
+                break;
+        }
+    }
+
+    private void RequireTransferCapabilities(PrincipalRecord principal, QueueLaneRef lane, Capability capabilities)
+        => Authorization.Require(TransferDataPrincipal(principal), lane.Partition, lane.Queue, capabilities);
+
     private void RequireTransferPublisher(PrincipalRecord principal, QueueLaneRef lane, ResourceDefinition resource)
     {
         var dataPrincipal = TransferDataPrincipal(principal);

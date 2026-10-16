@@ -60,17 +60,16 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     }
 
     internal static Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
-        PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock,
-        IControlledBlobWireBorrowObserver? wireObserver = null)
-        => RemoteDocumentRuntimeCreation.CreateAsync(node, partition, options, clock, wireObserver);
+        PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock)
+        => RemoteDocumentRuntimeCreation.CreateAsync(node, partition, options, clock);
 
     internal void Initialize(OrleansNode node, PartitionHost partition,
-        ServerRuntimeOptions options, TimeProvider clock, IControlledBlobWireBorrowObserver? wireObserver)
+        ServerRuntimeOptions options, TimeProvider clock)
     {
         var settings = options.Node.Value.PhysicalGroupTrust;
         if (settings.Role == PhysicalGroupTrustRole.Control)
         {
-            client = new(options.Node, options.Membership, clock, node.BorrowRemoteModelClient, wireObserver);
+            client = new(options.Node, options.Membership, clock, node.BorrowRemoteModelClient);
             Router = new RemoteDocumentRouter(node, partition, options.Node, options.Core.DatabaseLimits, client, work, clock);
             BlobRouter = new RemoteBlobReadRouter(node, partition, options.Node, options.Core.DatabaseLimits, client, work, clock);
             if (options.PartitionMovement.Value.Enabled)
@@ -90,16 +89,13 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         }
         else
         {
-            var receiver = new RemoteDocumentReceiver(node, partition, options.Node,
-                options.GrainRouting, options.Membership, clock);
-            var controlled = new RemoteControlledDocumentReceiver(node, partition, options.Node,
-                options.Membership, options.GrainRouting, clock);
             var controlledBlob = new RemoteControlledBlobReceiver(node, partition, options.Node,
                 options.Membership, options.GrainRouting, clock);
             var transfer = partition.TransferVerification is null ? null
                 : new RemoteTransferPeerReceiver(node, partition, options.GrainRouting, clock);
-            Endpoint = new(options.Node, receiver, work, controlled, controlledBlob,
-                options.Membership, options.GrainRouting, clock, transfer);
+            Endpoint = new(options.Node, work, controlledBlob,
+                options.Membership, options.GrainRouting, clock, transfer,
+                new RemoteResourceLifetimeReadEndpoint(node, partition, options, clock));
         }
         EventVectors = global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime.Create(node, partition, options, work, clock);
         AnnObservations = new(node, partition, options, clock);

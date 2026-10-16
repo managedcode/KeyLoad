@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -68,56 +67,7 @@ internal sealed partial class PartitionMovementPeerAdmission : IDisposable
 
     internal Task<PartitionMovementTransportRequest> VerifyAsync(ReadOnlyMemory<byte> originalBody,
         string signature, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (!execution.Enabled || !options.PhysicalGroupTrust.RegisterPhysicalOwners
-            || options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidProof);
-        }
-        if (originalBody.Length <= EmptyBodyBytes || originalBody.Length > database.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
-        }
-        var ownedBody = originalBody.ToArray();
-        using var mac = CreateControlMac();
-        if (!mac.Verify(ownedBody, signature, reply: false))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
-        }
-        var request = NativeSerialization.Deserialize<PartitionMovementTransportRequest>(ownedBody);
-        PartitionMovementTransportAdmission.Require(request);
-        var envelope = request.Envelope;
-        var maximum = database.Limits.MaxBatchBytes;
-        PartitionMovePeerEnvelopeValidation.RequireStructure(envelope, maximum);
-        var control = PhysicalOwnerConfiguredTuples.Control(options, configuration);
-        var local = PhysicalOwnerConfiguredTuples.Local(options, configuration);
-        var destination = PhysicalOwnerConfiguredTuples.Destination(options, configuration);
-        var now = clock.GetUtcNow();
-        if (request.CommandId == Guid.Empty || envelope.ExpiresAt <= now
-            || envelope.ExpiresAt > now + routing.RequestLifetime
-            || !PhysicalOwnerEntryValidation.SameOwner(envelope.ControlOwner, control.Owner)
-            || !PartitionMovementConfiguredOwners.RequirePair(envelope, control.Owner, destination.Owner)
-            || !control.Owner.VoterIds.Contains(request.CallerVoter, StringComparer.Ordinal)
-            || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, membership))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
-        }
-        if (!PartitionMoveGrantValidation.IsLocalControl(envelope.Stage))
-        {
-            PartitionMovementGrantProof.Require(request, control.Owner, local.Owner, now);
-        }
-        else if (!PhysicalOwnerEntryValidation.SameOwner(control.Owner, local.Owner))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
-        }
-        if (!replay.TryUse(envelope.Nonce.ToString(NonceFormat)))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
-        }
-        database.VerifyPhysicalCommandOwner(local.Owner, false, cancellationToken);
-        return Task.FromResult(request);
-    }
+        => PartitionMovementPeerFrameAdmission.VerifyAsync(this, originalBody, signature, cancellationToken);
 
     internal PartitionMovementMac CreateControlMac()
         => PartitionMovementControlMacFactory.Create(options, configuration, database);

@@ -3,7 +3,6 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Security;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.ServiceDefaults;
 using KeyLoad.Storage.ZoneTree;
@@ -16,7 +15,6 @@ namespace KeyLoad.Server;
 internal static class ServerConfiguration
 {
     internal static async Task<WebApplication> BuildAsync(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
-        IControlledBlobWireBorrowObserver? blobWireObserver = null,
         NativeLocalhostClusteringOptions? localhostClustering = null,
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
         IPartitionMovementNativeObserver? partitionMovementNativeObserver = null,
@@ -32,7 +30,7 @@ internal static class ServerConfiguration
         builder.Services.AddSingleton<IOptions<NodeOptions>>(node);
         ServerConnectionTransportComposition.Configure(builder);
         ConfigureTransportOptions(builder);
-        Register(builder.Services, blobWireObserver, localhostClustering);
+        Register(builder.Services, localhostClustering);
         PostgresNativeComposition.Register(builder.Services, builder.Configuration);
         if (sealedObserver is not null)
         {
@@ -155,8 +153,7 @@ internal static class ServerConfiguration
         }
     }
 
-    private static void Register(IServiceCollection services, IControlledBlobWireBorrowObserver? blobWireObserver,
-        NativeLocalhostClusteringOptions? localhostClustering)
+    private static void Register(IServiceCollection services, NativeLocalhostClusteringOptions? localhostClustering)
     {
         if (localhostClustering is not null)
         {
@@ -177,7 +174,7 @@ internal static class ServerConfiguration
         services.AddSingleton<INodeAdministration>(provider => ActivatorUtilities.CreateInstance<NodeAdministration>(provider,
             provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         PhysicalOwnerRegistrationServices.Add(services);
-        services.AddSingleton(provider => NativeDiscoveryOmissionComposition.CreateNode(provider, blobWireObserver));
+        services.AddSingleton(NativeDiscoveryOmissionComposition.CreateNode);
     }
 
 }

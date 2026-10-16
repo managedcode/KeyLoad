@@ -24,13 +24,13 @@ internal sealed class ControlledDocumentSourceRead(OrleansNode node, PartitionHo
         {
             expiry = envelope.ExpiresAt;
         }
-        var frame = partition.Database.TryCaptureControlledDocumentRead(principalId,
+        var frame = partition.Database.TryCaptureControlledDocumentReadV2(principalId,
             request.Reference, request.MinimumToken, expiry, work);
         if (frame is null)
         {
             return (false, null);
         }
-        var destination = RequireDestination(frame);
+        var destination = RequireDestination(frame.Original);
         var metadata = work.ReadBytes;
         var maximumBytes = Math.Min(limits.Value.MaxBatchBytes,
             limits.Value.MaxQueryReadBytes - checked(metadata * RevalidationPasses));
@@ -41,16 +41,19 @@ internal sealed class ControlledDocumentSourceRead(OrleansNode node, PartitionHo
         var maximumRecords = Math.Min(limits.Value.MaxBatchMutations, limits.Value.MaxScanRecords);
         var grant = work.CreateReadGrant(maximumBytes, maximumRecords);
         var maximumReply = Math.Min(limits.Value.MaxBatchBytes, RemoteDocumentProtocol.MaximumBodyBytes);
-        var capability = new ControlledDocumentReadRequest(frame, maximumBytes, maximumRecords, maximumReply);
+        var capability = new ControlledDocumentReadRequestV2(frame, maximumBytes, maximumRecords, maximumReply);
         var discovery = node.Discovery?.Read() ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
-        var call = new RemoteControlledDocumentCall(RemoteDocumentProtocol.Version, envelope.RequestId,
-            Guid.NewGuid().ToString(NonceFormat), partition.Configuration.LocalId, discovery.SiloAddress,
-            PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition).Owner, destination, capability, maximumReply);
-        var observed = await client.ReadControlledAsync(call, token).ConfigureAwait(false);
+        var call = new RemoteResourceLifetimeReadCallV2(RemoteResourceLifetimeReadProtocol.Version,
+            RemoteResourceLifetimeReadKindV2.ControlledDocument, envelope.RequestId, Guid.NewGuid().ToString(NonceFormat),
+            frame.Original.ExpiresAt, partition.Configuration.LocalId, discovery.SiloAddress,
+            PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition).Owner, destination,
+            NativeSerialization.Serialize(capability), maximumReply);
+        var bytes = await client.ReadLifetimeAsync(call, token).ConfigureAwait(false);
+        var observed = NativeSerialization.Deserialize<ControlledDocumentReadResultV2>(bytes.Span);
         work.ImportReadGrant(grant, observed.ReadBytes, observed.ExaminedRecords);
         work.MeasureResult(observed);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        partition.Database.ValidateControlledDocumentRead(frame, work);
+        partition.Database.ValidateControlledDocumentReadV2(frame, work);
         work.Check();
         return (true, observed.Document);
     }

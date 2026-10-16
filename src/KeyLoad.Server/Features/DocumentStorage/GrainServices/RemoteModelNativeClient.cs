@@ -55,10 +55,10 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         => SendCoreAsync(destination, source, SelectedVoter, channel, payload, signature, expiry,
             maximumReplyBytes, caller);
 
-    internal Task<RemoteModelAuthenticatedReply> SendAnnProjectionAsync(RegisteredPhysicalOwnerV1 destination,
+    internal Task<RemoteModelAuthenticatedReply> SendAnnProjectionLifetimeAsync(RegisteredPhysicalOwnerV1 destination,
         PhysicalShardRecord source, int voterIndex, ReadOnlyMemory<byte> payload,
         string signature, DateTimeOffset expiry, long maximumReplyBytes, CancellationToken caller)
-        => SendCoreAsync(destination, source, voterIndex, RemoteModelNativeChannel.AnnProjectionObservation,
+        => SendCoreAsync(destination, source, voterIndex, RemoteModelNativeChannel.ResourceLifetimeAnnRead,
             payload, signature, expiry, maximumReplyBytes, caller);
 
     private async Task<RemoteModelAuthenticatedReply> SendCoreAsync(RegisteredPhysicalOwnerV1 destination,

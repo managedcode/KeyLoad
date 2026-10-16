@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.GraphTraversal;
@@ -14,8 +15,12 @@ internal static class GraphSearchFieldAuthority
     {
         database.Authorization.Require(principal, partition, graphName, Capability.GraphRead);
         var graph = budget.ReadRecord<ResourceDefinition>(view,
-            KeySpace.Resource(partition.TenantId, partition.DatabaseId, graphName))
-            ?? throw Errors.Fail(ErrorCode.NotFound, MissingGraph);
+            KeySpace.Resource(partition.TenantId, partition.DatabaseId, graphName));
+        _ = ResourceLifetimeCatalog.Read(budget.CreateView(view), partition.TenantId, partition.DatabaseId, graphName, graph);
+        if (graph is null)
+        {
+            throw Errors.Fail(ErrorCode.NotFound, MissingGraph);
+        }
         if (graph.Kind != ResourceKind.Graph || graph.TransactionDomainId != partition.TransactionDomainId)
         {
             throw Errors.Fail(ErrorCode.Conflict, InvalidGraphResource);

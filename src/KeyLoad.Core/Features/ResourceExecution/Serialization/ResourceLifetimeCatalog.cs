@@ -9,6 +9,8 @@ internal static class ResourceLifetimeCatalog
     private const string InvalidPair = "The resource definition and lifetime metadata do not form a valid pair.";
     private const string AlreadyCreated = "The resource already has a persisted lifetime.";
 
+    internal static byte[] Prefix() => KeyCodec.Encode(LifetimeSpace);
+
     internal static byte[] Key(string tenantId, string databaseId, string resourceName)
         => KeyCodec.Encode(LifetimeSpace, tenantId, databaseId, resourceName);
 

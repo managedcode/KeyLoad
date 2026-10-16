@@ -42,7 +42,8 @@ internal enum RequestCqrsProbePhase
     QueryReadCutCaptured,
     WaitForIndexReadCutCaptured,
     MovementParentStateExecuting,
-    MovementParentStateReturned
+    MovementParentStateReturned,
+    ControlledLifetimeReplayBeforeDispatch
 }
 
 internal enum RequestCqrsProbeAction

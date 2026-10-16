@@ -1,10 +1,10 @@
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-/// <summary>Supporting six native production owners; mandatory Docker RF3 evidence remains separate.</summary>
+/// <summary>Preserves the original BlobWire case through its genuine six-silo Aspire native successor.</summary>
 [NotInParallel]
 internal sealed class PartitionMovementBlobWireNativeTests
 {
     [Test]
     public Task ActualSignedSixKindBlobWireFaultsDenyWithoutEffectsThenOriginalSendAndColdSdkMcpQ1AreHealthy()
-        => PartitionMovementBlobWireTrial.RunAsync(TestContext.Current!.Execution.CancellationToken);
+        => NativeBlobWholeParentTrial.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
@@ -33,7 +34,7 @@ internal static class CommandOutcomePartitionIdentity
             OperationKind.EventFeedSourcePhase => ForPayload<global::KeyLoad.Core.EventVectorSourceMutation>(payload, static request => request.Source?.Partition),
             OperationKind.Bm25CorpusPublicationPhase => ForPayload<global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand>(payload, static phase => phase.Current?.Partition),
             OperationKind.OnlineTextPublicationPhase => ForPayload<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload, static request => request.Request.Consumer.Partition),
-            OperationKind.PartitionMovementPhase => ForPayload<PartitionMovePhaseCommand>(payload, static request => request.Partition),
+            OperationKind.PartitionMovementPhase => ForMovement(payload),
             OperationKind.ConfigurePlacementPolicy => ForPayload<ConfigurePlacementPolicyRequest>(payload, static request => request.ControlPartition),
             OperationKind.PersistPlacementIntent => ForPayload<global::KeyLoad.Core.Features.ClusterRouting.Contracts.PlacementIntentPersistenceAdmissionV1>(payload,
                 static request => request.OriginalRequest.ControlPartition),
@@ -57,6 +58,13 @@ internal static class CommandOutcomePartitionIdentity
                 or OperationKind.BindAtomicPartitionPlacement or OperationKind.RegisterPhysicalOwner => CommandOutcomePartitionScope.Global,
             _ => CommandOutcomePartitionScope.Unknown
         };
+
+    private static CommandOutcomePartitionScope ForMovement(ReadOnlyMemory<byte> payload)
+    {
+        var original = PartitionMovementNativePayload.ReadValue(payload).Original;
+        DatabaseEngine.ValidatePartition(original.Partition);
+        return new(CommandOutcomeScopeKind.Partition, original.Partition);
+    }
 
     private static CommandOutcomePartitionScope ResolveSubscription(OperationKind kind, ReadOnlyMemory<byte> payload)
         => kind switch

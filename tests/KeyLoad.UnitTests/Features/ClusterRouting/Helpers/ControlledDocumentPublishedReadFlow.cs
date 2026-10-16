@@ -32,7 +32,7 @@ internal static class ControlledDocumentPublishedReadFlow
         var denialWork = new ReadExecutionBudget(sourceOptions, source.Database.EvaluationClock, token);
         var denied = await Assert.ThrowsAsync<KeyLoadException>(() =>
         {
-            source.Database.TryCaptureControlledDocumentRead(MissingPrincipal, reference, null,
+            source.Database.TryCaptureControlledDocumentReadV2(MissingPrincipal, reference, null,
                 source.Database.EvaluationClock.GetUtcNow() +
                     TimeSpan.FromSeconds(source.Database.Limits.QueryDeadlineSeconds), denialWork);
             return Task.CompletedTask;
@@ -66,9 +66,10 @@ internal static class ControlledDocumentPublishedReadFlow
         var originalReceipt = original.Get<CommitReceipt>();
         var parent = new ReadExecutionBudget(Options.Create(source.Database.Limits),
             source.Database.EvaluationClock, token);
-        var frame = source.Database.CaptureControlledDocumentRead(PhysicalShardCatalogFixture.RootPrincipalId,
+        var frame = source.Database.TryCaptureControlledDocumentReadV2(PhysicalShardCatalogFixture.RootPrincipalId,
             reference, originalReceipt.Token, source.Database.EvaluationClock.GetUtcNow() +
-                TimeSpan.FromSeconds(source.Database.Limits.QueryDeadlineSeconds), parent);
+                TimeSpan.FromSeconds(source.Database.Limits.QueryDeadlineSeconds), parent)
+            ?? throw new InvalidOperationException("The authenticated source lifetime frame is absent.");
         var bytes = Math.Min(target.Database.Limits.MaxBatchBytes, target.Database.Limits.MaxQueryReadBytes);
         var records = Math.Min(target.Database.Limits.MaxBatchMutations, target.Database.Limits.MaxScanRecords);
         var receiver = new ReadExecutionBudget(Options.Create(target.Database.Limits),
@@ -76,7 +77,7 @@ internal static class ControlledDocumentPublishedReadFlow
         var grant = receiver.CreateReadGrant(bytes, records);
         var denied = await Assert.ThrowsAsync<KeyLoadException>(() =>
         {
-            target.Database.ReadControlledDocument(PhysicalShardCatalogFixture.RootPrincipalId,
+            target.Database.ReadControlledDocumentV2(PhysicalShardCatalogFixture.RootPrincipalId,
                 frame, receiver, grant, token);
             return Task.CompletedTask;
         });
@@ -90,19 +91,20 @@ internal static class ControlledDocumentPublishedReadFlow
     {
         var parent = new ReadExecutionBudget(Options.Create(source.Database.Limits),
             source.Database.EvaluationClock, token);
-        var frame = source.Database.CaptureControlledDocumentRead(PhysicalShardCatalogFixture.RootPrincipalId,
+        var frame = source.Database.TryCaptureControlledDocumentReadV2(PhysicalShardCatalogFixture.RootPrincipalId,
             reference, null, source.Database.EvaluationClock.GetUtcNow() +
-                TimeSpan.FromSeconds(source.Database.Limits.QueryDeadlineSeconds), parent);
+                TimeSpan.FromSeconds(source.Database.Limits.QueryDeadlineSeconds), parent)
+            ?? throw new InvalidOperationException("The authenticated source lifetime frame is absent.");
         var bytes = Math.Min(source.Database.Limits.MaxBatchBytes, source.Database.Limits.MaxQueryReadBytes);
         var records = Math.Min(source.Database.Limits.MaxBatchMutations, source.Database.Limits.MaxScanRecords);
         var parentGrant = parent.CreateReadGrant(bytes, records);
         var receiver = new ReadExecutionBudget(Options.Create(target.Database.Limits),
             target.Database.EvaluationClock, token);
         var receiverGrant = receiver.CreateReadGrant(bytes, records);
-        var actual = target.Database.ReadControlledDocument(PhysicalShardCatalogFixture.RootPrincipalId,
+        var actual = target.Database.ReadControlledDocumentV2(PhysicalShardCatalogFixture.RootPrincipalId,
             frame, receiver, receiverGrant, token);
         parent.ImportReadGrant(parentGrant, receiverGrant.ReadBytes, receiverGrant.ExaminedRecords);
-        source.Database.ValidateControlledDocumentRead(frame, parent);
+        source.Database.ValidateControlledDocumentReadV2(frame, parent);
         var expected = new DocumentResult(reference, InitialRevision,
             OriginalJson, false, []);
         await Assert.That(JsonSerializer.SerializeToUtf8Bytes(actual, JsonDefaults.Options)

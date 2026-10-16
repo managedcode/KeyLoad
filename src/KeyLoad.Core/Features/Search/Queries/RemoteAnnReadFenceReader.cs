@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -17,7 +18,8 @@ public sealed partial class DatabaseEngine
 
     private RemoteAnnReadFence? CaptureRemoteAnnRead(IKeyValueView view, string principalId,
         ProjectionConsumerRef consumer, string collection, string field, VectorSpace space,
-        long generation, RegisteredPhysicalOwnerV1 configuredLocal, ReadExecutionBudget budget)
+        long generation, RegisteredPhysicalOwnerV1 configuredLocal, ReadExecutionBudget budget,
+        Action<PrincipalRecord, ResourceDefinition>? capture = null)
     {
         budget.Check();
         RequireConfiguredRemoteAnnOwner(configuredLocal);
@@ -32,7 +34,8 @@ public sealed partial class DatabaseEngine
         Authorization.Require(principal, consumer.Partition, collection, Capability.VectorSearch);
         // This is source metadata authorization only; no local resource/data read is authorized here.
         // The addressed receiver independently requires actual local ownership and current field policy.
-        var resource = ReadRemoteAnnResource(consumer, collection, field, bounded, principal);
+        var resource = ReadRemoteAnnResource(consumer, collection, field, bounded, principal, capture is not null);
+        capture?.Invoke(principal, resource);
         var configured = ProjectionConsumer(bounded, consumer);
         if (configured.Definition.AnnMaintenance is null)
         {
@@ -89,7 +92,7 @@ public sealed partial class DatabaseEngine
     }
 
     private ResourceDefinition ReadRemoteAnnResource(ProjectionConsumerRef consumer, string collection, string field,
-        IKeyValueView bounded, PrincipalRecord principal)
+        IKeyValueView bounded, PrincipalRecord principal, bool lifetimeCapture)
     {
         var resource = bounded.GetRecord<ResourceDefinition>(KeySpace.Resource(
             consumer.Partition.TenantId, consumer.Partition.DatabaseId, collection))
@@ -99,7 +102,14 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
         }
-        Authorization.RequireFieldUse(principal, resource, field);
+        if (lifetimeCapture)
+        {
+            AnnLifetimeReadAuthority.RequireSchema(this, principal, resource, field);
+        }
+        else
+        {
+            Authorization.RequireFieldUse(principal, resource, field);
+        }
         return resource;
     }
 

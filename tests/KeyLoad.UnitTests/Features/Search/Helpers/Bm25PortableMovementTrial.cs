@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterRouting;
@@ -50,7 +49,7 @@ internal sealed class Bm25PortableMovementTrial
             throw new InvalidOperationException("The original native parent finished before its Retire borrow.");
         }
         var sealedOperation = await borrow.Entered;
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(sealedOperation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(sealedOperation);
         await Assert.That(phase.MoveId).IsEqualTo(request.MoveId);
         await Assert.That(phase.Stage).IsEqualTo(PartitionMovePeerStage.Retire);
         await Bm25PortableMovementAssertions.HeadAsync(owners.Target, published.Head, published.Bytes, token);

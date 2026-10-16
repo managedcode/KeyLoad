@@ -29,7 +29,7 @@ internal static class AnnPublicSearchExecutor
 
     internal static async Task<AnnSearchPage> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, ApproximateSearchRequest request, IOptions<QueryExecutionOptions> configured,
-        ReadExecutionBudget budget, CancellationToken cancellationToken)
+        ReadExecutionBudget budget, CancellationToken cancellationToken, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
@@ -41,20 +41,28 @@ internal static class AnnPublicSearchExecutor
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => Execute(database, projection, principalId, request, budget, execution),
+        return await Task.Run(() => Execute(database, projection, principalId, request, budget, execution, sourceMetadata),
             cancellationToken).ConfigureAwait(false);
     }
 
     internal static AnnSearchPage Execute(DatabaseEngine database, IAnnProjection? projection,
         string principalId, ApproximateSearchRequest request, ReadExecutionBudget budget,
-        QueryExecutionOptions execution)
+        QueryExecutionOptions execution, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
         AnnPublicRequestValidation.Validate(request, database.Limits, execution, budget);
         var search = request.Search;
-        return database.WithQueryView(principalId, search.Partition, search.Collection, (view, principal, resource) =>
+        return database.WithQueryView(principalId, search.Partition, search.Collection, Capability.VectorSearch, (view, principal, resource) =>
         {
             database.Authorization.Require(principal, search.Partition, search.Collection, Capability.VectorSearch);
-            database.Authorization.RequireFieldUse(principal, resource, search.VectorField!);
+            if (sourceMetadata is not null)
+            {
+                AnnLifetimeReadAuthority.Require(database, view, principal, resource, search.Partition,
+                    search.Collection, search.VectorField!, sourceMetadata, budget);
+            }
+            else
+            {
+                database.Authorization.RequireFieldUse(principal, resource, search.VectorField!);
+            }
             var owner = projection ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
             var lease = owner.Acquire(view, new(search.Partition, search.Collection, search.VectorField!,
                 search.Space!, request.Consumer, request.IndexGeneration), budget);
@@ -63,7 +71,7 @@ internal static class AnnPublicSearchExecutor
             {
                 var caller = AnnSeedCollector.CaptureView(database, view, principalId,
                     search.Partition, search.Collection, search.VectorField!, search.Space!,
-                    lease.CallerSeedOptions, budget, scopeWork: lease.ScopeWork);
+                    lease.CallerSeedOptions, budget, scopeWork: lease.ScopeWork, sourceMetadata: sourceMetadata);
                 var work = new AnnWorkBudget(budget, lease.CallerSeedOptions.Value.MaxWorkUnits);
                 work.Charge(lease.ScopeWork.Units);
                 var eligible = AnnPublicEligibility.Create(lease.Records, caller, search.AllowedIds, work);
@@ -71,8 +79,10 @@ internal static class AnnPublicSearchExecutor
                 var scores = AnnPublicCandidateValidation.Scores(search, caller, lease.Records, eligible, result.Candidates, work);
                 var fusion = new SearchRankFusion(search.FusionConstant, search.Limit, budget);
                 fusion.AddBranch(scores, search.VectorWeight, SearchBranchKind.Vector);
-                var documents = SearchBranchExecution.ProjectSelected(database, view, principal, resource,
-                    fusion.Select(), budget);
+                var selected = fusion.Select();
+                var documents = sourceMetadata is null
+                    ? SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget)
+                    : AnnLifetimeProjection.ProjectSelected(database, view, principal, resource, sourceMetadata, selected, budget);
                 var page = new AnnSearchPage(AnnPublicRequestValidation.CurrentVersion, ImmutableCollectionsMarshal.AsImmutableArray(documents),
                     caller.Cut.Position, Mode(result.Mode), result.Mode != AnnSearchMode.Approximate,
                     request.IndexGeneration, request.RequestedMode);
@@ -81,7 +91,7 @@ internal static class AnnPublicSearchExecutor
             }
             catch (Exception error) { primary = error; throw; }
             finally { Dispose(lease, primary); }
-        });
+        }, budget);
     }
 
     private static AnnPageMode Mode(AnnSearchMode mode) => mode switch

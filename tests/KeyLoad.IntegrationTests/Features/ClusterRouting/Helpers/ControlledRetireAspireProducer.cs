@@ -1,5 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -32,7 +30,7 @@ internal static class ControlledRetireAspireProducer
 
     internal static async Task ExpiredAsync(ControlledRetireAspireOriginal original, CancellationToken token)
     {
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(original.Operation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(original.Operation);
         var expires = phase.ReceiverEffectAdmission?.OriginalExpiresAt
             ?? throw new InvalidOperationException(ControlledRetireAspireProtocol.Missing);
         var remaining = expires - TimeProvider.System.GetUtcNow();
@@ -45,7 +43,7 @@ internal static class ControlledRetireAspireProducer
 
     internal static async Task BeforeExpiryAsync(ControlledRetireAspireOriginal original)
     {
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(original.Operation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(original.Operation);
         var admission = phase.ReceiverEffectAdmission ?? throw new InvalidOperationException(ControlledRetireAspireProtocol.Missing);
         await Assert.That(original.Phase.OriginalExpiresAt).IsEqualTo(admission.OriginalExpiresAt);
         await Assert.That(TimeProvider.System.GetUtcNow() < admission.OriginalExpiresAt).IsTrue();

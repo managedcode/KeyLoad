@@ -14,6 +14,9 @@ public sealed partial class GrainRequestCodec
 
     internal IOptions<GrainRoutingOptions> ExecutionOptions => executionOptions;
 
+    internal (DatabaseEngine Database, DateTimeOffset Now, TimeSpan Lifetime) LifetimeReadContext
+        => (database, clock.GetUtcNow(), settings.RequestLifetime);
+
     internal IGrainRequestPhaseObserver? PhaseObserver
     {
         get; init;

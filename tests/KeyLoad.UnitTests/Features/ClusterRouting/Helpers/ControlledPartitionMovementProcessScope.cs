@@ -60,6 +60,32 @@ internal sealed class ControlledPartitionMovementProcessScope : IDisposable
         GrainRequestAuthority.RequireAdministrator(principal);
         var operation = node.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
             principal.Id, node.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
+        return await SubmitOperationAsync(node, verified, operation, token);
+    }
+
+    internal async Task<OperationResult> SubmitAsync(ControlledPartitionMovementNode node,
+        ServerRuntimeOptions runtime, PartitionMovementTransportRequest original,
+        PartitionMoveLifetimeProofV1 proof, CancellationToken token)
+    {
+        var admitted = await ControlledPartitionMovementFreshAdmission.VerifyControlledLifetimeAsync(node,
+            runtime, original, proof, token);
+        var verified = admitted.Request;
+        if (verified.Action != PartitionMovementTransportAction.Apply)
+        {
+            throw new InvalidOperationException("Only an admitted original logged phase is submitted.");
+        }
+        var principalId = PartitionMovementControlPrincipal.Resolve(node.Database, verified.Envelope);
+        var principal = node.Store.Read(view => node.Database.Principal(view, principalId,
+            node.Database.EvaluationClock.GetUtcNow()));
+        GrainRequestAuthority.RequireAdministrator(principal);
+        var operation = node.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
+            principal.Id, node.Database.EvaluationClock.GetUtcNow(), verified.Envelope, admitted.Proof);
+        return await SubmitOperationAsync(node, verified, operation, token);
+    }
+
+    private async Task<OperationResult> SubmitOperationAsync(ControlledPartitionMovementNode node,
+        PartitionMovementTransportRequest verified, ReplicatedOperation operation, CancellationToken token)
+    {
         if (Exercised || verified.Envelope.Stage != stage || verified.Envelope.PageOrdinal != FirstOrdinal
             || stage == PartitionMovePeerStage.Abort && !ReferenceEquals(node, source))
         {

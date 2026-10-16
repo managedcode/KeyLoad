@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
@@ -9,11 +10,11 @@ internal static class DistributedSearchWitnessRevalidation
 
     internal static DistributedTextWitnessV1 Execute(DatabaseEngine database, string principalId,
         SearchRequest request, string tenant, DistributedTextWitnessV1 witness,
-        ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant)
+        ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
-        return database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant,
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedTextWitnessV1> read =
             (view, principal, resource, digest) =>
             {
                 budget.Check();
@@ -23,8 +24,12 @@ internal static class DistributedSearchWitnessRevalidation
                 }
                 DistributedTextWitnessValidation.Require(database, view, principal, resource, digest,
                     witness, request.Partition, grant, budget);
-                DistributedSearchFieldAuthorization.Require(database, principal, resource, request);
+                DistributedSearchFieldAuthorization.Require(database, principal, resource, request, metadata);
                 return witness;
-            });
+            };
+        return metadata is null
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read)
+            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
+                grant, budget, metadata, read);
     }
 }

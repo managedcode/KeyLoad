@@ -19,7 +19,7 @@ internal static class VectorProjectionEligibility
 
     internal static bool IsEligible(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, DocumentRecord targetDocument, VectorRecord vector,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, AnnLifetimeResourceResolver? lifetime = null, bool sourcePolicies = false)
     {
         if (vector.DocumentId is null || vector.Field is null || vector.Space is null)
         {
@@ -46,7 +46,15 @@ internal static class VectorProjectionEligibility
         {
             return false;
         }
-
+        if (lifetime is not null)
+        {
+            var sourceDefinition = lifetime.Resolve(view, partition, sourceResource, budget);
+            if (sourceDefinition is null || !lifetime.CanSeeInput(database, sourceResource, sourceDefinition, lineage.InputField))
+            {
+                return false;
+            }
+            sourceResource = sourcePolicies ? sourceDefinition : sourceResource;
+        }
         var source = budget.ReadRecord<DocumentRecord>(view,
             DocumentStorageKeys.RecordKey(partition, lineage.SourceDocument.Collection, lineage.SourceDocument.Id));
         if (source is null || source.Deleted || source.Revision != lineage.SourceDocumentRevision)
@@ -63,17 +71,26 @@ internal static class VectorProjectionEligibility
             return false;
         }
 
-        return HasCompatiblePolicy(database, view, partition, collection, lineage, sourceResource, budget);
+        return HasCompatiblePolicy(database, view, partition, collection, lineage, sourceResource, budget, lifetime, sourcePolicies);
     }
 
     private static bool HasCompatiblePolicy(DatabaseEngine database, IKeyValueView view, PartitionRef partition,
         string collection, VectorProjectionLineage lineage, ResourceDefinition sourceResource,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, AnnLifetimeResourceResolver? lifetime, bool sourcePolicies)
     {
         var targetResource = budget.ReadRecord<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection))
             ?? throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         ValidateResource(targetResource, collection, partition);
+        if (lifetime is not null)
+        {
+            var definition = lifetime.Resolve(view, partition, targetResource, budget);
+            if (definition is null)
+            {
+                return false;
+            }
+            targetResource = sourcePolicies ? definition : targetResource;
+        }
         var sourceClasses = VectorProjectionPolicy.Classifications(database.Authorization, sourceResource,
             lineage.InputField);
         var targetClasses = VectorProjectionPolicy.Classifications(database.Authorization, targetResource,

@@ -30,9 +30,10 @@ public sealed partial class DatabaseEngine
     }
 
     private PartitionMovePhaseResult ExecuteMoveAuthorize(IAtomicTransaction transaction,
-        PrincipalRecord principal, Guid commandId, PartitionMovePhaseCommand phase,
+        PrincipalRecord principal, ReplicatedOperation operation, PartitionMovePhaseCommand phase,
         DateTimeOffset evaluatedAt, long position)
     {
+        var commandId = operation.Id;
         var body = NativeSerialization.Deserialize<PartitionMoveAuthorizeBody>(phase.Body.Span);
         var control = PartitionMoveControlStorage.ReadHistory(transaction, phase.Partition,
             phase.MoveId, Limits.MaxBatchBytes)
@@ -68,22 +69,36 @@ public sealed partial class DatabaseEngine
         grant = BindMoveCleanupGrant(body.Phase, grant);
         if (previous is not null)
         {
-            if (previous.PhaseCommandId != grant.PhaseCommandId || previous.BodyDigest != digest
-                || previous.Stage != grant.Stage || previous.PageOrdinal != grant.PageOrdinal || previous.ExpiresAt != grant.ExpiresAt
-                || previous.OperatorPolicyEpoch != grant.OperatorPolicyEpoch
-                || previous.RequireReceiverIssuance != grant.RequireReceiverIssuance
-                || !PhysicalOwnerEntryValidation.SameOwner(previous.ReceiverOwner, grant.ReceiverOwner))
+            RequireMatchingMoveGrant(digest, previous, grant);
+            if (grant.Stage == PartitionMovePeerStage.ControlApplyCommand)
             {
-                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+                RequireRetainedControlledGrantLifetimeProof(transaction, operation, body.Phase, previous);
             }
             grant = previous;
         }
         else
         {
+            if (grant.Stage == PartitionMovePeerStage.ControlApplyCommand)
+            {
+                CreateControlledGrantLifetimeProof(transaction, operation, body.Phase, grant);
+            }
             PublishMoveGrant(transaction, principal, commandId, phase, body.Phase, grant);
         }
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId,
             grant.AdmissionPosition, grant.ControlIntentDigest), control, null, null, null, grant);
+    }
+
+    private static void RequireMatchingMoveGrant(string digest, PartitionMovePhaseGrant previous,
+        PartitionMovePhaseGrant grant)
+    {
+        if (previous.PhaseCommandId != grant.PhaseCommandId || previous.BodyDigest != digest
+            || previous.Stage != grant.Stage || previous.PageOrdinal != grant.PageOrdinal || previous.ExpiresAt != grant.ExpiresAt
+            || previous.OperatorPolicyEpoch != grant.OperatorPolicyEpoch
+            || previous.RequireReceiverIssuance != grant.RequireReceiverIssuance
+            || !PhysicalOwnerEntryValidation.SameOwner(previous.ReceiverOwner, grant.ReceiverOwner))
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
     }
 
     private void PublishMoveGrant(IAtomicTransaction transaction, PrincipalRecord principal, Guid commandId,

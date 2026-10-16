@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Replication;
 
@@ -105,7 +104,7 @@ internal static class PartitionMovementCapturePointerRf3Cut
             } // Actual native election no-op, not an inferred effect.
             await Assert.That(before.Header).IsNotNull();
             await Assert.That(operation.Kind).IsEqualTo(OperationKind.PartitionMovementPhase);
-            var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+            var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
             await Assert.That(operation.PrincipalId).IsEqualTo(PartitionMovementCapturePointerRf3Producer.Administrator);
             await Assert.That(phase.MoveId).IsEqualTo(request.MoveId);
             await SqlRf3Protocol.EqualAsync(request.Partition, phase.Partition);

@@ -22,7 +22,7 @@ internal static class ControlledDocumentNativeCommandStages
             ControlledDocumentTechnicalIdentity.CommandAcknowledgement), context,
             PartitionMovePeerStage.ControlAcknowledgeCommand,
             new PartitionControlAcknowledgeBody(context.OperatorPrincipalId, record.Identity,
-                effectId, observed.Effect.Receipt, observed.Effect.OriginalResult, observed.GrantId),
+                effectId, observed.Effect.Receipt, observed.Effect.OriginalResult, observed.GrantId, observed.Effect.BlobAuthority),
             expiry, null, null, token);
         var finalized = await phases.ApplyAsync(ControlledDocumentTechnicalIdentity.Derive(original,
             ControlledDocumentTechnicalIdentity.Finalize), context, PartitionMovePeerStage.ControlFinalizeCommand,

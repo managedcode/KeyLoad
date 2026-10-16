@@ -20,7 +20,7 @@ internal static class RequestCqrsProbeArmValidator
             || (readKind is null) == (commandId == Guid.Empty)
             || (readKind is { } read && !Enum.IsDefined(read))
             || phase is (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
-                && (readKind is not null || commandId == Guid.Empty || action != RequestCqrsProbeAction.Hold))
+                && !RequestCqrsLifetimeReadProbe.ValidArm(phase, action, readKind, commandId))
         {
             throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm);
         }

@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -32,7 +31,7 @@ internal static class PartitionWriterOrleansRetainedEntry
                     {
                         continue;
                     }
-                    var command = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+                    var command = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
                     if (command.MoveId != seed.FirstRequest.MoveId
                         || command.Stage != PartitionMovePeerStage.ControlCompleteRetirement)
                     {

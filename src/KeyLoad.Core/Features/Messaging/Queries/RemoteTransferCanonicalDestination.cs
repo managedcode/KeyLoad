@@ -49,17 +49,6 @@ public sealed partial class DatabaseEngine
             return Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         }
         RequireNoUnpublishedPartitionMoveTarget(view, destination.Partition);
-        var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(destination.Partition.TenantId,
-            destination.Partition.DatabaseId, destination.Queue))
-            ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
-        if (resource.TransactionDomainId != destination.Partition.TransactionDomainId)
-        {
-            throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail);
-        }
-        if (resource.Kind != ResourceKind.WorkQueue)
-        {
-            throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
-        }
-        return resource;
+        return BindResourceDefinition(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
     }
 }

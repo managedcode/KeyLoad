@@ -18,7 +18,8 @@ internal sealed partial class PartitionMovementPeerAdmission
             || request is null || request.Payload.IsEmpty || request.Payload.Length > database.Limits.MaxBatchBytes
             || !Enum.IsDefined(request.Channel) || request.Nonce == Guid.Empty
             || request.ExpiresAt <= now || request.ExpiresAt > now + routing.RequestLifetime
-            || request.Channel == PartitionMovementGrainServiceChannel.Phase && request.Query
+            || (request.Channel is PartitionMovementGrainServiceChannel.Phase
+                or PartitionMovementGrainServiceChannel.ControlledLifetime) && request.Query
             || (request.Channel is PartitionMovementGrainServiceChannel.Outcome or PartitionMovementGrainServiceChannel.TransferData) && !request.Query
             || request.Signature is null || request.Signature.Length != ReplicaTransportProtocol.HashHexCharacters
             || request.SenderSignature is null || request.SenderSignature.Length != ReplicaTransportProtocol.HashHexCharacters

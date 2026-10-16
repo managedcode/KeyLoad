@@ -1,31 +1,15 @@
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Queries;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal ControlledBlobReadFrame? TryCaptureControlledBlobOutcome(string principalId,
-        ReplicatedOperation operation, DateTimeOffset requestExpiry, ReadExecutionBudget work)
-    {
-        work.Check();
-        var original = VerifyOperationAuthority(operation);
-        if (original.PrincipalId != principalId)
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, ClusterAdministrationRequiredMessage);
-        }
-        var frame = Store.Read(view => CaptureControlledBlobOutcomeView(work.CreateView(view),
-            principalId, original, requestExpiry, Guid.NewGuid()));
-        work.MeasureResult(frame);
-        work.Check();
-        return frame;
-    }
-
     private ControlledBlobReadFrame? CaptureControlledBlobOutcomeView(IKeyValueView view,
         string principalId, ReplicatedOperation original, DateTimeOffset expiry, Guid queryId)
     {
@@ -39,6 +23,9 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
+        var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(blob.Partition.TenantId,
+            blob.Partition.DatabaseId, blob.Resource));
+        _ = ResourceLifetimeCatalog.Read(view, blob.Partition.TenantId, blob.Partition.DatabaseId, blob.Resource, definition);
         var resources = PartitionMoveResources.Capture(view, blob.Partition, Limits);
         _ = RequireControlledBlobPolicies(principal, original, resources);
         var scope = CommandOutcomePartitionIdentity.Resolve(original);
@@ -62,17 +49,5 @@ public sealed partial class DatabaseEngine
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, original, selected);
         return CaptureControlledBlobFrame(view, principal, blob, ControlledBlobReadPurpose.Outcome,
             original, previous, default, expiry, queryId);
-    }
-
-    internal void ValidateControlledBlobOutcome(ControlledBlobReadFrame original, ReadExecutionBudget work)
-    {
-        work.Check();
-        var current = Store.Read(view => CaptureControlledBlobOutcomeView(work.CreateView(view),
-            original.Principal.Id, original.Original!, original.ExpiresAt, original.QueryId));
-        if (current is null || JsonData.Fingerprint(current) != JsonData.Fingerprint(original))
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
-        }
-        work.Check();
     }
 }

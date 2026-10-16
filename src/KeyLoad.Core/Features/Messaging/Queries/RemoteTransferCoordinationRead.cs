@@ -26,6 +26,8 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.PermissionDenied, RemoteTransferCoordinationProtocol.InvalidHint);
         }
         RequireTransferAdministrator(principal);
+        RequireTransferCapabilities(principal, record.Source, Capability.QueueInspect);
+        RequireTransferCapabilities(principal, record.Source, Capability.QueuePublish);
         var resource = Resource(view, record.Source.Partition, record.Source.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, record.Source, resource);
         RequireTransferPublisher(principal, record.Source, resource);

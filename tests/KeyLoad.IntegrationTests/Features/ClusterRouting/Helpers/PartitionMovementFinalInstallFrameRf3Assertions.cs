@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -32,7 +31,7 @@ internal static class PartitionMovementFinalInstallFrameRf3Assertions
                 {
                     var operation = entry.Operation!;
                     await Assert.That(operation.Kind).IsEqualTo(OperationKind.PartitionMovementPhase);
-                    var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+                    var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
                     await Assert.That(phase.MoveId).IsEqualTo(seed.FirstRequest.MoveId);
                     await Assert.That(phase.Partition).IsEqualTo(seed.Partition);
                     await Assert.That(phase.Stage is PartitionMovePeerStage.ControlAuthorize or PartitionMovePeerStage.ControlCheckpoint).IsTrue();

@@ -1,4 +1,38 @@
 {
+  "RESOURCE-LIFETIME-NATIVE-20261016": {
+    "title": "Integrated native resource lifetime command/read and controlled blob outcome checkpoint",
+    "status": "in_progress",
+    "implementation": "Canonical native source integrated; full strict Release compiler/analyzers and canonical full formatter passed. Runtime qualification on this integrated source remains pending.",
+    "scope": [
+      "D1 canonical resource pairs and mandatory command coverage",
+      "Native document/query/ANN source and target authority",
+      "Effect-sensitive controlled blob OutcomeV2 and bounded native carriers",
+      "Aspire-owned RF3 fixture image lifetime and exact17 local admission controls"
+    ],
+    "strictBuild": {
+      "label": "root-r544-test-bindings-final-release",
+      "result": "passed",
+      "elapsedSeconds": 364.02593612507917,
+      "errors": 0,
+      "warnings": 0,
+      "sourceDrift": 0,
+      "stdoutSha256": "dc48573d7b95d83fcddfe5c66332517e8fa29f369160d778e1ea45daae41156d",
+      "completionSha256": "39f680eefbe95342d8266d383cc3efc9b9c7679b8fc8e6cf89f09ac978a6509a"
+    },
+    "fullFormatVerify": {
+      "label": "root-r543-token-order-final-format-verify",
+      "result": "passed",
+      "elapsedSeconds": 430.19493220793083,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "completionSha256": "d5ad537e35db482c432e9a8f787dff0b4df518451451b39dfe70eefcaa7f81c4"
+    },
+    "focusedUnit": "OPEN: selected60 is source prediction only; native TUnit TRX and functional coverage required.",
+    "processRecovery": "OPEN: three selected real process regressions require a fresh native run.",
+    "publicQualification": "OPEN: actual native RF3 and fresh matched one-node/three-node functional and cold flows required after product changes. Earlier e292 normal and57cea624 cold results retain their own recorded source scope.",
+    "limits": "No full SQL, resource DROP/recreate, Linux, power-loss, endurance, performance or release completion claim. Original105 remain20done85in_progress.",
+    "next": "Run selected native unit and recovery flows, then actual SDK/MCP RF3 and matched functional/cold gates; D2 authoritative conservative resource owner inventory is separate prepared-only work until qualified adoption."
+  },
   "FUNCTIONAL-COLD-20261016": {
     "title": "Native all-model same-root cold-reopen functional pair",
     "status": "done",
@@ -214,7 +248,7 @@
       "repairQualification": "Repaired known native analytics-directory admission; original R491 complete public authorization/all3 same-root restart passes. Original failure remains historical."
     },
     "gate1Gate2HistoricalProof": "Currentcorrectednormalpair e292c1c1 passedR477/R478; separatecurrent57cea624 allmodelcoldpair passedR516/R517. Keeporiginalcohorts distinct; fulloriginal105/Linuxqualificationopen.",
-    "next": "Integratecomplete mandatoryCOMMAND/READ/localpair/ANN/sourcecoverage batches onlyafteractualreadyprerequisites; liveBlobOutcome nativeeffectfulV2+DocV1orphanclosure remainSourceN HOLD. Currentworkingandcoldbasepassed; originalacceptancegatesretained.",
+    "next": "Native COMMAND/READ/local-pair/ANN/source-coverage and controlled blob OutcomeV2 closure is now canonically integrated; see RESOURCE-LIFETIME-NATIVE-20261016 for actual full compiler/format PASS and pending native runtime gates. D2 inventory, reusable-name retirement/cleanup and DROP remain open; prior source-cohort results are preserved.",
     "historicalStrictBuild": {
       "label": "root-r486-fresh-admission-cross-tenant-full-release",
       "result": "passed",

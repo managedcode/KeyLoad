@@ -56,6 +56,8 @@ internal sealed class ReadExecutionBudgetReadGrant
         return result;
     }
 
+    internal IKeyValueView CreateView(IKeyValueView view) => budget.CreateView(view, this);
+
     internal bool BelongsTo(ReadExecutionBudget owner) => ReferenceEquals(budget, owner);
 
     internal void Accept(long count)

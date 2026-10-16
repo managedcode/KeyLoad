@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -33,23 +34,18 @@ internal sealed class RemoteDistributedSearchLeafCall(OrleansNode node, Partitio
     }
 
     internal async Task<DistributedSearchLeafResultV1> RunAsync(DateTimeOffset expiresAt, string principalId,
-        DistributedSearchOwnedLeafV1 request, RemoteDocumentCallV1? call, CancellationToken token)
+        DistributedSearchOwnedLeafV1 request, RemoteDocumentCallV1? call, PartitionQueryLifetimeMetadata metadata,
+        CancellationToken token)
         => call is null
-            ? await ReadLocalAsync(request, expiresAt, principalId, token).ConfigureAwait(false)
-            : await client.ReadSearchLeafAsync(call, token).ConfigureAwait(false);
+            ? await RemoteQueryLifetimeLocalRead.SearchAsync(node, partition, principalId, request, metadata,
+                expiresAt, token).ConfigureAwait(false)
+            : await RemoteQueryLifetimeExchange.ReadAsync<DistributedSearchLeafResultV1>(client, call, metadata,
+                PartitionQueryParallelRetention.ReplyBytes(request.MaxResultBytes), token).ConfigureAwait(false);
 
-    private async Task<DistributedSearchLeafResultV1> ReadLocalAsync(DistributedSearchOwnedLeafV1 request,
-        DateTimeOffset expiresAt, string principalId, CancellationToken token)
-    {
-        var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
-            principalId, partition.Database.EvaluationClock.GetUtcNow()));
-        var requestId = Guid.NewGuid();
-        var signed = node.CatalogRequestCodec().CreateDistributedSearchLeaf(requestId, principal.Id,
-            NativeSerialization.Serialize(request), expiresAt);
-        using var identity = node.OpenRequestContext(principal, requestId, Guid.Empty, token);
-        var reply = await node.ExecuteAsync(requestId, signed, command: false, cancellationToken: token)
-            .ConfigureAwait(false);
-        return GrainNativePayload.Read<GrainValue>(reply.Payload).Value as DistributedSearchLeafResultV1
-            ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
-    }
+    internal static long Measure(DistributedSearchOwnedLeafV1 request, RemoteDocumentCallV1? call,
+        PartitionQueryLifetimeMetadata metadata)
+        => call is null ? NativeSerialization.Measure(new DistributedSearchOwnedLeafV2(request,
+            metadata.Definition, metadata.Coverage, metadata.Principal)) : RemoteQueryLifetimeExchange.Measure(call, metadata,
+                PartitionQueryParallelRetention.ReplyBytes(request.MaxResultBytes));
+
 }

@@ -11,9 +11,10 @@ internal static class RequestCqrsProbeSnapshotReader
         RequestCqrsProbeLiveFiles liveFiles, RequestCqrsProbeMigrationFiles migrationFiles,
         RequestCqrsNativeModelFiles nativeModelFiles, RequestCqrsNativeReplayFiles replayFiles,
         RequestCqrsQueryReadCutFiles queryCutFiles, RequestCqrsWaitForIndexReadCutFiles waitCutFiles,
-        RequestCqrsMovementJournalFiles movementJournalFiles)
+        RequestCqrsMovementJournalFiles movementJournalFiles, RequestCqrsControlledLifetimeFiles controlledLifetimeFiles)
     {
         var entries = RequestCqrsProbeSnapshotFiles.RequireInventory(root, ownerBytes, executionOptions);
+        var controlledLifetime = controlledLifetimeFiles.Inventory();
         var arms = new List<RequestCqrsProbeLoadedArm>();
         var releases = new List<RequestCqrsProbeReleaseRecord>();
         var markers = new List<RequestCqrsProbeMarkerRecord>();
@@ -35,6 +36,11 @@ internal static class RequestCqrsProbeSnapshotReader
         {
             var name = Path.GetFileName(path);
             aggregateBytes = RequestCqrsProbeSnapshotFiles.ChargeEntry(path, name, aggregateBytes, executionOptions);
+            if (RequestCqrsControlledLifetimeNames.IsName(name))
+            {
+                controlledLifetime.Read(path, name, presentControls);
+                continue;
+            }
             if (ReadQueryEntry(path, name, movementJournalFiles, waitCutFiles, queryCutFiles, replayFiles, nativeModelFiles,
                 movementJournals, waitCuts, queryCuts, replayPlans, replayWitnesses, nativeModels, presentControls))
             {
@@ -48,13 +54,9 @@ internal static class RequestCqrsProbeSnapshotReader
             }
             records.ReadControl(path, name, arms, releases, markers, presentControls);
         }
-        RequestCqrsWaitForIndexReadCutInventory.RequireInventory(waitCuts, markers);
-        movementJournalFiles.RequireInventory(movementJournals, markers, arms);
-        waitCutFiles.RequireArms(waitCuts, arms);
-        RequestCqrsQueryReadCutInventory.RequireInventory(queryCuts, markers);
-        queryCutFiles.RequireArms(queryCuts, arms);
-        RequestCqrsNativeModelInventory.RequireMarkers(nativeModels, markers);
-        RequestCqrsNativeReplayInventory.RequireInventory(replayPlans, replayWitnesses, arms, markers, records.RetainedArm);
+        controlledLifetime.Require(arms, markers);
+        ValidateDataInventories(records, queryCutFiles, waitCutFiles, movementJournalFiles, arms, markers,
+            nativeModels, queryCuts, waitCuts, movementJournals, replayPlans, replayWitnesses);
         RequestCqrsReplicaSnapshotFiles.RequireInventory(replicaSnapshots, arms, markers);
         RequestCqrsEventVectorExpiryFiles.RequireInventory(eventVectorExpiries, arms, markers);
         RequestCqrsProbeActivationInventory.RequireMarkers(witnesses, markers);
@@ -63,6 +65,23 @@ internal static class RequestCqrsProbeSnapshotReader
         RequestCqrsProbeLiveFiles.RequireInventory(live, witnesses, markers, root, executionOptions);
         ValidateRecordInventories(records, migrationFiles, presentControls, markers, arms, releases, migration);
         return new(arms, releases, markers, entries.Length, aggregateBytes);
+    }
+
+    private static void ValidateDataInventories(RequestCqrsProbeRecords records,
+        RequestCqrsQueryReadCutFiles queryCutFiles, RequestCqrsWaitForIndexReadCutFiles waitCutFiles,
+        RequestCqrsMovementJournalFiles movementJournalFiles, List<RequestCqrsProbeLoadedArm> arms,
+        List<RequestCqrsProbeMarkerRecord> markers, List<RequestCqrsNativeModelWitness> nativeModels,
+        List<RequestCqrsQueryReadCutWitness> queryCuts, List<RequestCqrsWaitForIndexReadCutWitness> waitCuts,
+        List<RequestCqrsMovementJournalRecord> movementJournals, List<RequestCqrsNativeReplayPlan> replayPlans,
+        List<RequestCqrsNativeReplayWitness> replayWitnesses)
+    {
+        RequestCqrsWaitForIndexReadCutInventory.RequireInventory(waitCuts, markers);
+        movementJournalFiles.RequireInventory(movementJournals, markers, arms);
+        waitCutFiles.RequireArms(waitCuts, arms);
+        RequestCqrsQueryReadCutInventory.RequireInventory(queryCuts, markers);
+        queryCutFiles.RequireArms(queryCuts, arms);
+        RequestCqrsNativeModelInventory.RequireMarkers(nativeModels, markers);
+        RequestCqrsNativeReplayInventory.RequireInventory(replayPlans, replayWitnesses, arms, markers, records.RetainedArm);
     }
 
     private static bool ReadQueryEntry(string path, string name,

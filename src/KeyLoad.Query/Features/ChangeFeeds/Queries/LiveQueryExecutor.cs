@@ -24,9 +24,9 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         var query = LiveRequest(request.Query);
         var hash = QueryEngine.QueryHash(query);
         budget.Check();
-        return database.WithQueryView(principalId, query.Partition, query.Query.Collection,
+        return database.WithQueryView(principalId, query.Partition, query.Query.Collection, Capability.ChangesRead,
             (view, principal, resource) => StartView(view, principal, resource, query, hash, budget,
-                timeProvider ?? database.EvaluationClock));
+                timeProvider ?? database.EvaluationClock), budget);
     }
 
     internal LiveQueryPage Read(string principalId, ReadLiveQueryRequest request,
@@ -41,9 +41,9 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         var hash = QueryEngine.QueryHash(query);
         var prepared = new PreparedQuery(query.Query, EmptyElementCount, database.Limits.MaxScanRecords);
         budget.Check();
-        return database.WithQueryView(principalId, query.Partition, query.Query.Collection,
+        return database.WithQueryView(principalId, query.Partition, query.Query.Collection, Capability.ChangesRead,
             (view, principal, resource) => ReadView(budget.CreateView(view), principal, resource, query, hash, prepared, request,
-                budget));
+                budget), budget);
     }
 
     private LiveQuerySnapshot StartView(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,

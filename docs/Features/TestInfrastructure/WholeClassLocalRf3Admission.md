@@ -88,3 +88,35 @@ the strict solution, passes the four selection cases, then executes the eight
 original RF3 operations. Local and exact-source Linux qualification are OPEN
 until their own original results exist. No migration or persisted rollout is
 needed; rollback reverts this coherent test-only enrollment.
+
+
+## Lifetime read and preserved native Blob operation admission
+
+REQ/AC-RF3-LIFETIME-ADMISSION-001 appends exactly two selections after the
+preceding fifteen current model selections, in this order:
+
+`/*/*/ControlledBlobLifetimeReadRf3Tests/HeldNativeRepliesRequireFreshSourceAuthorityAndSettleBeforeTwoColdBlobReadWaves`
+
+`/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*`
+
+The first owns one declared READ lifetime operation under ADR-139; the second
+preserves both existing named native Blob operations required by
+NativeBlobWireSuccessor. The current source predicts one plus two cases, not
+actual discovered UIDs or outcomes. Keep prior selectors, refusal controls,
+current native SIMD, TUnit50, original deadlines and scheduling attributes.
+The four existing selection/control files must agree on seventeen entries,
+reject finite near-miss patterns without changing inputs or creating resources,
+and repeat each exact healthy native selection after the refusals.
+
+REQ/AC-RF3-LIFETIME-ADMISSION-002 requires NativeBlobWireWaveStartup to acquire
+and transfer the existing verified LocalRf3ImageTestSession only when no
+explicit Selection is supplied. An explicit selection remains borrowed; no
+second image owner is created. Preserve the same six-container Aspire flags,
+original observer, full native fault/effect/receipt/cold assertions and joined
+image cleanup after original wave and storage-lock closure.
+
+Root integrates this five-file qualification overlay with the complete lifetime
+source, then runs strict format/build, native selection controls and the real
+SDK/official MCP operations. Source review and configured admission do not pass
+the operation, native 8KiB RPC, cleanup or exact-source Linux gates. No public
+API, persistence format, provider, retry, timeout, UID or migration is added.

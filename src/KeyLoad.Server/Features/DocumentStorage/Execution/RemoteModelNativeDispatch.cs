@@ -1,5 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Server.Features.EventStreams;
+using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
 
@@ -9,7 +11,8 @@ internal static class RemoteModelNativeDispatch
         RemoteDocumentRuntime runtime, RemoteModelNativeRequest request,
         RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken token)
     {
-        if (request.Channel == RemoteModelNativeChannel.DocumentEnvelope)
+        if (request.Channel is RemoteModelNativeChannel.DocumentEnvelope or RemoteModelNativeChannel.ResourceLifetimeRead
+            or RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
         {
             return (runtime.Endpoint ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
             .ExecuteAsync(request, effectBoundary, token);
@@ -25,8 +28,18 @@ internal static class RemoteModelNativeDispatch
             return (runtime.EventVectors?.Endpoint ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
                 .ExecuteAsync(request.Payload, request.Signature, effectBoundary, token);
         }
+        if (request.Channel == RemoteModelNativeChannel.ResourceLifetimeAnnRead)
+        {
+            return (runtime.AnnObservations ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
+                .ExecuteLifetimeAsync(request, token);
+        }
         if (request.Channel == RemoteModelNativeChannel.AnnProjectionObservation)
         {
+            var legacy = NativeSerialization.Deserialize<AnnProjectionNativeCall>(request.Payload.Span);
+            if (legacy?.Observation?.Kind != AnnProjectionObservationKind.Identity)
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+            }
             return (runtime.AnnObservations ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
             .ExecuteAsync(request, token);
         }

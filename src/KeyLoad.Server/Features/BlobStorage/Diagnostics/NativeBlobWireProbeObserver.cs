@@ -8,7 +8,7 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
     private const int FirstFaultOrdinal = 1;
     private readonly NativeBlobWireCallbackLifetime lifetime = new();
 
-    public bool Select(RemoteControlledBlobCall original, CancellationToken originalCancellationToken)
+    public bool Select(RemoteControlledBlobOutcomeCallV2 original, CancellationToken originalCancellationToken)
     {
         lifetime.Enter();
         try
@@ -18,15 +18,37 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
         finally { lifetime.Leave(); }
     }
 
-    public async ValueTask ObserveAsync(RemoteControlledBlobCall original, RemoteModelNativeRequest signedOriginal,
+    public bool Select(RemoteResourceLifetimeReadCallV2 original, CancellationToken originalCancellationToken)
+    {
+        lifetime.Enter();
+        try
+        {
+            return selection.Select(original, originalCancellationToken);
+        }
+        finally { lifetime.Leave(); }
+    }
+
+    public ValueTask ObserveAsync(RemoteControlledBlobOutcomeCallV2 original, RemoteModelNativeRequest signedOriginal,
         NativeControlledBlobBorrowedCatalog borrowedCatalog, CancellationToken originalCancellationToken)
+        => ObserveSelectedAsync(() => selection.RequireSelected(original, originalCancellationToken), signedOriginal,
+            borrowedCatalog, NativeBlobWireProbeProtocol.MaximumFaultCount, originalCancellationToken);
+
+    public ValueTask ObserveAsync(RemoteResourceLifetimeReadCallV2 original, RemoteModelNativeRequest signedOriginal,
+        NativeControlledBlobBorrowedCatalog borrowedCatalog, CancellationToken originalCancellationToken)
+        => ObserveSelectedAsync(() => selection.RequireSelected(original, originalCancellationToken), signedOriginal,
+            borrowedCatalog, NativeBlobWireProbeProtocol.CommonFaultCount, originalCancellationToken);
+
+    private async ValueTask ObserveSelectedAsync(
+        Func<(NativeBlobWireSnapshot Snapshot, NativeBlobWireClaim Claim, string Digest)> select,
+        RemoteModelNativeRequest signedOriginal, NativeControlledBlobBorrowedCatalog borrowedCatalog,
+        int count, CancellationToken originalCancellationToken)
     {
         lifetime.Enter();
         var failures = new List<Exception>();
         NativeBlobWireReservation? reservation = null;
         try
         {
-            var selected = selection.RequireSelected(original, originalCancellationToken);
+            var selected = select();
             if (signedOriginal.CallerVoter != selected.Claim.CallerVoter
                 || signedOriginal.CallerSiloAddress != selected.Claim.CallerSiloAddress
                 || signedOriginal.ExpiresAt != selected.Claim.ExpiresAt)
@@ -34,8 +56,6 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
                 throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence);
             }
             reservation = reservations.Enter(selected.Snapshot.Owner, selected.Snapshot.OwnerDigest, selected.Claim, selected.Digest);
-            var count = original.Request.Frame.Original is null
-                ? NativeBlobWireProbeProtocol.CommonFaultCount : NativeBlobWireProbeProtocol.MaximumFaultCount;
             var originalBytes = evidence.EncodeNative(signedOriginal);
             var results = new NativeBlobWireResultEntry[count];
             for (var ordinal = FirstFaultOrdinal; ordinal <= count; ordinal++)

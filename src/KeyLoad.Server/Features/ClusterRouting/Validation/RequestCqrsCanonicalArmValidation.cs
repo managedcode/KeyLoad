@@ -4,6 +4,10 @@ internal static class RequestCqrsCanonicalArmValidation
 {
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
     {
+        if (arm.Phase == RequestCqrsProbePhase.ControlledLifetimeReplayBeforeDispatch)
+        {
+            return RequestCqrsControlledLifetimeArmValidation.Valid(arm);
+        }
         if (arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged)
         {
             return arm.Action == RequestCqrsProbeAction.ThrowOrdinary && arm.ReadKind is null

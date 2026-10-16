@@ -47,7 +47,7 @@ internal static class AnnSeedCollector
     internal static AnnSeed CaptureView(DatabaseEngine database, IKeyValueView view,
         string principalId, PartitionRef partition, string collection, string field,
         VectorSpace space, IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget,
-        AnnMaintenanceRequest? pin = null, AnnSeedWork? scopeWork = null)
+        AnnMaintenanceRequest? pin = null, AnnSeedWork? scopeWork = null, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(view);
@@ -59,7 +59,7 @@ internal static class AnnSeedCollector
         AnnSeedValidation.ValidateRequest(principalId, partition, collection, field, space, work);
         var startingReadBytes = readBudget.ReadBytes;
         var buffer = CaptureCut(database, view, principalId, partition,
-            collection, field, space, options, readBudget, work, pin);
+            collection, field, space, options, readBudget, work, pin, sourceMetadata);
         return Finish(buffer, readBudget, startingReadBytes);
     }
 
@@ -83,7 +83,7 @@ internal static class AnnSeedCollector
     private static AnnSeedBuffer CaptureCut(DatabaseEngine database, IKeyValueView view,
         string principalId, PartitionRef partition, string collection, string field,
         VectorSpace space, AnnSeedOptions options, ReadExecutionBudget budget, AnnSeedWork work,
-        AnnMaintenanceRequest? pin)
+        AnnMaintenanceRequest? pin, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
         const int CaptureCutAbsentCount = 0;
         const int AppliedValidationBoundary = 0;
@@ -127,7 +127,7 @@ internal static class AnnSeedCollector
         var cut = new AnnSeedCut(identity.NodeId, identity.Incarnation, identity.FormatVersion,
             identity.KeyCodecVersion, identity.ReadGeneration, position, applied, head.Tail, head.FirstAvailable);
         VisibleVectorReads.Visit(database, view, principal, partition, collection, field, budget,
-            (document, vector) => buffer.Observe(document, vector, partition, collection, field, space));
+            (document, vector) => buffer.Observe(document, vector, partition, collection, field, space), sourceMetadata, work);
         buffer.SetCut(cut);
         budget.Check();
         return buffer;

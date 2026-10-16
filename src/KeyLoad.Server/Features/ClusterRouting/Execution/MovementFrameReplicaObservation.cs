@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
@@ -40,7 +40,7 @@ internal sealed class MovementFrameReplicaObservation
         {
             return null;
         }
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = PartitionMovementNativePayload.Read(operation);
         if (phase.Stage != PartitionMovePeerStage.Install || phase.ReceiverEffectAdmission is not { } admission)
         {
             return null;

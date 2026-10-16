@@ -1,32 +1,13 @@
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal DocumentResult? ReadControlledDocument(string localPrincipalId, PartitionControlDocumentReadFrame frame,
-        ReadExecutionBudget work, ReadExecutionBudgetReadGrant grant, CancellationToken cancellationToken)
-    {
-        work.Check();
-        var result = Store.Read(view =>
-        {
-            var charged = work.CreateView(view, grant);
-            RequireControlledDocumentReadReceiver(charged, localPrincipalId, frame);
-            var controlled = new PartitionControlResourceView(charged, frame.Reference.Partition,
-                [frame.Resource], Limits.MaxBatchBytes, work, grant);
-            return ReadDocumentAtCut(controlled, frame.Principal, frame.Reference, frame.MinimumToken, cancellationToken);
-        });
-        work.MeasureResult(result);
-        work.Check();
-        return result;
-    }
-
     private void RequireControlledDocumentReadReceiver(IKeyValueView view, string localPrincipalId,
         PartitionControlDocumentReadFrame frame)
     {

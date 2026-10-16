@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
@@ -28,7 +27,7 @@ internal static class PartitionMovementEmbeddedFailureRf3Assertions
         var operation = entry.Operation!;
         await Assert.That(operation.PrincipalId).IsEqualTo(control.Header!.OperatorPrincipalId);
         await Assert.That(operation.Kind).IsEqualTo(OperationKind.PartitionMovementPhase);
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
         await Assert.That(phase.Stage).IsEqualTo(PartitionMovePeerStage.ControlCheckpoint);
         var body = NativeSerialization.Deserialize<PartitionMoveCheckpointBody>(phase.Body.Span);
         await Assert.That(body.Action).IsEqualTo(PartitionMoveCheckpointAction.Observe);

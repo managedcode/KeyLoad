@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -44,7 +43,7 @@ internal sealed class PartitionMovementLateNativeBorrow
             next = null;
             ordinal = ++admitted;
         }
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(operation);
         if (phase.Stage != PartitionMovePeerStage.Retire || phase.ReceiverEffectAdmission is null)
         {
             throw new InvalidOperationException("The actual parent receiver did not seal Retire authority.");

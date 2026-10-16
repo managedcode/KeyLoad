@@ -66,7 +66,8 @@ internal sealed partial class PartitionMovementGrainServiceClient : GrainService
     }
 
     internal async Task<PartitionMovementGrainServiceReply> ExchangeAsync(SiloAddress address,
-        PartitionMovementGrainServiceRequest request, CancellationToken token)
+        PartitionMovementGrainServiceRequest request, CancellationToken token,
+        Action<PartitionMovementGrainServiceRequest, PartitionMovementGrainServiceReply>? observed = null)
     {
         token.ThrowIfCancellationRequested();
         var reply = await GetGrainService(address).ExchangeAsync(request, token).ConfigureAwait(false) ?? throw InvalidReply(ReplyNullStage);
@@ -102,12 +103,14 @@ internal sealed partial class PartitionMovementGrainServiceClient : GrainService
             {
                 throw InvalidReply(ReplyErrorStage);
             }
+            observed?.Invoke(request, reply);
             throw Errors.Fail(error, PartitionMovementProtocol.Unavailable);
         }
         if (reply.Payload.IsEmpty || reply.SafeDetail is not null || string.IsNullOrEmpty(reply.Signature))
         {
             throw InvalidReply(ReplySuccessStage);
         }
+        observed?.Invoke(request, reply);
         return reply;
     }
 

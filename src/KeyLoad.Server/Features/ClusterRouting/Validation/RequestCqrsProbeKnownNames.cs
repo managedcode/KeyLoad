@@ -3,7 +3,8 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal static class RequestCqrsProbeKnownNames
 {
     private const string TemporaryFileSuffix = ".tmp";
-    internal static bool KnownName(string name) => RequestCqrsWaitForIndexReadCutInventory.IsName(name)
+    internal static bool KnownName(string name) => RequestCqrsControlledLifetimeNames.IsName(name)
+        || RequestCqrsWaitForIndexReadCutInventory.IsName(name)
         || RequestCqrsMovementJournalInventory.IsName(name)
         || RequestCqrsQueryReadCutInventory.IsName(name)
         || RequestCqrsNativeReplayInventory.IsPlanName(name)

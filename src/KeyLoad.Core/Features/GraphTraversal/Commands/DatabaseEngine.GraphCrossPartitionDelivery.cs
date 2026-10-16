@@ -127,10 +127,10 @@ public sealed partial class DatabaseEngine
     internal void RequireGraphWrite(IKeyValueView view, PrincipalRecord principal,
         PartitionRef source, PartitionRef destination, string graph)
     {
-        _ = Resource(view, source, graph, ResourceKind.Graph);
-        _ = Resource(view, destination, graph, ResourceKind.Graph);
         Authorization.Require(principal, source, graph, Capability.GraphWrite);
         Authorization.Require(principal, destination, graph, Capability.GraphWrite);
+        _ = Resource(view, source, graph, ResourceKind.Graph);
+        _ = Resource(view, destination, graph, ResourceKind.Graph);
     }
 
     private static GraphCrossPartitionDeliveryIntentV1? CurrentIntent(IKeyValueView view,

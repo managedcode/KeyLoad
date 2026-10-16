@@ -26,13 +26,14 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
         work.ConstrainLifetime(envelope.ExpiresAt);
         work.ConstrainNativeWork(work.MaximumNativeReadBytes, work.MaximumNativeScanRecords);
         work.ChargeBytes(payload.Length);
-        var captured = partition.Database.CaptureRemoteAnnRead(principal.Id, selected.Consumer, selected.Collection,
+        var captured = partition.Database.CaptureRemoteAnnLifetimeRead(principal.Id, selected.Consumer, selected.Collection,
             selected.Field, selected.Space, selected.Generation,
             PhysicalOwnerConfiguredTuples.Local(options.Value, partition), work);
-        if (captured is null || captured.OriginalMaintenance.NodeId == partition.Database.Store.Identity.NodeId)
+        var route = captured.Original;
+        if (route is null || route.OriginalMaintenance.NodeId == partition.Database.Store.Identity.NodeId)
         {
-            return await selected.ExecuteLocalAsync(actualSearch, principal.Id, work, cancellationToken)
-                .ConfigureAwait(false);
+            return await ReadLocalAsync(envelope, principal, selected, actualSearch, captured, work,
+                cancellationToken).ConfigureAwait(false);
         }
         var failures = new List<Exception>();
         object? result = null;
@@ -50,13 +51,13 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, deadline.Token);
                 using var cancellation = work.EnterStageCancellation(linked.Token);
-                var original = captured.OriginalMaintenance;
+                var original = route.OriginalMaintenance;
                 var exchange = new AnnProjectionNativeExchange(node, partition, options, clock, captured, original);
-                var locator = await AnnProjectionNativeLocator.FindAsync(exchange, captured.Destination,
+                var locator = await AnnProjectionNativeLocator.FindAsync(exchange, route.Destination,
                     principal.Id, original, envelope.ExpiresAt, work, linked.Token).ConfigureAwait(false);
                 AnnProjectionObservationSource.RequireSame(partition, captured, original, work);
                 var request = selected.ForOriginal(original, work);
-                var observed = await exchange.ReadAsync(captured.Destination, locator.VoterIndex, principal.Id,
+                var observed = await exchange.ReadAsync(route.Destination, locator.VoterIndex, principal.Id,
                     request, envelope.ExpiresAt, work, linked.Token).ConfigureAwait(false);
                 AnnProjectionNativeLocator.RequireResult(locator, original, observed);
                 await partition.Coordinator.ReadBarrierAsync(linked.Token).ConfigureAwait(false);
@@ -69,4 +70,35 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.RecoveryRequired, AnnProjectionObservationProtocol.Invalid);
     }
+    private async Task<object> ReadLocalAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
+        RemoteAnnReadSelection selected, SearchEngine actualSearch, RemoteAnnReadFenceV2 captured,
+        ReadExecutionBudget work, CancellationToken token)
+    {
+        var failures = new List<Exception>();
+        object? result = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var operation = owner.Acquire(envelope.RequestId);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                var remaining = envelope.ExpiresAt - clock.GetUtcNow();
+                if (remaining <= TimeSpan.Zero)
+                {
+                    throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
+                }
+                using var deadline = new CancellationTokenSource(remaining, clock);
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, operation.ShutdownToken, deadline.Token);
+                using var cancellation = work.EnterStageCancellation(linked.Token);
+                result = await selected.ExecuteLocalAsync(actualSearch, principal.Id, work, captured.Metadata, linked.Token)
+                    .ConfigureAwait(false);
+                await partition.Coordinator.ReadBarrierAsync(linked.Token).ConfigureAwait(false);
+                partition.Database.ValidateRemoteAnnLifetimeRead(captured, selected.Consumer, selected.Collection,
+                    selected.Field, selected.Space, selected.Generation, work);
+                work.CheckResult(result);
+            }, failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return result ?? throw Errors.Fail(ErrorCode.RecoveryRequired, AnnProjectionObservationProtocol.Invalid);
+    }
+
 }

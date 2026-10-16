@@ -11,7 +11,7 @@ internal static class VisibleVectorReads
 
     internal static void Visit(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, string field, ReadExecutionBudget budget,
-        Action<DocumentRecord, VectorRecord> visitor)
+        Action<DocumentRecord, VectorRecord> visitor, AnnReadLifetimeMetadata? sourceMetadata = null, AnnSeedWork? scopeWork = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(view);
@@ -22,6 +22,8 @@ internal static class VisibleVectorReads
         ArgumentNullException.ThrowIfNull(budget);
         ArgumentNullException.ThrowIfNull(visitor);
         budget.Check();
+        var resolver = sourceMetadata is null ? null : new AnnLifetimeResourceResolver(sourceMetadata,
+            scopeWork ?? throw new ArgumentNullException(nameof(scopeWork)), principal);
         var range = budget.VisitRange(view, KeySpace.Partition(VectorKeySpace, partition, collection, field),
             database.Limits.MaxScanRecords, (key, value) =>
             {
@@ -30,8 +32,11 @@ internal static class VisibleVectorReads
                     DocumentStorageKeys.RecordKey(partition, collection, vector.DocumentId));
                 if (document is { Deleted: false } && document.Revision == vector.DocumentRevision
                     && database.Authorization.CanReadRow(principal, document.Access)
+                    && (sourceMetadata is null || database.Authorization.CanReadRow(sourceMetadata.Principal, document.Access))
                     && VectorProjectionEligibility.IsEligible(database, view, principal, partition, collection,
-                        document, vector, budget))
+                        document, vector, budget, resolver)
+                    && (sourceMetadata is null || VectorProjectionEligibility.IsEligible(database, view, sourceMetadata.Principal,
+                        partition, collection, document, vector, budget, resolver, sourcePolicies: true)))
                 {
                     budget.Check();
                     visitor(document, vector);

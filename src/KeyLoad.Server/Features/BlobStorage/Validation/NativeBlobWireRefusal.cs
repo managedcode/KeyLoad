@@ -28,21 +28,11 @@ internal static class NativeBlobWireRefusal
             }
             return;
         }
-        if (reply.SafeDetail is not null || reply.Payload.IsEmpty)
-        {
-            throw Invalid();
-        }
-        var changed = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(request.Payload.Span).ControlledBlob
-            ?? throw Invalid();
-        var inner = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);
-        if (inner.RequestId != changed.RequestId || inner.Nonce != changed.Nonce
-            || inner.Error != ErrorCode.Unauthenticated || inner.SafeDetail != RemoteDocumentProtocol.InvalidProof
-            || inner.Result is not null || inner.QueryLeaf is not null || inner.Controlled is not null
-            || inner.ControlledBlob is not null || inner.SearchLeaf is not null || inner.QueueTransfer is not null)
-        {
-            throw Invalid();
-        }
+        // Both selected lifetime routes reject a changed full payload with its original inner MAC
+        // before entering a typed receiver or beginning the Outcome effect boundary.
+        throw Invalid();
     }
+
     private static bool Exact<T>(T first, T second)
         => NativeSerialization.Serialize(first).AsSpan().SequenceEqual(NativeSerialization.Serialize(second));
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);

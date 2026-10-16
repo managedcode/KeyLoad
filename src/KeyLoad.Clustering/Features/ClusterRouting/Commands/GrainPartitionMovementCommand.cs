@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 
 namespace KeyLoad.Clustering;
 
@@ -9,7 +9,7 @@ internal static class GrainPartitionMovementCommand
     internal static string Resolve(DecodedGrainRequest request)
     {
         var operation = Read(request);
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = PartitionMovementNativePayload.Read(operation);
         ArgumentNullException.ThrowIfNull(phase.Partition);
         JsonData.Identifier(phase.Partition.TenantId);
         JsonData.Identifier(phase.Partition.DatabaseId);
@@ -28,7 +28,7 @@ internal static class GrainPartitionMovementCommand
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
         }
-        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        var phase = PartitionMovementNativePayload.Read(operation);
         if (phase.Stage == PartitionMovePeerStage.Retire && phase.ReceiverEffectAdmission is not null
             && codec is { HasPhaseObserver: true })
         {

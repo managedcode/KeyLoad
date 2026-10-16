@@ -11,16 +11,17 @@ internal static class NativeControlledBlobFaultCatalog
     private const string WrongNonce = "wire-fault-nonce";
     private const string WrongResource = "wire-fault-resource";
 
-    internal static IEnumerable<NativeControlledBlobFaultPayload> Create(RemoteControlledBlobCall original,
+    internal static IEnumerable<NativeControlledBlobFaultPayload> Create(RemoteControlledBlobOutcomeCallV2 original,
         string originalSignature, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(original);
         ArgumentException.ThrowIfNullOrWhiteSpace(originalSignature);
-        if (original.Request?.Frame is not { } frame || !Supported(frame.Purpose, frame.Original?.Kind))
+        if (original.Original?.Request?.Frame is not { } frame || !Supported(frame.Purpose, frame.Original?.Kind))
         {
             throw new InvalidOperationException(UnsupportedIdentity);
         }
+        _ = BlobControlledReadScope.Require(frame);
         foreach (var payload in EnvelopeFaults(original, originalSignature, token))
         {
             yield return payload;
@@ -35,17 +36,18 @@ internal static class NativeControlledBlobFaultCatalog
         }
     }
 
-    private static IEnumerable<NativeControlledBlobFaultPayload> EnvelopeFaults(RemoteControlledBlobCall original,
+    private static IEnumerable<NativeControlledBlobFaultPayload> EnvelopeFaults(RemoteControlledBlobOutcomeCallV2 carrier,
         string originalSignature, CancellationToken token)
     {
+        var original = carrier.Original;
         yield return Wrap(NativeControlledBlobFaultVariation.Nonce, original with
         {
             Nonce = WrongNonce
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         yield return Wrap(NativeControlledBlobFaultVariation.RequestId, original with
         {
             RequestId = Guid.NewGuid()
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         yield return Wrap(NativeControlledBlobFaultVariation.SourcePhysicalShard,
             original with
             {
@@ -53,7 +55,7 @@ internal static class NativeControlledBlobFaultCatalog
                 {
                     PhysicalShardId = Guid.NewGuid()
                 }
-            }, originalSignature, token);
+            }, carrier, originalSignature, token);
         yield return Wrap(NativeControlledBlobFaultVariation.DestinationIncarnation, original with
         {
             Destination = original.Destination with
@@ -63,14 +65,18 @@ internal static class NativeControlledBlobFaultCatalog
                     Incarnation = Guid.NewGuid()
                 }
             }
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         yield return Encode(NativeControlledBlobFaultVariation.MissingEnvelope,
-            new RemoteDocumentTransportEnvelope(null, null, null), originalSignature, token);
+            carrier with
+            {
+                Original = null!
+            }, originalSignature, token);
     }
 
-    private static IEnumerable<NativeControlledBlobFaultPayload> AuthorizationFaults(RemoteControlledBlobCall original, ControlledBlobReadFrame frame,
+    private static IEnumerable<NativeControlledBlobFaultPayload> AuthorizationFaults(RemoteControlledBlobOutcomeCallV2 carrier, ControlledBlobReadFrame frame,
         string originalSignature, CancellationToken token)
     {
+        var original = carrier.Original;
         yield return Wrap(NativeControlledBlobFaultVariation.PrincipalPolicyEpoch, original with
         {
             Request = original.Request with
@@ -83,7 +89,7 @@ internal static class NativeControlledBlobFaultCatalog
                     }
                 }
             }
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         yield return Wrap(NativeControlledBlobFaultVariation.QueryId, original with
         {
             Request = original.Request with
@@ -93,7 +99,7 @@ internal static class NativeControlledBlobFaultCatalog
                     QueryId = Guid.NewGuid()
                 }
             }
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         yield return Wrap(NativeControlledBlobFaultVariation.Resource, original with
         {
             Request = original.Request with
@@ -106,12 +112,13 @@ internal static class NativeControlledBlobFaultCatalog
                     }
                 }
             }
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
     }
 
-    private static IEnumerable<NativeControlledBlobFaultPayload> OperationFaults(RemoteControlledBlobCall original, ControlledBlobReadFrame frame,
+    private static IEnumerable<NativeControlledBlobFaultPayload> OperationFaults(RemoteControlledBlobOutcomeCallV2 carrier, ControlledBlobReadFrame frame,
         string originalSignature, CancellationToken token)
     {
+        var original = carrier.Original;
         yield return Wrap(NativeControlledBlobFaultVariation.ExpiresAt, original with
         {
             Request = original.Request with
@@ -121,7 +128,7 @@ internal static class NativeControlledBlobFaultCatalog
                     ExpiresAt = DateTimeOffset.MinValue
                 }
             }
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         yield return Wrap(NativeControlledBlobFaultVariation.Purpose, original with
         {
             Request = original.Request with
@@ -131,7 +138,7 @@ internal static class NativeControlledBlobFaultCatalog
                     Purpose = frame.Purpose == ControlledBlobReadPurpose.Outcome ? ControlledBlobReadPurpose.Metadata : ControlledBlobReadPurpose.Outcome
                 }
             }
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         yield return Wrap(NativeControlledBlobFaultVariation.NativeRequest, original with
         {
             Request = original.Request with
@@ -141,7 +148,7 @@ internal static class NativeControlledBlobFaultCatalog
                     NativeRequest = frame.NativeRequest.IsEmpty ? new byte[] { NonemptyNativePayloadByte } : ReadOnlyMemory<byte>.Empty
                 }
             }
-        }, originalSignature, token);
+        }, carrier, originalSignature, token);
         if (frame.OriginalOutcome is not null)
         {
             yield return Wrap(NativeControlledBlobFaultVariation.OriginalOutcome, original with
@@ -153,7 +160,7 @@ internal static class NativeControlledBlobFaultCatalog
                         OriginalOutcome = null
                     }
                 }
-            }, originalSignature, token);
+            }, carrier, originalSignature, token);
         }
         if (frame.Original is { } operation)
         {
@@ -169,23 +176,24 @@ internal static class NativeControlledBlobFaultCatalog
                         }
                     }
                 }
-            }, originalSignature, token);
+            }, carrier, originalSignature, token);
         }
     }
 
     private static bool Supported(ControlledBlobReadPurpose purpose, OperationKind? kind)
         => purpose == ControlledBlobReadPurpose.Outcome
-            ? kind is OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.CompleteBlobUpload
-                or OperationKind.AbortBlobUpload or OperationKind.DeleteBlob or OperationKind.ReclaimBlob
-            : kind is null && purpose is ControlledBlobReadPurpose.Metadata or ControlledBlobReadPurpose.UploadInfo
-                or ControlledBlobReadPurpose.Range or ControlledBlobReadPurpose.List;
+            && kind is OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.CompleteBlobUpload
+                or OperationKind.AbortBlobUpload or OperationKind.DeleteBlob or OperationKind.ReclaimBlob;
 
     private static NativeControlledBlobFaultPayload Wrap(NativeControlledBlobFaultVariation variation,
-        RemoteControlledBlobCall call, string signature, CancellationToken token)
-        => Encode(variation, new RemoteDocumentTransportEnvelope(null, null, call), signature, token);
+        RemoteControlledBlobCall call, RemoteControlledBlobOutcomeCallV2 carrier, string signature, CancellationToken token)
+        => Encode(variation, carrier with
+        {
+            Original = call
+        }, signature, token);
 
     private static NativeControlledBlobFaultPayload Encode(NativeControlledBlobFaultVariation variation,
-        RemoteDocumentTransportEnvelope envelope, string signature, CancellationToken token)
+        RemoteControlledBlobOutcomeCallV2 envelope, string signature, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         return new(variation, RemoteDocumentWire.Encode(envelope), signature);

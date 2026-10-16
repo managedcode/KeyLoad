@@ -3,6 +3,7 @@ using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
@@ -21,15 +22,16 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
     /// <param name="root">The physical owner root, owned by the process trial.</param>
     /// <param name="owner">The actual listener-configured persisted physical owner.</param>
     /// <param name="observer">The existing storage observer for an armed actual canonical commit cut.</param>
+    /// <param name="limits">Optional validated native operation limits retained by the fixture owner.</param>
     /// <param name="maximumFixtureEntries">The exact selected supporting or terminal history bound.</param>
     public ControlledPartitionMovementNativeNode(string root, PhysicalShardRecord owner,
         Action<CommitStage, long, int>? observer = null,
-        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries)
-        : this(root, owner, UnavailablePartitionMovementCheckpointVerifier.Instance, observer, maximumFixtureEntries) { }
+        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null)
+        : this(root, owner, UnavailablePartitionMovementCheckpointVerifier.Instance, observer, maximumFixtureEntries, limits) { }
 
     internal ControlledPartitionMovementNativeNode(string root, PhysicalShardRecord owner,
         IPartitionMovementCheckpointVerifier checkpointVerifier, Action<CommitStage, long, int>? observer = null,
-        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries)
+        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null)
     {
         ArgumentNullException.ThrowIfNull(checkpointVerifier);
         ArgumentNullException.ThrowIfNull(owner);
@@ -47,7 +49,7 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
-            Database = new(Store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(),
+            Database = new(Store, new AuthorizationPolicy(), limits ?? CrashExecutionOptions.DatabaseLimits(),
                 CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
                 CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(),
                 CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(),

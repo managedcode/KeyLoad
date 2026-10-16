@@ -1,7 +1,5 @@
 using KeyLoad.Client;
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -95,7 +93,7 @@ internal sealed class PartitionMovementLateNativeTrial : IAsyncDisposable
         var original = await firstBorrow.WaitAsync(cancellationToken);
         await owners.Borrow.JoinFirstAsync(cancellationToken);
         await Assert.That((await producer.ConfigureAwait(false)).IsFailed).IsTrue();
-        var originalPhase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(original.Operation);
+        var originalPhase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(original.Operation);
         var originalAdmission = originalPhase.ReceiverEffectAdmission
             ?? throw new InvalidOperationException("The original receiver did not seal its actual proofs.");
         await Assert.That(original.Operation.Id).IsEqualTo(PartitionMovementParentPhaseIds.For(seed.Request, "root", PartitionMovementParentPhaseRole.Retire, cleanupGeneration: InitialGeneration));
@@ -107,7 +105,7 @@ internal sealed class PartitionMovementLateNativeTrial : IAsyncDisposable
         }, cancellationToken);
         owners.TrackProducer(producer);
         var next = await secondBorrow.WaitAsync(cancellationToken);
-        var nextPhase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(next.Operation);
+        var nextPhase = global::KeyLoad.Core.Features.ClusterRouting.Serialization.PartitionMovementNativePayload.Read(next.Operation);
         var nextAdmission = nextPhase.ReceiverEffectAdmission
             ?? throw new InvalidOperationException("The next receiver did not seal its actual proofs.");
         await Assert.That(next.Operation.Id).IsEqualTo(PartitionMovementParentPhaseIds.For(seed.Request, "root", PartitionMovementParentPhaseRole.Retire, cleanupGeneration: NextGeneration));

@@ -41,6 +41,7 @@ internal static class ControlledPartitionMovementLoopbackOptions
         var services = new ServiceCollection();
         services.AddRuntimeOptions(new ConfigurationBuilder().AddInMemoryCollection(
             new Dictionary<string, string?> { [EnabledKey] = EnabledValue }).Build());
+        services.AddSingleton(Options.Create(node.Database.Limits));
         services.AddSingleton(Options.Create(options));
         services.AddSingleton(Options.Create(node.Journal.Configuration));
         using var provider = services.BuildServiceProvider();

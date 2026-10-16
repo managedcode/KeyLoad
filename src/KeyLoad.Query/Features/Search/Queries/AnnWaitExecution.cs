@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.Features.Search;
@@ -32,7 +33,7 @@ internal static class AnnWaitExecution
 
     internal static async Task<WaitForAnnIndexResult> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, WaitForAnnIndexRequest request, IOptions<QueryExecutionOptions> configured,
-        ReadExecutionBudget budget, CancellationToken cancellationToken)
+        ReadExecutionBudget budget, CancellationToken cancellationToken, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
@@ -44,13 +45,13 @@ internal static class AnnWaitExecution
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => Read(database, projection, principalId, request, budget),
+        return await Task.Run(() => Read(database, projection, principalId, request, budget, sourceMetadata),
             cancellationToken).ConfigureAwait(false);
     }
 
     private static WaitForAnnIndexResult Read(DatabaseEngine database, IAnnProjection? projection,
-        string principalId, WaitForAnnIndexRequest request, ReadExecutionBudget budget)
-        => database.WithQueryView(principalId, request.Partition, request.Collection, (view, principal, resource) =>
+        string principalId, WaitForAnnIndexRequest request, ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null)
+        => database.WithQueryView(principalId, request.Partition, request.Collection, Capability.VectorSearch, (view, principal, resource) =>
         {
             FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
             database.Authorization.Require(principal, request.Partition, request.Collection, Capability.VectorSearch);
@@ -60,7 +61,15 @@ internal static class AnnWaitExecution
             {
                 throw Errors.Fail(ErrorCode.Validation, Invalid);
             }
-            database.Authorization.RequireFieldUse(principal, resource, request.VectorField);
+            if (sourceMetadata is not null)
+            {
+                AnnLifetimeReadAuthority.Require(database, view, principal, resource, request.Partition,
+                    request.Collection, request.VectorField, sourceMetadata, budget);
+            }
+            else
+            {
+                database.Authorization.RequireFieldUse(principal, resource, request.VectorField);
+            }
             JsonData.Identifier(request.Consumer.Name);
             var authority = new BudgetedReadView(view, budget);
             DatabaseEngine.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WrongToken);
@@ -98,7 +107,7 @@ internal static class AnnWaitExecution
             finally { Dispose(lease, primary); }
             budget.CheckResult(result);
             return result;
-        });
+        }, budget);
 
     private static void Dispose(IAnnProjectionLease lease, Exception? primary)
     {

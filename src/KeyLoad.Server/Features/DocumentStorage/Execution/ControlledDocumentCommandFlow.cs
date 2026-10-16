@@ -65,7 +65,7 @@ internal sealed class ControlledDocumentCommandFlow(PartitionHost partition,
         {
             queryExpiry = expiry;
         }
-        var frame = partition.Database.TryCaptureControlledBlobOutcome(original.PrincipalId, original, queryExpiry, work)
+        var frame = partition.Database.TryCaptureControlledBlobOutcomeV2(original.PrincipalId, original, queryExpiry, work)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteDocumentProtocol.Unavailable);
         return await blobReads.ObserveOutcomeAsync(ingressRequestId, frame, work, token).ConfigureAwait(false);
     }

@@ -83,7 +83,7 @@ internal static class RequestCqrsNativeModelInventory
     private static void Require(RequestCqrsNativeModelWitness value)
     {
         if (value.Version != RequestCqrsProbeProtocol.Version || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId)
-            || value.ArmId == Guid.Empty || value.RequestId == Guid.Empty || value.CommandId == Guid.Empty
+            || value.ArmId == Guid.Empty || value.RequestId == Guid.Empty
             || value.ConnectionId == Guid.Empty || string.IsNullOrWhiteSpace(value.Voter) || string.IsNullOrWhiteSpace(value.SiloAddress)
             || value.Phase is not (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch)
             || value.NativeRequest is not { Length: > EmptyNativeBytes } || value.NativeRequest.Length > MaximumBytes
@@ -98,6 +98,15 @@ internal static class RequestCqrsNativeModelInventory
             || request.Nonce == Guid.Empty || string.IsNullOrWhiteSpace(request.SenderSignature))
         {
             throw Invalid();
+        }
+        if (value.CommandId == Guid.Empty && (value.Phase != RequestCqrsProbePhase.NativeModelAfterDispatch
+            || request.Channel is not (RemoteModelNativeChannel.ResourceLifetimeRead or RemoteModelNativeChannel.ResourceLifetimeAnnRead)))
+        {
+            throw Invalid();
+        }
+        if (value.CommandId == Guid.Empty)
+        {
+            RequestCqrsLifetimeReadProbe.RequireReadWitness(request, value.RequestId);
         }
         if (value.NativeReply is not null)
         {

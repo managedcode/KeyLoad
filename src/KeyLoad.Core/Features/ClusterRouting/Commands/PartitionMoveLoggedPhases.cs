@@ -12,7 +12,7 @@ public sealed partial class DatabaseEngine
     private OperationResult ExecutePartitionMovePhase(IAtomicTransaction transaction,
         PrincipalRecord principal, ReplicatedOperation operation, long appliedPosition)
     {
-        var phase = Payload<PartitionMovePhaseCommand>(operation);
+        var phase = PartitionMovementNativePayload.Read(operation);
         if (!principal.ClusterAdministrator || appliedPosition <= PartitionMoveProtocol.EmptyCount)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
@@ -69,7 +69,7 @@ public sealed partial class DatabaseEngine
             PartitionMovePeerStage.ControlFinalize => Result(ExecuteMoveFinalize(transaction,
                 principal, operation.Id, phase, appliedPosition)),
             PartitionMovePeerStage.ControlAuthorize => Result(ExecuteMoveAuthorize(transaction,
-                principal, operation.Id, phase, operation.EvaluatedAt, appliedPosition)),
+                principal, operation, phase, operation.EvaluatedAt, appliedPosition)),
             PartitionMovePeerStage.ControlAcknowledge => Result(ExecuteMoveAcknowledge(transaction,
                 principal, operation.Id, phase, appliedPosition)),
             PartitionMovePeerStage.SourceBeginAbort => Result(ExecuteMoveSourceBeginAbort(transaction,

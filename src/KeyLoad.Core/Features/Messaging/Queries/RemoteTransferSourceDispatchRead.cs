@@ -52,6 +52,9 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
         }
         ValidateRemoteTransferOriginalSourceCommit(view, intent);
+        RequireTransferCapabilities(principal, claims.Source, Capability.QueuePublish);
+        RequireTransferCapabilities(principal, claims.Destination, Capability.QueuePublish);
+        RequireTransferCapabilities(principal, claims.Destination, Capability.QueueInspect);
         var source = Resource(view, claims.Source.Partition, claims.Source.Queue, ResourceKind.WorkQueue);
         var destination = RemoteTransferDestinationResource(view, claims.Destination);
         RequireTransferPublisher(principal, claims.Source, source);

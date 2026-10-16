@@ -56,10 +56,15 @@ internal sealed class RequestCqrsNativeModelObservation(RequestCqrsProbeFiles fi
         }
         if (context.ConnectionId == Guid.Empty || claim.ConnectionId != context.ConnectionId
             || claim.Identity.RequestId != context.RequestId || claim.Identity.CommandId != context.CommandId
-            || claim.Identity.ReadKind is not null || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold
+            || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold
             || original.CallerVoter != voter || original.CallerSiloAddress != address)
         {
             throw Invalid();
+        }
+        if (claim.Identity.ReadKind is not null)
+        {
+            return phase == RequestCqrsProbePhase.NativeModelAfterDispatch && context.CommandId == Guid.Empty
+                && RequestCqrsLifetimeReadProbe.MatchesCall(original, claim.Identity.ReadKind, context.RequestId) ? claim : null;
         }
         if (original.Channel != RemoteModelNativeChannel.DocumentEnvelope)
         {

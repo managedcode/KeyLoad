@@ -15,7 +15,7 @@ internal static class DistributedSearchProjectionExecution
 
     internal static DistributedSearchProjectionLeafV1 Execute(DatabaseEngine database, string principalId,
         SearchRequest request, string tenant, DistributedTextWitnessV1 witness,
-        ImmutableArray<GlobalBranchCandidate> selected, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant)
+        ImmutableArray<GlobalBranchCandidate> selected, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(request);
@@ -29,15 +29,19 @@ internal static class DistributedSearchProjectionExecution
         }
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
-        return database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant,
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedSearchProjectionLeafV1> read =
             (view, principal, resource, digest) => Project(database, view, principal, resource, digest,
-                request, tenant, witness, selected, budget, grant));
+                request, tenant, witness, selected, budget, grant, metadata);
+        return metadata is null
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read)
+            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
+                grant, budget, metadata, read);
     }
 
     private static DistributedSearchProjectionLeafV1 Project(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, string digest, SearchRequest request,
         string tenant, DistributedTextWitnessV1 witness, ImmutableArray<GlobalBranchCandidate> selected,
-        ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant)
+        ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata)
     {
         budget.Check();
         if (!string.Equals(principal.TenantId, tenant, StringComparison.Ordinal))
@@ -46,7 +50,7 @@ internal static class DistributedSearchProjectionExecution
         }
         DistributedTextWitnessValidation.Require(database, view, principal, resource, digest,
             witness, request.Partition, grant, budget);
-        DistributedSearchFieldAuthorization.Require(database, principal, resource, request);
+        DistributedSearchFieldAuthorization.Require(database, principal, resource, request, metadata);
         var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
         admission.Accept(PartitionQueryRetention.CandidateArrayBytes(selected.Length));
         var hits = ImmutableArray.CreateBuilder<RankedDocument>(selected.Length);
@@ -61,11 +65,16 @@ internal static class DistributedSearchProjectionExecution
             }
             var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(candidate.Reference));
             if (document is null || document.Deleted || document.Reference != candidate.Reference
-                || document.Revision != candidate.Revision)
+                || document.Revision != candidate.Revision
+                || !database.Authorization.CanReadRow(principal, document.Access)
+                || metadata is not null && !database.Authorization.CanReadRow(metadata.Principal, document.Access))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, ChangedSelectedDocument);
             }
-            var hit = new RankedDocument(database.Project(principal, resource, document), candidate.Score);
+            var projected = metadata is null ? database.Project(principal, resource, document)
+                : database.ProjectWithAuthorityIntersection(metadata.Principal, metadata.Definition,
+                    principal, resource, document).Value;
+            var hit = new RankedDocument(projected, candidate.Score);
             var bytes = budget.MeasureResult(hit);
             if (bytes > budget.MaximumResultBytes - projectedBytes)
             {

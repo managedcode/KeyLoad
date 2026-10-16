@@ -14,13 +14,19 @@ internal static class TestDatabaseReplicaRecovery
     internal static ReplicaMaterializer Recover(ReplicaMaterializer original, DatabaseEngine database,
         DurableReplicaLog log, IReplicaSnapshotStore snapshots, IOptions<ReplicaExecutionOptions> options,
         ReplicatedOperation operation, Action restoreFaultOwnedRow, Action retireJoinedOwner, List<Exception> originalFailures,
-        CancellationToken cancellationToken, ErrorCode? expectedApplyError = null)
+        CancellationToken cancellationToken, ErrorCode? expectedApplyError = null,
+        ErrorCode expectedMissingOutcomeError = ErrorCode.RecoveryRequired)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (expectedMissingOutcomeError is not (ErrorCode.RecoveryRequired or ErrorCode.Corruption)
+            || expectedMissingOutcomeError == ErrorCode.Corruption && expectedApplyError != ErrorCode.Corruption)
+        {
+            throw new InvalidOperationException(InvalidRecovery);
+        }
         var entry = log.ReadEntry(log.State.CommittedIndex);
         if (entry?.Operation is not { } retained || log.State.CommittedIndex != log.State.LastIndex
             || database.LastApplied >= entry.Index || !Same(retained, operation)
-            || database.ResolveOutcome(operation).Error != ErrorCode.RecoveryRequired)
+            || database.ResolveOutcome(operation).Error != expectedMissingOutcomeError)
         {
             throw new InvalidOperationException(InvalidRecovery);
         }

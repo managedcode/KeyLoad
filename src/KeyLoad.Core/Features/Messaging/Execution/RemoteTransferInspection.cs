@@ -79,6 +79,7 @@ public sealed partial class DatabaseEngine
         }
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         RequireTransferAdministrator(principal);
+        RequireTransferCapabilities(principal, source, Capability.QueueInspect);
         var resource = Resource(view, source.Partition, source.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, source, resource);
         var record = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(source, transferId));
@@ -101,6 +102,7 @@ public sealed partial class DatabaseEngine
         }
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         RequireTransferAdministrator(principal);
+        RequireTransferCapabilities(principal, destination, Capability.QueueInspect);
         var resource = Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, destination, resource);
         var record = view.GetRecord<RemoteTransferTargetReceiptRecord>(

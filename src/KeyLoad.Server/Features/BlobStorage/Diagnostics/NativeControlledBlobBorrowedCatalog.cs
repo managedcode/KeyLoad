@@ -4,8 +4,6 @@ namespace KeyLoad.Server.Features.BlobStorage;
 
 internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
 {
-    private const int NoOptionalFrame = 0;
-    private const int PresentOptionalFrame = 1;
     private readonly Lock gate = new();
     private readonly IEnumerator<NativeControlledBlobFaultPayload> catalog;
     private readonly NativeControlledBlobFaultDispatcher dispatcher;
@@ -17,14 +15,22 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
     private bool active;
     private int count;
 
-    internal NativeControlledBlobBorrowedCatalog(RemoteControlledBlobCall original, string signature,
+    internal NativeControlledBlobBorrowedCatalog(RemoteControlledBlobOutcomeCallV2 original, string signature,
         NativeControlledBlobFaultDispatcher dispatcher, CancellationToken originalToken)
     {
         this.dispatcher = dispatcher;
         this.originalToken = originalToken;
-        expected = NativeBlobWireProbeProtocol.CommonFaultCount + (original.Request.Frame.OriginalOutcome is null ? NoOptionalFrame : PresentOptionalFrame)
-            + (original.Request.Frame.Original is null ? NoOptionalFrame : PresentOptionalFrame);
+        expected = NativeBlobWireProbeProtocol.MaximumFaultCount;
         catalog = NativeControlledBlobFaultCatalog.Create(original, signature, originalToken).GetEnumerator();
+    }
+
+    internal NativeControlledBlobBorrowedCatalog(RemoteResourceLifetimeReadCallV2 original, string signature,
+        NativeControlledBlobFaultDispatcher dispatcher, CancellationToken originalToken)
+    {
+        this.dispatcher = dispatcher;
+        this.originalToken = originalToken;
+        expected = NativeBlobWireProbeProtocol.CommonFaultCount;
+        catalog = NativeControlledBlobLifetimeFaultCatalog.Create(original, signature, originalToken).GetEnumerator();
     }
 
     internal Task<NativeControlledBlobFaultResult> ExecuteNextAsync()

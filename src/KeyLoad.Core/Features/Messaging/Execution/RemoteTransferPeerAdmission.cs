@@ -54,6 +54,8 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid);
         }
+        RequireTransferCapabilities(principal, destination, call.Stage == RemoteQueueTransferPeerStage.Accept
+            ? Capability.QueuePublish : Capability.QueueInspect);
         var resource = Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         if (call.Stage == RemoteQueueTransferPeerStage.Accept)
         {

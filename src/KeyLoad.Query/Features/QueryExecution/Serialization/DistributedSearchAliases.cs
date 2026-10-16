@@ -4,6 +4,7 @@ internal static class DistributedSearchAliases
 {
     internal const string Phase = "keyload.query.distributed-search-phase.v1";
     internal const string OwnedLeaf = "keyload.query.distributed-search-owned-leaf.v1";
+    internal const string OwnedLeafV2 = "keyload.distributed-search.owned-leaf.v2";
     internal const string LeafResult = "keyload.query.distributed-search-leaf-result.v1";
     internal const string TextStatistics = DistributedTextStatisticsAliases.Statistics;
     internal const string TextWitness = "keyload.query.distributed-text-witness.v1";

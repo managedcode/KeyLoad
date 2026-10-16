@@ -3,6 +3,7 @@ using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Queries;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -28,6 +29,7 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
             }
+            _ = PartitionControlLifetimeProofStorage.ReadCommand(transaction, previous, Limits.MaxBatchBytes);
             return previous;
         }
         if (body.EffectId == Guid.Empty || body.EffectId == original.Id || body.ExpiresAt <= now)
@@ -49,7 +51,10 @@ public sealed partial class DatabaseEngine
         var admitted = new PartitionControlCommandRecord(PartitionMoveProtocol.Version, identity, fingerprint,
             owner, destination, body.EffectId, position, PartitionControlCommandPhase.Admitted,
             null, null, null, null, delegation, original, targetBytes);
+        var lifetimeProof = new PartitionControlLifetimeProofV1(delegation,
+            PartitionControlLifetimeCoverage.Capture(transaction, control.Partition, resources, Limits.MaxBatchBytes));
         PartitionControlCommandStorage.Write(transaction, admitted, Limits.MaxBatchBytes);
+        PartitionControlLifetimeProofStorage.WriteCommand(transaction, admitted, lifetimeProof, Limits.MaxBatchBytes);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction, principal.Id, true, Limits.MaxBatchMutations);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction,
             PartitionMoveGrantStorage.DatabaseKey(control.Partition.TenantId, control.Partition.DatabaseId),

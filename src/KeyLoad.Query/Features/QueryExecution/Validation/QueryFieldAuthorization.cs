@@ -31,7 +31,7 @@ internal static class QueryFieldAuthorization
         PredicateEvaluator.CheckParameters(request.Query.Filter, request.Parameters);
     }
 
-    private static void RequireSchema(DatabaseEngine database, PrincipalRecord principal,
+    internal static void RequireSchema(DatabaseEngine database, PrincipalRecord principal,
         ResourceDefinition resource, AstQueryRequest request)
     {
         var fields = request.Query.Projection.Where(selection => selection.Path != SqlSyntax.Star)

@@ -22,6 +22,8 @@ public sealed partial class DatabaseEngine
     {
         ValidateTransferSource(request, partition);
         RequireTransferAdministrator(principal);
+        RequireTransferCapabilities(principal, request.SourceQueue, Capability.QueuePublish);
+        RequireTransferCapabilities(principal, request.Destination, Capability.QueuePublish);
         var sourceResource = Resource(tx, request.SourceQueue.Partition, request.SourceQueue.Queue, ResourceKind.WorkQueue);
         var targetResource = RemoteTransferDestinationResource(tx, request.Destination);
         RequireTransferPublisher(principal, request.SourceQueue, sourceResource);
@@ -81,6 +83,7 @@ public sealed partial class DatabaseEngine
         }
         var claims = Verify<RemoteTransferIntentClaims>(request.IntentToken, Limits.MaxBatchBytes);
         ValidateIntentClaims(claims, request.DestinationQueue, principal.Id);
+        RequireTransferCapabilities(principal, request.DestinationQueue, Capability.QueuePublish);
         var resource = Resource(tx, request.DestinationQueue.Partition, request.DestinationQueue.Queue, ResourceKind.WorkQueue);
         RequireTransferPublisher(principal, request.DestinationQueue, resource);
 
@@ -117,6 +120,7 @@ public sealed partial class DatabaseEngine
     {
         ValidateTransferSource(request.SourceQueue, request.TransferId, partition);
         RequireTransferAdministrator(principal);
+        RequireTransferCapabilities(principal, request.SourceQueue, Capability.QueuePublish);
         var resource = Resource(tx, request.SourceQueue.Partition, request.SourceQueue.Queue, ResourceKind.WorkQueue);
         RequireTransferPublisher(principal, request.SourceQueue, resource);
         if (request.ReceiptToken is null)

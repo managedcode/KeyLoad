@@ -2,7 +2,6 @@ using KeyLoad.Clustering;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,14 +27,11 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     private TimeSpan? shutdownTimeout;
     private TimeProvider? shutdownClock;
     private readonly List<PartitionMovementLateNativeColdCohort> coldCohorts = [];
-    private readonly IControlledBlobWireBorrowObserver? blobWireObserver;
     private readonly Action<int, List<string>>? configureArguments;
     private readonly Action<int, WebApplication>? configureApplication;
 
-    internal PartitionMovementLateNativeOwners(IControlledBlobWireBorrowObserver? blobWireObserver = null,
-        Action<int, List<string>>? configureArguments = null, Action<int, WebApplication>? configureApplication = null)
+    internal PartitionMovementLateNativeOwners(Action<int, List<string>>? configureArguments = null, Action<int, WebApplication>? configureApplication = null)
     {
-        this.blobWireObserver = blobWireObserver;
         this.configureArguments = configureArguments;
         this.configureApplication = configureApplication;
         var root = Path.Combine(Path.GetTempPath(), "keyload-late-native-" + Guid.NewGuid().ToString("N"));
@@ -63,7 +59,6 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         {
             nodes.Add(await PartitionMovementLateNativeNode.CreateAsync(Arguments(index),
                 index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
-                index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null,
                 Settings.LocalhostClustering, cancellationToken).ConfigureAwait(false));
             configureApplication?.Invoke(index, nodes[index].Application);
         }

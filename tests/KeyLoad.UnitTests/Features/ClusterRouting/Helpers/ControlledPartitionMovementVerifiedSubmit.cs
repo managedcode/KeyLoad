@@ -13,6 +13,10 @@ internal static class ControlledPartitionMovementVerifiedSubmit
         ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
         PartitionMovementTransportRequest original, CancellationToken cancellationToken)
     {
+        if (original.Envelope.Stage == PartitionMovePeerStage.ControlApplyCommand)
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
         if (ControlledPartitionMovementProcessScope.Current is { } process)
         {
             return await process.SubmitAsync(receiver, runtime, original, cancellationToken);
@@ -51,5 +55,45 @@ internal static class ControlledPartitionMovementVerifiedSubmit
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException("The original verified native phase has no result.");
+    }
+
+    internal static async Task<OperationResult> SubmitAsync(ControlledPartitionMovementNode receiver,
+        ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
+        PartitionMovementTransportRequest original, PartitionMoveLifetimeProofV1 proof, CancellationToken cancellationToken)
+    {
+        if (ControlledPartitionMovementProcessScope.Current is { } process)
+        {
+            return await process.SubmitAsync(receiver, runtime, original, proof, cancellationToken);
+        }
+        if (original.Envelope.Stage != PartitionMovePeerStage.ControlApplyCommand)
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
+        OperationResult? result = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var mac = admission.CreateControlMac();
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                var originalBytes = NativeSerialization.Serialize(original);
+                var body = NativeSerialization.Serialize(new PartitionControlLifetimeTransportV1(originalBytes, proof));
+                var verified = await admission.VerifyControlledLifetimeAsync(body, mac.SignControlledLifetime(body), cancellationToken);
+                var request = verified.Request;
+                if (request.Action != PartitionMovementTransportAction.Apply)
+                {
+                    throw new InvalidOperationException("Only an original admitted controlled effect may be submitted here.");
+                }
+                var principalId = PartitionMovementControlPrincipal.Resolve(receiver.Database, request.Envelope);
+                var principal = receiver.Store.Read(view => receiver.Database.Principal(view, principalId,
+                    receiver.Database.EvaluationClock.GetUtcNow()));
+                GrainRequestAuthority.RequireAdministrator(principal);
+                var operation = receiver.Database.CreateVerifiedPartitionMovementOperation(request.CommandId,
+                    principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), request.Envelope, verified.Proof);
+                result = receiver.Journal.Submit(operation, cancellationToken);
+            }, failures);
+        }, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return result ?? throw new InvalidOperationException("The original verified controlled effect has no result.");
     }
 }

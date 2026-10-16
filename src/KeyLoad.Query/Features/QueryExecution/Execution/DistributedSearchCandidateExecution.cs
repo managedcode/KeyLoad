@@ -13,7 +13,7 @@ internal static class DistributedSearchCandidateExecution
     internal static DistributedSearchCandidateLeafV1 Execute(DatabaseEngine database, string principalId,
         SearchRequest request, string tenant, DistributedTextWitnessV1 witness,
         DistributedTextStatisticsV1 statistics, GlobalBranchScope scope, string sourceWindowId,
-        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant)
+        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(request);
@@ -31,22 +31,28 @@ internal static class DistributedSearchCandidateExecution
         var eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
-        return database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant,
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedSearchCandidateLeafV1> read =
             (view, principal, resource, digest) => Capture(database, view, principal, resource, digest,
-                request, tenant, witness, statistics, scope, sourceWindowId, execution, eligibility, budget, grant));
+                request, tenant, witness, statistics, scope, sourceWindowId, execution, eligibility, budget, grant, metadata);
+        return metadata is null
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read)
+            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
+                grant, budget, metadata, read);
     }
 
     private static DistributedSearchCandidateLeafV1 Capture(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, string digest, SearchRequest request,
         string tenant, DistributedTextWitnessV1 witness, DistributedTextStatisticsV1 statistics,
         GlobalBranchScope scope, string sourceWindowId, QueryExecutionOptions execution,
-        FilteredSearchEligibility eligibility, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant)
+        FilteredSearchEligibility eligibility, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant,
+        PartitionQueryLifetimeMetadata? metadata)
     {
         budget.Check();
         if (!string.Equals(principal.TenantId, tenant, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged);
         }
+        DistributedSearchFieldAuthorization.Require(database, principal, resource, request, metadata);
         DistributedTextWitnessValidation.Require(database, view, principal, resource, digest,
             witness, request.Partition, grant, budget);
         GlobalBranchWindow? text = null;
@@ -55,14 +61,14 @@ internal static class DistributedSearchCandidateExecution
         {
             database.Authorization.RequireFieldUse(principal, resource, request.TextField!);
             text = DistributedSearchCanonicalText.Capture(database, view, principal, request,
-                statistics, scope, sourceWindowId, execution, eligibility, budget);
+                statistics, scope, sourceWindowId, execution, eligibility, budget, metadata?.Principal);
         }
         if (request.Vector is { } query)
         {
             database.Authorization.Require(principal, request.Partition, request.Collection, Capability.VectorSearch);
             database.Authorization.RequireFieldUse(principal, resource, request.VectorField!);
             var similarity = PreparedSimilarity.Create(query.AsMemory(), request.Space!.Metric);
-            var scores = VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility);
+            var scores = VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility, metadata?.Principal);
             vector = DistributedSearchCandidateWindow.Capture(view, scores, request.Partition, request.Collection,
                 DistributedSearchBranchNames.Vector, GlobalBranchKind.Vector, sourceWindowId, scope, budget);
         }

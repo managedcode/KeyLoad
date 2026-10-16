@@ -116,18 +116,19 @@ internal static class ControlledDocumentNativeCommandAssertions
         var reference = new EntityRef(Partition,
             Collection, DocumentId);
         var parent = new ReadExecutionBudget(Options.Create(source.Database.Limits), source.Database.EvaluationClock, token);
-        var frame = source.Database.CaptureControlledDocumentRead(PhysicalShardCatalogFixture.RootPrincipalId,
+        var frame = source.Database.TryCaptureControlledDocumentReadV2(PhysicalShardCatalogFixture.RootPrincipalId,
             reference, minimum, source.Database.EvaluationClock.GetUtcNow() +
-                TimeSpan.FromSeconds(source.Database.Limits.QueryDeadlineSeconds), parent);
+                TimeSpan.FromSeconds(source.Database.Limits.QueryDeadlineSeconds), parent)
+            ?? throw new InvalidOperationException("The authenticated source lifetime frame is absent.");
         var bytes = Math.Min(target.Database.Limits.MaxBatchBytes, target.Database.Limits.MaxQueryReadBytes);
         var records = Math.Min(target.Database.Limits.MaxBatchMutations, target.Database.Limits.MaxScanRecords);
         var originalGrant = parent.CreateReadGrant(bytes, records);
         var receiver = new ReadExecutionBudget(Options.Create(target.Database.Limits), target.Database.EvaluationClock, token);
         var grant = receiver.CreateReadGrant(bytes, records);
-        var actual = target.Database.ReadControlledDocument(PhysicalShardCatalogFixture.RootPrincipalId,
+        var actual = target.Database.ReadControlledDocumentV2(PhysicalShardCatalogFixture.RootPrincipalId,
             frame, receiver, grant, token);
         parent.ImportReadGrant(originalGrant, grant.ReadBytes, grant.ExaminedRecords);
-        source.Database.ValidateControlledDocumentRead(frame, parent);
+        source.Database.ValidateControlledDocumentReadV2(frame, parent);
         var expected = new DocumentResult(reference, UpdatedRevision,
             UpdatedJson, false, []);
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))

@@ -160,9 +160,9 @@ internal sealed class TestDatabase : IDisposable
 
     internal KeyLoad.Replication.ReplicaEntry RecoverFaultOwnedRow(ReplicatedOperation original,
         Action restoreFaultOwnedRow, List<Exception> failures, CancellationToken cancellationToken,
-        ErrorCode? expectedApplyError = null)
+        ErrorCode? expectedApplyError = null, ErrorCode expectedMissingOutcomeError = ErrorCode.RecoveryRequired)
         => replicaAdmission is { } native
-            ? native.RecoverFaultOwnedRow(original, restoreFaultOwnedRow, failures, cancellationToken, expectedApplyError)
+            ? native.RecoverFaultOwnedRow(original, restoreFaultOwnedRow, failures, cancellationToken, expectedApplyError, expectedMissingOutcomeError)
             : throw new InvalidOperationException(NativeOperationRequired);
 
     public ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null, IndexDefinition[]? indexes = null,

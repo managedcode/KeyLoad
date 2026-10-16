@@ -27,7 +27,8 @@ internal static class NativeSearchTerminalPrivacy
         IKeyValueView captured, IReadOnlyList<EntityRef> selected, ReadExecutionBudget budget)
     {
         budget.Check();
-        database.WithQueryView(principalId, partition, collection, (raw, principal, resource) =>
+        database.WithQueryView(principalId, partition, collection,
+            vectorField is null ? Capability.None : Capability.VectorSearch, (raw, principal, resource) =>
         {
             RequireAuthority(database, raw, principal, resource, partition, original, budget);
             database.Authorization.RequireFieldUse(principal, resource, textField);
@@ -45,7 +46,7 @@ internal static class NativeSearchTerminalPrivacy
                 }
             }
             return true;
-        });
+        }, budget);
         budget.Check();
     }
 
@@ -85,8 +86,9 @@ internal static class NativeSearchTerminalPrivacy
             return;
         }
         VectorProjectionEligibility.ValidateLineage(lineage, target.Partition, document, vector);
-        var sourceResource = database.Resource(current, target.Partition, lineage.SourceDocument.Collection, ResourceKind.Collection);
-        database.Authorization.Require(principal, target.Partition, sourceResource.Name, Capability.DocumentsRead);
+        database.Authorization.Require(principal, target.Partition, lineage.SourceDocument.Collection, Capability.DocumentsRead);
+        var sourceResource = database.Resource(budget.CreateView(current), target.Partition,
+            lineage.SourceDocument.Collection, ResourceKind.Collection);
         database.Authorization.RequireFieldUse(principal, sourceResource, lineage.InputField);
         var originalResource = budget.ReadRecord<ResourceDefinition>(captured,
             KeySpace.Resource(target.Partition.TenantId, target.Partition.DatabaseId, lineage.SourceDocument.Collection))

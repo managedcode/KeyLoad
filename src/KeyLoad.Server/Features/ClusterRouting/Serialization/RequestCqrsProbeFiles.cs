@@ -26,6 +26,7 @@ internal sealed class RequestCqrsProbeFiles
     internal readonly RequestCqrsProbeMigrationFiles Migration;
     internal readonly RequestCqrsNativeModelFiles NativeModel;
     internal readonly RequestCqrsNativeReplayFiles Replay;
+    internal readonly RequestCqrsControlledLifetimeFiles ControlledLifetime;
     internal readonly RequestCqrsQueryReadCutFiles QueryCuts;
     internal readonly RequestCqrsWaitForIndexReadCutFiles WaitCuts;
     internal readonly RequestCqrsMovementJournalFiles MovementJournals;
@@ -47,6 +48,7 @@ internal sealed class RequestCqrsProbeFiles
         Migration = new(root, sessionId, new(json, executionOptions), records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
         NativeModel = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
         Replay = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
+        ControlledLifetime = new(root, sessionId, executionOptions, records, sync, ReadSnapshotLocked);
         QueryCuts = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
         WaitCuts = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
         MovementJournals = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
@@ -142,7 +144,7 @@ internal sealed class RequestCqrsProbeFiles
     private RequestCqrsProbeSnapshot ReadSnapshotLocked()
         => RequestCqrsProbeSnapshotReader.Read(root, ownerBytes, executionOptions, records, activations,
             connectionFiles, ReplicaSnapshot, EventVectorExpiry, Live, Migration, NativeModel, Replay,
-            QueryCuts, WaitCuts, MovementJournals);
+            QueryCuts, WaitCuts, MovementJournals, ControlledLifetime);
 
     private long ValidateEntry(string path, string name)
         => RequestCqrsProbeSnapshotFiles.ValidateEntry(path, name, executionOptions);

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHost partition,
-    IOptions<NodeOptions> options, TimeProvider clock, RemoteAnnReadFence capturedSource,
+    IOptions<NodeOptions> options, TimeProvider clock, RemoteAnnReadFenceV2 capturedSource,
     AnnMaintenanceRequest originalRequest)
 {
     internal async Task<AnnProjectionNativeObservation> ReadAsync(RegisteredPhysicalOwnerV1 destination,
@@ -22,8 +22,10 @@ internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHos
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
         }
-        var encoded = AnnProjectionNativeEncoding.EncodeCall(
-            new(AnnProjectionObservationProtocol.Version, principalId, request, expiry),
+        var encoded = AnnProjectionNativeLifetimeEncoding.EncodeCall(
+            new(new(AnnProjectionObservationProtocol.Version, principalId, request, expiry),
+                capturedSource.Metadata.Definition, capturedSource.Metadata.Coverage, capturedSource.Metadata.Principal,
+                capturedSource.Metadata.Definitions),
             work, RemoteDocumentProtocol.MaximumBodyBytes);
         var call = encoded.Call;
         var payload = encoded.Bytes;
@@ -35,7 +37,7 @@ internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHos
             using var mac = RemoteDocumentMac.FromConfiguredSecret(RemoteModelNativeIdentity.Secret(options.Value, partition, source));
             var maximum = Math.Min(RemoteDocumentProtocol.MaximumBodyBytes, Math.Min(work.RemainingReadGrantBytes,
                 node.CatalogRequestCodec().ExecutionOptions.Value.MaximumCompletedBytes));
-            var reply = await node.BorrowRemoteModelClient().SendAnnProjectionAsync(destination, source,
+            var reply = await node.BorrowRemoteModelClient().SendAnnProjectionLifetimeAsync(destination, source,
                 voterIndex, payload, mac.Sign(payload, reply: false), expiry, maximum, cancellationToken)
                 .ConfigureAwait(false);
             await ServerFailureObserver.ObserveAsync(() =>
@@ -55,8 +57,8 @@ internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHos
                     if (result is null || result.Version != AnnProjectionObservationProtocol.Version
                         || result.NodeId == Guid.Empty || result.AcceptedReadBytes < AnnProjectionObservationProtocol.NoReadWork
                         || result.ExaminedRecords < AnnProjectionObservationProtocol.NoReadWork
-                        || result.AcceptedReadBytes > call.Observation.MaximumReadBytes
-                        || result.ExaminedRecords > call.Observation.MaximumRecords)
+                        || result.AcceptedReadBytes > call.Original.Observation.MaximumReadBytes
+                        || result.ExaminedRecords > call.Original.Observation.MaximumRecords)
                     {
                         throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid);
                     }

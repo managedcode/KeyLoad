@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -32,13 +33,21 @@ internal sealed class PartitionMovementEffectTransport(PartitionMovementTranspor
         PartitionMovementTransportRequest original, byte[] body, bool local, CancellationToken cancellationToken)
     {
         var address = await context.ResolveAsync(receiver, index, readOnly: false, cancellationToken).ConfigureAwait(false);
-        var signature = context.Sign(body, PartitionMovementTransportReplyVerifier.ReceiverReplyPurpose.Effect);
+        var controlled = original.Envelope.Stage == PartitionMovePeerStage.ControlApplyCommand;
+        var channel = controlled ? PartitionMovementGrainServiceChannel.ControlledLifetime : PartitionMovementGrainServiceChannel.Phase;
+        if (controlled && context.ControlledLifetimeObserver is { } observer && observer.Select(original, cancellationToken))
+        {
+            await ControlledLifetimeReplayDispatch.ObserveAsync(context, address, receiver.Owner.VoterIds[index],
+                original, body, observer, cancellationToken).ConfigureAwait(false);
+        }
+        var signature = controlled ? context.SignControlledLifetime(body)
+            : context.Sign(body, PartitionMovementTransportReplyVerifier.ReceiverReplyPurpose.Effect);
         cancellationToken.ThrowIfCancellationRequested();
         PartitionMovementGrainServiceReply response;
         try
         {
             response = await context.ExchangeAsync(address, receiver.Owner.VoterIds[index],
-                PartitionMovementGrainServiceChannel.Phase, query: false, body, signature,
+                channel, query: false, body, signature,
                 readOnly: false, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception error) when (PartitionMovementTransportContext.IsUnresolvedTransport(error))

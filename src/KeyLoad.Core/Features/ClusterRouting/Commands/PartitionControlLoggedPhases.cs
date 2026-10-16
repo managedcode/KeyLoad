@@ -1,17 +1,21 @@
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int ControlledDocumentLifetimeProofIndex = 0;
+
     private PartitionMovePhaseResult ExecuteControlledDocumentPhase(IAtomicTransaction transaction,
         PrincipalRecord principal, ReplicatedOperation operation, PartitionMovePhaseCommand phase, long position)
     {
         if (phase.Stage == PartitionMovePeerStage.ControlApplyCommand)
         {
-            var effect = ApplyControlledDocumentEffect(transaction, phase, operation.Id, position, operation.EvaluatedAt);
+            var proof = PartitionMovementNativePayload.ReadAuthenticated(operation).LifetimeProofs[ControlledDocumentLifetimeProofIndex];
+            var effect = ApplyControlledDocumentEffect(transaction, phase, proof, operation.Id, position, operation.EvaluatedAt);
             var effectJournal = MoveJournalReceipt(transaction, operation.Id, position, phase.ControlIntentDigest)
                 with
             {

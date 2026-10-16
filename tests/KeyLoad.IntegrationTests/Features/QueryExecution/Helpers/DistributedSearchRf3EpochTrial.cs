@@ -4,6 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
@@ -52,7 +53,7 @@ internal sealed class DistributedSearchRf3EpochTrial
         bool useMcp, CancellationToken token)
     {
         arm = controls.WriteArm(seed.Original.Destination.Principal.Id, Guid.Empty,
-            GrainReadKind.DistributedSearch, RequestCqrsProbePhase.DistributedSearchStatisticsCaptured,
+            GrainReadKind.DistributedSearch, RequestCqrsProbePhase.NativeModelAfterDispatch,
             RequestCqrsProbeAction.Hold);
         if (useMcp)
         {
@@ -62,12 +63,11 @@ internal sealed class DistributedSearchRf3EpochTrial
         {
             sdk = reader.DistributedSearchAsync(DistributedSearchRf3Seed.Request(), token);
         }
-        var marker = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.DistributedSearchStatisticsCaptured,
-            RequestCqrsProbeOutcome.Observed, discovery, token).ConfigureAwait(false);
+        var marker = await QueryLifetimeNativeHoldBoundary.WaitAsync(controls, arm, discovery,
+            useMcp ? mcp! : sdk!, () => ObserveEarlyAsync(useMcp), token);
         requestId = marker.RequestId;
-        await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, arm, Guid.Empty,
-            RequestCqrsProbePhase.DistributedSearchStatisticsCaptured, discovery).ConfigureAwait(false);
-        await Assert.That(useMcp ? mcp!.IsCompleted : sdk!.IsCompleted).IsFalse();
+        await QueryLifetimeNativeWitness.RequireAsync(controls, marker, RemoteResourceLifetimeReadKindV2.DistributedSearch,
+            seed.Original.Destination.Principal.Id);
         await DistributedSearchRf3Seed.ConfigureAsync(destination, seed.Original.Destination.Principal,
             ChangedEpoch, token).ConfigureAwait(false);
         var sourceBefore = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
@@ -80,6 +80,18 @@ internal sealed class DistributedSearchRf3EpochTrial
         await Assert.That(sourceAfter.Applied).IsEqualTo(sourceBefore.Applied);
         await Assert.That(destinationAfter.Applied).IsEqualTo(destinationBefore.Applied);
         await controls.RetireArmAsync(arm, token).ConfigureAwait(false);
+    }
+
+    private async Task ObserveEarlyAsync(bool useMcp)
+    {
+        if (useMcp)
+        {
+            _ = await McpCallerAssertions.SuccessAsync<DistributedSearchPageV1>(await mcp!);
+        }
+        else
+        {
+            _ = await McpCallerAssertions.SdkSuccessAsync(await sdk!);
+        }
     }
 
     private async Task OriginalAsync(bool useMcp)

@@ -1,11 +1,12 @@
 using System.Security.Cryptography;
+using KeyLoad.Core.Features.Search;
 
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
     internal LocalAnnObservationFence CaptureLocalAnnObservation(string principalId, AnnMaintenanceRequest original,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
         return Store.Read(view =>
         {
@@ -18,7 +19,15 @@ public sealed partial class DatabaseEngine
             }
             Authorization.Require(principal, original.Consumer.Partition, original.Collection, Capability.VectorSearch);
             var resource = Resource(bounded, original.Consumer.Partition, original.Collection, ResourceKind.Collection);
-            Authorization.RequireFieldUse(principal, resource, original.Field);
+            if (sourceMetadata is null)
+            {
+                Authorization.RequireFieldUse(principal, resource, original.Field);
+            }
+            else
+            {
+                AnnLifetimeReadAuthority.Require(this, view, principal, resource, original.Consumer.Partition,
+                    original.Collection, original.Field, sourceMetadata, budget);
+            }
             var current = ReadPlacementWitness(bounded, original.Consumer.Partition);
             if (current.PhysicalShardId != original.Placement.PhysicalShardId
                 || current.Incarnation != original.Placement.Incarnation
@@ -40,9 +49,9 @@ public sealed partial class DatabaseEngine
     }
 
     internal void RequireLocalAnnObservation(string principalId, AnnMaintenanceRequest original,
-        LocalAnnObservationFence admitted, ReadExecutionBudget budget)
+        LocalAnnObservationFence admitted, ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
-        if (CaptureLocalAnnObservation(principalId, original, budget) != admitted)
+        if (CaptureLocalAnnObservation(principalId, original, budget, sourceMetadata) != admitted)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
         }

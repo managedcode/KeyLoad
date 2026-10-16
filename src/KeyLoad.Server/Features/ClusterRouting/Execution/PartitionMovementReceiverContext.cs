@@ -44,6 +44,22 @@ internal sealed class PartitionMovementReceiverContext(OrleansNode node, Partiti
                     new ReadExecutionBudget(partition.Database.OperationLimitsOptions, clock, cancellationToken))
                 : partition.Database.CreateVerifiedPartitionMovementOperation(commandId, principal.Id,
                     clock.GetUtcNow(), verified);
+        return await ExecuteMovementAsync(principal, commandId, verified, operation, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal async Task<GrainOperationReply> ApplyWithLifetimeAsync(Guid commandId, PartitionMovePeerEnvelope verified,
+        PartitionMoveLifetimeProofV1 proof, CancellationToken cancellationToken)
+    {
+        var principal = Administrator(PartitionMovementControlPrincipal.Resolve(partition.Database, verified), cancellationToken);
+        var operation = partition.Database.CreateVerifiedPartitionMovementOperation(commandId, principal.Id,
+            clock.GetUtcNow(), verified, proof);
+        return await ExecuteMovementAsync(principal, commandId, verified, operation, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<GrainOperationReply> ExecuteMovementAsync(PrincipalRecord principal, Guid commandId,
+        PartitionMovePeerEnvelope verified, ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreatePartitionMovementCommand(requestId, operation, verified.ExpiresAt);
         return await ExecuteSignedAsync(principal, requestId, commandId, signed, command: true,

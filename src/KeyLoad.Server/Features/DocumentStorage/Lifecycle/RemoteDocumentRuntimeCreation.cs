@@ -1,12 +1,9 @@
-using KeyLoad.Server.Features.BlobStorage;
-
 namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal static class RemoteDocumentRuntimeCreation
 {
     internal static async Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
-        PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock,
-        IControlledBlobWireBorrowObserver? wireObserver = null)
+        PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock)
     {
         var settings = options.Node.Value.PhysicalGroupTrust;
         if (!settings.RemoteDocumentReads)
@@ -17,7 +14,7 @@ internal static class RemoteDocumentRuntimeCreation
         try
         {
             partition.TransferVerification?.AttachRuntime(runtime);
-            runtime.Initialize(node, partition, options, clock, wireObserver);
+            runtime.Initialize(node, partition, options, clock);
             return runtime;
         }
         catch (Exception primary)

@@ -1,13 +1,31 @@
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.BlobStorage;
 
 internal static class NativeBlobWireScope
 {
     internal static NativeBlobWireArm? Match(NativeBlobWireOwner owner, NativeBlobWireArms arms,
-        RemoteControlledBlobCall call)
+        RemoteControlledBlobOutcomeCallV2 original)
     {
-        var frame = call.Request.Frame;
+        var call = original.Original;
+        if (call.Request.Frame.Purpose != ControlledBlobReadPurpose.Outcome)
+        {
+            throw Invalid();
+        }
+        return MatchFrame(owner, arms, call.Source, call.Destination.Owner, call.CallerVoter, call.Request.Frame);
+    }
+
+    internal static NativeBlobWireArm? Match(NativeBlobWireOwner owner, NativeBlobWireArms arms,
+        RemoteResourceLifetimeReadCallV2 call)
+    {
+        var request = NativeControlledBlobLifetimeCall.Require(call, RemoteDocumentProtocol.MaximumBodyBytes);
+        return MatchFrame(owner, arms, call.Source, call.Destination.Owner, call.CallerVoter, request.Frame.Original);
+    }
+
+    private static NativeBlobWireArm? MatchFrame(NativeBlobWireOwner owner, NativeBlobWireArms arms,
+        PhysicalShardRecord source, PhysicalShardRecord destination, string callerVoter, ControlledBlobReadFrame frame)
+    {
         if (frame.Principal.Id != arms.PrincipalId || frame.Principal.TenantId != arms.TenantId
             || frame.Principal.PolicyEpoch != arms.PolicyEpoch || frame.Control.Partition != arms.Partition
             || frame.Control.MoveId != arms.MoveId || frame.Resource.Name != arms.ResourceName
@@ -15,9 +33,9 @@ internal static class NativeBlobWireScope
         {
             return null;
         }
-        if (!NativeBlobWireShape.Same(owner.SourceOwner, call.Source)
-            || !NativeBlobWireShape.Same(owner.DestinationOwner, call.Destination.Owner)
-            || !owner.SourceOwner.VoterIds.Contains(call.CallerVoter, StringComparer.Ordinal))
+        if (!NativeBlobWireShape.Same(owner.SourceOwner, source)
+            || !NativeBlobWireShape.Same(owner.DestinationOwner, destination)
+            || !owner.SourceOwner.VoterIds.Contains(callerVoter, StringComparer.Ordinal))
         {
             throw Invalid();
         }
