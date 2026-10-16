@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
@@ -11,13 +12,14 @@ internal static class ControlledPartitionMovementNativeApplicationFactory
         IDatabaseAuthenticationExecutionObserver? authenticationObserver,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory,
         IGrainRequestPhaseObserver? phaseObserver, IGrainRequestPurposeObserver? purposeObserver,
-        CancellationToken startupCancellation)
+        Action<IServiceCollection, NodeOptions>? configureServices, CancellationToken startupCancellation)
     {
         var nativeObservation = new ControlledPartitionMovementNativeObservationWitness();
         var application = await ServerConfiguration.BuildAsync(arguments, sealedObserver: sealedObserver,
             localhostClustering: localhostClustering, authenticationExecutionObserver: authenticationObserver,
             partitionMovementNativeObserver: nativeObservation, lifecycleParticipantFactory: lifecycleParticipantFactory,
-            phaseObserver: phaseObserver, purposeObserver: purposeObserver, startupCancellation: startupCancellation).ConfigureAwait(false);
+            phaseObserver: phaseObserver, purposeObserver: purposeObserver, configureServices: configureServices,
+            startupCancellation: startupCancellation).ConfigureAwait(false);
         try
         {
             return new(application, nativeObservation);

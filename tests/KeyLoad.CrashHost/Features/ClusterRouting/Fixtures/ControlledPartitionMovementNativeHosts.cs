@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
@@ -52,42 +52,38 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         Func<int, IDatabaseAuthenticationExecutionObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, null, null, null, null, null, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, null, null, null, null, null, null, cancellationToken);
     }
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithPhaseObserverAsync(
         Func<int, IGrainRequestPhaseObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory, null, null, null, null, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory, null, null, null, null, null, cancellationToken);
     }
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithMaximumBatchBytesAsync(
         int maximumBatchBytes, CancellationToken cancellationToken)
     {
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, null, maximumBatchBytes, null, null, null, cancellationToken);
-    }
-
-    internal static Task<ControlledPartitionMovementNativeHosts> CreateWithRoutingAsync(
-        IOptions<GrainRoutingOptions> routingOptions, Func<int, IGrainRequestPhaseObserver> observerFactory,
-        IGrainRequestPurposeObserver? purposeObserver,
-        Action<int, ControlledPartitionMovementNativeHost>? beforeStart, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(routingOptions);
-        ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory,
-            null, routingOptions, purposeObserver, beforeStart, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, null, maximumBatchBytes, null, null, null, null, cancellationToken);
     }
 
     internal void RetainCreationFailure(Exception original) => creationFailure = original;
 
-    internal async Task CreateNodesAsync(CancellationToken startupCancellation)
+    internal Task CreateNodesAsync(CancellationToken startupCancellation)
+        => CreateNodesAsync(null, startupCancellation);
+
+    internal async Task CreateNodesAsync(Action<int, IServiceCollection, NodeOptions>? configureServices,
+        CancellationToken startupCancellation)
     {
         observers.Prepare();
+        var configureNode = configureServices;
         for (var index = SourceIndex; index < ControlledPartitionMovementNativeHostEndpoints.OwnerCount; index++)
         {
+            var nodeIndex = index;
             nodes.Add(await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(index), localhost,
             observers.Sealed(index), observers.Authentication(index), phaseObserver: observers.Phase(index), purposeObserver: observers.Purpose,
+                configureServices: configureNode is null ? null : (services, node) => configureNode(nodeIndex, services, node),
                 startupCancellation: startupCancellation).ConfigureAwait(false));
         }
     }

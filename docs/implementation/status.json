@@ -1,7 +1,7 @@
 {
   "NATIVE-FOUNDATION-REPAIR-20261017": {
     "status": "in_progress",
-    "implementation": "The follow-up118-source native foundation repair is integrated: real provider-owned discard-only composition preparation, genuine native Server connection fixtures, corrected source/target lifetime authorities and original creation-derived full result oracles. Strict Recovery plus its actual project closure passed R720 with zero warnings/errors; all related21 native process-recovery cases passed R722 without coverage collector. Current Unit70 and expanded public ONE/RF3/cold/file qualification remain open. Original105 acceptance states remain20 done/85 in_progress.",
+    "implementation": "The follow-up118-source native foundation repair is integrated. The current seven-file native test-host repair transfers the logger lifetime to native DI and moves routing creation to the existing factory, preserving initial-only logging and cold/cleanup flows. R738 strict Unit, Integration and Recovery projects plus their real dependency graph passed with zero warnings/errors and zero source drift. Related current Unit70, Recovery21 and expanded public ONE/RF3/cold/file execution remain open; old R722 Recovery21 PASS retains its original source scope. Original105 acceptance states remain20 done/85 in_progress.",
     "sourceIdentity": {
       "evidence": "TestResults/stage61-native-join/root-r720-native118-current-source.original.json",
       "sha256": "d2a3f345efe45c7982811817d1597f17214737e6e107a3800c403f076f05fca1",
@@ -19,8 +19,8 @@
       "sourceRepairFiles": 6,
       "sourceRepairEvidence": "TestResults/stage61-native-join/root-r728-main-ci6-source.original.json",
       "sourceRepairSha256": "daaab72358b90b57eb1cee14ecb0bb7c4b22ff3cf3189765266d7c3ea7b0b28b",
-      "sourceRepairStatus": "Integrated and independently source-reviewed; existing API imports/constants, target-reference assertion responsibility and native logging-provider ownership are preserved. Current Unit/public runtime and repeated Linux qualification remain OPEN.",
-      "localIntegrationCompiler": "R728 joined after16.940249874955043 seconds with zero warnings and one CA2025 error in the separately owned benchmark Session library; whole-source drift0. Unit/Integration compilation was blocked by that real dependency, not qualified as passing."
+      "sourceRepairStatus": "Original six-file fixes are checkpointed at c7c5ed489. Linux c7 stopped before tests on the remaining CA2000 logger ownership diagnostic. The current seven-file native DI/creation-factory follow-up passed local strict R738; fresh exact-head Linux/runtime qualification remains OPEN.",
+      "localIntegrationCompiler": "R738 native solution filter compiled Unit, Integration and Recovery together with all actual ProjectReferences/analyzers: zero warnings/errors in169.70172954094596 seconds, source drift0. Full solution and Linux qualification remain separate OPEN gates."
     },
     "strictRecoveryCompiler": {
       "label": "root-r720-foundation-recovery-release",
@@ -139,6 +139,27 @@
       "total": 105,
       "done": 20,
       "in_progress": 85
+    },
+    "currentFoundationCompiler": {
+      "label": "root-r738-foundation-client-filter-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 169.70172954094596,
+      "scope": "Unit, Integration and Recovery projects in one native solution filter, with actual dependencies and unchanged analyzers; not full solution or benchmark-stage verification",
+      "sourceDrift": [],
+      "expectedCompiledImageUpdates": 52,
+      "stdout": "TestResults/stage61-native-join/root-r738-foundation-client-filter-release.stdout.original.txt",
+      "stdoutSha256": "3146caddff9b6d9e0f9525b389623b1606af3e152b49e1be2f7b536cfed335dd",
+      "completion": "TestResults/stage61-native-join/root-r738-foundation-client-filter-release.completion.original.json",
+      "completionSha256": "c9ceeb092a8f2c57e605b0ca32a65a3bf9be47335d049152ac485b909cc3ba63"
+    },
+    "nativeDiLoggerRepair": {
+      "sourceFiles": 7,
+      "sourceManifest": "TestResults/stage61-native-join/root-r738-main-native-di7-source.prepared.json",
+      "sourceManifestSha256": "0c8d2e524b224409ffc61e479bc009626f76e0bd9378fc31127c1674a707930f",
+      "contract": "Factory-created singleton ILoggerProvider is owned by native DI before host Build; initial six log identities and assertions remain, cold reopen does not replay that callback. Existing creation factory owns routing creation; no cap raise or suppression. Arbitrary native Build-failure cleanup is not claimed from source inspection.",
+      "qualification": "Strict local compiler PASS only. Fresh Unit, Recovery and public ONE/RF3/cold/file runtime and exact-head Linux qualification OPEN."
     }
   },
   "BENCHMARK-SOURCE-REDESIGN-20261017": {

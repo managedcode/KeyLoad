@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text.Json;
-using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,9 +18,9 @@ internal sealed class ConnectionNativeServerEvidence
     private string? clusterId;
     internal string ClusterId => clusterId ?? throw new InvalidOperationException(MissingOwner);
 
-    internal void Attach(int index, ControlledPartitionMovementNativeHost host)
+    internal void Configure(int index, IServiceCollection services, NodeOptions node)
     {
-        var actual = host.Runtime.Node.Value.ClusterId;
+        var actual = node.ClusterId;
         if (index < FirstNode || index >= paths.Length || paths[index] is not null
             || !NativeClusterStartupProtocol.Identifier(actual) || clusterId is not null && clusterId != actual)
         {
@@ -31,42 +30,8 @@ internal sealed class ConnectionNativeServerEvidence
         var directory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, actual + "_" + Role(index) + ".log");
-        FileLoggerProvider? pending = null;
-        var failures = new List<Exception>();
-        try
-        {
-            pending = new FileLoggerProvider(path);
-            host.Application.Services.GetRequiredService<ILoggerFactory>().AddProvider(pending);
-            pending = null;
-        }
-        catch (Exception primary) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
-        {
-            failures.Add(primary);
-        }
-        catch (Exception primary) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
-        {
-            failures.Add(primary);
-        }
-        finally
-        {
-            if (pending is not null)
-            {
-                try
-                {
-                    pending.Dispose();
-                }
-                catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-                {
-                    failures.Add(cleanup);
-                }
-                catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-                {
-                    failures.Add(cleanup);
-                }
-            }
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
-        // The actual host ILoggerFactory owns and disposes the successfully added provider.
+        services.AddSingleton<ILoggerProvider>(_ => new FileLoggerProvider(path));
+        // The native container creates and owns this provider for its complete host lifetime.
         paths[index] = path;
     }
 

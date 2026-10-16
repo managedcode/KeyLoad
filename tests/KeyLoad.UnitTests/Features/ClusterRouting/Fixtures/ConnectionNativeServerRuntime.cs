@@ -55,8 +55,8 @@ internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
         originalToken = token;
         using var deadline = new CancellationTokenSource(Timing.StartupTimeout, TimeProvider.System);
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
-        hosts = await ControlledPartitionMovementNativeHosts.CreateWithRoutingAsync(RoutingOptions,
-            _ => observer, purposeObserver, Evidence.Attach, startup.Token).ConfigureAwait(false);
+        hosts = await ControlledPartitionMovementNativeHostFactory.CreateWithRoutingAsync(RoutingOptions,
+            _ => observer, purposeObserver, Evidence.Configure, beforeStart: null, startup.Token).ConfigureAwait(false);
         inventory = new(hosts, Cluster.Client, ConnectionId);
     }
 

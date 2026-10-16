@@ -20,6 +20,7 @@ internal static class ServerConfiguration
         IPartitionMovementNativeObserver? partitionMovementNativeObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
         IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
+        Action<IServiceCollection, NodeOptions>? configureServices = null,
         CancellationToken startupCancellation = default)
     {
         startupCancellation.ThrowIfCancellationRequested();
@@ -42,6 +43,7 @@ internal static class ServerConfiguration
         }
         DatabaseAuthenticationComposition.Register(builder.Services);
         McpServerComposition.Register(builder);
+        configureServices?.Invoke(builder.Services, node.Value);
         var app = builder.Build();
         try
         {

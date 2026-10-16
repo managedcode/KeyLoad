@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
@@ -9,13 +10,26 @@ internal static class ControlledPartitionMovementNativeHostFactory
     private const int FirstOwner = 0;
     internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory, CancellationToken cancellationToken)
-        => CreateAsync(observerFactory, null, null, null, null, null, null, cancellationToken);
+        => CreateAsync(observerFactory, null, null, null, null, null, null, null, cancellationToken);
+
+    internal static Task<ControlledPartitionMovementNativeHosts> CreateWithRoutingAsync(
+        IOptions<GrainRoutingOptions> routingOptions, Func<int, IGrainRequestPhaseObserver> observerFactory,
+        IGrainRequestPurposeObserver? purposeObserver,
+        Action<int, IServiceCollection, NodeOptions>? configureServices,
+        Action<int, ControlledPartitionMovementNativeHost>? beforeStart, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(routingOptions);
+        ArgumentNullException.ThrowIfNull(observerFactory);
+        return CreateAsync(null, null, observerFactory,
+            null, routingOptions, purposeObserver, configureServices, beforeStart, cancellationToken);
+    }
 
     internal static async Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory,
         Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory,
         Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory, int? maximumBatchBytes,
         IOptions<GrainRoutingOptions>? routingOptions, IGrainRequestPurposeObserver? purposeObserver,
+        Action<int, IServiceCollection, NodeOptions>? configureServices,
         Action<int, ControlledPartitionMovementNativeHost>? beforeStart, CancellationToken cancellationToken)
     {
         using var endpoints = new ControlledPartitionMovementNativeHostEndpoints();
@@ -26,7 +40,7 @@ internal static class ControlledPartitionMovementNativeHostFactory
         try
         {
             owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory, phaseObserverFactory, purposeObserver);
-            await owner.CreateNodesAsync(cancellationToken).ConfigureAwait(false);
+            await owner.CreateNodesAsync(configureServices, cancellationToken).ConfigureAwait(false);
             if (beforeStart is not null)
             {
                 for (var index = FirstOwner; index < owner.Nodes.Count; index++)
