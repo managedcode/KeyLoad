@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -37,7 +38,7 @@ internal static class PartitionMovementSourceReadProducer
                 {
                     var captured = capture(work);
                     session = captured.Session;
-                    work.CheckResult(captured.Handle);
+                    _ = ResultByteCounterStream.MeasureNative(work, captured.Handle);
                     publish(captured.Handle, captured.Session, retainedWork ?? throw new InvalidOperationException());
                     completed = captured.Handle;
                     session = null;

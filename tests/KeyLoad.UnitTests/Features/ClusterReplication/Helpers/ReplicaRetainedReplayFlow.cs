@@ -50,7 +50,17 @@ internal static class ReplicaRetainedReplayFlow
     {
         foreach (var voter in ReplicaBarrierDeadlineFlow.Voters)
         {
-            await fixture.Node(voter).Journal.Consensus.ReadControlBarrierAsync(token);
+            try
+            {
+                await fixture.Node(voter).Journal.Consensus.ReadControlBarrierAsync(token);
+            }
+            catch (Exception primary)
+            {
+                var failures = new List<Exception> { primary };
+                await ReplicaRetainedReplayFailureObservation.ReportAsync(fixture, voter, primary, failures, token);
+                ServerFailureObserver.ThrowIfAny(failures);
+                throw;
+            }
         }
     }
 }

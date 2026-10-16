@@ -10,7 +10,8 @@ internal static class SharedDomainRecoveryInputReader
         => new(await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, SharedDomainCrashProtocol.OperationFile, token),
             await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation[]>(root, SharedDomainCrashProtocol.SeedOperationsFile, token),
             await CommandIdempotencyCrashData.ReadEvidenceAsync<OperationResult[]>(root, SharedDomainCrashProtocol.SeedResultsFile, token),
-            await CommandIdempotencyCrashData.ReadEvidenceAsync<string[]>(root, SharedDomainCrashProtocol.SeedImageFile, token),
+            SharedDomainStoredImage.Format(await CommandIdempotencyCrashData.ReadEvidenceAsync<KeyValueRecord[]>(
+                root, SharedDomainCrashProtocol.SeedImageFile, token)),
             await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, SharedDomainCrashProtocol.SeedPositionFile, token),
             await CommandIdempotencyCrashData.ReadEvidenceAsync<StoreIdentity>(root, SharedDomainCrashProtocol.IdentityDigestFile, token));
 }

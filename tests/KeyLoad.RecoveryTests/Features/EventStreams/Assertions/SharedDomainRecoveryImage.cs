@@ -23,16 +23,17 @@ internal static class SharedDomainRecoveryImage
         await Assert.That(SHA256.HashData(actual.SigningKey.Span).AsSpan().SequenceEqual(digest.SigningKey.Span)).IsTrue();
     }
 
-    internal static async Task SeedOtherScopesAsync(IAtomicStore store, SharedDomainRecoveryInput input)
+    internal static async Task SeedOtherScopesAsync(IAtomicStore store, SharedDomainRecoveryInput input, bool committed)
     {
-        var original = SharedDomainCorpus.Create(Tenant, Database)[FirstIndex].Partition;
-        var expected = WithoutScope(input.SeedImage, original);
+        var scope = SharedDomainCorpus.Create(Tenant, Database)[FirstIndex];
+        var original = scope.Partition;
+        var expected = WithoutScope(await SharedDomainRecoveryInventoryImage.ExpectedAsync(input, scope, committed), original);
         await Assert.That(WithoutScope(SharedDomainStoredImage.Capture(store), original))
             .IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     private static IEnumerable<string> WithoutScope(IEnumerable<string> rows, PartitionRef partition)
-        => rows.Where(row => !SharedDomainStoredImage.Owns(Convert.FromHexString(row[..row.IndexOf(RowSeparator, StringComparison.Ordinal)]), partition));
+        => rows.Where(row => SharedDomainRecoveryInventoryImage.Retain(Convert.FromHexString(row[..row.IndexOf(RowSeparator, StringComparison.Ordinal)]), partition));
 
     internal static async Task SameAsync(IAtomicStore store, string[] rows, long position)
     {

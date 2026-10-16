@@ -16,7 +16,10 @@ internal static class ControlledBlobOutcomeLifetimeNativeFlow
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
         ControlledPartitionMovementLoopbackCorpus corpus, CancellationToken token)
     {
+        await ControlledBlobOutcomeLifetimeNativeHistory.BoundsAsync();
         await ControlledPartitionMovementTerminalTrial.ExecuteAsync(source, target, listeners, corpus);
+        var sourceIndex = source.Journal.Log.State.LastIndex;
+        var targetIndex = target.Journal.Log.State.LastIndex;
         await ConfigureTargetAsync(target, token);
         var sourceKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(KeyBytes));
         var targetKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(KeyBytes));
@@ -30,6 +33,7 @@ internal static class ControlledBlobOutcomeLifetimeNativeFlow
         await ControlledBlobOutcomeLifetimeNativeAssertions.InventoryAsync(state);
         await ControlledBlobOutcomeLifetimeNativeCold.ExecuteAsync(state, token);
         await ControlledBlobOutcomeLifetimeNativeRefusals.ExecuteAsync(state, execution, token);
+        await ControlledBlobOutcomeLifetimeNativeHistory.CompleteAsync(state, sourceIndex, targetIndex);
     }
 
     internal static async Task<PartitionControlEffectPayload> ApplyAsync(ControlledBlobOutcomeLifetimeNativeExecution execution,

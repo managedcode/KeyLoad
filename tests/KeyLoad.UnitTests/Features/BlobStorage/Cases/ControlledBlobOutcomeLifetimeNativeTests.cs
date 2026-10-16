@@ -1,3 +1,4 @@
+using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
@@ -20,5 +21,6 @@ internal sealed class ControlledBlobOutcomeLifetimeNativeTests
                 target.RetainRoot = true;
                 throw;
             }
-        });
+        }, sourceHistoryEntries: ControlledPartitionMovementNativeJournal.BlobOutcomeSourceHistoryEntries,
+            targetHistoryEntries: ControlledPartitionMovementNativeJournal.BlobOutcomeTargetHistoryEntries);
 }

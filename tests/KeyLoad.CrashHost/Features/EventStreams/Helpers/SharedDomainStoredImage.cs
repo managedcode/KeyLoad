@@ -13,16 +13,22 @@ internal static class SharedDomainStoredImage
     private const int ScopeComponentCount = 5;
     private const string RowSeparator = ":";
 
-    internal static string[] Capture(IAtomicStore store, PartitionRef? partition = null) => store.Read(view =>
+    internal static string[] Capture(IAtomicStore store, PartitionRef? partition = null)
+        => Format(CaptureRecords(store), partition);
+
+    internal static KeyValueRecord[] CaptureRecords(IAtomicStore store) => store.Read(view =>
     {
         var page = view.Scan([], ImageBound);
         if (page.HasMore)
         {
             throw new InvalidOperationException(ImageLimit);
         }
-        return page.Records.Where(row => partition is null || Owns(row.Key.Span, partition))
-            .Select(row => Convert.ToHexString(row.Key.Span) + RowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.ToArray();
     });
+
+    internal static string[] Format(IEnumerable<KeyValueRecord> records, PartitionRef? partition = null)
+        => records.Where(row => partition is null || Owns(row.Key.Span, partition))
+            .Select(row => Convert.ToHexString(row.Key.Span) + RowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
 
     internal static bool Owns(ReadOnlySpan<byte> key, PartitionRef partition)
     {

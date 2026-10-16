@@ -8,14 +8,16 @@ internal static class ControlledPartitionMovementTerminalOwners
 {
     internal static async Task ExecuteAsync(Func<ControlledPartitionMovementNode,
         ControlledPartitionMovementNode, ControlledPartitionMovementLoopbackListeners,
-        ControlledPartitionMovementLoopbackCorpus, Task> operation, DatabaseLimits? limits = null)
+        ControlledPartitionMovementLoopbackCorpus, Task> operation, DatabaseLimits? limits = null,
+        long sourceHistoryEntries = ControlledPartitionMovementNativeJournal.TerminalHistoryEntries,
+        long targetHistoryEntries = ControlledPartitionMovementNativeJournal.TerminalHistoryEntries)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var listeners = new ControlledPartitionMovementLoopbackListeners();
             var corpus = new ControlledPartitionMovementLoopbackCorpus(listeners);
-            await ServerFailureObserver.ObserveAsync(() => WithSourceAsync(listeners, corpus, operation, limits), failures);
+            await ServerFailureObserver.ObserveAsync(() => WithSourceAsync(listeners, corpus, operation, limits, sourceHistoryEntries, targetHistoryEntries), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -23,14 +25,15 @@ internal static class ControlledPartitionMovementTerminalOwners
     private static async Task WithSourceAsync(ControlledPartitionMovementLoopbackListeners listeners,
         ControlledPartitionMovementLoopbackCorpus corpus, Func<ControlledPartitionMovementNode,
         ControlledPartitionMovementNode, ControlledPartitionMovementLoopbackListeners,
-        ControlledPartitionMovementLoopbackCorpus, Task> operation, DatabaseLimits? limits)
+        ControlledPartitionMovementLoopbackCorpus, Task> operation, DatabaseLimits? limits,
+        long sourceHistoryEntries, long targetHistoryEntries)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var source = new ControlledPartitionMovementNode(corpus.Control.Owner,
-                ControlledPartitionMovementNativeJournal.TerminalHistoryEntries, limits);
-            await ServerFailureObserver.ObserveAsync(() => WithTargetAsync(source, listeners, corpus, operation, limits), failures);
+                sourceHistoryEntries, limits);
+            await ServerFailureObserver.ObserveAsync(() => WithTargetAsync(source, listeners, corpus, operation, limits, targetHistoryEntries), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -38,13 +41,14 @@ internal static class ControlledPartitionMovementTerminalOwners
     private static async Task WithTargetAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementLoopbackListeners listeners, ControlledPartitionMovementLoopbackCorpus corpus,
         Func<ControlledPartitionMovementNode, ControlledPartitionMovementNode,
-        ControlledPartitionMovementLoopbackListeners, ControlledPartitionMovementLoopbackCorpus, Task> operation, DatabaseLimits? limits)
+        ControlledPartitionMovementLoopbackListeners, ControlledPartitionMovementLoopbackCorpus, Task> operation, DatabaseLimits? limits,
+        long targetHistoryEntries)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var target = new ControlledPartitionMovementNode(corpus.Destination.Owner,
-                ControlledPartitionMovementNativeJournal.TerminalHistoryEntries, limits);
+                targetHistoryEntries, limits);
             await ServerFailureObserver.ObserveAsync(() => operation(source, target, listeners, corpus), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

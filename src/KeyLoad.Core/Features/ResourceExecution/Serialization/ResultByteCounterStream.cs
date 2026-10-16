@@ -14,6 +14,15 @@ internal sealed class ResultByteCounterStream(long maximumBytes, Action check) :
         return counter.Length;
     }
 
+    internal static long MeasureNative<T>(ReadExecutionBudget budget, T result)
+    {
+        budget.Check();
+        using var counter = new ResultByteCounterStream(budget.MaximumResultBytes, budget.Check);
+        NativeSerialization.Serialize(result, counter);
+        budget.Check();
+        return counter.Length;
+    }
+
     public override bool CanRead => false;
     public override bool CanSeek => false;
     public override bool CanWrite => true;

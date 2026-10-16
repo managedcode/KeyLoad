@@ -15,6 +15,10 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
     public const long SupportingHistoryEntries = 64;
     /// <summary>Frozen mathematical terminal fixture history; native per-append ceilings remain unchanged.</summary>
     public const long TerminalHistoryEntries = 426;
+    /// <summary>Conservative terminal maximum plus the complete Blob outcome flow's 83 source entries.</summary>
+    public const long BlobOutcomeSourceHistoryEntries = 590;
+    /// <summary>Conservative terminal maximum plus the complete Blob outcome flow's 18 target entries.</summary>
+    public const long BlobOutcomeTargetHistoryEntries = 131;
     private readonly long maximumFixtureEntries;
     private const string MissingEntry = ControlledPartitionMovementNativeCommandIndex.MissingEntry;
     private readonly ControlledPartitionMovementNativeCommandIndex originalEntries;
@@ -31,12 +35,13 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
     /// <param name="database">The actual borrowed canonical database owner.</param>
     /// <param name="physical">Its immutable actual physical RF3 logical scope.</param>
     /// <param name="directory">The independently owned replica-store directory.</param>
-    /// <param name="maximumFixtureEntries">The exact supporting or terminal history bound.</param>
+    /// <param name="maximumFixtureEntries">The exact selected closed fixture history profile.</param>
     /// <param name="replicaObserver">Existing native durable replica boundary observer; null preserves original behavior.</param>
     public ControlledPartitionMovementNativeJournal(DatabaseEngine database,
         PhysicalShardRecord physical, string directory, long maximumFixtureEntries = SupportingHistoryEntries, Action<ReplicaCrashBoundary>? replicaObserver = null)
     {
-        if (maximumFixtureEntries != SupportingHistoryEntries && maximumFixtureEntries != TerminalHistoryEntries)
+        if (maximumFixtureEntries != SupportingHistoryEntries && maximumFixtureEntries != TerminalHistoryEntries
+            && maximumFixtureEntries != BlobOutcomeSourceHistoryEntries && maximumFixtureEntries != BlobOutcomeTargetHistoryEntries)
         {
             throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries));
         }

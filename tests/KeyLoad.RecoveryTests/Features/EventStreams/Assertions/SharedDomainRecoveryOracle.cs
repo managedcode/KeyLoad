@@ -34,7 +34,7 @@ internal static class SharedDomainRecoveryOracle
         }
         await Assert.That(store.Position).IsEqualTo(input.SeedPosition + (committed ? FirstRevision : NoRevision));
         await SharedDomainRecoveryModels.RequireAsync(database, input, committed, healthy: false, token);
-        await SharedDomainRecoveryImage.SeedOtherScopesAsync(store, input);
+        await SharedDomainRecoveryImage.SeedOtherScopesAsync(store, input, committed);
         var history = await SharedDomainRecoverySeed.VerifyAsync(database, store, input);
         var applied = database.Apply(input.Original);
         await SharedDomainRecoveryValues.ProducerAsync(applied, original, CommandId, Item, store.Identity.Incarnation,
@@ -44,7 +44,7 @@ internal static class SharedDomainRecoveryOracle
             await SharedDomainRecoveryValues.ResultAsync(applied, recovered);
         }
         history.Add(SharedDomainRecoverySeed.Capture(store, input.Original, applied, original.Partition));
-        await SharedDomainRecoveryImage.SeedOtherScopesAsync(store, input);
+        await SharedDomainRecoveryImage.SeedOtherScopesAsync(store, input, committed: true);
         await SharedDomainRecoveryModels.RequireAsync(database, input, committed: true, healthy: false, token);
         await SharedDomainRecoveryHistoryAssertions.AllAsync(database, store, history);
         await SharedDomainRecoveryConflict.RequireAsync(database, store, input);

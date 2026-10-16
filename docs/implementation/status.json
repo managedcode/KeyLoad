@@ -3,38 +3,51 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "Native canonical inventory enrollment, authenticated voter reads and verified restore origins are integrated. Startup/replay/archive repairs passed strict R592. Current source adds full V2 native carriers, genuine8192-byte owners, public inventory policy/move/cold oracles, strict compiled-PDB category accounting, independent roster admission and bounded failure-only original child evidence. These successors passed the R601 complete strict build; actual runtime qualification remains open.",
+    "implementation": "Native canonical inventory and selected current repair batch are integrated. R606 complete strict Release passed with zero warnings/errors. The matched local normal public ONE/RF3 pair R600/R602 remains accepted on its original afee6834 frozen source/DLL/image-input cohort. Focused R597/R598 retain real failures; the newly rebuilt batch awaits focused original Unit3/Recovery7 and public inventory/movement runs. DROP/AnalyticsStore successors remain source-only.",
     "strictBuild": {
-      "label": "root-r601-native-carrier-inventory-roster-recovery-pdb-full-release",
+      "label": "root-r606-recovery-keyspace-full-release",
       "result": "passed",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 381.4587200419046,
+      "elapsedSeconds": 131.2092912499793,
       "sourceDrift": 0,
-      "stdoutSha256": "f9ab85c9da5f8f3c04b2be5ec03c5ca34a2981fbe3682977ad5751b9f27d1c54",
-      "scope": "Complete strict Release solution with V2 full native carrier/actual8192owner scenario, current-policy inventory and actual movement/cold oracles, separate PDB authored/generated category limits, roster admission and async exact journal checks, bounded original child recovery evidence. No runtime acceptance claim; full focused cohort and public ONE/RF3 refresh pending."
+      "stdoutSha256": "c4e6756fa6ca21b0ae1bb79a08430312dce47b4faf5608a12f1c36b974d5cd39",
+      "scope": "Complete strict Release after native accounting7, complete recovery-image/D2 oracle6, explicit Blob composed fixture6, bounded failure-only quorum diagnostic2 and one existing namespace import. Whole-operation runtime refresh remains pending."
     },
-    "format": "R595 scoped current modified/new C# whitespace apply+verify passed, followed by exact async roster correction verification. Final full-solution formatter verification remains pending.",
+    "format": "R604d scoped21 C# whitespace verification passed; R606 final namespace-helper whitespace verification passed. Full-solution canonical formatter qualification remains pending.",
     "focusedRuntime": {
-      "cohort": "root-r588-589-functional-one",
+      "cohort": "root-r597-600-unit-recovery-analyzers-functional-one",
+      "sourceCommit": "afee683468c447670a3d911e29a195ede7377e3f",
       "sourceDrift": 0,
       "compiledDrift": 0,
       "unit": {
-        "total": 30,
-        "passed": 25,
-        "failed": 5,
-        "skipped": 0
+        "label": "root-r597-confirmed-native-unit",
+        "total": 38,
+        "passed": 35,
+        "failed": 3,
+        "skipped": 0,
+        "evidence": "TestResults/stage61-native-join/root-r597-confirmed-native-unit.completion.original.json"
       },
       "recovery": {
-        "total": 13,
-        "passed": 11,
-        "failed": 2,
-        "skipped": 0
+        "label": "root-r598-confirmed-native-recovery",
+        "total": 20,
+        "passed": 13,
+        "failed": 7,
+        "skipped": 0,
+        "evidence": "TestResults/stage61-native-join/root-r598-confirmed-native-recovery.completion.original.json"
       },
-      "evidence": "TestResults/stage61-native-join/root-r588-589-functional-one.cohort-after.original.json",
-      "scope": "Selected actual whole-operation Unit and process-recovery flows on 615d813b. All original processes and readers joined. This is a different focused Unit selection from the preceding101-case cohort; no coverage or total-suite improvement claim."
+      "analyzers": {
+        "label": "root-r599-complete-native-analyzers",
+        "total": 391,
+        "passed": 391,
+        "failed": 0,
+        "skipped": 0,
+        "evidence": "TestResults/stage61-native-join/root-r599-complete-native-analyzers.completion.original.json"
+      },
+      "evidence": "TestResults/stage61-native-join/root-r597-600-unit-recovery-analyzers-functional-one.cohort-after.original.json",
+      "scope": "Local development selections, not complete Unit/recovery qualification. Original processes/readers joined. R597 failed retained-replay quorum repair, controlled Blob outcome original fixture-entry lookup and actual8192-owner movement read-result budget. R598 failed all7 original shared-domain process cuts. R597 issuer/full-carrier control passed with carrier8097 under cap8192, but supporting owners/peers remain8388608; this does not pass true8192-owner qualification."
     },
-    "publicQualification": "OPEN: native SDK/official MCP RF3 inventory and fresh same-source ONE/RF3 functional+cold pair. Historical e292 normal and57cea624 cold results retain their original scope.",
+    "publicQualification": "Local normal public ONE/RF3 R600/R602 accepted on matched frozen source/DLL/image inputs. Public inventory-specific RF3, refreshed eight-user cold ONE/RF3, DROP/recreate and user AnalyticsStore qualification remain OPEN; historical cold receipts retain their original source and three-user scope.",
     "remaining": [
       "Full public resource DROP/recreate lifecycle",
       "User-addressable analytics stores (current native integration is node operational analytics only)",
@@ -52,7 +65,7 @@
     },
     "currentSourceRepairs": {
       "stage": "R601",
-      "state": "compiled_runtime_pending",
+      "state": "compiled_with_runtime_failures_and_uncompiled_successors_pending",
       "scope": [
         "Original native transport injection removes the inventory startup dependency cycle",
         "Verified restored new-history local applied cut zero without restoring old authority",
@@ -69,30 +82,53 @@
         "Bounded secret-free original recovery-child phase witness written only before arming; same-handle bounded failure evidence read only after actual child/readers join, original exception retained"
       ],
       "unresolved": [
-        "Actual V2 carrier fit and complete genuine8192-byte owner movement must pass their executable whole-operation assertions"
+        "R597 true8192-byte native-owner full movement fails the original read-result budget; issuer/carrier-only control passed at8097bytes with larger supportingowners.",
+        "R597 post-restart retained-replay quorum control barrier and controlled Blob outcome fixture-entry failures remain open.",
+        "R598 shared-domain Recovery7 failed; native-image evidence and exact D2 conservation successors are prepared, not yet compiled or executed."
       ],
-      "publicFunctionalRefresh": "Repeat actual ONE after a new strict build; accept its complete original scenario/image/cleanup evidence before RF3. Public DROP/recreate and user AnalyticsStore remain open.",
-      "verification": "R601 full strict Release passed with zero warnings/errors and unchanged full source snapshot. R594 formatting/import and R596 four CA1849 diagnostics are repaired; original failure receipts retained. New actual native Unit/recovery/analyzers/ONE cohort is the next gate. Bounded recovery child evidence is diagnosis, not a speculative product repair."
+      "publicFunctionalRefresh": "R600 ONE then R602 RF3 normal public pair accepted. Refreshed eight-user cold pair, DROP/recreate and user-addressable AnalyticsStore remain open.",
+      "verification": "R601 strict Release0warnings/0errors. R597 Unit35/38 and R598 recovery13/20 retain their original failures; R599 analyzers391/391 passed. R600/R602 normal public pair accepted. Subsequent source-ready quorum diagnostics, recovery image/D2 correction, DROP and AnalyticsStore packets are not covered by those compiler/runtime receipts and require adoption, strict rebuild and original tests. R603/R606 current21-file correction batch now passes full strict Release0/0 and scoped whitespace; focused runtime is pending and no prior failure is reclassified.",
+      "nextAdoptedStage": {
+        "stage": "R603/R606",
+        "state": "compiled_focused_runtime_pending",
+        "files": 21,
+        "scope": [
+          "Native internal result accounting through generated serialization with unchanged original bounds",
+          "Complete native KeyValueRecord recovery image plus exact D2 member/reverse/origin/witness conservation",
+          "Explicit Blob composed fixture history profiles with original full scenario and per-append product limits preserved",
+          "Failure-only bounded local quorum diagnostics without retries or a claimed product fix"
+        ],
+        "evidence": "TestResults/stage61-native-join/root-r603-current-native-recovery-blob21.adoption.original.json",
+        "namespaceCorrection": "R606 existing KeyLoad.Core import fixes both original CS0103 errors; full strict Release passed0/0.",
+        "scopedFormat": "R604d scoped21 passed; final R606 import-helper matching whitespace verification passed.",
+        "buildEvidence": "TestResults/stage61-native-join/root-r606-recovery-keyspace-full-release.completion.original.json"
+      }
     },
     "latestCompilerAttempt": {
-      "label": "root-r601-native-carrier-inventory-roster-recovery-pdb-full-release",
+      "label": "root-r606-recovery-keyspace-full-release",
       "result": "passed",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 381.4587200419046,
+      "elapsedSeconds": 131.2092912499793,
       "sourceDrift": 0,
-      "stdoutSha256": "f9ab85c9da5f8f3c04b2be5ec03c5ca34a2981fbe3682977ad5751b9f27d1c54",
-      "scope": "Complete strict Release solution with V2 full native carrier/actual8192owner scenario, current-policy inventory and actual movement/cold oracles, separate PDB authored/generated category limits, roster admission and async exact journal checks, bounded original child recovery evidence. No runtime acceptance claim; full focused cohort and public ONE/RF3 refresh pending."
+      "stdoutSha256": "c4e6756fa6ca21b0ae1bb79a08430312dce47b4faf5608a12f1c36b974d5cd39",
+      "scope": "Complete strict Release after native accounting7, complete recovery-image/D2 oracle6, explicit Blob composed fixture6, bounded failure-only quorum diagnostic2 and one existing namespace import. Whole-operation runtime refresh remains pending."
     },
     "latestPublicFunctionalAttempt": {
-      "label": "root-r583-functional-normal-one",
+      "label": "R600 ONE then R602 RF3 normal public pair",
+      "result": "accepted_local_normal_pair",
+      "evidenceReference": "FUNCTIONAL-GATES-20261016.latestMatchedPublicPair",
+      "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
+    },
+    "previousCompilerAttempt": {
+      "label": "root-r605-native-recovery-blob-full-release",
       "result": "failed",
-      "phase": "Aspire node startup before workload",
-      "cause": "ResourceOwnerInventoryNativeFactory eagerly borrowed OrleansNode.RuntimeServices while native GrainService initialization was still preparing that runtime.",
-      "evidence": "TestResults/root-r583-functional-execution-r1/root-r583-functional-normal-one.stdout.original.txt",
+      "warnings": 0,
+      "errors": 2,
+      "elapsedSeconds": 483.0473872500006,
       "sourceDrift": 0,
-      "compiledDrift": 0,
-      "rf3Continuation": "Not run after this failed ONE gate."
+      "stdoutSha256": "9cbb2559cef0acfb8c6106f6ef816f6a43732ea952c124885919a385e8af2c15",
+      "scope": "Complete strict Release collected two CS0103 KeySpace namespace import errors in the new shared-domain recovery oracle. Existing KeyLoad.Core import correction adopted; R606 complete rebuild pending. No runtime acceptance claim."
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {
@@ -635,8 +671,8 @@
     "persistedQueueOperators": 1,
     "minimumSuccessfulOperationsPerTopology": 10000,
     "orchestration": "Aspire AppHost owns native Azure Table membership through local Azurite, actual one/three-node resources, readiness, endpoints and joined shutdown",
-    "gate1": "PASSED corrected R477:1Aspire node10302successfuloperations/41waves/full3resource rotation/nativecleanup.",
-    "gate2": "PASSED corrected R478 after acceptedR477:3genuineRF3nodes10306successfuloperations/41waves/samefrozen source-DLL-imageinput/fullcleanup.",
+    "gate1": "PASSED accepted R600: one Aspire node,10302successful SDK/MCP operations,41waves,8workloadusers+1operator,3resources/model,original joinedcleanup.",
+    "gate2": "PASSED accepted R602 after R600: genuineRF3,10306successful operations,41waves,same frozen source/DLL/image inputs and original joinedcleanup.",
     "latestLocalExecution": {
       "lane": "root-r478-lifetime-three-node-functional-gate",
       "result": "passed",
@@ -673,7 +709,7 @@
       },
       "boundary": "Accepted updated local functional scenario with independentlyrotated3resource flows, complete native result, owned shutdown/releasedstorage/imagechecks. Not full105/Linux/endurance/security/performance/release."
     },
-    "qualification": "Both corrected local functional gates passed on e292c1c1. Full original105 and Linux/fault/endurance/security/performance/release qualification remain separate; RF1 proves no replica fault tolerance.",
+    "qualification": "Latest matched normal local R600/R602 pair accepted on afee6834. Original R477/R478 receipts below remain historical. Full original105, refreshed eight-user cold, DROP/AnalyticsStore and Linux/fault/endurance/security/performance/release gates remain separate.",
     "originalTaskStatusCounts": {
       "done": 20,
       "in_progress": 85,
@@ -1027,10 +1063,73 @@
     "currentSourceCoverageCorrection": {
       "scope": "Explicit resource index independent from globally unique iteration; events, queues/topics and blobs rotate over all3 configured resources. At least27complete waves AND10000successful public operations required.",
       "sourceEvidence": "TestResults/stage61-native-join/functional-model-inventory-sourceN-r2/independent-schedule-enumeration.json",
-      "runtimeStatus": "Closed by correctedR477/R478 matchedpair:41completewaves each,10302/10306 successfuloperations, original native PASS/cleanup/0sourceDLLimagedrift. Historicalearlierpairretainsnarrowerscenario.",
+      "runtimeStatus": "Retained corrected R477/R478 schedule is freshly accepted by R600/R602:41waves each,10302/10306successful operations,original native PASS and joinedcleanup,source/DLL/image identity drift0.",
       "analyticsBoundary": "Three persisted TimeSeries sets serve data/aggregate operations; native operational analytics is one derived engine pernode, not3 catalog stores."
     },
-    "additionalColdQualificationReference": "FUNCTIONAL-COLD-20261016; separate57cea624 matchednativecoldpair passed, original normalpair/counters/e292cohortunchanged"
+    "additionalColdQualificationReference": "FUNCTIONAL-COLD-20261016; separate57cea624 matchednativecoldpair passed, original normalpair/counters/e292cohortunchanged",
+    "latestMatchedPublicPair": {
+      "result": "accepted_local_normal_pair",
+      "sourceCommit": "afee683468c447670a3d911e29a195ede7377e3f",
+      "delivery": "Main verified afee6834 checkpoint pushed; delivery does not promote original task acceptance.",
+      "one": {
+        "label": "root-r600-functional-normal-one",
+        "result": "accepted",
+        "nodes": 1,
+        "workloadUsers": 8,
+        "operationalUsers": 1,
+        "resourcesPerModel": 3,
+        "sdkSuccessfulOperations": 5315,
+        "mcpSuccessfulOperations": 4987,
+        "aggregateSuccessfulOperations": 10302,
+        "waves": 41,
+        "elapsedSeconds": 442.6188349581789,
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        "terminalEvaluation": "TestResults/stage61-native-join/root-r600-gate1-terminal-evaluation.original.json",
+        "terminalEvaluationSha256": "7495563213bfd110bb6f460419ad705b3017a5e3bbc9c1d31f4799148c9d0cdf",
+        "processJoined": true,
+        "bothReadersJoined": true,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "imageIdentityDrift": 0
+      },
+      "rf3": {
+        "label": "root-r602-functional-normal-three",
+        "result": "accepted",
+        "nodes": 3,
+        "workloadUsers": 8,
+        "operationalUsers": 1,
+        "resourcesPerModel": 3,
+        "sdkSuccessfulOperations": 5317,
+        "mcpSuccessfulOperations": 4989,
+        "aggregateSuccessfulOperations": 10306,
+        "waves": 41,
+        "elapsedSeconds": 1176.9581818750594,
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        "terminalEvaluation": "TestResults/stage61-native-join/root-r602-gate2-terminal-evaluation.original.json",
+        "terminalEvaluationSha256": "d4f5498ea9c59a0cf134c26addbe3d173dc833f3c4bf387d8edf7f6734d465a0",
+        "processJoined": true,
+        "bothReadersJoined": true,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "imageIdentityDrift": 0
+      },
+      "cohortBinding": {
+        "sourceCohortDigest": "c7bc96c7b360d68659f62719c6fc470eca14025af8fb566fe33a47e0675a85ed",
+        "compiledCohortDigest": "793a46224a012ca225beb3e7112d77409a3aea54f561896be01bffaf3b52bcc8",
+        "imageInputDigest": "sha256:d28ea66b6b6773a0fdc59e9adb84754b6ec989d0ca61e6e0079fa451bb828a62"
+      },
+      "limits": "Actual test-owned Aspire Docker normal ONE/RF3 through real .NET SDK, official MCP SDK and selected T-SQL. Local arm64 development evidence, not Linux release, comparative performance, power-loss or production qualification. Single-voter ONE has no replica fault tolerance. DROP/resource recreation, user AnalyticsStore and refreshed eight-user cold remain open."
+    }
   },
   "NATIVE-FOUNDATION-20261015": {
     "status": "in_progress",

@@ -64,7 +64,7 @@ internal static class SharedDomainCrashScenario
         progress.Record(SharedDomainChildProgressPhase.SaveSeedResults);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedResultsFile, results);
         progress.Record(SharedDomainChildProgressPhase.SaveSeedImage);
-        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedImageFile, SharedDomainStoredImage.Capture(store));
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedImageFile, SharedDomainStoredImage.CaptureRecords(store));
         progress.Record(SharedDomainChildProgressPhase.SaveSeedPosition);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.SeedPositionFile, store.Position);
         progress.Record(SharedDomainChildProgressPhase.SaveIdentityDigest);

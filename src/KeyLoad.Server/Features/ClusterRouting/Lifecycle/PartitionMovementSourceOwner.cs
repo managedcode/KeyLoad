@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -79,7 +80,7 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
             var work = new ReadExecutionBudget(limits, clock, cancellationToken);
             database.ValidateVerifiedPartitionMovementCaptureScope(principal.Id, verified, work);
             current.Session.RequireOpen();
-            work.CheckResult(handle);
+            _ = ResultByteCounterStream.MeasureNative(work, handle);
             return handle;
         }
         var original = producer ?? throw Errors.Fail(ErrorCode.Corruption, ClosedDetail);

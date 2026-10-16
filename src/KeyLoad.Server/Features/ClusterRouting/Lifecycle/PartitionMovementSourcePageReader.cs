@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -24,7 +25,7 @@ internal static class PartitionMovementSourcePageReader
             using var stage = work.EnterStageCancellation(entry.Session.StageCancellation);
             ServerFailureObserver.Observe(() =>
             {
-                work.CheckResult(page.Page);
+                _ = ResultByteCounterStream.MeasureNative(work, page.Page);
                 var encodedLength = NativeSerialization.Measure(page.Page);
                 if (encodedLength > database.Limits.MaxBatchBytes)
                 {
@@ -33,7 +34,7 @@ internal static class PartitionMovementSourcePageReader
                 var encoded = NativeSerialization.Serialize(page.Page);
                 work.Check();
                 result = new(query.HandleId, query.Ordinal, encoded);
-                work.CheckResult(result);
+                _ = ResultByteCounterStream.MeasureNative(work, result);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

@@ -24,7 +24,7 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
     /// <param name="owner">The actual listener-configured persisted physical owner.</param>
     /// <param name="observer">The existing storage observer for an armed actual canonical commit cut.</param>
     /// <param name="limits">Optional validated native operation limits retained by the fixture owner.</param>
-    /// <param name="maximumFixtureEntries">The exact selected supporting or terminal history bound.</param>
+    /// <param name="maximumFixtureEntries">The exact selected closed fixture history profile.</param>
     /// <param name="replicaObserver">Existing native durable replica boundary observer; null preserves original behavior.</param>
     public ControlledPartitionMovementNativeNode(string root, PhysicalShardRecord owner,
         Action<CommitStage, long, int>? observer = null,
@@ -40,7 +40,9 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
         ArgumentNullException.ThrowIfNull(checkpointVerifier);
         ArgumentNullException.ThrowIfNull(owner);
         if (maximumFixtureEntries != ControlledPartitionMovementNativeJournal.SupportingHistoryEntries
-            && maximumFixtureEntries != ControlledPartitionMovementNativeJournal.TerminalHistoryEntries)
+            && maximumFixtureEntries != ControlledPartitionMovementNativeJournal.TerminalHistoryEntries
+            && maximumFixtureEntries != ControlledPartitionMovementNativeJournal.BlobOutcomeSourceHistoryEntries
+            && maximumFixtureEntries != ControlledPartitionMovementNativeJournal.BlobOutcomeTargetHistoryEntries)
         {
             throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries));
         }

@@ -29,6 +29,7 @@ internal static class ControlledPartitionMovementCapturedPageReader
                 admission, pageRequest, cancellationToken);
             pages[ordinal] = await owner.ReadPageAsync(ControlledPartitionMovementCaptureFlow.Principal(source, page),
                 page.Envelope, new(handle.HandleId, ordinal), cancellationToken);
+            await Assert.That(NativeSerialization.Measure(pages[ordinal])).IsLessThanOrEqualTo(source.Database.Limits.MaxBatchBytes);
             await Assert.That(pages[ordinal].HandleId).IsEqualTo(handle.HandleId);
             await Assert.That(pages[ordinal].Ordinal).IsEqualTo(ordinal);
         }

@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Server;
 
@@ -22,10 +23,10 @@ internal sealed partial class PartitionMovementTransferSourceReads
             using var stage = work.EnterStageCancellation(entry.Session.StageCancellation);
             ServerFailureObserver.Observe(() =>
             {
-                work.CheckResult(page.Page);
+                _ = ResultByteCounterStream.MeasureNative(work, page.Page);
                 var encoded = NativeSerialization.Serialize(page.Page);
                 result = new(query.HandleId, query.Ordinal, encoded);
-                work.CheckResult(result);
+                _ = ResultByteCounterStream.MeasureNative(work, result);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
