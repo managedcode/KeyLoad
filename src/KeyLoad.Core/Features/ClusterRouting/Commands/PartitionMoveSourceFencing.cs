@@ -2,6 +2,7 @@ using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -40,6 +41,7 @@ public sealed partial class DatabaseEngine
             phase.Partition, phase.ControlOwner, record.SourcePlacement, record.DestinationOwner,
             position, phase.ControlIntentDigest);
         PartitionMoveSourceFenceStorage.Write(transaction, fence, Limits.MaxBatchBytes);
+        ResourceOwnerInventoryMovementCapture.Capture(transaction, fence, Store.Identity.Incarnation, Limits);
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId, position,
             phase.ControlIntentDigest), record, fence, null, null);
     }

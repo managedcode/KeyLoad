@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -9,6 +10,8 @@ internal static class BackupRequiredFileAccessFlow
     private const string JournalName = "commands.wal";
     private const string DestinationName = "required-file-access-repaired";
     private const string RestoreCommand = "restore";
+    private const int PermissionDeniedErrno = 13;
+    private const string NativeFileAccessFailure = "Offline filesystem operation failed.";
 
     internal static async Task RunAsync(bool existingEmpty, CancellationToken token)
     {
@@ -63,9 +66,11 @@ internal static class BackupRequiredFileAccessFlow
         (StoreIdentity Identity, long Position, string[] Rows) source, CancellationToken token)
     {
         region.DenyNewReaders();
-        var native = Assert.ThrowsExactly<UnauthorizedAccessException>(() => ZoneTreeStore.Restore(
+        var native = Assert.ThrowsExactly<IOException>(() => ZoneTreeStore.Restore(
             fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
         await Assert.That(native).IsNotNull();
+        await Assert.That(native!.Message).IsEqualTo(NativeFileAccessFailure);
+        await Assert.That(native.InnerException is Win32Exception { NativeErrorCode: PermissionDeniedErrno }).IsTrue();
         await BackupRequiredFileAccessAssertions.NoPublicationAsync(fixture.BackupDirectory, destination, existingEmpty);
         await region.RequireOriginalAsync(original[JournalName], token);
         await BackupRequiredFileAccessAssertions.ImmutableInputsAsync(fixture, original, source, token);

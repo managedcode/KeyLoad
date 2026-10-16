@@ -1,12 +1,11 @@
-using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class MultiLaneReceiveRf3Flow
 {
-    private const string ArgumentsParameter = "args";
     internal const string Tool = "keyload_messages_receive_across_lanes";
     internal const string Message = "input";
     internal const string Payload = "{\"work\":1}";
@@ -30,11 +29,7 @@ internal static class MultiLaneReceiveRf3Flow
     }
 
     internal static SqlOperationRequest Sql(MultiLaneReceiveRequest request)
-        => new(request.Requests[0].Lane.Partition, "CALL keyload_messages_receive_across_lanes(@args)",
-            new(StringComparer.Ordinal)
-            {
-                [ArgumentsParameter] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(request), JsonDefaults.Options)
-            });
+        => SqlRf3Protocol.Call(request.Requests[0].Lane.Partition, Tool, request);
 
     internal static async Task EquivalentAsync(MultiLaneReceiveResult actual, MultiLaneReceiveResult expected)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

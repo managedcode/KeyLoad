@@ -6,7 +6,7 @@ internal sealed class PartitionRecordInventoryTests
 {
     private const string Suffix = "inventory-probe";
     private const string Value = "raw-value";
-    internal const int ExpectedFamilyCount = 83;
+    internal const int ExpectedFamilyCount = 85;
     private static readonly PartitionRef Partition = new(PartitionRecordNativeFixture.TenantId,
         PartitionRecordNativeFixture.DatabaseId, PartitionRecordNativeFixture.DomainId, PartitionRecordNativeFixture.PartitionKey);
     internal static readonly string[] ExpectedFamilies =
@@ -25,6 +25,7 @@ internal sealed class PartitionRecordInventoryTests
         "queue-dead-letter-order", "queue-order", "queue-pending-dead-letter",
         "queue-transfer-intent", "queue-transfer-source-capacity", "queue-transfer-target-capacity",
         "queue-transfer-target-receipt", "ready", "recurring-saga-capacity", "recurring-schedule",
+        "resource-owner-inventory-member-v1", "resource-owner-inventory-proof-v1",
         "saga-state", "sample", "sample-chunk-block", "sample-chunk-correction", "sample-chunk-manifest",
         "sample-chunk-window", "sample-id", "sample-retention-v1", "sample-rollup-v1", "sample-sequence", "scheduled",
         "stream-head", "subscription", "subscription-completion", "subscription-inbox",

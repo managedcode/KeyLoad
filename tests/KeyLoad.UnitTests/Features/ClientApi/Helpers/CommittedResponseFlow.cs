@@ -9,10 +9,10 @@ internal static class CommittedResponseFlow
 {
     internal static async Task RunAsync(ConnectionNativeScenario scenario, bool callerCancellation)
     {
+        await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
         using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
         var token = linked.Token;
-        await scenario.InitializeAsync(token);
         var principal = scenario.Principal();
         var credential = scenario.Fixture.Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(
             global::KeyLoad.Core.DatabaseEngine.Credential(CommittedResponseProtocol.ApiKeyId, principal.Id,

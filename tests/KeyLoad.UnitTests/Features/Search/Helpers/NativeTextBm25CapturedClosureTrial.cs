@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
@@ -6,9 +7,15 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class NativeTextBm25CapturedClosureTrial
 {
+    private const string SourceCollection = "orders";
+
     internal static async Task RunAsync(Bm25OriginalPhaseRecoveryFlow flow)
     {
         var owner = flow.Owner;
+        var lifetimeKey = ResourceLifetimeCatalog.Key(owner.Source.Partition.TenantId,
+            owner.Source.Partition.DatabaseId, SourceCollection);
+        var lifetime = owner.Store.Read(view => view.ReadOwnedValue(lifetimeKey));
+        await Assert.That(lifetime).IsNotNull();
         var absent = await ReadAsync(flow);
         var original = flow.Capture(null);
         var receipt = flow.Publish(original);
@@ -27,6 +34,9 @@ internal static class NativeTextBm25CapturedClosureTrial
         await Assert.That(NativeSerialization.Serialize(cold).SequenceEqual(
             NativeSerialization.Serialize(absent))).IsTrue();
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(owner, original, entry);
+        var retainedLifetime = owner.Store.Read(view => view.ReadOwnedValue(lifetimeKey));
+        await Assert.That(retainedLifetime).IsNotNull();
+        await Assert.That(retainedLifetime!.SequenceEqual(lifetime!)).IsTrue();
     }
 
     private static async Task<RankedDocument[]> ReadAsync(Bm25OriginalPhaseRecoveryFlow flow)
@@ -35,7 +45,7 @@ internal static class NativeTextBm25CapturedClosureTrial
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         var execution = UnitExecutionOptions.QueryExecution().Value;
-        var request = new SearchRequest(owner.Source.Partition, "orders", "/text", "needle");
+        var request = new SearchRequest(owner.Source.Partition, SourceCollection, "/text", "needle");
         NativeTextProjection? projection = null;
         ICapturedTextRead? captured = null;
         RankedDocument[]? result = null;

@@ -6,6 +6,9 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class PartitionQueryMergeTests
 {
     private const string LabelProperty = "label";
+    private const string RestrictedPath = "/secret";
+    private const string RestrictedAlias = "secret";
+    private const string RestrictedProjectionJson = "{\"secret\":null}";
     [Test]
     public async Task RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection()
     {
@@ -85,19 +88,46 @@ internal sealed class PartitionQueryMergeTests
     [Test]
     public async Task IndependentRetainedOracleIncludesPersistedRedactionMetadata()
     {
-        using var database = PartitionQueryTestSupport.Create(fields: [new("/secret", "private")]);
+        using var database = PartitionQueryTestSupport.Create(fields: [new(RestrictedPath, "private")]);
         PartitionQueryTestSupport.AddRows(database, database.Partition,
             new PartitionQuerySeed("redacted", 9, "visible", "NEVER-RETURN"));
         PartitionQueryTestSupport.ConfigureSinglePartitionReader(database);
 
-        var result = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Reader,
-            PartitionQueryTestSupport.Request(database, 1), [database.Partition]);
+        var position = database.Store.Position;
+        var identity = database.Store.Identity;
+        var request = PartitionQueryTestSupport.Request(database, 1);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var result = engine.ExecutePartitionQuery(PartitionQueryTestSupport.Reader, request, [database.Partition]);
         var row = result.Rows.Single().Row;
 
         await Assert.That(row.Json).IsEqualTo("{\"label\":\"visible\"}");
-        await Assert.That(row.Redacted).IsTrue();
-        await Assert.That(row.RedactedFields!.Value.SequenceEqual(["/secret"])).IsTrue();
+        await Assert.That(row.Redacted).IsFalse();
+        await Assert.That(row.RedactedFields!.Value).IsEmpty();
         await Assert.That(result.RetainedBytes).IsEqualTo(PartitionQueryReferenceSizing.RetainedBytes(result));
+        var selectedRequest = request with
+        {
+            Query = request.Query with
+            {
+                Projection = [new(RestrictedPath, RestrictedAlias)]
+            }
+        };
+        var selected = engine.ExecutePartitionQuery(PartitionQueryTestSupport.Reader, selectedRequest, [database.Partition]);
+        var selectedRow = selected.Rows.Single();
+        await Assert.That(selected.Complete).IsTrue();
+        await Assert.That(selectedRow.Reference).IsEqualTo(result.Rows.Single().Reference);
+        await Assert.That(selectedRow.Row.Revision).IsEqualTo(row.Revision);
+        await Assert.That(selectedRow.Row.Json).IsEqualTo(RestrictedProjectionJson);
+        await Assert.That(selectedRow.Row.Redacted).IsTrue();
+        await Assert.That(selectedRow.Row.RedactedFields!.Value.SequenceEqual([RestrictedPath])).IsTrue();
+        var leaf = selected.Leaves.Single();
+        await Assert.That(leaf.Partition).IsEqualTo(database.Partition);
+        await Assert.That(leaf.NodeId).IsEqualTo(identity.NodeId);
+        await Assert.That(leaf.Incarnation).IsEqualTo(identity.Incarnation);
+        await Assert.That(leaf.ReadGeneration).IsEqualTo(identity.ReadGeneration);
+        await Assert.That(leaf.CutPosition).IsEqualTo(result.Leaves.Single().CutPosition);
+        await Assert.That(selected.RetainedBytes).IsEqualTo(PartitionQueryReferenceSizing.RetainedBytes(selected));
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+        await Assert.That(database.Store.Identity).IsEqualTo(identity);
     }
 
     [Test]

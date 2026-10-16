@@ -35,6 +35,7 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
         receiver = serviceProvider.GetService<PartitionMovementNativeReceiver>();
         physicalProbe = serviceProvider.GetService<PhysicalOwnerProbeNativeRuntime>();
         capacity = serviceProvider.GetService<Func<OwnerCapacityNativeLifetime>>()?.Invoke();
+        resourceInventory = serviceProvider.GetRequiredService<Func<global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeRuntime>>()();
     }
 
     /// <inheritdoc />
@@ -87,6 +88,15 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
     public override async Task Stop()
     {
         var failures = new List<Exception>();
+        try
+        {
+            if (resourceInventory is { } inventory)
+            {
+                await inventory.DisposeAsync().ConfigureAwait(true);
+            }
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
         {
             if (capacity is { } owned)

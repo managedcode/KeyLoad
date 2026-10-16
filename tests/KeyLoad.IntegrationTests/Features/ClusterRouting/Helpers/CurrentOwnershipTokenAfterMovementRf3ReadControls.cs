@@ -72,6 +72,9 @@ internal static class CurrentOwnershipTokenAfterMovementRf3ReadControls
             WaitForIndexProtocol.Tool, wait, token), ErrorCode.TokenInvalidated, PartitionMovementPublicRefusalRf3Oracle.SafeGenericDetail);
         await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await seed.Official.CallAsync(
             McpCallerTools.ChangesRead, feed, token), ErrorCode.TokenInvalidated, PartitionMovementPublicRefusalRf3Oracle.SafeGenericDetail);
+        await CurrentOwnershipTokenSqlRf3Assertions.RefusedAsync(seed, WaitForIndexProtocol.Tool, wait,
+            PartitionMovementPublicRefusalRf3Oracle.IndexMinimumDetail,
+            PartitionMovementPublicRefusalRf3Oracle.SafeGenericDetail, token);
     }
 
     internal static async Task HealthyAsync(PartitionMovementPublicParentRf3Seed seed, CommitToken current,
@@ -109,6 +112,7 @@ internal static class CurrentOwnershipTokenAfterMovementRf3ReadControls
         await CurrentOwnershipTokenAfterMovementRf3ReadAssertions.WaitAsync(
             official, minimum, seed.Models.TableDefinition.SchemaVersion);
         await Assert.That(official.PolicyEpoch).IsEqualTo(original.PolicyEpoch);
+        await CurrentOwnershipTokenSqlRf3Assertions.WaitAsync(seed, request, original, token);
         return original;
     }
 }

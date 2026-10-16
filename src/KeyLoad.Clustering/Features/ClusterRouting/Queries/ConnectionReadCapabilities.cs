@@ -26,6 +26,11 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
 
         var principal = await ReloadPrincipalAsync(request, requestId, cancellationToken).ConfigureAwait(true);
+        if (kind == GrainReadKind.ResourceOwnerInventory)
+        {
+            return await ResourceOwnerInventoryObservedReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,
+                principal, request, codec, context, cancellationToken).ConfigureAwait(true);
+        }
         if (kind is GrainReadKind.PlacementPolicy or GrainReadKind.PlacementPlan or GrainReadKind.PlacementIntent)
         {
             return await TenantPlacementReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,

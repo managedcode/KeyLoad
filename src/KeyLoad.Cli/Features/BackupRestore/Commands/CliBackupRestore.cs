@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Resources;
@@ -21,6 +22,10 @@ internal static class CliBackupRestore
     private const string ArchiveCopiedMessageKey = "ArchiveCopied";
     private const string BackupExtractedMessageKey = "BackupExtracted";
     private const string BackupMissingRequiredFileMessageKey = "BackupMissingRequiredFile";
+    private const string BackupSourceUnavailableDetail = "The offline backup source could not be opened.";
+    private const int RequiredRestoreAccessDeniedErrno = 13;
+    private const string NativeFileAccessFailure = "Offline filesystem operation failed.";
+    private const string RestoreInputUnavailableDetail = "A required restore file could not be read.";
     private static readonly ResourceManager Messages = new(
         MessagesBaseName,
         typeof(CliBackupRestore).Assembly);
@@ -61,12 +66,25 @@ internal static class CliBackupRestore
     private static void CreateBackup(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions,
         IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
     {
-        using (var store = new ZoneTreeStore(new(Path.GetFullPath(args[SourceArgumentIndex])), storageOptions, cacheOptions))
+        using (var store = OpenBackupSource(Path.GetFullPath(args[SourceArgumentIndex]), storageOptions, cacheOptions))
         {
             store.CreateBackup(Path.GetFullPath(args[DestinationArgumentIndex]));
         }
 
         Console.WriteLine(GetMessage(BackupVerifiedMessageKey));
+    }
+
+    private static ZoneTreeStore OpenBackupSource(string source,
+        IOptions<ZoneTreeStorageExecutionOptions> storageOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
+    {
+        try
+        {
+            return new ZoneTreeStore(new(source), storageOptions, cacheOptions);
+        }
+        catch (IOException original)
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, BackupSourceUnavailableDetail, original);
+        }
     }
 
     private static void Compact(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions,
@@ -92,6 +110,12 @@ internal static class CliBackupRestore
         catch (DirectoryNotFoundException)
         {
             throw Errors.Fail(ErrorCode.Corruption, GetMessage(BackupMissingRequiredFileMessageKey));
+        }
+        catch (IOException original) when (original.InnerException is Win32Exception
+        { NativeErrorCode: RequiredRestoreAccessDeniedErrno }
+            && string.Equals(original.Message, NativeFileAccessFailure, StringComparison.Ordinal))
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, RestoreInputUnavailableDetail, original);
         }
         Console.WriteLine(JsonSerializer.Serialize(
             new

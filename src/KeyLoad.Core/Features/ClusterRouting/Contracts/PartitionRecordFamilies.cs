@@ -64,6 +64,8 @@ internal static class PartitionRecordFamilies
     internal const string Ready = "ready";
     internal const string RecurringSagaCapacity = "recurring-saga-capacity";
     internal const string RecurringSchedule = "recurring-schedule";
+    internal const string ResourceOwnerInventoryMember = "resource-owner-inventory-member-v1";
+    internal const string ResourceOwnerInventoryProof = "resource-owner-inventory-proof-v1";
     internal const string SagaState = "saga-state";
     internal const string Sample = "sample";
     internal const string SampleChunkBlock = "sample-chunk-block";
@@ -153,6 +155,8 @@ internal static class PartitionRecordFamilies
         Ready,
         RecurringSagaCapacity,
         RecurringSchedule,
+        ResourceOwnerInventoryMember,
+        ResourceOwnerInventoryProof,
         SagaState,
         Sample,
         SampleChunkBlock,

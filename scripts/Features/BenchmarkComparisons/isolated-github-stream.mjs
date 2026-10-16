@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { openExclusive, hashRegularFile, writeCapture, writeJson } from './isolated-github-files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { responseDecoder } from './isolated-github-headers.mjs';
+import { isInterruptedMetadataResponse } from './isolated-github-rate.mjs';
 
 function stopOwned(child, state) {
   if (state.stopping) return;
@@ -107,8 +108,12 @@ async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd
     requireGitHub(result.signal === null && !state.timedOut && !state.exceeded && !state.spawnFailed && !state.cancelled);
     requireGitHub(decoder ? decoder.response !== undefined && [0, 1].includes(result.code) : result.code === 0);
     await handle.sync();
-    return { ...output, nativeProcess: nativeProcessDiagnostic(state, result),
-      ...(decoder ? { response: decoder.response, exitCode: result.code } : {}) };
+    const nativeProcess = nativeProcessDiagnostic(state, result);
+    const metadataInterrupted = decoder !== undefined && maximumBytes === GH.metadataBytes
+      && isInterruptedMetadataResponse({ response: decoder.response, nativeProcess, bytes: output.bytes },
+        Buffer.concat(state.stderrChunks, state.stderrCapturedBytes));
+    return { ...output, nativeProcess,
+      ...(decoder ? { response: decoder.response, exitCode: result.code, metadataInterrupted } : {}) };
   } catch (error) {
     primaryFailure = error;
     throw error;

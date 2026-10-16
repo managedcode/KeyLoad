@@ -106,7 +106,7 @@ internal static class ReplicaBarrierDeadlineFlow
             await ReplicaBarrierDeadlineAssertions.DocumentAsync(node, token);
         }
         var leader = await LeaderAsync(fixture, token);
-        var replayIndex = checked(leader.Journal.Log.State.LastIndex + 1);
+        var replayIndex = leader.Journal.Log.State.LastIndex;
         var replayTerm = leader.Journal.Log.State.Term;
         var before = ReplicaBarrierDeadlineAssertions.Image(leader);
         var replay = (await leader.Journal.Consensus.SubmitAsync(operation, token)).Get<CommitReceipt>();
@@ -149,7 +149,7 @@ internal static class ReplicaBarrierDeadlineFlow
     private static Task Barrier(RequestCqrsCohortNativeNode node, bool control, CancellationToken token)
         => control ? node.Journal.Consensus.ReadControlBarrierAsync(token) : node.Journal.Consensus.ReadBarrierAsync(token);
 
-    private static async Task<RequestCqrsCohortNativeNode> LeaderAsync(RequestCqrsCohortRuntimeFixture fixture,
+    internal static async Task<RequestCqrsCohortNativeNode> LeaderAsync(RequestCqrsCohortRuntimeFixture fixture,
         CancellationToken token)
     {
         while (true)

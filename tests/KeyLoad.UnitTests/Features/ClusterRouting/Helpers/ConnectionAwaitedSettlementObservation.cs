@@ -8,6 +8,7 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
 {
     private readonly ConcurrentDictionary<Guid, ConnectionAwaitedCallback> callbacks = new();
     private readonly ConcurrentDictionary<Guid, GrainRequestContextState> identities = new();
+    private readonly ConcurrentDictionary<Guid, Task> deactivations = new();
 
     internal ConnectionAwaitedCallback Hold(Guid requestId, Exception? failure = null)
     {
@@ -27,7 +28,8 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
             if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
                 || state.RequestId != identity.RequestId || state.CommandId != identity.CommandId
                 || context.GrainInstance is not ConnectionGrain connection || connection.GetPrimaryKey() != state.ConnectionId
-                || !identities.TryAdd(identity.RequestId, state))
+                || !identities.TryAdd(identity.RequestId, state)
+                || !deactivations.TryAdd(identity.RequestId, context.Deactivated))
             {
                 throw Invalid();
             }
@@ -50,6 +52,7 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     }
 
     internal GrainRequestContextState Identity(Guid requestId) => identities[requestId];
+    internal Task Deactivated(Guid requestId) => deactivations[requestId];
     internal void ReleaseAll()
     {
         foreach (var callback in callbacks.Values)

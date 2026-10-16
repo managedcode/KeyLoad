@@ -1,4 +1,4 @@
-import { randomInt } from 'node:crypto';
+import { createHash, randomInt } from 'node:crypto';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 
 const transientStatuses = Object.freeze([500, 502, 503, 504]);
@@ -17,8 +17,20 @@ function retryAfter(value, nowMs) {
   return Math.max(0, time - nowMs);
 }
 
-export function retryDelay(response, nowMs, waitedMs, repeats) {
-  const transient = transientStatuses.includes(response?.status);
+export function isInterruptedMetadataResponse(result, stderr) {
+  const native = result?.nativeProcess;
+  if (result?.response?.status !== 200 || result.bytes !== 0 || native?.exitCode !== 1
+    || native.signal !== null || native.timedOut !== false || native.exceeded !== false
+    || native.spawnFailed !== false || native.cancelled !== false
+    || !Buffer.isBuffer(stderr) || stderr.length === 0 || stderr.length > GH.stderrBytes
+    || native.stderrBytes !== stderr.length
+    || native.stderrSha256 !== createHash('sha256').update(stderr).digest('hex')) return false;
+  return /^stream error: stream ID [1-9]\d*; CANCEL; received from peer\r?\n?$/u.test(stderr.toString('utf8'));
+}
+
+export function retryDelay(response, nowMs, waitedMs, repeats, nativeInterrupted = false) {
+  requireGitHub(typeof nativeInterrupted === 'boolean');
+  const transient = transientStatuses.includes(response?.status) || nativeInterrupted && response?.status === 200;
   requireGitHub(([403, 429].includes(response?.status) || transient) && Number.isSafeInteger(nowMs)
     && Number.isSafeInteger(waitedMs) && waitedMs >= 0 && Number.isSafeInteger(repeats) && repeats >= 0 && repeats < GH.rateRepeats);
   const headers = response.headers;

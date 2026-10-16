@@ -1,6 +1,7 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -9,7 +10,7 @@ public sealed partial class DatabaseEngine
 {
     private const string BootstrapRequiresRevisionZero = "Physical shard catalog bootstrap requires expected revision zero.";
     private const string ExistingCatalogConflict = "The physical shard catalog conflicts with configured cluster identity.";
-    private static OperationResult ExecuteBootstrapPhysicalShardCatalog(IAtomicTransaction transaction,
+    private OperationResult ExecuteBootstrapPhysicalShardCatalog(IAtomicTransaction transaction,
         ReplicatedOperation operation)
     {
         const int EmptyExpectedRevision = 0;
@@ -25,7 +26,13 @@ public sealed partial class DatabaseEngine
         var current = PhysicalShardCatalogRecordSerialization.Read(transaction);
         if (current is null)
         {
-            transaction.PutRecord(key, PhysicalShardCatalogRecordSerialization.InitialCatalog(request));
+            var initial = PhysicalShardCatalogRecordSerialization.InitialCatalog(request);
+            if (ResourceOwnerInventoryGenesis.CanInitialize(transaction, Store.Identity, Store.Position,
+                initial.DefaultShard, Limits))
+            {
+                ResourceOwnerInventoryCatalog.InitializeFresh(transaction, Store.Identity, initial.DefaultShard, Limits);
+            }
+            transaction.PutRecord(key, initial);
             return Result(true);
         }
 

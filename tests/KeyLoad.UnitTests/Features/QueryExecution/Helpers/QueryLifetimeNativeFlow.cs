@@ -112,9 +112,10 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
                 RemoteDocumentNativeFixture.Collection, TextField: field,
                 Text: text, Limit: QueryLifetimeNativeProtocol.Limit),
             PhysicalOwnerDirectoryWholeFlow.Destination.Owner, RemoteDocumentNativeFixture.Tenant,
-            database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords,
+            database.Limits.MaxQueryReadBytes / QueryLifetimeNativeProtocol.GrantDivisor,
+            database.Limits.MaxScanRecords / QueryLifetimeNativeProtocol.GrantDivisor,
             QueryResultBudgetPolicy.Resolve(database.Limits, UnitExecutionOptions.QueryExecution().Value)
-                / QueryLifetimeNativeProtocol.GrantDivisor, null, null, null, null, default);
+                / QueryLifetimeNativeProtocol.GrantDivisor, null, null, null, null, []);
         var input = new DistributedSearchOwnedLeafV2(original, metadata.Definition, metadata.Coverage, metadata.Principal);
         var roundTrip = nativeRoundTrip
             ? NativeSerialization.Deserialize<DistributedSearchOwnedLeafV2>(NativeSerialization.Serialize(input)) : input;

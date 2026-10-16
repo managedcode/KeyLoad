@@ -192,7 +192,7 @@ internal static class QueueRenewedDeadlinePublicFlow
             1, 3L, 2L, null, null, LeaseVersion: 1L), null, null);
         await QueueLeaseRf3Assertions.EqualAsync(await PublicReadAssertions.MessageAsync(
             await callers.Sdk.InspectAsync(new(state.Seed.Lane, QueueLeaseRf3Protocol.Healthy), token)), expected);
-        var inspected = await McpCallerAssertions.SuccessAsync<MessageInspection>(await callers.Mcp.CallAsync(
+        var inspected = await PublicReadAssertions.RequiredMessageAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesInspect, new InspectMessageRequest(state.Seed.Lane, QueueLeaseRf3Protocol.Healthy), token));
         await QueueLeaseRf3Assertions.EqualAsync(inspected.Value, expected);
         await QueueRenewedDeadlinePublicAssertions.SettledOriginalAsync(callers, settled, token);

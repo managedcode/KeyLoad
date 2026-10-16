@@ -17,6 +17,7 @@ internal static class NativePeriodicMaintenanceFlow
         var injected = failSweep ? new InvalidOperationException("Owned post-native cleanup fault.") : null;
         ZoneTreeStore? store = null;
         Task? disposal = null;
+        var originalFailureVerified = false;
         using var disk = new NativeMaintenanceBarrier();
         using var periodic = new NativePeriodicMaintenanceBarrier(injected);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(NativeMaintenanceBarrier.DeadlineSeconds), TimeProvider.System);
@@ -38,7 +39,8 @@ internal static class NativePeriodicMaintenanceFlow
                     NativeBlockCacheLifetime = TimeSpan.Zero
                 });
                 runtime.Maintenance = new(runtime.Tree, execution, TimeProvider.System, periodic.Sweep);
-                var originalWorker = runtime.Maintenance.Worker;
+                var maintenance = runtime.Maintenance;
+                var originalWorker = maintenance.Worker;
                 var actualSweep = await periodic.Swept.Task.WaitAsync(caller.Token);
                 await Assert.That(actualSweep.ReadBuffers).IsGreaterThanOrEqualTo(0);
                 await Assert.That(actualSweep.CacheKeys).IsGreaterThanOrEqualTo(0);
@@ -49,6 +51,8 @@ internal static class NativePeriodicMaintenanceFlow
                 await Assert.That(originalWorker.IsCompleted).IsFalse();
                 periodic.Release();
                 await JoinOriginalAsync(disposal!, originalWorker, injected, caller.Token);
+                originalFailureVerified = injected is not null;
+                await VerifyRepeatedDisposalAsync(maintenance.Dispose, injected);
                 await NativeMaintenanceJoinFlow.VerifyReopenAsync(root, image, position, identity);
             }, failures);
         }
@@ -56,11 +60,8 @@ internal static class NativePeriodicMaintenanceFlow
         {
             disk.Release();
             periodic.Release();
-            await SettleDisposalAsync(disposal, injected, failures);
-            if (store is not null)
-            {
-                ServerFailureObserver.Observe(store.Dispose, failures);
-            }
+            await SettleDisposalAsync(disposal, injected, originalFailureVerified, failures);
+            await SettleStoreAsync(store, injected, originalFailureVerified, failures);
             if (failures.Count == 0)
             {
                 ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
@@ -71,6 +72,23 @@ internal static class NativePeriodicMaintenanceFlow
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task SettleStoreAsync(ZoneTreeStore? store, Exception? expected,
+        bool originalFailureVerified, List<Exception> failures)
+    {
+        if (store is null)
+        {
+            return;
+        }
+        if (originalFailureVerified)
+        {
+            await ServerFailureObserver.ObserveAsync(() => VerifyRepeatedDisposalAsync(store.Dispose, expected), failures);
+        }
+        else
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
     }
 
     private static async Task PrepareDiskAsync(ZoneTreeStoreRuntime runtime, ZoneTreeStore store,
@@ -121,7 +139,19 @@ internal static class NativePeriodicMaintenanceFlow
         await Assert.That(ReferenceEquals(workerFailure, injected)).IsTrue();
     }
 
-    private static async Task SettleDisposalAsync(Task? disposal, Exception? expected, List<Exception> failures)
+    private static async Task VerifyRepeatedDisposalAsync(Action dispose, Exception? expected)
+    {
+        if (expected is null)
+        {
+            dispose();
+            return;
+        }
+        var failure = Assert.ThrowsExactly<InvalidOperationException>(dispose);
+        await Assert.That(ReferenceEquals(failure, expected)).IsTrue();
+    }
+
+    private static async Task SettleDisposalAsync(Task? disposal, Exception? expected,
+        bool originalFailureVerified, List<Exception> failures)
     {
         if (disposal is null)
         {
@@ -129,14 +159,13 @@ internal static class NativePeriodicMaintenanceFlow
         }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            try
+            if (!originalFailureVerified)
             {
                 await disposal;
+                return;
             }
-            catch (InvalidOperationException failure) when (ReferenceEquals(failure, expected))
-            {
-                // The original failure was asserted after the real worker and owner settled.
-            }
+            var failure = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () => await disposal);
+            await Assert.That(ReferenceEquals(failure, expected)).IsTrue();
         }, failures);
     }
 }

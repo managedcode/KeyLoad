@@ -19,6 +19,7 @@ internal static class QueryLifetimeNativeAssertions
         var expectedStatistics = new DistributedTextStatisticsV1([QueryLifetimeNativeProtocol.Text], QueryLifetimeNativeProtocol.Limit,
             QueryLifetimeNativeProtocol.Limit, [QueryLifetimeNativeProtocol.Limit]);
         await Assert.That(JsonDefaults.Serialize(statistics).AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedStatistics))).IsTrue();
+        await QueryLifetimeNativePhaseRoundTrips.VerifyAsync(flow);
     }
 
     internal static async Task UnchangedAsync(QueryLifetimeNativeFlow flow, Func<Task> operation)

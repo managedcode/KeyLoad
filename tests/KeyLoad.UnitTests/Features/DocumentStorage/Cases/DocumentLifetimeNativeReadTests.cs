@@ -95,11 +95,14 @@ internal sealed class DocumentLifetimeNativeReadTests
                 DocumentLifetimeNativeRead.Work(fixture.Source.Database)) ?? throw new InvalidOperationException(C.Collection);
             var source = RemoteDocumentNativeAssertions.Image(fixture.Source);
             var target = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-            var remaining = expiry - TimeProvider.System.GetUtcNow();
-            if (remaining > TimeSpan.Zero)
+            var clock = fixture.Destination.Database.EvaluationClock;
+            var remaining = expiry - clock.GetUtcNow();
+            while (remaining > TimeSpan.Zero)
             {
-                await Task.Delay(remaining, TimeProvider.System, TestContext.Current!.Execution.CancellationToken);
+                await Task.Delay(remaining, clock, TestContext.Current!.Execution.CancellationToken);
+                remaining = expiry - clock.GetUtcNow();
             }
+            await Assert.That(clock.GetUtcNow() >= expiry).IsTrue();
             OwnedDocumentReadResultV1? result = null;
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => result = DocumentLifetimeNativeRead.Read(fixture, frame));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);

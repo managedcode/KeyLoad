@@ -68,9 +68,14 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        var term = await ReplicaLeaderSubmissionReadCut.RequireAsync(state, followers, cancellationToken).ConfigureAwait(false);
         await ReplicaLeaderSubmissionAdmission.ValidateAsync(state, operation, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        var admission = await state.LockedAsync(() => ReplicaLeaderSubmissionAdmission.AppendOwned(state, operation, boundary, cancellationToken), cancellationToken).ConfigureAwait(false);
+        var admission = await state.LockedAsync(() =>
+        {
+            state.RequireLeader(term);
+            return ReplicaLeaderSubmissionAdmission.AppendOwned(state, operation, boundary, cancellationToken);
+        }, cancellationToken).ConfigureAwait(false);
         if (admission.Outcome is { } originalOutcome)
         {
             return originalOutcome;

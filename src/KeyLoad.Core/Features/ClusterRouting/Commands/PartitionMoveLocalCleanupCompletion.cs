@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -17,6 +18,10 @@ public sealed partial class DatabaseEngine
             if (target is not null)
             {
                 transaction.Delete(PartitionMoveTargetStorage.Key(phase.Partition));
+            }
+            if (phase.Stage == PartitionMovePeerStage.Abort)
+            {
+                ResourceOwnerInventoryMovementImport.Abort(transaction, phase.Partition, phase.MoveId, Limits);
             }
         }
         else if (phase.Stage == PartitionMovePeerStage.Abort)

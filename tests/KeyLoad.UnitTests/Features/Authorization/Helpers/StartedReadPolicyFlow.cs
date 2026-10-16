@@ -11,10 +11,10 @@ internal static class StartedReadPolicyFlow
     internal static Task RunAsync(string variant)
         => ConnectionNativeScenario.RunAsync(async scenario =>
         {
+            await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
             using var parent = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, TestContext.Current!.Execution.CancellationToken);
             var token = parent.Token;
-            await scenario.InitializeAsync(token);
             var writer = scenario.Principal();
             var reader = scenario.Principal();
             var command = scenario.Command(P.Document);

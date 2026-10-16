@@ -1,4 +1,6 @@
+using System.Text.Json;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -9,10 +11,23 @@ internal static class BackupRequiredFileAccessAssertions
     private const string RestoreStagingPattern = ".keyload-restore-*";
     private const string MissingParent = "The owned backup fixture has no parent directory.";
     private const string MissingName = "The owned backup input has no file name.";
+    private const int RefusedCliExitCode = 1;
+    private const int RestoreUnavailableStatusCode = 503;
+    private const string RestoreUnavailableType = "urn:keyload:error:RecoveryRequired";
+    private const string RestoreUnavailableCode = "RecoveryRequired";
+    private const string RestoreUnavailableDetail = "A required restore file could not be read.";
 
     internal static async Task RefusedCliAsync(CliBackupRestoreProcessResult result)
     {
         await CliBackupRestoreAssertions.RejectedProcessAsync(result);
+        await Assert.That(result.ExitCode).IsEqualTo(RefusedCliExitCode);
+        var problem = JsonSerializer.Deserialize<Problem>(result.StandardError, JsonDefaults.Options);
+        await Assert.That(problem).IsNotNull();
+        await Assert.That(problem!.Type).IsEqualTo(RestoreUnavailableType);
+        await Assert.That(problem.Title).IsEqualTo(RestoreUnavailableCode);
+        await Assert.That(problem.ErrorCode).IsEqualTo(RestoreUnavailableCode);
+        await Assert.That(problem.Detail).IsEqualTo(RestoreUnavailableDetail);
+        await Assert.That(problem.StatusCode).IsEqualTo(RestoreUnavailableStatusCode);
         await Assert.That(result.StandardOutput).IsEqualTo(string.Empty);
     }
 

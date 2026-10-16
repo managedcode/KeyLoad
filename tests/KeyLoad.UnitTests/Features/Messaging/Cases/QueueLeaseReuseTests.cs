@@ -121,7 +121,14 @@ internal sealed class QueueLeaseReuseTests
         var processingId = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.Processing,
             new ProcessingRequest(processingId, lane, "invalid", Handler, 1, []), id: processingId).Error)
+            .IsEqualTo(ErrorCode.NotFound);
+        db.Configure(lane.Queue, ResourceKind.WorkQueue);
+        var before = QueueLifecycleImage.Capture(db.Store, lane);
+        var invalidTokenId = Guid.NewGuid();
+        await Assert.That(db.Submit(OperationKind.Processing,
+            new ProcessingRequest(invalidTokenId, lane, "invalid", Handler, 1, []), id: invalidTokenId).Error)
             .IsEqualTo(ErrorCode.TokenInvalidated);
+        await QueueLifecycleImage.SameAsync(db.Store, lane, before);
     }
 
     private static long BodyLength(TestDatabase db) => db.Store.Read(view =>

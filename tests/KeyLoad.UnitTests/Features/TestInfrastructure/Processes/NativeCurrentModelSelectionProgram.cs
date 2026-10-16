@@ -20,7 +20,11 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands",
               "/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*",
               "/*/*/ControlledBlobLifetimeReadRf3Tests/HeldNativeRepliesRequireFreshSourceAuthorityAndSettleBeforeTwoColdBlobReadWaves",
-              "/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*"
+              "/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*",
+              "/*/*/ResourcePartitionInventoryRf3Tests/AuthenticatedConservativeInventoryRetainsReplayRollbackAndTwoColdOwners",
+              "/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay",
+              "/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
+              "/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -28,6 +32,33 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              currentModelFilters[19] + ' ',
+              currentModelFilters[19] + '*',
+              currentModelFilters[19].replace('EmptyReplicaSnapshotRf3Tests/', 'EmptyReplicaSnapshotRf3Tests*/'),
+              '/*/*/EmptyReplicaSnapshotRf3Tests/OtherMethod',
+              '/*/*/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation/EmptyReplicaSnapshotRf3Tests',
+              '/*/*/(EmptyReplicaSnapshotRf3Tests|RequestCqrsAuthorityFaultTests)/*',
+              currentModelFilters[20] + ' ',
+              currentModelFilters[20] + '*',
+              currentModelFilters[20].replace('RequestCqrsAuthorityFaultTests/', 'RequestCqrsAuthorityFaultTests*/'),
+              '/*/*/RequestCqrsAuthorityFaultTests/*',
+              '/*/*/RequestCqrsAuthorityFaultTests/OtherMethod',
+              '/*/*/RequestCqrsAuthorityFaultTests/OfficialMcpWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects',
+              '/*/*/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects/RequestCqrsAuthorityFaultTests',
+              currentModelFilters[18] + ' ',
+              currentModelFilters[18] + '*',
+              currentModelFilters[18].replace('PartitionMovementPublicParentFlowTests/', 'PartitionMovementPublicParentFlowTests*/'),
+              '/*/*/PartitionMovementPublicParentFlowTests/*',
+              '/*/*/PartitionMovementPublicParentFlowTests/OtherMethod',
+              '/*/*/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay/PartitionMovementPublicParentFlowTests',
+              '/*/*/(PartitionMovementPublicParentFlowTests|ResourcePartitionInventoryRf3Tests)/*',
+              currentModelFilters[17] + ' ',
+              currentModelFilters[17] + '*',
+              currentModelFilters[17].replace('ResourcePartitionInventoryRf3Tests/', 'ResourcePartitionInventoryRf3Tests*/'),
+              '/*/*/ResourcePartitionInventoryRf3Tests/*',
+              '/*/*/ResourcePartitionInventoryRf3Tests/OtherMethod',
+              '/*/*/AuthenticatedConservativeInventoryRetainsReplayRollbackAndTwoColdOwners/ResourcePartitionInventoryRf3Tests',
+              '/*/*/(ResourcePartitionInventoryRf3Tests|NativeBlobWholeParentQualificationCases)/*',
               currentModelFilters[16] + ' ',
               currentModelFilters[16] + '*',
               '/*/*/(NativeBlobWholeParentQualificationCases|PartitionMovementBlobWireNativeTests)/*',
@@ -119,7 +150,7 @@ internal static class NativeCurrentModelSelectionProgram
               }
               if (!rejected) throw new Error('Unsupported current model cohort selector was accepted.');
             }
-            for (const addedIndex of [15, 16]) {
+            for (const addedIndex of [15, 16, 17, 18, 19, 20]) {
               const currentModelHealthy = nativeSelection(currentModelArgs[addedIndex], publicCohortEnvironment);
               if (JSON.stringify(currentModelHealthy) !== JSON.stringify(currentModels[addedIndex])) {
                 throw new Error('Exact current model selection changed after refused selectors.');

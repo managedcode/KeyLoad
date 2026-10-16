@@ -22,6 +22,12 @@ internal interface IPartitionMovementGrainService : IGrainService
     Task<OwnerCapacityNativeReply> ReadCapacityAsync(OwnerCapacityNativeRequest request,
         CancellationToken cancellationToken);
 
+    /// <summary>Reads bounded authoritative inventory through the original authenticated connection path.</summary>
+    [Alias(global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeProtocol.ServiceMethodAlias)]
+    Task<global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeReply> ReadResourceInventoryAsync(
+        global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeRequest request,
+        CancellationToken cancellationToken);
+
     /// <summary>Returns this actual silo generation bound to a fresh discovery nonce.</summary>
     [Alias(PartitionMovementGrainServiceProtocol.DiscoverAlias)]
     Task<PartitionMovementGrainServiceDiscovery> DiscoverAsync(Guid nonce, CancellationToken cancellationToken);

@@ -94,7 +94,7 @@ internal static class RequestCqrsAuthorityFaultAssertions
     }
     internal static async Task JoinOriginalAndAssertDeniedAsync(bool useMcp,
         Task<Result<CommitReceipt>>? sdkCall, Task<RequestCqrsFaultMcpObservation>? mcpCall,
-        RequestCqrsProbeMarkerRecord? heldMarker, string missingOwner)
+        RequestCqrsProbeMarkerRecord? heldMarker, string missingOwner, RequestCqrsHeldSdkObservation? sdkObservation = null)
     {
         if (useMcp)
         {
@@ -105,8 +105,17 @@ internal static class RequestCqrsAuthorityFaultAssertions
                 ?? throw new InvalidOperationException(missingOwner)).RequestId);
             return;
         }
-        await RequestCqrsAuthorityFaultAssertions.VerifySdkUnauthorizedAsync(
-            await (sdkCall ?? throw new InvalidOperationException(missingOwner)).ConfigureAwait(false)).ConfigureAwait(false);
+        try
+        {
+            var original = await (sdkCall ?? throw new InvalidOperationException(missingOwner)).ConfigureAwait(false);
+            sdkObservation?.Completed(original);
+            await RequestCqrsAuthorityFaultAssertions.VerifySdkUnauthorizedAsync(original).ConfigureAwait(false);
+        }
+        catch (Exception original)
+        {
+            sdkObservation?.WriteAndThrow(original);
+            throw;
+        }
     }
 
 }

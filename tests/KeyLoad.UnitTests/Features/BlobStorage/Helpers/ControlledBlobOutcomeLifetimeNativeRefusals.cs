@@ -45,7 +45,7 @@ internal static class ControlledBlobOutcomeLifetimeNativeRefusals
         var work = ControlledBlobOutcomeLifetimeNativeReads.Work(state.Target, token);
         var grant = work.CreateReadGrant(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes,
             state.Target.Database.Limits.MaxScanRecords);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => state.Target.Database.ReadControlledBlobOutcomeV2(
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => state.Target.BorrowLifetimeIssuer(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes).ReadControlledBlobOutcomeV2(
             "root", frame, work, grant, token));
         await Assert.That(error.Code).IsEqualTo(code);
         await ControlledBlobOutcomeLifetimeNativeAssertions.UnchangedAsync(state, source, target);
@@ -59,7 +59,7 @@ internal static class ControlledBlobOutcomeLifetimeNativeRefusals
         var target = ControlledPartitionMovementExpiryOwnerState.Capture(state.Target);
         var work = ControlledBlobOutcomeLifetimeNativeReads.Work(state.Target, token);
         var grant = work.CreateReadGrant(MinimalGrant, MinimalGrant);
-        var exceeded = Assert.ThrowsExactly<KeyLoadException>(() => state.Target.Database.ReadControlledBlobOutcomeV2(
+        var exceeded = Assert.ThrowsExactly<KeyLoadException>(() => state.Target.BorrowLifetimeIssuer(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes).ReadControlledBlobOutcomeV2(
             "root", frame, work, grant, token));
         await Assert.That(exceeded.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -67,7 +67,7 @@ internal static class ControlledBlobOutcomeLifetimeNativeRefusals
         var cancelledGrant = cancelledWork.CreateReadGrant(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes,
             state.Target.Database.Limits.MaxScanRecords);
         await cancelled.CancelAsync();
-        Assert.ThrowsExactly<OperationCanceledException>(() => state.Target.Database.ReadControlledBlobOutcomeV2(
+        Assert.ThrowsExactly<OperationCanceledException>(() => state.Target.BorrowLifetimeIssuer(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes).ReadControlledBlobOutcomeV2(
             "root", frame, cancelledWork, cancelledGrant, cancelled.Token));
         await ControlledBlobOutcomeLifetimeNativeAssertions.UnchangedAsync(state, source, target);
         await ControlledBlobOutcomeLifetimeNativeReads.HealthyAsync(state, state.Proofs.First(), token);
@@ -87,7 +87,7 @@ internal static class ControlledBlobOutcomeLifetimeNativeRefusals
         var targetWork = ControlledBlobOutcomeLifetimeNativeReads.Work(state.Target, token);
         var grant = targetWork.CreateReadGrant(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes,
             state.Target.Database.Limits.MaxScanRecords);
-        await Assert.That(state.Target.Database.ReadControlledBlobOutcomeV2("root", frame, targetWork, grant, token)).IsNull();
+        await Assert.That(state.Target.BorrowLifetimeIssuer(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes).ReadControlledBlobOutcomeV2("root", frame, targetWork, grant, token)).IsNull();
         var demoted = principal with
         {
             ClusterAdministrator = false,
@@ -116,7 +116,7 @@ internal static class ControlledBlobOutcomeLifetimeNativeRefusals
     {
         var before = ControlledPartitionMovementExpiryOwnerState.Capture(state.Source);
         var target = ControlledPartitionMovementExpiryOwnerState.Capture(state.Target);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => state.Source.Database.ValidateControlledBlobOutcomeV2(original, work));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => state.Source.BorrowLifetimeIssuer(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes).ValidateControlledBlobOutcomeV2(original, work));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         foreach (var proof in state.Proofs)
         {
@@ -133,7 +133,7 @@ internal static class ControlledBlobOutcomeLifetimeNativeRefusals
         var target = ControlledPartitionMovementExpiryOwnerState.Capture(state.Target);
         var request = new BeginBlobUploadRequest(Guid.NewGuid(), new(ControlledPartitionMovementCorpus.Partition,
             ControlledPartitionMovementBlobSeed.Resource, "outcome-lifetime-demoted"), Guid.NewGuid(), 4, 0);
-        var original = state.Source.Database.CreateNativeOperation(OperationKind.BeginBlobUpload, request.CommandId, "root",
+        var original = state.Source.BorrowLifetimeIssuer(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes).CreateNativeOperation(OperationKind.BeginBlobUpload, request.CommandId, "root",
             state.Source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var error = Assert.ThrowsExactly<KeyLoadException>(() => state.Source.Database.TryCaptureControlledDocumentCommand(
             "root", original, ControlledBlobOutcomeLifetimeNativeReads.Work(state.Source, token)));

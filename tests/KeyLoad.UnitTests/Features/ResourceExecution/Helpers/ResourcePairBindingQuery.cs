@@ -84,16 +84,19 @@ internal static class ResourcePairBindingQuery
             return Project(state, database, view, principal, resource);
         }
         var baseline = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        baseline.ConstrainNativeWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
         var expected = database.WithQueryView(QueryUser, state.Source.Partition, Documents, Capability.VectorSearch, Read, baseline);
         await Assert.That(entered).IsTrue();
         var lifetimeCharge = ResourcePairBindingFaults.LifetimeKey(state.Source.Partition, Documents).Length
             + (long)state.Pairs[Documents].Lifetime.Length;
         await Assert.That(baseline.ReadBytes).IsGreaterThan(lifetimeCharge);
+        await Assert.That(baseline.ConstrainedNativeRecords).IsGreaterThan(One);
         var limits = UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryReadBytes = baseline.ReadBytes - One
         });
         var limited = new ReadExecutionBudget(limits, database.EvaluationClock, token);
+        limited.ConstrainNativeWork(limits.Value.MaxQueryReadBytes, limits.Value.MaxScanRecords);
         entered = false;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.WithQueryView(QueryUser, state.Source.Partition,
             Documents, Capability.VectorSearch, Read, limited));
@@ -102,6 +105,7 @@ internal static class ResourcePairBindingQuery
         await Assert.That(limited.ReadBytes).IsEqualTo(baseline.ReadBytes - lifetimeCharge);
         await Assert.That(limited.ConstrainedNativeRecords).IsEqualTo(baseline.ConstrainedNativeRecords - One);
         var healthy = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        healthy.ConstrainNativeWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
         await ResourcePairBindingAssertions.EqualAsync(expected, database.WithQueryView(QueryUser, state.Source.Partition,
             Documents, Capability.VectorSearch, Read, healthy));
         await Assert.That(healthy.ReadBytes).IsEqualTo(baseline.ReadBytes);

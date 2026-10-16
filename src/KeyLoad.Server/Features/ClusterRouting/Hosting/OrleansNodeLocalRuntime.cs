@@ -3,6 +3,7 @@ using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.GraphTraversal;
+using KeyLoad.Server.Features.ResourceExecution;
 
 namespace KeyLoad.Server;
 
@@ -27,11 +28,13 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
     private IAsyncDisposable? administration;
     private RequestCqrsProbeNativeRelay? relay;
     private RequestCqrsProbeObserver? observer;
+    private ResourceOwnerInventoryNativeRuntime? resourceInventory;
 
     internal RemoteGraphNodeResources Graphs { get; } = new();
     internal RemoteDocumentRuntime? Documents => Volatile.Read(ref documents);
     internal PartitionMovementRuntime? Movement => Volatile.Read(ref movement);
     internal TenantPlacementNativeRuntime? TenantPlacement => placement.Runtime;
+    internal ResourceOwnerInventoryNativeRuntime? ResourceInventory => Volatile.Read(ref resourceInventory);
     internal RuntimeJournalAdmission? Journal => Volatile.Read(ref journal);
     internal ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref discovery);
     internal ReplicaEnvelopeAuthenticator? Authentication => Volatile.Read(ref authentication);
@@ -51,6 +54,10 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(node, partition,
             options, work, clock).ConfigureAwait(false));
         await placement.InitializeAsync(node, partition, options, Movement, clock, token).ConfigureAwait(false);
+        // Retain ownership before release publication; later initialization failures join DisposeCoreAsync.
+        resourceInventory = await ResourceOwnerInventoryNativeFactory.CreateAsync(node, partition, options,
+            services.GetRequiredService<ReplicaSiloDiscoveryState>(), clock).ConfigureAwait(false);
+        Volatile.Write(ref resourceInventory, resourceInventory);
         Volatile.Write(ref discovery, services.GetRequiredService<ReplicaSiloDiscoveryState>());
         Volatile.Write(ref journal, services.GetRequiredService<RuntimeJournalAdmission>());
     }
@@ -99,11 +106,16 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
     {
         ServerFailureObserver.Observe(() => bootstrap.Catalog?.CloseAdmission(), failures);
         ServerFailureObserver.Observe(() => Journal?.CloseScheduling(), failures);
+        if (ResourceInventory is { } inventory)
+        {
+            await ServerFailureObserver.ObserveAsync(inventory.CloseAdmissionAsync, failures).ConfigureAwait(false);
+        }
         await JoinHostAsync(requestLifetime.Work, failures).ConfigureAwait(false);
         await JoinAsync(failures).ConfigureAwait(false);
         await PhysicalOwnerRegistrationRuntime.StopAndJoinAsync(bootstrap.OwnerRegistration,
             physicalOwnerWork, failures).ConfigureAwait(false);
-        if (OrleansNodeClosure.KnownOwnersJoined(requestLifetime.Work, Documents, Movement, Graphs))
+        if (OrleansNodeClosure.KnownOwnersJoined(requestLifetime.Work, Documents, Movement, Graphs)
+            && (ResourceInventory is null || ResourceInventory.IsJoined))
         {
             ServerFailureObserver.Observe(() => Journal?.Close(), failures);
             withdrawGrains();
@@ -140,6 +152,10 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
     private async Task DisposeCoreAsync(Task registered)
     {
         await registered.ConfigureAwait(false);
+        if (ResourceInventory is { } inventory)
+        {
+            await ServerFailureObserver.ObserveAsync(() => inventory.DisposeAsync().AsTask(), closeFailures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(placement.CloseAdmissionAsync, closeFailures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Graphs.JoinAsync(closeFailures), closeFailures).ConfigureAwait(false);
         if (Volatile.Read(ref receiver) is { } originalReceiver)

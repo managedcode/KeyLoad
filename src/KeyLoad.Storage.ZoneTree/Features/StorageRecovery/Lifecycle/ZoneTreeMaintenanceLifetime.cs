@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 using ZoneTree;
 using ZoneTree.Core;
@@ -14,6 +15,7 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
     private readonly TimeProvider clock;
     private readonly Task worker;
     private bool disposed;
+    private ExceptionDispatchInfo? originalDisposalFailure;
 
     internal ZoneTreeMaintenanceLifetime(IZoneTree<Memory<byte>, Memory<byte>> tree,
         IOptions<ZoneTreeStorageExecutionOptions> options, TimeProvider clock,
@@ -52,7 +54,7 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
             }
             finally
             {
-                stop.Dispose();
+                ZoneTreeReadCutCleanup.Capture(stop.Dispose, failures);
             }
             ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
             throw;
@@ -71,21 +73,49 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
         {
             if (disposed)
             {
+                originalDisposalFailure?.Throw();
                 return;
             }
             disposed = true;
             var failures = new List<Exception>();
             try
             {
-                ZoneTreeReadCutCleanup.Capture(stop.Cancel, failures);
-                ZoneTreeReadCutCleanup.Capture(() => worker.GetAwaiter().GetResult(), failures);
-                ZoneTreeReadCutCleanup.Capture(Maintainer.Dispose, failures);
+                try
+                {
+                    StopOwnedMaintenance(failures);
+                }
+                finally
+                {
+                    stop.Dispose();
+                }
             }
-            finally
+            catch (Exception failure)
             {
-                stop.Dispose();
+                failures.Add(failure);
+                ThrowDisposalFailures(failures);
+                throw;
             }
+            ThrowDisposalFailures(failures);
+        }
+    }
+
+    private void StopOwnedMaintenance(List<Exception> failures)
+    {
+        ZoneTreeReadCutCleanup.Capture(stop.Cancel, failures);
+        ZoneTreeReadCutCleanup.Capture(() => worker.GetAwaiter().GetResult(), failures);
+        ZoneTreeReadCutCleanup.Capture(Maintainer.Dispose, failures);
+    }
+
+    private void ThrowDisposalFailures(List<Exception> failures)
+    {
+        try
+        {
             ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
+        }
+        catch (Exception failure)
+        {
+            originalDisposalFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
         }
     }
 

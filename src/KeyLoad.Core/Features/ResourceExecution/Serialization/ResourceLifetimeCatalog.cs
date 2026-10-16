@@ -46,6 +46,7 @@ internal static class ResourceLifetimeCatalog
         }
         var created = ResourceLifetimeIdentity.Create(original, tenantId, databaseId, definition);
         transaction.PutRecord(Key(tenantId, databaseId, definition.Name), created);
+        ResourceOwnerInventoryCreation.Record(transaction, created);
         return created;
     }
 }

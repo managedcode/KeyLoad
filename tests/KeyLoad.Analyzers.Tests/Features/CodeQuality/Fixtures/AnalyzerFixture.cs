@@ -7,7 +7,7 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
 internal static class AnalyzerFixture
 {
-    internal const string OrleansAssembly = "KeyLoad.Orleans";
+    internal const string ClusteringAssembly = "KeyLoad.Clustering";
     internal const string ServerAssembly = "KeyLoad.Server";
     internal const string CoreAssembly = "KeyLoad.Core";
     internal const string CoreTestAssembly = "KeyLoad.Core.Tests";
@@ -16,9 +16,9 @@ internal static class AnalyzerFixture
     internal const string ProgramPath = "/repo/src/KeyLoad.Server/Program.cs";
     internal const string ServerEndpointsPath = "/repo/src/KeyLoad.Server/ApiEndpoints.cs";
     internal const string ServerHostingPath = "/repo/src/KeyLoad.Server/Hosting.cs";
-    internal const string ContractPath = "/repo/src/KeyLoad.Orleans/Features/Sample/Contracts/Dto.cs";
-    internal const string OrleansModelsPath = "/repo/src/KeyLoad.Orleans/Features/Sample/Models.cs";
-    internal const string GeneratedPath = "/repo/src/KeyLoad.Orleans/Features/Sample/Generated.g.cs";
+    internal const string ContractPath = "/repo/src/KeyLoad.Clustering/Features/Sample/Contracts/Dto.cs";
+    internal const string ClusteringModelsPath = "/repo/src/KeyLoad.Clustering/Features/Sample/Models.cs";
+    internal const string GeneratedPath = "/repo/src/KeyLoad.Clustering/Features/Sample/Generated.g.cs";
     private const string SupportPath = "/repo/src/Support.cs";
     private const string PlatformAssembliesName = "TRUSTED_PLATFORM_ASSEMBLIES";
     private const string MissingPlatformAssemblies = "Trusted platform assemblies are unavailable.";
@@ -29,7 +29,7 @@ internal static class AnalyzerFixture
     internal static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(
         DiagnosticAnalyzer analyzer,
         string source,
-        string assemblyName = OrleansAssembly,
+        string assemblyName = ClusteringAssembly,
         string path = ContractPath,
         bool executable = false,
         string? additionalSource = null)

@@ -22,9 +22,11 @@ internal static class NativeControlledLifetimePayloadBoundary
     {
         var before = ControlledPartitionMovementExpiryOwnerState.Capture(source);
         var receiver = ControlledPartitionMovementExpiryOwnerState.Capture(target);
-        var exact = FindLargest(source, token);
+        var issuer = source.BorrowLifetimeIssuer(MaximumBytes);
+        await Assert.That(issuer.Limits.MaxBatchBytes).IsEqualTo(MaximumBytes);
+        var exact = FindLargest(source, issuer, token);
         var belowRequest = Request(source, exact.Characters - BoundaryStep);
-        var below = source.Database.CreateNativeOperation(OperationKind.Batch, CommandId, PrincipalId,
+        var below = issuer.CreateNativeOperation(OperationKind.Batch, CommandId, PrincipalId,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(belowRequest));
         await Assert.That(below.NativePayload.Length).IsLessThanOrEqualTo(MaximumBytes);
         await Assert.That(exact.Operation.NativePayload.Length).IsLessThanOrEqualTo(MaximumBytes);
@@ -33,7 +35,7 @@ internal static class NativeControlledLifetimePayloadBoundary
         var greater = Request(source, exact.Characters + BoundaryStep);
         var bytes = NativeSerialization.Serialize(greater);
         await Assert.That(bytes.Length).IsEqualTo(NativeSerialization.Serialize(exact.Request).Length + BoundaryStep);
-        var refusal = Assert.ThrowsExactly<KeyLoadException>(() => source.Database.CreateNativeOperation(
+        var refusal = Assert.ThrowsExactly<KeyLoadException>(() => issuer.CreateNativeOperation(
             OperationKind.Batch, CommandId, PrincipalId, source.Database.EvaluationClock.GetUtcNow(), bytes));
         await Assert.That(refusal.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await before.AssertUnchangedAsync(source);
@@ -51,7 +53,7 @@ internal static class NativeControlledLifetimePayloadBoundary
     }
 
     private static (int Characters, CommandRequest Request, ReplicatedOperation Operation) FindLargest(
-        ControlledPartitionMovementNode source, CancellationToken token)
+        ControlledPartitionMovementNode source, global::KeyLoad.Core.DatabaseEngine issuer, CancellationToken token)
     {
         var low = EmptyCharacters;
         var high = MaximumBytes;
@@ -64,7 +66,7 @@ internal static class NativeControlledLifetimePayloadBoundary
             ReplicatedOperation? actual = null;
             try
             {
-                actual = source.Database.CreateNativeOperation(OperationKind.Batch, CommandId, PrincipalId,
+                actual = issuer.CreateNativeOperation(OperationKind.Batch, CommandId, PrincipalId,
                     source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
             }
             catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted) { }

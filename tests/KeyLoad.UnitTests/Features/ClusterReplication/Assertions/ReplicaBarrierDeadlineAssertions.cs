@@ -65,22 +65,7 @@ internal static class ReplicaBarrierDeadlineAssertions
     internal static async Task ReplayStateAsync(RequestCqrsCohortNativeNode node,
         (long Position, string[] Records) before, Guid operationId, long expectedIndex, long expectedTerm)
     {
-        var appliedPrefix = Convert.ToHexString(global::KeyLoad.Core.KeySpace.Applied.Span) + ":";
-        var expectedRecords = before.Records.ToArray();
-        var matches = 0;
-        for (var index = 0; index < expectedRecords.Length; index++)
-        {
-            if (expectedRecords[index].StartsWith(appliedPrefix, StringComparison.Ordinal))
-            {
-                matches++;
-                expectedRecords[index] = appliedPrefix + Convert.ToHexString(NativeSerialization.Serialize(expectedIndex));
-            }
-        }
-        await Assert.That(matches).IsEqualTo(1);
-        var after = Image(node);
-        await Assert.That(after.Position).IsEqualTo(checked(before.Position + 1));
-        await Assert.That(after.Records.Length).IsEqualTo(before.Records.Length);
-        await Assert.That(after.Records.SequenceEqual(expectedRecords, StringComparer.Ordinal)).IsTrue();
+        await UnchangedAsync(node, before);
         await Assert.That(node.Journal.Log.State.LastIndex).IsEqualTo(expectedIndex);
         await Assert.That(node.Journal.Log.State.Term).IsEqualTo(expectedTerm);
         await Assert.That(node.Journal.Log.State.CommittedIndex).IsEqualTo(expectedIndex);

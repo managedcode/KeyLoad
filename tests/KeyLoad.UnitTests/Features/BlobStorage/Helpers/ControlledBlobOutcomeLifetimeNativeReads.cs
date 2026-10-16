@@ -14,11 +14,14 @@ internal static class ControlledBlobOutcomeLifetimeNativeReads
     internal const int MaximumBytes = NativeControlledLifetimePayloadBoundary.MaximumBytes;
 
     internal static ReadExecutionBudget Work(ControlledPartitionMovementNode owner, CancellationToken token)
-        => new(Options.Create(owner.Database.Limits), owner.Database.EvaluationClock, token);
+        => new(Options.Create(owner.Database.Limits with
+        {
+            MaxBatchBytes = MaximumBytes
+        }), owner.Database.EvaluationClock, token);
 
     internal static ControlledBlobReadFrameV2 Capture(ControlledBlobOutcomeLifetimeNativeState state,
         ControlledBlobOutcomeLifetimeNativeProof proof, ReadExecutionBudget work)
-        => state.Source.Database.TryCaptureControlledBlobOutcomeV2(PrincipalId, proof.Original,
+        => state.Source.BorrowLifetimeIssuer(MaximumBytes).TryCaptureControlledBlobOutcomeV2(PrincipalId, proof.Original,
             state.Source.Database.EvaluationClock.GetUtcNow().AddSeconds(state.Source.Database.Limits.QueryDeadlineSeconds), work)
             ?? throw new InvalidOperationException("The genuine published Blob outcome frame is absent.");
 
@@ -53,14 +56,31 @@ internal static class ControlledBlobOutcomeLifetimeNativeReads
         var parentGrant = parent.CreateReadGrant(MaximumBytes, request.MaximumExaminedRecords);
         var work = Work(state.Target, token);
         var grant = work.CreateReadGrant(MaximumBytes, request.MaximumExaminedRecords);
-        var actual = state.Target.Database.ReadControlledBlobOutcomeV2(PrincipalId, frame, work, grant, token);
+        var actual = state.Target.BorrowLifetimeIssuer(MaximumBytes).ReadControlledBlobOutcomeV2(PrincipalId, frame, work, grant, token);
         await Assert.That(actual).IsNull();
         await Assert.That(grant.ReadBytes).IsGreaterThan(0L);
         await Assert.That(grant.ReadBytes).IsLessThanOrEqualTo((long)MaximumBytes);
         await Assert.That(grant.ExaminedRecords).IsLessThanOrEqualTo(request.MaximumExaminedRecords);
         parent.ImportReadGrant(parentGrant, grant.ReadBytes, grant.ExaminedRecords);
-        state.Source.Database.ValidateControlledBlobOutcomeV2(frame, parent);
+        state.Source.BorrowLifetimeIssuer(MaximumBytes).ValidateControlledBlobOutcomeV2(frame, parent);
         parent.Check();
+        await Console.Out.WriteLineAsync(System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Kind = "NativeBlobOutcomeLifetimeIssuerBudget",
+            CommandId = proof.Original.Id,
+            Operation = proof.Original.Kind,
+            IssuerMaximumBytes = MaximumBytes,
+            SignedCommandBytes = proof.Original.NativePayload.Length,
+            FrameBytes = NativeSerialization.Serialize(frame).Length,
+            JsonResultBytes = parent.MeasureResult(frame),
+            ParentReadBytes = parent.ReadBytes,
+            AggregateReadMaximumBytes = state.Source.Database.Limits.MaxQueryReadBytes,
+            TypedRequestBytes = NativeSerialization.Serialize(request).Length,
+            InnerCallBytes = RemoteDocumentWire.Encode(wrapper, MaximumBytes).Length,
+            TargetReadBytes = grant.ReadBytes,
+            TargetExaminedRecords = grant.ExaminedRecords,
+            SupportingMoveMaximumBytes = state.Source.Database.Limits.MaxBatchBytes
+        }));
         await ControlledBlobOutcomeLifetimeNativeAssertions.UnchangedAsync(state, sourceBefore, targetBefore);
     }
 }

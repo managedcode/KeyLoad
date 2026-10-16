@@ -23,7 +23,8 @@ internal static class ConnectionNativeCloseAdmissionFlow
             await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Fixture.RequestWork, requestId);
             await Assert.That(original.IsCompleted).IsFalse();
             await RefusalsAsync(scenario, second, token);
-            close = scenario.CloseOwnerAsync(token);
+            close = scenario.Connection.CloseAsync(
+                scenario.Fixture.Codec.CreateConnectionClose(scenario.Fixture.ConnectionId), token);
             await ClosedAdmissionAsync(scenario, second, token);
             await Assert.That(original.IsCompleted).IsFalse();
             await Assert.That(close.IsCompleted).IsFalse();
@@ -32,6 +33,10 @@ internal static class ConnectionNativeCloseAdmissionFlow
             var receipt = await original;
             await Assert.That(receipt.Error).IsNull();
             await close;
+            await observer.Deactivated(requestId).WaitAsync(token);
+            // Native caller DisposeAsync can reactivate the owner after the overlapping close.
+            // Close that transport cleanup only after the original caller and first close have joined.
+            await scenario.CloseOwnerAsync(token);
             await ConnectionNativeAssertions.StoredAsync(scenario, "close-admission-original", InitialRevision,
                 ConnectionNativeProtocol.FirstJson);
             await scenario.AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, token);

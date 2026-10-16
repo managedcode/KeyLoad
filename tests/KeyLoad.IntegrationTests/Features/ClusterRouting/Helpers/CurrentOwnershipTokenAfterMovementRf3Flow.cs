@@ -74,6 +74,10 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
         await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await seed.Official.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(seed.Models.First, original), token).ConfigureAwait(false),
             ErrorCode.TokenInvalidated, PartitionMovementPublicRefusalRf3Oracle.DocumentMinimumDetail);
+        await CurrentOwnershipTokenSqlRf3Assertions.RefusedAsync(seed, McpCallerTools.DocumentsGet,
+            new GetDocumentRequest(seed.Models.First, original),
+            PartitionMovementPublicRefusalRf3Oracle.DocumentMinimumDetail,
+            PartitionMovementPublicRefusalRf3Oracle.DocumentMinimumDetail, token);
     }
 
     private static async Task RequireReadAsync(PartitionMovementPublicParentRf3Seed seed, EntityRef reference,
@@ -87,6 +91,7 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
         await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(
             await seed.Official.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), token)
                 .ConfigureAwait(false))).Value);
+        await CurrentOwnershipTokenSqlRf3Assertions.ReadAsync(seed, reference, minimum, expected, token);
     }
 
     private static async Task RequireHealthyAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,

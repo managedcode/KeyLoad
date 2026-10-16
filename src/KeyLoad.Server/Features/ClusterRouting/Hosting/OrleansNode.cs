@@ -37,6 +37,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     internal NativeRequestWorkOwner RequestWork => requestLifetime.Work;
     internal NativeConnectionOwnerIdentity ConnectionOwner => connectionOwner;
     internal TenantPlacementNativeRuntime? TenantPlacementRuntime => localRuntime.TenantPlacement;
+    internal global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeRuntime? ResourceInventoryRuntime => localRuntime.ResourceInventory;
     private IGrainFactory? grains;
     private Task? shutdown;
     private readonly OrleansNodeClosure closure = new();

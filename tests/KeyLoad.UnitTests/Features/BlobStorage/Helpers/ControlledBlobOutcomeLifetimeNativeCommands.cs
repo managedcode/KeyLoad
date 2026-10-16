@@ -105,7 +105,8 @@ internal static class ControlledBlobOutcomeLifetimeNativeCommands
     {
         var source = execution.Source;
         var target = execution.Target;
-        var original = source.Database.CreateNativeOperation(kind, id, "root",
+        var issuer = source.BorrowLifetimeIssuer(ControlledBlobOutcomeLifetimeNativeReads.MaximumBytes);
+        var original = issuer.CreateNativeOperation(kind, id, "root",
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var index = checked(target.Journal.Log.State.LastIndex + One);
         var effect = await ControlledBlobOutcomeLifetimeNativeFlow.ApplyAsync(execution, original, token);

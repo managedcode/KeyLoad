@@ -1,7 +1,9 @@
+using System.Text.Json;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -10,6 +12,11 @@ internal static class CliBackupOwnerExclusionTrial
 {
     private const int MaximumFixtureRows = 128;
     private const string AdditionalBackupName = "cli-owner-exclusion-backup";
+    private const int RejectedCliExitCode = 1;
+    private const int UnavailableSourceStatusCode = 503;
+    private const string UnavailableSourceType = "urn:keyload:error:RecoveryRequired";
+    private const string UnavailableSourceCode = "RecoveryRequired";
+    private const string UnavailableSourceDetail = "The offline backup source could not be opened.";
 
     internal static async Task RunAsync(CancellationToken token)
     {
@@ -56,6 +63,15 @@ internal static class CliBackupOwnerExclusionTrial
         var result = await CliBackupRestoreProcess.RunAsync(options,
             ["backup", fixture.Source, destination], token);
         await CliBackupRestoreAssertions.RejectedProcessAsync(result);
+        await Assert.That(result.ExitCode).IsEqualTo(RejectedCliExitCode);
+        await Assert.That(result.StandardError.Length <= options.Value.CleanupOutputCharacters).IsTrue();
+        var problem = JsonSerializer.Deserialize<Problem>(result.StandardError, JsonDefaults.Options);
+        await Assert.That(problem).IsNotNull();
+        await Assert.That(problem!.Type).IsEqualTo(UnavailableSourceType);
+        await Assert.That(problem.Title).IsEqualTo(UnavailableSourceCode);
+        await Assert.That(problem.ErrorCode).IsEqualTo(UnavailableSourceCode);
+        await Assert.That(problem.Detail).IsEqualTo(UnavailableSourceDetail);
+        await Assert.That(problem.StatusCode).IsEqualTo(UnavailableSourceStatusCode);
         await Assert.That(result.StandardOutput).IsEmpty();
         await Assert.That(Directory.Exists(destination) || File.Exists(destination)).IsFalse();
         await NativeBackupJournalRepairAssertions.SameCutAsync(source, Read(owner, token));

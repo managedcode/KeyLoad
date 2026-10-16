@@ -26,6 +26,24 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         native = new(root, owner, maximumFixtureEntries: maximumFixtureEntries, limits: this.limits);
     }
     internal DatabaseEngine Database => native.Database;
+    /// <summary>Borrows the current owner without opening storage or changing its supporting operation limits.</summary>
+    internal DatabaseEngine BorrowLifetimeIssuer(int maximumBytes)
+        => new(Store, Database.Authorization,
+            UnitExecutionOptions.DatabaseLimits(Database.Limits with
+            {
+                MaxBatchBytes = maximumBytes
+            }),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.DueWork(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.EventSource(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.Messaging(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.GraphExecution(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.ChangeFeedExecution(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.BlobExecution(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.NativeClaimsExecution(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.TimeSeriesExecution(),
+            global::KeyLoad.CrashHost.CrashExecutionOptions.MovementCheckpoints(), checkpointVerifier,
+            Database.EvaluationClock, PhysicalOwner);
+
     internal ZoneTreeStore Store => native.Store;
     internal ControlledPartitionMovementNativeJournal Journal => native.Journal;
     internal string Root => native.Root;

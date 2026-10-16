@@ -144,7 +144,9 @@ internal sealed class RelationalSqlRf3JoinAuthorizationTests(ClusterFixture fixt
     {
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             fixture.AdminKey, cancellationToken);
-        var direct = await McpCallerAssertions.SdkSuccessAsync(await admin.QueryAsync(query, cancellationToken));
+        var directResult = await admin.QueryAsync(query, cancellationToken);
+        RelationalSqlRf3OriginalQueryObservation.Failure(directResult);
+        var direct = await McpCallerAssertions.SdkSuccessAsync(directResult);
         var unified = await SqlRf3Protocol.SdkAsync<QueryPage>(admin, sql, cancellationToken);
         var mcpDirect = await ReadMcpAsync(mcp, query, cancellationToken);
         var mcpUnified = await SqlRf3Protocol.McpAsync<QueryPage>(mcp, sql, cancellationToken);

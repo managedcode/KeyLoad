@@ -8,6 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal sealed class ControlledBlobLifetimeReadHold
 {
+    private const int NativeCarrierMaximumBytes = 8_192;
     private readonly RequestCqrsProbeFixture fixture;
     private readonly PartitionRef partition;
     private readonly GrainReadKind kind;
@@ -51,6 +52,19 @@ internal sealed class ControlledBlobLifetimeReadHold
             owner.Directory, RequestCqrsNativeModelInventory.Name(armId, marker.RequestId, marker.Phase))));
         await RequireWitnessAsync(witness, marker).ConfigureAwait(false);
         var native = RequestCqrsNativeModelInventory.Request(witness);
+        var nativeReply = witness.NativeReply
+            ?? throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        await Assert.That(witness.NativeRequest.Length).IsLessThanOrEqualTo(NativeCarrierMaximumBytes);
+        await Assert.That(nativeReply.Length).IsLessThanOrEqualTo(NativeCarrierMaximumBytes);
+        await Console.Out.WriteLineAsync(System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Kind = "ActualControlledBlobLifetimeSignedCarrierBytes",
+            ReadKind = kind,
+            CarrierAssertionMaximumBytes = NativeCarrierMaximumBytes,
+            ProductionTransportMaximumBytes = RemoteDocumentProtocol.MaximumBodyBytes,
+            RequestBytes = witness.NativeRequest.Length,
+            ReplyBytes = nativeReply.Length
+        }));
         var call = NativeSerialization.Deserialize<RemoteResourceLifetimeReadCallV2>(native.Payload.Span);
         var request = NativeSerialization.Deserialize<ControlledBlobReadRequestV2>(call.Payload.Span);
         await Assert.That(native.Channel).IsEqualTo(RemoteModelNativeChannel.ResourceLifetimeRead);

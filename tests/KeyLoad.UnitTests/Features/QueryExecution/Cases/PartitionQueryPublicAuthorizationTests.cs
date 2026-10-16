@@ -6,6 +6,8 @@ internal sealed class PartitionQueryPublicAuthorizationTests
 {
     private const string DeniedTenant = "zz-denied";
     private const string RestrictedPath = "/secret";
+    private const string RestrictedAlias = "secret";
+    private const string RestrictedProjectionJson = "{\"secret\":null}";
 
     [Test]
     public async Task LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore()
@@ -69,8 +71,25 @@ internal sealed class PartitionQueryPublicAuthorizationTests
         var healthy = new QueryEngine(protectedFixture.Database, UnitExecutionOptions.QueryExecution())
             .QueryPartitions(PartitionQueryPublicTestSupport.ReaderId, healthyQuery, PartitionQueryPublicTestSupport.ExpectedOwner);
         await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, protectedFixture.First, "secret-row", "visible");
-        await Assert.That(healthy.Rows[0].Row.Redacted).IsTrue();
-        await Assert.That(healthy.Rows[0].Row.RedactedFields!.Value.SequenceEqual([RestrictedPath])).IsTrue();
+        await Assert.That(healthy.Rows[0].Row.Redacted).IsFalse();
+        await Assert.That(healthy.Rows[0].Row.RedactedFields!.Value).IsEmpty();
+        var selectedQuery = healthyQuery with
+        {
+            Query = healthyQuery.Query with
+            {
+                Projection = [new(RestrictedPath, RestrictedAlias)]
+            }
+        };
+        var selected = new QueryEngine(protectedFixture.Database, UnitExecutionOptions.QueryExecution())
+            .QueryPartitions(PartitionQueryPublicTestSupport.ReaderId, selectedQuery, PartitionQueryPublicTestSupport.ExpectedOwner);
+        var selectedRow = selected.Rows.Single();
+        await Assert.That(selected.Complete).IsTrue();
+        await Assert.That(selectedRow.Reference).IsEqualTo(healthy.Rows[0].Reference);
+        await Assert.That(selectedRow.Row.Revision).IsEqualTo(healthy.Rows[0].Row.Revision);
+        await Assert.That(selectedRow.Row.Json).IsEqualTo(RestrictedProjectionJson);
+        await Assert.That(selectedRow.Row.Redacted).IsTrue();
+        await Assert.That(selectedRow.Row.RedactedFields!.Value.SequenceEqual([RestrictedPath])).IsTrue();
+        await Assert.That(selected.Leaves.Single()).IsEqualTo(healthy.Leaves.Single());
         await Assert.That(protectedFixture.Position).IsEqualTo(fieldPosition);
     }
 }

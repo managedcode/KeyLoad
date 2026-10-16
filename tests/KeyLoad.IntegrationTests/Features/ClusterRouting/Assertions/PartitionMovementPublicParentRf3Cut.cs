@@ -14,6 +14,8 @@ internal sealed record PartitionMovementPublicParentRf3ModelCut(DocumentResult? 
 
 internal static partial class PartitionMovementPublicParentRf3Cut
 {
+    private const double FirstVectorFusionScore = 1d / 61d;
+
     internal static async Task<PartitionMovementPublicParentRf3ModelCut> CaptureAsync(
         PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)
     {
@@ -89,7 +91,7 @@ internal static partial class PartitionMovementPublicParentRf3Cut
         await SqlRf3Protocol.EqualAsync(new global::KeyLoad.GraphTraversal([seed.Models.First, seed.Models.Second], [edge]), actual.Graph);
         await SqlRf3Protocol.EqualAsync(new global::KeyLoad.GraphTraversal([seed.Models.First, seed.Models.Second],
             [edge with { Id = PartitionMovementPublicParentRf3Seed.ComposedEdge }]), actual.CompositionGraph);
-        await SqlRf3Protocol.EqualAsync(new RankedDocument[] { new(actual.First!, 1d) }, actual.Vectors);
+        await SqlRf3Protocol.EqualAsync(new RankedDocument[] { new(actual.First!, FirstVectorFusionScore) }, actual.Vectors);
         await SqlRf3Protocol.EqualAsync(new StreamHead(1, 1, 1), actual.StreamHead);
         await Assert.That(actual.Events).HasSingleItem();
         await SqlRf3Protocol.EqualAsync(new EventData(RelationalSqlRf3Tokens.EventId,

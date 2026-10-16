@@ -1,15 +1,19 @@
+using System.Collections.Immutable;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
 using KeyLoad.Core.Features.BackupRestore.Validation;
 using KeyLoad.Core.Features.ClusterRouting.Authorization;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.BackupRestore.Execution;
 
-internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope
+internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope, IResourceOwnerInventoryContext
 {
     private const int NoCandidates = 0;
     private readonly IAtomicTransaction inner;
+    private readonly ResourceOwnerInventoryStaging inventory;
     bool IPartitionMovementReadScope.MovementAuthorityAbsent
     {
         get; set;
@@ -30,6 +34,7 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
     {
         this.inner = inner ?? throw new ArgumentNullException(nameof(inner));
         this.limits = limits ?? throw new ArgumentNullException(nameof(limits));
+        inventory = new(inner, limits);
         this.storePosition = storePosition;
         this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
             ? appliedIndex : AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex;
@@ -72,14 +77,24 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
         ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
         movementViewChanged = true;
         candidates.Clear();
+        inventory.Reset();
         retainedKeyBytes = NoRetainedKeyBytes;
         inner.Reset();
     }
 
     public void ValidateCommit() => inner.ValidateCommit();
 
+    void IResourceOwnerInventoryContext.UseVerifiedImage(PartitionRef partition)
+        => inventory.UseVerifiedImage(partition);
+
+    void IResourceOwnerInventoryContext.UseControlledResources(PartitionRef partition,
+        ImmutableArray<ResourceDefinition> definitions,
+        ResourceLifetimeCoverageV1 coverage)
+        => inventory.UseControlled(partition, definitions, coverage);
+
     internal void PersistCandidates(Guid currentIncarnation)
     {
+        inventory.Persist(currentIncarnation);
         if (candidates.Count == NoCandidates)
         {
             return;
@@ -130,6 +145,7 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
             return null;
         }
 
+        inventory.Observe(key, partition);
         var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
         if (candidates.ContainsKey(partition))
         {

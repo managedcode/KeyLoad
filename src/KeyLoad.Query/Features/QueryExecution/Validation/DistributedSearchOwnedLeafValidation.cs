@@ -24,6 +24,7 @@ internal static class DistributedSearchOwnedLeafValidation
         if (request.Version != CurrentVersion || !Enum.IsDefined(request.Phase)
             || request.Search is null || request.Owner is null || string.IsNullOrEmpty(request.Tenant)
             || request.Search.Partition is null || request.Search.Partition.TenantId != request.Tenant
+            || request.Selected.IsDefault
             || !ValidSlots(request))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
@@ -52,13 +53,13 @@ internal static class DistributedSearchOwnedLeafValidation
         => request.Phase switch
         {
             DistributedSearchPhase.Statistics => request.Witness is null && request.Statistics is null
-                && request.Scope is null && request.SourceWindowId is null && request.Selected.IsDefault,
+                && request.Scope is null && request.SourceWindowId is null && request.Selected.IsEmpty,
             DistributedSearchPhase.Candidates => request.Witness is not null && request.Statistics is not null
-                && request.Scope is not null && request.SourceWindowId is not null && request.Selected.IsDefault,
+                && request.Scope is not null && request.SourceWindowId is not null && request.Selected.IsEmpty,
             DistributedSearchPhase.Projection => request.Witness is not null && request.Statistics is null
                 && request.Scope is null && request.SourceWindowId is null && !request.Selected.IsDefault,
             DistributedSearchPhase.Revalidate => request.Witness is not null && request.Statistics is null
-                && request.Scope is null && request.SourceWindowId is null && request.Selected.IsDefault,
+                && request.Scope is null && request.SourceWindowId is null && request.Selected.IsEmpty,
             _ => false
         };
 }

@@ -31,6 +31,13 @@ internal static class OrleansMovementServiceRegistration
         });
         services.AddSingleton(provider => Node(provider).Movement?.NativeReceiver!);
         services.AddSingleton(provider => (Node(provider).Movement?.Source as PartitionMovementSourceOwner)?.TransferReads!);
+        services.AddSingleton<global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeClient>(provider =>
+            Node(provider).ResourceInventoryRuntime!.Client);
+        services.AddSingleton<Func<global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeRuntime>>(provider =>
+        {
+            var borrowed = Node(provider).ResourceInventoryRuntime!;
+            return () => borrowed;
+        });
         services.AddSingleton<Func<OwnerCapacityNativeLifetime>>(provider =>
         {
             var borrowed = Node(provider).TenantPlacementRuntime?.Capacity!;

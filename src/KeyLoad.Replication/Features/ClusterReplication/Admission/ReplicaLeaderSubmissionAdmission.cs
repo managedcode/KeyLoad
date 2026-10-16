@@ -50,6 +50,11 @@ internal static class ReplicaLeaderSubmissionAdmission
         {
             return (null, sourceOriginal, Guid.Empty, Guid.Empty);
         }
+        var retained = state.Materializer.Database.ReadRetainedSubmissionOutcome(operation);
+        if (retained is not null)
+        {
+            return (null, retained, Guid.Empty, Guid.Empty);
+        }
         ReplicaFirstEventVectorAdmit.RequireAbsent(state, firstAdmit, operation);
         ReplicaEventVectorSourceAdmit.RequireAbsent(state, sourceAdmit, operation);
         var admitted = state.Materializer.Database.PrepareQueueRetryOperation(operation with

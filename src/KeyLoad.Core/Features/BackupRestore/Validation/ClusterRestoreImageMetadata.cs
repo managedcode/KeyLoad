@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -16,6 +17,7 @@ internal static class ClusterRestoreImageMetadata
 
     internal static void Require(ClusterRestoreImageState state)
     {
+        ClusterRestoreImageInventoryOrigin.Require(state);
         var catalog = PhysicalShardCatalogRecordSerialization.Read(state.Target);
         if (catalog is null || catalog.Version != PhysicalShardCatalogProtocol.CurrentVersion
             || catalog.Revision != PhysicalShardCatalogProtocol.InitialRevision
@@ -65,7 +67,7 @@ internal static class ClusterRestoreImageMetadata
     internal static List<byte[]> ChangedKeys(ClusterRestoreImageState state)
     {
         List<byte[]> keys = [PhysicalShardCatalogRecordSerialization.CatalogKey(), MarkerKey(),
-            ClusterRestoreSlotKeys.Reconciled(), ClusterRestoreSlotKeys.AuthorityReset()];
+            ClusterRestoreSlotKeys.Reconciled(), ClusterRestoreSlotKeys.AuthorityReset(), ResourceOwnerInventoryKeys.Origin()];
         if (state.Mappings.Length > SingleOwner)
         {
             keys.Add(PhysicalOwnerDirectorySerialization.Key());

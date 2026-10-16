@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 namespace KeyLoad.Core.Features.Search;
 
@@ -10,6 +11,7 @@ internal static class NativeSearchLookupClosure
     {
         source.CapturePrefix(DocumentStorageKeys.Prefix(partition, collection));
         source.CaptureExact(KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
+        source.CaptureExact(ResourceLifetimeCatalog.Key(partition.TenantId, partition.DatabaseId, collection));
         if (textField is not null)
         {
             DatabaseEngine.CaptureBm25CorpusReadLookups(source, principal, partition, collection, textField, tokenizer);

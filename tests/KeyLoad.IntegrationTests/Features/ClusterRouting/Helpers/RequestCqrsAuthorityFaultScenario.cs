@@ -29,6 +29,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
     private RequestCqrsProbeMarkerRecord? heldMarker;
     private CancellationTokenSource? operationDeadline;
     private CancellationTokenSource? operationTimeout;
+    private RequestCqrsHeldSdkObservation? sdkObservation;
     private Task<Result<CommitReceipt>>? sdkCall;
     private Task<RequestCqrsFaultMcpObservation>? mcpCall;
     private Guid armId;
@@ -99,8 +100,8 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         lifecycle.SetStage(RequestCqrsLifecycleStage.IdentityCreate);
         identity = await RequestCqrsAuthorityFaultProvisioning.CreateIdentityAsync(
             administrator.Sdk, cancellationToken).ConfigureAwait(false);
-        caller = await RequestCqrsRf3Callers.ConnectAsync(app, RequestCqrsRf3Protocol.Node2,
-            identity.Secret, cancellationToken).ConfigureAwait(false);
+        (caller, sdkObservation) = await RequestCqrsHeldSdkCallers.ConnectAsync(app, RequestCqrsRf3Protocol.Node2,
+            identity.Secret, useMcp, clock, cancellationToken).ConfigureAwait(false);
         outcomeOracle = await RequestCqrsAuthorityOutcomeOracle.SeedAsync(dataRoot, profile, identity, caller,
             cancellationToken).ConfigureAwait(false);
         await RequestCqrsAuthorityFaultAssertions.VerifyDocumentAsync(administrator, identity,
@@ -128,6 +129,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         }
         else
         {
+            sdkObservation?.Arm(commandId);
             sdkCall = RequestCqrsFaultCallers.CommitSdkAsync(activeCaller.Sdk, command, cancellationToken);
         }
         originalStarted = true;
@@ -135,6 +137,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
             RequestCqrsProbeOutcome.Observed, discovery ?? throw new InvalidOperationException(MissingOwner),
             cancellationToken).ConfigureAwait(false);
         heldMarker = marker;
+        sdkObservation?.Held(marker.RequestId);
         lifecycle.MarkHeldWriteObserved();
         await RequestCqrsAuthorityFaultAssertions.VerifyHeldMarkerAsync(marker, armId, commandId, discovery)
             .ConfigureAwait(false);
@@ -161,6 +164,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         var marker = heldMarker ?? throw new InvalidOperationException(MissingOwner);
         var activeControls = controls ?? throw new InvalidOperationException(MissingOwner);
         lifecycle.SetStage(RequestCqrsLifecycleStage.ReleaseHeld);
+        sdkObservation?.Release(sdkCall?.IsCompleted == true);
         activeControls.WriteRelease(armId, marker.RequestId);
         lifecycle.SetStage(RequestCqrsLifecycleStage.ReleaseAndProducerObserved);
         await RequestCqrsAuthorityFaultLifecycleAssertions.VerifyReleasedAndDisposedAsync(
@@ -169,7 +173,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
             cancellationToken, lifecycle.SetStage).ConfigureAwait(false);
         lifecycle.SetStage(RequestCqrsLifecycleStage.JoinOriginalDenied);
         await RequestCqrsAuthorityFaultAssertions.JoinOriginalAndAssertDeniedAsync(useMcp,
-            sdkCall, mcpCall, heldMarker, MissingOwner).ConfigureAwait(false);
+            sdkCall, mcpCall, heldMarker, MissingOwner, sdkObservation).ConfigureAwait(false);
         lifecycle.SetStage(RequestCqrsLifecycleStage.RetireRevocationArm);
         await activeControls.RetireArmAsync(armId,
             cancellationToken).ConfigureAwait(false);

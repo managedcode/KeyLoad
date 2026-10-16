@@ -15,7 +15,7 @@ internal static class QueueLifecyclePublicAssertions
         {
             var actual = await QueueLifecyclePublicRoutes.CallAsync(callers, route, state.Partition, McpCallerTools.MessagesInspect,
                 request, () => callers.Sdk.InspectAsync(request, token), token);
-            await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+            await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(new MessageInspectionResult(expected)))).IsTrue();
         }
     }
 

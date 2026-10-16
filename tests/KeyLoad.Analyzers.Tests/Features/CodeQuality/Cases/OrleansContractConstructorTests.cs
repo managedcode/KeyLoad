@@ -121,7 +121,7 @@ internal sealed class OrleansContractConstructorTests
             }
             """;
         var findings = await AnalyzerFixture.AnalyzeAsync(new OrleansContractConstructorAnalyzer(),
-            source, path: AnalyzerFixture.OrleansModelsPath);
+            source, path: AnalyzerFixture.ClusteringModelsPath);
         await Assert.That(findings).IsEmpty();
     }
 

@@ -45,6 +45,8 @@ internal static class RequestCqrsProbeClaimSelection
             && loaded.Record.CommandId == identity.CommandId
             && (loaded.Record.TargetVoter is null || loaded.Record.TargetVoter == actualVoter)
             && loaded.Record.ReadKind == identity.ReadKind && identity.RequestId != Guid.Empty
+            && (loaded.Record.Phase != RequestCqrsProbePhase.ResourceOwnerInventoryOwnerValidation
+                || phase == GrainRequestPhase.ResourceOwnerInventoryOwnerValidation)
             && (loaded.Record.Phase != RequestCqrsProbePhase.SubmitReturned || loaded.Record.Partition is null
                 || identity.CommandKind == OperationKind.PartitionMovementPhase)
             && RequestCqrsEventVectorProbePair.Eligible(loaded.Record, identity, snapshot.Markers)

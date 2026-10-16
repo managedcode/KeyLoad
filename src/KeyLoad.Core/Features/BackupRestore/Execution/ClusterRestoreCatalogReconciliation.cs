@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
@@ -13,6 +14,7 @@ public static class ClusterRestoreCatalogReconciliation
     private const string InvalidVector = "The original local cut is absent or inconsistent in the verified restore vector.";
     private const string MarkerSpace = "cluster-restore-marker";
     private const string MarkerVersion = "v1";
+    private const string InvalidInventoryOrigin = "The inventory origin does not belong to the verified archive identity.";
     private const string MarkerTooLarge = "The complete restore marker exceeds its native transaction payload limit.";
 
     /// <summary>Verifies the genuine original cut, then stages only explicit new-generation catalog metadata.</summary>
@@ -48,6 +50,23 @@ public static class ClusterRestoreCatalogReconciliation
         }
         var selected = mappings.Single(mapping => mapping.Source.PhysicalShardId == original.Owner.PhysicalShardId);
         work.Check();
+        var sourceOrigin = ResourceOwnerInventoryCatalog.ReadOrigin(work.CreateView(transaction), limits.Value);
+        if (sourceOrigin is null || !sourceOrigin.Proven)
+        {
+            ResourceOwnerInventoryCatalog.Invalidate(transaction, limits.Value);
+        }
+        else
+        {
+            if (sourceOrigin.StoreIncarnation != identity.Incarnation)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidInventoryOrigin);
+            }
+            ResourceOwnerInventoryCatalog.RestoreVerified(transaction,
+                identity with
+                {
+                    Incarnation = selected.Target.Incarnation
+                }, sourceOrigin, limits.Value);
+        }
         StageCatalog(transaction, original, mappings, selected.Target);
         StagePlacements(transaction, original, mappings, work);
         transaction.Put(KeyCodec.Encode(MarkerSpace, MarkerVersion), marker);

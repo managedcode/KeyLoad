@@ -2,6 +2,7 @@ using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -31,6 +32,12 @@ public sealed partial class DatabaseEngine
             Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
         PartitionMovePageAdmission.Require(page, body.Fence, Limits, Limits.MaxBatchBytes);
+        if (transaction is not IResourceOwnerInventoryContext context)
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryProtocol.Unknown);
+        }
+        context.UseVerifiedImage(phase.Partition);
+        ResourceOwnerInventoryMovementImport.Begin(transaction, phase.Partition, phase.MoveId, Limits);
         InstallMoveRecords(transaction, page, body.Descriptor, body.Fence.SourcePlacement.Incarnation);
         PartitionMoveTargetStorage.Write(transaction, PartitionMoveTargetStorage.Key(phase.Partition),
             stage with
@@ -52,8 +59,11 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
             }
             PartitionMoveBlobImport.Charge(transaction, page, record, descriptor, Store.Identity.Incarnation, Limits);
-            transaction.Put(record.Key.ToArray(), PartitionMoveBlobImport.Value(page, record,
-                sourceIncarnation, Store.Identity.Incarnation));
+            if (!ResourceOwnerInventoryMovementImport.TryInstall(transaction, page, record, Limits))
+            {
+                transaction.Put(record.Key.ToArray(), PartitionMoveBlobImport.Value(page, record,
+                    sourceIncarnation, Store.Identity.Incarnation));
+            }
         }
     }
 

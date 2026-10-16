@@ -20,5 +20,5 @@ internal sealed class ControlledBlobOutcomeLifetimeNativeTests
                 target.RetainRoot = true;
                 throw;
             }
-        }, new DatabaseLimits { MaxBatchBytes = NativeControlledLifetimePayloadBoundary.MaximumBytes });
+        });
 }

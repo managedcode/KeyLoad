@@ -6,6 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class NativeBlobWireEvidenceReader
 {
+    private const int NativeCarrierMaximumBytes = 8_192;
     internal static async Task RequireAsync(NativeBlobWireProbeFixture fixture,
         IReadOnlyList<ReplicaSiloDiscovery> actualSourceAtCapture, IReadOnlyList<ReplicaSiloDiscovery> actualDestinationAtCapture,
         string sourceSecret, string destinationSecret, CancellationToken token)
@@ -63,6 +64,20 @@ internal static class NativeBlobWireEvidenceReader
             var request = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.NativeRequest);
             var reply = NativeSerialization.Deserialize<RemoteModelNativeReply>(result.NativeReply);
             RequireCall(fixture, arm, claim, original);
+            await Assert.That(result.OriginalNativeRequest.Length).IsLessThanOrEqualTo(NativeCarrierMaximumBytes);
+            await Assert.That(result.NativeRequest.Length).IsLessThanOrEqualTo(NativeCarrierMaximumBytes);
+            await Assert.That(result.NativeReply.Length).IsLessThanOrEqualTo(NativeCarrierMaximumBytes);
+            await Console.Out.WriteLineAsync(System.Text.Json.JsonSerializer.Serialize(new
+            {
+                Kind = "ActualNativeBlobSignedCarrierBytes",
+                Identity = arm.Identity,
+                Variation = result.Variation,
+                CarrierAssertionMaximumBytes = NativeCarrierMaximumBytes,
+                ProductionTransportMaximumBytes = RemoteDocumentProtocol.MaximumBodyBytes,
+                OriginalRequestBytes = result.OriginalNativeRequest.Length,
+                FaultRequestBytes = result.NativeRequest.Length,
+                ReplyBytes = result.NativeReply.Length
+            }));
             await PartitionMovementNativeBlobFaultAssertions.RequireAsync(original,
                 new(result.Variation, request.Payload, original.Signature), request, reply,
                 actualSourceAtCapture, actualDestinationAtCapture, sourceSecret, destinationSecret, token).ConfigureAwait(false);

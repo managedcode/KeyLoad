@@ -36,11 +36,11 @@ internal static class DeclaredResponseEofFlow
         async Task RunOwnedAsync()
         {
             scenario = new ConnectionNativeScenario(nativeReplicaAdmission: true);
+            await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
                 TestContext.Current!.Execution.CancellationToken);
             var token = linked.Token;
-            await scenario.InitializeAsync(token);
             var principal = scenario.Principal();
             await Assert.That(scenario.Fixture.Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(
                 global::KeyLoad.Core.DatabaseEngine.Credential(KeyId, principal.Id, ApiKey))).Get<bool>()).IsTrue();

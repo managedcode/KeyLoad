@@ -19,6 +19,7 @@ internal static class FunctionalGateColdScenario
                     administrator => FunctionalGateColdProvision.CreateAsync(administrator, lifetime.Token), lifetime.Token);
                 state = await FunctionalGateColdCallers.RunAsync(fixture, state,
                     context => FunctionalGateColdSeed.RunAsync(context, state, lifetime.Token), lifetime.Token);
+                state = await FunctionalGateColdWorkloads.SeedAsync(fixture, state, lifetime.Token);
                 state = await FunctionalGateColdAnalytics.CaptureAsync(fixture, state, lifetime.Token);
                 // All original SDK and MCP caller scopes have joined disposal before any native node kill.
                 await FunctionalGateColdReopen.RunAsync(fixture, lifetime.Token);
@@ -27,6 +28,7 @@ internal static class FunctionalGateColdScenario
                     await FunctionalGateNodeAssertions.VerifyAsync(fixture, context, lifetime.Token);
                     await FunctionalGateColdReplay.RunAsync(context, state, lifetime.Token);
                     await FunctionalGateColdAuthorization.RunAsync(context, state, lifetime.Token);
+                    await FunctionalGateColdWorkloads.VerifyAsync(fixture, context, state, lifetime.Token);
                     await FunctionalGateColdAnalytics.VerifyAsync(fixture, state, lifetime.Token);
                     return true;
                 }, lifetime.Token);

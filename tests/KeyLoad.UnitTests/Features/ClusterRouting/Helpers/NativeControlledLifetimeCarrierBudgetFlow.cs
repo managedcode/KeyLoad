@@ -48,10 +48,16 @@ internal static class NativeControlledLifetimeCarrierBudgetFlow
                 var carrier = NativeSerialization.Serialize(new PartitionControlLifetimeTransportV1(
                     NativeSerialization.Serialize(state.Request), state.Proof));
                 await Assert.That(carrier.Length).IsLessThanOrEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
-                await Assert.That(source.Database.Limits.MaxBatchBytes).IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
-                await Assert.That(target.Database.Limits.MaxBatchBytes).IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
-                await Assert.That(sourceOptions.Core.DatabaseLimits.Value.MaxBatchBytes).IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
-                await Assert.That(targetOptions.Core.DatabaseLimits.Value.MaxBatchBytes).IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+                var issuer = source.BorrowLifetimeIssuer(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+                var originalRequest = global::KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(state.Original);
+                var issued = issuer.CreateNativeOperation(state.Original.Kind, state.Original.Id,
+                    state.Original.PrincipalId, state.Original.EvaluatedAt, NativeSerialization.Serialize(originalRequest));
+                await ResourceLifetimeGrantAssertions.EqualAsync(state.Original, issued);
+                await ResourceLifetimeGrantAssertions.EqualAsync(state.Proof,
+                    issuer.CaptureControlledCommandLifetimeProof(state.Request.Envelope, token));
+                await Assert.That(issued.NativePayload.Length).IsLessThanOrEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+                await Assert.That(sourceOptions.Core.DatabaseLimits.Value.MaxBatchBytes).IsEqualTo(source.Database.Limits.MaxBatchBytes);
+                await Assert.That(targetOptions.Core.DatabaseLimits.Value.MaxBatchBytes).IsEqualTo(target.Database.Limits.MaxBatchBytes);
                 await ResourceLifetimeGrantAssertions.CaptureAsync(state);
                 await NativeControlledLifetimeLocalSubstitution.ExecuteAsync(state, token);
                 var result = await ResourceLifetimeGrantStages.CompleteAsync(state, token);
@@ -61,7 +67,8 @@ internal static class NativeControlledLifetimeCarrierBudgetFlow
                     Kind = WitnessKind,
                     MaximumBytes = NativeControlledLifetimePayloadBoundary.MaximumBytes,
                     CarrierBytes = carrier.Length,
-                    SignedCommandBytes = state.Original.NativePayload.Length
+                    SignedCommandBytes = issued.NativePayload.Length,
+                    SupportingMoveMaximumBytes = source.Database.Limits.MaxBatchBytes
                 }));
                 completed = state;
             }, failures);
@@ -70,8 +77,8 @@ internal static class NativeControlledLifetimeCarrierBudgetFlow
         await ResourceLifetimeGrantCold.ExecuteAsync(completed
             ?? throw new InvalidOperationException("The original controlled command did not complete."),
             TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(source.Database.Limits.MaxBatchBytes).IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
-        await Assert.That(target.Database.Limits.MaxBatchBytes).IsEqualTo(NativeControlledLifetimePayloadBoundary.MaximumBytes);
+        await Assert.That(source.Database.Limits.MaxBatchBytes).IsEqualTo(sourceOptions.Core.DatabaseLimits.Value.MaxBatchBytes);
+        await Assert.That(target.Database.Limits.MaxBatchBytes).IsEqualTo(targetOptions.Core.DatabaseLimits.Value.MaxBatchBytes);
     }
 
     private static PartitionMovementPeerAdmission Open(ControlledPartitionMovementNode owner, ServerRuntimeOptions runtime)

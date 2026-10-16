@@ -19,6 +19,9 @@ internal static class RequestCqrsProbeArmValidator
                 or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed or RequestCqrsProbePhase.ReplicaEntryObserverDisposed || !Enum.IsDefined(action)
             || (readKind is null) == (commandId == Guid.Empty)
             || (readKind is { } read && !Enum.IsDefined(read))
+            || phase == RequestCqrsProbePhase.ResourceOwnerInventoryOwnerValidation
+                && (readKind != GrainReadKind.ResourceOwnerInventory || action != RequestCqrsProbeAction.Hold
+                    || commandId != Guid.Empty)
             || phase is (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
                 && !RequestCqrsLifetimeReadProbe.ValidArm(phase, action, readKind, commandId))
         {

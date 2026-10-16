@@ -56,7 +56,8 @@ export async function requestNative(endpoint, target, maximumBytes, timeoutMs, c
     const successful = result.response.status === 200 && result.exitCode === 0;
     let delay = 0;
     try {
-      if (!successful) delay = retryDelay(result.response, Date.now(), state.waitedMs, repeat);
+      if (!successful) delay = retryDelay(result.response, Date.now(), state.waitedMs, repeat,
+        maximumBytes === GH.metadataBytes && result.metadataInterrupted === true);
     } finally {
       await writeJson(path.join(state.requests, `${name}.json`), { endpoint, repeat, status: result.response.status,
         body: path.relative(state.root, successful ? target : body), headers: path.relative(state.root, headers),

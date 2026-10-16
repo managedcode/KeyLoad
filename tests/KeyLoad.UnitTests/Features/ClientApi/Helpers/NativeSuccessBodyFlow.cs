@@ -80,11 +80,11 @@ internal sealed class NativeSuccessBodyFlow : IAsyncDisposable
     private async Task RunOwnedAsync(string body, bool appendNativePrefix, bool declareLength)
     {
         scenario = new ConnectionNativeScenario(nativeReplicaAdmission: true);
+        await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
         using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
             TestContext.Current!.Execution.CancellationToken);
         var token = linked.Token;
-        await scenario.InitializeAsync(token);
         var principal = scenario.Principal();
         await Assert.That(scenario.Fixture.Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(
             global::KeyLoad.Core.DatabaseEngine.Credential(P.KeyId, principal.Id, P.ApiKey))).Get<bool>()).IsTrue();

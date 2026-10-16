@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -24,14 +25,17 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
     /// <param name="observer">The existing storage observer for an armed actual canonical commit cut.</param>
     /// <param name="limits">Optional validated native operation limits retained by the fixture owner.</param>
     /// <param name="maximumFixtureEntries">The exact selected supporting or terminal history bound.</param>
+    /// <param name="replicaObserver">Existing native durable replica boundary observer; null preserves original behavior.</param>
     public ControlledPartitionMovementNativeNode(string root, PhysicalShardRecord owner,
         Action<CommitStage, long, int>? observer = null,
-        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null)
-        : this(root, owner, UnavailablePartitionMovementCheckpointVerifier.Instance, observer, maximumFixtureEntries, limits) { }
+        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null,
+        Action<ReplicaCrashBoundary>? replicaObserver = null)
+        : this(root, owner, UnavailablePartitionMovementCheckpointVerifier.Instance, observer, maximumFixtureEntries, limits, replicaObserver) { }
 
     internal ControlledPartitionMovementNativeNode(string root, PhysicalShardRecord owner,
         IPartitionMovementCheckpointVerifier checkpointVerifier, Action<CommitStage, long, int>? observer = null,
-        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null)
+        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null,
+        Action<ReplicaCrashBoundary>? replicaObserver = null)
     {
         ArgumentNullException.ThrowIfNull(checkpointVerifier);
         ArgumentNullException.ThrowIfNull(owner);
@@ -60,7 +64,7 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
                 ClusterAdministrator = true
             },
                 DatabaseEngine.Credential(InfrastructurePrincipal, InfrastructurePrincipal, InfrastructureCredential));
-            Journal = new(Database, owner, Path.Combine(Root, ReplicaDirectory), maximumFixtureEntries);
+            Journal = new(Database, owner, Path.Combine(Root, ReplicaDirectory), maximumFixtureEntries, replicaObserver);
         }
         catch (Exception primary)
         {

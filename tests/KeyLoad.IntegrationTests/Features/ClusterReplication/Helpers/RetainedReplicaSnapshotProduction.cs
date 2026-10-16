@@ -18,34 +18,22 @@ internal static class RetainedReplicaSnapshotProduction
             last = command;
             var survivorIndex = availableNodes[index % availableNodes.Length];
             var client = state.Clients[survivorIndex];
-            string? lastErrorCode = null;
-            string? lastSafeDetail = null;
+            var evidence = new RetainedReplicaSnapshotRetryEvidence();
             try
             {
                 committed = Success(await RetryDuringElectionAsync(async () =>
                 {
+                    evidence.BeginAttempt();
                     var result = await client.CommitAsync(command, cancellationToken);
-                    if (!result.IsSuccess)
-                    {
-                        lastErrorCode = result.Problem?.ErrorCode;
-                        lastSafeDetail = result.Problem?.Detail;
-                    }
+                    evidence.Complete(result.IsSuccess, result.Problem?.ErrorCode, result.Problem?.Detail);
                     return result;
                 }, cancellationToken));
             }
             catch (OperationCanceledException error) when (cancellationToken.IsCancellationRequested)
             {
                 var failures = new List<Exception> { error };
-                KeyLoad.Server.ServerFailureObserver.Observe(() =>
-                    Console.Error.WriteLine(System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        phase = nameof(ReplicateWhileStoppedAsync),
-                        command.CommandId,
-                        commandOrdinal = index,
-                        survivorNode = NodeName(survivorIndex + 1),
-                        lastErrorCode,
-                        lastSafeDetail
-                    })), failures);
+                KeyLoad.Server.ServerFailureObserver.Observe(() => evidence.Write(command.CommandId,
+                    index, survivorIndex, stoppedIndex, state.InitialStatuses), failures);
                 KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
                 throw;
             }

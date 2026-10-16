@@ -24,7 +24,7 @@ internal static class DistributedSearchWorkFactory
             budget.Check();
             var witness = phase == DistributedSearchPhase.Statistics ? null : witnesses[index];
             var projection = phase == DistributedSearchPhase.Projection
-                ? ForPartition(selected, partitions[index], budget) : default;
+                ? ForPartition(selected, partitions[index], budget) : ImmutableArray<GlobalBranchCandidate>.Empty;
             work.Add(new(phase, search with
             {
                 Partition = partitions[index]

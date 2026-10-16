@@ -5,6 +5,10 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class SecurityAndQueryTests
 {
+    private const string ProtectedProjectionSql = "SELECT d.[odd.name] AS hidden FROM orders d WHERE d.id = 'o1'";
+    private const string ProtectedProjectionJson = "{\"hidden\":null}";
+    private const string ProtectedProjectionPath = "/odd.name";
+
     private static void Reader(TestDatabase db, bool revoked = false, long epoch = 1)
         => db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("reader", "tenant",
             [new("database", "orders", Capability.DocumentsRead | Capability.Query)], [])
@@ -22,11 +26,21 @@ internal sealed class SecurityAndQueryTests
         var document = db.Database.GetDocument("reader", new(db.Partition, "orders", "o1"))!;
         await Assert.That(document.Redacted).IsTrue();
         await Assert.That(document.Json).DoesNotContain("CANARY");
+        var position = db.Store.Position;
         var queries = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var result = queries.Execute("reader", new(db.Partition, "SELECT d.status AS state FROM orders d WHERE d.id = 'o1'"));
         await Assert.That(System.Linq.Enumerable.Single(result.Rows).Json).IsEqualTo("{\"state\":\"open\"}");
-        await Assert.That(result.Rows[0].Redacted).IsTrue();
-        await Assert.That(result.Rows[0].RedactedFields!.Value).Contains("/odd.name");
+        await Assert.That(result.Rows[0].Redacted).IsFalse();
+        await Assert.That(result.Rows[0].RedactedFields!.Value).IsEmpty();
+        var protectedPage = queries.Execute("reader", new(db.Partition, ProtectedProjectionSql));
+        var protectedRow = protectedPage.Rows.Single();
+        await Assert.That(protectedRow.EntityId).IsEqualTo(document.Reference.Id);
+        await Assert.That(protectedRow.Revision).IsEqualTo(document.Revision);
+        await Assert.That(protectedRow.Json).IsEqualTo(ProtectedProjectionJson);
+        await Assert.That(protectedRow.Redacted).IsTrue();
+        await Assert.That(protectedRow.RedactedFields!.Value.SequenceEqual([ProtectedProjectionPath])).IsTrue();
+        await Assert.That(protectedPage.CutPosition).IsEqualTo(result.CutPosition);
+        await Assert.That(db.Store.Position).IsEqualTo(position);
         var exception = Assert.ThrowsExactly<KeyLoadException>(() => queries.Execute("reader",
             new(db.Partition, "SELECT * FROM orders d WHERE d.\"odd.name\" = 'CANARY'", AllowFullScan: true)));
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.PermissionDenied);

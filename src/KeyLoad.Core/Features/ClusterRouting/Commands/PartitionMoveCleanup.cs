@@ -3,6 +3,7 @@ using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Queries;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -40,6 +41,14 @@ public sealed partial class DatabaseEngine
         if (phase.Resources.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
+        if (phase.Stage == PartitionMovePeerStage.Abort && body.Role == PartitionMoveCleanupRole.Target)
+        {
+            if (transaction is not IResourceOwnerInventoryContext context)
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryProtocol.Unknown);
+            }
+            context.UseVerifiedImage(phase.Partition);
         }
         var journal = MoveJournalReceipt(transaction, commandId, position, phase.ControlIntentDigest);
         if (body.FamilyOrdinal == PartitionMoveCleanupFamilies.All.Length)

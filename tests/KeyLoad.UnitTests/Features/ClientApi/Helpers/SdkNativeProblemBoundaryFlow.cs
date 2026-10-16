@@ -32,11 +32,11 @@ internal static class SdkNativeProblemBoundaryFlow
         async Task RunOwnedAsync()
         {
             native = new ConnectionNativeScenario(nativeReplicaAdmission: true);
+            var state = new SdkNativeProblemBoundaryScenario(native, tasks);
+            await state.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var deadline = new CancellationTokenSource(native.Timing.CompletionTimeout, TimeProvider.System);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
                 TestContext.Current!.Execution.CancellationToken);
-            var state = new SdkNativeProblemBoundaryScenario(native, tasks);
-            await state.InitializeAsync(linked.Token);
             var endpoint = new SdkNativeProblemBoundaryEndpoint(state, tasks, declared);
             transportUncertain = true;
             server = await KeyLoadClientKestrelServer.StartAsync(endpoint.HandleAsync);

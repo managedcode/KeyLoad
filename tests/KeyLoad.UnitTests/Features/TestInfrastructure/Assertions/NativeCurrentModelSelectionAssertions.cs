@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 internal static class NativeCurrentModelSelectionAssertions
 {
     private const string Selections = "currentModels";
-    private const int ExpectedSelections = 17;
+    private const int ExpectedSelections = 21;
     private static readonly string[] Filters =
     [
         "/*/*/GraphSearchPathPolicyRf3Tests/*",
@@ -24,7 +24,11 @@ internal static class NativeCurrentModelSelectionAssertions
         "/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands",
         "/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*",
         "/*/*/ControlledBlobLifetimeReadRf3Tests/HeldNativeRepliesRequireFreshSourceAuthorityAndSettleBeforeTwoColdBlobReadWaves",
-        "/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*"
+        "/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*",
+        "/*/*/ResourcePartitionInventoryRf3Tests/AuthenticatedConservativeInventoryRetainsReplayRollbackAndTwoColdOwners",
+        "/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay",
+        "/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
+        "/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects"
     ];
 
     internal static async Task AssertAsync(JsonElement root)

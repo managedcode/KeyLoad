@@ -17,7 +17,7 @@ internal static class CrashHostApplication
         const int RunAsyncArgsComponentIndex = 3;
 
         _ = SerializationExecutionRegistration.Process.Value;
-        if (await global::KeyLoad.CrashHost.Features.BlobStorage.BlobCommitCutScenario.TryRunAsync(args))
+        if (await TryRunResourceCrashAsync(args))
         {
             return;
         }
@@ -71,6 +71,11 @@ internal static class CrashHostApplication
         }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         await RunScenarioAsync(directory, store, boundary, mode);
     }
+
+    private static async Task<bool> TryRunResourceCrashAsync(string[] args)
+        => await global::KeyLoad.CrashHost.Features.ResourceExecution.D2ImportCrashScenario.TryRunAsync(args)
+            || await global::KeyLoad.CrashHost.Features.ResourceExecution.D2InventoryCrashScenario.TryRunAsync(args)
+            || await global::KeyLoad.CrashHost.Features.BlobStorage.BlobCommitCutScenario.TryRunAsync(args);
 
     private static Task RunScenarioAsync(string directory, ZoneTreeStore store,
         CanonicalCrashBoundary boundary, string mode) => mode switch

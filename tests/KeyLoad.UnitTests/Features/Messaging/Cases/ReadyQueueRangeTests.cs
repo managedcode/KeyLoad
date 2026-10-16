@@ -26,6 +26,8 @@ internal sealed class ReadyQueueRangeTests
     private const long OneStoredMessage = 1;
     private const long OneInFlightMessage = 1;
     private const long NoRangeLookaheads = 0;
+    // Fresh stored-capacity authority visits exactly one retained body before the ready scan.
+    private const long StoredCapacityWitnessEntries = 1;
     private const string ExpiredPrefix = "expired-";
     private const string LiveMessageId = "live";
 
@@ -52,7 +54,7 @@ internal sealed class ReadyQueueRangeTests
 
         await Assert.That(first.Deliveries).HasSingleItem();
         await Assert.That(first.Deliveries[0].Id).IsEqualTo(MessagePrefix + "000");
-        await Assert.That(after.RangeBaselineEntries - before.RangeBaselineEntries).IsEqualTo(1L);
+        await Assert.That(after.RangeBaselineEntries - before.RangeBaselineEntries).IsEqualTo(StoredCapacityWitnessEntries + RequestedMessageCount);
         await Assert.That(second.Deliveries[0].Id).IsEqualTo(MessagePrefix + "001");
     }
 
@@ -76,7 +78,7 @@ internal sealed class ReadyQueueRangeTests
         await Assert.That(result.Deliveries).HasSingleItem();
         await Assert.That(result.Deliveries[0].Id).IsEqualTo(LiveMessageId);
         await Assert.That(after.RangeBaselineEntries - before.RangeBaselineEntries)
-            .IsEqualTo((long)ExpiredAndLiveRecordCount);
+            .IsEqualTo(StoredCapacityWitnessEntries + ExpiredAndLiveRecordCount);
         await Assert.That(Metadata(db, ExpiredMessageId(FirstMessageIndex)).State).IsEqualTo(MessageState.Expired);
         await Assert.That(Counters(db).StoredMessages).IsEqualTo(OneStoredMessage);
         await Assert.That(Counters(db).InFlightMessages).IsEqualTo(OneInFlightMessage);
@@ -98,7 +100,7 @@ internal sealed class ReadyQueueRangeTests
 
         await Assert.That(first.Deliveries).IsEmpty();
         await Assert.That(after.RangeBaselineEntries - before.RangeBaselineEntries)
-            .IsEqualTo((long)ReadyExaminationLimit);
+            .IsEqualTo(StoredCapacityWitnessEntries + ReadyExaminationLimit);
         await Assert.That(after.RangeLimitLookaheads - before.RangeLimitLookaheads).IsEqualTo(NoRangeLookaheads);
         await Assert.That(Metadata(db, ExpiredMessageId(LastIndexInFirstPage)).State)
             .IsEqualTo(MessageState.Expired);
@@ -112,7 +114,7 @@ internal sealed class ReadyQueueRangeTests
         await Assert.That(second.Deliveries).HasSingleItem();
         await Assert.That(second.Deliveries[0].Id).IsEqualTo(LiveMessageId);
         await Assert.That(afterNext.RangeBaselineEntries - beforeNext.RangeBaselineEntries)
-            .IsEqualTo((long)ExpiredAndLiveRecordCount);
+            .IsEqualTo(StoredCapacityWitnessEntries + ExpiredAndLiveRecordCount);
         await Assert.That(Metadata(db, ExpiredMessageId(ReadyExaminationLimit)).State)
             .IsEqualTo(MessageState.Expired);
         await Assert.That(Counters(db).StoredMessages).IsEqualTo(StoredAfterLiveDelivery);

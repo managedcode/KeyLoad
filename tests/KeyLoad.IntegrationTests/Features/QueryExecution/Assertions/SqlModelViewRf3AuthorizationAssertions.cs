@@ -12,7 +12,7 @@ internal static class SqlModelViewRf3AuthorizationAssertions
         => scenario.EventSql() with
         {
             Sql = $"SELECT TOP (1) payload.secret AS secret FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
-                + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE id = '{SqlModelViewRf3Scenario.FirstEventId}'"
+                + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE eventId = '{SqlModelViewRf3Scenario.FirstEventId}'"
         };
 
     internal static QueryRequest QueuePrivateProjection(SqlModelViewRf3Scenario scenario)

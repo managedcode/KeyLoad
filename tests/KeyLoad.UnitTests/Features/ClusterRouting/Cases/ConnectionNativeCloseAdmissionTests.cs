@@ -10,12 +10,12 @@ internal sealed class ConnectionNativeCloseAdmissionTests
         ConnectionAwaitedSettlementObservation? observer = null;
         return ConnectionNativeScenario.RunAsync(async scenario =>
         {
-            using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
-            using var caller = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
-                TestContext.Current!.Execution.CancellationToken);
             try
             {
-                await scenario.InitializeAsync(caller.Token);
+                await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
+                using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+                using var caller = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+                    TestContext.Current!.Execution.CancellationToken);
                 await ConnectionNativeCloseAdmissionFlow.RunAsync(scenario, observer!, caller.Token);
             }
             finally { observer?.ReleaseAll(); }

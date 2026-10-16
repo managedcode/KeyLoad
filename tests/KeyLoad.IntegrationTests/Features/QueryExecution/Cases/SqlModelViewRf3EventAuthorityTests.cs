@@ -54,6 +54,8 @@ internal sealed class SqlModelViewRf3EventAuthorityTests(ClusterFixture fixture)
             McpCallerTools.QueryExecute, SqlModelViewRf3AuthorizationAssertions.EventPrivateProjection(scenario), deadline.Token));
         await SqlRf3Protocol.EqualAsync(visible.Rows, visibleMcp.Value.Rows);
         await Assert.That(visible.Rows.Length).IsEqualTo(1);
+        await Assert.That(visible.Rows[0].EntityId).IsEqualTo(SqlModelViewRf3Scenario.FirstEventId);
+        await Assert.That(visible.Rows[0].Revision).IsEqualTo(1);
         using var visibleJson = JsonDocument.Parse(visible.Rows[0].Json);
         await Assert.That(visibleJson.RootElement.GetProperty(SqlModelViewRf3JsonKeys.Secret).GetString())
             .IsEqualTo(SqlModelViewRf3Scenario.EventCanary);

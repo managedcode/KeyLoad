@@ -1,8 +1,96 @@
 {
+  "RESOURCE-OWNER-INVENTORY-20261016": {
+    "title": "Native resource-owner inventory and all-model recovery development stage",
+    "status": "in_progress",
+    "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
+    "implementation": "Native canonical enrollment, authenticated cross-voter inventory, verified restore-origin handling and overlapping-import recovery flows are integrated. Current successor repairs preserve imported-inventory origin during authenticated target Abort, compare complete inventory values independently of serializer object-reference aliasing, and verify actual process-owner roots. Runtime verification of those repairs remains open.",
+    "strictBuild": {
+      "label": "root-r590-native-replay-import-full-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 207.95170391607098,
+      "sourceDrift": 0,
+      "stdoutSha256": "a788f5138c0fa2672914312e404fd0cff7bc01a6cc25a223dd24d2103ef55a6b",
+      "scope": "Complete Release solution after all integrated R583-R590 Unit/recovery/CLI/selector/fresh-quorum retained-replay repairs. Runtime rerun pending; this build is not acceptance."
+    },
+    "format": "R586 current modified/new C# whitespace apply+verify and structural governance passed. R585 full format revealed observed whitespace/import and native analyzer diagnostics; those were repaired and strict R590 passed. Final full formatter verification remains pending.",
+    "focusedRuntime": {
+      "cohort": "root-r577-579-current-ci-native",
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "unit": {
+        "total": 101,
+        "passed": 77,
+        "failed": 24,
+        "skipped": 0
+      },
+      "recovery": {
+        "total": 13,
+        "passed": 3,
+        "failed": 10,
+        "skipped": 0
+      },
+      "analyzers": {
+        "total": 391,
+        "passed": 391,
+        "failed": 0,
+        "skipped": 0
+      },
+      "evidence": "TestResults/stage61-native-join/root-r583-prior-native-cohort-terminal.original.json",
+      "scope": "Selected whole-operation Unit and process-recovery flows plus complete analyzer suite. All processes and output readers joined; successor fixes await a focused rerun."
+    },
+    "publicQualification": "OPEN: native SDK/official MCP RF3 inventory and fresh same-source ONE/RF3 functional+cold pair. Historical e292 normal and57cea624 cold results retain their original scope.",
+    "remaining": [
+      "Full public resource DROP/recreate lifecycle",
+      "User-addressable analytics stores (current native integration is node operational analytics only)",
+      "Exact-source Linux fault/endurance/security/performance/release gates"
+    ],
+    "limits": "No full SQL, power-loss, performance, production or original105 task completion claim.",
+    "focusedCompiler": {
+      "label": "root-r562-crashhost-abort-repair-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 141.42517154221423,
+      "sourceDrift": 0,
+      "scope": "CrashHost and actual production dependencies including the targetAbort checkpoint repair. New10body Abort regression and exactQ1admission19 joined afterward; fullsolution/runtime qualification remains open."
+    },
+    "currentSourceRepairs": {
+      "stage": "R583-R590",
+      "state": "strict_build_passed_runtime_pending",
+      "scope": [
+        "Authenticated target-Abort inventory origin",
+        "D2 full-value and archive/credential fixture assertions",
+        "Exact complete partition-family inventory",
+        "Native statistics grant/result budget allocation",
+        "Actual receiver-clock expiry witness",
+        "Original connection deactivation before final native consumer cleanup",
+        "Bounded original Abort cancellation discriminator",
+        "Strict bounded CLI restore permission refusal",
+        "Native selector exact unsupported-union regression",
+        "Fresh-quorum captured-tail retained replay without another append"
+      ],
+      "unresolved": [
+        "Before-page Abort original whole-flow cancellation requires original phase evidence"
+      ],
+      "publicFunctionalRefresh": "Fresh one-node then RF3 SDK/official MCP/T-SQL pair remains pending; historical e292c1c1 and 57cea624 proofs retain their original source scope.",
+      "verification": "R590 full strict Release:0warnings0errors, sourceDrift0. Current-source native selected Unit/recovery and ONE→RF3 functional checks remain pending."
+    },
+    "latestCompilerAttempt": {
+      "label": "root-r587-confirmed-native-repairs-full-release",
+      "result": "failed",
+      "elapsedSeconds": 420.87072379118763,
+      "warnings": 0,
+      "errors": 1,
+      "sourceDrift": 0,
+      "scope": "All production, RecoveryTests and IntegrationTests compiled. New Unit replica replay helper lacked the existing KeyLoad.Storage extension namespace; exact import repaired; full R590 rerun pending."
+    }
+  },
   "RESOURCE-LIFETIME-NATIVE-20261016": {
     "title": "Integrated native resource lifetime command/read and controlled blob outcome checkpoint",
     "status": "in_progress",
-    "implementation": "Integrated source passes the full strict Release build; fresh focused native cohort improved from42/60 to49/60. Eleven failures in three groups remain and are being repaired; runtime/public qualification is open.",
+    "implementation": "R545 predecessor strict Release build passed and R546 native selection improved42/60 to49/60. All three remaining failure groups now have source repairs joined with the native D2 inventory batch; fresh current-source build/runtime qualification remains open.",
     "scope": [
       "D1 canonical resource pairs and mandatory command coverage",
       "Native document/query/ANN source and target authority",
@@ -28,7 +116,7 @@
       "completionSha256": "d5ad537e35db482c432e9a8f787dff0b4df518451451b39dfe70eefcaa7f81c4",
       "scope": "Passed on the pre-runtime-repair source; no fresh full-format result is claimed for the later six-file runtime repair."
     },
-    "focusedUnit": "FAILED: fresh native TUnit selected60,49passed,11failed,0skipped; seven original remote-document failures repaired. Query phase serialization5, scoped-budget counter oracle4 and overconstrained supporting Move budget2 remain open.",
+    "focusedUnit": "Last executed R546:60selected49passed11failed0skipped. Query phase serialization5, scoped-budget counter oracle4 and supporting Move budget2 source repairs are integrated, but not yet runtime reverified.",
     "processRecovery": "R538 passed3/3 before the later six-file runtime repair. Its original source identity remains authoritative; no fresh current-source recovery qualification is claimed.",
     "publicQualification": "OPEN: actual native RF3 and fresh matched one-node/three-node functional and cold flows required after product changes. Earlier e292 normal and57cea624 cold results retain their own recorded source scope.",
     "limits": "No full SQL, resource DROP/recreate, Linux, power-loss, endurance, performance or release completion claim. Original105 remain20done85in_progress.",

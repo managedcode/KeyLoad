@@ -86,6 +86,10 @@ internal static class LocalRf3ImageSelection
     private const string NativeImageEnrollmentFilterArgument = "--KeyLoadTests:Filter=/*/*/(PhysicalOwnerRegistrationRf3Tests|RemotePartitionQueryRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsRf3FollowerRestartTests)/*";
     private const string ControlledBlobLifetimeReadFilterArgument = "--KeyLoadTests:Filter=/*/*/ControlledBlobLifetimeReadRf3Tests/HeldNativeRepliesRequireFreshSourceAuthorityAndSettleBeforeTwoColdBlobReadWaves";
     private const string NativeBlobWholeParentFilterArgument = "--KeyLoadTests:Filter=/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*";
+    private const string ResourcePartitionInventoryFilterArgument = "--KeyLoadTests:Filter=/*/*/ResourcePartitionInventoryRf3Tests/AuthenticatedConservativeInventoryRetainsReplayRollbackAndTwoColdOwners";
+    private const string PublicPartitionMovementFilterArgument = "--KeyLoadTests:Filter=/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay";
+    private const string ErasedFollowerSnapshotFilterArgument = "--KeyLoadTests:Filter=/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation";
+    private const string SdkRevocationWriteFilterArgument = "--KeyLoadTests:Filter=/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -144,6 +148,10 @@ internal static class LocalRf3ImageSelection
                 or RemotePartitionQueryFilterArgument or FunctionalSingleColdFilterArgument or FunctionalClusterColdFilterArgument or NativeImageEnrollmentFilterArgument
                 or ControlledBlobLifetimeReadFilterArgument
                 or NativeBlobWholeParentFilterArgument
+                or ResourcePartitionInventoryFilterArgument
+                or PublicPartitionMovementFilterArgument
+                or ErasedFollowerSnapshotFilterArgument
+                or SdkRevocationWriteFilterArgument
                 or CurrentGraphSearchPathPolicyFilterArgument or CurrentSampleChunkCorrectionFilterArgument or CurrentSqlGraphPublicFilterArgument or CurrentSqlGraphSamplePublicFilterArgument or CurrentGraphSamplePublicFilterArgument or CurrentFoundationRf3FilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
@@ -181,7 +189,7 @@ internal static class LocalRf3ImageSelection
             || rejectAmbientGithub && HasAmbientGithubIdentity()
             || receipt.Length is 0 or > MaximumReceiptPathCharacters || Path.IsPathRooted(receipt)
             || receipt.Contains('\\', StringComparison.Ordinal) || !reference.StartsWith(Repository + ":local-", StringComparison.Ordinal)
-            || !IsCanonicalReferenceAndReceipt(reference, receipt))
+            || !LocalRf3ImageReferenceValidation.IsCanonicalReferenceAndReceipt(reference, receipt))
         {
             throw new InvalidOperationException("The local RF3 image identity is invalid.");
         }
@@ -194,19 +202,4 @@ internal static class LocalRf3ImageSelection
             || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(GitHubRevisionEnvironment))
             || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(GitHubActionsEnvironment));
 
-    private static bool IsCanonicalReferenceAndReceipt(string reference, string receipt)
-    {
-        var separator = reference.IndexOf(':', StringComparison.Ordinal);
-        if (separator < 0 || separator == reference.Length - 1)
-        {
-            return false;
-        }
-        var tag = reference[(separator + 1)..];
-        if (tag.Length != 38 || !tag.StartsWith("local-", StringComparison.Ordinal)
-            || tag[6..].Length != 32 || tag[6..].Any(character => !char.IsAsciiHexDigit(character) || char.IsUpper(character)))
-        {
-            return false;
-        }
-        return receipt == $"TestResults/rf3/local-images/image-{tag[6..]}.json";
-    }
 }

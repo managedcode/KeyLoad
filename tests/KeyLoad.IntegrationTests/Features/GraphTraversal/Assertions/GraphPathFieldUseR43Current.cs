@@ -6,6 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphPathFieldUseR43Current
 {
+    private const string CanonicalFullAttributes = "{\"public\":\"visible\",\"secret\":\"graph-path-private-marker\"}";
+
     internal static async Task ObserveAsync(RequestCqrsRf3Callers admin, GraphPathFieldUseR43State state,
         CancellationToken token)
     {
@@ -17,7 +19,8 @@ internal static class GraphPathFieldUseR43Current
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(vertex), token))).Value);
         }
         var request = new TraverseRequest(state.Seed.Partition, GraphPathRf3Scenario.Graph, state.Source, 2, 3, 2);
-        var expectedGraph = new global::KeyLoad.GraphTraversal([state.Middle, state.Source, state.Target], [.. state.Edges]);
+        var expectedGraph = new global::KeyLoad.GraphTraversal([state.Middle, state.Source, state.Target],
+            [.. state.Edges.Select(edge => edge with { AttributesJson = CanonicalFullAttributes })]);
         await SqlRf3Protocol.EqualAsync(expectedGraph, await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.TraverseAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(expectedGraph, (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(

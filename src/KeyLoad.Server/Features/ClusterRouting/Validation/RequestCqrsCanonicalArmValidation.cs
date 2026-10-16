@@ -3,6 +3,17 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal static class RequestCqrsCanonicalArmValidation
 {
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
+        => arm.Phase == RequestCqrsProbePhase.ResourceOwnerInventoryOwnerValidation
+            ? ValidResourceOwnerInventory(arm)
+            : ValidCanonical(arm);
+
+    private static bool ValidResourceOwnerInventory(RequestCqrsProbeArmRecord arm)
+        => arm.ReadKind == KeyLoad.Clustering.GrainReadKind.ResourceOwnerInventory
+            && arm.Action == RequestCqrsProbeAction.Hold && arm.CommandId == Guid.Empty
+            && arm.Partition is null && arm.SourceRequestId is null && arm.SourceArmId is null
+            && (arm.TargetVoter is null || RequestCqrsProbeActivationTargetValidation.Valid(arm.TargetVoter));
+
+    private static bool ValidCanonical(RequestCqrsProbeArmRecord arm)
     {
         if (arm.Phase == RequestCqrsProbePhase.ControlledLifetimeReplayBeforeDispatch)
         {

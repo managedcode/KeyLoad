@@ -33,8 +33,9 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
     /// <param name="physical">Its immutable actual physical RF3 logical scope.</param>
     /// <param name="directory">The independently owned replica-store directory.</param>
     /// <param name="maximumFixtureEntries">The exact supporting or terminal history bound.</param>
+    /// <param name="replicaObserver">Existing native durable replica boundary observer; null preserves original behavior.</param>
     public ControlledPartitionMovementNativeJournal(DatabaseEngine database,
-        PhysicalShardRecord physical, string directory, long maximumFixtureEntries = SupportingHistoryEntries)
+        PhysicalShardRecord physical, string directory, long maximumFixtureEntries = SupportingHistoryEntries, Action<ReplicaCrashBoundary>? replicaObserver = null)
     {
         if (maximumFixtureEntries != SupportingHistoryEntries && maximumFixtureEntries != TerminalHistoryEntries)
         {
@@ -53,7 +54,7 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
-            Log = new(replica, configuration, canonicalDatabase: database);
+            Log = new(replica, configuration, replicaObserver, canonicalDatabase: database);
             try
             {
                 var snapshots = new ReplicaSnapshotStore(database.Store, Log, configuration, execution);

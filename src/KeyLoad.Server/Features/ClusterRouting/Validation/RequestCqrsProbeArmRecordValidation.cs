@@ -24,6 +24,9 @@ internal static class RequestCqrsProbeArmRecordValidation
                 && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
             || value.Phase == RequestCqrsProbePhase.SampleChunkAdmissionRefused
                 && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
+            || value.Phase == RequestCqrsProbePhase.ResourceOwnerInventoryOwnerValidation
+                && (value.ReadKind != KeyLoad.Clustering.GrainReadKind.ResourceOwnerInventory
+                    || value.Action != RequestCqrsProbeAction.Hold || value.CommandId != Guid.Empty)
             || value.Phase == RequestCqrsProbePhase.NativeTextOriginalPostingRead
                 && (value.ReadKind != KeyLoad.Clustering.GrainReadKind.Search
                     || value.Action != RequestCqrsProbeAction.Hold || value.CommandId != Guid.Empty)

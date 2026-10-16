@@ -186,5 +186,7 @@ public enum GrainReadKind
     /// <summary>Privately observes native ANN publication and data under mandatory lifetime coverage.</summary>
     AnnProjectionObservationV2 = 90,
     /// <summary>Privately validates an original blob command outcome under mandatory lifetime coverage.</summary>
-    ControlledBlobOutcomeV2 = 91
+    ControlledBlobOutcomeV2 = 91,
+    /// <summary>Privately reads bounded canonical resource-owner inventory under current administrator authority.</summary>
+    ResourceOwnerInventory = 92
 }
