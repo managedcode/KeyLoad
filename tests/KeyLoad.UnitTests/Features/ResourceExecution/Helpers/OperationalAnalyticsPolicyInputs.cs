@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class OperationalAnalyticsPolicyInputs
 {
-    internal const int ExpectedRefusals = 42;
+    internal const int ExpectedRefusals = 38;
     private const int NegativeCount = -1;
     private const int UnsetCount = 0;
     private const int AboveMutableItems = 4_097;
@@ -21,8 +21,6 @@ internal static class OperationalAnalyticsPolicyInputs
     private const long FollowingTick = 1;
     private const int MaximumOperationSeconds = 2;
     private const int RetentionDays = 7;
-    private const int ShortSampleSeconds = 9;
-    private const int LongSampleSeconds = 11;
     private const int ShortCheckMinutes = 59;
     private const int LongCheckMinutes = 61;
 
@@ -107,13 +105,6 @@ internal static class OperationalAnalyticsPolicyInputs
             yield return new()
             {
                 Retention = value
-            };
-        }
-        foreach (var value in new[] { TimeSpan.FromTicks(NegativeTick), TimeSpan.Zero, TimeSpan.FromSeconds(ShortSampleSeconds), TimeSpan.FromSeconds(LongSampleSeconds) })
-        {
-            yield return new()
-            {
-                SampleInterval = value
             };
         }
         foreach (var value in new[] { TimeSpan.FromTicks(NegativeTick), TimeSpan.Zero, TimeSpan.FromMinutes(ShortCheckMinutes), TimeSpan.FromMinutes(LongCheckMinutes) })

@@ -15,7 +15,8 @@ internal static class PartitionMovementParentCapacityResourceRecords
         => checked(ReferenceFieldBytes
             + PartitionMovementParentCapacityBounds.Bound(value.Path) + PartitionMovementParentCapacityBounds.Bound(value.Classification)
             + PartitionMovementParentCapacityBounds.Bound(value.RawReadGrant) + PartitionMovementParentCapacityBounds.Bound(value.RawUseGrant)
-            + PartitionMovementParentCapacityBounds.Bound(value.WriteGrant) + ScalarFieldBytes);
+            + PartitionMovementParentCapacityBounds.Bound(value.WriteGrant) + ScalarFieldBytes
+            + PartitionMovementParentCapacityBounds.Bound(value.SchemaReadGrant));
 
     internal static long Bound(EventRetentionPolicy _)
         => checked(ReferenceFieldBytes

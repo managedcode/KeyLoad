@@ -9,14 +9,20 @@ internal static class GrainAdminDashboardCapabilities
         or GrainReadKind.AdminResources or GrainReadKind.AdminQueue;
 
     internal static async Task<object> ExecuteAsync(DatabaseEngine database, INodeAdministration administration,
-        PrincipalRecord principal, GrainReadKind kind, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        PrincipalRecord principal, GrainReadKind kind, DecodedGrainRequest request, GrainRequestCodec codec,
+        TimeProvider clock, CancellationToken cancellationToken)
     {
         GrainRequestAuthority.RequireAdministrator(principal);
         cancellationToken.ThrowIfCancellationRequested();
+        var payload = request.Payload;
         if (kind == GrainReadKind.AdminDashboard)
         {
             GrainNativePayload.RequireNoDto(payload);
-            return await administration.DashboardAsync(cancellationToken).ConfigureAwait(true);
+            var result = await administration.DashboardAsync(cancellationToken).ConfigureAwait(true);
+            ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, cancellationToken);
+            GrainRequestAuthority.RequireAdministrator(GrainRequestAuthority.ReloadForRequest(database,
+                request.Envelope, clock));
+            return result;
         }
         return kind switch
         {

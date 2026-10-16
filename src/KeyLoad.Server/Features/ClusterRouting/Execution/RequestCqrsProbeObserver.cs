@@ -7,6 +7,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGrainPartitionMovementJournalObserver, IGrainRequestProducerDisposedObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver, IAsyncDisposable
 {
     private readonly Lock disposeSync = new();
+    internal readonly RequestCqrsRetireSealedCapture RetireSealed;
     private readonly RequestCqrsProbeFiles files;
     private readonly RequestCqrsProbeLifecycle lifecycle;
     private readonly ReplicaConfiguration replica;
@@ -50,15 +51,16 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         this.files = files;
         hold = new(files, applicationLifetime, executionOptions, clock ?? TimeProvider.System, CreateMarker, stopping.Token);
         lifecycle = new(executionOptions);
+        RetireSealed = new(files, executionOptions);
         canonicalCuts = new(files, lifecycle, applicationLifetime, executionOptions, clock ?? TimeProvider.System, stopping.Token);
         QueryCuts = new(files, lifecycle, replica.LocalId, siloAddress);
-        nativeModel = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, HoldAsync);
-        nativeReplay = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, HoldAsync);
+        nativeModel = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, hold.RunAsync);
+        nativeReplay = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, hold.RunAsync);
         ReplicaSnapshot = new(files, lifecycle, replicaOptions, executionOptions, clock ?? TimeProvider.System,
-            CreateMarker, HoldAsync, stopping.Token, applicationLifetime.ApplicationStopping);
-        Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => HoldAsync(claim, phase, null, token));
+            CreateMarker, hold.RunAsync, stopping.Token, applicationLifetime.ApplicationStopping);
+        Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => hold.RunAsync(claim, phase, null, token));
         ReplicaLog = new(files, lifecycle, replica.LocalId, siloAddress, CreateReplicaLogMarker, ThrowOrdinary);
-        receiverIssueAdjunct = new(files, lifecycle, CreateMarker, HoldAsync);
+        receiverIssueAdjunct = new(files, lifecycle, CreateMarker, hold.RunAsync);
         ProducerDisposal = new(files, lifecycle, CreateMarker, receiverIssueAdjunct);
         connections = new(() => new ConnectionProbeCapture(files, executionOptions));
     }
@@ -92,6 +94,9 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         lifecycle.EnterCallback();
         return new ValueTask(ObserveCoreAsync(identity, phase, context, cancellationToken));
     }
+
+    public void CaptureSealed(GrainRequestProbeIdentity identity, ReplicatedOperation original, IGrainContext context)
+        => RetireSealed.Capture(lifecycle, identity, original, context);
 
     public void CaptureReturned(GrainRequestProbeIdentity identity, OperationResult actual, IGrainContext context)
         => RequestCqrsMovementJournalCapture.CaptureReturned(lifecycle, files, identity, actual,
@@ -175,7 +180,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
             {
                 ThrowOrdinary();
             }
-            await HoldAsync(claim, selectedPhase, context, requestCancellation).ConfigureAwait(true);
+            await hold.RunAsync(claim, selectedPhase, context, requestCancellation).ConfigureAwait(true);
         }
         finally
         {
@@ -194,10 +199,6 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
 
     private static bool TryGetPhase(GrainRequestPhase phase, out RequestCqrsProbePhase selectedPhase)
         => Enum.TryParse(phase.ToString(), ignoreCase: false, out selectedPhase);
-
-    private Task HoldAsync(RequestCqrsProbeClaim claim, RequestCqrsProbePhase phase,
-        IGrainContext? context, CancellationToken cancellationToken)
-        => hold.RunAsync(claim, phase, context, cancellationToken);
 
     private RequestCqrsProbeMarkerRecord CreateMarker(RequestCqrsProbeClaim claim,
         RequestCqrsProbePhase phase, RequestCqrsProbeOutcome outcome)

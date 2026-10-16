@@ -2,9 +2,9 @@
 
 Owner-selected ZoneTree.Analytics adoption is specified in
 [OperationalAnalytics](ResourceExecution/OperationalAnalytics.md) and
-[ADR-134](../ADR/ADR-134-node-owned-derived-analytics.md). It provides proposed
-node-owned disposable operational history alongside OpenTelemetry. The published1.0.0 package is integrated privately; the actual whole native operations
-and remaining activation/resource gates are recorded in the linked feature contract.
+[ADR-134](../ADR/ADR-134-node-owned-derived-analytics.md). It provides
+node-owned disposable operational history alongside OpenTelemetry. The published1.0.0 package uses the existing physical silo owner and administrator Dashboard; new production/public execution remains OPEN. The original whole native component operations
+and remaining runtime/resource gates are recorded in the linked feature contract.
 Orleans owns the hosting/lifecycle integration.
 
 Actual database phase diagnostics are specified in

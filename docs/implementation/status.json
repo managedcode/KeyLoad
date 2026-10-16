@@ -1,4 +1,91 @@
 {
+  "FUNCTIONAL-GATES-20261016": {
+    "status": "in_progress",
+    "ownerPriority": "One actual working Aspire instance, then the same canonical functional scenario on three genuine RF3 nodes before unrelated 105-task expansion",
+    "workingWindowStartUtc": "2026-10-15T22:18:00Z",
+    "workingWindowEndUtc": "2026-10-16T04:18:00Z",
+    "contract": "docs/Features/DatabaseComposition/FunctionalDatabaseGates.md",
+    "models": [
+      "relational",
+      "documents",
+      "events",
+      "queues",
+      "topics",
+      "graphs",
+      "vectors",
+      "full-text",
+      "time-series/analytics",
+      "blobs"
+    ],
+    "resourcesPerModel": 3,
+    "persistedUsers": 9,
+    "persistedWorkloadUsers": 8,
+    "persistedQueueOperators": 1,
+    "minimumSuccessfulOperationsPerTopology": 10000,
+    "orchestration": "Aspire AppHost owns native Azure Table membership through local Azurite, actual one/three-node resources, readiness, endpoints and joined shutdown",
+    "gate1": "PASSED for the recorded R440 source/executable cohort: genuine one-instance Aspire topology, 10258 successful SDK/MCP public operations, all model scenarios and joined cleanup. Repeat after any gate-affecting repair.",
+    "gate2": "OPEN: R441 genuine three-node RF3 run failed only at full-text search with HistoryUnavailable for an uncaptured frozen read scope; repair then repeat matched Gate1/Gate2.",
+    "latestLocalExecution": {
+      "lane": "Root R441",
+      "result": "failed",
+      "nodes": 3,
+      "elapsedSeconds": 100.79314624983817,
+      "successfulPublicOperations": 1971,
+      "completedInitialWaves": 9,
+      "failedModels": [
+        "full-text search"
+      ],
+      "modelsWithoutAnObservedExerciseFailure": [
+        "documents",
+        "relational",
+        "composition",
+        "events",
+        "queues/topics",
+        "blobs",
+        "graphs",
+        "time-series/analytics"
+      ],
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "processJoined": true,
+      "stdoutSha256": "101d5d84b73ea12bfa6d164f97e954b14e4d12a7bec815b66b17820137e94fb6",
+      "originalReport": "TestResults/stage61-native-join/root-r441-three-node-working-database-functional-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "boundary": "Initial full-model RF3 cycles are partial evidence; HistoryUnavailable from full-text search fails the whole gate before 10000 operations. All original errors and native cleanup retained. No full-task or performance promotion."
+    },
+    "qualification": "No gate pass, full-task promotion, RF3 durability inference from RF1, throughput claim or production readiness follows from source, package presence or build alone",
+    "originalTaskStatusCounts": {
+      "done": 20,
+      "in_progress": 85,
+      "total": 105
+    },
+    "gate1Evidence": {
+      "lane": "Root R440",
+      "result": "passed",
+      "nodes": 1,
+      "successfulPublicOperations": 10258,
+      "sdkOperations": 5288,
+      "mcpOperations": 4970,
+      "completedWaves": 41,
+      "persistedWorkloadUsers": 8,
+      "persistedQueueOperators": 1,
+      "resourcesPerModel": 3,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 221.52084870799445,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "processJoined": true,
+      "stdoutSha256": "33162d2b4e9fc4da81b7dea10496979e53fddecd826a599615fc07b2c874ac6b",
+      "originalReport": "TestResults/stage61-native-join/root-r440-single-instance-native-tsql-redrive-canonical-samples-gate/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "terminalEvaluation": "TestResults/stage61-native-join/root-r440-gate1-terminal-evaluation.original.json",
+      "terminalEvaluationSha256": "5736001d6c8b43f998be5bb9461cba82b10c56303e30c0615849fba766ec1463",
+      "boundary": "Native TUnit passed after caller/Aspire shutdown and storage lock release assertions. Local functional evidence only; single-instance acknowledgement is not RF3 durability or Linux production qualification."
+    }
+  },
   "NATIVE-FOUNDATION-20261015": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,
@@ -189,7 +276,7 @@
         ]
       }
     },
-    "implementationPending": "Strict full Release and full formatter pass; actual current test-owned Aspire RF3 SQL SDK/MCP with two cold cycles passed, selected Unit82/recovery2 passed. Later native storage/lifecycle11 had4failures (startup publication, cancelled framework shutdown, replay-entry oracle) and AppHost fault/refusal full operation failed at stale readiness artifact assertion after live parity. Confirmed defects have separate repair owners. Current checkpoint preserves all failures; no task promotion. Comparison cleanup conversions and complete Linux/fault/endurance/coverage gates remain open.",
+    "implementationPending": "Checkpoint9fb574bd remains committed/pushed with all original failures retained. Current128-path foundation/lifecycle/authorization/browser/Retire-to-Aspire batch is integrated with exact guards and independent whole-source reviews. Original compiler diagnostics have scoped native corrections; fresh strict build, complete native Unit census/meaningful recovery and genuine Aspire SDK/MCP regressions remain pending. Current acceptance20/105; Linux and complete coverage/fault/endurance/performance gates remain open.",
     "remaining": [
       "Qualify the complete one-host lifecycle/storage/native movement foundation; rerun the original native BM25 producer and current AppHost fault/refusal/namespace cases, retaining original failure/cleanup gates",
       "Qualify current public graph-policy, sample correction-predicate and composed-SQL whole operations; keep exact-source Linux and full feature gates open",
@@ -285,6 +372,21 @@
         "record": "TestResults/stage61-native-join/root-r398-native-progress22-intake.original.json",
         "qualified": false,
         "runtime": "Root R405 original native progress classes44/44 passed; complete original BM25 move remains open"
+      },
+      "currentFoundationRepairAndAuthorizationBatch": {
+        "paths": 128,
+        "records": [
+          "TestResults/stage61-native-join/root-r408-original-fixture-readiness-path-whole4.SourceN.prepared.json",
+          "TestResults/stage61-native-join/root-r409-original-transport-and-replay-seven-intake.original.json",
+          "TestResults/stage61-native-join/root-r410-foundation-schema-and-typed-binding59-intake.original.json",
+          "TestResults/stage61-native-join/root-r411-original-startup-publication-seven-intake.original.json",
+          "TestResults/stage61-native-join/root-r412-existing-browser-joined-owner-five-intake.original.json",
+          "TestResults/stage61-native-join/root-r416-original-retire-real-aspire46-intake.original.json"
+        ],
+        "scope": "Original-task foundation: native startup publication and mandatory original shutdown joins, exact signed retry journal oracle, fixture-owned fresh readiness path, typed pre-candidate binding and persisted field-schema authority across projection/Saga/public callers; native browser process/reader join prerequisite for initial Dashboard telemetry. All full original guards and independent peers retained; original R2 strict existing-root helper retained. Original complete Retire operation is now an existing test-owned TwoRf3 Aspire flow: nine exclusive direct-host Unit paths removed, shared BM25 producer retained, signed bounded native observations and genuine SDK/MCP/full-model/two graceful cold waves preserved. Actual native Unit/RF3 inventory enrollment requires fresh reports.",
+        "compiler": "Root R413 failed three IDE0055 in one Core line; native whitespace applied. Root R415 failed sole IDE0005 in typed binder; exact unused import removed. Current128 combined build pending; no diagnostic disabled.",
+        "runtime": "pending focused whole-operation original failures, native schema/binder/Saga, genuine SDK/official MCP Aspire RF3 and actual browser ownership operation",
+        "qualified": false
       }
     },
     "previousModelLocalVerification": {

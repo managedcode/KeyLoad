@@ -11,6 +11,10 @@ public interface IAuthorizationPolicy
     void RequireWriteRow(PrincipalRecord principal, RowAccess access);
     /// <summary>Requires raw field-use permission before filtering, ordering or searching.</summary>
     void RequireFieldUse(PrincipalRecord principal, ResourceDefinition resource, string path);
+    /// <summary>Determines whether the current principal may see this persisted field policy schema.</summary>
+    bool CanReadFieldSchema(PrincipalRecord principal, SensitiveFieldPolicy policy);
+    /// <summary>Requires all effective resource field schema grants before restricted explicit query binding.</summary>
+    void RequireSchemaVisibility(PrincipalRecord principal, ResourceDefinition resource);
     /// <summary>Requires permission to modify the field path.</summary>
     void RequireFieldWrite(PrincipalRecord principal, ResourceDefinition resource, string path);
     /// <summary>Enumerates persisted field policies overlapping the requested path with the evaluator's canonical matching rules.</summary>

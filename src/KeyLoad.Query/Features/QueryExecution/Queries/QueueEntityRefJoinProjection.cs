@@ -16,8 +16,10 @@ internal static class QueueEntityRefJoinProjection
         ResourceDefinition queue, ResourceDefinition target, SelectQuery query,
         DocumentRecord left, DocumentRecord right)
     {
-        var leftSafe = database.Project(principal, queue, left);
-        var rightSafe = database.Project(principal, target, right);
+        var leftProjection = database.ProjectWithLineage(principal, queue, left);
+        var leftSafe = leftProjection.Value;
+        var rightProjection = database.ProjectWithLineage(principal, target, right);
+        var rightSafe = rightProjection.Value;
         using var leftJson = JsonDocument.Parse(leftSafe.Json);
         using var rightJson = JsonDocument.Parse(rightSafe.Json);
         var json = new JsonObject();
@@ -27,13 +29,15 @@ internal static class QueueEntityRefJoinProjection
             var value = JsonData.Scalar(root, selection.Path);
             json[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
         }
-        var leftFields = QueryProjectionRedactions.Selected(database, queue, leftSafe, query.Projection, query.Alias);
-        var rightFields = QueryProjectionRedactions.Selected(database, target, rightSafe, query.Projection, query.InnerJoin?.Alias);
-        var fields = leftFields.Select(field => Field(query.Alias!, field))
-            .Concat(rightFields.Select(field => Field(query.InnerJoin!.Alias, field))).ToImmutableArray();
+        var leftFields = QueryProjectionRedactions.Selected(database, queue, leftSafe,
+            leftProjection.CompleteOmittedPaths, query.Projection, query.Alias);
+        var rightFields = QueryProjectionRedactions.Selected(database, target, rightSafe,
+            rightProjection.CompleteOmittedPaths, query.Projection, query.InnerJoin?.Alias);
+        var fields = leftFields.Fields.Select(field => Field(query.Alias!, field))
+            .Concat(rightFields.Fields.Select(field => Field(query.InnerJoin!.Alias, field))).ToImmutableArray();
         var sources = ImmutableArray.Create(new QueryRowSource(query.Alias!, left.Reference.Id, left.Revision),
             new QueryRowSource(query.InnerJoin!.Alias, right.Reference.Id, right.Revision));
-        return new(left.Reference.Id, left.Revision, json.ToJsonString(), !fields.IsEmpty, fields, sources);
+        return new(left.Reference.Id, left.Revision, json.ToJsonString(), leftFields.Redacted || rightFields.Redacted, fields, sources);
     }
 
     private static string Field(string alias, string field) => alias + SourceSeparator + field.TrimStart(LeadingSeparator);

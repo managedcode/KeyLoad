@@ -44,6 +44,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     private readonly OrleansNodeClosure closure = new();
     internal Task? Closing => Volatile.Read(ref shutdown);
     private Task? startup;
+    private readonly OrleansNodeStartupWait startupWait = new();
     private readonly OrleansNodeDatabaseBootstrap databaseBootstrap = new();
     internal PartitionMovementRuntime? Movement => localRuntime.Movement;
     internal RemoteDocumentRuntime? RemoteDocuments => localRuntime.Documents;
@@ -157,6 +158,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
             var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             startup = databaseBootstrap.StartAsync(registered.Task, this, partition, nodeOptions,
                 runtimeOptions, applicationServices, clock ?? TimeProvider.System, loggerFactory, bootstrapToken);
+            startupWait.Publish(startup);
             registered.SetResult();
             return startup;
         }
@@ -187,6 +189,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
         {
             if (shutdown is null)
             {
+                startupWait.Close();
                 databaseBootstrap.Catalog?.CloseAdmission();
                 var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
                 shutdown = StopCoreAsync(registered.Task, localInitialization, startup);

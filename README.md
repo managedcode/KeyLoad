@@ -92,7 +92,7 @@ flowchart LR
 
 [KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
 
-Execution follows the [foundation-first plan for all105 tasks](docs/Features/RepositoryGovernance/FoundationDelivery.md): native Orleans hosting and silo-local ZoneTree ownership, then protected RF3 operations and model composition. The [current acceptance status](docs/implementation/status.json) remains **20 accepted /85 in progress**. Complete Linux, recovery, security, coverage and performance qualification remains open.
+The immediate priority is the [working database functional gates](docs/Features/DatabaseComposition/FunctionalDatabaseGates.md): the same complete SDK/MCP/SQL model scenario on one Aspire-owned instance, then three RF3 nodes, with eight workload users, one queue operator and at least 10,000 successful public operations per topology. The recorded single-instance gate passed **10,258 operations**, including joined cleanup. The RF3 gate remains open after a full-text frozen-read scope failure. This takes precedence over the broader [foundation-first plan for all105 tasks](docs/Features/RepositoryGovernance/FoundationDelivery.md). The [current acceptance status](docs/implementation/status.json) remains **20 accepted /85 in progress**. Complete Linux, recovery, security, coverage and performance qualification remains open.
 
 
 | Workstream | What it does and why | State | Remaining work |

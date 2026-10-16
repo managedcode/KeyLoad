@@ -55,16 +55,31 @@ internal sealed class NativeCanonicalModelCutLease : IDisposable
     {
         Token.ThrowIfCancellationRequested();
         NativeCanonicalModelCutCodec.ValidateRequest(request);
+        BindCore(request.ArmId, request.SessionId, request.AcceptCommandId, request.LogicalPrincipalId, null);
+    }
+
+    internal void Bind(NativeRetireCutRequest request)
+    {
+        NativeRetireCutWire.Validate(request);
+        BindCore(request.ArmId, request.SessionId, request.CommandId, request.PrincipalId,
+            RequestCqrsProbePhase.RetireOperationSealed);
+    }
+
+    private void BindCore(Guid armId, string sessionId, Guid commandId, string principalId,
+        RequestCqrsProbePhase? requiredPhase)
+    {
+        Token.ThrowIfCancellationRequested();
         if (arm is not null)
         {
             throw NativeCanonicalModelCutCodec.Invalid();
         }
         var snapshot = files.ReadSnapshot();
-        var selected = snapshot.Arms.SingleOrDefault(candidate => candidate.Record.ArmId == request.ArmId);
-        if (selected is null || selected.Record.SessionId != request.SessionId
-            || selected.Record.CommandId != request.AcceptCommandId
-            || selected.Record.PrincipalId != request.LogicalPrincipalId
-            || selected.Record.ReadKind is not null || selected.Record.Action != RequestCqrsProbeAction.Hold)
+        var selected = snapshot.Arms.SingleOrDefault(candidate => candidate.Record.ArmId == armId);
+        if (selected is null || selected.Record.SessionId != sessionId
+            || selected.Record.CommandId != commandId
+            || selected.Record.PrincipalId != principalId
+            || selected.Record.ReadKind is not null || selected.Record.Action != RequestCqrsProbeAction.Hold
+            || requiredPhase is { } phase && selected.Record.Phase != phase)
         {
             throw NativeCanonicalModelCutCodec.Invalid();
         }

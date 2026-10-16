@@ -44,6 +44,8 @@ internal static class RelationalInnerJoinExecutor
         ResourceDefinition leftResource, ResourceDefinition rightResource, AstQueryRequest request,
         ReadExecutionBudget budget, InnerJoinClause join)
     {
+        database.Authorization.RequireSchemaVisibility(principal, leftResource);
+        database.Authorization.RequireSchemaVisibility(principal, rightResource);
         var query = request.Query;
         var leftSchema = leftResource.RelationalSchema;
         var rightSchema = rightResource.RelationalSchema;

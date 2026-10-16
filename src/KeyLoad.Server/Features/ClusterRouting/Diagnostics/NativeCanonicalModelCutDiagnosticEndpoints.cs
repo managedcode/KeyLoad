@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -13,6 +14,7 @@ internal static class NativeCanonicalModelCutDiagnosticEndpoints
             return;
         }
         app.MapPost(NativeCanonicalModelCutDiagnosticProtocol.Path, ReadAsync);
+        NativeRetireCutEndpoints.Map(app);
     }
 
     private static async Task<IResult> ReadAsync(HttpContext context, PartitionHostApplicationOwner owner, OrleansNode node, TimeProvider clock)

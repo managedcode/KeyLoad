@@ -3,15 +3,16 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Retains only original source policy paths contributing to the selected row.</summary>
+/// <summary>Separates complete selected source redaction from publicly visible policy paths.</summary>
 internal static class QueryProjectionRedactions
 {
-    internal static ImmutableArray<string> Selected(DatabaseEngine database, ResourceDefinition resource,
-        DocumentResult safe, ImmutableArray<Selection> selections, string? sourceAlias = null)
+    internal static (bool Redacted, ImmutableArray<string> Fields) Selected(DatabaseEngine database,
+        ResourceDefinition resource, DocumentResult safe, ImmutableArray<string> completeOmittedPaths,
+        ImmutableArray<Selection> selections, string? sourceAlias = null)
     {
-        if (safe.RedactedFields.IsEmpty)
+        if (completeOmittedPaths.IsEmpty)
         {
-            return [];
+            return (false, []);
         }
         var relevant = new HashSet<string>(StringComparer.Ordinal);
         foreach (var selection in selections)
@@ -22,13 +23,19 @@ internal static class QueryProjectionRedactions
             }
             if (selection.Path == SqlSyntax.Star)
             {
-                return safe.RedactedFields;
+                return (true, safe.RedactedFields);
+            }
+            if (selection.Path is SqlSyntax.MetadataIdPath or SqlSyntax.MetadataRevisionPath)
+            {
+                continue;
             }
             foreach (var policy in database.Authorization.GetEffectiveFieldPolicies(resource, selection.Path))
             {
                 relevant.Add(policy.Path);
             }
         }
-        return safe.RedactedFields.Where(relevant.Contains).ToImmutableArray();
+        var redacted = completeOmittedPaths.Any(relevant.Contains);
+        var visible = safe.RedactedFields.Where(relevant.Contains).ToImmutableArray();
+        return (redacted, visible);
     }
 }

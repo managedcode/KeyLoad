@@ -75,6 +75,9 @@ internal static class LocalRf3ImageSelection
     private const string FoundationTelemetryFilterArgument = "--KeyLoadTests:Filter=/*/*/FoundationOtlpRf3Tests/NativeDashboardReceivesActualRf3SdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs";
     private const string AspireFaultFilterArgument = "--KeyLoadTests:Filter=/*/*/AspireContainerFaultCommandTests/WrongStaleAndForeignIdsRefuseWithoutEffectsBeforeHealthySdkMcpRestart";
     private const string AcceptedRestartCancellationFilterArgument = "--KeyLoadTests:Filter=/*/*/AggregateReplayRf3LeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay";
+    private const string OriginalRetireAspireFilterArgument = "--KeyLoadTests:Filter=/*/*/ControlledPartitionMovementNativeRetireTests/OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners";
+    private const string FunctionalSingleFilterArgument = "--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers";
+    private const string FunctionalClusterFilterArgument = "--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -127,7 +130,8 @@ internal static class LocalRf3ImageSelection
                 or SlowBodyReturnFilterArgument or RowRevisionAdmissionFilterArgument
                 or FoundationAdmissionRepairFilterArgument or CatalogBootstrapAuthorityFilterArgument
                 or FoundationAdmissionAuthorityFilterArgument or FoundationTelemetryFilterArgument
-                or AspireFaultFilterArgument or AcceptedRestartCancellationFilterArgument
+                or AspireFaultFilterArgument or AcceptedRestartCancellationFilterArgument or OriginalRetireAspireFilterArgument
+                or FunctionalSingleFilterArgument or FunctionalClusterFilterArgument
                 or CurrentGraphSearchPathPolicyFilterArgument or CurrentSampleChunkCorrectionFilterArgument or CurrentSqlGraphPublicFilterArgument or CurrentSqlGraphSamplePublicFilterArgument or CurrentGraphSamplePublicFilterArgument or CurrentFoundationRf3FilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()

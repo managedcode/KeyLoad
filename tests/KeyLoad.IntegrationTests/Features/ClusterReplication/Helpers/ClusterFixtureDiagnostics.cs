@@ -63,13 +63,13 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     /// <param name="adminCredential">The actual persisted administrator credential for authenticated diagnostics.</param>
     /// <param name="incarnation">The original configured RF3 incarnation bound to signed discovery.</param>
     /// <param name="cancellationToken">The caller's test deadline, linked to the diagnostic request bound.</param>
-    internal async Task SaveAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, CancellationToken cancellationToken)
-        => await SaveCoreAsync(peerSecret, adminCredential, incarnation, null, cancellationToken).ConfigureAwait(false);
+    internal Task<string> SaveAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, CancellationToken cancellationToken)
+        => SaveCoreAsync(peerSecret, adminCredential, incarnation, null, cancellationToken);
 
     internal Task SaveOwnedAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, string output, CancellationToken cancellationToken)
         => SaveCoreAsync(peerSecret, adminCredential, incarnation, output, cancellationToken);
 
-    private async Task SaveCoreAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, string? ownedOutput, CancellationToken cancellationToken)
+    private async Task<string> SaveCoreAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, string? ownedOutput, CancellationToken cancellationToken)
     {
         var nodeGroups = new List<IEnumerable<string>>();
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
@@ -105,7 +105,14 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
             : ClusterFailureReceipts.SaveImmutable(ownedOutput, bounded);
         app.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save(output);
         LogSaved(app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>(), path, bounded.Length, null);
+        return path;
     }
+
+    internal string[] SnapshotResourceLogs(IEnumerable<string> names)
+        => BoundedDiagnosticLog.Bound(names.SelectMany(name =>
+            logEvidence.Values.Where(entry => entry.NodeName == name).Select(entry => entry.Snapshot())
+                .Concat(ReadFailures(name).Select(line => name + ": " + line))
+                .Concat(ReadTail(name).Reverse().Select(line => name + ": " + line))));
 
     /// <summary>Locates the solution root for the bounded qualification artifact.</summary>
     /// <returns>The nearest directory containing the solution marker.</returns>

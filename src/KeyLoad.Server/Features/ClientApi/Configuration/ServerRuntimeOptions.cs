@@ -33,6 +33,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<TenantPlacementExecutionOptions> TenantPlacement,
     IOptions<RemoteDocumentExecutionOptions> RemoteDocuments,
     IOptions<AdminObservationOptions> AdminObservation,
+    IOptions<OperationalAnalyticsOptions> OperationalAnalytics,
     IOptions<NativeTextExecutionOptions> NativeText,
     IOptions<NativeAnnExecutionOptions> NativeAnn,
     IOptions<ServerExecutionOptions> ServerExecution,
@@ -63,6 +64,7 @@ internal sealed record ServerRuntimeOptions(
         _ = TenantPlacement.Value;
         _ = RemoteDocuments.Value;
         _ = AdminObservation.Value;
+        _ = OperationalAnalytics.Value;
         _ = NativeText.Value;
         _ = NativeAnn.Value;
         _ = ServerExecution.Value;

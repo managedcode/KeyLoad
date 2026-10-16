@@ -32,9 +32,10 @@ public sealed class ReplicaTransportLifecycle : ILifecycleParticipant<ISiloLifec
         }
     }
 
-    /// <summary>Registers the original drain after membership teardown, while transport still exists.</summary>
+    /// <summary>Registers the mandatory original drain after membership teardown, independent of framework escalation.</summary>
     public void Participate(ISiloLifecycle lifecycle) => lifecycle.Subscribe(ReplicaTransportProtocol.LifecycleName,
-        ServiceLifecycleStage.RuntimeStorageServices, _ => Task.CompletedTask, StopAsync);
+        ServiceLifecycleStage.RuntimeStorageServices, _ => Task.CompletedTask,
+        _ => StopAsync(CancellationToken.None));
 
     /// <summary>Returns the same original captured-owner drain for native and later physical-close joins.</summary>
     public Task StopAsync(CancellationToken cancellationToken)

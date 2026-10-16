@@ -18,6 +18,10 @@ internal sealed class RecurringSagaPolicyTests
     private const string FieldWrite = RecurringSagaDatabase.FieldWriteGrant;
 
     [Test]
+    public Task SchemaHiddenScheduleHeadersAndSagaStateFollowCurrentGrantsThroughReplayAndTwoCold()
+        => RecurringSagaSchemaFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
     public async Task SchedulerCapabilitiesRemainRequiredEvenForClusterAdministrator()
     {
         var protectedPolicy = new[]

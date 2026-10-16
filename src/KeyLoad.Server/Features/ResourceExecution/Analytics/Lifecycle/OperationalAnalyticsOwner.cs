@@ -43,12 +43,15 @@ internal sealed class OperationalAnalyticsOwner : IAsyncDisposable
         engine = new AnalyticsEngine(OperationalAnalyticsNativeConfiguration.Create(nodeDirectory, settings, failures));
     }
 
-    internal bool TryRecord(ReplicaNodeState snapshot)
+    internal bool TryRecord(ReplicaNodeState snapshot) => TryRecord(snapshot, out _);
+
+    internal bool TryRecord(ReplicaNodeState snapshot, out DateTimeOffset sampledAt)
     {
         lock (lifecycle)
         {
             RequireAdmission();
-            return engine.Track(OperationalAnalyticsSample.Create(snapshot, clock.GetUtcNow()));
+            sampledAt = clock.GetUtcNow();
+            return engine.Track(OperationalAnalyticsSample.Create(snapshot, sampledAt));
         }
     }
 

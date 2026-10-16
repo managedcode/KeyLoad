@@ -56,10 +56,12 @@ public sealed record IndexDefinition([property: Orleans.Id(0)] string Name, [pro
 /// <param name="RawUseGrant">Names the grant required to use raw values.</param>
 /// <param name="WriteGrant">Names the grant required to write values.</param>
 /// <param name="RequiredForProcessing">Requires this field for processing when true.</param>
+/// <param name="SchemaReadGrant">Names the grant required to disclose field schema, or null for public schema.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.SensitiveFieldPolicy)]
 public sealed record SensitiveFieldPolicy([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] string Classification, [property: Orleans.Id(2)] string RawReadGrant = SensitiveFieldPolicy.DefaultRawReadGrant,
-    [property: Orleans.Id(3)] string RawUseGrant = SensitiveFieldPolicy.DefaultRawUseGrant, [property: Orleans.Id(4)] string WriteGrant = SensitiveFieldPolicy.DefaultWriteGrant, [property: Orleans.Id(5)] bool RequiredForProcessing = false)
+    [property: Orleans.Id(3)] string RawUseGrant = SensitiveFieldPolicy.DefaultRawUseGrant, [property: Orleans.Id(4)] string WriteGrant = SensitiveFieldPolicy.DefaultWriteGrant, [property: Orleans.Id(5)] bool RequiredForProcessing = false,
+    [property: Orleans.Id(6), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? SchemaReadGrant = null)
 {
     private const string DefaultRawReadGrant = "pii.read";
     private const string DefaultRawUseGrant = "pii.use";

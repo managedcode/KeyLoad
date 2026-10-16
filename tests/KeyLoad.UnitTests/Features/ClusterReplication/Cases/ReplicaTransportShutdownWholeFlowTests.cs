@@ -5,10 +5,12 @@ namespace KeyLoad.UnitTests.Features.ClusterReplication;
 internal sealed class ReplicaTransportShutdownWholeFlowTests(RequestCqrsCohortRuntimeFixture runtime)
 {
     [Test]
-    public async Task OriginalDiscoveryAndEndpointFailuresJoinBeforeAggregateThenFreshNativeOwnersAreHealthy()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task OriginalDiscoveryAndEndpointFailuresJoinBeforeAggregateThenFreshNativeOwnersAreHealthy(bool frameworkCancelled)
     {
         using var deadline = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound, TimeProvider.System);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
-        await ReplicaTransportShutdownFlow.RunAsync(runtime, caller.Token);
+        await ReplicaTransportShutdownFlow.RunAsync(runtime, frameworkCancelled, caller.Token);
     }
 }

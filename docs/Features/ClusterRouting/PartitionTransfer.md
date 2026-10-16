@@ -1,5 +1,7 @@
 # ClusterRouting: bounded partition record pages
 
+[Original Retire Aspire ownership](RetireAspireOwnership.md) replaces the direct-host composition of the original cancellation/graceful-stop/mixed-model/two-cold operation. Its complete correctness gates remain mandatory; source preparation is not a runtime pass.
+
 ### Persisted local phase observation intent
 REQ/AC-PMOVE-NATIVE-OBSERVED-INTENT-001: when a local Control phase has a successful original persisted outcome, its observation checkpoint uses that exact outcome journal's ControlIntentDigest. The pre-effect parent state is not current authority after Prepare or another local Control mutation. Validate the same MoveId, phase stage, original phase CommandId, positive applied position, full Control physical owner and bounded canonical digest; a returned Control record, when present, must carry the same digest. The existing Core checkpoint scope and exact stored original outcome verification remain authoritative.
 

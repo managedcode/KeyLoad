@@ -32,6 +32,7 @@ internal static class GrainPartitionMovementCommand
         if (phase.Stage == PartitionMovePeerStage.Retire && phase.ReceiverEffectAdmission is not null
             && codec is { HasPhaseObserver: true })
         {
+            GrainPartitionMovementJournalObservation.CaptureSealed(codec, request, operation, context);
             await codec.ObservePhaseAsync(request, GrainRequestPhase.RetireOperationSealed, context,
                 cancellationToken).ConfigureAwait(true);
         }

@@ -6,6 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 internal sealed class AdminBrowserCdp : IAsyncDisposable
 {
     private readonly ClientWebSocket socket = new();
+    private readonly Lock disposalGate = new();
+    private Task? disposal;
     private int requestId;
     internal AdminBrowserNetwork Network { get; } = new();
 
@@ -95,7 +97,15 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
+        lock (disposalGate)
+        {
+            return new(disposal ??= DisposeCoreAsync());
+        }
+    }
+
+    private async Task DisposeCoreAsync()
+    {
         socket.Dispose();
-        return ValueTask.CompletedTask;
+        await Task.CompletedTask.ConfigureAwait(false);
     }
 }

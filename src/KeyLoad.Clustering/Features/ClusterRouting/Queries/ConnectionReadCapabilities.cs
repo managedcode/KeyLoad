@@ -138,7 +138,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (GrainAdminDashboardCapabilities.Handles(kind))
         {
             return await GrainAdminDashboardCapabilities.ExecuteAsync(localDatabase, Administration, principal,
-                kind, request.Payload, cancellationToken).ConfigureAwait(true);
+                kind, request, codec, runtimeClock, cancellationToken).ConfigureAwait(true);
         }
         if (GrainBlobReadCapabilities.Handles(kind))
         {

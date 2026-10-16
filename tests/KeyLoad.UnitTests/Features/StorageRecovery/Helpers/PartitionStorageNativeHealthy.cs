@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageNativeHealthy
 {
-    internal static async Task<CommitReceipt> ExecuteAsync(ControlledPartitionMovementNativeHost source,
+    internal static async Task<PartitionStorageNativeCommit> ExecuteAsync(ControlledPartitionMovementNativeHost source,
         CancellationToken token)
     {
         var definition = new ConfigureResourceRequest(P.Partition.TenantId, P.Partition.DatabaseId,
@@ -29,19 +29,20 @@ internal static class PartitionStorageNativeHealthy
             [new(P.PutKind, P.Collection, P.Document, P.InitialRevision)], DurabilityProfile.QuorumProcessDurable);
         await RequireReceiptAsync(reply, expected).ConfigureAwait(false);
         await PartitionStorageNativeRead.RequireAsync(source, expected.Token, token).ConfigureAwait(false);
-        return expected;
+        return new(expected, entry, PartitionStorageNativeReplay.ReadBytes(source, entry.Index, token));
     }
 
     internal static async Task ReplayAsync(ControlledPartitionMovementNativeHost source,
-        CommitReceipt expected, CancellationToken token)
+        PartitionStorageNativeCommit original, CancellationToken token)
     {
+        await PartitionStorageNativeReplay.RequireOriginalAsync(source, original, token).ConfigureAwait(false);
+        var committedBefore = source.Log.State.CommittedIndex;
         var reply = await source.SubmitAsync(OperationKind.Batch, P.Command, P.Root,
             NativeSerialization.Serialize(P.Request()), token).ConfigureAwait(false);
-        await RequireReceiptAsync(reply, expected).ConfigureAwait(false);
-        var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(source, P.Command, token)
-            .ConfigureAwait(false);
-        await Assert.That(entry.Index).IsEqualTo(expected.Token.Position);
-        await PartitionStorageNativeRead.RequireAsync(source, expected.Token, token).ConfigureAwait(false);
+        await RequireReceiptAsync(reply, original.Receipt).ConfigureAwait(false);
+        await PartitionStorageNativeReplay.RequireOriginalAsync(source, original, token).ConfigureAwait(false);
+        await PartitionStorageNativeReplay.RequireAdmissionAsync(source, committedBefore, token).ConfigureAwait(false);
+        await PartitionStorageNativeRead.RequireAsync(source, original.Receipt.Token, token).ConfigureAwait(false);
     }
 
     private static async Task RequireReceiptAsync(GrainOperationReply reply, CommitReceipt expected)

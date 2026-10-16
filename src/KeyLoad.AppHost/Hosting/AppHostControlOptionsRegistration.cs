@@ -27,6 +27,12 @@ internal static class AppHostControlOptionsRegistration
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string InvalidLoggerModelControl = "The C1 logger model control selection is invalid.";
+    private const string FunctionalNodeCountSetting = "KeyLoadTests:FunctionalNodeCount";
+    private const string SingleFunctionalNode = "1";
+    private const string ThreeFunctionalNodes = "3";
+    private const int SingleFunctionalNodeCount = 1;
+    private const int ThreeFunctionalNodeCount = 3;
+    private const string InvalidFunctionalTopology = "Functional topology requires one or three real ephemeral nodes and an exclusive owned data root.";
     private const string NativeBlobRootKey = "Root";
     private const string NativeBlobSessionKey = "SessionId";
     private const int SectionPresenceCount = 1;
@@ -66,10 +72,41 @@ internal static class AppHostControlOptionsRegistration
                 value.EventVectorReservedProbe = EventVectorReservedProbeProfile.Read(configuration, value);
                 value.NativeBlobWireProbe = ReadNativeBlobWireProbe(configuration, value);
                 value.ProtectedMovementProbe = ProtectedMovementProbeProfile.Read(configuration, value);
+                value.FunctionalNodeCount = ReadFunctionalNodeCount(configuration, value);
             })], [], []));
         _ = options.Value;
         return options;
     }
+    private static int? ReadFunctionalNodeCount(IConfiguration configuration, AppHostControlOptions options)
+    {
+        var section = configuration.GetSection(FunctionalNodeCountSetting);
+        var selected = section.Value;
+        var nested = section.GetChildren().Take(SectionPresenceCount).Any();
+        if (selected is null && !nested)
+        {
+            return null;
+        }
+        if (selected is not (SingleFunctionalNode or ThreeFunctionalNodes) || nested
+            || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
+            || string.IsNullOrWhiteSpace(configuration[DataRootSetting])
+            || !Path.IsPathFullyQualified(configuration[DataRootSetting]!)
+            || options.Tests is not null || options.TwoRf3 || options.BenchmarksEnabled
+            || options.TargetSelected || options.ComparisonSelectorsPresent || options.ScaleSelected
+            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.ContainerFaults
+            || options.LoggerModelControl || options.RequestProbe is not null
+            || options.MovementFrameObservation is not null || options.NativeDiscoveryOmission is not null
+            || options.EventVectorReservedProbe || options.NativeBlobWireProbe is not null || options.ProtectedMovementProbe
+            || HasSection(configuration, BenchmarkTimeSeries)
+            || configuration[ComparisonWorkerSelection.OpenLoopRateSetting] is not null
+            || configuration[ComparisonWorkerSelection.VectorProfileSetting] is not null
+            || configuration[TestSuiteSelectionValidator.OpenLoopRateSetting] is not null
+            || configuration[TestSuiteSelectionValidator.OpenLoopCancellationProofSetting] is not null)
+        {
+            throw new InvalidOperationException(InvalidFunctionalTopology);
+        }
+        return selected == SingleFunctionalNode ? SingleFunctionalNodeCount : ThreeFunctionalNodeCount;
+    }
+
     private static bool ReadContainerFaults(IConfiguration configuration, AppHostControlOptions options)
     {
         var enabled = configuration.GetValue<bool>(ContainerFaultCommandProtocol.EnabledSetting);

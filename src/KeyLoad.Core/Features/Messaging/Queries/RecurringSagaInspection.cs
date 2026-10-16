@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -88,14 +89,21 @@ public sealed partial class DatabaseEngine
         _ = RecurringSagaStorage.RequireCapacity(view, lane);
         var payload = Authorization.Project(principal, resource.FieldPolicies, record.Definition.PayloadJson, out var payloadOmitted);
         var headers = Authorization.Project(principal, resource.HeaderPolicies, record.Definition.HeadersJson, out var headerOmitted);
-        var redactedFields = ProjectRedactedPaths(payloadOmitted, headerOmitted);
+        var visiblePayload = FieldRedactionMetadata.Visible(Authorization, principal, resource, payloadOmitted);
+        var visibleHeaders = FieldRedactionMetadata.Visible(Authorization, principal,
+            resource with
+            {
+                FieldPolicies = resource.HeaderPolicies
+            }, headerOmitted);
+        var redactedFields = ProjectRedactedPaths(visiblePayload, visibleHeaders);
         var definition = record.Definition with
         {
             PayloadJson = payload,
             HeadersJson = headers
         };
         return new(definition, record.Revision, record.Generation, record.NextOrdinal, record.Cancelled,
-            redactedFields.Length != RecurringSagaInspectionEmptyElementCount, redactedFields);
+            payloadOmitted.Length != RecurringSagaInspectionEmptyElementCount
+                || headerOmitted.Length != RecurringSagaInspectionEmptyElementCount, redactedFields);
     }
 
     private SagaInspection ProjectSaga(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
@@ -104,12 +112,13 @@ public sealed partial class DatabaseEngine
         ValidateSagaRecord(record, lane, sagaId);
         _ = RecurringSagaStorage.RequireCapacity(view, lane);
         var state = Authorization.Project(principal, resource.FieldPolicies, record.StateJson, out var omitted);
-        var redactedFields = omitted.Select(path => string.Concat(StateRedactionPrefix, path)).ToImmutableArray();
+        var redactedFields = FieldRedactionMetadata.Visible(Authorization, principal, resource, omitted)
+            .Select(path => string.Concat(StateRedactionPrefix, path)).ToImmutableArray();
         return new(lane, sagaId, record.Revision, record.Phase, state, record.Deadline,
-            redactedFields.Length != RecurringSagaInspectionEmptyElementCount, redactedFields);
+            omitted.Length != RecurringSagaInspectionEmptyElementCount, redactedFields);
     }
 
-    private static ImmutableArray<string> ProjectRedactedPaths(string[] payload, string[] headers)
+    private static ImmutableArray<string> ProjectRedactedPaths(ImmutableArray<string> payload, ImmutableArray<string> headers)
     {
         var paths = ImmutableArray.CreateBuilder<string>(payload.Length + headers.Length);
         paths.AddRange(payload.Select(path => string.Concat(PayloadRedactionPrefix, path)));

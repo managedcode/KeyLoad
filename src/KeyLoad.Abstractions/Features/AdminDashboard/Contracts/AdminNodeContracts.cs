@@ -73,4 +73,11 @@ public sealed record AdminNodeSnapshot([property: Orleans.Id(0)] DateTimeOffset 
     /// <summary>Gets the configured voter membership; membership never implies that another voter is healthy.</summary>
     [Orleans.Id(6)]
     public ImmutableArray<string> Voters { get; init; } = [];
+
+    /// <summary>Gets bounded native derived history of this physical node; null when the embedding host provides none.</summary>
+    [Orleans.Id(7)]
+    public OperationalAnalyticsReport? OperationalAnalytics
+    {
+        get; init;
+    }
 }

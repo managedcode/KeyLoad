@@ -80,7 +80,8 @@ internal static class KeyLoadAppHostApplication
             _ = TwoRf3ClusterResources.Add(builder, profile, configuration.DataRoot);
             return;
         }
-        var nodes = global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral);
+        var nodes = global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral,
+            functionalNodeCount: runtimeOptions.Control.Value.FunctionalNodeCount);
         if (configuration.BenchmarkMode)
         {
             var admin = builder.CreateResourceBuilder(builder.Resources.OfType<ParameterResource>()

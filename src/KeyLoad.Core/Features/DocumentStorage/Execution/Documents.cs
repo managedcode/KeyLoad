@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage;
 
@@ -101,6 +102,9 @@ public sealed partial class DatabaseEngine
     /// <param name="record">Document at the current read cut.</param>
     /// <returns>An owned projected document result.</returns>
     public DocumentResult Project(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord record)
+        => ProjectWithLineage(principal, resource, record).Value;
+
+    internal DocumentProjection ProjectWithLineage(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord record)
     {
         const int RedactedEmptyCount = 0;
 
@@ -108,7 +112,9 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(resource);
         ArgumentNullException.ThrowIfNull(record);
         var json = Authorization.Project(principal, resource.FieldPolicies, record.Json, out var omitted);
-        return new(record.Reference, record.Revision, json, omitted.Length != RedactedEmptyCount, [.. omitted]);
+        var visible = FieldRedactionMetadata.Visible(Authorization, principal, resource, omitted);
+        var value = new DocumentResult(record.Reference, record.Revision, json, omitted.Length != RedactedEmptyCount, visible);
+        return new(value, [.. omitted]);
     }
     /// <summary>Runs one authorized query callback inside a consistent storage read gate.</summary>
     /// <typeparam name="T">Owned callback result type.</typeparam>

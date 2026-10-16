@@ -36,6 +36,22 @@ internal sealed record McpPersistedIdentity(PrincipalRecord Principal, ApiKeyRec
     internal static async Task<McpPersistedIdentity> CreateAsync(ClusterFixture fixture, PartitionRef partition,
         string resourceName, Capability capabilities, CancellationToken cancellationToken)
     {
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
+        return await CreateAsync(administrator, partition, resourceName, capabilities, cancellationToken);
+    }
+
+    /// <summary>Reuses native persisted identity creation with an already owned real administrator SDK.</summary>
+    /// <param name="administrator">The real public SDK authenticated as the persisted administrator.</param>
+    /// <param name="partition">The actual identity tenant and scoped database.</param>
+    /// <param name="resourceName">The resource receiving the initial persisted grant.</param>
+    /// <param name="capabilities">The initial native capability set.</param>
+    /// <param name="cancellationToken">The original bounded caller lifetime.</param>
+    /// <returns>The genuinely persisted identity and its private generated credential.</returns>
+    internal static async Task<McpPersistedIdentity> CreateAsync(KeyLoadClient administrator, PartitionRef partition,
+        string resourceName, Capability capabilities, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(administrator);
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
         var id = PrincipalPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var principal = new PrincipalRecord(id, partition.TenantId,
@@ -43,8 +59,6 @@ internal sealed record McpPersistedIdentity(PrincipalRecord Principal, ApiKeyRec
         var keyId = CredentialPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var secret = keyId + Separator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
         var credential = new ApiKeyRecord(keyId, id, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal, cancellationToken));
         await Assert.That(persisted.Id).IsEqualTo(principal.Id);
         await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), credential, cancellationToken))).IsSuccess).IsTrue();

@@ -15,8 +15,13 @@ internal sealed record NodeOptions
     public string PublicEndpoint { get; init; } = NodeDefaults.PublicEndpoint;
     /// <summary>Fixed voter origins including the local origin; production requires an odd group of at least three.</summary>
     public IReadOnlyList<string> Peers { get; init; } = [];
-    /// <summary>Trusted startup opt-in for isolated benchmark fixed groups of one, two or three voters.</summary>
+    /// <summary>Trusted startup opt-in for isolated benchmark fixed groups of one or three voters.</summary>
     public bool BenchmarkTopology
+    {
+        get; init;
+    }
+    /// <summary>Explicit development-only single physical voter; acknowledgement has no replica fault tolerance.</summary>
+    public bool DevelopmentSingleVoter
     {
         get; init;
     }
@@ -118,7 +123,8 @@ internal sealed record NodeOptions
         const int PeersCountValidationBoundary = 2;
         const int EmptyPeersCount = 0;
 
-        if (Peers is null || (BenchmarkTopology
+        if (Peers is null || DevelopmentSingleVoter && (BenchmarkTopology || !AllowPrivateNetworkHttp && !AllowLoopbackHttp)
+            || (DevelopmentSingleVoter ? Peers.Count != NodeDefaults.DevelopmentVoters : BenchmarkTopology
                 ? Peers.Count is not (NodeDefaults.MinimumBenchmarkVoters or NodeDefaults.MaximumBenchmarkVoters)
                 : Peers.Count < NodeDefaults.MinimumVoters || Peers.Count % PeersCountValidationBoundary == EmptyPeersCount)
             || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Count
@@ -166,6 +172,7 @@ internal sealed record NodeOptions
     public ReplicaConfiguration CreateReplicaConfiguration(string directory) => new(PublicEndpoint, [.. Peers], directory, Incarnation)
     {
         BenchmarkTopology = BenchmarkTopology,
+        DevelopmentSingleVoter = DevelopmentSingleVoter,
         SnapshotThreshold = SnapshotThreshold,
         LowerElectionTimeout = TimeSpan.FromMilliseconds(LowerElectionTimeoutMilliseconds),
         UpperElectionTimeout = TimeSpan.FromMilliseconds(UpperElectionTimeoutMilliseconds),
@@ -194,6 +201,7 @@ internal sealed record NodeOptions
         internal const string InvalidIdentity = "Cluster identity, credentials or silo port are invalid.";
         internal const string InvalidPeers = "Cluster origins require distinct fixed voters, private development HTTP or HTTPS, and a local member.";
         internal const string InvalidAddress = "A remote voter requires a routable advertised silo address.";
+        internal const int DevelopmentVoters = 1;
         internal const int MinimumVoters = 3;
         internal const int MinimumBenchmarkVoters = 1;
         internal const int MaximumBenchmarkVoters = 3;

@@ -11,3 +11,44 @@ AC-KL048-FIELD-002: LOWER, CAST and COALESCE projection attempts fail with exact
 AC-KL048-FIELD-003: Exact original mutation/receipt fields and same-ID replay survive two genuine existing-only opens of the same root, including full image, position and identity equality. All owned resources join and independent failures remain retained.
 
 This is newly authored Unit coverage over real native components, not runtime evidence. Semantic compilation, full original runtime execution/deadline fit, Linux qualification, SDK/official MCP RF3, complete binder type inference and SQL conformance remain OPEN. No product defect or performance improvement is claimed from this source packet.
+
+
+## Typed predicate binding before candidate access
+
+TASK-KL048-TYPED-BIND-001 implements the original KL-048 type-inference and
+pre-data-access binding requirement for the existing single-source typed
+Collection predicates and ordering. A known WholeNumber field compared with a
+string was previously validated only when a candidate row reached the evaluator;
+an empty table could return a page for the same invalid expression. This is a
+source-confirmed cardinality-dependent gap, not a measured runtime failure.
+
+After existing fresh persisted field-use permission and parameter validation,
+`QueryFieldAuthorization.Bind` resolves predicate and ordering fields against the
+same-cut `ResourceDefinition.RelationalSchema`, using native schema validation.
+Unknown predicate/order fields and incompatible known operand domains reject
+with Validation and exactly `The typed query binding is invalid.` before candidate
+access. Native schema validation retains its existing classification, detail and
+bounds: an unsupported declared scalar type fails with `The relational schema is
+invalid.`, and an excessive schema retains its native ResourceExhausted limit. Existing Comparison, IN, logical, negated and
+null-test nodes are visited completely. WholeNumber/FixedPoint preserve the
+existing decimal comparison domain; Text/UtcTimestamp preserve string comparison;
+Boolean remains boolean. NULL keeps existing three-valued semantics. No cast,
+conversion, function, grammar, schema, serializer or public AST is added.
+
+Projection paths and source masking/aliases retain their existing behavior,
+including unknown projection paths. Untyped documents and joins/model sources
+retain their existing independent contracts; shared `Validate` is unchanged.
+Principal permissions are reloaded per operation and are never cached by binding.
+
+The native `RelationalQueryBindingWholeFlowTests` operation owns an actual
+unindexed ZoneTree typed table. It repeats invalid SQL/direct/JSON/native AST
+comparisons, IN, nested predicates and unknown predicate/order paths before and
+after a literal acknowledged seed, checks zero additional native range attempts,
+and preserves full image/cut/identity. Metadata point I/O remains permitted; this
+is not zero-storage-I/O or indexed-path evidence. Literal numeric/field/null
+controls, fresh persisted denial/repair, original-token cancellation, exact seed
+receipt replay and two same-root cold continuations remain mandatory.
+
+Source-only: semantic build, original native execution, Linux RF3 SDK/official
+MCP, full binder catalog identity/functions/casts and resource qualification remain
+OPEN. The single-source typed slice does not close whole KL-048.

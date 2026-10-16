@@ -1,5 +1,6 @@
 using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 
@@ -26,28 +27,37 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         var scenario = await AdminDashboardScenario.CreateAsync(fixture, deadline.Token);
         using var http = fixture.App.CreateHttpClient(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint);
         var url = new Uri(http.BaseAddress!, AdminPath).AbsoluteUri;
-        await using var browser = await AdminBrowserProcess.StartAsync(deadline.Token);
-        await AdminBrowserLifecycleAssertions.BeginNetworkAsync(browser.Cdp, deadline.Token);
-        await browser.Cdp.CommandAsync(AdminBrowserProtocol.PageNavigate, new
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            url
-        }, deadline.Token);
-        await browser.Cdp.WaitAsync(Ready, deadline.Token);
-        await AdminBrowserAssertions.ConnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
-        await AdminBrowserLifecycleAssertions.VerifyRefreshAndMotionAsync(browser.Cdp, deadline.Token);
-        await AdminBrowserLifecycleAssertions.VerifyBackgroundSuspensionAsync(browser.Cdp, deadline.Token);
-        await browser.Cdp.EvaluateAsync(SelectCollections, deadline.Token);
-        await browser.Cdp.WaitAsync(ResourcesLoaded, deadline.Token);
-        await browser.Cdp.EvaluateAsync(SelectResource, deadline.Token);
-        await browser.Cdp.WaitAsync(RowsLoaded, deadline.Token);
-        await Assert.That((await browser.Cdp.EvaluateAsync(InjectionAbsent, deadline.Token)).GetBoolean()).IsTrue();
-        await Assert.That((await browser.Cdp.EvaluateAsync(FocusVisible, deadline.Token)).GetBoolean()).IsTrue();
-        await AdminBrowserScopeAssertions.VerifyEmptyScopeAndReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
-        await AdminBrowserAssertions.DetailsAndNavigationAsync(browser.Cdp, deadline.Token);
-        await AdminBrowserViewAssertions.VerifyViewsAsync(browser.Cdp, deadline.Token);
-        await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.DesktopWidth, "desktop", deadline.Token);
-        await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.MobileWidth, "mobile", deadline.Token);
-        await AdminBrowserAssertions.DisconnectAsync(browser.Cdp, fixture, deadline.Token);
-        await AdminBrowserAssertions.RejectThenReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
+            await using var browser = await AdminBrowserProcess.StartAsync(deadline.Token);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await AdminBrowserLifecycleAssertions.BeginNetworkAsync(browser.Cdp, deadline.Token);
+                await browser.Cdp.CommandAsync(AdminBrowserProtocol.PageNavigate, new
+                {
+                    url
+                }, deadline.Token);
+                await browser.Cdp.WaitAsync(Ready, deadline.Token);
+                await AdminBrowserAssertions.ConnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
+                await AdminBrowserLifecycleAssertions.VerifyRefreshAndMotionAsync(browser.Cdp, deadline.Token);
+                await AdminBrowserLifecycleAssertions.VerifyBackgroundSuspensionAsync(browser.Cdp, deadline.Token);
+                await browser.Cdp.EvaluateAsync(SelectCollections, deadline.Token);
+                await browser.Cdp.WaitAsync(ResourcesLoaded, deadline.Token);
+                await browser.Cdp.EvaluateAsync(SelectResource, deadline.Token);
+                await browser.Cdp.WaitAsync(RowsLoaded, deadline.Token);
+                await Assert.That((await browser.Cdp.EvaluateAsync(InjectionAbsent, deadline.Token)).GetBoolean()).IsTrue();
+                await Assert.That((await browser.Cdp.EvaluateAsync(FocusVisible, deadline.Token)).GetBoolean()).IsTrue();
+                await AdminBrowserScopeAssertions.VerifyEmptyScopeAndReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
+                await AdminBrowserAssertions.DetailsAndNavigationAsync(browser.Cdp, deadline.Token);
+                await AdminBrowserViewAssertions.VerifyViewsAsync(browser.Cdp, deadline.Token);
+                await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.DesktopWidth, "desktop", deadline.Token);
+                await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.MobileWidth, "mobile", deadline.Token);
+                await AdminBrowserAssertions.DisconnectAsync(browser.Cdp, fixture, deadline.Token);
+                await AdminBrowserAssertions.RejectThenReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
+            }, failures);
+            browser.PreserveEvidence = failures.Count != 0;
+        }, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

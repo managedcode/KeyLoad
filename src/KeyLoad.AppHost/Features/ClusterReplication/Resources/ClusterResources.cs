@@ -7,11 +7,6 @@ using KeyLoad.AppHost.Hosting;
 
 internal static class ClusterResources
 {
-    private const string ThirdVoterName = "node3";
-
-    private const string FirstVoterName = "node1";
-    private const string SecondVoterName = "node2";
-
     private const string ContainerDirectory = "/data";
     private const string HttpEndpoint = "http";
     private const string SiloEndpoint = "silo";
@@ -42,19 +37,20 @@ internal static class ClusterResources
     private const string HttpPortEnvironment = "ASPNETCORE_HTTP_PORTS";
     private const string PeerEnvironmentPrefix = "KeyLoad__Peers__";
     private const string BenchmarkTopologyEnvironment = "KeyLoad__BenchmarkTopology";
+    private const string DevelopmentSingleVoterEnvironment = "KeyLoad__DevelopmentSingleVoter";
+    private const int SingleFunctionalNodeCount = 1;
+    private const int FirstNodeIndex = 0;
     private const string TrueValue = "true";
     private const int HttpPort = 8080;
     private const int SiloPort = 11111;
-    private const int MinimumBenchmarkNodes = 1;
-    private static readonly string[] NodeNames = [FirstVoterName, SecondVoterName, ThirdVoterName];
 
     /// <summary>Adds RF3 Docker nodes, or an explicitly selected benchmark fixed group, with independent storage.</summary>
     internal static IResourceBuilder<ContainerResource>[] Add(IDistributedApplicationBuilder builder,
-        LocalProfile profile, string dataRoot, bool ephemeral, int? benchmarkNodeCount = null)
+        LocalProfile profile, string dataRoot, bool ephemeral, int? benchmarkNodeCount = null, int? functionalNodeCount = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
-        var nodeNames = ReadNodeNames(benchmarkNodeCount);
+        var nodeNames = ClusterTopologyNodeNames.Read(benchmarkNodeCount, functionalNodeCount, ephemeral);
         ClusterProfileStore.Validate(profile);
         var root = Path.GetFullPath(dataRoot);
         var imageOptions = AppHostOptionsRegistration.Get(builder).NativeCoverageRf3Image;
@@ -65,6 +61,10 @@ internal static class ClusterResources
         var identity = AddIdentityParameters(builder, profile);
         var nodes = AddNodes(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames, coverageImage,
             localImage, images, probes, identity);
+        if (functionalNodeCount == SingleFunctionalNodeCount)
+        {
+            nodes[FirstNodeIndex].WithEnvironment(DevelopmentSingleVoterEnvironment, TrueValue);
+        }
         var tables = KeyLoad.AppHost.Features.ClusterRouting.NativeClusteringResources.Add(builder);
         foreach (var node in nodes)
         {
@@ -159,7 +159,7 @@ internal static class ClusterResources
         ReadImagesAndProbes(IDistributedApplicationBuilder builder, string root, bool ephemeral,
             int? benchmarkNodeCount, NativeCoverageRf3ClusterImage? coverageImage)
     {
-        const string MessageText = "Local RF3 image mode requires the ordinary ephemeral RF3 topology.";
+        const string MessageText = "Local image mode requires an ephemeral non-benchmark topology.";
 
         var localImage = LocalDevelopmentContainerImage.Read(builder);
         if (coverageImage is not null && localImage is not null)
@@ -185,19 +185,6 @@ internal static class ClusterResources
         var directory = Path.Combine(root, name);
         ClusterProfileStore.PrepareDirectory(directory);
         return directory;
-    }
-
-    private static string[] ReadNodeNames(int? benchmarkNodeCount)
-    {
-        if (benchmarkNodeCount is null)
-        {
-            return NodeNames;
-        }
-        if (benchmarkNodeCount.Value != MinimumBenchmarkNodes && benchmarkNodeCount.Value != NodeNames.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(benchmarkNodeCount));
-        }
-        return [.. NodeNames.Take(benchmarkNodeCount.Value)];
     }
 
     private static void ApplyPeers(IResourceBuilder<ContainerResource> resource, string[] nodeNames, bool benchmark)

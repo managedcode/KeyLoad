@@ -96,6 +96,10 @@ public sealed partial class DatabaseEngine
         foreach (var policy in definition.FieldPolicies.Concat(definition.HeaderPolicies))
         {
             JsonData.PathSegments(policy.Path);
+            if (policy.SchemaReadGrant is { } schemaReadGrant)
+            {
+                JsonData.Identifier(schemaReadGrant);
+            }
         }
     }
 

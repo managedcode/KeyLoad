@@ -12,6 +12,7 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     private const string RowWriteDeniedMessage = "The principal cannot write this row scope.";
     private const string FieldUseDeniedMessage = "The query requires a protected field-use grant.";
     private const string FieldWriteDeniedMessage = "The mutation requires a protected field-write grant.";
+    private const string SchemaBindingUnavailableMessage = "The requested field binding is unavailable.";
     private const string SensitiveReplacementGrant = "document.replaceSensitive";
     private const string ReplacementDeniedMessage = "Replacing a redacted document requires an explicit replacement grant. Use a field patch.";
     private const string WorkerInputDeniedMessage = "Required worker input is protected by a missing raw-read grant.";
@@ -89,6 +90,23 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
         ArgumentNullException.ThrowIfNull(resource);
         ArgumentNullException.ThrowIfNull(path);
         return resource.FieldPolicies.Where(policy => Overlaps(policy.Path, path));
+    }
+    /// <inheritdoc />
+    public bool CanReadFieldSchema(PrincipalRecord principal, SensitiveFieldPolicy policy)
+    {
+        ArgumentNullException.ThrowIfNull(principal);
+        ArgumentNullException.ThrowIfNull(policy);
+        return policy.SchemaReadGrant is null || Grant(principal, policy.SchemaReadGrant);
+    }
+    /// <inheritdoc />
+    public void RequireSchemaVisibility(PrincipalRecord principal, ResourceDefinition resource)
+    {
+        ArgumentNullException.ThrowIfNull(principal);
+        ArgumentNullException.ThrowIfNull(resource);
+        if (resource.FieldPolicies.Any(policy => !CanReadFieldSchema(principal, policy)))
+        {
+            throw Errors.Fail(ErrorCode.Validation, SchemaBindingUnavailableMessage);
+        }
     }
     /// <inheritdoc />
     public void RequireReplacement(PrincipalRecord principal, ResourceDefinition resource, bool explicitReplacement)

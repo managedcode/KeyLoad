@@ -16,7 +16,8 @@ internal static class QueryRowProjection
         ImmutableArray<Selection> selections,
         IReadOnlyDictionary<string, string[]>? paths = null)
     {
-        var safe = database.Project(principal, resource, document);
+        var projection = database.ProjectWithLineage(principal, resource, document);
+        var safe = projection.Value;
         if (selections.Length == SingleSelection && selections[FirstSelectionIndex].Path == SqlSyntax.Star)
         {
             return new(document.Reference.Id, document.Revision, safe.Json, safe.Redacted, safe.RedactedFields);
@@ -28,7 +29,8 @@ internal static class QueryRowProjection
             var value = PredicateEvaluator.FieldValue(selection.Path, document, json.RootElement, paths);
             result[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
         }
-        var fields = QueryProjectionRedactions.Selected(database, resource, safe, selections);
-        return new(document.Reference.Id, document.Revision, result.ToJsonString(), !fields.IsEmpty, fields);
+        var selected = QueryProjectionRedactions.Selected(database, resource, safe,
+            projection.CompleteOmittedPaths, selections);
+        return new(document.Reference.Id, document.Revision, result.ToJsonString(), selected.Redacted, selected.Fields);
     }
 }

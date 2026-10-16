@@ -13,5 +13,5 @@ internal sealed partial class OrleansNode
     internal RequestCqrsReplicaSnapshotObserver? ReplicaSnapshotObserver
         => Grains is null ? null : RequestCqrsReplicaSnapshotObserver.Find(applicationServices);
     internal Task WaitForNativeStartupAsync(CancellationToken cancellationToken)
-        => OrleansNodeStartupWait.WaitAsync(lifecycle, ref startup, cancellationToken);
+        => startupWait.WaitAsync(cancellationToken);
 }

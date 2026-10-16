@@ -19,18 +19,19 @@ internal static class ReplicaTransportShutdownFlow
     private const int SingleCallbackFailure = 1;
     private const int OriginalCallbackIndex = 0;
 
-    internal static async Task RunAsync(RequestCqrsCohortRuntimeFixture runtime, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsCohortRuntimeFixture runtime, bool frameworkCancelled, CancellationToken token)
     {
         var failures = new List<Exception>();
         await RequestCqrsCohortCleanup.CaptureAsync(async () =>
         {
             using var db = new TestDatabase();
-            await RequestCqrsCohortCleanup.CaptureAsync(() => RunOwnedAsync(runtime, db, token), failures);
+            await RequestCqrsCohortCleanup.CaptureAsync(() => RunOwnedAsync(runtime, db, frameworkCancelled, token), failures);
         }, failures);
         RequestCqrsCohortCleanup.ThrowIfAny(failures);
     }
 
-    private static async Task RunOwnedAsync(RequestCqrsCohortRuntimeFixture runtime, TestDatabase db, CancellationToken token)
+    private static async Task RunOwnedAsync(RequestCqrsCohortRuntimeFixture runtime, TestDatabase db, bool frameworkCancelled,
+        CancellationToken token)
     {
         db.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(db.Partition.TenantId, db.Partition.DatabaseId,
@@ -51,7 +52,7 @@ internal static class ReplicaTransportShutdownFlow
             {
                 await using var native = Native(runtime, state, discoveryGate);
                 await RequestCqrsCohortCleanup.CaptureAsync(() => FailAsync(runtime, db, operation,
-                    endpoint, state, native, discoveryGate, endpointGate, observed, token), failures);
+                    endpoint, state, native, discoveryGate, endpointGate, observed, frameworkCancelled, token), failures);
                 discoveryGate.Release();
                 endpointGate.Release();
                 await JoinAttemptsAsync(observed, failures);
@@ -64,7 +65,7 @@ internal static class ReplicaTransportShutdownFlow
     private static async Task FailAsync(RequestCqrsCohortRuntimeFixture runtime, TestDatabase db,
         ReplicatedOperation operation, ReplicaLifecycleFixture endpoint, ReplicaSiloDiscoveryState state,
         ReplicaNativeDiscoveryRuntime native, ReplicaTransportFailureGate discoveryGate,
-        ReplicaTransportFailureGate endpointGate, Settlement observed, CancellationToken token)
+        ReplicaTransportFailureGate endpointGate, Settlement observed, bool frameworkCancelled, CancellationToken token)
     {
         endpoint.Consensus.AttachTransport(runtime.LocalServices.GetRequiredService<ReplicaGrainServiceClient>());
         endpoint.Consensus.ConfigureForwarding((input, cancellation) => endpointGate.ForwardAsync(db.Database, input, cancellation));
@@ -80,7 +81,8 @@ internal static class ReplicaTransportShutdownFlow
         transport.Attach(endpoint.Consensus, state, native);
         transport.Participate(lifecycle);
         await lifecycle.StartAsync(token);
-        observed.FrameworkStop = lifecycle.StopAsync(CancellationToken.None);
+        // The actual native lifecycle passes escalation cancellation even while mandatory physical borrowers must join.
+        observed.FrameworkStop = lifecycle.StopAsync(new CancellationToken(canceled: frameworkCancelled));
         await discoveryGate.Cancelled.Task.WaitAsync(token);
         var original = await lifecycle.StopObserved.Task.WaitAsync(token);
         await Assert.That(original.IsCompleted).IsFalse();

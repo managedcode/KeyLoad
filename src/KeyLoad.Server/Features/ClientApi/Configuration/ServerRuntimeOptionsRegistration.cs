@@ -100,6 +100,9 @@ internal static class ServerRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), ServerExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<McpExecutionOptions>().Bind(configuration.GetSection(McpExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), McpExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<OperationalAnalyticsOptions>()
+            .Bind(configuration.GetSection(OperationalAnalyticsProtocol.Section), binding => binding.ErrorOnUnknownConfiguration = true)
+            .Validate(options => options.IsValid(), OperationalAnalyticsProtocol.InvalidPolicy).ValidateOnStart();
         services.AddOptions<AdminObservationOptions>().Bind(configuration.GetSection(AdminObservationOptions.SectionName))
             .Validate(options => options.IsValid(), AdminObservationOptions.ValidationMessage).ValidateOnStart();
     }

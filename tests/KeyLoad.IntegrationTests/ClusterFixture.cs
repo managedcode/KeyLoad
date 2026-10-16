@@ -267,7 +267,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
 
     private Guid diagnosticIncarnation;
 
-    internal Task SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>
+    internal Task<string> SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>
         RequireDiagnostics().SaveAsync(peerSecret, AdminKey, diagnosticIncarnation, cancellationToken);
 
     private ClusterFixtureDiagnostics RequireDiagnostics() => diagnostics

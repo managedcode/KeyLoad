@@ -10,4 +10,8 @@ internal sealed class SafeProjectorOperationRf3Tests(ClusterFixture fixture)
     {
         await SafeProjectorOperationRf3Trial.RunAsync(fixture);
     }
+
+    [Test]
+    public Task SchemaVisibilityAndRawAuthorityRemainIndependentThroughSdkOfficialMcpAndBothColdCuts()
+        => SchemaVisibleProjectionRf3Flow.RunAsync(fixture);
 }

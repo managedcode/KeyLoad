@@ -1,0 +1,91 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Storage;
+using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Features.ResourceExecution;
+
+namespace KeyLoad.UnitTests.Features.Messaging;
+
+internal static class RecurringSagaSchemaReplay
+{
+    private const string MissingStored = "The original Saga schema outcome is absent.";
+    private const string MissingOperation = "The original Saga schema operation is absent.";
+    private const string UnsupportedResult = "The Saga schema outcome has an unexpected native type.";
+
+    internal static async Task AllAsync(SafeProjectorOperationDatabase owner, RecurringSagaSchemaState state)
+    {
+        foreach (var command in state.History)
+        {
+            await RecurringSagaSchemaProjection.ObserveAsync(owner, state, async () =>
+            {
+                var actual = owner.Database.Apply(command.Operation, command.Entry.Index);
+                await ResultAsync(actual, command.Result);
+                await EntryAsync(owner, command);
+            });
+            await RecurringSagaSchemaProjection.ObserveAsync(owner, state, async () =>
+            {
+                var actual = owner.Database.ResolveOutcome(command.Operation);
+                await ResultAsync(actual, command.Result);
+                await EntryAsync(owner, command);
+            });
+            await RecurringSagaSchemaProjection.ObserveAsync(owner, state, async () =>
+            {
+                var actual = owner.Submit(command.Operation);
+                await ResultAsync(actual, command.Result);
+                await EntryAsync(owner, command);
+            });
+        }
+    }
+
+    internal static async Task StoredAsync(SafeProjectorOperationDatabase owner, SafeProjectorOperationCommand command)
+    {
+        await SafeProjectorOperationHistoryImages.UnchangedAsync(owner, command);
+        var global = command.Operation.Kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;
+        var key = global ? KeySpace.GlobalOutcome(command.Operation.PrincipalId, command.Operation.Id)
+            : KeySpace.PartitionOutcome(owner.Source.Partition, command.Operation.PrincipalId, command.Operation.Id);
+        var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))
+            ?? throw new InvalidOperationException(MissingStored);
+        await Assert.That(stored.Fingerprint).IsEqualTo(NativeOperationFingerprint.Compute(command.Operation));
+        await Assert.That(stored.PolicyEpoch).IsEqualTo(command.CreatorEpoch);
+        await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
+        await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);
+        await Assert.That(stored.Partition).IsEqualTo(global ? null : owner.Source.Partition);
+        await Assert.That(stored.BlobAuthority is null).IsTrue();
+        await Assert.That(stored.CompositionAuthority is null).IsTrue();
+        await Assert.That(stored.OnlineTextAuthority is null).IsTrue();
+        await Assert.That(stored.RemoteTransferAuthority is null).IsTrue();
+        await Assert.That(stored.RemoteTransferFailureAuthority is null).IsTrue();
+        await ResultAsync(stored.Result, command.Result);
+    }
+
+    private static async Task EntryAsync(SafeProjectorOperationDatabase owner, SafeProjectorOperationCommand command)
+    {
+        var entry = owner.Entry(command.Operation);
+        await SafeProjectorOperationSeed.EqualAsync(entry, command.Entry);
+        var operation = entry.Operation ?? throw new InvalidOperationException(MissingOperation);
+        await Assert.That(operation.NativePayload.IsEmpty).IsFalse();
+        await Assert.That(operation.NativePayload.Span.SequenceEqual(command.Operation.NativePayload.Span)).IsTrue();
+        await SafeProjectorOperationHistoryImages.UnchangedAsync(owner, command);
+    }
+
+    private static async Task ResultAsync(OperationResult actual, OperationResult expected)
+    {
+        switch (expected.NativeValue)
+        {
+            case CommitReceipt:
+                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);
+                await RecurringSagaSchemaCanonical.PrivateReferencesAsync(actual.Get<CommitReceipt>());
+                await RecurringSagaSchemaCanonical.PrivateReferencesAsync(expected.Get<CommitReceipt>());
+                break;
+            case PrincipalRecord:
+                await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, expected);
+                break;
+            case ResourceDefinition:
+                await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, expected);
+                break;
+            default:
+                throw new InvalidOperationException(UnsupportedResult);
+        }
+    }
+}

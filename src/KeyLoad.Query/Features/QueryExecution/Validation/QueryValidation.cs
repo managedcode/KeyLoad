@@ -65,7 +65,14 @@ internal static class QueryValidation
             value => JsonData.Validate(value, limits, false));
         var filter = query.Filter is null ? null : predicates.Filter(query.Filter, RootPredicateDepth);
         var parameters = NormalizeParameters(request.Parameters, predicates);
-        global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
+        if (query.ModelSource is null)
+        {
+            global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
+        }
+        else if (join is not null)
+        {
+            PredicateEvaluator.CheckParameters(filter, parameters);
+        }
         var normalized = request with
         {
             Query = query with

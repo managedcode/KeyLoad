@@ -11,12 +11,10 @@ internal sealed class OperationalAnalyticsOptions
     private const int GroupsCeiling = 192;
     private const int BucketsCeiling = 168;
     private const int RowsCeiling = 192;
-    private const int SampleSeconds = 10;
     private const int FlushSeconds = 2;
     private const int QuerySeconds = 2;
     private const int RetentionDays = 7;
     private const int RetentionCheckMinutes = 60;
-    private static readonly TimeSpan RequiredSampleInterval = TimeSpan.FromSeconds(SampleSeconds);
     private static readonly TimeSpan MaximumFlushInterval = TimeSpan.FromSeconds(FlushSeconds);
     private static readonly TimeSpan MaximumQueryTimeout = TimeSpan.FromSeconds(QuerySeconds);
     private static readonly TimeSpan MaximumRetention = TimeSpan.FromDays(RetentionDays);
@@ -29,7 +27,6 @@ internal sealed class OperationalAnalyticsOptions
     public int MaximumBuckets { get; init; } = BucketsCeiling;
     public int MaximumRows { get; init; } = RowsCeiling;
     public int MaximumReportBytes { get; init; } = OperationalAnalyticsProtocol.MaximumReportBytes;
-    public TimeSpan SampleInterval { get; init; } = RequiredSampleInterval;
     public TimeSpan FlushInterval { get; init; } = MaximumFlushInterval;
     public TimeSpan QueryTimeout { get; init; } = MaximumQueryTimeout;
     public TimeSpan Retention { get; init; } = MaximumRetention;
@@ -41,7 +38,6 @@ internal sealed class OperationalAnalyticsOptions
             && Positive(MaximumGroups, GroupsCeiling) && Positive(MaximumBuckets, BucketsCeiling)
             && Positive(MaximumRows, RowsCeiling)
             && Positive(MaximumReportBytes, OperationalAnalyticsProtocol.MaximumReportBytes)
-            && SampleInterval == RequiredSampleInterval
             && Bounded(FlushInterval, MaximumFlushInterval)
             && Bounded(QueryTimeout, MaximumQueryTimeout)
             && Bounded(Retention, MaximumRetention)

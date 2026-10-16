@@ -1,61 +1,89 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
+using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 
 internal sealed class AdminBrowserProcess : IAsyncDisposable
 {
-    private readonly Process process;
-    private readonly string profile;
-    private readonly Task errors;
-    private readonly Task output;
-    internal AdminBrowserCdp Cdp { get; } = new();
-
-    private AdminBrowserProcess(Process process, string profile)
+    private const string UnknownSettlement = "The original administration browser process and readers have not joined.";
+    private readonly Lock disposalGate = new();
+    private Process? process;
+    private Task? disposal;
+    private AdminBrowserCdp? cdp;
+    internal AdminBrowserCdp Cdp => cdp ?? throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
+    internal string ProfilePath
     {
-        this.process = process;
-        this.profile = profile;
-        errors = DrainAsync(process.StandardError);
-        output = DrainAsync(process.StandardOutput);
+        get;
     }
+    internal Task? OriginalExit
+    {
+        get; private set;
+    }
+    internal Task? OriginalOutput
+    {
+        get; private set;
+    }
+    internal Task? OriginalError
+    {
+        get; private set;
+    }
+    internal bool PreserveEvidence
+    {
+        get; set;
+    }
+
+    private AdminBrowserProcess(string profile) => ProfilePath = profile;
 
     internal static async Task<AdminBrowserProcess> StartAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var executable = Environment.GetEnvironmentVariable(AdminBrowserProtocol.BrowserEnvironment);
         if (string.IsNullOrWhiteSpace(executable) || !Path.IsPathFullyQualified(executable) || !File.Exists(executable))
         {
             throw new InvalidOperationException(AdminBrowserProtocol.MissingBrowser);
         }
         var profile = Path.Combine(Path.GetTempPath(), AdminBrowserProtocol.ProfilePrefix + Guid.NewGuid().ToString(AdminBrowserProtocol.GuidFormat));
-        Directory.CreateDirectory(profile);
         var start = new ProcessStartInfo(executable) { UseShellExecute = false, RedirectStandardError = true, RedirectStandardOutput = true };
         foreach (var argument in new[] { "--headless=new", "--no-sandbox", "--disable-dev-shm-usage",
             "--remote-debugging-port=0", "--user-data-dir=" + profile, "about:blank" })
         {
             start.ArgumentList.Add(argument);
         }
-        var process = Process.Start(start) ?? throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
-        var owner = new AdminBrowserProcess(process, profile);
+        var owner = new AdminBrowserProcess(profile);
         try
         {
+            Directory.CreateDirectory(profile);
+            owner.cdp = new AdminBrowserCdp();
+            owner.process = Process.Start(start) ?? throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
+            owner.OriginalExit = owner.process.WaitForExitAsync(CancellationToken.None);
+            owner.OriginalError = DrainAsync(owner.process.StandardError);
+            owner.OriginalOutput = DrainAsync(owner.process.StandardOutput);
             var endpoint = await owner.EndpointAsync(cancellationToken);
             await owner.Cdp.ConnectAsync(endpoint, cancellationToken);
             return owner;
         }
-        catch (Exception)
+        catch (Exception primary)
         {
-            await owner.DisposeAsync();
+            owner.PreserveEvidence = true;
+            var cleanup = await OwnedProcessFailureObserver.CaptureAsync(owner.DisposeAsync().AsTask()).ConfigureAwait(false);
+            if (cleanup is not null)
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }
 
     private async Task<Uri> EndpointAsync(CancellationToken cancellationToken)
     {
-        var endpointFile = Path.Combine(profile, AdminBrowserProtocol.EndpointFile);
+        var original = process ?? throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
+        var endpointFile = Path.Combine(ProfilePath, AdminBrowserProtocol.EndpointFile);
         while (!File.Exists(endpointFile))
         {
-            if (process.HasExited)
+            if (original.HasExited)
             {
                 throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
             }
@@ -70,26 +98,62 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
             .GetProperty(AdminBrowserProtocol.SocketProperty).GetString()!);
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await Cdp.DisposeAsync();
-        try
+        lock (disposalGate)
         {
-            if (!process.HasExited)
-            {
-                process.Kill(entireProcessTree: true);
-            }
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10), TimeProvider.System);
-            await process.WaitForExitAsync(timeout.Token);
-            await Task.WhenAll(errors, output);
+            return new(disposal ??= DisposeCoreAsync());
         }
-        finally
+    }
+
+    private async Task DisposeCoreAsync()
+    {
+        var failures = new List<Exception>();
+        var cdpFailure = await OwnedProcessFailureObserver.CaptureAsync(DisposeCdpAsync()).ConfigureAwait(false);
+        if (cdpFailure is not null)
         {
-            process.Dispose();
-            if (Directory.Exists(profile))
+            failures.Add(cdpFailure);
+        }
+        var joined = process is null;
+        if (process is { } original)
+        {
+            var cleanup = LocalImageOwnedProcessLifetime.TerminateAndJoinAsync(original, OriginalExit, OriginalOutput, OriginalError, failures);
+            var failure = await OwnedProcessFailureObserver.CaptureAsync(cleanup).ConfigureAwait(false);
+            if (failure is not null)
             {
-                Directory.Delete(profile, recursive: true);
+                failures.Add(failure);
             }
+            var exited = false;
+            OwnedProcessFailureObserver.Observe(() => exited = original.HasExited, failures);
+            joined = exited && (OriginalExit is null || OriginalExit.IsCompleted)
+                && (OriginalOutput is null || OriginalOutput.IsCompleted) && (OriginalError is null || OriginalError.IsCompleted);
+            if (joined)
+            {
+                OwnedProcessFailureObserver.Observe(original.Dispose, failures);
+            }
+        }
+        if (!joined)
+        {
+            failures.Add(new InvalidOperationException(UnknownSettlement));
+        }
+        if (joined && failures.Count == 0 && !PreserveEvidence)
+        {
+            OwnedProcessFailureObserver.Observe(() =>
+            {
+                if (Directory.Exists(ProfilePath))
+                {
+                    Directory.Delete(ProfilePath, recursive: true);
+                }
+            }, failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task DisposeCdpAsync()
+    {
+        if (cdp is not null)
+        {
+            await cdp.DisposeAsync().ConfigureAwait(false);
         }
     }
 

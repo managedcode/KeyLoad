@@ -24,8 +24,7 @@ internal static class PartitionStorageNativePreStartDisposeFlow
             endpoints.Dispose();
             owners = new(settings, localhost);
             await owners.CreateNodesAsync(token).ConfigureAwait(false);
-            var starting = Task.WhenAll(owners.Nodes.Select(node => node.StartAsync(token)));
-            await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(starting).ConfigureAwait(false);
+            await PartitionStorageNativeStartupWaitAssertions.StartAsync(owners, token).ConfigureAwait(false);
             var receipt = await PartitionStorageNativeHealthy.ExecuteAsync(owners.Source, token).ConfigureAwait(false);
             await PartitionStorageNativeHealthy.ReplayAsync(owners.Source, receipt, token).ConfigureAwait(false);
             for (var cold = FirstCold; cold < ColdCount; cold++)

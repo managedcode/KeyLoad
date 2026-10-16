@@ -12,6 +12,7 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
 {
     private const int MinimumBenchmarkVoters = 1;
     private const int MaximumBenchmarkVoters = 3;
+    private const int DevelopmentVoters = 1;
     private const int MinimumProductionVoters = 3;
     private const int DefaultLowerElectionTimeoutSeconds = 4;
     private const int DefaultUpperElectionTimeoutSeconds = 8;
@@ -27,8 +28,13 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
     private const int DefaultMaxAppendBytes = 16_777_216;
     private const int DefaultSnapshotChunkBytes = 262_144;
     private const long DefaultMaxSnapshotBytes = 4_294_967_296;
-    /// <summary>Permits only explicit trusted benchmark fixed groups of one, two or three voters.</summary>
+    /// <summary>Permits only explicit trusted benchmark fixed groups of one or three voters.</summary>
     public bool BenchmarkTopology
+    {
+        get; init;
+    }
+    /// <summary>Explicit development-only single physical voter, without replica fault tolerance.</summary>
+    public bool DevelopmentSingleVoter
     {
         get; init;
     }
@@ -58,7 +64,9 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
     public void Validate()
     {
         if (Incarnation == Guid.Empty || VoterIds.IsDefault
-            || (BenchmarkTopology ? VoterIds.Length is not (MinimumBenchmarkVoters or MaximumBenchmarkVoters)
+            || DevelopmentSingleVoter && BenchmarkTopology
+            || (DevelopmentSingleVoter ? VoterIds.Length != DevelopmentVoters
+                : BenchmarkTopology ? VoterIds.Length is not (MinimumBenchmarkVoters or MaximumBenchmarkVoters)
                 : VoterIds.Length < MinimumProductionVoters || VoterIds.Length % MajorityDivisor == EvenVoterRemainder)
             || VoterIds.Distinct(StringComparer.Ordinal).Count() != VoterIds.Length
             || VoterIds.Any(string.IsNullOrWhiteSpace) || !VoterIds.Contains(LocalId, StringComparer.Ordinal))

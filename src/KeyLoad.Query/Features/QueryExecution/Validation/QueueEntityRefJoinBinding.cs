@@ -64,6 +64,8 @@ internal static class QueueEntityRefJoinBinding
     internal static ResourceDefinition Bind(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition queue, AstQueryRequest request, ReadExecutionBudget budget)
     {
+        var model = ModelQueryPolicies.Rebase(queue);
+        database.Authorization.RequireSchemaVisibility(principal, model);
         var query = request.Query;
         var join = query.InnerJoin;
         if (!IsSupportedSource(query) || query.Alias is null || join is null || request.Cursor is not null
@@ -75,9 +77,9 @@ internal static class QueueEntityRefJoinBinding
         }
         database.Authorization.Require(principal, request.Partition, join.Collection, Capability.Query | Capability.DocumentsRead);
         var target = database.Resource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
+        database.Authorization.RequireSchemaVisibility(principal, target);
         var schema = target.RelationalSchema ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         RelationalRowValidation.ValidateSchema(target);
-        var model = ModelQueryPolicies.Rebase(queue);
         ValidatePredicatePaths(query.Filter, request.Parameters);
         QueryFieldAuthorization.Validate(database, principal, model, request);
         database.Authorization.RequireFieldUse(principal, model, ReferencePath);

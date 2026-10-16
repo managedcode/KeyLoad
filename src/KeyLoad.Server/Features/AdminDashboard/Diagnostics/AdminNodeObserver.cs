@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 
 internal sealed class AdminNodeObserver(PartitionHost partition, CommandAdmissionGovernor commands,
     HttpAdmissionGovernor http, AdminHttpMetrics metrics, IServiceProvider services, TimeProvider clock,
-    IOptions<AdminObservationOptions> observationOptions)
+    IOptions<AdminObservationOptions> observationOptions, OperationalAnalyticsRuntime analytics)
 {
     private const int IdleObservation = 0;
     private const int ActiveObservation = 1;
@@ -23,6 +23,7 @@ internal sealed class AdminNodeObserver(PartitionHost partition, CommandAdmissio
         try
         {
             var node = await services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken).ConfigureAwait(false);
+            var report = await analytics.ReadAsync(partition, cancellationToken).ConfigureAwait(false);
             var storage = await Task.Run(() => AdminStorageObserver.Read(directory: partition.DirectoryPath, cancellationToken: cancellationToken,
                 options: observationOptions, clock: clock), cancellationToken).ConfigureAwait(false);
             return new(clock.GetUtcNow(), node, new(commands.Limits, commands.Snapshot())
@@ -30,6 +31,7 @@ internal sealed class AdminNodeObserver(PartitionHost partition, CommandAdmissio
                 Http = http.Status()
             }, storage, metrics.Snapshot())
             {
+                OperationalAnalytics = report,
                 LocalVoter = partition.Configuration.LocalId,
                 Voters = partition.Configuration.VoterIds
             };

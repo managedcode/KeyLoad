@@ -7,10 +7,7 @@ internal static class NativeRestartReadinessEvidenceAssertions
 
     internal static async Task HealthyAsync(ClusterFixture fixture, CancellationToken cancellationToken)
     {
-        await fixture.SaveFailureDiagnosticsAsync(cancellationToken);
-        var path = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
-            ClusterFixtureProtocol.ArtifactDirectory, ClusterFixtureProtocol.QualificationDirectory,
-            ClusterFixtureProtocol.DiagnosticsFileName);
+        var path = await fixture.SaveFailureDiagnosticsAsync(cancellationToken);
         var lines = await File.ReadAllLinesAsync(path, cancellationToken);
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber,
             ClusterFixtureProtocol.NodeCount))
