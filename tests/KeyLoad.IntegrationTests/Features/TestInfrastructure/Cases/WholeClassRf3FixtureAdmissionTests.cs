@@ -30,6 +30,7 @@ internal sealed class WholeClassRf3FixtureAdmissionTests
     [Arguments(11)]
     [Arguments(12)]
     [Arguments(13)]
+    [Arguments(14)]
     public async Task ExactFixtureArgumentsRejectForeignIdentitiesAndRestoreOriginalSelectionWithoutStartingResources(int selection)
     {
         var original = WholeClassRf3AdmissionEnvironment.IdentityKeys.Append(WholeClassRf3AdmissionEnvironment.Arguments)

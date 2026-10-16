@@ -11,11 +11,11 @@ internal sealed class GrainBlobReadExecution(DatabaseEngine database, IServicePr
     private readonly GrainBlobReadCapabilities local = new(database);
 
     internal async Task<object?> ExecuteAsync(GrainReadKind kind, PrincipalRecord principal,
-        DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         if (services.GetService<IRemoteBlobReadRouter>() is { } remote)
         {
-            return await remote.ReadAsync(request.Envelope, principal, request.Payload, cancellationToken, binding)
+            return await remote.ReadAsync(request.Envelope, principal, request.Payload, binding, cancellationToken)
                 .ConfigureAwait(true);
         }
         var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, cancellationToken);

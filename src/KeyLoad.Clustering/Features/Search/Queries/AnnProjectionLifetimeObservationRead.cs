@@ -11,7 +11,7 @@ internal static class AnnProjectionLifetimeObservationRead
 {
     internal static async Task<AnnProjectionObservationResult> ExecuteAsync(DatabaseEngine database,
         IServiceProvider services, TimeProvider clock, PrincipalRecord principal,
-        DecodedGrainRequest original, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        DecodedGrainRequest original, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         cancellationToken.ThrowIfCancellationRequested();
@@ -34,12 +34,12 @@ internal static class AnnProjectionLifetimeObservationRead
         AnnSearchPage? approximate = null;
         if (request.Kind == AnnProjectionObservationKind.Wait)
         {
-            waited = await search.WaitForAnnIndexBoundAsync(principal.Id, request.Wait!, work, metadata, cancellationToken, binding)
+            waited = await search.WaitForAnnIndexBoundAsync(principal.Id, request.Wait!, work, metadata, binding, cancellationToken)
                 .ConfigureAwait(true);
         }
         else if (request.Kind == AnnProjectionObservationKind.Approximate)
         {
-            approximate = await search.ApproximateSearchBoundAsync(principal.Id, request.Approximate!, work, metadata, cancellationToken, binding)
+            approximate = await search.ApproximateSearchBoundAsync(principal.Id, request.Approximate!, work, metadata, binding, cancellationToken)
                 .ConfigureAwait(true);
         }
         var current = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);

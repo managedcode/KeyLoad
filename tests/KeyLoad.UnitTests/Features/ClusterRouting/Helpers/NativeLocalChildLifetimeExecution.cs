@@ -18,7 +18,7 @@ internal static class NativeLocalChildLifetimeExecution
         var database = state.Leader.Journal.Database;
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         return PartitionQueryLifetimeLeafExecution.ExecuteBound(engine, P.Root, input.Request, state.PhysicalOwner,
-            database.EvaluationClock, operation.Expiry, operation.Token, child);
+            database.EvaluationClock, operation.Expiry, child, operation.Token);
     }
 
     internal static async Task<PartitionQueryLeafResultV1> HeldProducerAsync(NativeLocalChildLifetimeSession session,

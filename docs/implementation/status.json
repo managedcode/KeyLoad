@@ -3,7 +3,7 @@
     "title": "Native resource-owner inventory and all-model recovery development stage",
     "status": "in_progress",
     "contract": "docs/Features/ResourceExecution/ResourceOwnerInventory.md",
-    "implementation": "R638 all-model source adopted; R640/R646 compiler repairs and approved analytics restore complete. R648 strict build failed262 diagnostics; R650 native braces/var fixes and matchingverification passed, R65146native/Analytics/CT/typedDROP source files adopted. Remaining ResourceExecution and downstream lifetimebinding CT closure are inparallel. Expanded normal/cold/DROP execution OPEN; R600/R602PASSbelongsoriginaloldercohort; original105taskacceptanceunchanged.",
+    "implementation": "Core and Query strict project gates passed. All R653 Query/Replication diagnostics and R656/R657 owning disposal/import defects are repaired in source. R659 complete strict solution reached Clustering and failed with 75 diagnostics in 13.0 seconds; distinct owners are repairing the combined batch. Aspire physical-file cases, bounded contender logs, exact native admission and CI enrollment are adopted. Shared same-file positive mode remains OPEN. No new runtime pass or original task acceptance is claimed.",
     "strictBuild": {
       "label": "root-r619-hosted-cold-full-release",
       "result": "passed",
@@ -242,8 +242,8 @@
       "compilerRepairAfterR648": {
         "stage": "R650/R651",
         "state": "partial_source_adopted_remaining_parallel_semantic_repairs",
-        "files": 46,
-        "scope": "R65146 adopted source files: actual native operands/imports/guards and cohesive ownership, Analytics five defects in6files, all9Core CT signatures plus actual25file caller/atomic closure, and typed DROP replies onbothfirstcompletion/replay. Separately R650 native braces/var241sourcechanges withmatchingverifyPASS. Remaining ResourceExecution options/validation and same-pattern downstream lifetime-binding CT closure are inparallel; no new compiler/runtime acceptance.",
+        "files": 92,
+        "scope": "R65146 adopted source files: actual native operands/imports/guards and cohesive ownership, Analytics five defects in6files, all9Core CT signatures plus actual25file caller/atomic closure, and typed DROP replies onbothfirstcompletion/replay. Separately R650 native braces/var241sourcechanges withmatchingverifyPASS. Remaining ResourceExecution options/validation and same-pattern downstream lifetime-binding CT closure are inparallel; no new compiler/runtime acceptance. R651ResourceExecution46nowadopted; R652d3exactCorestylecorrectionsafterCore3diagnostics; finalCoreR652ePASS0warnings0errors. Fullsolution/runtimegatesstillopen.",
         "evidence": [
           "TestResults/stage61-native-join/root-r650-existing-native-commit-gate-import.adoption.original.json",
           "TestResults/stage61-native-join/root-r650-adopted-native-braces-var-style-apply.completion.original.json",
@@ -253,20 +253,25 @@
           "TestResults/stage61-native-join/root-r651-blob-restore-page-reader2.adoption.original.json",
           "TestResults/stage61-native-join/root-r651-analytics-five-in-six.adoption.original.json",
           "TestResults/stage61-native-join/root-r651-native-ct-atomic25.adoption.original.json",
-          "TestResults/stage61-native-join/root-r651-native-drop-typed-result1.adoption.original.json"
+          "TestResults/stage61-native-join/root-r651-native-drop-typed-result1.adoption.original.json",
+          "TestResults/stage61-native-join/root-r651-resource-execution46.adoption.original.json",
+          "TestResults/stage61-native-join/root-r652d-core-style3.adoption.original.json"
         ]
       }
     },
     "latestCompilerAttempt": {
-      "label": "root-r648-combined-models-full-release",
+      "label": "root-r659-combined-models-filecases-full-release",
       "result": "failed",
+      "errors": 75,
       "warnings": 0,
-      "errors": 262,
-      "elapsedSeconds": 28.643378249835223,
+      "elapsedSeconds": 12.999856082955375,
       "sourceDrift": 0,
-      "stdoutSha256": "b48e80aff525cee43278db8f1b10b51d46181e176169e68be4686785c4050c3b",
-      "evidence": "TestResults/stage61-native-join/root-r648-combined-models-full-release.completion.original.json",
-      "scope": "Restored dependency graph reached deeper Core analysis. Includes178IDE0011/2IDE0007, original Core/Storage compiler bindings and bounded ownership/options/validation diagnostics. R650 style and R65114 source repairs adopted; other semantic repairs pending. Counts across different blocked compilation layers are not a regression trend or acceptance result."
+      "compiledDrift": 0,
+      "allProcessesAndReadersJoined": true,
+      "stdoutSha256": "4481772a6e7f8d076106dee1cd3b752f0336305ae8ce8e442ce15e5289e84186",
+      "evidence": "TestResults/stage61-native-join/root-r659-combined-models-filecases-full-release.completion.original.json",
+      "diagnostics": "TestResults/stage61-native-join/root-r659-compiler-diagnostics.prepared.json",
+      "scope": "Actual Clustering compiler/analyzer layer; Core and Query project passes do not establish a full solution or runtime pass."
     },
     "latestPublicFunctionalAttempt": {
       "label": "R600 ONE then R602 RF3 normal public pair",
@@ -275,15 +280,16 @@
       "scope": "Same frozen source/DLL/image-input cohort; local development only. DROP, user AnalyticsStore and refreshed eight-user cold remain OPEN."
     },
     "previousCompilerAttempt": {
-      "label": "root-r643-combined-models-full-release",
+      "label": "root-r656-combined-models-full-release",
       "result": "failed",
       "warnings": 0,
-      "errors": 31,
-      "elapsedSeconds": 21.246417665854096,
+      "errors": 1,
+      "elapsedSeconds": 8.668360457988456,
       "sourceDrift": 0,
-      "stdoutSha256": "d7fe0e509b4559ee2371fc5b6546e881bdc85bec045b1bc844ce5148dbbc9d5c",
-      "evidence": "TestResults/stage61-native-join/root-r643-combined-models-full-release.completion.original.json",
-      "scope": "Abstractions compiled;31uniqueCore14missingAnalytics reference assets/Client1type-size/Storage16orderedCT+ownership+checkpointstyle diagnostics. R644actualrestorePASS andR64627cohesiverepairsadopted. Freshcombinedfullbuildpending."
+      "compiledDrift": 0,
+      "stdoutSha256": "20e0684f6f4e2b6be163478c999d4b81278104fd563bcb21d86d07f863c0e720",
+      "evidence": "TestResults/stage61-native-join/root-r656-combined-models-full-release.completion.original.json",
+      "scope": "Fullsolution afterQuery4/Replication21sourcefixes. Only remainingCA2000deadlineallocation; causalusingownershiprepairinC4. Core/QueryseparatestrictPASSretainownscope; no runtimeacceptance."
     },
     "latestFocusedRuntime": {
       "sourceCommit": "467641948fab77b1e3b837ec5b8eff5ced5ef57c",
@@ -338,12 +344,13 @@
       "scope": "Complete Release original R609 source. KLD0031 partial test helper201>200 and IDE0005 unused import. All product projects compiled, but no complete build/runtime acceptance."
     },
     "formatVerification": {
-      "label": "root-r619-hosted-cold20-format-verify",
+      "label": "root-r659-filecase-combined-whitespace-verify",
       "result": "passed",
-      "files": 20,
-      "elapsedSeconds": 713.9612580828834,
+      "changedCSharpScope": 175,
       "sourceDrift": 0,
-      "evidence": "TestResults/stage61-native-join/root-r619-hosted-cold20-format-verify.completion.original.json"
+      "compiledDrift": 0,
+      "evidence": "TestResults/stage61-native-join/root-r659-filecase-combined-whitespace-verify.completion.original.json",
+      "scope": "Native whitespace only; the later R660 validation/blank-line repairs await the combined matching verification."
     },
     "focusedRawCoverage": {
       "linesCovered": 25140,
@@ -371,6 +378,59 @@
         "cause": "Actual first public MOVE HTTP429/BudgetExceeded; exact production budget gate unproven."
       },
       "evidence": "TestResults/stage61-native-join/root-r614-615-current-public-inventory-move.cohort-after.original.json"
+    },
+    "latestCoreCompilerGate": {
+      "label": "root-r652e-core-strict-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 20.75653412519023,
+      "sourceDrift": 0,
+      "compiledDriftExpected": 4,
+      "evidence": "TestResults/stage61-native-join/root-r652e-core-strict-terminal-evaluation.original.json",
+      "scope": "Complete Core project and its native dependencies strictRelease only; not fullsolution/runtime/105acceptance."
+    },
+    "downstreamRequiredLifetimeCallClosure": {
+      "stage": "R652",
+      "sourceFiles": 82,
+      "state": "adopted_independent_source_peers_clean_fullsolution_build_pending",
+      "evidence": "TestResults/stage61-native-join/root-r652-required-lifetime-ct82.adoption.original.json",
+      "sha256": "d622da2d5b78aa1295d1952c831e220bf2fc96750d5c14300e55de524b4aaf8c",
+      "sourcePacketSha256": "b480e588ad23ee484d3ff04d48beecfdaf1a2def96d1774169b03096aef95f22",
+      "scope": "Required lifetime-binding/CT signatures andallactualcallers; preserveexact originalbinding/work/grant/token/callbacks/defaults andgenuinenonoptionalCToptionalbindingexceptions. Immutable3564b20c gitpreimagesforall82verified. C1Server41independentpeerCLEAN; remainingClusteringpeerandfullstrict pending. Independent Server41 andClustering33 exhaustive peer scopes CLEAN; MainQuery6+Unit2 review complete; no nativecompiler/runtime claim.",
+      "peerEvidence": [
+        "TestResults/c1-r652-server-binding-peer-r1/server41-independent-peer-clean.original.json",
+        "TestResults/companion4-d4-r1/r652-clustering-peer/clustering33.independent-peer.original.json"
+      ],
+      "matchingWhitespace": {
+        "scopeFiles": 1525,
+        "result": "passed",
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "evidence": "TestResults/stage61-native-join/root-r652g-combined-native-whitespace-verify.completion.original.json"
+      }
+    },
+    "latestQueryCompilerGate": {
+      "label": "root-r655qb-query-strict-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 8.555316625162959,
+      "sourceDrift": 0,
+      "compiledChangesExpected": 6,
+      "stdoutSha256": "3a9b64b72c9b05e06cf77c042c7d1fba886dff5268c9e04c7144a40c59054757",
+      "evidence": "TestResults/stage61-native-join/root-r655qb-query-strict-release.completion.original.json",
+      "scope": "Entire Queryproject/dependencies strictRelease only, notfullsolution/runtimeacceptance."
+    },
+    "compilerRepairAfterR653": {
+      "stage": "R655",
+      "state": "all_known25_diagnostics_source_repaired_query_pass_full_clustering_build_open",
+      "sourceFiles": 23,
+      "evidence": [
+        "TestResults/stage61-native-join/root-r655-query-four-in-seven.adoption.original.json",
+        "TestResults/stage61-native-join/root-r655-replication21-in16.adoption.original.json"
+      ],
+      "scope": "Cohesive Query capturedview/search/preparedleafownership; exactCTcallbacks; nativeForwardtypedaliases, fullpublicationorder/buffercleanup/firstEDI+fatalpriority+Unknownpoison; actualCTSfinallyownership; completecoordinator/consensusshutdownownership inexistingowners/allactualcallers. No limits/suppression/ABI/fallbackchanges."
     }
   },
   "RESOURCE-LIFETIME-NATIVE-20261016": {
@@ -69548,5 +69608,34 @@
     },
     "parallelOwnership": "12 distinct primaries assigned across3 authorized chats; completed source packets retain original acceptance/failure owner while freed executor immediately takes the next distinct task",
     "qualification": "No original task promotion, full coverage, RF3, Linux, endurance, power-loss, release or performance claim from source/formatter/compiler alone."
+  },
+  "FUNCTIONAL-FILE-LAYOUTS-20261016": {
+    "status": "in_progress",
+    "ownerRequestedCases": [
+      "Each silo uses its own distinct ZoneTree files",
+      "All silo processes read the same physical ZoneTree files in one shared directory"
+    ],
+    "positiveSharedFilesStatus": "open_unsupported_native_contract_not_qualified",
+    "engine": "ZoneTree2.0.1/ec774af2223bd87457a0aa985908f0b4e508e4c8",
+    "nativeEvidence": "TestResults/root-r653-zonetree-shared-files-research-r1/research.original.json",
+    "nativeEvidenceSha256": "8164891112157981ad0407d9e8117771ef754e4f903bb02a7c47246f045396a2",
+    "topologyPlan": "TestResults/root-r653-functional-file-layout-plan-r1/aspire-literal-file-layout-seams.original.json",
+    "contract": "docs/Features/ClusterReplication/FunctionalDevelopmentTopology.md",
+    "implementation": "Adopted actual Aspire-owned distinct-file oracles and three explicit-start competing-owner diagnostic resources sharing the exact live node1 data root and image. Bounded original IOException, node.owner.lock, native PartitionStores stack, nonzero exits, no readiness and joined settlement are required. Original healthy RF3 data, receipts and two same-root cold reopens remain mandatory. Refusal is not successful shared-file qualification; per-node child folders are not the same files.",
+    "runtime": "not_run_pending_complete_strict_solution",
+    "sourceEvidence": [
+      "TestResults/stage61-native-join/root-r658-aspire-filecase19.adoption.original.json",
+      "TestResults/stage61-native-join/root-r659-filecase-bounded-log-reader2.adoption.original.json",
+      "TestResults/stage61-native-join/root-r659-filecase-native-enrolment6.adoption.original.json",
+      "TestResults/stage61-native-join/root-r659-functional-filecase-ci1.adoption.original.json"
+    ],
+    "nativeSelector": "/*/*/FunctionalFileOwnershipRf3Tests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens",
+    "selectionVerification": {
+      "scope": "Actual production JavaScript native selection only; no runner or resources started",
+      "acceptedExactSelector": true,
+      "refusedNearMisses": 7,
+      "unchangedInputsAndHealthyFollowup": true,
+      "evidence": "TestResults/stage61-native-join/root-r659-filecase-native-js-selection.original.json"
+    }
   }
 }

@@ -13,8 +13,8 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
     private const string InvalidResult = "The native ANN maintenance result is invalid.";
 
     internal async Task<AnnMaintenanceResult> ExecuteAsync(global::Orleans.IGrainFactory grains,
-        PrincipalRecord principal, AnnMaintenanceRequest original, DateTimeOffset expiry, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, AnnMaintenanceRequest original, DateTimeOffset expiry, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         var requestId = Guid.NewGuid();
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);

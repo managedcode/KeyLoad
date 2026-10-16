@@ -54,4 +54,36 @@ internal static class ReplicaCoordinatorShutdown
             throw new AggregateException(failures);
         }
     }
+
+    internal static async Task DisposeAsync(Task originalShutdown, AdmittedCommandInbox commands,
+        CancellationTokenSource lifetime)
+    {
+        var failures = await ReplicaCoordinatorShutdown.JoinDisposalAsync(originalShutdown).ConfigureAwait(false);
+        try
+        {
+            await ReplicaShutdownStage.ObserveAsync(commands.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
+        catch (Exception failure)
+        {
+            failures.Add(failure);
+            DisposeLifetime(lifetime, failures);
+            throw;
+        }
+        DisposeLifetime(lifetime, failures);
+    }
+
+    private static void DisposeLifetime(CancellationTokenSource lifetime, List<Exception> failures)
+    {
+        try
+        {
+            lifetime.Dispose();
+        }
+        catch (Exception failure)
+        {
+            failures.Add(failure);
+            ReplicaCoordinatorShutdown.ThrowIfAny(failures);
+            throw;
+        }
+        ReplicaCoordinatorShutdown.ThrowIfAny(failures);
+    }
 }

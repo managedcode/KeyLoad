@@ -90,10 +90,10 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             {
                 return await NativeLifetimeReadTransportExecution.ExecuteAsync(requestWork(), partition.Database,
                     request, caller, operation.ShutdownToken, (binding, boundToken) =>
-                        ExecuteAdmittedAsync(request, targetMac, boundToken, operation.ShutdownToken, binding))
+                        ExecuteAdmittedAsync(request, targetMac, binding, boundToken, operation.ShutdownToken))
                     .ConfigureAwait(false);
             }
-            return await ExecuteAdmittedAsync(request, targetMac, caller, operation.ShutdownToken, null).ConfigureAwait(false);
+            return await ExecuteAdmittedAsync(request, targetMac, null, caller, operation.ShutdownToken).ConfigureAwait(false);
         }
         finally
         {
@@ -105,7 +105,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     }
 
     private async Task<RemoteModelNativeReply> ExecuteAdmittedAsync(RemoteModelNativeRequest request,
-        RemoteDocumentMac targetMac, CancellationToken caller, CancellationToken shutdown, IResourceLifetimeWorkBinding? binding)
+        RemoteDocumentMac targetMac, IResourceLifetimeWorkBinding? binding, CancellationToken caller, CancellationToken shutdown)
     {
         var effectBoundary = new RemoteModelNativeEffectBoundary();
         RemoteModelNativeReply reply;

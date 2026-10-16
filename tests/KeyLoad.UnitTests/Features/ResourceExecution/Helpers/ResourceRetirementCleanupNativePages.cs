@@ -1,6 +1,7 @@
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using Microsoft.Extensions.Options;
 using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementCleanupNativeData;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -12,7 +13,8 @@ internal static class ResourceRetirementCleanupNativePages
         => store.Commit((transaction, _) =>
         {
             var progress = ResourceRetirementTableCleanupPage.Apply(transaction, state.Lifetime, partition,
-                Cursor(transaction, partition), limits, ReservedMutations, ReservedBytes);
+                Cursor(transaction, partition), Options.Create(limits),
+                (limits.MaxQueryReadBytes, limits.MaxScanRecords), ReservedMutations, ReservedBytes);
             var value = KeyCodec.Encode(progress.Next.FamilyOrdinal, progress.Next.AfterKey);
             if (Checkpoint(partition).LongLength + value.LongLength > ReservedBytes)
             {

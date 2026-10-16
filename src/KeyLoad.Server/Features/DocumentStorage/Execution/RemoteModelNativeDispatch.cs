@@ -10,8 +10,8 @@ internal static class RemoteModelNativeDispatch
 {
     internal static Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
         RemoteDocumentRuntime runtime, RemoteModelNativeRequest request,
-        RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken token,
-        IResourceLifetimeWorkBinding? binding)
+        RemoteModelNativeEffectBoundary? effectBoundary, IResourceLifetimeWorkBinding? binding,
+        CancellationToken token)
     {
         if (request.Channel is RemoteModelNativeChannel.DocumentEnvelope or RemoteModelNativeChannel.ResourceLifetimeRead
             or RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
@@ -33,7 +33,7 @@ internal static class RemoteModelNativeDispatch
         if (request.Channel == RemoteModelNativeChannel.ResourceLifetimeAnnRead)
         {
             return (runtime.AnnObservations ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
-                .ExecuteLifetimeAsync(request, token, RequireBinding(binding));
+                .ExecuteLifetimeAsync(request, RequireBinding(binding), token);
         }
         if (request.Channel == RemoteModelNativeChannel.AnnProjectionObservation)
         {

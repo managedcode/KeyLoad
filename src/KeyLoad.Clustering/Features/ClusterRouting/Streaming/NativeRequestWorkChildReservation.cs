@@ -92,7 +92,6 @@ internal sealed class NativeRequestWorkChildReservation(NativeRequestWorkOwner o
                 : await child.CompleteAsync(original, null).ConfigureAwait(false);
         }
 
-
     }
 
 }

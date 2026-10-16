@@ -56,8 +56,7 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
         };
     }
 
-
-    internal async ValueTask<object> ExecuteAsync(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+    internal async ValueTask<object> ExecuteAsync(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (kind == GrainReadKind.PartitionQueryLeaf)
@@ -69,44 +68,44 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
         {
             return queries.QueryPartitionsBound(principal,
                 GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(payload), expectedOwner, clock,
-                cancellationToken, binding);
+                binding, cancellationToken);
         }
         if (kind == GrainReadKind.WaitForIndex)
         {
-            return await search.WaitForIndexBoundAsync(principal, GrainNativePayload.Read<WaitForIndexRequest>(payload), cancellationToken, binding).ConfigureAwait(true);
+            return await search.WaitForIndexBoundAsync(principal, GrainNativePayload.Read<WaitForIndexRequest>(payload), binding, cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.WaitForAnnIndex)
         {
-            return await search.WaitForAnnIndexBoundAsync(principal, GrainNativePayload.Read<WaitForAnnIndexRequest>(payload), cancellationToken, binding).ConfigureAwait(true);
+            return await search.WaitForAnnIndexBoundAsync(principal, GrainNativePayload.Read<WaitForAnnIndexRequest>(payload), binding, cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.ApproximateSearch)
         {
-            return await search.ApproximateSearchBoundAsync(principal, GrainNativePayload.Read<ApproximateSearchRequest>(payload), cancellationToken, binding).ConfigureAwait(true);
+            return await search.ApproximateSearchBoundAsync(principal, GrainNativePayload.Read<ApproximateSearchRequest>(payload), binding, cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.Search)
         {
-            return await search.SearchBoundAsync(principal, GrainNativePayload.Read<SearchRequest>(payload), cancellationToken, binding).ConfigureAwait(true);
+            return await search.SearchBoundAsync(principal, GrainNativePayload.Read<SearchRequest>(payload), binding, cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.GraphSearch)
         {
-            return await search.GraphSearchBoundAsync(principal, GrainNativePayload.Read<GraphSearchRequest>(payload), cancellationToken, binding).ConfigureAwait(true);
+            return await search.GraphSearchBoundAsync(principal, GrainNativePayload.Read<GraphSearchRequest>(payload), binding, cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.SqlGraphSearch)
         {
-            return await queries.SearchSqlBoundAsync(principal, GrainNativePayload.Read<SqlGraphSearchRequest>(payload), cancellationToken, binding).ConfigureAwait(true);
+            return await queries.SearchSqlBoundAsync(principal, GrainNativePayload.Read<SqlGraphSearchRequest>(payload), binding, cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.SqlGraphPath)
         {
             return queries.ShortestPathSqlBound(principal, GrainNativePayload.Read<SqlGraphPathRequest>(payload),
-                clock, cancellationToken, binding);
+                clock, binding, cancellationToken);
         }
         return kind switch
         {
-            GrainReadKind.Query => queries.ExecuteBound(principal, GrainNativePayload.Read<QueryRequest>(payload), clock, cancellationToken, binding),
-            GrainReadKind.AstQuery => queries.ExecuteAstBound(principal, GrainNativePayload.ReadPublicInput<AstQueryRequest>(payload), clock, cancellationToken, binding),
+            GrainReadKind.Query => queries.ExecuteBound(principal, GrainNativePayload.Read<QueryRequest>(payload), clock, binding, cancellationToken),
+            GrainReadKind.AstQuery => queries.ExecuteAstBound(principal, GrainNativePayload.ReadPublicInput<AstQueryRequest>(payload), clock, binding, cancellationToken),
             GrainReadKind.QueryCapabilities => Capabilities(payload),
-            GrainReadKind.LiveQueryStart => queries.StartLiveQueryBound(principal, GrainNativePayload.ReadPublicInput<StartLiveQueryRequest>(payload), clock, cancellationToken, binding),
-            GrainReadKind.LiveQueryRead => queries.ReadLiveQueryBound(principal, GrainNativePayload.ReadPublicInput<ReadLiveQueryRequest>(payload), clock, cancellationToken, binding),
+            GrainReadKind.LiveQueryStart => queries.StartLiveQueryBound(principal, GrainNativePayload.ReadPublicInput<StartLiveQueryRequest>(payload), clock, binding, cancellationToken),
+            GrainReadKind.LiveQueryRead => queries.ReadLiveQueryBound(principal, GrainNativePayload.ReadPublicInput<ReadLiveQueryRequest>(payload), clock, binding, cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

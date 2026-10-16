@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementCleanupNativeData;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -28,7 +29,8 @@ internal static class ResourceRetirementCleanupPlanNative
         fixture.Store.Commit((transaction, _) =>
         {
             var plan = ResourceRetirementTableCleanupPage.Plan(transaction, state.Lifetime, partition,
-                new(Zero), limits, Zero, Zero, stopAtCapacity: true);
+                new(Zero), Options.Create(limits),
+                (limits.MaxQueryReadBytes, limits.MaxScanRecords), Zero, Zero, stopAtCapacity: true);
             maximal = plan.Select(plan.Count);
             selected = plan.Select(One);
             rejected = Assert.ThrowsExactly<KeyLoadException>(() => plan.Select(RowsPerPartition + One));

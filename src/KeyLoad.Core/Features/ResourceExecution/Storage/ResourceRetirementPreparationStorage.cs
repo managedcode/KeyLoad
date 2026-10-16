@@ -1,4 +1,5 @@
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
@@ -43,10 +44,11 @@ internal static class ResourceRetirementPreparationStorage
     }
 
     internal static void RequireMovementAdmission(IKeyValueView view,
-        KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionMovePhaseCommand phase, DatabaseLimits limits)
+        KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionMovePhaseCommand phase, IOptions<DatabaseLimits> options)
     {
+        var limits = options.Value;
         ResourceRetirementStorage.RequireNoRetirement(view, limits);
-        ResourceRetirementPreparationMovementAdmission.Require(view, phase, limits);
+        ResourceRetirementPreparationMovementAdmission.Require(view, phase, options);
     }
 
     internal static void CreateSource(IAtomicTransaction transaction, ResourceRetirementPreparationStateV1 state, DatabaseLimits limits)

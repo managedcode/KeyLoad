@@ -1,10 +1,12 @@
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Accounts actual examined native metadata before decode without owning another read cut or deadline.</summary>
-internal sealed class ResourceRetirementMetadataScan(IKeyValueView view, DatabaseLimits limits)
+internal sealed class ResourceRetirementMetadataScan(IKeyValueView view, IOptions<DatabaseLimits> options)
 {
+    private readonly DatabaseLimits limits = options.Value;
     private int records;
     private long bytes;
 

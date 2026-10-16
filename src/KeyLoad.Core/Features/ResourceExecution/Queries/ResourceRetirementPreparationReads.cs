@@ -48,7 +48,7 @@ public sealed partial class DatabaseEngine
             }
             ResourceRetirementPreparationEvidence.Owner(view, reservation, Limits);
             var status = new ResourceRetirementOwnerStatusV1(reservation, CaptureRetirementStatusCut(view),
-                ResourceRetirementMovementSnapshot.Capture(view, Limits));
+                ResourceRetirementMovementSnapshot.Capture(view, OperationLimitsOptions));
             ResourceRetirementPreparationValidation.Status(status, Limits);
             return status;
         });

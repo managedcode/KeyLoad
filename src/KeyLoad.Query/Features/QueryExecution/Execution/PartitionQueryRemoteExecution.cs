@@ -35,12 +35,7 @@ internal static partial class PartitionQueryRemoteExecution
                 database.Limits, engine.Execution, budget.MaximumResultBytes);
             _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
             var grants = Reserve(plan, budget);
-            var preparedLeaves = new PartitionQueryPreparedLeaf[plan.Leaves.Length];
-            for (var index = FirstLeafIndex; index < preparedLeaves.Length; index++)
-            {
-                budget.Check();
-                preparedLeaves[index] = prepare(plan.Leaves[index], grants[index], budget);
-            }
+            var preparedLeaves = PrepareLeaves(plan, grants, budget, prepare);
             var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);
             var owners = ImmutableArray.CreateBuilder<PhysicalShardRecord>(plan.Leaves.Length);
             var concurrency = Math.Min(engine.Execution.MaximumConcurrentPartitionLeaves, plan.Leaves.Length);
@@ -74,6 +69,19 @@ internal static partial class PartitionQueryRemoteExecution
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceededDetail);
         }
+    }
+
+    private static PartitionQueryPreparedLeaf[] PrepareLeaves(PartitionQueryPlanV1 plan,
+        ReadExecutionBudgetReadGrant[] grants, ReadExecutionBudget budget,
+        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, PartitionQueryPreparedLeaf> prepare)
+    {
+        var preparedLeaves = new PartitionQueryPreparedLeaf[plan.Leaves.Length];
+        for (var index = FirstLeafIndex; index < preparedLeaves.Length; index++)
+        {
+            budget.Check();
+            preparedLeaves[index] = prepare(plan.Leaves[index], grants[index], budget);
+        }
+        return preparedLeaves;
     }
 
     private static void CompleteReadAccounting(ImmutableArray<PartitionQueryLeafResultV1>.Builder leaves,

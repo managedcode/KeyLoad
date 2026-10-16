@@ -12,5 +12,5 @@ internal interface IRemoteBlobReadRouter
     /// <param name="binding">The actual original hosted lifetime binding and result ledger.</param>
     /// <returns>The bounded native Blob result after canonical revalidation.</returns>
     Task<object?> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding);
+        ReadOnlyMemory<byte> payload, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken);
 }

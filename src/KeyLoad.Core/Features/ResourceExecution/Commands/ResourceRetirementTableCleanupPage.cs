@@ -1,4 +1,5 @@
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 using static KeyLoad.Core.Features.ResourceExecution.ResourceRetirementTableCleanupFamilies;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
@@ -8,9 +9,10 @@ internal static class ResourceRetirementTableCleanupPage
 {
     internal static ResourceRetirementTableCleanupProgress Apply(IAtomicTransaction transaction,
         ResourceLifetimeV1 lifetime, PartitionRef partition, ResourceRetirementTableCleanupCursor cursor,
-        DatabaseLimits limits, int reservedMutations, long reservedBytes)
+        IOptions<DatabaseLimits> limits, (long MaximumBytes, int MaximumRecords) readBounds,
+        int reservedMutations, long reservedBytes)
     {
-        var plan = Plan(transaction, lifetime, partition, cursor, limits, reservedMutations, reservedBytes);
+        var plan = Plan(transaction, lifetime, partition, cursor, limits, readBounds, reservedMutations, reservedBytes);
         var selection = plan.Select(plan.Count);
         selection.Apply(transaction);
         return selection.Progress;
@@ -18,11 +20,13 @@ internal static class ResourceRetirementTableCleanupPage
 
     internal static ResourceRetirementTableCleanupPlan Plan(IKeyValueView view,
         ResourceLifetimeV1 lifetime, PartitionRef partition, ResourceRetirementTableCleanupCursor cursor,
-        DatabaseLimits limits, int reservedMutations, long reservedBytes, bool stopAtCapacity = false)
+        IOptions<DatabaseLimits> limits, (long MaximumBytes, int MaximumRecords) readBounds,
+        int reservedMutations, long reservedBytes, bool stopAtCapacity = false)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(limits);
-        var work = new ResourceRetirementTableCleanupBudget(limits, reservedMutations, reservedBytes, stopAtCapacity);
+        var work = new ResourceRetirementTableCleanupBudget(limits, readBounds, reservedMutations, reservedBytes, stopAtCapacity);
+        var policy = limits.Value;
         var prefix = ResourceRetirementTableCleanupKeys.Prefix(lifetime, partition, cursor);
         if (cursor.FamilyOrdinal == All.Length)
         {
@@ -30,7 +34,7 @@ internal static class ResourceRetirementTableCleanupPage
         }
         var family = All[cursor.FamilyOrdinal];
         var after = cursor.AfterKey;
-        if (after.LongLength > limits.MaxBatchBytes - reservedBytes)
+        if (after.LongLength > policy.MaxBatchBytes - reservedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Capacity);
         }

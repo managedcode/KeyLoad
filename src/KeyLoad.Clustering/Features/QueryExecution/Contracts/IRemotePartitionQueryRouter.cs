@@ -12,5 +12,5 @@ internal interface IRemotePartitionQueryRouter
     /// <param name="binding">The explicit original native work binding and shared result-retention ledger.</param>
     /// <returns>Only a fully validated complete page after every child joins.</returns>
     Task<PartitionQueryPageV1> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        PartitionQueryRequestV1 request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding);
+        PartitionQueryRequestV1 request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken);
 }

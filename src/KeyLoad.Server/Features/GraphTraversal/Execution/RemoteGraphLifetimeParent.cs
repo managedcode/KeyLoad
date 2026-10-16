@@ -8,8 +8,8 @@ internal sealed class RemoteGraphLifetimeParent(IRemoteGraphParent original, Fun
     : IRemoteGraphParent
 {
     public async Task<RemoteGraphEdgeResultV1> ExecuteAsync(GrainRequestEnvelope trusted, OperationKind kind,
-        ReadOnlyMemory<byte> payload, ReadExecutionBudget work, CancellationToken caller,
-        IResourceLifetimeWorkBinding binding)
+        ReadOnlyMemory<byte> payload, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        CancellationToken caller)
     {
         ArgumentNullException.ThrowIfNull(trusted);
         ArgumentNullException.ThrowIfNull(work);
@@ -19,7 +19,7 @@ internal sealed class RemoteGraphLifetimeParent(IRemoteGraphParent original, Fun
         using var stage = work.EnterStageCancellation(linked.Token);
         linked.Token.ThrowIfCancellationRequested();
         work.Check();
-        var result = await original.ExecuteAsync(trusted, kind, payload, work, linked.Token, binding).ConfigureAwait(false);
+        var result = await original.ExecuteAsync(trusted, kind, payload, work, binding, linked.Token).ConfigureAwait(false);
         try
         {
             linked.Token.ThrowIfCancellationRequested();
@@ -33,8 +33,8 @@ internal sealed class RemoteGraphLifetimeParent(IRemoteGraphParent original, Fun
     }
 
     public async Task<RemoteIncomingGraphEdgesPageV1> ReadIncomingAsync(GrainRequestEnvelope trusted,
-        ReadRemoteIncomingGraphEdgesRequestV1 request, ReadExecutionBudget work, CancellationToken caller,
-        IResourceLifetimeWorkBinding binding)
+        ReadRemoteIncomingGraphEdgesRequestV1 request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        CancellationToken caller)
     {
         ArgumentNullException.ThrowIfNull(trusted);
         ArgumentNullException.ThrowIfNull(request);
@@ -45,7 +45,7 @@ internal sealed class RemoteGraphLifetimeParent(IRemoteGraphParent original, Fun
         using var stage = work.EnterStageCancellation(linked.Token);
         linked.Token.ThrowIfCancellationRequested();
         work.Check();
-        var result = await original.ReadIncomingAsync(trusted, request, work, linked.Token, binding).ConfigureAwait(false);
+        var result = await original.ReadIncomingAsync(trusted, request, work, binding, linked.Token).ConfigureAwait(false);
         linked.Token.ThrowIfCancellationRequested();
         work.Check();
         return result;

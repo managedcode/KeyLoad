@@ -1,6 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
-using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.ChangeFeeds;
@@ -13,9 +11,6 @@ namespace KeyLoad.Query;
 /// <summary>Executes authorized bounded SQL and AST queries.</summary>
 public sealed partial class QueryEngine
 {
-    private const int InitialSequence = 0;
-    private const long NoRetainedBytesLong = 0L;
-
     internal const string ExplainId = "explain";
     internal const string ResultLimitExceeded = "The query result byte budget is exceeded.";
     private readonly TimeSpan cursorLifetime;
@@ -96,64 +91,8 @@ public sealed partial class QueryEngine
         => QueryFieldAuthorization.Bind(database, principal, resource, request);
     internal QueryPage ExecuteView(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, ReadExecutionBudget budget, TimeProvider clock)
-    {
-        var query = request.Query;
-        budget.Check();
-        Bind(principal, resource, request);
-        var coverage = budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [resource]);
-        var cursor = QueryCursorExecution.Resolve(database, view, principal, resource, request, hash, clock,
-            coverage.Lifetimes.Single());
-        var prepared = new PreparedQuery(query, cursor.Offset, database.Limits.MaxScanRecords);
-        var accessPath = new QueryCandidateReader(database, view, principal, resource, request, budget, document =>
-        {
-            budget.Check();
-            if (query.Explain)
-            {
-                return;
-            }
-            using var json = JsonDocument.Parse(document.Json);
-            if (query.Filter is null || PredicateEvaluator.Evaluate(query.Filter, document, json.RootElement,
-                    request.Parameters, prepared.Paths) == true)
-            {
-                budget.Check();
-                prepared.Consider(document, json.RootElement);
-            }
-        }, visibilitySourceEpoch: cursor.SourceEpoch).Visit();
-        if (query.Explain)
-        {
-            var explain = new QueryPage([new(ExplainId, InitialSequence, JsonSerializer.Serialize(new { AccessPath = accessPath,
-                AtomicPartition = request.Partition.AtomicPartitionId, ScanBudget = database.Limits.MaxScanRecords },
-                JsonDefaults.Options))], null, cursor.Cut, accessPath);
-            budget.CheckResult(explain);
-            return explain;
-        }
-        return BuildPage(principal, resource, request, hash, cursor, prepared, accessPath, budget, clock);
-    }
+        => QueryViewExecution.Execute(database, cursorLifetime, view, principal, resource, request, hash, budget, clock);
 
-    private QueryPage BuildPage(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request,
-        string hash, QueryCursorExecution.State cursor, PreparedQuery prepared, string accessPath, ReadExecutionBudget budget, TimeProvider clock)
-    {
-        var query = request.Query;
-        var rows = new List<QueryRow>();
-        var minimumResultBytes = NoRetainedBytesLong;
-        foreach (var row in prepared.Page(cursor.Offset, query.Limit, budget))
-        {
-            budget.Check();
-            var projected = Project(principal, resource, row.Document, query.Projection, prepared.Paths);
-            minimumResultBytes += Encoding.UTF8.GetByteCount(projected.Json);
-            if (minimumResultBytes > budget.MaximumResultBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, ResultLimitExceeded);
-            }
-            rows.Add(projected);
-        }
-        var next = cursor.Offset + rows.Count;
-        var token = QueryCursorExecution.SignNext(database, cursorLifetime, principal, resource, hash,
-            cursor, next, prepared.EligibleCount, clock);
-        var result = new QueryPage(rows.ToImmutableArray(), token, cursor.Cut, accessPath);
-        budget.CheckResult(result);
-        return result;
-    }
     internal QueryRow Project(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord document,
         ImmutableArray<Selection> selections, IReadOnlyDictionary<string, string[]>? paths = null)
         => QueryRowProjection.Project(database, principal, resource, document, selections, paths);

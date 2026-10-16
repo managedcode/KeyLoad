@@ -8,7 +8,7 @@ namespace KeyLoad.Clustering;
 internal static class GrainRemoteTransferRead
 {
     internal static RemoteQueueTransferPeerResult Execute(DatabaseEngine database, PrincipalRecord principal,
-        DecodedGrainRequest request, IOptions<DatabaseLimits> limits, TimeProvider clock, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        DecodedGrainRequest request, IOptions<DatabaseLimits> limits, TimeProvider clock, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         token.ThrowIfCancellationRequested();

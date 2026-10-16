@@ -57,6 +57,11 @@ internal static class ResourceRetirementReadActionShape
         {
             throw Invalid();
         }
+        RequireContext(query, limits);
+    }
+
+    private static void RequireContext(ResourceRetirementReadRequestV1 query, DatabaseLimits limits)
+    {
         if (query.Context is { } context)
         {
             ResourceRetirementAttemptContextValidation.Require(context, limits);

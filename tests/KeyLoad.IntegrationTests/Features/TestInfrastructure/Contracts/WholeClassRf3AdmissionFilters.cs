@@ -18,6 +18,7 @@ internal static class WholeClassRf3AdmissionFilters
         11 => "/*/*/CompetingInboxPublicTests/*",
         12 => "/*/*/QueueViewLeaseIsolationTests/*",
         13 => "/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests)/*",
+        14 => "/*/*/FunctionalFileOwnershipRf3Tests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens",
         _ => throw new ArgumentOutOfRangeException(nameof(selection)),
     };
 }

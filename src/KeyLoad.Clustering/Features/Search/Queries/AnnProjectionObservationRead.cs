@@ -11,13 +11,13 @@ internal static class AnnProjectionObservationRead
 {
     internal static async Task<AnnProjectionObservationResult> ExecuteAsync(DatabaseEngine database,
         IServiceProvider services, TimeProvider clock, PrincipalRecord principal,
-        DecodedGrainRequest original, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        DecodedGrainRequest original, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         if (original.Envelope.ReadKind == GrainReadKind.AnnProjectionObservationV2)
         {
             return await AnnProjectionLifetimeObservationRead.ExecuteAsync(database, services, clock,
-                principal, original, cancellationToken, binding).ConfigureAwait(true);
+                principal, original, binding, cancellationToken).ConfigureAwait(true);
         }
         cancellationToken.ThrowIfCancellationRequested();
         if (!services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value.EnableApproximateSearch)

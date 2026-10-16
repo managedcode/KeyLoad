@@ -51,6 +51,12 @@ internal static class ResourceRetirementCompletionValidation
 
             return;
         }
+        FinalizedState(state, cleanupOwners, limits);
+    }
+
+    private static void FinalizedState(ResourceRetirementStateV1 state, HashSet<Guid> cleanupOwners,
+        DatabaseLimits limits)
+    {
         var finalization = state.Finalization;
         if (finalization is null || cleanupOwners.Count != state.Control.Directory.Owners.Length
             || !ResourceRetirementValidation.Same(finalization.Control, state.Control))
@@ -112,7 +118,7 @@ internal static class ResourceRetirementCompletionValidation
 
     internal static void Release(ResourceRetirementOwnerReleaseV1 release, DatabaseLimits limits)
     {
-        if (release is null || release.Receiver is null || release.PreparedReplacementCount <= 0)
+        if (release is null || release.Receiver is null || release.PreparedReplacementCount <= ResourceRetirementProtocol.Empty)
         {
             throw Invalid();
         }

@@ -11,14 +11,16 @@ public sealed partial class DatabaseEngine
         var state = RequireRetirementSource(view, context.Retirement!);
         ResourceRetirementWorkValidation.RequireBarrier(state, Limits);
         _ = ReadOriginalResourceRetirementWorkBarrier(view, state);
+        var receiver = context.Receiver
+            ?? throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementProtocol.Malformed);
         if (state.Finalization is not null || state.OwnerCleanupReceipts.Any(cleanup =>
-                PhysicalOwnerEntryValidation.Same(cleanup.Receiver, context.Receiver)))
+                PhysicalOwnerEntryValidation.Same(cleanup.Receiver, receiver)))
         {
             throw Errors.Fail(ErrorCode.Conflict, ResourceRetirementProtocol.Changed);
         }
 
         if (!state.FinalInventory!.Entries.Any(entry => entry.Partition == context.Page!.Partition
-            && PhysicalOwnerEntryValidation.SameOwner(entry.ObservedOwner, context.Receiver!.Owner)))
+            && PhysicalOwnerEntryValidation.SameOwner(entry.ObservedOwner, receiver.Owner)))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ResourceRetirementProtocol.Changed);
         }

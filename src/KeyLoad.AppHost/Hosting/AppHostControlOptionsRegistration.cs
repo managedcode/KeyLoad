@@ -2,6 +2,7 @@ using KeyLoad.AppHost.Features.BlobStorage;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
+using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using KeyLoad.Comparisons;
@@ -74,6 +75,7 @@ internal static class AppHostControlOptionsRegistration
                 value.ProtectedMovementProbe = ProtectedMovementProbeProfile.Read(configuration, value);
                 value.FunctionalColdReopen = FunctionalColdReopenProfile.Read(configuration, value);
                 value.FunctionalNodeCount = ReadFunctionalNodeCount(configuration, value);
+                value.ExclusiveOwnerContention = ExclusiveOwnerContentionProfile.Read(configuration, value);
             })], [], []));
         _ = options.Value;
         return options;

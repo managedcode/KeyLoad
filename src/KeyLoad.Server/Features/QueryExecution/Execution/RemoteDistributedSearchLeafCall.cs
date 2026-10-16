@@ -39,7 +39,7 @@ internal sealed class RemoteDistributedSearchLeafCall(OrleansNode node, Partitio
         CancellationToken token)
         => call is null
             ? await RemoteQueryLifetimeLocalRead.SearchAsync(node, partition, principalId, request, metadata,
-                expiresAt, token, binding).ConfigureAwait(false)
+                expiresAt, binding, token).ConfigureAwait(false)
             : await RemoteQueryLifetimeExchange.ReadAsync<DistributedSearchLeafResultV1>(client, call, metadata,
                 PartitionQueryParallelRetention.ReplyBytes(request.MaxResultBytes), token).ConfigureAwait(false);
 

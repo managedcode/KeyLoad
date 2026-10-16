@@ -8,53 +8,53 @@ namespace KeyLoad.Query;
 public sealed partial class SearchEngine
 {
     internal Task<RankedDocument[]> SearchBoundAsync(string principalId, SearchRequest request,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
-        => SearchLifetimeWorkBudget.RunNativeAsync(database, execution, binding, token,
-            budget => SearchCore(principalId, request, budget));
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
+        => SearchLifetimeWorkBudget.RunNativeAsync(database, execution, binding,
+            budget => SearchCore(principalId, request, budget), token);
 
     internal Task<GraphSearchResult> GraphSearchBoundAsync(string principalId, GraphSearchRequest request,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
         => GraphSearchAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, execution, binding, token), token);
 
     internal Task<WaitForIndexResult> WaitForIndexBoundAsync(string principalId, WaitForIndexRequest request,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
-        => SearchLifetimeWorkBudget.RunNativeAsync(database, execution, binding, token,
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
+        => SearchLifetimeWorkBudget.RunNativeAsync(database, execution, binding,
             budget => TextIndexWaitExecution.Execute(database, textProjection, execution,
-                readCutObserver, principalId, request, budget));
+                readCutObserver, principalId, request, budget), token);
 
     internal Task<WaitForAnnIndexResult> WaitForAnnIndexBoundAsync(string principalId, WaitForAnnIndexRequest request,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
         => WaitForAnnIndexAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, execution, binding, token), token);
 
     internal Task<AnnSearchPage> ApproximateSearchBoundAsync(string principalId, ApproximateSearchRequest request,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
         => ApproximateSearchAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, execution, binding, token), token);
 
     internal Task<WaitForAnnIndexResult> WaitForAnnIndexBoundAsync(string principalId, WaitForAnnIndexRequest request,
-        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         budget.RequireResourceLifetimeBinding(binding);
         return WaitForAnnIndexAsync(principalId, request, budget, metadata, token);
     }
 
     internal Task<AnnSearchPage> ApproximateSearchBoundAsync(string principalId, ApproximateSearchRequest request,
-        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         budget.RequireResourceLifetimeBinding(binding);
         return ApproximateSearchAsync(principalId, request, budget, metadata, token);
     }
 
     internal Task<WaitForAnnIndexResult> WaitForAnnIndexBoundAsync(string principalId, WaitForAnnIndexRequest request,
-        ReadExecutionBudget budget, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         budget.RequireResourceLifetimeBinding(binding);
         return WaitForAnnIndexAsync(principalId, request, budget, token);
     }
 
     internal Task<AnnSearchPage> ApproximateSearchBoundAsync(string principalId, ApproximateSearchRequest request,
-        ReadExecutionBudget budget, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         budget.RequireResourceLifetimeBinding(binding);
         return ApproximateSearchAsync(principalId, request, budget, token);

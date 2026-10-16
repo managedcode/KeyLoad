@@ -6,6 +6,7 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 internal static class ResourceRetirementIdentity
 {
     private const int GuidByteCount = 16;
+    private const string PreparedOperationIdentitySpace = "keyload.resource-retirement.prepared-operation-id.v1";
     private const string Invalid = "The resource retirement phase identity is invalid.";
 
     internal static Guid PhaseCommandId(ResourceRetirementRequestV1 request,
@@ -91,7 +92,7 @@ internal static class ResourceRetirementIdentity
 
         var request = ResourceRetirementAttemptContextValidation.Request(context);
         var owner = ResourceRetirementAttemptContextValidation.ExecutionOwner(context);
-        var identity = KeyCodec.Encode("keyload.resource-retirement.prepared-operation-id.v1",
+        var identity = KeyCodec.Encode(PreparedOperationIdentitySpace,
             request.RetirementId, request.TenantId, request.DatabaseId, request.ResourceName,
             request.ExpectedIncarnation.Value, (int)ResourceRetirementPhase.PreparedOperation,
             (int)context.Purpose, owner.PhysicalShardId, (int)action, attemptId);

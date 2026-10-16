@@ -14,7 +14,7 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
 
     internal ReadExecutionBudget CreateWork(EventVectorAdmittedCall admitted,
-        CancellationToken originalCancellationToken, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken originalCancellationToken)
     {
         ArgumentNullException.ThrowIfNull(admitted);
         var work = partition.Database.CreateEventVectorReadWork(admitted.Original.Call.ExpiresAt, originalCancellationToken);

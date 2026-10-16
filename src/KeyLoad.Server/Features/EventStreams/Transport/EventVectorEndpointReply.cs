@@ -26,7 +26,7 @@ internal static class EventVectorEndpointReply
         ArgumentNullException.ThrowIfNull(originalReplyMac);
         ArgumentNullException.ThrowIfNull(encoding);
         var call = admitted.Original.Call;
-        var work = receiver.CreateWork(admitted, originalCancellationToken, RemoteModelNativeDispatch.RequireBinding(binding));
+        var work = receiver.CreateWork(admitted, RemoteModelNativeDispatch.RequireBinding(binding), originalCancellationToken);
         var result = ReadOnlyMemory<byte>.Empty;
         ErrorCode? errorCode = null;
         try

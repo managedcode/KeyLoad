@@ -20,7 +20,7 @@ internal static class ResourceRetirementSourceSealShape
         }
         ResourceRetirementValidation.Control(control, limits);
         ResourceRetirementAttemptValidation.Witness(attempt,
-            new(ResourceRetirementAttemptPurpose.SealBarrier, control, null, null), limits);
+            new ResourceRetirementAttemptContextV1(ResourceRetirementAttemptPurpose.SealBarrier, control, null, null), limits);
         ResourceRetirementInventoryValidation.Require(inventory, control, limits);
     }
 }

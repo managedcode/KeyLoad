@@ -10,7 +10,7 @@ namespace KeyLoad.Clustering;
 internal static class QueryLifetimeReadCapability
 {
     internal static object Execute(DatabaseEngine database, IServiceProvider services, TimeProvider clock,
-        PrincipalRecord principal, DecodedGrainRequest request, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var owner = services.GetRequiredService<PhysicalShardRecord>();
@@ -19,11 +19,11 @@ internal static class QueryLifetimeReadCapability
             GrainReadKind.PartitionQueryLeafV2 => PartitionQueryLifetimeLeafExecution.ExecuteBound(
                 services.GetRequiredService<QueryEngine>(), principal.Id,
                 GrainNativePayload.Read<PartitionQueryOwnedLeafRequestV2>(request.Payload), owner, clock,
-                request.Envelope.ExpiresAt, token, binding),
+                request.Envelope.ExpiresAt, binding, token),
             GrainReadKind.DistributedSearchLeafV2 => DistributedSearchOwnedLeafExecution.ExecuteV2Bound(database,
                 principal.Id, GrainNativePayload.Read<DistributedSearchOwnedLeafV2>(request.Payload), owner,
                 services.GetRequiredService<IOptions<QueryExecutionOptions>>(), clock,
-                request.Envelope.ExpiresAt, token, binding),
+                request.Envelope.ExpiresAt, binding, token),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

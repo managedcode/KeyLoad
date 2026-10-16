@@ -50,21 +50,21 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         var current = owner.Current;
         if (current is null)
         {
-            current = await execution.InitializeAsync(work, budget, token, binding).ConfigureAwait(true);
+            current = await execution.InitializeAsync(work, budget, binding, token).ConfigureAwait(true);
             if (current is null)
             {
                 return;
             }
-            await WriteAsync(current, token, binding).ConfigureAwait(true);
+            await WriteAsync(current, binding, token).ConfigureAwait(true);
         }
-        var next = await execution.NextAsync(current, work, budget, token, binding).ConfigureAwait(true);
+        var next = await execution.NextAsync(current, work, budget, binding, token).ConfigureAwait(true);
         if (next is null)
         {
             return;
         }
         if (next != current)
         {
-            await WriteAsync(next, token, binding).ConfigureAwait(true);
+            await WriteAsync(next, binding, token).ConfigureAwait(true);
             current = next;
         }
         if (current.JobId is not null)
@@ -79,7 +79,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         await WriteAsync(current with
         {
             JobId = scheduled.Id
-        }, token, binding).ConfigureAwait(true);
+        }, binding, token).ConfigureAwait(true);
     }
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
@@ -110,7 +110,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         AnnMaintenanceResult result;
         try
         {
-            result = await execution.ExecuteAsync(GrainFactory, original, budget, expiry, token, binding).ConfigureAwait(true);
+            result = await execution.ExecuteAsync(GrainFactory, original, budget, expiry, binding, token).ConfigureAwait(true);
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated
             or ErrorCode.TokenInvalidated)
@@ -121,7 +121,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
                 {
                     JobId = context.Job.Id,
                     BlockedError = failure.Code
-                }, token, binding)
+                }, binding, token)
                     .ConfigureAwait(true);
             }
             catch (Exception cleanup) { throw new AggregateException(failure, cleanup); }
@@ -133,11 +133,11 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             LastRequest = original.PendingRequest,
             PendingRequest = null,
             LastResult = result
-        }, token, binding).ConfigureAwait(true);
+        }, binding, token).ConfigureAwait(true);
     }
 
-    private async Task WriteAsync(AnnProjectionJobState value, CancellationToken token,
-        NativeCapabilityWorkLifetime binding)
+    private async Task WriteAsync(AnnProjectionJobState value, NativeCapabilityWorkLifetime binding,
+        CancellationToken token)
     {
         try
         {

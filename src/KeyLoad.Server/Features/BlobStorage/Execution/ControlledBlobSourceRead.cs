@@ -19,7 +19,7 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
 
     internal async Task<(bool Routed, object? Value)> TryReadAsync(GrainRequestEnvelope envelope,
         string principalId, ControlledBlobReadPurpose purpose, ReadOnlyMemory<byte> nativeRequest,
-        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var expiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (expiry > envelope.ExpiresAt)
@@ -39,7 +39,7 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
     }
 
     internal async Task<OperationResult> ObserveOutcomeAsync(Guid ingressRequestId,
-        ControlledBlobReadFrameV2 frame, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        ControlledBlobReadFrameV2 frame, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         work.AttachResourceLifetimeBinding(binding);

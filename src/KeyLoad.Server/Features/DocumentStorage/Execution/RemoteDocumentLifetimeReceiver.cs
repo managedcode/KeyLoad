@@ -9,8 +9,8 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, PartitionHost partition,
     ServerRuntimeOptions options, TimeProvider clock)
 {
-    internal Task<ReadOnlyMemory<byte>> ExecuteAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+    internal Task<ReadOnlyMemory<byte>> ExecuteAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (!options.Node.Value.PhysicalGroupTrust.RemoteDocumentReads)
@@ -19,14 +19,14 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         }
         return call.Kind switch
         {
-            RemoteResourceLifetimeReadKindV2.Document => OwnedAsync(call, token, binding),
-            RemoteResourceLifetimeReadKindV2.ControlledDocument => ControlledAsync(call, token, binding),
+            RemoteResourceLifetimeReadKindV2.Document => OwnedAsync(call, binding, token),
+            RemoteResourceLifetimeReadKindV2.ControlledDocument => ControlledAsync(call, binding, token),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.InvalidProof)
         };
     }
 
-    private async Task<ReadOnlyMemory<byte>> OwnedAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+    private async Task<ReadOnlyMemory<byte>> OwnedAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         var request = NativeSerialization.Deserialize<OwnedDocumentReadRequestV2>(call.Payload.Span);
         var frame = request.Frame;
@@ -43,7 +43,7 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         var id = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateOwnedDocumentReadV2(id, principal.Id, request);
         var result = await NativeLifetimeReadChildExecution.ExecuteAsync<OwnedDocumentReadResultV2>(node,
-            principal, id, signed, null, token, binding).ConfigureAwait(false);
+            principal, id, signed, null, binding, token).ConfigureAwait(false);
         var actual = partition.Database.Store.Identity;
         if (result.Result.NodeId != actual.NodeId || result.Result.Incarnation != actual.Incarnation
             || result.Result.ReadGeneration != actual.ReadGeneration)
@@ -54,8 +54,8 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         return Encode(result, call.MaximumReplyBytes);
     }
 
-    private async Task<ReadOnlyMemory<byte>> ControlledAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+    private async Task<ReadOnlyMemory<byte>> ControlledAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         var request = NativeSerialization.Deserialize<ControlledDocumentReadRequestV2>(call.Payload.Span);
         var frame = request.Frame?.Original;
@@ -70,7 +70,7 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         var id = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateControlledDocumentReadV2(id, principal.Id, request);
         var result = await NativeLifetimeReadChildExecution.ExecuteAsync<ControlledDocumentReadResultV2>(node,
-            principal, id, signed, null, token, binding).ConfigureAwait(false);
+            principal, id, signed, null, binding, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         return Encode(result, call.MaximumReplyBytes);
     }

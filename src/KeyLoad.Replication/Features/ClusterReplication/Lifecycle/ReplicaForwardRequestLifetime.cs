@@ -1,4 +1,4 @@
-using KeyLoad.Core;
+using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Replication;
 
@@ -8,7 +8,7 @@ internal static class ReplicaForwardRequestLifetime
     private const int NoRemainingTicks = 0;
 
     internal static async Task<T> ExecuteAsync<T>(DateTimeOffset? expiresAt, TimeProvider clock,
-        CancellationToken incoming, Func<CancellationToken, Task<T>> execute)
+        Func<CancellationToken, Task<T>> execute, CancellationToken incoming)
     {
         if (expiresAt is null)
         {
@@ -19,29 +19,88 @@ internal static class ReplicaForwardRequestLifetime
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReplicaProtocol.InvalidPeer);
         }
-        CancellationTokenSource? deadline = null;
-        CancellationTokenSource? linked = null;
+        return await ExecuteOwnedAsync(remaining, clock, execute, incoming).ConfigureAwait(false);
+    }
+
+    private static async Task<T> ExecuteOwnedAsync<T>(TimeSpan remaining, TimeProvider clock,
+        Func<CancellationToken, Task<T>> execute, CancellationToken incoming)
+    {
         var failures = new List<Exception>();
         T? result = default;
         try
         {
-            deadline = new(remaining, clock);
-            linked = CancellationTokenSource.CreateLinkedTokenSource(incoming, deadline.Token);
-            result = await execute(linked.Token).ConfigureAwait(false);
+            using var deadline = new CancellationTokenSource(remaining, clock);
+            try
+            {
+                result = await ExecuteLinkedAsync(deadline, execute, failures, incoming).ConfigureAwait(false);
+            }
+            catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
+            {
+                failures.Add(error);
+            }
         }
-        catch (Exception error)
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
         {
             failures.Add(error);
         }
-        await CancelAsync(deadline, failures).ConfigureAwait(false);
-        await CancelAsync(linked, failures).ConfigureAwait(false);
-        Dispose(linked, failures);
-        Dispose(deadline, failures);
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
+        {
+            failures.Add(error);
+        }
         ReplicaShutdownStage.ThrowIfAny(failures);
         return result!;
     }
 
-    private static async Task CancelAsync(CancellationTokenSource? source, List<Exception> failures)
+    private static async Task<T> ExecuteLinkedAsync<T>(CancellationTokenSource deadline,
+        Func<CancellationToken, Task<T>> execute, List<Exception> failures, CancellationToken incoming)
+    {
+        CancellationTokenSource? linked = null;
+        T? result = default;
+        try
+        {
+            linked = CancellationTokenSource.CreateLinkedTokenSource(incoming, deadline.Token);
+            result = await execute(linked.Token).ConfigureAwait(false);
+        }
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
+        {
+            failures.Add(error);
+        }
+        finally
+        {
+            try
+            {
+                await CancelAsync(deadline, linked, failures).ConfigureAwait(false);
+            }
+            finally
+            {
+                linked?.Dispose();
+            }
+        }
+        return result!;
+    }
+
+    private static async Task CancelAsync(CancellationTokenSource? deadline, CancellationTokenSource? linked,
+        List<Exception> failures)
+    {
+        try
+        {
+            await CancelOneAsync(deadline, failures).ConfigureAwait(false);
+        }
+        finally
+        {
+            await CancelOneAsync(linked, failures).ConfigureAwait(false);
+        }
+    }
+
+    private static async Task CancelOneAsync(CancellationTokenSource? source, List<Exception> failures)
     {
         try
         {
@@ -50,19 +109,11 @@ internal static class ReplicaForwardRequestLifetime
                 await ReplicaShutdownStage.ObserveAsync(source.CancelAsync(), failures).ConfigureAwait(false);
             }
         }
-        catch (Exception error)
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
         {
             failures.Add(error);
         }
-    }
-
-    private static void Dispose(CancellationTokenSource? source, List<Exception> failures)
-    {
-        try
-        {
-            source?.Dispose();
-        }
-        catch (Exception error)
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
         {
             failures.Add(error);
         }

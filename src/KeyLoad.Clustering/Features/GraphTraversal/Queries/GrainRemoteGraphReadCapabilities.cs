@@ -9,7 +9,7 @@ namespace KeyLoad.Clustering;
 internal static class GrainRemoteGraphReadCapabilities
 {
     internal static object Execute(DatabaseEngine database, IServiceProvider services, TimeProvider clock,
-        PrincipalRecord principal, DecodedGrainRequest request, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         ArgumentNullException.ThrowIfNull(clock);

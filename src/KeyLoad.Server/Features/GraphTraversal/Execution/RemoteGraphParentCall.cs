@@ -9,7 +9,7 @@ internal static class RemoteGraphParentCall
 {
     internal static async Task<T> ReadAsync<T>(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, GrainReadKind kind, object actualRequest, DateTimeOffset expiry,
-        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding) where T : class
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token) where T : class
     {
         work.RequireResourceLifetimeBinding(binding);
         var bytes = RemoteGraphNativeResultEncoding.Encode(actualRequest, partition.Database.Limits.MaxBatchBytes, work);
@@ -18,7 +18,7 @@ internal static class RemoteGraphParentCall
             var id = Guid.NewGuid();
             var signed = node.CatalogRequestCodec().RemoteGraph.CreateRemoteGraphRead(id, principal.Id, kind, bytes, expiry);
             var result = await RemoteGraphNativeChild.ReadSignedAsync<T>(node, partition, principal,
-                id, signed, work, token, binding, bytes).ConfigureAwait(false);
+                id, signed, work, binding, bytes, token).ConfigureAwait(false);
             try
             {
                 return Decode<T>(result, partition, work);

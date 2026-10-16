@@ -25,7 +25,8 @@ internal sealed partial class FunctionalGateFixture
             ?? new CancellationTokenSource(App is null ? TimeSpan.FromSeconds(30)
                 : App.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.ApplicationCleanupTimeout,
                 TimeProvider.System);
-        if (App is { } application)
+        var contendersReleased = await fileContenders.JoinAsync(cleanup.Token, failures).ConfigureAwait(false);
+        if (contendersReleased && App is { } application)
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -33,30 +34,19 @@ internal sealed partial class FunctionalGateFixture
                 stopped = true;
             }, failures).ConfigureAwait(false);
         }
-        if (diagnostics is { } logs)
-        {
-            try
-            {
-                await diagnostics.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            {
-                failures.Add(failure);
-            }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            {
-                failures.Add(failure);
-            }
-            ServerFailureObserver.Observe(() => FunctionalGateResourceLogs.Save(
-                logs, NodeNames, diagnosticSecrets, Root, saveStartupEvidence!), failures);
-        }
-        if (builder is { } ownedBuilder)
+        await FunctionalGateResourceLogs.JoinAsync(diagnostics, NodeNames, diagnosticSecrets,
+            Root, saveStartupEvidence!, failures).ConfigureAwait(false);
+        if (contendersReleased && builder is { } ownedBuilder)
         {
             await ServerFailureObserver.ObserveAsync(() => ownedBuilder.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         if (stopped && started && failures.Count == 0)
         {
             ServerFailureObserver.Observe(() => FunctionalGateStorageOwnership.RequireReleased(this), failures);
+            if (failures.Count == 0 && PhysicalFiles is { } physicalFiles)
+            {
+                ServerFailureObserver.Observe(() => FunctionalGatePhysicalFileAssertions.RequireStopped(this, physicalFiles), failures);
+            }
         }
         if (imageSession is { } ownedImage)
         {
@@ -83,7 +73,7 @@ internal sealed partial class FunctionalGateFixture
         {
             foreach (var failure in failures.ToArray())
             {
-                ServerFailureObserver.Observe(() => failure.Data[FailureRootDataKey] = Root, failures);
+                ServerFailureObserver.Observe(() => failure.Data[FunctionalGateFixtureStartup.FailureRootDataKey] = Root, failures);
             }
             ServerFailureObserver.Observe(() => Console.Error.WriteLine("Original functional gate root retained at " + Root), failures);
         }

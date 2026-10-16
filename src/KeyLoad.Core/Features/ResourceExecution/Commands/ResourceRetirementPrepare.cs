@@ -12,11 +12,8 @@ public sealed partial class DatabaseEngine
     private OperationResult PrepareResourceRetirement(IAtomicTransaction transaction, PrincipalRecord principal,
         ReplicatedOperation operation, ResourceRetirementPhaseCommandV1 phase, long position)
     {
-        var body = NativeSerialization.Deserialize<ResourceRetirementPrepareBodyV1>(phase.Body.Span);
-        if (body is null)
-        {
-            throw Errors.Fail(ErrorCode.Validation, ResourceRetirementProtocol.Invalid);
-        }
+        var body = NativeSerialization.Deserialize<ResourceRetirementPrepareBodyV1>(phase.Body.Span)
+            ?? throw Errors.Fail(ErrorCode.Validation, ResourceRetirementProtocol.Invalid);
         ResourceRetirementValidation.Request(body.Request, Limits);
         if (operation.Id != ResourceRetirementIdentity.PreparationCommandId(body.Request) || phase.RetirementId != body.Request.RetirementId)
         {
@@ -36,7 +33,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ResourceRetirementProtocol.Changed);
         }
-        var moves = ResourceRetirementMovementSnapshot.Capture(transaction, Limits);
+        var moves = ResourceRetirementMovementSnapshot.Capture(transaction, OperationLimitsOptions);
         var digest = NativeOperationFingerprint.Compute(operation);
         var receipt = new ResourceRetirementPhaseReceiptV1(ResourceRetirementProtocol.Version, body.Request.RetirementId,
             phase.Phase, operation.Id, lifetime, catalog.DefaultShard, position, digest);

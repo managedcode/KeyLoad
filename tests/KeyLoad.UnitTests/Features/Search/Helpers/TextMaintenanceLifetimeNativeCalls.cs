@@ -30,7 +30,7 @@ internal static class TextMaintenanceLifetimeNativeCalls
         var failures = new List<Exception>();
         TextMaintenanceCapabilityResult? result = null;
         await ServerFailureObserver.ObserveAsync(async () => result = await runtime.Explicit.ExecuteBoundAsync(
-            principal, input, operation.Expiry, operation.Token, child), failures);
+            principal, input, operation.Expiry, child, operation.Token), failures);
         var original = failures.FirstOrDefault();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

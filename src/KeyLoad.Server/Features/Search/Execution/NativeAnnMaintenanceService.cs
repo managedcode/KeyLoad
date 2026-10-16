@@ -20,7 +20,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
             clock, admitted, state.EnsureOwner, cancellationToken);
 
     public Task<AnnProjectionEnrollment?> ReadEnrollmentBoundAsync(PrincipalRecord principal,
-        AnnMaintenanceRequest initialRequest, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        AnnMaintenanceRequest initialRequest, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         work.AttachResourceLifetimeBinding(binding);
@@ -29,7 +29,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
     }
 
     public Task<AnnProjectionPublication> ReadPublishedBoundAsync(PrincipalRecord principal,
-        AnnMaintenanceRequest request, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        AnnMaintenanceRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         work.AttachResourceLifetimeBinding(binding);
@@ -75,7 +75,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
 
     public async Task<AnnMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, DateTimeOffset requestExpiry,
-        CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         if (binding is not INativeRequestWorkBinding native)

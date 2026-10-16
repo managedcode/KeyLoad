@@ -29,7 +29,7 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
     }
 
     internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(RemoteModelNativeRequest request,
-        PartitionMovementReplayCache replay, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        PartitionMovementReplayCache replay, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var call = NativeSerialization.Deserialize<RemoteResourceLifetimeReadCallV2>(request.Payload.Span);
         RemoteResourceLifetimeReadValidation.RequireCall(call, options, partition, clock, token);
@@ -45,7 +45,7 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
         }
         using var expiry = new CancellationTokenSource(remaining, clock);
         using var original = CancellationTokenSource.CreateLinkedTokenSource(token, expiry.Token);
-        var reply = await ReadReplyAsync(call, original.Token, binding).ConfigureAwait(false);
+        var reply = await ReadReplyAsync(call, binding, original.Token).ConfigureAwait(false);
         original.Token.ThrowIfCancellationRequested();
         RemoteResourceLifetimeReadValidation.RequireCall(call, options, partition, clock, original.Token);
         var bytes = RemoteDocumentWire.Encode(reply, call.MaximumReplyBytes);
@@ -53,13 +53,13 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
         return (bytes, mac.Sign(bytes, reply: true));
     }
 
-    private async Task<RemoteResourceLifetimeReadReplyV2> ReadReplyAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+    private async Task<RemoteResourceLifetimeReadReplyV2> ReadReplyAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         ReadOnlyMemory<byte> result;
         try
         {
-            result = await ExecuteModelAsync(call, token, binding).ConfigureAwait(false);
+            result = await ExecuteModelAsync(call, binding, token).ConfigureAwait(false);
         }
         catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
         {
@@ -73,13 +73,13 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
         return new(RemoteResourceLifetimeReadProtocol.Version, call.Kind, call.RequestId, call.Nonce, result, null, null, Discovery());
     }
 
-    private Task<ReadOnlyMemory<byte>> ExecuteModelAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+    private Task<ReadOnlyMemory<byte>> ExecuteModelAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
         => call.Kind switch
         {
-            RemoteResourceLifetimeReadKindV2.Document or RemoteResourceLifetimeReadKindV2.ControlledDocument => documents.ExecuteAsync(call, token, binding),
-            RemoteResourceLifetimeReadKindV2.ControlledBlob => blobs.ExecuteAsync(call, token, binding),
-            RemoteResourceLifetimeReadKindV2.PartitionQuery or RemoteResourceLifetimeReadKindV2.DistributedSearch => queries.ExecuteAsync(call, token, binding),
+            RemoteResourceLifetimeReadKindV2.Document or RemoteResourceLifetimeReadKindV2.ControlledDocument => documents.ExecuteAsync(call, binding, token),
+            RemoteResourceLifetimeReadKindV2.ControlledBlob => blobs.ExecuteAsync(call, binding, token),
+            RemoteResourceLifetimeReadKindV2.PartitionQuery or RemoteResourceLifetimeReadKindV2.DistributedSearch => queries.ExecuteAsync(call, binding, token),
             _ => throw RemoteResourceLifetimeReadValidation.Invalid()
         };
 

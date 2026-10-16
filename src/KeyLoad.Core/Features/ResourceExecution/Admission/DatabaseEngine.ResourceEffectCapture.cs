@@ -47,7 +47,7 @@ public sealed partial class DatabaseEngine
     private ResourceEffectAdmissionV1 CaptureResourceEffectAdmission(IKeyValueView raw,
         ReplicatedOperation operation, string fingerprint, bool preserveBudgetFailure = false)
     {
-        var scope = new ResourceEffectBindingScope(Limits);
+        var scope = new ResourceEffectBindingScope(OperationLimitsOptions);
         var view = new ResourceEffectObservationView(raw, scope);
         try
         {

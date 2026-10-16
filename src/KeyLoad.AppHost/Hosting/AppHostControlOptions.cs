@@ -103,6 +103,10 @@ internal sealed class AppHostControlOptions
     {
         get; set;
     }
+    internal bool ExclusiveOwnerContention
+    {
+        get; set;
+    }
     internal bool LoggerModelControl
     {
         get; set;

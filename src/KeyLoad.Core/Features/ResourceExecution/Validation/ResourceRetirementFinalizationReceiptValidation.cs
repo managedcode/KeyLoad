@@ -10,7 +10,7 @@ internal static class ResourceRetirementFinalizationReceiptValidation
         var canonical = completed.CanonicalReceipt;
         var original = completed.Original;
         var owner = completed.Control.Catalog.DefaultShard;
-        if (completed.PolicyEpoch < 0 || canonical is null || canonical.Token is null || original is null
+        if (completed.PolicyEpoch < ResourceRetirementProtocol.Empty || canonical is null || canonical.Token is null || original is null
             || original.Kind != OperationKind.ResourceRetirementPhase || original.Id != completed.Receipt.CommandId
             || string.IsNullOrWhiteSpace(original.PrincipalId) || original.NativePayload.IsEmpty
             || canonical.CommandId != completed.Receipt.CommandId

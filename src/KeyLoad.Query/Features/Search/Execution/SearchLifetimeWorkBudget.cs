@@ -17,7 +17,7 @@ internal static class SearchLifetimeWorkBudget
     }
 
     internal static async Task<T> RunNativeAsync<T>(DatabaseEngine database, QueryExecutionOptions execution,
-        IResourceLifetimeWorkBinding binding, CancellationToken token, Func<ReadExecutionBudget, T> read)
+        IResourceLifetimeWorkBinding binding, Func<ReadExecutionBudget, T> read, CancellationToken token)
     {
         var budget = Create(database, execution, binding, token);
         using var reservation = database.AdmitQuery(token);

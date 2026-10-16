@@ -9,7 +9,7 @@ internal static partial class DistributedSearchOwnedLeafExecution
     internal static DistributedSearchLeafResultV1 ExecuteV2Bound(DatabaseEngine database, string principalId,
         DistributedSearchOwnedLeafV2 request, PhysicalShardRecord actualOwner,
         IOptions<QueryExecutionOptions> options, TimeProvider clock, DateTimeOffset originalExpiry,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         return ExecuteV2(database, principalId, request, actualOwner, options, clock, originalExpiry, token, binding);

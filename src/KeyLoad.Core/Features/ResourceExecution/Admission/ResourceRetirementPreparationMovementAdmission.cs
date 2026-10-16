@@ -1,13 +1,15 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 internal static class ResourceRetirementPreparationMovementAdmission
 {
-    internal static void Require(IKeyValueView view, PartitionMovePhaseCommand phase, DatabaseLimits limits)
+    internal static void Require(IKeyValueView view, PartitionMovePhaseCommand phase, IOptions<DatabaseLimits> options)
     {
-        var work = new ResourceRetirementMetadataScan(view, limits);
+        var limits = options.Value;
+        var work = new ResourceRetirementMetadataScan(view, options);
         long indices = ResourceRetirementProtocol.Empty;
         work.Visit(KeyCodec.Encode(ResourceRetirementPreparationKeys.SourceActive), (key, value) =>
         {

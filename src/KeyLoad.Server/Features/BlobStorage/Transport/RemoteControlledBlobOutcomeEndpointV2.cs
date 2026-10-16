@@ -26,7 +26,7 @@ internal static class RemoteControlledBlobOutcomeEndpointV2
     internal static async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(RemoteControlledBlobOutcomeCallV2 call,
         RemoteControlledBlobReceiver receiver, NodeOptions options,
         PartitionMovementReplayCache replay, TimeProvider clock,
-        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         receiver.ValidateOutcomeV2(call, token);
         if (!replay.TryUse(call.Original.Nonce))
@@ -43,7 +43,7 @@ internal static class RemoteControlledBlobOutcomeEndpointV2
         RemoteControlledBlobOutcomeReplyV2 reply;
         try
         {
-            var result = await receiver.ReadOutcomeV2Async(call, boundary, original.Token, binding).ConfigureAwait(false);
+            var result = await receiver.ReadOutcomeV2Async(call, boundary, binding, original.Token).ConfigureAwait(false);
             reply = new(call.Original.RequestId, call.Original.Nonce, result, null, null, receiver.Discovery());
         }
         catch (global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeTerminalException terminal)

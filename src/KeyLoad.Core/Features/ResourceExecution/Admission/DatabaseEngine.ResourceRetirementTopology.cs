@@ -27,7 +27,7 @@ public sealed partial class DatabaseEngine
         var phase = PartitionMovementNativePayload.Read(operation);
         if (!IsControlledResourceMovement(phase))
         {
-            ResourceRetirementPreparationStorage.RequireMovementAdmission(view, phase, Limits);
+            ResourceRetirementPreparationStorage.RequireMovementAdmission(view, phase, OperationLimitsOptions);
         }
     }
 

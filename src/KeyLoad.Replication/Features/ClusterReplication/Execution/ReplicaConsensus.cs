@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -137,11 +136,11 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IReplicaAuthenticatedFo
     /// <param name="cancellationToken">Caller cancellation within the bounded command deadline.</param>
     /// <returns>The persisted outcome after quorum commit and ordered canonical apply.</returns>
     public Task<OperationResult> SubmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
-        => SubmitAsync(operation, cancellationToken, null);
+        => SubmitAsync(operation, null, null, cancellationToken);
 
     internal async Task<OperationResult> SubmitAsync(ReplicatedOperation operation,
-        CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding,
-        ReadExecutionBudget? sourcePlanningBudget = null)
+        IResourceLifetimeWorkBinding? binding, ReadExecutionBudget? sourcePlanningBudget,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(operation);
         using var active = activity.Enter();
@@ -238,59 +237,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IReplicaAuthenticatedFo
             followers, snapshots, maintenance, stoppingToken);
 
     private async Task DisposeCoreAsync()
-    {
-        var failures = new List<Exception>();
-        await ReplicaShutdownStage.ObserveAsync(StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
-        try
-        {
-            leader.Dispose();
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
-        {
-            failures.Add(failure);
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
-        {
-            failures.Add(failure);
-        }
-        try
-        {
-            snapshots.Dispose();
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
-        {
-            failures.Add(failure);
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
-        {
-            failures.Add(failure);
-        }
-        try
-        {
-            followers.Dispose();
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
-        {
-            failures.Add(failure);
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
-        {
-            failures.Add(failure);
-        }
-        try
-        {
-            lifetime.Dispose();
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
-        {
-            failures.Add(failure);
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
-        {
-            failures.Add(failure);
-        }
-        ReplicaShutdownStage.ThrowIfAny(failures);
-    }
+        => await ReplicaShutdownStage.DisposeAsync(StopAsync(CancellationToken.None), leader, snapshots, followers, lifetime).ConfigureAwait(false);
 
     /// <summary>Stops protocol work before the composition root disposes node-owned storage.</summary>
     /// <returns>Completion after the shared shutdown task drains every protocol owner.</returns>

@@ -58,7 +58,7 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 operation = owner.Acquire(Guid.NewGuid());
-                result = await ExecuteOwnedAsync(request, operation, effectBoundary, caller, binding).ConfigureAwait(false);
+                result = await ExecuteOwnedAsync(request, operation, effectBoundary, binding, caller).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         finally
@@ -74,8 +74,8 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
 
     private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteOwnedAsync(
         RemoteModelNativeRequest request, RemoteDocumentWorkOwner.Operation operation,
-        RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken caller,
-        IResourceLifetimeWorkBinding? binding)
+        RemoteModelNativeEffectBoundary? effectBoundary, IResourceLifetimeWorkBinding? binding,
+        CancellationToken caller)
     {
         using var deadline = new CancellationTokenSource(routing.ExecutionLifetime, clock);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, operation.ShutdownToken, deadline.Token);
@@ -88,14 +88,14 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         if (request.Channel == RemoteModelNativeChannel.ResourceLifetimeRead)
         {
             return await (lifetime ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteResourceLifetimeReadProtocol.Unavailable))
-                .ExecuteAsync(request, replay, token, RemoteModelNativeDispatch.RequireBinding(binding)).ConfigureAwait(false);
+                .ExecuteAsync(request, replay, RemoteModelNativeDispatch.RequireBinding(binding), token).ConfigureAwait(false);
         }
         if (request.Channel == RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
         {
             var outcome = NativeSerialization.Deserialize<RemoteControlledBlobOutcomeCallV2>(request.Payload.Span);
             RemoteControlledBlobOutcomeEndpointV2.RequireEnvelope(request, outcome);
             return await RemoteControlledBlobOutcomeEndpointV2.ExecuteAsync(outcome, controlledBlob,
-                options, replay, clock, effectBoundary, token, RemoteModelNativeDispatch.RequireBinding(binding)).ConfigureAwait(false);
+                options, replay, clock, effectBoundary, RemoteModelNativeDispatch.RequireBinding(binding), token).ConfigureAwait(false);
         }
         var transport = RemoteDocumentWire.DecodeCall(request.Payload.Span);
         RequireEnvelope(request, transport);

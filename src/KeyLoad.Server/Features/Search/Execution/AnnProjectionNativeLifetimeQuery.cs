@@ -12,14 +12,14 @@ internal static class AnnProjectionNativeLifetimeQuery
     internal static async Task<AnnProjectionObservationResult> ExecuteAsync(OrleansNode node,
         PartitionHost partition, TimeProvider clock, PrincipalRecord principal,
         LocalAnnObservationFence admitted, AnnProjectionNativeCallV2 call, byte[] payload, ReadExecutionBudget work,
-        CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateAnnProjectionObservationV2(
             requestId, principal.Id, payload, call.Original.ExpiresAt);
         var nativeReplyBytes = NoReplyBytes;
         var result = await NativeLifetimeReadChildExecution.ExecuteAsync<AnnProjectionObservationResult>(node,
-            principal, requestId, signed, payload, cancellationToken, binding,
+            principal, requestId, signed, payload, binding, cancellationToken,
             reply => nativeReplyBytes = reply.Payload.Length,
             node.RuntimeServices.GetRequiredService<NativeConnectionOwnerIdentity>().Id).ConfigureAwait(false);
         var current = partition.Database.Store.Read(view =>

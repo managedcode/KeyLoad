@@ -101,8 +101,8 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
     }
 
     internal async Task<ReadOnlyMemory<byte>> ExecuteNativeAsync(RemoteGraphNativeRequestV1 request,
-        RemoteGraphEffectBoundary boundary, ReadExecutionBudget budget, CancellationToken caller,
-        IResourceLifetimeWorkBinding binding)
+        RemoteGraphEffectBoundary boundary, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding,
+        CancellationToken caller)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(boundary);
@@ -114,7 +114,7 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
         linked.Token.ThrowIfCancellationRequested();
         budget.Check();
         var result = await RemoteGraphNativeDispatch.ExecuteAsync(node, partition, clock, request, boundary,
-            budget, linked.Token, binding).ConfigureAwait(false);
+            budget, binding, linked.Token).ConfigureAwait(false);
         linked.Token.ThrowIfCancellationRequested();
         budget.Check();
         return result;

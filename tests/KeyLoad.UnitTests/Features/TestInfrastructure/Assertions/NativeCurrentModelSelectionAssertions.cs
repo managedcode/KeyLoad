@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 internal static class NativeCurrentModelSelectionAssertions
 {
     private const string Selections = "currentModels";
-    private const int ExpectedSelections = 22;
+    private const int ExpectedSelections = 23;
     private static readonly string[] Filters =
     [
         "/*/*/GraphSearchPathPolicyRf3Tests/*",
@@ -29,7 +29,8 @@ internal static class NativeCurrentModelSelectionAssertions
         "/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay",
         "/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
         "/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects",
-        "/*/*/DropTableLifecycleRf3Tests/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves"
+        "/*/*/DropTableLifecycleRf3Tests/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves",
+        "/*/*/FunctionalFileOwnershipRf3Tests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens"
     ];
 
     internal static async Task AssertAsync(JsonElement root)

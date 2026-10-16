@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
@@ -12,10 +13,10 @@ internal interface INativeAnnMaintenance
         AnnMaintenanceRequest request, CancellationToken cancellationToken);
 
     Task<AnnProjectionEnrollment?> ReadEnrollmentBoundAsync(PrincipalRecord principal,
-        AnnMaintenanceRequest initialRequest, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding);
+        AnnMaintenanceRequest initialRequest, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token);
 
     Task<AnnProjectionPublication> ReadPublishedBoundAsync(PrincipalRecord principal,
-        AnnMaintenanceRequest request, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding);
+        AnnMaintenanceRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token);
 
     Task<AnnMaintenanceResult?> AdmitOriginalAsync(PrincipalRecord principal, AnnMaintenanceRequest request,
         ProjectionConsumerInfo originalConfigure, CancellationToken cancellationToken);
@@ -26,7 +27,7 @@ internal interface INativeAnnMaintenance
     Task AbortAsync(Guid sessionId);
 
     Task<AnnMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, DateTimeOffset requestExpiry, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding);
+        AnnMaintenanceCapabilityRequest request, DateTimeOffset requestExpiry, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken);
 
     Task<AnnMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, CancellationToken cancellationToken);

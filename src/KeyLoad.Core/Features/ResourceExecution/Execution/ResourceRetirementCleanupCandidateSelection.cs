@@ -1,7 +1,6 @@
 using System.Runtime.ExceptionServices;
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
@@ -37,7 +36,7 @@ public sealed partial class DatabaseEngine
         throw new InvalidOperationException(ResourceRetirementTableCleanupFamilies.Accounting);
     }
 
-    private void ValidateCleanupCandidate(IAtomicCommitCandidateValidation capability,
+    private void ValidateCleanupCandidate(AtomicPartitionRosterTransaction capability,
         ResourceRetirementTableCleanupSelection selection, ResourceRetirementCleanupMetadata metadata)
     {
         var mutations = selection.Deletes.Concat(metadata.Mutations).ToArray();

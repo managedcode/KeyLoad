@@ -6,13 +6,15 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Checks actual staged or retained release authority without requiring its not-yet-written outer outcome.</summary>
 internal static class ResourceRetirementConservationReleaseStorage
 {
+    private const long NoReadBytes = 0;
+
     internal static ResourceRetirementConservationReleaseV1? Read(IKeyValueView view, ResourceLifetimeV1 lifetime,
         PhysicalShardRecord owner, DatabaseLimits limits, StorageReadObserver? observer = null)
     {
-        long bytes = 0;
+        var bytes = NoReadBytes;
         void Observe(long amount)
         {
-            if (amount < 0 || amount > limits.MaxQueryReadBytes - bytes)
+            if (amount < NoReadBytes || amount > limits.MaxQueryReadBytes - bytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceRetirementProtocol.Capacity);
             }

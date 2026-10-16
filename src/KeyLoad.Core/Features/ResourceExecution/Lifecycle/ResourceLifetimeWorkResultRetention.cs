@@ -7,6 +7,9 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
 {
     private const long NoAvailableBytes = 0;
+    private const int NoResultBytes = 0;
+    private const long NoAddedBytes = 0;
+    private const int NoRetainedBytes = 0;
     private const string Exceeded = "The read result byte budget is exceeded.";
     private const string MissingLifetimeSet = "The actual resource lifetime set is missing.";
     private readonly Lock gate = new();
@@ -55,7 +58,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            return checked((int)Math.Max(0, Math.Min(maximumBytes, operationMaximumBytes) - retainedBytes));
+            return checked((int)Math.Max(NoResultBytes, Math.Min(maximumBytes, operationMaximumBytes) - retainedBytes));
         }
     }
 
@@ -73,7 +76,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             var admitted = new HashSet<ResourceLifetimeV1>();
-            var addedBytes = 0L;
+            var addedBytes = NoAddedBytes;
             var available = Math.Min(maximumBytes, operationMaximumBytes) - retainedBytes;
             if (available < NoAvailableBytes)
             {
@@ -110,7 +113,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
             }
             disposed = true;
             retained.Clear();
-            retainedBytes = 0;
+            retainedBytes = NoRetainedBytes;
         }
     }
 }

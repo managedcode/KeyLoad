@@ -30,7 +30,7 @@ internal static class RemoteGraphParentExecution
         if (original.Envelope.ReadKind == GrainReadKind.RemoteGraphIncomingParent)
         {
             var request = GrainNativePayload.ReadPublicInput<ReadRemoteIncomingGraphEdgesRequestV1>(original.Payload);
-            var result = await parent.ReadIncomingAsync(original.Envelope, request, work, token, binding).ConfigureAwait(true);
+            var result = await parent.ReadIncomingAsync(original.Envelope, request, work, binding, token).ConfigureAwait(true);
             work.CheckResult(result);
             return GrainReplyFactory.Value(result, codec.ExecutionOptions, token);
         }
@@ -40,7 +40,7 @@ internal static class RemoteGraphParentExecution
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var command = await parent.ExecuteAsync(original.Envelope, kind, original.Payload, work, token, binding).ConfigureAwait(true);
+        var command = await parent.ExecuteAsync(original.Envelope, kind, original.Payload, work, binding, token).ConfigureAwait(true);
         work.CheckResult(command);
         return GrainReplyFactory.Value(command, codec.ExecutionOptions, token);
     }

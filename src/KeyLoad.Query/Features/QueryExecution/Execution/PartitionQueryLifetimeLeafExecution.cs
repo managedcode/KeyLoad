@@ -12,7 +12,7 @@ internal static class PartitionQueryLifetimeLeafExecution
 
     internal static PartitionQueryLeafResultV1 ExecuteBound(QueryEngine engine, string principalId,
         PartitionQueryOwnedLeafRequestV2 request, PhysicalShardRecord actualOwner, TimeProvider clock,
-        DateTimeOffset originalExpiry, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        DateTimeOffset originalExpiry, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         return Execute(engine, principalId, request, actualOwner, clock, originalExpiry, token, binding);

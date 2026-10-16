@@ -11,7 +11,7 @@ internal static class GrainNativeMaintenanceReadCapabilities
         => kind is GrainReadKind.TextMaintenance or GrainReadKind.AnnMaintenance or GrainReadKind.OnlineTextMaintenance;
 
     internal static async Task<object?> ExecuteAsync(IServiceProvider services, PrincipalRecord principal,
-        GrainReadKind kind, DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        GrainReadKind kind, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         GrainRequestAuthority.RequireAdministrator(principal);
@@ -19,11 +19,11 @@ internal static class GrainNativeMaintenanceReadCapabilities
         {
             GrainReadKind.OnlineTextMaintenance => await services.GetRequiredService<Func<INativeOnlineTextMaintenance>>()().ExecuteBoundAsync(principal,
                 GrainNativePayload.Read<OnlineTextCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt,
-                cancellationToken, binding).ConfigureAwait(true),
+                binding, cancellationToken).ConfigureAwait(true),
             GrainReadKind.TextMaintenance => await services.GetRequiredService<Func<INativeTextMaintenance>>()().ExecuteBoundAsync(principal,
-                GrainNativePayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, cancellationToken, binding).ConfigureAwait(true),
+                GrainNativePayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, binding, cancellationToken).ConfigureAwait(true),
             GrainReadKind.AnnMaintenance => await services.GetRequiredService<Func<INativeAnnMaintenance>>()().ExecuteBoundAsync(principal,
-                GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, cancellationToken, binding).ConfigureAwait(true),
+                GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, binding, cancellationToken).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

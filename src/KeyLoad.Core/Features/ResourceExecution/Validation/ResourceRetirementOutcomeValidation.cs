@@ -8,7 +8,7 @@ internal static class ResourceRetirementOutcomeValidation
 {
     internal static void Identity(ResourceRetirementOutcomeIdentityV1? identity, DatabaseLimits limits)
     {
-        if (identity is null || identity.PolicyEpoch < 0 || !ResourceRetirementValidation.Digest(identity.Fingerprint)
+        if (identity is null || identity.PolicyEpoch < ResourceRetirementProtocol.Empty || !ResourceRetirementValidation.Digest(identity.Fingerprint)
             || string.IsNullOrWhiteSpace(identity.PrincipalId))
         {
             throw Invalid();

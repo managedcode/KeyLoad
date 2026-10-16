@@ -10,8 +10,8 @@ namespace KeyLoad.Clustering;
 internal static class NativeAdministratorAuthenticationRead
 {
     internal static NativeAdministratorAuthenticationResultV1 Execute(DatabaseEngine database, TimeProvider clock,
-        IOptions<GrainRoutingOptions> routing, DecodedGrainRequest request, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        IOptions<GrainRoutingOptions> routing, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);

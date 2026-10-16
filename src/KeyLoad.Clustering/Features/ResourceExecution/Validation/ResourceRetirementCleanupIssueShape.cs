@@ -21,8 +21,8 @@ internal static class ResourceRetirementCleanupIssueShape
             || !ResourceRetirementValidation.Same(body.SealedState.Control, context.Retirement)
             || !ResourceRetirementValidation.Same(body.Receiver, context.Receiver)
             || context.Page is null || context.Page.Partition != body.Partition
-            || context.Page.Ordinal != (body.Previous is null ? ResourceRetirementNativeProtocol.Version
-                : checked(body.Previous.Ordinal + ResourceRetirementNativeProtocol.Version))
+            || context.Page.Ordinal != (body.Previous is null ? ResourceRetirementProtocol.First
+                : checked(body.Previous.Ordinal + ResourceRetirementProtocol.First))
             || !PhysicalOwnerEntryValidation.Same(body.Receiver, query.ObservedOwner)
             || ResourceRetirementCleanupPageValidation.Require(body, limits) != attempt.OriginalCommandId)
         {

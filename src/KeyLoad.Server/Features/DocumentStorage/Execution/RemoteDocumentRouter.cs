@@ -11,7 +11,7 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
 {
 
     public async Task<DocumentResult?> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        GetDocumentRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        GetDocumentRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
         DocumentResult? document = null;
@@ -25,14 +25,14 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
                     operation.ShutdownToken, originalExpiry.Token);
                 var work = new ReadExecutionBudget(limits, clock, original.Token);
                 var controlled = await new ControlledDocumentSourceRead(node, partition, nodeOptions, limits, client, clock)
-                    .TryReadAsync(envelope, principal.Id, request, work, original.Token, binding).ConfigureAwait(false);
+                    .TryReadAsync(envelope, principal.Id, request, work, binding, original.Token).ConfigureAwait(false);
                 if (controlled.Routed)
                 {
                     document = controlled.Document;
                     return;
                 }
                 var ordinary = await new OrdinaryDocumentLifetimeSourceRead(node, partition, nodeOptions, limits, client, clock)
-                    .TryReadAsync(envelope, principal.Id, request, work, original.Token, binding).ConfigureAwait(false);
+                    .TryReadAsync(envelope, principal.Id, request, work, binding, original.Token).ConfigureAwait(false);
                 document = ordinary.Routed ? ordinary.Document
                     : partition.Database.GetDocumentBound(principal.Id, request, work, binding);
             }, failures).ConfigureAwait(false);
@@ -42,9 +42,9 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
     }
 
     public Task<RemoteQueueTransferReceiptRead> InspectTransferAsync(GrainRequestEnvelope envelope,
-        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
         => new KeyLoad.Server.Features.Messaging.RemoteTransferReceiptRouter(node, partition, nodeOptions,
-            limits, client, owner, clock).ReadAsync(envelope, principal, request, cancellationToken, binding);
+            limits, client, owner, clock).ReadAsync(envelope, principal, request, binding, cancellationToken);
 
     private CancellationTokenSource OriginalExpiry(DateTimeOffset expiresAt)
     {

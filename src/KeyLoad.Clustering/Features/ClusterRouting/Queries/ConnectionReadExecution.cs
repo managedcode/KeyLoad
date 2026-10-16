@@ -28,7 +28,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
     /// <param name="request">The verified operation whose native identity remains current.</param>
     /// <param name="cancellationToken">Cancellation for quorum barrier and read execution.</param>
     /// <returns>A bounded safe reply from the requested persisted-authorized capability.</returns>
-    internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding originalBinding, Action<Exception> observeOriginalFailure)
+    internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, IResourceLifetimeWorkBinding originalBinding, Action<Exception> observeOriginalFailure, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(originalBinding);
         ArgumentNullException.ThrowIfNull(observeOriginalFailure);
@@ -113,7 +113,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         ValidateFreshRequest(codec, request, work.RequestId, work.Token);
         work.Stage = GrainFailureStage.CapabilityExecution;
         work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);
-        var result = await capabilities.ReadAsync(request, work.RequestId, work.Token, work).ConfigureAwait(true);
+        var result = await capabilities.ReadAsync(request, work.RequestId, work, work.Token).ConfigureAwait(true);
         work.CompletePhase();
         work.Stage = GrainFailureStage.ReplyEncoding;
         return GrainReplyFactory.Value(value: result, cancellationToken: work.Token, options: codec.ExecutionOptions);

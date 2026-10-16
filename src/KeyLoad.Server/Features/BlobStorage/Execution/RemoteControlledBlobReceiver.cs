@@ -31,7 +31,7 @@ internal sealed class RemoteControlledBlobReceiver(OrleansNode node, PartitionHo
     }
 
     internal async Task<ControlledBlobReadResult> ReadOutcomeV2Async(RemoteControlledBlobOutcomeCallV2 call,
-        RemoteModelNativeEffectBoundary? boundary, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        RemoteModelNativeEffectBoundary? boundary, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ValidateOutcomeV2(call, token);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
@@ -44,7 +44,7 @@ internal sealed class RemoteControlledBlobReceiver(OrleansNode node, PartitionHo
         var signed = node.CatalogRequestCodec().CreateControlledBlobOutcomeReadV2(requestId, principal.Id, request);
         boundary?.Begin(token);
         var result = await NativeLifetimeReadChildExecution.ExecuteAsync<ControlledBlobReadResult>(
-            node, principal, requestId, signed, null, token, binding).ConfigureAwait(false);
+            node, principal, requestId, signed, null, binding, token).ConfigureAwait(false);
         ValidateOutcomeV2(call, token);
         if (!result.OutcomeValidated || result.NativeValue is not null)
         {

@@ -9,7 +9,7 @@ internal static class RemoteGraphNativeChild
 {
     internal static Task<ReadOnlyMemory<byte>> ReadAsync<T>(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, RemoteGraphNativeRequestV1 request, GrainReadKind kind,
-        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding) where T : class
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token) where T : class
     {
         work.RequireResourceLifetimeBinding(binding);
         work.Check();
@@ -17,16 +17,16 @@ internal static class RemoteGraphNativeChild
         var childId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().RemoteGraph.CreateRemoteGraphRead(childId, principal.Id, kind,
             request.Payload, request.ExpiresAt);
-        return ReadSignedAsync<T>(node, partition, principal, childId, signed, work, token, binding, null);
+        return ReadSignedAsync<T>(node, partition, principal, childId, signed, work, binding, null, token);
     }
 
     internal static async Task<ReadOnlyMemory<byte>> ReadSignedAsync<T>(OrleansNode node, PartitionHost partition,
-        PrincipalRecord principal, Guid childId, string signed, ReadExecutionBudget work, CancellationToken token,
-        IResourceLifetimeWorkBinding binding, ReadOnlyMemory<byte>? ownedInput) where T : class
+        PrincipalRecord principal, Guid childId, string signed, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        ReadOnlyMemory<byte>? ownedInput, CancellationToken token) where T : class
     {
         work.RequireResourceLifetimeBinding(binding);
         var actual = await NativeLifetimeReadChildExecution.ExecuteAsync<T>(node, principal, childId, signed,
-            ownedInput, token, binding, reply => RequireReply(reply, partition, work)).ConfigureAwait(false);
+            ownedInput, binding, token, reply => RequireReply(reply, partition, work)).ConfigureAwait(false);
         work.Check();
         token.ThrowIfCancellationRequested();
         return RemoteGraphNativeResultEncoding.Encode(actual, partition.Database.Limits.MaxBatchBytes, work);

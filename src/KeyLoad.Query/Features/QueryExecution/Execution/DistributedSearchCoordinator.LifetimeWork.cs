@@ -11,8 +11,8 @@ internal static partial class DistributedSearchCoordinator
         DistributedSearchRequestV1 request, IOptions<QueryExecutionOptions> options,
         Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, DistributedSearchPreparedLeaf> prepare,
         Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,
-        CancellationToken original, Func<CancellationToken, Task>? statisticsCaptured,
-        IResourceLifetimeWorkBinding binding)
+        Func<CancellationToken, Task>? statisticsCaptured, IResourceLifetimeWorkBinding binding,
+        CancellationToken original)
     {
         ArgumentNullException.ThrowIfNull(binding);
         return ExecuteAsync(database, request, options, prepare, sourceBarrier, clock, originalExpiry,

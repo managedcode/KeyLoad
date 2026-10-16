@@ -15,22 +15,22 @@ internal static class RemoteQueryLifetimeLocalRead
     private const int NoFailures = 0;
     internal static Task<PartitionQueryLeafResultV1> QueryAsync(OrleansNode node, PartitionHost partition,
         string principalId, PartitionQueryOwnedLeafRequest request, PartitionQueryLifetimeMetadata metadata,
-        DateTimeOffset expiresAt, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        DateTimeOffset expiresAt, IResourceLifetimeWorkBinding binding, CancellationToken token)
         => ExecuteAsync<PartitionQueryOwnedLeafRequestV2, PartitionQueryLeafResultV1>(node, partition,
             principalId, new(request, metadata.Definition, metadata.Coverage, metadata.Principal), expiresAt,
-            node.CatalogRequestCodec().CreatePartitionQueryLeafV2, token, binding);
+            node.CatalogRequestCodec().CreatePartitionQueryLeafV2, binding, token);
 
     internal static Task<DistributedSearchLeafResultV1> SearchAsync(OrleansNode node, PartitionHost partition,
         string principalId, DistributedSearchOwnedLeafV1 request, PartitionQueryLifetimeMetadata metadata,
-        DateTimeOffset expiresAt, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        DateTimeOffset expiresAt, IResourceLifetimeWorkBinding binding, CancellationToken token)
         => ExecuteAsync<DistributedSearchOwnedLeafV2, DistributedSearchLeafResultV1>(node, partition,
             principalId, new(request, metadata.Definition, metadata.Coverage, metadata.Principal), expiresAt,
-            node.CatalogRequestCodec().CreateDistributedSearchLeafV2, token, binding);
+            node.CatalogRequestCodec().CreateDistributedSearchLeafV2, binding, token);
 
     private static async Task<TResult> ExecuteAsync<TRequest, TResult>(OrleansNode node, PartitionHost partition,
         string principalId, TRequest request, DateTimeOffset expiresAt,
-        Func<Guid, string, ReadOnlyMemory<byte>, DateTimeOffset, string> sign, CancellationToken token,
-        IResourceLifetimeWorkBinding binding) where TResult : class
+        Func<Guid, string, ReadOnlyMemory<byte>, DateTimeOffset, string> sign, IResourceLifetimeWorkBinding binding,
+        CancellationToken token) where TResult : class
     {
         var input = NativeSerialization.Serialize(request);
         var failures = new List<Exception>();

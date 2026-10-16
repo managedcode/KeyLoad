@@ -70,7 +70,7 @@ internal sealed class ControlledDocumentCommandFlow(PartitionHost partition,
         }
         var frame = partition.Database.TryCaptureControlledBlobOutcomeV2Bound(original.PrincipalId, original, queryExpiry, work, binding)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteDocumentProtocol.Unavailable);
-        return await blobReads.ObserveOutcomeAsync(ingressRequestId, frame, work, token, binding).ConfigureAwait(false);
+        return await blobReads.ObserveOutcomeAsync(ingressRequestId, frame, work, binding, token).ConfigureAwait(false);
     }
 
     private async Task<PartitionControlCommandRecord> ApplyEffectAsync(ReplicatedOperation original,

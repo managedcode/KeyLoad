@@ -73,7 +73,7 @@ internal sealed class ReplicaForwardedRequestExecution
         ReadOnlyMemory<byte> encoded = default;
         try
         {
-            return await ReplicaForwardRequestLifetime.ExecuteAsync(frame.ExpiresAt, clock, cancellationToken,
+            return await ReplicaForwardRequestLifetime.ExecuteAsync(frame.ExpiresAt, clock,
                 async token =>
                 {
                     var work = await create(database, clock, token).ConfigureAwait(false)
@@ -84,9 +84,9 @@ internal sealed class ReplicaForwardedRequestExecution
                             encoded = payload;
                             return createReply(payload, error);
                         }, measureReply, completed).ConfigureAwait(false);
-                }).ConfigureAwait(false);
+                }, cancellationToken).ConfigureAwait(false);
         }
-        catch
+        catch (Exception)
         {
             ReplicaForwardReplyEncoding.Clear(encoded);
             throw;

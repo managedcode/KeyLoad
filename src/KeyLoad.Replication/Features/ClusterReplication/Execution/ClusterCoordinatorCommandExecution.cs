@@ -43,7 +43,7 @@ internal static class ClusterCoordinatorCommandExecution
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.InvalidPeer);
         }
-        return consensus.SubmitAsync(pending.Operation, cancellationToken, null, pending.SourcePlanningBudget);
+        return consensus.SubmitAsync(pending.Operation, null, pending.SourcePlanningBudget, cancellationToken);
     }
 
 }

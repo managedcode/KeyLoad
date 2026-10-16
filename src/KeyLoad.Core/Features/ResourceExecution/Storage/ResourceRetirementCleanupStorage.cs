@@ -4,9 +4,11 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 
 internal static class ResourceRetirementCleanupStorage
 {
+    private const string CheckpointSpace = "resource-retirement-cleanup-checkpoint-v1";
+
     internal static byte[] Key(ResourceRetirementControlV1 control, RegisteredPhysicalOwnerV1 receiver,
         PartitionRef partition)
-        => KeyCodec.Encode("resource-retirement-cleanup-checkpoint-v1", control.Lifetime.TenantId,
+        => KeyCodec.Encode(CheckpointSpace, control.Lifetime.TenantId,
             control.Lifetime.DatabaseId, control.Lifetime.ResourceName, control.Lifetime.Incarnation.Value,
             receiver.Owner.PhysicalShardId, receiver.Owner.Incarnation, partition.TransactionDomainId,
             partition.PartitionKey);
@@ -19,7 +21,7 @@ internal static class ResourceRetirementCleanupStorage
             Key(control, receiver, partition), limits);
         if (stored is not null && (!ResourceRetirementValidation.Same(stored.Control, control)
             || !ResourceRetirementValidation.Same(stored.Receiver, receiver) || stored.Partition != partition
-            || stored.Ordinal <= 0 || stored.FamilyOrdinal < 0
+            || stored.Ordinal <= ResourceRetirementProtocol.Empty || stored.FamilyOrdinal < ResourceRetirementProtocol.Empty
             || stored.FamilyOrdinal > ResourceRetirementTableCleanupFamilies.Count
             || stored.Complete != (stored.FamilyOrdinal == ResourceRetirementTableCleanupFamilies.Count)
             || stored.Complete && !stored.AfterKey.IsEmpty))

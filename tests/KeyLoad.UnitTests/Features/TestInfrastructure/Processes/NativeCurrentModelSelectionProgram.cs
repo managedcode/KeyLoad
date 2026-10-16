@@ -25,7 +25,8 @@ internal static class NativeCurrentModelSelectionProgram
               "/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay",
               "/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
               "/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects",
-              "/*/*/DropTableLifecycleRf3Tests/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves"
+              "/*/*/DropTableLifecycleRf3Tests/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves",
+              "/*/*/FunctionalFileOwnershipRf3Tests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens"
             ]);
             const currentModelArgs = Object.freeze(currentModelFilters.map(filter => Object.freeze(
               publicCohortArgs.map(value => value.startsWith('--KeyLoadTests:Filter=')
@@ -33,6 +34,13 @@ internal static class NativeCurrentModelSelectionProgram
             const currentModelInputBytes = JSON.stringify(currentModelArgs);
             const currentModels = currentModelArgs.map(args => nativeSelection(args, publicCohortEnvironment));
             for (const badFilter of [
+              currentModelFilters[22] + ' ',
+              currentModelFilters[22] + '*',
+              currentModelFilters[22].replace('FunctionalFileOwnershipRf3Tests/', 'FunctionalFileOwnershipRf3Tests*/'),
+              '/*/*/FunctionalFileOwnershipRf3Tests/*',
+              '/*/*/FunctionalFileOwnershipRf3Tests/OtherMethod',
+              '/*/*/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens/FunctionalFileOwnershipRf3Tests',
+              '/*/*/(FunctionalFileOwnershipRf3Tests|DropTableLifecycleRf3Tests)/*',
               currentModelFilters[21] + ' ',
               currentModelFilters[21] + '*',
               currentModelFilters[21].replace('DropTableLifecycleRf3Tests/', 'DropTableLifecycleRf3Tests*/'),
@@ -158,7 +166,7 @@ internal static class NativeCurrentModelSelectionProgram
               }
               if (!rejected) throw new Error('Unsupported current model cohort selector was accepted.');
             }
-            for (const addedIndex of [15, 16, 17, 18, 19, 20, 21]) {
+            for (const addedIndex of [15, 16, 17, 18, 19, 20, 21, 22]) {
               const currentModelHealthy = nativeSelection(currentModelArgs[addedIndex], publicCohortEnvironment);
               if (JSON.stringify(currentModelHealthy) !== JSON.stringify(currentModels[addedIndex])) {
                 throw new Error('Exact current model selection changed after refused selectors.');

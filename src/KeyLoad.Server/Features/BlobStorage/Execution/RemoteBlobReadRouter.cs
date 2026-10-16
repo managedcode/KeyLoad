@@ -12,7 +12,7 @@ internal sealed class RemoteBlobReadRouter(OrleansNode node, PartitionHost parti
     RemoteDocumentWorkOwner owner, TimeProvider clock) : IRemoteBlobReadRouter
 {
     public async Task<object?> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        ReadOnlyMemory<byte> payload, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         object? result = null;
         var failures = new List<Exception>();
@@ -30,7 +30,7 @@ internal sealed class RemoteBlobReadRouter(OrleansNode node, PartitionHost parti
                     var bytes = NativeRequest(purpose, payload);
                     var work = new ReadExecutionBudget(limits, clock, original.Token);
                     var read = new ControlledBlobSourceRead(node, partition, options, limits, client, clock);
-                    var controlled = await read.TryReadAsync(envelope, principal.Id, purpose, bytes, work, original.Token, binding).ConfigureAwait(false);
+                    var controlled = await read.TryReadAsync(envelope, principal.Id, purpose, bytes, work, binding, original.Token).ConfigureAwait(false);
                     result = controlled.Routed ? controlled.Value : ReadLocal(purpose, principal.Id, payload, work, binding);
                 }, failures).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);

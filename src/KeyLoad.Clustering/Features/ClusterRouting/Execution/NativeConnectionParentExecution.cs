@@ -58,7 +58,7 @@ internal static class NativeConnectionParentExecution
             return GrainReplyFactory.ParentValue(result, options, writer.CancellationToken);
         }
         var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, executeChild, services, codec,
-            clock, chunkSerializer, options, diagnostics, writer.CancellationToken, purpose.WorkBinding).ConfigureAwait(true);
+            clock, chunkSerializer, options, diagnostics, purpose.WorkBinding, writer.CancellationToken).ConfigureAwait(true);
         return GrainReplyFactory.ParentValue(lanes, options, writer.CancellationToken);
     }
 }

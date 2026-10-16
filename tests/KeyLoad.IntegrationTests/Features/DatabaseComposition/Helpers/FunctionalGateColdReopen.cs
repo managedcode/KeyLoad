@@ -16,6 +16,8 @@ internal static class FunctionalGateColdReopen
         ServerFailureObserver.ThrowIfAny([.. stopped.SelectMany(item => item)]);
         _ = native.RequireKilledOwners(fixture.App);
         FunctionalGateStorageOwnership.RequireReleased(fixture);
+        FunctionalGatePhysicalFileAssertions.RequireStopped(fixture, fixture.PhysicalFiles
+            ?? throw new InvalidOperationException(FunctionalGatePhysicalFileProtocol.Failure));
         // Start every original voter before any native health/quorum settlement.
         var begun = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(async () =>
         {

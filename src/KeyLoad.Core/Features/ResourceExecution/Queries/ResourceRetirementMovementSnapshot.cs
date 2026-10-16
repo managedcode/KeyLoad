@@ -3,19 +3,21 @@ using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Captures actual accepted physical work from the original gated view; no resource provenance is inferred.</summary>
-internal sealed class ResourceRetirementMovementSnapshot(IKeyValueView view, DatabaseLimits limits)
+internal sealed class ResourceRetirementMovementSnapshot(IKeyValueView view, IOptions<DatabaseLimits> options)
 {
+    private readonly DatabaseLimits limits = options.Value;
     private readonly HashSet<(PartitionRef Partition, Guid Move)> accepted = [];
     private readonly Dictionary<(PartitionRef Partition, Guid Move), string> retired = [];
-    private readonly ResourceRetirementMetadataScan scan = new(view, limits);
+    private readonly ResourceRetirementMetadataScan scan = new(view, options);
 
-    internal static ImmutableArray<ResourceRetirementAcceptedMoveV1> Capture(IKeyValueView view, DatabaseLimits limits)
+    internal static ImmutableArray<ResourceRetirementAcceptedMoveV1> Capture(IKeyValueView view, IOptions<DatabaseLimits> options)
     {
-        var capture = new ResourceRetirementMovementSnapshot(view, limits);
+        var capture = new ResourceRetirementMovementSnapshot(view, options);
         capture.scan.Visit(KeyCodec.Encode(PartitionMoveProtocol.CleanupSpace), capture.Cleanup);
         ResourceRetirementParentSnapshot.Capture(capture.scan, capture.Add);
         capture.scan.Visit(KeyCodec.Encode(PartitionMoveProtocol.RecordSpace), capture.Control);
@@ -27,7 +29,7 @@ internal sealed class ResourceRetirementMovementSnapshot(IKeyValueView view, Dat
             .ThenBy(item => item.Partition.TransactionDomainId, StringComparer.Ordinal)
             .ThenBy(item => item.Partition.PartitionKey, StringComparer.Ordinal).ThenBy(item => item.Move)
             .Select(item => new ResourceRetirementAcceptedMoveV1(item.Partition, item.Move)).ToImmutableArray();
-        ResourceRetirementPreparationValidation.Moves(result, limits);
+        ResourceRetirementPreparationValidation.Moves(result, capture.limits);
         return result;
     }
 

@@ -82,6 +82,7 @@ localImageFilters.add("/*/*/ControlledBlobLifetimeReadRf3Tests/HeldNativeReplies
 localImageFilters.add("/*/*/(PartitionMovementBlobWireNativeTests|NativeBlobWholeParentQualificationCases)/*");
 localImageFilters.add("/*/*/ResourcePartitionInventoryRf3Tests/AuthenticatedConservativeInventoryRetainsReplayRollbackAndTwoColdOwners");
 localImageFilters.add("/*/*/DropTableLifecycleRf3Tests/PublicDropRecreateRetainsAuthorityAndReplayAcrossTwoColdRf3Waves");
+localImageFilters.add("/*/*/FunctionalFileOwnershipRf3Tests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens");
 localImageFilters.add("/*/*/PartitionMovementPublicParentFlowTests/ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay");
 localImageFilters.add("/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation");
 localImageFilters.add("/*/*/RequestCqrsAuthorityFaultTests/SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects");

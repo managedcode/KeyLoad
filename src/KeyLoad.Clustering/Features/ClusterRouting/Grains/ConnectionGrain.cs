@@ -158,8 +158,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
                 var reader = new ConnectionReadExecution(codec, services.GetRequiredService<KeyLoad.Core.DatabaseEngine>(),
                     services.GetRequiredService<Func<KeyLoad.Core.ICommitCoordinator>>()(), services, clock, workOwner,
                     diagnostics, ((IGrainBase)this).GrainContext);
-                reply = await reader.ExecuteAsync(request, writer.CancellationToken, purpose.WorkBinding,
-                    purpose.RecordFailure).ConfigureAwait(true);
+                reply = await reader.ExecuteAsync(request, purpose.WorkBinding, purpose.RecordFailure,
+                    writer.CancellationToken).ConfigureAwait(true);
             }
 
             return NativeCommandMetadataReplies.StreamResult(request, reply, options);
@@ -202,6 +202,5 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             writer.CancellationToken, grantSettled, outcomeObserved).ConfigureAwait(true);
         return original is null ? null : GrainReplyFactory.Operation(original, options, writer.CancellationToken);
     }
-
 
 }

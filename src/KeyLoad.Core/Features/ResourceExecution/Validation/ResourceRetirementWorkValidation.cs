@@ -115,10 +115,10 @@ internal static class ResourceRetirementWorkValidation
             || !actualOwner.VoterIds.Contains(witness.VoterId, StringComparer.Ordinal)
             || string.IsNullOrWhiteSpace(witness.FullSiloAddress)
             || witness.FullSiloAddress != witness.FullSiloAddress.Trim()
-            || witness.StoreNodeId == Guid.Empty || witness.ReadGeneration < 0
-            || witness.MatchedCount < 0
-            || witness.MaximumPublicationGeneration < 0 || witness.SnapshotSha256.Length != SnapshotDigestBytes
-            || witness.MatchedCount == 0 && witness.MaximumPublicationGeneration != 0)
+            || witness.StoreNodeId == Guid.Empty || witness.ReadGeneration < ResourceRetirementProtocol.Empty
+            || witness.MatchedCount < ResourceRetirementProtocol.Empty
+            || witness.MaximumPublicationGeneration < ResourceRetirementProtocol.Empty || witness.SnapshotSha256.Length != SnapshotDigestBytes
+            || witness.MatchedCount == ResourceRetirementProtocol.Empty && witness.MaximumPublicationGeneration != ResourceRetirementProtocol.Empty)
         {
             throw Invalid();
         }

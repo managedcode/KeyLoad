@@ -10,8 +10,8 @@ internal sealed class AnnProjectionNativeReceiver(OrleansNode node, PartitionHos
     ServerRuntimeOptions options, TimeProvider clock)
 {
     internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteLifetimeAsync(
-        RemoteModelNativeRequest original, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
-        => new AnnProjectionNativeLifetimeReceiver(node, partition, options, clock).ExecuteAsync(original, cancellationToken, binding);
+        RemoteModelNativeRequest original, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
+        => new AnnProjectionNativeLifetimeReceiver(node, partition, options, clock).ExecuteAsync(original, binding, cancellationToken);
 
     internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
         RemoteModelNativeRequest original, CancellationToken cancellationToken)

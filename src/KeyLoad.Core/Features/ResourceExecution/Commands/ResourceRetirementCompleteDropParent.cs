@@ -48,7 +48,7 @@ public sealed partial class DatabaseEngine
         };
     }
 
-    private CommitReceipt RequireRetirementDropCompletion(ResourceRetirementDropParentV1 parent,
+    private static CommitReceipt RequireRetirementDropCompletion(ResourceRetirementDropParentV1 parent,
         ResourceRetirementStateV1 state)
     {
         if (state.Stage != ResourceRetirementStage.Completed || state.CompletionReceipt is null

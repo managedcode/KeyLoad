@@ -49,7 +49,7 @@ public sealed partial class DatabaseEngine
         _ = Store.Read(raw =>
         {
             var view = work is null ? raw : work.CreateView(raw);
-            var current = new ResourceEffectBindingScope(Limits);
+            var current = new ResourceEffectBindingScope(OperationLimitsOptions);
             var observed = new ResourceEffectObservationView(view, current);
             var principal = Principal(observed, operation.PrincipalId, admittedAt);
             if (!AuthorizeResourceEffectSubmission(observed, principal, operation))

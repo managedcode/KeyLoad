@@ -62,8 +62,8 @@ internal static class NativeReplicaCommandExecution
         {
             await observation.BeforeExecuteAsync(operation, receiverWork, cancellationToken).ConfigureAwait(false);
         }
-        return await consensus.SubmitAsync(operation, cancellationToken,
-            receiverWork.Binding, receiverWork.Budget).ConfigureAwait(false);
+        return await consensus.SubmitAsync(operation, receiverWork.Binding,
+            receiverWork.Budget, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task<OperationResult> ExecuteAsync(NativeRequestWorkOwner owner, DatabaseEngine database,
@@ -80,7 +80,7 @@ internal static class NativeReplicaCommandExecution
             retention = new(database.OperationLimitsOptions);
             lease.AttachResultRetention(retention);
             linked = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
-            result = await consensus.SubmitAsync(operation, linked.Token, lease, sourcePlanningBudget).ConfigureAwait(false);
+            result = await consensus.SubmitAsync(operation, lease, sourcePlanningBudget, linked.Token).ConfigureAwait(false);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {

@@ -13,7 +13,7 @@ internal interface INativeOnlineTextMaintenance
         string principalId, DateTimeOffset originalExpiry);
     Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry,
-        CancellationToken token, IResourceLifetimeWorkBinding binding);
+        IResourceLifetimeWorkBinding binding, CancellationToken token);
 
     Task AbortAsync(Guid sessionId);
 }

@@ -225,35 +225,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         => ReplicaCoordinatorShutdown.DrainAsync(commands, lifetime, worker ?? Task.CompletedTask);
 
     private async Task DisposeCoreAsync()
-    {
-        var failures = await ReplicaCoordinatorShutdown.JoinDisposalAsync(StopAsync(CancellationToken.None)).ConfigureAwait(false);
-        try
-        {
-            await ReplicaShutdownStage.ObserveAsync(commands.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
-        catch (Exception failure)
-        {
-            failures.Add(failure);
-            DisposeLifetime(failures);
-            throw;
-        }
-        DisposeLifetime(failures);
-    }
-
-    private void DisposeLifetime(List<Exception> failures)
-    {
-        try
-        {
-            lifetime.Dispose();
-        }
-        catch (Exception failure)
-        {
-            failures.Add(failure);
-            ReplicaCoordinatorShutdown.ThrowIfAny(failures);
-            throw;
-        }
-        ReplicaCoordinatorShutdown.ThrowIfAny(failures);
-    }
+        => await ReplicaCoordinatorShutdown.DisposeAsync(StopAsync(CancellationToken.None), commands, lifetime).ConfigureAwait(false);
 
     /// <summary>Drains the queue once; DI aliases do not dispose its lifetime source twice.</summary>
     /// <returns>Completion after shared shutdown and admission resource disposal.</returns>

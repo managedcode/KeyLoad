@@ -1,4 +1,3 @@
-using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -13,7 +12,6 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 /// <summary>Owns one real development voter or the same real three-voter functional scenario through Aspire.</summary>
 internal sealed partial class FunctionalGateFixture : IAsyncDisposable
 {
-    private const string FailureRootDataKey = "KeyLoad.FunctionalGate.Root";
     private const int SingleVoter = 1;
     private const int ThreeVoters = 3;
     private readonly Lock disposalGate = new();
@@ -41,40 +39,29 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         get; set;
     }
 
-    private FunctionalGateFixture(int nodes, bool coldReopen)
+    private FunctionalGateFixture(int nodes, bool coldReopen, bool exclusiveOwnerContention)
     {
         this.coldReopen = coldReopen;
+        fileContenders = new(exclusiveOwnerContention);
         NodeNames = Enumerable.Range(SingleVoter, nodes).Select(ClusterFixtureProtocol.NodeName).ToArray();
     }
 
     internal static Task<FunctionalGateFixture> StartAsync(int nodes, CancellationToken token)
-        => StartCoreAsync(nodes, false, token);
+        => StartCoreAsync(nodes, false, false, token);
 
     internal static Task<FunctionalGateFixture> StartColdAsync(int nodes, CancellationToken token)
-        => StartCoreAsync(nodes, true, token);
+        => StartCoreAsync(nodes, true, false, token);
 
-    private static async Task<FunctionalGateFixture> StartCoreAsync(int nodes, bool coldReopen, CancellationToken token)
+    private static async Task<FunctionalGateFixture> StartCoreAsync(int nodes, bool coldReopen, bool exclusiveOwnerContention, CancellationToken token)
     {
         if (nodes is not (SingleVoter or ThreeVoters))
         {
             throw new ArgumentOutOfRangeException(nameof(nodes));
         }
         token.ThrowIfCancellationRequested();
-        var owner = new FunctionalGateFixture(nodes, coldReopen);
-        try
-        {
-            await owner.InitializeAsync(nodes, token).ConfigureAwait(false);
-            return owner;
-        }
-        catch (Exception primary)
-        {
-            owner.PreserveEvidence = true;
-            var failures = new List<Exception> { primary };
-            ServerFailureObserver.Observe(() => primary.Data[FailureRootDataKey] = owner.Root, failures);
-            await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
+        var owner = new FunctionalGateFixture(nodes, coldReopen, exclusiveOwnerContention);
+        return await FunctionalGateFixtureStartup.InitializeAsync(owner,
+            () => owner.InitializeAsync(nodes, token)).ConfigureAwait(false);
     }
 
     private async Task InitializeAsync(int nodes, CancellationToken token)
@@ -87,21 +74,8 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         {
             throw new InvalidOperationException("The functional fixture requires its own selected local image preparation session.");
         }
-        var arguments = new List<string>
-        {
-            ClusterFixtureProtocol.DataRootArgument + Root,
-            ClusterFixtureProtocol.EphemeralArgument,
-            "--KeyLoadTests:FunctionalNodeCount=" + nodes.ToString(CultureInfo.InvariantCulture)
-        };
-        if (coldReopen)
-        {
-            arguments.Add(FunctionalColdReopenProfile.EnabledArgument);
-            arguments.Add(ContainerFaultCommandProtocol.EnabledArgument);
-        }
-        if (selection is not null)
-        {
-            arguments.AddRange(selection.CreateWaveArguments());
-        }
+        var arguments = FunctionalGateFixtureStartup.Arguments(Root, nodes, coldReopen,
+            fileContenders.Enabled, selection);
         using var startupBound = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, startupBound.Token);
         builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments.ToArray(), startup.Token)
@@ -132,5 +106,6 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
                 .ConfigureAwait(false);
         }
         started = true;
+        PhysicalFiles = await FunctionalGatePhysicalFileAssertions.CaptureLiveAsync(this, startup.Token).ConfigureAwait(false);
     }
 }

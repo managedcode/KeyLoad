@@ -13,6 +13,6 @@ internal interface IRemoteDistributedSearchRouter
     /// <param name="binding">The explicit original native work binding and shared result-retention ledger.</param>
     /// <returns>A complete page bound to the original same-cut witnesses.</returns>
     Task<DistributedSearchPageV1> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        DistributedSearchRequestV1 request, CancellationToken cancellationToken,
-        Func<CancellationToken, Task>? statisticsCaptured, IResourceLifetimeWorkBinding binding);
+        DistributedSearchRequestV1 request, Func<CancellationToken, Task>? statisticsCaptured,
+        IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken);
 }

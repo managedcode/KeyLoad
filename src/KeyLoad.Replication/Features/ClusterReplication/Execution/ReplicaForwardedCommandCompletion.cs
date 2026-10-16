@@ -38,7 +38,11 @@ internal static class ReplicaForwardedCommandCompletion
         {
             await work.CancelAsync().ConfigureAwait(false);
         }
-        catch (Exception error)
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
         {
             failures.Add(error);
         }

@@ -34,7 +34,7 @@ internal static class NativeResourceCommandBindingChecks
         await ConfigureAsync(fixture, state, queue, InitialEpoch, Capability.DocumentsRead, token);
         var denied = Batch(state.Leader.Journal.Database);
         await Assert.That(await state.Leader.Journal.Consensus.IsLeaderAsync(token)).IsTrue();
-        var refusal = await state.Leader.Journal.Consensus.SubmitAsync(denied, token, lease);
+        var refusal = await state.Leader.Journal.Consensus.SubmitAsync(denied, lease, null, token);
         await A.EqualAsync(new OperationResult(null, ErrorCode.PermissionDenied, PermissionDetail), refusal);
         await Assert.That(ledger.RetainedEntries).IsEqualTo(NoEntries);
         await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo((long)NoEntries);
@@ -46,7 +46,7 @@ internal static class NativeResourceCommandBindingChecks
         var operation = Batch(state.Leader.Journal.Database);
         var index = checked(state.Leader.Journal.Log.State.LastIndex + NextIndex);
         await Assert.That(await state.Leader.Journal.Consensus.IsLeaderAsync(token)).IsTrue();
-        var result = await state.Leader.Journal.Consensus.SubmitAsync(operation, token, lease);
+        var result = await state.Leader.Journal.Consensus.SubmitAsync(operation, lease, null, token);
         var expected = new CommitReceipt(operation.Id,
             new(state.PhysicalOwner.Incarnation, P.Partition.AtomicPartitionId, index, state.PhysicalOwner.PlacementEpoch),
             [new(K.MutationKind, P.Collection, Document, FirstRevision)], DurabilityProfile.QuorumProcessDurable);

@@ -14,8 +14,8 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
     TimeProvider clock) : IRemoteAnnReadRouter
 {
     public async Task<object> ReadAnnAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        GrainReadKind kind, ReadOnlyMemory<byte> payload, SearchEngine actualSearch, CancellationToken cancellationToken,
-        IResourceLifetimeWorkBinding binding)
+        GrainReadKind kind, ReadOnlyMemory<byte> payload, SearchEngine actualSearch, IResourceLifetimeWorkBinding binding,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         var execution = configured.Value;
@@ -37,7 +37,7 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
         if (route is null || route.OriginalMaintenance.NodeId == partition.Database.Store.Identity.NodeId)
         {
             return await ReadLocalAsync(envelope, principal, selected, actualSearch, captured, work,
-                cancellationToken, binding).ConfigureAwait(false);
+                binding, cancellationToken).ConfigureAwait(false);
         }
         var failures = new List<Exception>();
         object? result = null;
@@ -76,7 +76,7 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
     }
     private async Task<object> ReadLocalAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
         RemoteAnnReadSelection selected, SearchEngine actualSearch, RemoteAnnReadFenceV2 captured,
-        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var failures = new List<Exception>();
         object? result = null;
@@ -93,7 +93,7 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
                 using var deadline = new CancellationTokenSource(remaining, clock);
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, operation.ShutdownToken, deadline.Token);
                 using var cancellation = work.EnterStageCancellation(linked.Token);
-                result = await selected.ExecuteLocalAsync(actualSearch, principal.Id, work, captured.Metadata, linked.Token, binding)
+                result = await selected.ExecuteLocalAsync(actualSearch, principal.Id, work, captured.Metadata, binding, linked.Token)
                     .ConfigureAwait(false);
                 await partition.Coordinator.ReadBarrierAsync(linked.Token).ConfigureAwait(false);
                 partition.Database.ValidateRemoteAnnLifetimeReadBound(captured, selected.Consumer, selected.Collection,

@@ -7,6 +7,7 @@ internal sealed class ResourceRetirementCleanupReadView(IKeyValueView inner,
     long maximumBytes, int maximumRecords) : IKeyValueView
 {
     private const int Step = 1;
+    private const long NoReadBytes = 0;
     private const string Exceeded = "The admitted retirement cleanup read grant is exhausted.";
     internal long ExaminedBytes
     {
@@ -21,7 +22,7 @@ internal sealed class ResourceRetirementCleanupReadView(IKeyValueView inner,
 
     private void Charge(long bytes)
     {
-        if (bytes < 0 || bytes > RemainingBytes || RemainingRecords < Step)
+        if (bytes < NoReadBytes || bytes > RemainingBytes || RemainingRecords < Step)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Exceeded);
         }

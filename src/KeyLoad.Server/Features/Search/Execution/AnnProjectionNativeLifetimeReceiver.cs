@@ -11,7 +11,7 @@ internal sealed class AnnProjectionNativeLifetimeReceiver(OrleansNode node, Part
     ServerRuntimeOptions options, TimeProvider clock)
 {
     internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
-        RemoteModelNativeRequest original, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        RemoteModelNativeRequest original, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using var source = RemoteDocumentMac.FromConfiguredSecret(
@@ -36,7 +36,7 @@ internal sealed class AnnProjectionNativeLifetimeReceiver(OrleansNode node, Part
         try
         {
             var result = await AnnProjectionNativeLifetimeQuery.ExecuteAsync(node, partition, clock, authority.Principal,
-                admitted, encoded.Call, input, work, cancellationToken, binding).ConfigureAwait(false);
+                admitted, encoded.Call, input, work, binding, cancellationToken).ConfigureAwait(false);
             Require(call, original, cancellationToken);
             var current = ReadAuthority(call, work);
             if (current.Principal.PolicyEpoch != authority.Principal.PolicyEpoch || current.Lifetime != authority.Lifetime)

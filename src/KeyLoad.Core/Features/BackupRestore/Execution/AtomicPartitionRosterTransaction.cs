@@ -39,7 +39,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         this.inner = inner ?? throw new ArgumentNullException(nameof(inner));
         this.limits = limits ?? throw new ArgumentNullException(nameof(limits));
         inventory = new(inner, limits);
-        EffectAdmission = new(limits.Value);
+        EffectAdmission = new(limits);
         this.storePosition = storePosition;
         this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
             ? appliedIndex : AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex;

@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementCleanupNativeData;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -28,7 +29,8 @@ internal static class ResourceRetirementCleanupNativeRefusals
             KeySpace.Partition(DocumentFamily, state.Partitions[SecondIndex], Table, First));
         var invalid = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Commit((transaction, _) =>
             ResourceRetirementTableCleanupPage.Apply(transaction, state.Lifetime, partition, stale,
-                limits, ReservedMutations, ReservedBytes)));
+                Options.Create(limits), (limits.MaxQueryReadBytes, limits.MaxScanRecords),
+                ReservedMutations, ReservedBytes)));
         await Assert.That(invalid!.Code).IsEqualTo(ErrorCode.Corruption);
         await ResourceRetirementCleanupNativeImages.SameAsync(fixture.Store, before, position);
         var rolledBack = Assert.ThrowsExactly<InvalidOperationException>(() =>

@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
@@ -10,23 +9,16 @@ namespace KeyLoad.Core;
 public sealed partial class ReadExecutionBudget
 {
 
-    private const string DeadlineExceeded = "The read execution deadline is exceeded.";
     internal const string ReadBytesExceeded = "The read execution byte budget is exceeded.";
     private const string TextTokensExceeded = "The search corpus token budget is exceeded.";
     private const long NoReservedReadBytes = 0;
     private readonly DatabaseLimits limits;
     private ReadExecutionBudgetScopedReadGrants? readGrants;
-    private readonly CancellationToken cancellationToken;
-    private readonly TimeProvider clock;
-    private readonly long started;
-    private TimeSpan lifetimeBound;
-    private DateTimeOffset expiresAt;
+    private ReadExecutionBudgetLifetime executionLifetime;
     private long bytes;
     private ReadExecutionBudgetNativeWork nativeWork;
     private int resultBytesLimit;
     private long textTokens;
-    private ReadExecutionBudgetStageCancellation? stageCancellation;
-    private ExceptionDispatchInfo? indeterminateMetadata;
 
     /// <summary>Starts a budget for one operation; the clock does not alter the hosting runtime.</summary>
     /// <param name="options">Native centrally validated operation limits, captured once for this read.</param>
@@ -37,62 +29,23 @@ public sealed partial class ReadExecutionBudget
         ArgumentNullException.ThrowIfNull(options);
         limits = options.Value;
         limits.Validate();
-        lifetimeBound = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
+        var lifetimeBound = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
         resultBytesLimit = limits.MaxBatchBytes;
         nativeWork = new(limits.MaxQueryReadBytes, limits.MaxScanRecords);
-        this.cancellationToken = cancellationToken;
-        clock = timeProvider ?? TimeProvider.System;
-        started = clock.GetTimestamp();
-        expiresAt = clock.GetUtcNow() + lifetimeBound;
+        executionLifetime = new(lifetimeBound, timeProvider, cancellationToken);
     }
 
     /// <summary>Gets accepted logical key/value bytes; this is not physical disk I/O.</summary>
     public long ReadBytes => bytes;
 
     /// <summary>Gets the earliest original absolute deadline without reminting it from remaining monotonic time.</summary>
-    internal DateTimeOffset ExpiresAt
-    {
-        get
-        {
-            Check();
-            return expiresAt;
-        }
-    }
+    internal DateTimeOffset ExpiresAt => executionLifetime.ExpiresAt;
 
-    internal TimeSpan RemainingLifetime
-    {
-        get
-        {
-            Check();
-            var remaining = lifetimeBound - clock.GetElapsedTime(started);
-            if (remaining <= TimeSpan.Zero)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
-            }
-            return remaining;
-        }
-    }
+    internal TimeSpan RemainingLifetime => executionLifetime.RemainingLifetime;
 
-    internal void ConstrainLifetime(DateTimeOffset absoluteExpiry)
-    {
-        Check();
-        var remaining = absoluteExpiry - clock.GetUtcNow();
-        if (remaining <= TimeSpan.Zero)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
-        }
-        var bounded = clock.GetElapsedTime(started) + remaining;
-        if (bounded < lifetimeBound)
-        {
-            lifetimeBound = bounded;
-        }
-        if (absoluteExpiry < expiresAt)
-        {
-            expiresAt = absoluteExpiry;
-        }
-    }
+    internal void ConstrainLifetime(DateTimeOffset absoluteExpiry) => executionLifetime.ConstrainLifetime(absoluteExpiry);
 
-    internal CancellationToken Cancellation => cancellationToken;
+    internal CancellationToken Cancellation => executionLifetime.Cancellation;
     internal int MaximumResultBytes => lifetimeBindings?.AvailableResultBytes(resultBytesLimit) ?? resultBytesLimit;
     internal int LifetimeResultBytesLimit => resultBytesLimit;
     internal long MaximumNativeReadBytes => nativeWork.MaximumBytes;
@@ -133,32 +86,15 @@ public sealed partial class ReadExecutionBudget
     }
 
     /// <summary>Throws when cancellation or the operation deadline prevents further work.</summary>
-    public void Check()
-    {
-        Volatile.Read(ref indeterminateMetadata)?.Throw();
-        cancellationToken.ThrowIfCancellationRequested();
-        Volatile.Read(ref stageCancellation)?.Check();
-        if (clock.GetElapsedTime(started) > lifetimeBound)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
-        }
-    }
+    public void Check() => executionLifetime.Check();
 
-    internal bool HasIndeterminateMetadata => Volatile.Read(ref indeterminateMetadata) is not null;
+    internal bool HasIndeterminateMetadata => executionLifetime.HasIndeterminateMetadata;
 
     /// <summary>Retains an uncertain dispatched frame failure without inventing observed work or renewing this ledger.</summary>
-    internal void FailIndeterminateMetadata(Exception original)
-    {
-        ArgumentNullException.ThrowIfNull(original);
-        _ = Interlocked.CompareExchange(ref indeterminateMetadata, ExceptionDispatchInfo.Capture(original), null);
-    }
+    internal void FailIndeterminateMetadata(Exception original) => executionLifetime.FailIndeterminateMetadata(original);
 
     internal ReadExecutionBudgetStageCancellationLease EnterStageCancellation(CancellationToken stageToken)
-    {
-        Check();
-        var stages = LazyInitializer.EnsureInitialized(ref stageCancellation, static () => new());
-        return stages.Enter(stageToken);
-    }
+        => executionLifetime.EnterStageCancellation(stageToken);
 
     /// <summary>Accepts examined storage bytes before the consumer allocates or decodes them.</summary>
     /// <param name="count">Nonnegative key/value work, including matching scan lookahead.</param>

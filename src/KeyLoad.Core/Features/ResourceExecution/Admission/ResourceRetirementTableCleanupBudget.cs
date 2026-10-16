@@ -1,4 +1,5 @@
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 using static KeyLoad.Core.Features.ResourceExecution.ResourceRetirementTableCleanupFamilies;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
@@ -11,18 +12,22 @@ internal sealed class ResourceRetirementTableCleanupBudget
     private readonly bool stopAtCapacity;
     private bool rejectedRecord;
 
-    internal ResourceRetirementTableCleanupBudget(DatabaseLimits limits, int reservedMutations, long reservedBytes, bool stopAtCapacity = false)
+    internal ResourceRetirementTableCleanupBudget(IOptions<DatabaseLimits> options,
+        (long MaximumBytes, int MaximumRecords) readBounds, int reservedMutations, long reservedBytes, bool stopAtCapacity = false)
     {
+        var limits = options.Value;
         if (reservedMutations < Empty || reservedBytes < Empty
             || reservedMutations >= limits.MaxBatchMutations || reservedBytes >= limits.MaxBatchBytes
-            || limits.MaxScanRecords <= Empty || limits.MaxQueryReadBytes <= Empty)
+            || limits.MaxScanRecords <= Empty || limits.MaxQueryReadBytes <= Empty
+            || readBounds.MaximumRecords <= Empty || readBounds.MaximumRecords > limits.MaxScanRecords
+            || readBounds.MaximumBytes <= Empty || readBounds.MaximumBytes > limits.MaxQueryReadBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Capacity);
         }
         this.stopAtCapacity = stopAtCapacity;
-        MaximumRecords = Math.Min(limits.MaxBatchMutations - reservedMutations, limits.MaxScanRecords);
+        MaximumRecords = Math.Min(limits.MaxBatchMutations - reservedMutations, readBounds.MaximumRecords);
         maximumKeyBytes = limits.MaxBatchBytes - reservedBytes;
-        maximumExaminedBytes = limits.MaxQueryReadBytes;
+        maximumExaminedBytes = readBounds.MaximumBytes;
     }
 
     internal List<byte[]> Keys { get; } = [];

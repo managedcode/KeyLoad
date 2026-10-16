@@ -46,22 +46,22 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
 
     public Task<OnlineTextCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry, CancellationToken token)
-        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, token, null, null));
+        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, null, null, token));
 
     public Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var parent = NativeTextMaintenanceBinding.Parent(binding);
         var budget = new ReadExecutionBudget(options.Core.DatabaseLimits, clock, parent.Cancellation);
         budget.ConstrainLifetime(originalExpiry);
         budget.AttachResourceLifetimeBinding(parent);
-        return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, token, budget, parent));
+        return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, budget, parent, token));
     }
 
     private async Task<OnlineTextCapabilityResult> ExecuteOwnedAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token,
-        ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding)
+        OnlineTextCapabilityRequest request, DateTimeOffset expiry, ReadExecutionBudget? originalBudget,
+        IResourceLifetimeWorkBinding? originalBinding, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         await catalog.ObserveCompletedRetirementsAsync().ConfigureAwait(false);

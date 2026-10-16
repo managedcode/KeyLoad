@@ -1,4 +1,5 @@
 using System.Runtime.ExceptionServices;
+using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Replication;
 
@@ -46,5 +47,61 @@ internal static class ReplicaShutdownStage
         {
             failures.Add(new TaskCanceledException(stage));
         }
+    }
+
+    internal static async Task DisposeAsync(Task originalShutdown, ReplicaLeader leader,
+        ReplicaSnapshotReceiver snapshots, ReplicaFollowerSender followers, CancellationTokenSource lifetime)
+    {
+        var failures = new List<Exception>();
+        await ReplicaShutdownStage.ObserveAsync(originalShutdown, failures).ConfigureAwait(false);
+        try
+        {
+            leader.Dispose();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        try
+        {
+            snapshots.Dispose();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        try
+        {
+            followers.Dispose();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        try
+        {
+            lifetime.Dispose();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        ReplicaShutdownStage.ThrowIfAny(failures);
     }
 }

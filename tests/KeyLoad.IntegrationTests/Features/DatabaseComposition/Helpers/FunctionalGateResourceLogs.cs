@@ -1,10 +1,34 @@
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 /// <summary>Writes joined native resource logs and the original retained startup snapshot without consulting a stopped provider.</summary>
 internal static class FunctionalGateResourceLogs
 {
+    internal static async Task JoinAsync(ClusterFixtureDiagnostics? diagnostics, string[] nodeNames,
+        string[] diagnosticSecrets, string root, Action<string> saveStartupEvidence, List<Exception> failures)
+    {
+        if (diagnostics is { } logs)
+        {
+            try
+            {
+                await diagnostics.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            ServerFailureObserver.Observe(() => FunctionalGateResourceLogs.Save(
+                logs, nodeNames, diagnosticSecrets, root, saveStartupEvidence), failures);
+        }
+    }
+
+
     internal static void Save(ClusterFixtureDiagnostics logs, string[] nodeNames, string[] diagnosticSecrets,
         string root, Action<string> saveStartupEvidence)
     {

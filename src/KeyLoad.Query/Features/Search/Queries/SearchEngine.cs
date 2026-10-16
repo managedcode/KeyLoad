@@ -90,20 +90,7 @@ public sealed partial class SearchEngine
     }
 
     private RankedDocument[] SearchCore(string principalId, SearchRequest request, ReadExecutionBudget budget)
-    {
-        budget.Check();
-        SearchRequestValidation.Validate(request, database.Limits, false, execution);
-        FilteredSearchEligibility.ValidateRequest(request.AllowedIds, database.Limits, budget);
-        var similarity = request.Vector is { } vector
-            ? PreparedSimilarity.Create(vector.AsMemory(), request.Space!.Metric) : null;
-        FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
-        var eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
-        var original = database.WithQueryView(principalId, request.Partition, request.Collection,
-            request.Vector is null ? Capability.None : Capability.VectorSearch,
-            (view, principal, resource) => SearchCapturedExecution.Start(database, textProjection, view,
-                principal, resource, request, budget, execution, similarity, eligibility), budget);
-        return SearchCapturedExecution.Complete(database, original, request, budget, similarity, eligibility);
-    }
+        => ExactSearchExecution.Execute(database, textProjection, execution, principalId, request, budget);
 
     /// <summary>Computes the selected vector metric using the same native SIMD blocks and bounded scalar tails as search.</summary>
     /// <param name="left">Finite query vector.</param>

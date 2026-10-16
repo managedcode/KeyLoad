@@ -11,20 +11,20 @@ internal static class ConnectionRemoteTransferReadCapabilities
         => kind == GrainReadKind.QueueTransferCoordination && envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose;
 
     internal static object? ExecutePeer(DatabaseEngine database, TimeProvider clock,
-        PrincipalRecord principal, DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         return GrainRemoteTransferRead.Execute(database, principal, request,
-            database.OperationLimitsOptions, clock, cancellationToken, binding);
+            database.OperationLimitsOptions, clock, binding, cancellationToken);
     }
 
     internal static Task<RemoteQueueTransferReceiptRead> TryReceiptAsync(IServiceProvider services,
-        PrincipalRecord principal, DecodedGrainRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         return services.GetService<IRemoteDocumentReadRouter>() is IRemoteQueueTransferReceiptRouter transfers
             ? transfers.InspectTransferAsync(request.Envelope, principal,
-                GrainNativePayload.Read<InspectQueueTransferReceiptRequest>(request.Payload), cancellationToken, binding)
+                GrainNativePayload.Read<InspectQueueTransferReceiptRequest>(request.Payload), binding, cancellationToken)
             : Task.FromResult(new RemoteQueueTransferReceiptRead(false, null));
     }
 }

@@ -74,8 +74,9 @@ internal static class ResourceRetirementCompletionBodyValidation
         ResourceRetirementFinalizationValidation.Require(body.Finalization, limits);
         var control = body.Finalization.Control;
         Parent(phase, control, limits);
-        var member = ResourceRetirementStateValidation.Member(control, body.Receiver?.Owner);
-        if (!PhysicalOwnerEntryValidation.Same(member, body.Receiver))
+        var receiver = body.Receiver;
+        var member = ResourceRetirementStateValidation.Member(control, receiver?.Owner);
+        if (receiver is null || !PhysicalOwnerEntryValidation.Same(member, receiver))
         {
             throw Invalid();
         }
@@ -103,8 +104,9 @@ internal static class ResourceRetirementCompletionBodyValidation
         RequireImmutableState(body.SealedState, limits);
         var control = body.SealedState.Control;
         Parent(phase, control, limits);
-        var member = ResourceRetirementStateValidation.Member(control, body.Receiver?.Owner);
-        if (!PhysicalOwnerEntryValidation.Same(member, body.Receiver))
+        var receiver = body.Receiver;
+        var member = ResourceRetirementStateValidation.Member(control, receiver?.Owner);
+        if (receiver is null || !PhysicalOwnerEntryValidation.Same(member, receiver))
         {
             throw Invalid();
         }

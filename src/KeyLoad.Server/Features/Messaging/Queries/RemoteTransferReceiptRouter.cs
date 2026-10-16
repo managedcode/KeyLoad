@@ -12,7 +12,7 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
     RemoteDocumentWorkOwner owner, TimeProvider clock)
 {
     internal async Task<RemoteQueueTransferReceiptRead> ReadAsync(GrainRequestEnvelope envelope,
-        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         var failures = new List<Exception>();
@@ -25,7 +25,7 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
                 using var expiry = OriginalExpiry(envelope.ExpiresAt);
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, expiry.Token);
-                result = await ReadAtCutAsync(envelope, principal, request, linked.Token, binding).ConfigureAwait(false);
+                result = await ReadAtCutAsync(envelope, principal, request, binding, linked.Token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -33,7 +33,7 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
     }
 
     private async Task<RemoteQueueTransferReceiptRead> ReadAtCutAsync(GrainRequestEnvelope envelope,
-        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         node.CatalogRequestCodec().ValidateScope(envelope);

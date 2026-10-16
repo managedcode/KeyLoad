@@ -11,7 +11,7 @@ internal sealed class RemotePartitionQueryRouter(OrleansNode node, PartitionHost
     : IRemotePartitionQueryRouter
 {
     public async Task<PartitionQueryPageV1> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        PartitionQueryRequestV1 request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding)
+        PartitionQueryRequestV1 request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         var failures = new List<Exception>();
@@ -33,7 +33,7 @@ internal sealed class RemotePartitionQueryRouter(OrleansNode node, PartitionHost
                 var reads = new RemotePartitionQueryLeafRead(node, partition, options, client, binding);
                 page = await PartitionQueryRemoteExecution.ExecuteBoundAsync(queries, request,
                     (plan, grant, budget) => reads.Prepare(envelope, principal.Id, plan, grant, budget),
-                    token => reads.RevalidateAsync(principal.Id, token), clock, original.Token, binding).ConfigureAwait(false);
+                    token => reads.RevalidateAsync(principal.Id, token), clock, binding, original.Token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

@@ -7,7 +7,7 @@ internal static class ResourceRetirementTerminalOperationValidation
     internal static void Require(ResourceRetirementStateV1 state, DatabaseLimits limits)
     {
         var original = state.CompletionOperation;
-        if (original is null || state.CompletionPolicyEpoch is null or < 0
+        if (original is null || state.CompletionPolicyEpoch is null or < ResourceRetirementProtocol.Empty
             || original.Kind != OperationKind.ResourceRetirementPhase || original.NativePayload.IsEmpty
             || string.IsNullOrWhiteSpace(original.PrincipalId) || original.Id != state.CompletionReceipt!.CommandId)
         {

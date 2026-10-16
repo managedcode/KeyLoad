@@ -12,12 +12,12 @@ internal static class RemoteGraphParentMutation
     private const int RequiredDeliveryIntentCount = 1;
     internal static async Task<RemoteGraphEdgeResultV1> ExecuteAsync(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, GrainRequestEnvelope trusted, OperationKind kind, ReadOnlyMemory<byte> payload,
-        RemoteGraphEffectBoundary effects, ReadExecutionBudget work, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        RemoteGraphEffectBoundary effects, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         if (kind == OperationKind.DeliverRemoteGraphEdge)
         {
-            return await DeliverAsync(node, partition, principal, trusted, payload, effects, work, token, binding).ConfigureAwait(false);
+            return await DeliverAsync(node, partition, principal, trusted, payload, effects, work, binding, token).ConfigureAwait(false);
         }
         var original = Original(kind, payload);
         if (original.CommandId != trusted.CommandId)
@@ -30,7 +30,7 @@ internal static class RemoteGraphParentMutation
             original.SourcePartition, null, graph, work);
         var query = new RemoteGraphSourceReadRequestV1(original.CommandId, original.SourcePartition,
             graph, edgeId, initial.Source.Owner, original);
-        var current = await SnapshotAsync(node, partition, principal, trusted, query, work, token, binding).ConfigureAwait(false);
+        var current = await SnapshotAsync(node, partition, principal, trusted, query, work, binding, token).ConfigureAwait(false);
         RemoteGraphSourceResultV1 actual;
         if (current.OriginalOutcome is { } retained)
         {
@@ -51,7 +51,7 @@ internal static class RemoteGraphParentMutation
                 mutation, trusted.ExpiresAt, work);
             actual = await RemoteGraphParentCall.CommandAsync<RemoteGraphSourceResultV1>(node, partition,
                 principal, operation, trusted.ExpiresAt, effects, work, token).ConfigureAwait(false);
-            current = await SnapshotAsync(node, partition, principal, trusted, query, work, token, binding).ConfigureAwait(false);
+            current = await SnapshotAsync(node, partition, principal, trusted, query, work, binding, token).ConfigureAwait(false);
         }
         return await RemoteGraphParentDelivery.ExecuteAsync(node, partition, principal, trusted,
             original.CommandId, current.Cut, actual, effects, work, token).ConfigureAwait(false);
@@ -59,8 +59,8 @@ internal static class RemoteGraphParentMutation
 
     private static async Task<RemoteGraphEdgeResultV1> DeliverAsync(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, GrainRequestEnvelope trusted, ReadOnlyMemory<byte> payload,
-        RemoteGraphEffectBoundary effects, ReadExecutionBudget work, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        RemoteGraphEffectBoundary effects, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         var delivery = GrainNativePayload.ReadCommand<DeliverRemoteGraphEdgeRequestV1>(payload);
         if (delivery.CommandId != trusted.CommandId)
@@ -71,7 +71,7 @@ internal static class RemoteGraphParentMutation
             delivery.Destination, delivery.Graph, work);
         var read = new RemoteGraphSourceReadRequestV1(Guid.Empty, delivery.SourcePartition,
             delivery.Graph, delivery.EdgeId, route.Source.Owner, null, delivery);
-        var snapshot = await SnapshotAsync(node, partition, principal, trusted, read, work, token, binding).ConfigureAwait(false);
+        var snapshot = await SnapshotAsync(node, partition, principal, trusted, read, work, binding, token).ConfigureAwait(false);
         var source = snapshot.OriginalOutcome?.Result.Get<RemoteGraphSourceResultV1>()
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphNativeProtocol.InvalidProof);
         var selected = source.Intents.Where(value => (value.Content.Destination with
@@ -113,8 +113,8 @@ internal static class RemoteGraphParentMutation
 
     private static Task<RemoteGraphSourceSnapshotV1> SnapshotAsync(OrleansNode node, PartitionHost partition,
         PrincipalRecord principal, GrainRequestEnvelope trusted, RemoteGraphSourceReadRequestV1 query,
-        ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
         => RemoteGraphParentCall.ReadAsync<RemoteGraphSourceSnapshotV1>(node, partition, principal,
-            GrainReadKind.RemoteGraphSourceIntent, query, trusted.ExpiresAt, work, token, binding);
+            GrainReadKind.RemoteGraphSourceIntent, query, trusted.ExpiresAt, work, binding, token);
 
 }

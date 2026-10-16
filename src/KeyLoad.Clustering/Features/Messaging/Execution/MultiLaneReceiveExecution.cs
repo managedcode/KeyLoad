@@ -17,8 +17,8 @@ internal static class MultiLaneReceiveExecution
         Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        IOptions<GrainRoutingOptions> routing, ILogger diagnostics, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        IOptions<GrainRoutingOptions> routing, ILogger diagnostics, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         var request = GrainNativePayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
         ArgumentNullException.ThrowIfNull(binding);

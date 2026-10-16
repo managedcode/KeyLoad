@@ -8,8 +8,8 @@ internal sealed class RemoteGraphParent(OrleansNode node, PartitionHost partitio
     : IRemoteGraphParent
 {
     public async Task<RemoteGraphEdgeResultV1> ExecuteAsync(GrainRequestEnvelope trusted, OperationKind kind,
-        ReadOnlyMemory<byte> payload, ReadExecutionBudget work, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        ReadOnlyMemory<byte> payload, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         work.RequireResourceLifetimeBinding(binding);
         var principal = RemoteGraphParentRouting.Principal(partition, clock, trusted, work);
@@ -17,7 +17,7 @@ internal sealed class RemoteGraphParent(OrleansNode node, PartitionHost partitio
         try
         {
             var result = await RemoteGraphParentMutation.ExecuteAsync(node, partition, principal,
-                trusted, kind, payload, effects, work, token, binding).ConfigureAwait(false);
+                trusted, kind, payload, effects, work, binding, token).ConfigureAwait(false);
             work.Check();
             token.ThrowIfCancellationRequested();
             return result;
@@ -29,8 +29,8 @@ internal sealed class RemoteGraphParent(OrleansNode node, PartitionHost partitio
     }
 
     public Task<RemoteIncomingGraphEdgesPageV1> ReadIncomingAsync(GrainRequestEnvelope trusted,
-        ReadRemoteIncomingGraphEdgesRequestV1 request, ReadExecutionBudget work, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        ReadRemoteIncomingGraphEdgesRequestV1 request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         work.RequireResourceLifetimeBinding(binding);
         var principal = RemoteGraphParentRouting.Principal(partition, clock, trusted, work);

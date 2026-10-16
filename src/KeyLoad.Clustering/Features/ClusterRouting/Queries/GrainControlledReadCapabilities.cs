@@ -23,7 +23,7 @@ internal static class GrainControlledReadCapabilities
             GrainReadKind.OwnedDocumentV2 or GrainReadKind.ControlledDocumentV2 => DocumentLifetimeReadCapabilities.Execute(
                 database, services, clock, principal, request, binding, cancellationToken),
             GrainReadKind.PartitionQueryLeafV2 or GrainReadKind.DistributedSearchLeafV2 => QueryLifetimeReadCapability.Execute(
-                database, services, clock, principal, request, cancellationToken, binding),
+                database, services, clock, principal, request, binding, cancellationToken),
             GrainReadKind.ControlledBlobOutcomeV2 => ControlledBlobOutcomeReadExecutionV2.Execute(database,
                 limits, clock, principal, request.Envelope,
                 GrainNativePayload.Read<ControlledBlobReadRequestV2>(request.Payload), binding, cancellationToken),

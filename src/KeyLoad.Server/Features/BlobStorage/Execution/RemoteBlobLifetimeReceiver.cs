@@ -10,8 +10,8 @@ namespace KeyLoad.Server.Features.BlobStorage;
 internal sealed class RemoteBlobLifetimeReceiver(OrleansNode node, PartitionHost partition,
     ServerRuntimeOptions options, TimeProvider clock)
 {
-    internal async Task<ReadOnlyMemory<byte>> ExecuteAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+    internal async Task<ReadOnlyMemory<byte>> ExecuteAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         var request = Require(call, token);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
@@ -20,7 +20,7 @@ internal sealed class RemoteBlobLifetimeReceiver(OrleansNode node, PartitionHost
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateControlledBlobReadV2(requestId, principal.Id, request);
         var actual = await NativeLifetimeReadChildExecution.ExecuteAsync<ControlledBlobReadResultV2>(
-            node, principal, requestId, signed, null, token, binding).ConfigureAwait(false);
+            node, principal, requestId, signed, null, binding, token).ConfigureAwait(false);
         _ = Require(call, token);
         token.ThrowIfCancellationRequested();
         if (NativeSerialization.Measure(actual) > call.MaximumReplyBytes)

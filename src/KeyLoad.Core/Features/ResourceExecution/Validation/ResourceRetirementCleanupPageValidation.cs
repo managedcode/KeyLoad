@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
@@ -30,8 +29,8 @@ internal static class ResourceRetirementCleanupPageValidation
         var previous = body.Previous;
         if (previous is not null && (!ResourceRetirementValidation.Same(previous.Control, control)
             || !ResourceRetirementValidation.Same(previous.Receiver, body.Receiver)
-            || previous.Partition != body.Partition || previous.Ordinal <= 0 || previous.Ordinal == long.MaxValue
-            || previous.Complete || previous.FamilyOrdinal < 0
+            || previous.Partition != body.Partition || previous.Ordinal <= ResourceRetirementProtocol.Empty || previous.Ordinal == long.MaxValue
+            || previous.Complete || previous.FamilyOrdinal < ResourceRetirementProtocol.Empty
             || previous.FamilyOrdinal >= ResourceRetirementTableCleanupFamilies.Count
             || previous.AfterKey.Length > limits.MaxBatchBytes))
         {

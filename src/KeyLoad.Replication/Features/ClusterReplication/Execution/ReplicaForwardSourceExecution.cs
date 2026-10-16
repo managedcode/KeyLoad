@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
+using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Replication;
 
@@ -53,7 +54,15 @@ internal static class ReplicaForwardSourceExecution
             work.Check();
             result = ReadResult(reply);
         }
-        catch (Exception failure)
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            if (attempted && !imported)
+            {
+                work.FailIndeterminateMetadata(failure);
+            }
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
         {
             if (attempted && !imported)
             {
@@ -86,7 +95,11 @@ internal static class ReplicaForwardSourceExecution
         {
             work.CompleteSettledReadGrant(grant);
         }
-        catch (Exception failure)
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
         {
             failures.Add(failure);
         }

@@ -37,14 +37,14 @@ internal sealed record RemoteAnnReadSelection(ProjectionConsumerRef Consumer, st
     }
 
     internal async Task<object> ExecuteLocalAsync(SearchEngine actual, string principal,
-        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, CancellationToken cancellationToken,
-        IResourceLifetimeWorkBinding binding)
+        ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, IResourceLifetimeWorkBinding binding,
+        CancellationToken cancellationToken)
     {
         if (Wait is not null)
         {
-            return await actual.WaitForAnnIndexBoundAsync(principal, Wait, budget, metadata, cancellationToken, binding).ConfigureAwait(false);
+            return await actual.WaitForAnnIndexBoundAsync(principal, Wait, budget, metadata, binding, cancellationToken).ConfigureAwait(false);
         }
-        return await actual.ApproximateSearchBoundAsync(principal, Approximate!, budget, metadata, cancellationToken, binding).ConfigureAwait(false);
+        return await actual.ApproximateSearchBoundAsync(principal, Approximate!, budget, metadata, binding, cancellationToken).ConfigureAwait(false);
     }
 
     internal AnnProjectionObservationRequest ForOriginal(AnnMaintenanceRequest original, ReadExecutionBudget budget)

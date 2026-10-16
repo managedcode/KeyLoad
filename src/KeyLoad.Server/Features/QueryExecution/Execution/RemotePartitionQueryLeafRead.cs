@@ -94,7 +94,7 @@ internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHo
     {
         var result = call is null
             ? await RemoteQueryLifetimeLocalRead.QueryAsync(node, partition, principalId, request, metadata,
-                expiresAt, token, binding).ConfigureAwait(false)
+                expiresAt, binding, token).ConfigureAwait(false)
             : await RemoteQueryLifetimeExchange.ReadAsync<PartitionQueryLeafResultV1>(client, call, metadata,
                 PartitionQueryParallelRetention.ReplyBytes(request.Plan), token).ConfigureAwait(false);
         return new(request.Owner, result);

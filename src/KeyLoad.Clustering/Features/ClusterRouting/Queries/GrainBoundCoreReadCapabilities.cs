@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;

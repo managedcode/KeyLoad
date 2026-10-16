@@ -44,35 +44,35 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
 
     public Task<TextMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, CancellationToken cancellationToken)
-        => worker.RunAsync(() => Execute(principal, request, cancellationToken, null, null));
+        => worker.RunAsync(() => Execute(principal, request, null, null, cancellationToken));
 
     public Task<TextMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, DateTimeOffset originalExpiry,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var parent = NativeTextMaintenanceBinding.Parent(binding);
         var budget = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, parent.Cancellation);
         budget.ConstrainLifetime(originalExpiry);
         budget.AttachResourceLifetimeBinding(parent);
-        return worker.RunAsync(() => Execute(principal, request, token, budget, parent));
+        return worker.RunAsync(() => Execute(principal, request, budget, parent, token));
     }
 
     private TextMaintenanceCapabilityResult Execute(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding)
+        TextMaintenanceCapabilityRequest request, ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding, CancellationToken token)
     {
         var failures = new List<Exception>();
         TextMaintenanceCapabilityResult? result = null;
         ServerFailureObserver.Observe(() =>
         {
             using var exclusive = new NativeTextSelectedWriteLease(selectedAdmission, token);
-            ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, token, originalBudget, originalBinding), failures);
+            ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, originalBudget, originalBinding, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result!;
     }
 
     private TextMaintenanceCapabilityResult ExecuteExclusive(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding)
+        TextMaintenanceCapabilityRequest request, ReadExecutionBudget? originalBudget, IResourceLifetimeWorkBinding? originalBinding, CancellationToken token)
     {
         RequireSelectedSettled();
         token.ThrowIfCancellationRequested();

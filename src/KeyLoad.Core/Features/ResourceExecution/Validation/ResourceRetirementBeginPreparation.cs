@@ -44,7 +44,7 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, ResourceRetirementProtocol.Changed);
         var reservation = ResourceRetirementPreparationStorage.ReadReservation(view, state.Control.Lifetime, Limits);
         if (!ResourceRetirementValidation.Same(local.Reservation, reservation)
-            || !ResourceRetirementMovementSnapshot.Capture(view, Limits).IsEmpty)
+            || !ResourceRetirementMovementSnapshot.Capture(view, OperationLimitsOptions).IsEmpty)
         {
             throw Errors.Fail(ErrorCode.Conflict, ResourceRetirementProtocol.Incomplete);
         }
@@ -62,7 +62,7 @@ public sealed partial class DatabaseEngine
             || !ResourceRetirementValidation.Same(reservation.Control.Lifetime, control.Lifetime)
             || !ResourceRetirementValidation.Same(reservation.Control.Catalog, control.Catalog)
             || !ResourceRetirementValidation.Same(reservation.Control.Directory, control.Directory)
-            || !ResourceRetirementMovementSnapshot.Capture(view, Limits).IsEmpty)
+            || !ResourceRetirementMovementSnapshot.Capture(view, OperationLimitsOptions).IsEmpty)
         {
             throw Errors.Fail(ErrorCode.Conflict, ResourceRetirementProtocol.Incomplete);
         }

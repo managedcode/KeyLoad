@@ -655,6 +655,65 @@ jobs:
             imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
           } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
+      - name: Test distinct native files and exclusive-owner refusal with 3 nodes
+        id: functional-file-ownership-three
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' }}
+        shell: bash
+        env:
+          TMPDIR: ${{ runner.temp }}/functional-gates
+        run: |
+          evidence="TestResults/functional-gates/file-ownership-three"
+          mkdir -p "$TMPDIR" "$evidence"
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/FunctionalFileOwnershipRf3Tests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/file-ownership-three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
+            native_exit=0
+          else
+            native_exit=$?
+          fi
+          printf '%s\n' "$native_exit" > "$evidence/native-exit-code.txt"
+          tail -c 65536 "$evidence/native.stdout.original.txt"
+          tail -c 65536 "$evidence/native.stderr.original.txt" >&2
+          exit "$native_exit"
+      - name: Verify original distinct-files and exclusive-owner refusal receipt
+        id: functional-file-ownership-three-receipt
+        if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' && (steps.functional-file-ownership-three.outcome == 'success' || steps.functional-file-ownership-three.outcome == 'failure') }}
+        shell: pwsh
+        env:
+          NATIVE_OUTCOME: ${{ steps.functional-file-ownership-three.outcome }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-StrictMode -Version Latest
+          $directory = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-gates/file-ownership-three'
+          $reports = @(Get-ChildItem -LiteralPath $directory -Filter '*.trx' -Recurse -File)
+          if ($reports.Count -ne 1 -or $reports[0].Length -le 0 -or $reports[0].Length -gt 16777216) {
+            throw 'Exactly one bounded original functional gate TRX is required.'
+          }
+          [xml] $trx = Get-Content -LiteralPath $reports[0].FullName -Raw
+          $ns = [Xml.XmlNamespaceManager]::new($trx.NameTable)
+          $ns.AddNamespace('t', 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010')
+          $counts = $trx.SelectSingleNode('/t:TestRun/t:ResultSummary/t:Counters', $ns)
+          $results = @($trx.SelectNodes('/t:TestRun/t:Results/t:UnitTestResult', $ns))
+          $definitions = @($trx.SelectNodes('/t:TestRun/t:TestDefinitions/t:UnitTest', $ns))
+          $nativeExit = (Get-Content -LiteralPath (Join-Path $directory 'native-exit-code.txt') -Raw).Trim()
+          $valid = $env:NATIVE_OUTCOME -ceq 'success' -and $nativeExit -ceq '0' -and $null -ne $counts -and
+            $results.Count -eq 1 -and $definitions.Count -eq 1
+          $valid = $valid -and [int]$counts.total -eq 1 -and [int]$counts.executed -eq 1 -and [int]$counts.passed -eq 1
+          foreach ($counter in $counts.Attributes) {
+            if ($counter.Name -notin @('total','executed','passed') -and [long]$counter.Value -ne 0) { $valid = $false }
+          }
+          $method = 'DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens'
+          $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
+            $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
+            $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalFileOwnershipRf3Tests'
+          [ordered]@{
+            sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
+            method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
+            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
+            imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
+          } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
+          if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test three-node database with .NET and MCP clients
         id: rf3-required
         if: ${{ inputs.task != 'functional-gates' }}
@@ -795,6 +854,8 @@ jobs:
           SINGLE_RECEIPT: ${{ steps.functional-single-receipt.outcome }}
           THREE_OUTCOME: ${{ steps.functional-three.outcome }}
           THREE_RECEIPT: ${{ steps.functional-three-receipt.outcome }}
+          FILE_OWNERSHIP_OUTCOME: ${{ steps.functional-file-ownership-three.outcome }}
+          FILE_OWNERSHIP_RECEIPT: ${{ steps.functional-file-ownership-three-receipt.outcome }}
           COLD_PRECONDITIONS_OUTCOME: ${{ steps.functional-cold-preconditions.outcome }}
           COLD_PRECONDITIONS_RECEIPT: ${{ steps.functional-cold-preconditions-receipt.outcome }}
           COLD_SINGLE_OUTCOME: ${{ steps.functional-cold-single.outcome }}
@@ -810,14 +871,15 @@ jobs:
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
             single = $env:SINGLE_OUTCOME; singleReceipt = $env:SINGLE_RECEIPT
             three = $env:THREE_OUTCOME; threeReceipt = $env:THREE_RECEIPT
+            fileOwnershipThree = $env:FILE_OWNERSHIP_OUTCOME; fileOwnershipThreeReceipt = $env:FILE_OWNERSHIP_RECEIPT
             coldPreconditions = $env:COLD_PRECONDITIONS_OUTCOME; coldPreconditionsReceipt = $env:COLD_PRECONDITIONS_RECEIPT
             coldSingle = $env:COLD_SINGLE_OUTCOME; coldSingleReceipt = $env:COLD_SINGLE_RECEIPT
             coldThree = $env:COLD_THREE_OUTCOME; coldThreeReceipt = $env:COLD_THREE_RECEIPT
             sourceVerify = $env:SOURCE_VERIFY; imageCleanup = $env:IMAGE_CLEANUP
           }
           $outcomes | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gates-outcomes.json') -Encoding utf8NoBOM
-          foreach ($name in @('single','singleReceipt','three','threeReceipt','coldPreconditions','coldPreconditionsReceipt','coldSingle','coldSingleReceipt','coldThree','coldThreeReceipt','sourceVerify','imageCleanup')) {
-            if ($outcomes[$name] -cne 'success') { throw 'Both original normal gates, cold preconditions, both cold gates and joined identity/cleanup checks must pass.' }
+          foreach ($name in @('single','singleReceipt','three','threeReceipt','fileOwnershipThree','fileOwnershipThreeReceipt','coldPreconditions','coldPreconditionsReceipt','coldSingle','coldSingleReceipt','coldThree','coldThreeReceipt','sourceVerify','imageCleanup')) {
+            if ($outcomes[$name] -cne 'success') { throw 'Both original normal gates, native file-ownership gate and receipt, cold preconditions, both cold gates and joined identity/cleanup checks must pass.' }
           }
       - name: Save three-node database test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

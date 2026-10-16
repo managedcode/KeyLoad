@@ -92,7 +92,7 @@ internal static class ResourceRetirementFinalizationValidation
         var seen = new HashSet<PartitionRef>();
         foreach (var checkpoint in owner.Partitions)
         {
-            if (checkpoint is null || checkpoint.Partition is null || checkpoint.Ordinal <= 0
+            if (checkpoint is null || checkpoint.Partition is null || checkpoint.Ordinal <= ResourceRetirementProtocol.Empty
                 || !checkpoint.Complete || checkpoint.FamilyOrdinal != ResourceRetirementTableCleanupFamilies.Count
                 || !checkpoint.AfterKey.IsEmpty || !seen.Add(checkpoint.Partition)
                 || !expected.Contains(checkpoint.Partition)
@@ -106,7 +106,7 @@ internal static class ResourceRetirementFinalizationValidation
             if (receipt is null || receipt.Version != ResourceRetirementProtocol.Version
                 || receipt.RetirementId != owner.Control.Request.RetirementId
                 || receipt.Phase != ResourceRetirementPhase.CleanupPage || receipt.CommandId == Guid.Empty
-                || receipt.AppliedPosition <= 0 || receipt.AppliedPosition >= owner.Receipt.AppliedPosition
+                || receipt.AppliedPosition <= ResourceRetirementProtocol.Empty || receipt.AppliedPosition >= owner.Receipt.AppliedPosition
                 || receipt.IntentDigest != owner.Control.IntentDigest
                 || !ResourceRetirementValidation.Same(receipt.Lifetime, owner.Control.Lifetime)
                 || !PhysicalOwnerEntryValidation.SameOwner(receipt.PhysicalOwner, member.Owner))

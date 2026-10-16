@@ -144,7 +144,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteNativeAsync(
         RemoteModelNativeRequest request, RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken token,
         IResourceLifetimeWorkBinding? binding = null)
-        => RemoteModelNativeDispatch.ExecuteAsync(this, request, effectBoundary, token, binding);
+        => RemoteModelNativeDispatch.ExecuteAsync(this, request, effectBoundary, binding, token);
 
     public ValueTask DisposeAsync()
     {

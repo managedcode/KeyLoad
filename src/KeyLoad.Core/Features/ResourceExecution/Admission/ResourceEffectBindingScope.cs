@@ -1,10 +1,12 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
-internal sealed class ResourceEffectBindingScope(DatabaseLimits limits)
+internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> options)
 {
+    private readonly DatabaseLimits limits = options.Value;
     private readonly HashSet<ResourceLifetimeV1> observed = [];
     private ResourceEffectAdmissionV1? admitted;
     private long retainedBytes;

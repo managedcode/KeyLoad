@@ -46,7 +46,7 @@ public sealed partial class DatabaseEngine
         var available = CleanupScanLimits(work);
         var plan = ResourceRetirementTableCleanupPage.Plan(work, control.Lifetime, body.Partition,
             new(previous?.FamilyOrdinal ?? ResourceRetirementProtocol.Empty, previous?.AfterKey.ToArray()),
-            available, ResourceRetirementProtocol.Empty, ResourceRetirementProtocol.Empty, stopAtCapacity: true);
+            OperationLimitsOptions, available, ResourceRetirementProtocol.Empty, ResourceRetirementProtocol.Empty, stopAtCapacity: true);
         var selected = SelectCleanupCandidate(roster, principal, operation, body, receipt, plan, work, outcomeKey);
         selected.Selection.Apply(transaction);
         transaction.Put(selected.Metadata.Mutations[ResourceRetirementProtocol.Empty].Key.ToArray(),
@@ -54,16 +54,13 @@ public sealed partial class DatabaseEngine
         return selected.Metadata.Checkpoint;
     }
 
-    private DatabaseLimits CleanupScanLimits(ResourceRetirementCleanupReadView work)
+    private (long MaximumBytes, int MaximumRecords) CleanupScanLimits(ResourceRetirementCleanupReadView work)
     {
         if (work.RemainingBytes <= ResourceRetirementProtocol.Empty || work.RemainingRecords <= ResourceRetirementProtocol.Empty)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceRetirementTableCleanupFamilies.Capacity);
         }
-        return Limits with
-        {
-            MaxQueryReadBytes = Math.Min(Limits.MaxQueryReadBytes, work.RemainingBytes),
-            MaxScanRecords = Math.Min(Limits.MaxScanRecords, work.RemainingRecords)
-        };
+        return (Math.Min(Limits.MaxQueryReadBytes, work.RemainingBytes),
+            Math.Min(Limits.MaxScanRecords, work.RemainingRecords));
     }
 }

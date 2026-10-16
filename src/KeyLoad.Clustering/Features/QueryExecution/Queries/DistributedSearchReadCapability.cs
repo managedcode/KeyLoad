@@ -9,7 +9,7 @@ internal static class DistributedSearchReadCapability
 
     internal static Task<DistributedSearchPageV1> ExecuteAsync(IServiceProvider services, PrincipalRecord principal,
         DecodedGrainRequest request, Guid requestId, GrainRequestCodec codec, IGrainContext context,
-        CancellationToken token, IResourceLifetimeWorkBinding binding)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         var router = services.GetService<IRemoteDistributedSearchRouter>()
@@ -20,6 +20,6 @@ internal static class DistributedSearchReadCapability
             observed = new DistributedSearchStatisticsObservation(codec, request, requestId, context).ObserveAsync;
         }
         return router.ReadAsync(request.Envelope, principal,
-            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), token, observed, binding);
+            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), observed, binding, token);
     }
 }

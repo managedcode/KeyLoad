@@ -11,5 +11,5 @@ internal interface IRemoteDocumentReadRouter
     /// <param name="cancellationToken">Original capability cancellation.</param>
     /// <returns>Only the authorized projected document, after source-fence revalidation.</returns>
     Task<DocumentResult?> ReadAsync(GrainRequestEnvelope envelope, PrincipalRecord principal,
-        GetDocumentRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding binding);
+        GetDocumentRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken);
 }

@@ -12,11 +12,8 @@ public sealed partial class DatabaseEngine
     private ResourceRetirementPhaseResultV1 BeginResourceRetirement(IAtomicTransaction transaction,
         PrincipalRecord principal, ReplicatedOperation operation, ResourceRetirementPhaseCommandV1 phase, long position)
     {
-        var body = NativeSerialization.Deserialize<ResourceRetirementBeginBodyV1>(phase.Body.Span);
-        if (body is null)
-        {
-            throw Errors.Fail(ErrorCode.Validation, ResourceRetirementProtocol.Invalid);
-        }
+        var body = NativeSerialization.Deserialize<ResourceRetirementBeginBodyV1>(phase.Body.Span)
+            ?? throw Errors.Fail(ErrorCode.Validation, ResourceRetirementProtocol.Invalid);
         ResourceRetirementValidation.Request(body.Request, Limits);
         if (phase.RetirementId != body.Request.RetirementId || operation.Id != body.Request.RetirementId)
         {

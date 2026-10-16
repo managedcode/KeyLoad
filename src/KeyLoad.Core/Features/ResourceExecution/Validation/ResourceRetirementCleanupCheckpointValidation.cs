@@ -20,10 +20,10 @@ internal static class ResourceRetirementCleanupCheckpointValidation
     private static void RequireCore(ResourceRetirementCleanupCheckpointV1 checkpoint, DatabaseLimits limits)
     {
         if (checkpoint is null || checkpoint.Control is null || checkpoint.Receiver is null
-            || checkpoint.Partition is null || checkpoint.Receipt is null || checkpoint.Ordinal <= 0
-            || checkpoint.FamilyOrdinal < 0 || checkpoint.FamilyOrdinal > ResourceRetirementTableCleanupFamilies.Count
+            || checkpoint.Partition is null || checkpoint.Receipt is null || checkpoint.Ordinal <= ResourceRetirementProtocol.Empty
+            || checkpoint.FamilyOrdinal < ResourceRetirementProtocol.Empty || checkpoint.FamilyOrdinal > ResourceRetirementTableCleanupFamilies.Count
             || checkpoint.Complete != (checkpoint.FamilyOrdinal == ResourceRetirementTableCleanupFamilies.Count)
-            || checkpoint.ExaminedBytes < 0 || checkpoint.ExaminedRecords < 0 || checkpoint.AttemptId == Guid.Empty
+            || checkpoint.ExaminedBytes < ResourceRetirementProtocol.Empty || checkpoint.ExaminedRecords < ResourceRetirementProtocol.Empty || checkpoint.AttemptId == Guid.Empty
             || checkpoint.AfterKey.Length > limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementProtocol.Malformed);
@@ -41,7 +41,7 @@ internal static class ResourceRetirementCleanupCheckpointValidation
         var receipt = checkpoint.Receipt;
         if (receipt.Version != ResourceRetirementProtocol.Version
             || receipt.RetirementId != control.Request.RetirementId
-            || receipt.Phase != ResourceRetirementPhase.CleanupPage || receipt.AppliedPosition <= 0
+            || receipt.Phase != ResourceRetirementPhase.CleanupPage || receipt.AppliedPosition <= ResourceRetirementProtocol.Empty
             || receipt.CommandId != ResourceRetirementCleanupPageIdentity.For(control, member,
                 checkpoint.Partition, checkpoint.Ordinal, checkpoint.AttemptId)
             || receipt.IntentDigest != control.IntentDigest

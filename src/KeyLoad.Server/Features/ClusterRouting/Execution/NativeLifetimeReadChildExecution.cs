@@ -13,8 +13,8 @@ internal static class NativeLifetimeReadChildExecution
     private const int NoFailures = 0;
 
     internal static async Task<TResult> ExecuteAsync<TResult>(OrleansNode node, PrincipalRecord principal,
-        Guid requestId, string signed, ReadOnlyMemory<byte>? ownedInput, CancellationToken token,
-        IResourceLifetimeWorkBinding binding, Action<GrainOperationReply>? observeReply = null,
+        Guid requestId, string signed, ReadOnlyMemory<byte>? ownedInput, IResourceLifetimeWorkBinding binding,
+        CancellationToken token, Action<GrainOperationReply>? observeReply = null,
         Guid? connectionId = null) where TResult : class
     {
         var failures = new List<Exception>();

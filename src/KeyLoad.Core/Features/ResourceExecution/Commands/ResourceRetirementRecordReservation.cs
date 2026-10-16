@@ -9,11 +9,8 @@ public sealed partial class DatabaseEngine
     private OperationResult RecordResourceRetirementReservation(IAtomicTransaction transaction, ReplicatedOperation operation,
         ResourceRetirementPhaseCommandV1 phase, long position)
     {
-        var body = NativeSerialization.Deserialize<ResourceRetirementRecordReservationBodyV1>(phase.Body.Span);
-        if (body is null)
-        {
-            throw Errors.Fail(ErrorCode.Validation, ResourceRetirementProtocol.Invalid);
-        }
+        var body = NativeSerialization.Deserialize<ResourceRetirementRecordReservationBodyV1>(phase.Body.Span)
+            ?? throw Errors.Fail(ErrorCode.Validation, ResourceRetirementProtocol.Invalid);
         var state = RequirePreparationSource(transaction, body.Control);
         ResourceRetirementPreparationValidation.Reservation(body.Reservation, Limits);
         var context = ResourceRetirementAttemptValidation.Owner(body.Control, body.Reservation.Receiver);

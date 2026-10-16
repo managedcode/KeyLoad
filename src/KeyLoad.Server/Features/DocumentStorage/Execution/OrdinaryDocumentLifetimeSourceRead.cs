@@ -16,7 +16,7 @@ internal sealed class OrdinaryDocumentLifetimeSourceRead(OrleansNode node, Parti
     private const string NonceFormat = "N";
 
     internal async Task<(bool Routed, DocumentResult? Document)> TryReadAsync(GrainRequestEnvelope envelope,
-        string principalId, GetDocumentRequest request, ReadExecutionBudget work, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        string principalId, GetDocumentRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var expiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (expiry > envelope.ExpiresAt)

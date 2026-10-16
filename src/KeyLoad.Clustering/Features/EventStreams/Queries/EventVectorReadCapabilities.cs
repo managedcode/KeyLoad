@@ -11,7 +11,7 @@ internal static class EventVectorReadCapabilities
     private const string Invalid = "The private event vector receiving read is inconsistent.";
 
     internal static object Execute(DatabaseEngine database, IServiceProvider services, PrincipalRecord principal,
-        DecodedGrainRequest request, CancellationToken originalCancellationToken, IResourceLifetimeWorkBinding binding)
+        DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken originalCancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         originalCancellationToken.ThrowIfCancellationRequested();

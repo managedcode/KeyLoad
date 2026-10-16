@@ -104,7 +104,7 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             }
             using var targetMac = RemoteGraphNativeMac.Create(options, partition, request.DestinationOwner);
             return await RemoteGraphNativeWorkExecution.ExecuteAsync(requestWork(), partition.Database, request,
-                linked.Token, (binding, token) => ExecuteBoundAsync(request, targetMac, token, binding)).ConfigureAwait(false);
+                linked.Token, (binding, token) => ExecuteBoundAsync(request, targetMac, binding, token)).ConfigureAwait(false);
         }
         finally
         {
@@ -113,17 +113,17 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
     }
 
     private Task<RemoteGraphNativeReplyV1> ExecuteBoundAsync(RemoteGraphNativeRequestV1 request,
-        PartitionMovementMac targetMac, CancellationToken token, IResourceLifetimeWorkBinding binding)
+        PartitionMovementMac targetMac, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var work = partition.Database.CreateRemoteGraphReadWork(request.ExpiresAt, token);
         work.AttachResourceLifetimeBinding(binding);
         work.ChargeBytes(request.Payload.Length);
-        return ExecuteAdmittedAsync(request, targetMac, work, token, binding);
+        return ExecuteAdmittedAsync(request, targetMac, work, binding, token);
     }
 
     private async Task<RemoteGraphNativeReplyV1> ExecuteAdmittedAsync(RemoteGraphNativeRequestV1 request,
-        PartitionMovementMac targetMac, ReadExecutionBudget work, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        PartitionMovementMac targetMac, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         var boundary = new RemoteGraphEffectBoundary();
         RemoteGraphNativeReplyV1 reply;
@@ -137,7 +137,7 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             }
             var owner = Volatile.Read(ref runtime)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
-            var payload = await owner.ExecuteNativeAsync(request, boundary, work, token, binding).ConfigureAwait(false);
+            var payload = await owner.ExecuteNativeAsync(request, boundary, work, binding, token).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
             identity.RequireCurrent(request);
             work.Check();

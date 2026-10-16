@@ -1,0 +1,56 @@
+using System.Globalization;
+using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.Server;
+
+namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+
+/// <summary>Owns original functional startup arguments and failure cleanup before publication.</summary>
+internal static class FunctionalGateFixtureStartup
+{
+    internal const string FailureRootDataKey = "KeyLoad.FunctionalGate.Root";
+
+    internal static async Task<FunctionalGateFixture> InitializeAsync(FunctionalGateFixture owner, Func<Task> initialize)
+    {
+        try
+        {
+            await initialize().ConfigureAwait(false);
+            return owner;
+        }
+        catch (Exception primary)
+        {
+            owner.PreserveEvidence = true;
+            var failures = new List<Exception> { primary };
+            ServerFailureObserver.Observe(() => primary.Data[FailureRootDataKey] = owner.Root, failures);
+            await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    internal static List<string> Arguments(string root, int nodes, bool coldReopen, bool exclusiveOwnerContention,
+        LocalRf3ImageSelection.Selection? selection)
+    {
+        var arguments = new List<string>
+        {
+            ClusterFixtureProtocol.DataRootArgument + root,
+            ClusterFixtureProtocol.EphemeralArgument,
+            "--KeyLoadTests:FunctionalNodeCount=" + nodes.ToString(CultureInfo.InvariantCulture)
+        };
+        if (coldReopen)
+        {
+            arguments.Add(FunctionalColdReopenProfile.EnabledArgument);
+            arguments.Add(ContainerFaultCommandProtocol.EnabledArgument);
+        }
+        if (exclusiveOwnerContention)
+        {
+            arguments.Add(KeyLoad.AppHost.Features.StorageRecovery.ExclusiveOwnerContentionProfile.EnabledArgument);
+        }
+        if (selection is not null)
+        {
+            arguments.AddRange(selection.CreateWaveArguments());
+        }
+        return arguments;
+    }
+}

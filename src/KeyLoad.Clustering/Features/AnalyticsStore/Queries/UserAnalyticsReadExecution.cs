@@ -13,8 +13,8 @@ internal static class UserAnalyticsReadExecution
         => kind is GrainReadKind.AnalyticsEvents or GrainReadKind.AnalyticsAggregate;
 
     internal static async Task<object?> ExecuteAsync(DatabaseEngine database, IServiceProvider services,
-        PrincipalRecord principal, GrainReadKind kind, DecodedGrainRequest request, CancellationToken token,
-        IResourceLifetimeWorkBinding binding)
+        PrincipalRecord principal, GrainReadKind kind, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding,
+        CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);

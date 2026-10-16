@@ -9,7 +9,7 @@ internal interface INativeTextMaintenance
 
     Task<TextMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, DateTimeOffset originalExpiry,
-        CancellationToken token, IResourceLifetimeWorkBinding binding);
+        IResourceLifetimeWorkBinding binding, CancellationToken token);
 
     Task AbortAsync(Guid sessionId);
 }

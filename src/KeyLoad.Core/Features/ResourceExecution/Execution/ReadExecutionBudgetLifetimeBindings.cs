@@ -10,6 +10,8 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
 {
     internal const string AlreadyAttached = "The read resource lifetime binding is already attached.";
     internal const string MissingBinding = "The read resource lifetime work owner is unavailable.";
+    private const int NoObservedLifetimes = 0;
+    private const int FirstDefinitionIndex = 0;
     private readonly Dictionary<(PartitionRef Partition, string Name), ResourceLifetimeV1> local = [];
     private IResourceLifetimeWorkBinding? binding;
     private ResourceLifetimeWorkResultRetention? resultRetention;
@@ -26,7 +28,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
             Require(value);
             return;
         }
-        if (local.Count != 0)
+        if (local.Count != NoObservedLifetimes)
         {
             throw new InvalidOperationException(AlreadyAttached);
         }
@@ -114,7 +116,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         }
         PartitionControlLifetimeCoverage.Require(coverage, coverage.Partition, definitions, database.Limits.MaxBatchBytes);
         var bindingView = new AuthenticatedResourceLifetimeReadView(authorizedLocalView, this);
-        for (var index = 0; index < definitions.Length; index++)
+        for (var index = FirstDefinitionIndex; index < definitions.Length; index++)
         {
             database.BindAuthenticatedReadResourceLifetime(bindingView, coverage.Partition,
                 definitions[index], coverage.Lifetimes[index]);
