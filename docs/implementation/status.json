@@ -5,11 +5,14 @@
     "verification": {
       "sourceInventory": "Original per-project source content census passed before formatting; no source loss or duplication.",
       "governance": "Passed local repository inventory validation.",
-      "format": "Applying full-solution dotnet format; final verification pending.",
-      "build": "Full Release solution build with explicit -warnaserror pending.",
-      "tests": "TUnit, process recovery and Docker/Aspire RF3 were not run for this layout checkpoint. Exact-source Linux and all existing acceptance gates remain open."
+      "format": "Passed dotnet format KeyLoad.slnx --no-restore and final dotnet format KeyLoad.slnx --verify-no-changes --no-restore with the current Debug analyzer. All19 formatter edits only reorder existing using directives.",
+      "build": "Passed full dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror -m:1 twice; final build:0 warnings,0 errors. Current Debug analyzer build also passed with -warnaserror.",
+      "tests": "TUnit, process recovery and Docker/Aspire RF3 were not run for this layout checkpoint. Exact-source Linux and all existing acceptance gates remain open.",
+      "gitIndex": "All13913 current C# sources are tracked after5536 unique moves. A scoped CodeQuality Coverage C# exception retains source files while generated coverage reports remain ignored."
     },
-    "policy": "Every dotnet build uses -warnaserror. Existing central compiler/analyzer warning enforcement remains enabled; workflow and composite-action build commands make the requirement explicit."
+    "policy": "Every dotnet build uses -warnaserror. Existing central compiler/analyzer warning enforcement remains enabled; workflow and composite-action build commands make the requirement explicit.",
+    "localSourceChecksPassed": true,
+    "fullQualificationPassed": false
   },
   "NATIVE-FOUNDATION-REPAIR-20261017": {
     "status": "in_progress",
