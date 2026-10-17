@@ -5,7 +5,6 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedResourceTopologyRouteTests
 {
-    private const string ScenarioEnvironment = "Benchmarks__Scenario";
     private const string KeyLoad = "KeyLoad";
     private const string Redis = "Redis";
     private const string Neo4j = "Neo4j";

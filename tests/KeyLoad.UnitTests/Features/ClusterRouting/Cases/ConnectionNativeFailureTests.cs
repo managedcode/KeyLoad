@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -6,6 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class ConnectionNativeFailureTests
 {
     [Test]
+    [NotInParallel(LoggingEventSourceIsolation.Key)]
     public Task AcCrs052FailureAndRevocationLeaveNoEffectsAndFollowingCallSucceeds()
     {
         return ConnectionNativeScenario.RunAsync(async scenario =>
@@ -14,11 +16,17 @@ internal sealed class ConnectionNativeFailureTests
             var token = timeout.Token;
             await scenario.InitializeAsync(token);
             var principal = scenario.Principal();
+            using var diagnostics = new EventSourceLogCapture();
+            var beforeFailure = scenario.Fixture.Database.ReadJournalCut();
+            var beforeFailurePosition = scenario.Fixture.Database.Store.Position;
             var failedId = Guid.NewGuid();
             scenario.Observation.Hold(failedId, fail: true);
             var failedCommand = scenario.Command("ordinary-failure");
             var failed = await scenario.CommandAsync(principal, failedId, failedCommand, token);
             await Assert.That(failed.Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
+            await ConnectionFailureDiagnosticAssertions.FailedAsync(scenario, failedId, failed, diagnostics, token);
+            await Assert.That(scenario.Fixture.Database.ReadJournalCut()).IsEqualTo(beforeFailure);
+            await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(beforeFailurePosition);
             await ConnectionNativeAssertions.MissingOutcomeAsync(scenario, principal, failedCommand, "ordinary-failure");
             var revoked = principal with
             {
@@ -41,6 +49,7 @@ internal sealed class ConnectionNativeFailureTests
             await ConnectionNativeAssertions.StoredAsync(scenario, "healthy-after-revocation", 1, ConnectionNativeProtocol.FirstJson);
             await ConnectionNativeAssertions.SameOwnerAsync(scenario, failedId, followingId, token);
             await ConnectionNativeAssertions.SameOwnerAsync(scenario, rejectedId, followingId, token);
+            await ConnectionFailureDiagnosticAssertions.ReplayAsync(scenario, following, followingId, command, reply, token);
             await scenario.CloseAsync(token);
         });
     }

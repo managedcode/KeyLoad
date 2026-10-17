@@ -129,7 +129,6 @@ internal sealed class BenchmarkSessionContractTests
         await Assert.That(target.Opened).IsEqualTo(target.Closed);
     }
 
-
     [Test]
     public async Task ProductionSessionRejectsNoncanonicalConcurrencyBeforeNativeInitialization()
     {
@@ -139,7 +138,6 @@ internal sealed class BenchmarkSessionContractTests
         await Assert.That(target.Initializations).IsEqualTo(0);
         await Assert.That(target.Writes).IsEqualTo(0);
     }
-
 
     [Test]
     public async Task SynchronousNativeOperationsStillUseEveryConfiguredClientAndItsDisjointOrdinals()

@@ -8,12 +8,17 @@ internal sealed class IsolatedNativeTeardownFailures(Exception? primary)
     private const string Failure = "IsolatedNativeTeardownFailed";
     private readonly List<Exception> cleanup = [];
     private readonly List<string> stages = [];
+    private readonly List<(string Stage, Exception Failure)> observations = [];
 
     internal bool HasPrimary => primary is not null;
 
     internal void Record(string stage, Exception failure)
     {
-        stages.Add(stage);
+        if (!observations.Any(observation => observation.Stage == stage && ReferenceEquals(observation.Failure, failure)))
+        {
+            observations.Add((stage, failure));
+            stages.Add(stage);
+        }
         if (!cleanup.Any(existing => ReferenceEquals(existing, failure)))
         {
             cleanup.Add(failure);

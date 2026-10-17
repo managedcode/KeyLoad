@@ -9,9 +9,25 @@ internal static class IsolatedNativeTeardown
     private const string LogFile = "runner.log";
     private const string Receipt = "teardown.json";
 
-    internal static async Task CompleteAsync(DistributedApplication app, ComparisonTestLogCapture? capture,
+    internal static Task CompleteAsync(DistributedApplication app, string output, string evidence, string root,
+        ContainerResource[] containers, IsolatedNativeOwnedWork work, Exception? primaryFailure)
+    {
+        var capture = work.Capture;
+        Func<Task>? disposeCapture = capture is null ? null : () => work.DisposeCaptureAsync(capture);
+        return CompleteCoreAsync(app, capture, disposeCapture, output, evidence, root, containers, work, primaryFailure);
+    }
+
+    internal static Task CompleteAsync(DistributedApplication app, ComparisonTestLogCapture? capture,
         string output, string evidence, string root, ContainerResource[] containers, IsolatedNativeOwnedWork work,
         Exception? primaryFailure)
+    {
+        Func<Task>? disposeCapture = capture is null ? null : () => capture.DisposeAsync().AsTask();
+        return CompleteCoreAsync(app, capture, disposeCapture, output, evidence, root, containers, work, primaryFailure);
+    }
+
+    private static async Task CompleteCoreAsync(DistributedApplication app, ComparisonTestLogCapture? capture,
+        Func<Task>? disposeCapture, string output, string evidence, string root, ContainerResource[] containers,
+        IsolatedNativeOwnedWork work, Exception? primaryFailure)
     {
         var failures = new IsolatedNativeTeardownFailures(primaryFailure);
         var options = work.ExecutionOptions;
@@ -29,8 +45,8 @@ internal static class IsolatedNativeTeardown
         }
         await IsolatedNativeOriginalTaskSettlement.RunAsync(() => CopyRawAsync(output, evidence), "raw", failures, options);
         var stopped = await StopAsync(app, failures, options);
-        var captureDisposed = capture is null || await IsolatedNativeOriginalTaskSettlement.RunAsync(
-            () => capture.DisposeAsync().AsTask(), "capture-dispose", failures, options);
+        var captureDisposed = disposeCapture is null || await IsolatedNativeOriginalTaskSettlement.RunAsync(
+            disposeCapture, "capture-dispose", failures, options);
         var applicationDisposed = await IsolatedNativeOriginalTaskSettlement.RunAsync(
             () => app.DisposeAsync().AsTask(), "app-dispose", failures, options);
         var nativeReportsRetained = stopped && applicationDisposed

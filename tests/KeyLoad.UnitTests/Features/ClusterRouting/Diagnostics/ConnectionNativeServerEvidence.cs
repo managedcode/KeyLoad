@@ -63,7 +63,8 @@ internal sealed class ConnectionNativeServerEvidence
             exceptionTypes = failures.SelectMany(NativeClusterStartupEvidence.ExceptionTypes).ToArray(),
             nativeFileLogging = paths.All(path => path is not null),
             expectedNativeFiles = ExpectedNativeFiles,
-            missingNativeFiles = ExpectedNativeFiles - files.Count,
+            nativeFileCollectionAttempted = joined,
+            missingNativeFiles = joined ? ExpectedNativeFiles - files.Count : (int?)null,
             files,
             trace.Saturated,
             events = trace.Events

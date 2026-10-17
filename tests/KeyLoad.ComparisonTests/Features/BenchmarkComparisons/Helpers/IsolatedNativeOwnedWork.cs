@@ -8,6 +8,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class IsolatedNativeOwnedWork
 {
     private const string IncompleteRunnerOwnership = "Native runner ownership was incomplete.";
+    private const string CaptureOwnershipFailure = "Native log capture ownership was incomplete or already assigned.";
     private const string RunnerCancelFailureStage = "runner-cancel";
     private const string RunnerJoinFailureStage = "runner-join";
     private const string RunnerDisposeFailureStage = "runner-lifetime-dispose";
@@ -23,6 +24,8 @@ internal sealed class IsolatedNativeOwnedWork
     {
         get; private set;
     }
+    private ComparisonTestLogCapture? capture;
+    internal ComparisonTestLogCapture? Capture => capture;
     private readonly System.Threading.Lock stopGate = new();
     private CancellationTokenSource? runnerLifetime;
     private Task<int>? runnerCompletion;
@@ -38,6 +41,25 @@ internal sealed class IsolatedNativeOwnedWork
     internal IOptions<NativeComparisonHarnessOptions> ExecutionOptions
     {
         get;
+    }
+
+    internal void BeginCapture(DistributedApplication application, IEnumerable<string> resources,
+        string progressPath, Action<string>? nativeLineObserver = null)
+    {
+        if (capture is not null)
+        {
+            throw new InvalidOperationException(CaptureOwnershipFailure);
+        }
+        capture = new(application, ExecutionOptions, resources, progressPath, nativeLineObserver);
+    }
+
+    internal Task DisposeCaptureAsync(ComparisonTestLogCapture borrowed)
+    {
+        if (capture is null || !ReferenceEquals(capture, borrowed))
+        {
+            throw new InvalidOperationException(CaptureOwnershipFailure);
+        }
+        return capture.DisposeAsync().AsTask();
     }
 
     internal async Task<int> RunAsync(DistributedApplication app, string resourceName, CancellationToken token)

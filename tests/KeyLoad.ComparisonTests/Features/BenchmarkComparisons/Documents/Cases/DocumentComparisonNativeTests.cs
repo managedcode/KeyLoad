@@ -78,7 +78,7 @@ internal sealed class DocumentComparisonNativeTests
         await Assert.That(failed.Status).IsEqualTo(FailedStatus);
         var actual = failed.Lanes.Single().Measurement;
         await Assert.That(actual.Attempts).IsEqualTo(actual.Successes + actual.Failures);
-        await Assert.That(actual.Successes).IsGreaterThanOrEqualTo(CancellationAcknowledgements);
+        await Assert.That(actual.Successes).IsGreaterThanOrEqualTo(CancellationThreshold);
         await Assert.That((long)failed.Lanes.Single().Samples.Length).IsEqualTo(actual.Attempts);
         await Assert.That((await session.SequentialReadAsync(token)).Status).IsEqualTo(FailedStatus);
         await using var healthyTarget = await OpenTargetAsync(fixture, name, token);

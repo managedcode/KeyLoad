@@ -17,6 +17,12 @@ internal static class ScaleServerCancellationProbe
     private const string EvidenceFile = "session-resource-evidence.json";
     private const string SamplingMissing = "serverCpuRss";
     private const string KeyLoad = "KeyLoad";
+    private const string SessionIdentityEnvironment = "KEYLOAD_BENCHMARK_SESSION_ID";
+    private const string ObservationsField = "observations";
+    private const string QualifiedField = "qualified";
+    private const string MissingEvidenceField = "missingEvidence";
+    private const string ContainersField = "containers";
+    private const string SampleCountField = "sampleCount";
     private const int AdditionalSampleCount = 1;
 
     internal static async Task VerifyAsync(DistributedApplication app, ContainerResource[] containers,
@@ -35,7 +41,7 @@ internal static class ScaleServerCancellationProbe
         var collector = new ScaleServerResourceEvidenceCollector(selection, output, applicationStopping: lifetime.ApplicationStopping,
             executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
             provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>(),
-            sessionId: ComparisonImageProtocol.RequiredEnvironment("KEYLOAD_BENCHMARK_SESSION_ID"),
+            sessionId: ComparisonImageProtocol.RequiredEnvironment(SessionIdentityEnvironment),
             provider: app.Services.GetRequiredService<TimeProvider>());
         var failures = new List<Exception>();
         try
@@ -49,13 +55,13 @@ internal static class ScaleServerCancellationProbe
         ThrowFailures(failures);
         await using var stream = File.OpenRead(Path.Combine(output, EvidenceFile));
         using var evidence = await JsonDocument.ParseAsync(stream, cancellationToken: token);
-        var observations = evidence.RootElement.GetProperty("observations");
-        await Assert.That(observations.GetProperty("qualified").GetBoolean()).IsFalse();
-        await Assert.That(observations.GetProperty("missingEvidence").EnumerateArray()
+        var observations = evidence.RootElement.GetProperty(ObservationsField);
+        await Assert.That(observations.GetProperty(QualifiedField).GetBoolean()).IsFalse();
+        await Assert.That(observations.GetProperty(MissingEvidenceField).EnumerateArray()
             .Select(item => item.GetString())).Contains(SamplingMissing);
-        var recorded = observations.GetProperty("containers").EnumerateArray().ToArray();
+        var recorded = observations.GetProperty(ContainersField).EnumerateArray().ToArray();
         await Assert.That(recorded.Length).IsEqualTo(selection.NodeCount);
-        await Assert.That(recorded.All(item => item.GetProperty("sampleCount").GetInt32()
+        await Assert.That(recorded.All(item => item.GetProperty(SampleCountField).GetInt32()
             >= ScaleServerResourceBounds.MinimumSamples)).IsTrue();
         await VerifyFailedWriteMemoizationAsync(app, containers, selection, root, evidenceDirectory, token);
     }
@@ -100,7 +106,7 @@ internal static class ScaleServerCancellationProbe
             applicationStopping: app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
             executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
             provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>(),
-            sessionId: ComparisonImageProtocol.RequiredEnvironment("KEYLOAD_BENCHMARK_SESSION_ID"),
+            sessionId: ComparisonImageProtocol.RequiredEnvironment(SessionIdentityEnvironment),
             provider: app.Services.GetRequiredService<TimeProvider>());
         var failures = new List<Exception>();
         Exception? expected = null;

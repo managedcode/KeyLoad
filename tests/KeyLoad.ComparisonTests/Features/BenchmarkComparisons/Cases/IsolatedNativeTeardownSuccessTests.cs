@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -14,6 +15,7 @@ internal sealed class IsolatedNativeTeardownSuccessTests
         var dataRoot = Path.Combine(directory.FullName, "absent-data");
         try
         {
+            Directory.CreateDirectory(evidence);
             await using var fixture = await IsolatedNativeTeardownNativeSupport.CreateFixtureAsync(
                 Path.Combine(evidence, "progress.json"));
             var stopping = fixture.Capture.StopAsync();
@@ -30,5 +32,29 @@ internal sealed class IsolatedNativeTeardownSuccessTests
         {
             directory.Delete(recursive: true);
         }
+    }
+
+    [Test]
+    public async Task OwnedCaptureCannotBeReplacedAndSettlesItsOriginalWritersBeforeReturn()
+    {
+        using var directory = new ImageBundleTestDirectory();
+        var evidence = Path.Combine(directory.Root, "evidence");
+        var output = Path.Combine(directory.Root, "output");
+        var data = Path.Combine(directory.Root, "absent-data");
+        Directory.CreateDirectory(evidence);
+        await using var fixture = await IsolatedNativeTeardownNativeSupport.CreateFixtureAsync(
+            Path.Combine(directory.Root, "fixture-progress.json"));
+        var work = new IsolatedNativeOwnedWork(NativeExecutionPolicyFixture.Harness());
+        work.BeginCapture(fixture.Application, [fixture.Node.Name], Path.Combine(evidence, "progress.json"));
+        var capture = work.Capture!;
+        Assert.ThrowsExactly<InvalidOperationException>(() => work.BeginCapture(fixture.Application,
+            [fixture.Node.Name], Path.Combine(evidence, "replacement-progress.json")));
+        await Assert.That(ReferenceEquals(capture, work.Capture)).IsTrue();
+        await IsolatedNativeTeardown.CompleteAsync(fixture.Application, output, evidence, data,
+            [fixture.Runner, fixture.Node], work, null);
+        await Assert.That(capture.StopAsync().IsCompletedSuccessfully).IsTrue();
+        await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.RunnerLog))).IsTrue();
+        await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.NodeLog))).IsTrue();
+        await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.ReceiptFile))).IsTrue();
     }
 }

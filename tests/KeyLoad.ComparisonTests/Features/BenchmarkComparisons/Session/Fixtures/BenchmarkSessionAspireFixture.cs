@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Owns the single Aspire deployment, native workload runner and original artifact lifetime.</summary>
-internal sealed class BenchmarkSessionAspireFixture
+internal static class BenchmarkSessionAspireFixture
 {
     private const string Enabled = "--Benchmarks:Enabled=true";
     private const string Session = "--Benchmarks:Session=true";
@@ -52,12 +52,11 @@ internal sealed class BenchmarkSessionAspireFixture
             .Resources.OfType<ContainerResource>().ToArray();
         var execution = NativeExecutionPolicyFixture.Harness();
         var work = new IsolatedNativeOwnedWork(execution);
-        ComparisonTestLogCapture? capture = null;
         Exception? primary = null;
         try
         {
             await IsolatedNativeReportAssertions.VerifyModelAsync(containers, selection, token);
-            capture = new(application, execution, containers.Select(container => container.Name),
+            work.BeginCapture(application, containers.Select(container => container.Name),
                 ComparisonProgressLine.PathForEvidenceDirectory(evidence));
             work.Collector = application.Services.GetService<ScaleServerResourceEvidenceCollector>();
             if (work.Collector is not null && !BenchmarkSessionContract.UnsupportedTopologies.Any(item =>
@@ -88,12 +87,12 @@ internal sealed class BenchmarkSessionAspireFixture
         catch (Exception error)
         {
             primary = error;
+            throw;
         }
-        await IsolatedNativeTeardown.CompleteAsync(application, capture, evidence, evidence, root,
-            containers, work, primary);
-        if (primary is not null)
+        finally
         {
-            ExceptionDispatchInfo.Capture(primary).Throw();
+            await IsolatedNativeTeardown.CompleteAsync(application, evidence, evidence, root,
+                containers, work, primary);
         }
     }
 

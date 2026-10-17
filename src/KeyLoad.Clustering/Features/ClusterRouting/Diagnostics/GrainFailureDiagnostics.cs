@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
@@ -18,18 +20,50 @@ internal enum GrainFailureCategory
     Unexpected
 }
 
+/// <summary>Closed diagnostic shapes; never contains exception type names or caller text.</summary>
+internal enum GrainFailureCauseKind
+{
+    /// <summary>The existing category does not require unexpected-cause inspection.</summary>
+    Unobserved,
+    /// <summary>An invalid operation state.</summary>
+    State,
+    /// <summary>A released or disposed operation state.</summary>
+    ReleasedState,
+    /// <summary>A missing object reference.</summary>
+    Reference,
+    /// <summary>A failed conversion, format or arithmetic representation.</summary>
+    Conversion,
+    /// <summary>A type initializer failed.</summary>
+    Initialization,
+    /// <summary>A required type or member could not be resolved.</summary>
+    TypeResolution,
+    /// <summary>An operation is unsupported.</summary>
+    Unsupported,
+    /// <summary>A serializer reported an invalid representation.</summary>
+    Serialization,
+    /// <summary>A storage or stream input/output operation failed.</summary>
+    StorageIo,
+    /// <summary>No selected closed shape matched.</summary>
+    Other,
+    /// <summary>The primary aggregate chain exceeded the bounded inspection depth.</summary>
+    AggregateDepthLimit
+}
+
 /// <summary>Stores closed failure-stage metadata and writes privacy-safe internal diagnostics.</summary>
-internal static class GrainFailureDiagnostics
+internal static partial class GrainFailureDiagnostics
 {
     private const int FailureEventId = 3;
-    private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}; movement guard {MovementOwnerGuard}; parent operands {ParentReadOperands}.";
+    private const int MaximumAggregateDepth = 4;
+    private const int InitialAggregateDepth = 0;
+    private const int NoInnerExceptions = 0;
+    private const int PrimaryExceptionIndex = 0;
+    private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}; movement guard {MovementOwnerGuard}; parent operands {ParentReadOperands}. Closed cause {CauseKind}.";
     private const string StageMetadataKeyValue = "KeyLoad.Orleans.ClusterRouting.GrainFailureStage";
-    private static readonly Action<ILogger, Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string, Exception?> LogRejected =
-        LoggerMessage.Define<Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string>(LogLevel.Warning,
-            new EventId(FailureEventId), FailureMessage);
-    private static readonly Action<ILogger, Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string, Exception?> LogUnexpected =
-        LoggerMessage.Define<Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string>(LogLevel.Error,
-            new EventId(FailureEventId), FailureMessage);
+    [LoggerMessage(EventId = FailureEventId, Message = FailureMessage)]
+    private static partial void LogFailure(ILogger logger, LogLevel level, Guid requestId,
+        GrainFailureStage stage, GrainFailureCategory category, ErrorCode errorCode,
+        global::KeyLoad.Core.PartitionMoveOwnerGuard movementOwnerGuard, string parentReadOperands,
+        GrainFailureCauseKind causeKind, Exception? exception);
 
     /// <summary>Names the private exception data entry used for an optional closed stage marker.</summary>
     internal const string StageMetadataKey = StageMetadataKeyValue;
@@ -77,10 +111,48 @@ internal static class GrainFailureDiagnostics
         var stage = error.Data[StageMetadataKey] is GrainFailureStage marked && Enum.IsDefined(marked) ? marked : ValidStage(fallback);
         var category = Category(error, stage);
         var safeCode = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost;
-        var write = category == GrainFailureCategory.Unexpected ? LogUnexpected : LogRejected;
-        write(logger, requestId, stage, category, safeCode, global::KeyLoad.Core.PartitionMoveOwnerDiagnostic.Read(error),
-            global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.ReadText(error), null);
+        var movementOwnerGuard = global::KeyLoad.Core.PartitionMoveOwnerDiagnostic.Read(error);
+        var parentReadOperands = global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.ReadText(error);
+        var causeKind = CauseKind(error, category);
+        var level = category == GrainFailureCategory.Unexpected ? LogLevel.Error : LogLevel.Warning;
+        LogFailure(logger, level, requestId, stage, category, safeCode, movementOwnerGuard,
+            parentReadOperands, causeKind, null);
         ReplicaReadFailureLog.Observe(logger, error, requestId);
+    }
+
+    private static GrainFailureCauseKind CauseKind(Exception error, GrainFailureCategory category)
+    {
+        if (category != GrainFailureCategory.Unexpected)
+        {
+            return GrainFailureCauseKind.Unobserved;
+        }
+        var depth = InitialAggregateDepth;
+        while (error is AggregateException aggregate)
+        {
+            if (depth >= MaximumAggregateDepth)
+            {
+                return GrainFailureCauseKind.AggregateDepthLimit;
+            }
+            if (aggregate.InnerExceptions.Count == NoInnerExceptions)
+            {
+                return GrainFailureCauseKind.Other;
+            }
+            error = aggregate.InnerExceptions[PrimaryExceptionIndex];
+            depth++;
+        }
+        return error switch
+        {
+            ObjectDisposedException => GrainFailureCauseKind.ReleasedState,
+            InvalidOperationException => GrainFailureCauseKind.State,
+            NullReferenceException => GrainFailureCauseKind.Reference,
+            InvalidCastException or FormatException or OverflowException => GrainFailureCauseKind.Conversion,
+            TypeInitializationException => GrainFailureCauseKind.Initialization,
+            TypeLoadException or ReflectionTypeLoadException or MissingMemberException => GrainFailureCauseKind.TypeResolution,
+            NotSupportedException => GrainFailureCauseKind.Unsupported,
+            SerializationException => GrainFailureCauseKind.Serialization,
+            IOException => GrainFailureCauseKind.StorageIo,
+            _ => GrainFailureCauseKind.Other
+        };
     }
 
     private static GrainFailureStage ValidStage(GrainFailureStage stage) => Enum.IsDefined(stage) ? stage : GrainFailureStage.EnvelopeVerification;

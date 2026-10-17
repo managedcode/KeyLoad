@@ -8,6 +8,7 @@ internal sealed class IsolatedAggregateJsonTests
     private const string ModuleMode = "--input-type=module";
     private const string EvaluationMode = "-e";
     private const string Module = "aggregate-json.mjs";
+    private const string AcceptedProperty = "accepted";
     private const string Probe = """
         import {pathToFileURL} from 'node:url';
         const module=await import(pathToFileURL(process.argv[1]).href);
@@ -26,7 +27,7 @@ internal sealed class IsolatedAggregateJsonTests
         await Assert.That(response.ExitCode).IsEqualTo(0);
         await Assert.That(response.Error).IsEqualTo(string.Empty);
         using var result = JsonDocument.Parse(response.Output);
-        var accepted = result.RootElement.GetProperty("accepted").EnumerateArray().Select(value => value.GetBoolean()).ToArray();
+        var accepted = result.RootElement.GetProperty(AcceptedProperty).EnumerateArray().Select(value => value.GetBoolean()).ToArray();
         await Assert.That(accepted.Length).IsEqualTo(4);
         await Assert.That(accepted[0]).IsFalse();
         await Assert.That(accepted[1]).IsFalse();

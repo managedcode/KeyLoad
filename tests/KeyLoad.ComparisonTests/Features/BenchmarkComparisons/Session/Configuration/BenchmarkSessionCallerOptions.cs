@@ -25,12 +25,19 @@ internal sealed class BenchmarkSessionCallerOptions
     [ConfigurationBinding]
     internal static IOptions<BenchmarkSessionCallerOptions> Read(IConfiguration configuration)
     {
-        var options = new OptionsManager<BenchmarkSessionCallerOptions>(new OptionsFactory<BenchmarkSessionCallerOptions>(
+        var options = new OptionsManager<BenchmarkSessionCallerOptions>(new CallerOptionsFactory(configuration));
+        _ = options.Value;
+        return options;
+    }
+
+    [ConfigurationBinding]
+    private sealed class CallerOptionsFactory(IConfiguration configuration)
+        : OptionsFactory<BenchmarkSessionCallerOptions>(
             [new ConfigureFromConfigurationOptions<BenchmarkSessionCallerOptions>(configuration)], [],
             [new ValidateOptions<BenchmarkSessionCallerOptions>(Options.DefaultName, value =>
                 value.SessionId.Length > 0 && value.SessionId.All(character => char.IsAsciiLetterOrDigit(character) || character == '-')
-                && Path.IsPathFullyQualified(value.EvidenceDirectory), SessionKey)]));
-        _ = options.Value;
-        return options;
+                && Path.IsPathFullyQualified(value.EvidenceDirectory), SessionKey)])
+    {
+        protected override BenchmarkSessionCallerOptions CreateInstance(string name) => new();
     }
 }

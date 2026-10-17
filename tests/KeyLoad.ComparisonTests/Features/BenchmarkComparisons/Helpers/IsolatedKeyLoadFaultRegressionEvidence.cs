@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 

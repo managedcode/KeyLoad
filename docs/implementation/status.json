@@ -1,7 +1,7 @@
 {
   "NATIVE-FOUNDATION-REPAIR-20261017": {
     "status": "in_progress",
-    "implementation": "The native foundation repair now includes20 files for public ONE placement registration, bounded resource inventory capture, graph endpoint effect closure, complete authorization/composition replay expectations, and heartbeat liveness during original command preparation. R751 strict Unit, Integration and Recovery with actual dependencies passed with zero warnings/errors and zero source drift. R739 previously failed62 of216 selected Unit cases and public ONE before workload; R740 Recovery21 passed on its earlier source. Fresh current Unit72, Recovery21 and public ONE/RF3/cold/file execution remain OPEN. Original105 acceptance states remain20 done/85 in_progress.",
+    "implementation": "The20-file foundation repair remains integrated. A six-file follow-up adds native closed-cause logging and actual whole-operation/privacy regressions while preserving original errors, exception objects, receipts and private text, and truthfully distinguishes unattempted native-file collection from missing files. R755 strict Unit and actual dependencies passed zero warnings/errors after correcting two test-only CA2201 constructors. R753 emitted Integration/Recovery with unchanged production inputs but its overall command failed those Unit diagnostics; no overall R753 PASS is claimed. Current runtime and Linux gates remain OPEN; original105 states remain20 done/85 in_progress.",
     "sourceIdentity": {
       "evidence": "TestResults/stage61-native-join/root-r720-native118-current-source.original.json",
       "sha256": "d2a3f345efe45c7982811817d1597f17214737e6e107a3800c403f076f05fca1",
@@ -130,7 +130,7 @@
       "boundary": "Original R700 prior-source selected Unit results, not current118-source acceptance."
     },
     "remaining": [
-      "Full solution and current Unit72, Recovery21 through exact committed CI source",
+      "Full solution and current Unit74, Recovery21 through exact committed CI source",
       "Resolve actual native connection bootstrap cause with privacy-safe original evidence",
       "Expanded public ONE then RF3 and cold SDK/official MCP/T-SQL scenarios",
       "Both requested physical-file cases; current negative owner-lock proof does not qualify concurrent same-files engines",
@@ -142,25 +142,25 @@
       "in_progress": 85
     },
     "currentFoundationCompiler": {
-      "label": "root-r751-foundation-repair-release",
+      "label": "root-r755-native-unit-diagnostics-release",
       "result": "passed",
       "warnings": 0,
       "errors": 0,
-      "elapsedSeconds": 166.51122362492606,
-      "scope": "Unit, Integration and Recovery projects in one native solution filter with actual dependencies and unchanged analyzers; not full solution, Linux or benchmark-stage qualification",
+      "elapsedSeconds": 115.64969016704708,
+      "scope": "Unit project and all real dependencies only; not full solution, ComparisonTests, Integration/Recovery rerun or Linux/runtime qualification",
       "sourceDrift": [],
-      "expectedCompiledImageUpdates": 46,
-      "stdout": "TestResults/stage61-native-join/root-r751-foundation-repair-release.stdout.original.txt",
-      "stdoutSha256": "001ab3d102eb49812034ed4a2d90b0e50a20f5e1b59efbe01b4605a2f47f6794",
-      "completion": "TestResults/stage61-native-join/root-r751-foundation-repair-release.completion.original.json",
-      "completionSha256": "b3d4c341e82e3fd6484bb9f6c4dd463ae6fa816d71e281ba9c329b51d0456917"
+      "expectedCompiledImageUpdates": 36,
+      "stdout": "TestResults/stage61-native-join/root-r755-native-unit-diagnostics-release.stdout.original.txt",
+      "stdoutSha256": "1eee5509d5030af73ef2acbfc96deef8a4e2bf6b6f04cea944bb3058e7757aff",
+      "completion": "TestResults/stage61-native-join/root-r755-native-unit-diagnostics-release.completion.original.json",
+      "completionSha256": "d4857017dc52b2b97bb68dacda29414d6a1037edd27a2f12baa0d1b2959ab5ec"
     },
     "nativeDiLoggerRepair": {
       "sourceFiles": 7,
       "sourceManifest": "TestResults/stage61-native-join/root-r738-main-native-di7-source.prepared.json",
       "sourceManifestSha256": "0c8d2e524b224409ffc61e479bc009626f76e0bd9378fc31127c1674a707930f",
       "contract": "Factory-created singleton ILoggerProvider is owned by native DI before host Build; initial six log identities and assertions remain, cold reopen does not replay that callback. Existing creation factory owns routing creation; no cap raise or suppression. Arbitrary native Build-failure cleanup is not claimed from source inspection.",
-      "qualification": "Strict local compiler PASS. R739 native/public runtime failures retain their original scope; fresh current Unit72, Recovery21, public ONE/RF3/cold/file and exact-head Linux qualification OPEN."
+      "qualification": "R755 strict native Unit PASS; original R739/R752 native/public failures retain their source scope. Current Unit74, Recovery21, public ONE/RF3/cold/file and exact-head Linux qualification OPEN."
     },
     "previousFoundationCompilerR738": {
       "label": "root-r738-foundation-client-filter-release",
@@ -177,12 +177,12 @@
       "completionSha256": "c9ceeb092a8f2c57e605b0ca32a65a3bf9be47335d049152ac485b909cc3ba63"
     },
     "currentRepairSource": {
-      "pathCount": 36,
-      "foundationFiles": 20,
-      "separateBenchmarkCleanupPaths": 16,
-      "evidence": "TestResults/stage61-native-join/root-r751-integrated36-source.prepared.json",
-      "sha256": "cad6a59361ac392143c64fec81074b55a2c470f704442eb7d5bfe19404b75c05",
-      "qualification": "Strict native compiler only. Runtime and exact-source Linux qualification remain OPEN; no task acceptance promotion."
+      "pathCount": 24,
+      "nativeFiles": 6,
+      "separateComparisonTestFiles": 18,
+      "evidence": "TestResults/stage61-native-join/root-r755-integrated24-source.prepared.json",
+      "sha256": "d5c34b8402c468bfc3de6a7c21adb7dd17503b52f1c0aaec9df56c5a4f970849",
+      "qualification": "Strict native Unit PASS; separate ComparisonTests full-solution compiler/native gates require Linux CI. Fresh runtime and exact-source Linux acceptance OPEN."
     },
     "latestUnitR739": {
       "total": 216,
@@ -225,7 +225,41 @@
       "trxSha256": "6751e56ec3921ea30392aef78159f1fee0d32e6f282d802290ac4a194d67b712",
       "scope": "Original earlier-source related selection only; current Core/Replica changes require a fresh run. Not entire Recovery/Linux/power-loss qualification."
     },
-    "nativeBootstrapBoundary": "R742 isolated native connection control reached all six Active hosts then failed original BootstrapPhysicalShardCatalog with CapabilityExecution/Unexpected/UnknownWriteOutcome. Underlying CLR cause remains unproven. R748 transient exception capture observed only late cleanup I/O exceptions; those do not identify the bootstrap cause. No raw exception type/message or private payload logging was added."
+    "nativeBootstrapBoundary": "R742 isolated native connection control reached all six Active hosts then failed original BootstrapPhysicalShardCatalog with CapabilityExecution/Unexpected/UnknownWriteOutcome. Underlying CLR cause remains unproven. R748 transient exception capture observed only late cleanup I/O exceptions; those do not identify the bootstrap cause. No raw exception type/message or private payload logging was added.",
+    "previousFoundationCompilerR751": {
+      "label": "root-r751-foundation-repair-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 166.51122362492606,
+      "scope": "Unit, Integration and Recovery projects in one native solution filter with actual dependencies and unchanged analyzers; not full solution, Linux or benchmark-stage qualification",
+      "sourceDrift": [],
+      "expectedCompiledImageUpdates": 46,
+      "stdout": "TestResults/stage61-native-join/root-r751-foundation-repair-release.stdout.original.txt",
+      "stdoutSha256": "001ab3d102eb49812034ed4a2d90b0e50a20f5e1b59efbe01b4605a2f47f6794",
+      "completion": "TestResults/stage61-native-join/root-r751-foundation-repair-release.completion.original.json",
+      "completionSha256": "b3d4c341e82e3fd6484bb9f6c4dd463ae6fa816d71e281ba9c329b51d0456917"
+    },
+    "latestCompanionCompilerR753": {
+      "result": "failed",
+      "warnings": 0,
+      "errors": 2,
+      "diagnostics": "CA2201 x2 in new Unit-only exception test data; corrected without suppressions. Production Clustering, Integration and Recovery emitted successfully.",
+      "scopeProof": "TestResults/stage61-native-join/root-r755-companion-source-closure.prepared.json",
+      "scopeProofSha256": "80914a38a69770c111dcf15774a2eb7e9f30a15f0007d2c25df31b074146a406",
+      "boundary": "Only2 Unit sources and18 separate ComparisonTests paths changed afterward; production, Integration/Recovery source and central compilation inputs unchanged. ComparisonTests is outside the local native build graph."
+    },
+    "latestNativeConnectionControlR752": {
+      "result": "failed_before_business_operation",
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "elapsedSeconds": 17.146056458121166,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "stdoutSha256": "49cb7e49f84f009cdcaa604520492521d242e9290c5d77a13508a1cf0e9ee9dd",
+      "boundary": "Fresh8de control still failed original physical catalog bootstrap. Closed-cause follow-up has not yet run; cause classification is neither root-cause repair nor functional acceptance."
+    }
   },
   "BENCHMARK-SOURCE-REDESIGN-20261017": {
     "status": "in_progress",
@@ -234,7 +268,8 @@
     "contract": "docs/Features/BenchmarkComparisons/SessionExecution.md",
     "adr": "docs/ADR/ADR-142-shared-live-benchmark-sessions.md",
     "taskAcceptance": "Original105 tasks remain20 done/85 in_progress; no acceptance promotion.",
-    "orphanCleanup": "A separate16-path source cleanup removes13 orphan vector/report files and updates3 exclusive report references/tests, preserving native adapters, independent corpus/oracles and current session contracts. This is not benchmark runtime/performance qualification. Time-series cleanup is not included; meaningful retained ledger assertions must be preserved first."
+    "orphanCleanup": "A separate16-path source cleanup removes13 orphan vector/report files and updates3 exclusive report references/tests, preserving native adapters, independent corpus/oracles and current session contracts. This is not benchmark runtime/performance qualification. Time-series cleanup is not included; meaningful retained ledger assertions must be preserved first.",
+    "compilerRepair18": "Actual Linux38985238558 and38986363387 ComparisonTests diagnostics are repaired in18 files, including native capture ownership and original failure/reference preservation regressions plus4 orphan deletions. Required full solution and native benchmark checks remain Linux-only and OPEN; local native Unit compilation does not compile or qualify ComparisonTests. Optional retirement33 is not applied."
   },
   "RESOURCE-OWNER-INVENTORY-20261016": {
     "title": "Native resource-owner inventory and all-model recovery development stage",

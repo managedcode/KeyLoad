@@ -76,6 +76,35 @@ internal class SessionRegressionTarget : IDocumentComparisonTarget
         => await OpenDocumentSessionAsync(cancellationToken);
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
+    private void Write(BenchmarkDocument document)
+    {
+        Interlocked.Increment(ref writes);
+        if (!DiscardWrites && !Documents.TryAdd(document.Id, document))
+        {
+            throw new InvalidOperationException("Duplicate create.");
+        }
+    }
+
+    private void Update(BenchmarkDocument document)
+    {
+        if (!Documents.ContainsKey(document.Id))
+        {
+            throw new InvalidOperationException("Missing update.");
+        }
+        if (!DiscardUpdates)
+        {
+            Documents[document.Id] = document;
+        }
+    }
+
+    private void Delete(BenchmarkDocument document)
+    {
+        if (!Documents.TryRemove(document.Id, out _))
+        {
+            throw new InvalidOperationException("Missing delete.");
+        }
+    }
+
     private sealed class Session(SessionRegressionTarget target) : IDocumentComparisonSession
     {
         public Guid ClientIdentity { get; } = Guid.NewGuid();
@@ -88,39 +117,21 @@ internal class SessionRegressionTarget : IDocumentComparisonTarget
             }
             cancellationToken.ThrowIfCancellationRequested();
             await target.ObserveMixedLaneAsync(scenario.ToString(), cancellationToken);
-            if (scenario == Scenario.PointRead)
+            switch (scenario)
             {
-                return new(Document: await ReadAsync(document, cancellationToken));
-            }
-            if (scenario == Scenario.DocumentWrite)
-            {
-                Interlocked.Increment(ref target.writes);
-                if (!target.DiscardWrites && !target.Documents.TryAdd(document.Id, document))
-                {
-                    throw new InvalidOperationException("Duplicate create.");
-                }
-            }
-            else if (scenario == Scenario.DocumentUpdate)
-            {
-                if (!target.Documents.ContainsKey(document.Id))
-                {
-                    throw new InvalidOperationException("Missing update.");
-                }
-                if (!target.DiscardUpdates)
-                {
-                    target.Documents[document.Id] = document;
-                }
-            }
-            else if (scenario == Scenario.DocumentDelete)
-            {
-                if (!target.Documents.TryRemove(document.Id, out _))
-                {
-                    throw new InvalidOperationException("Missing delete.");
-                }
-            }
-            else
-            {
-                throw new NotSupportedException();
+                case Scenario.PointRead:
+                    return new(Document: await ReadAsync(document, cancellationToken));
+                case Scenario.DocumentWrite:
+                    target.Write(document);
+                    break;
+                case Scenario.DocumentUpdate:
+                    target.Update(document);
+                    break;
+                case Scenario.DocumentDelete:
+                    target.Delete(document);
+                    break;
+                default:
+                    throw new NotSupportedException();
             }
             return new();
         }
