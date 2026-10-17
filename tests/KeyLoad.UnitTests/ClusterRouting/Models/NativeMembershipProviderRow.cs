@@ -13,8 +13,3 @@ internal sealed record NativeMembershipProviderRow(
     DateTime IAmAliveTime,
     Tuple<SiloAddress, DateTime>[]? SuspectTimes,
     string RowEtag);
-
-internal sealed record NativeMembershipProviderObservation(
-    NativeMembershipProviderRow[] Rows,
-    int TableVersion,
-    string TableVersionEtag);

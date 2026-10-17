@@ -2,7 +2,6 @@ using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-internal sealed record SqlBooleanTruthCase(string Clause, Predicate Predicate, string[] Ids);
 internal static class SqlBooleanTruthCases
 {
     internal const string Profile = "TSQL.NamedParameters.v1";

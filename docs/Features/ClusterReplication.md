@@ -823,7 +823,7 @@ REQ-CQRS-COHORT-LIFETIME-001: RequestCqrsCohortRuntimeFixture disposal returns t
 
 AC-CQRS-COHORT-LIFETIME-001: Preserve existing RequestCqrsCohort whole-flow declarations, exact native voter/incarnation/address, signed calls, generation-change oracle, startup/shutdown bounds and actual healthy/rejected/replay operations. Direct cluster disposal stays in the original ordered shutdown and every fatal/nonfatal error is retained. Required native Unit50 SIMD execution, compiled discovery and analyzer recognition are OPEN. This source-only correction does not prove causes for historical Linux cancellation or introduce a retry, timeout, authority, topology or synthetic-success seam.
 
-Source map: UnitTests/Features/ClusterReplication/Fixtures/RequestCqrsCohortRuntimeFixture.cs. Existing original scenario/native node owners remain unchanged.
+Source map: UnitTests/ClusterReplication/Fixtures/RequestExecution/RequestCqrsCohortRuntimeFixture.cs. Existing original scenario/native node owners remain unchanged.
 
 
 ## Authenticated native caller cancellation and healthy continuation
@@ -974,3 +974,17 @@ Close and join the original replica store through its existing fixture lifetime,
 ### Private native read-failure evidence for the original snapshot operation
 
 REQ-REP-004/005 and AC-REP-004/005: preserve the original KL-035/KL-079 snapshot operation and native UID. A private typed leaf records only its original request ID, closed read stage and caller/lifetime/deadline cancellation flags before the existing internal OwnershipLost mapping. Correlate the original failure within the fixture’s unchanged bounded ring/tail, without retaining caller payload, credentials or arbitrary exception metadata. Public diagnostics, signed error contracts, serializers, retries, quorum receipts, full model replay, two cold checks and joined cleanup remain unchanged. This observation does not establish the initiating cancellation or historical root cause; exact-source Linux execution and qualification remain OPEN.
+
+## Owner correction 2026-10-17: independently selected node and copy counts
+
+Ordinary AppHost deployment accepts `KeyLoad:SiloCount` and `KeyLoad:ReplicaCount`
+independently. The default remains 3/3; 1/1, 2/1, 2/2, 3/2, 5/3 and 5/5 are
+valid configurations within the existing native membership admission bounds.
+The physical group uses the existing majority acknowledgement, ordered apply,
+persisted voter-set fencing and node-local ZoneTree ownership. Extra silos own
+native cluster infrastructure without database storage or public database APIs.
+The SDK PublishContainer target packages product images; Aspire owns publisher
+completion, container startup, membership infrastructure, health and shutdown.
+See [ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md). New topology
+runtime/fault qualification is pending until actual bound evidence exists;
+original RF3 tests and all required Linux suites remain mandatory.

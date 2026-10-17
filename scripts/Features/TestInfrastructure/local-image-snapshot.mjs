@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
-import { chmod, lstat, mkdir, mkdtemp, open, rmdir, unlink } from 'node:fs/promises';
+import { chmod, lstat, mkdir, mkdtemp, open, opendir, rmdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { enumerateBuildInputs } from './local-image-context.mjs';
 import { localImage, messages } from './local-image-contracts.mjs';
@@ -104,9 +104,57 @@ export async function cleanupBuildContextSnapshot(snapshot) {
   const state = ownedSnapshots.get(snapshot);
   if (!state) throw new Error(messages.invalidContext);
   if (state.cleaned) return;
+  if (state.sdkOutputs && !state.sdkOutputsCaptured) {
+    await captureSdkOutputs(state);
+    state.sdkOutputsCaptured = true;
+  }
   await cleanupState(state);
   state.cleaned = true;
   ownedSnapshots.delete(snapshot);
+}
+
+export async function prepareSdkBuildOutputs(snapshot) {
+  const state = ownedSnapshots.get(snapshot);
+  if (!state || state.cleaned || state.sdkOutputs) throw new Error(messages.invalidContext);
+  await verifyOwnedParent('artifacts', state);
+  const output = path.join(state.directory, 'artifacts');
+  await mkdir(output, { mode: temporaryDirectoryMode });
+  const actual = await lstat(output);
+  if (!actual.isDirectory() || actual.isSymbolicLink()) throw new Error(messages.invalidContext);
+  const entry = Object.freeze({ relative: 'artifacts', path: output, kind: 'directory', dev: actual.dev, ino: actual.ino });
+  state.entries.set(entry.relative, entry);
+  state.directories.push(entry);
+  state.sdkOutputs = entry;
+  return output;
+}
+
+async function captureSdkOutputs(state) {
+  let entries = 0;
+  const admitted = [];
+  async function visit(parent) {
+    const before = await lstat(parent.path);
+    if (!checkedDirectory(before, parent)) throw new Error(messages.invalidContext);
+    const directory = await opendir(parent.path);
+    for await (const child of directory) {
+      const target = path.join(parent.path, child.name);
+      const relative = path.posix.join(parent.relative, child.name);
+      const actual = await lstat(target);
+      if (++entries > localImage.maxInputFiles || actual.isSymbolicLink()
+        || !actual.isDirectory() && !actual.isFile()) throw new Error(messages.invalidContext);
+      const entry = Object.freeze({ relative, path: target, kind: actual.isDirectory() ? 'directory' : 'file',
+        dev: actual.dev, ino: actual.ino });
+      if (state.entries.has(relative)) throw new Error(messages.invalidContext);
+      admitted.push(entry);
+      if (actual.isDirectory()) await visit(entry);
+    }
+    if (!checkedDirectory(await lstat(parent.path), parent)) throw new Error(messages.invalidContext);
+  }
+  await visit(state.sdkOutputs);
+  for (const entry of admitted) {
+    state.entries.set(entry.relative, entry);
+    if (entry.kind === 'directory') state.directories.push(entry);
+    else state.files.push(entry);
+  }
 }
 
 async function ensureSnapshotParent(root) {

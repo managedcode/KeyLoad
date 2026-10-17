@@ -183,5 +183,3 @@ internal static class ScaleServerResourceCancellationNativeFixture
     }
 
 }
-
-internal readonly record struct ScaleServerResourceChildIdentity(int ProcessId, long StartTimeUtcTicks);

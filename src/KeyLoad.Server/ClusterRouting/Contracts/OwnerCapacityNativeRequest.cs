@@ -22,8 +22,3 @@ internal sealed record OwnerCapacityNativeRequest(
     [property: global::Orleans.Id(16)] long MaximumReadBytes,
     [property: global::Orleans.Id(17)] int MaximumExaminedRecords,
     [property: global::Orleans.Id(18)] int MaximumResultBytes);
-
-internal static class OwnerCapacityNativeRequestAliases
-{
-    internal const string OwnerCapacityNativeRequestAlias = "keyload.cluster-routing.owner-capacity-native-request.v1";
-}

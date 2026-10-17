@@ -2,14 +2,6 @@ using System.Text.Json;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteCoverageRange(int StartOffset, int EndOffset, long Count);
-
-internal sealed record SiteCoverageFunctionRanges(string SourcePath, string FunctionName, bool IsBlockCoverage,
-    int FunctionStart, int FunctionEnd, IReadOnlyList<SiteCoverageRange> Ranges);
-
-internal sealed record SiteCoverageScriptSnapshot(string ReceiptIdentity, string ReceiptSha256, string ScriptId,
-    int? ExecutionContextId, string SourcePath, IReadOnlyList<SiteCoverageFunctionRanges> Functions);
-
 internal static class SiteCoverageNativeRanges
 {
     public static IReadOnlyList<SiteCoverageScriptSnapshot> ParseScripts(JsonElement scripts, string runtime,

@@ -35,6 +35,3 @@ internal static class NativeAnnCrashContract
     private const string DocumentIndexFormat = "D2";
     internal static string Id(int index) => DocumentPrefix + index.ToString(DocumentIndexFormat, System.Globalization.CultureInfo.InvariantCulture);
 }
-
-internal sealed record NativeAnnCrashSnapshot(VectorRecord[] Records, AnnSourceCut Source,
-    string IndexSha256, string Receipt, string CanonicalImage, long Position);

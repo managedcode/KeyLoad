@@ -19,8 +19,12 @@ internal static class OrleansNativeClustering
 
     internal static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica,
         IPAddress address, NativeLocalhostClusteringOptions? localhostClustering)
+        => ConfigureMembership(silo, replica.LocalId, options.ClusterId, options.SiloPort, address, localhostClustering);
+
+    internal static void ConfigureMembership(ISiloBuilder silo, string siloName, string clusterId, int siloPort,
+        IPAddress address, NativeLocalhostClusteringOptions? localhostClustering)
     {
-        silo.Configure<SiloOptions>(identity => identity.SiloName = replica.LocalId);
+        silo.Configure<SiloOptions>(identity => identity.SiloName = siloName);
         if (localhostClustering is null)
         {
             silo.UseAzureStorageClustering((OptionsBuilder<global::Orleans.Clustering.AzureStorage.AzureStorageClusteringOptions> azure) =>
@@ -29,11 +33,11 @@ internal static class OrleansNativeClustering
         }
         else
         {
-            silo.UseLocalhostClustering(siloPort: options.SiloPort,
+            silo.UseLocalhostClustering(siloPort: siloPort,
                 gatewayPort: OrleansNodeProtocol.GatewayPort,
                 primarySiloEndpoint: localhostClustering.PrimarySiloEndpoint,
-                serviceId: OrleansNodeProtocol.ServiceId, clusterId: options.ClusterId);
+                serviceId: OrleansNodeProtocol.ServiceId, clusterId: clusterId);
         }
-        silo.ConfigureEndpoints(address, options.SiloPort, OrleansNodeProtocol.GatewayPort);
+        silo.ConfigureEndpoints(address, siloPort, OrleansNodeProtocol.GatewayPort);
     }
 }

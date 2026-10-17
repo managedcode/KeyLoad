@@ -5,13 +5,14 @@ using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
+using Orleans.Placement;
 using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
 #pragma warning disable ORLEANSEXP005 // Centrally pinned native Orleans journaling required by ADR-124.
-[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
-[GrainType(SampleChunkJobProtocol.GrainAlias), global::Orleans.Placement.PreferLocalPlacement]
+[Immovable(ImmovableKind.Any)]
+[GrainType(SampleChunkJobProtocol.GrainAlias), PreferLocalPlacement]
 internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
     ILocalDurableJobManager jobs, DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
     RuntimeJournalAdmission runtime, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,

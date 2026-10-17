@@ -10,6 +10,7 @@ internal static class NativeCoverageImageConstants
     internal const string BaseReceipt = "identity/base-image-receipt.json";
     internal const string ServerReceiptName = "server-source-receipt";
     internal const string BaseReceiptName = "base-image-receipt";
+    internal const string ContainerSettings = "Directory.Build.props";
     internal const string Dockerfile = "Dockerfile";
     internal const string Settings = "settings.xml";
     internal const string Wrapper = "server-wrapper.sh";

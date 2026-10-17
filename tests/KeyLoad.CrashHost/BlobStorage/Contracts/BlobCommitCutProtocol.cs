@@ -1,14 +1,4 @@
-using KeyLoad.Storage.ZoneTree;
-
 namespace KeyLoad.CrashHost.Features.BlobStorage;
-
-internal enum BlobCommitCutKind
-{
-    HeaderWritten,
-    JournalFlushed,
-    UnknownAfterJournalFlush,
-    Acknowledged
-}
 
 internal static class BlobCommitCutProtocol
 {
@@ -45,6 +35,3 @@ internal static class BlobCommitCutProtocol
     internal static readonly Guid CompleteId = Guid.Parse(CompleteIdText);
     internal static readonly Guid DeleteId = Guid.Parse(DeleteIdText);
 }
-
-internal sealed record BlobCommitCutObservedFault(ErrorCode Code, string Detail, ErrorCode PoisonCode,
-    string PoisonDetail, CommitStage Stage, long Position, bool Injected);

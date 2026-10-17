@@ -4,12 +4,6 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-internal readonly record struct PartitionQueryCancellationOutcome(
-    bool QueryReturned,
-    OperationCanceledException? Cancellation,
-    long ObservedReadBytes,
-    bool CancellationRequested);
-
 internal static class PartitionQueryCancellationRun
 {
     internal static PartitionQueryCancellationOutcome Execute(TestDatabase database, QueryEngine engine,

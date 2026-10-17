@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Options;
-
 namespace KeyLoad.CrashHost;
 
 /// <summary>Bounded execution policy for the original crash-helper child processes.</summary>
@@ -53,10 +51,4 @@ internal sealed record CrashHostExecutionOptions
 
     private static bool Positive(TimeSpan value, int maximumSeconds)
         => value > TimeSpan.Zero && value.Ticks <= maximumSeconds * TimeSpan.TicksPerSecond;
-}
-
-internal sealed class CrashHostExecutionOptionsValidator : IValidateOptions<CrashHostExecutionOptions>
-{
-    public ValidateOptionsResult Validate(string? name, CrashHostExecutionOptions options)
-        => options.IsValid() ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(CrashHostExecutionOptions.ValidationMessage);
 }

@@ -3,8 +3,6 @@ using System.Text;
 
 namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
 
-internal sealed record GovernanceResult(int ExitCode, string Output, string Error);
-
 internal static class GovernanceNodeProcess
 {
     private const int OutputLimitCharacters = 64 * 1024;

@@ -38,7 +38,3 @@ internal static class CliStorageConfiguration
         return options;
     }
 }
-
-internal sealed record CliStorageRuntimeOptions(
-    IOptions<ZoneTreeStorageExecutionOptions> Storage, IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
-    IOptions<CliBackupExecutionOptions> Backup);

@@ -79,5 +79,3 @@ internal sealed class PartitionMovementLateNativeBorrow
             => owner.AcceptAsync(index, operation, cancellationToken);
     }
 }
-
-internal sealed record PartitionMovementLateNativeCaptured(int OwnerIndex, ReplicatedOperation Operation);

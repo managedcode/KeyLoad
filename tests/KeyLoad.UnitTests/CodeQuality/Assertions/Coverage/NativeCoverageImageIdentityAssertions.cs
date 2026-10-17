@@ -44,7 +44,7 @@ internal static class NativeCoverageImageIdentityAssertions
             && baseImage.GetProperty(NativeCoverageImageFields.SourceReceiptSha256).GetString()
             == NativeCoverageImageOracleSupport.HashFile(invocation.BaseReceiptPath, fixture.Options.Coverage.Value.MaximumManifestBytes),
             "The manifest does not use the source-pinned ASP.NET base receipt.");
-        var sourcePath = Path.Combine(NativeCoverageImageFixture.RepositoryRoot, NativeCoverageImageConstants.Dockerfile);
+        var sourcePath = Path.Combine(NativeCoverageImageFixture.RepositoryRoot, NativeCoverageImageConstants.ContainerSettings);
         using var receipt = JsonDocument.Parse(NativeCoverageImageOracleSupport.ReadBounded(invocation.BaseReceiptPath,
             fixture.Options.Coverage.Value.MaximumManifestBytes));
         var root = receipt.RootElement;
@@ -54,9 +54,9 @@ internal static class NativeCoverageImageIdentityAssertions
             == NativeCoverageImageConstants.SchemaVersion
             && root.GetProperty(NativeCoverageImageFields.EvidenceKind).GetString() == NativeCoverageImageConstants.LocalEvidenceKind
             && root.GetProperty(NativeCoverageImageFields.ImageReference).GetString() == invocation.BaseReference
-            && root.GetProperty(NativeCoverageImageFields.SourcePath).GetString() == NativeCoverageImageConstants.Dockerfile
+            && root.GetProperty(NativeCoverageImageFields.SourcePath).GetString() == NativeCoverageImageConstants.ContainerSettings
             && root.GetProperty(NativeCoverageImageFields.SourceSha256).GetString() == NativeCoverageImageOracleSupport.HashFile(sourcePath, fixture.Options.Coverage.Value.MaximumManifestBytes),
-            "The base receipt does not bind the actual Dockerfile source pin and bytes.");
+            "The base receipt does not bind the actual SDK container settings source pin and bytes.");
     }
 
     private static void VerifyServer(JsonElement server, NativeCoverageImageInvocation invocation, int maximumManifestBytes)

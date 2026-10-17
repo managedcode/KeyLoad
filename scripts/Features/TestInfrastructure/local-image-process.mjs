@@ -14,8 +14,16 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
 }
 
 export async function runDocker(root, args, timeoutMs, capture = true, retainTail = false) {
+  return runCommand(localImage.docker, root, args, timeoutMs, capture, retainTail);
+}
+
+export async function runDotnet(root, args, timeoutMs, capture = true, retainTail = false) {
+  return runCommand('dotnet', root, args, timeoutMs, capture, retainTail);
+}
+
+async function runCommand(command, root, args, timeoutMs, capture, retainTail) {
   if (stopping) throw new Error(messages.timeout);
-  const child = spawn(localImage.docker, args, {
+  const child = spawn(command, args, {
     cwd: root,
     detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],

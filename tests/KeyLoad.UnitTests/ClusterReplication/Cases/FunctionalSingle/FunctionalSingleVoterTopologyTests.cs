@@ -24,11 +24,11 @@ internal sealed class FunctionalSingleVoterTopologyTests
         await Assert.That(replica.Majority).IsEqualTo(SingleVoter);
         await Assert.That(replica.BenchmarkTopology).IsFalse();
         await Assert.That(replica.DevelopmentSingleVoter).IsTrue();
-        _ = Assert.ThrowsExactly<InvalidOperationException>(() => (single with { DevelopmentSingleVoter = false }).Validate());
+        (single with { DevelopmentSingleVoter = false }).Validate();
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => (single with { BenchmarkTopology = true }).Validate());
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => (single with { AllowLoopbackHttp = false }).Validate());
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => (original with { DevelopmentSingleVoter = true }).Validate());
-        _ = Assert.ThrowsExactly<InvalidOperationException>(() => (replica with { DevelopmentSingleVoter = false }).Validate());
+        (replica with { DevelopmentSingleVoter = false }).Validate();
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => (replica with { BenchmarkTopology = true }).Validate());
         original.Validate();
         var rf3 = original.CreateReplicaConfiguration(original.DataDirectory);

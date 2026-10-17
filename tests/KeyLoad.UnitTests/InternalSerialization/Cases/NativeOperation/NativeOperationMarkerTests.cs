@@ -99,9 +99,3 @@ internal sealed class NativeOperationMarkerTests
             payload.Value, payload.Error, payload.SafeDetail, payload.Authority, payload.Signature,
             payload.RetryDecisions, payload.TransferProof, payload.ResourceAdmission);
 }
-
-internal static class NativeMarkerFixtures
-{
-    internal const string NullJson = "null";
-    internal const int UnknownKind = 999;
-}

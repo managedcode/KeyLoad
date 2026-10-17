@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createRunContext } from './image-inputs.mjs';
-import { verifyDockerEngine, verifyDockerfilePins } from './image-engine.mjs';
+import { verifyDockerEngine, verifyContainerPins } from './image-engine.mjs';
 import { verifySourceCheckout } from './prepare-images.mjs';
 import { bundleDiagnostic, imageNames, requireBundle } from './image-bundle-contract.mjs';
 import { parseImportArguments } from './image-bundle-cli.mjs';
@@ -14,7 +14,7 @@ export async function importImages(environment = process.env, argv = process.arg
   const context = createRunContext(environment, process.platform);
   const prepared = await readImageBundle(directory, context);
   await verifySourceCheckout(context);
-  await verifyDockerfilePins(context.workspace);
+  await verifyContainerPins(context.workspace);
   await prepareImportOutputs(context, prepared);
   await verifyDockerEngine(context);
   const loaded = {};

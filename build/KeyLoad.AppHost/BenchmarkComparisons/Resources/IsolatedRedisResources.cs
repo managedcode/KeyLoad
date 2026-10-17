@@ -19,7 +19,7 @@ internal static class IsolatedRedisResources
     private const string ConnectionSetting = "ConnectionString";
     private const string ReplicaSettingPrefix = "ReplicaConnections__";
     private const string ScriptName = "IsolatedRedisBootstrap.sh";
-    private const string ScriptDirectory = "BenchmarkComparisons";
+    private const string ScriptDirectory = "BenchmarkComparisons/Containers/Redis";
     private const string ScriptTarget = "/bootstrap/isolated-redis.sh";
     private const string Shell = "/bin/sh";
     private const string UserArgument = "--user";

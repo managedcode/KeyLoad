@@ -73,5 +73,3 @@ internal static class DocumentCommandOutcomeTestSupport
     private static bool BytesEqual(byte[]? left, byte[]? right)
         => left is null ? right is null : right is not null && left.AsSpan().SequenceEqual(right);
 }
-
-internal sealed record OutboxSnapshot(byte[]? HeadBytes, ImmutableArray<byte[]> EntryBytes, long Tail);

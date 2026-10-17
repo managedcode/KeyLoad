@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
-  baseImage, buildArgument, dockerArgument, envName, imageBuild, imageKind, imageReference, message, operatingSystem,
+  baseImage, buildArgument, dockerArgument, envName, imageKind, imageReference, message, operatingSystem,
   processLimit, registry, registryProtocol, validation,
 } from './image-contracts.mjs';
 import { assertLocalUnixEndpoint } from './image-inputs.mjs';
@@ -12,14 +12,23 @@ import { requireSuccessful, runBounded } from './image-process.mjs';
 const emptyValue = '';
 const linuxPlatform = 'linux';
 const dockerCommand = dockerArgument.docker;
-const expectedSchemaPins = Object.freeze([baseImage.sdk, baseImage.aspnet]);
+const containerSettingsPath = 'Directory.Build.props';
+const productProjects = Object.freeze({
+  [imageKind.server]: 'src/KeyLoad.Server/KeyLoad.Server.csproj',
+  [imageKind.comparisons]: 'benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj',
+});
 
-export async function verifyDockerfilePins(workspace, kinds = [imageKind.server, imageKind.comparisons]) {
-  const dockerfiles = kinds.map(kind => kind === imageKind.server
-    ? imageBuild.serverDockerfile : imageBuild.runnerDockerfile);
-  for (const relativePath of dockerfiles) {
-    const source = await readFile(path.join(workspace, relativePath), 'utf8').catch(() => emptyValue);
-    if (expectedSchemaPins.some(pin => !source.includes(pin))) throw new Error(message.invalidWorkspace);
+export async function verifyContainerPins(workspace, kinds = [imageKind.server, imageKind.comparisons]) {
+  const source = await readFile(path.join(workspace, containerSettingsPath), 'utf8');
+  const sdk = JSON.parse(await readFile(path.join(workspace, 'global.json'), 'utf8')).sdk?.version;
+  const pins = [...source.matchAll(/<ContainerBaseImage>([^<]+)<\/ContainerBaseImage>/gu)];
+  if (pins.length !== 1 || pins[0][1] !== baseImage.aspnet
+    || `dotnet-sdk:${sdk}` !== baseImage.sdk || kinds.some(kind => !productProjects[kind])) {
+    throw new Error(message.invalidWorkspace);
+  }
+  for (const kind of kinds) {
+    const project = await readFile(path.join(workspace, productProjects[kind]), 'utf8').catch(() => emptyValue);
+    if (!project.includes('<Project')) throw new Error(message.invalidWorkspace);
   }
 }
 
@@ -46,17 +55,6 @@ export async function verifyDockerEngine(context) {
   await requireDockerSuccess(context, 'docker-version', [dockerArgument.version], { cwd: context.workspace, timeoutMs: processLimit.inspectTimeoutMs });
 }
 
-export async function verifyBuildx(context) {
-  await requireDockerSuccess(context, 'buildx-version', [buildArgument.buildx, buildArgument.version], {
-    cwd: context.workspace,
-    timeoutMs: processLimit.inspectTimeoutMs,
-  });
-  const details = await requireDockerSuccess(context, 'buildx-inspect', [buildArgument.buildx, buildArgument.inspect], {
-    cwd: context.workspace,
-    timeoutMs: processLimit.inspectTimeoutMs,
-  });
-  if (!details.includes(imageBuild.platform)) throw new Error(message.missingBuildx);
-}
 
 export function makeImageTag(context) {
   return [context.sourceSha, context.runId, context.runAttempt].join(imageReference.runSeparator);
@@ -72,24 +70,27 @@ export async function buildProductImage(context, kind, taggedReference, imageSou
   if (!path.isAbsolute(source.workspace ?? '')
     || source.workspace.length > validation.maxPathLength
     || !validation.shaPattern.test(source.sourceSha ?? '')) throw new Error(message.invalidWorkspace);
-  const dockerfile = kind === imageKind.server ? imageBuild.serverDockerfile : imageBuild.runnerDockerfile;
-  const args = [
-    buildArgument.buildx,
-    buildArgument.build,
-    buildArgument.platform,
-    imageBuild.platform,
-    buildArgument.load,
-    buildArgument.tag,
-    taggedReference,
-    buildArgument.file,
-    dockerfile,
-    buildArgument.label,
-    `${registry.sourceLabel}=${source.sourceSha}`,
-    imageBuild.context,
-  ];
-  await requireDockerSuccess(context, kind === imageKind.server ? 'build-server' : 'build-comparisons', args, {
-    cwd: source.workspace,
-    timeoutMs: processLimit.buildTimeoutMs,
+  await verifyContainerPins(source.workspace, [kind]);
+  const sdk = await requireSuccessful('dotnet', ['--version'], {
+    cwd: source.workspace, timeoutMs: processLimit.inspectTimeoutMs,
+    recordResult: result => recordNativeCommand(context, 'sdk-version', result),
+  });
+  if (`dotnet-sdk:${sdk.trim()}` !== baseImage.sdk) throw new Error(message.invalidWorkspace);
+  const tag = taggedReference.slice(taggedReference.lastIndexOf(':') + 1);
+  const repository = kind === imageKind.server ? 'keyload/server' : 'keyload/comparisons';
+  const localReference = `${repository}:${tag}`;
+  await requireSuccessful('dotnet', [
+    'publish', productProjects[kind], '/t:PublishContainer', '--disable-build-servers', '--configuration', 'Release',
+    '--runtime', 'linux-x64', '-warnaserror', `-p:ContainerRepository=${repository}`,
+    `-p:ContainerImageTag=${tag}`, `-p:SourceRevisionId=${source.sourceSha}`,
+  ], { cwd: source.workspace, timeoutMs: processLimit.buildTimeoutMs,
+    recordResult: result => recordNativeCommand(context, kind === imageKind.server ? 'build-server' : 'build-comparisons', result),
+  });
+  await requireDockerSuccess(context, 'tag-product-image', ['tag', localReference, taggedReference], {
+    cwd: source.workspace, timeoutMs: processLimit.inspectTimeoutMs,
+  });
+  await requireDockerSuccess(context, 'remove-product-build-alias', ['image', 'rm', localReference], {
+    cwd: source.workspace, timeoutMs: processLimit.inspectTimeoutMs,
   });
   const metadata = await requireDockerSuccess(context, kind === imageKind.server ? 'inspect-server-image' : 'inspect-comparisons-image', [
     dockerArgument.image,

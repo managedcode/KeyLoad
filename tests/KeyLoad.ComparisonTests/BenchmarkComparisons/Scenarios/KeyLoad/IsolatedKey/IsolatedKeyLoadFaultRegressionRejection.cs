@@ -1,0 +1,3 @@
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
+
+internal sealed record IsolatedKeyLoadFaultRegressionRejection(string WriteCode, bool NativeMcpAuthentication503);

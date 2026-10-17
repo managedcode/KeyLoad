@@ -147,6 +147,3 @@ internal static class NativeCoverageRf3InvocationWriter
 
     private static void FlushToDisk(FileStream stream) => stream.Flush(flushToDisk: true);
 }
-
-internal sealed record NativeCoverageRf3Invocation(string Path, string ContextDirectory,
-    NativeCoverageRf3BaseImageReceipt BaseImage, string ImageReference);

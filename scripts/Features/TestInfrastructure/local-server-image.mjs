@@ -2,9 +2,9 @@ import { lstat, mkdir, open, rename, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { cleanupBuildContextSnapshot, createBuildContextSnapshot, readBuildInputs, sameScaffolds } from './local-image-snapshot.mjs';
+import { cleanupBuildContextSnapshot, createBuildContextSnapshot, readBuildInputs, sameScaffolds, prepareSdkBuildOutputs } from './local-image-snapshot.mjs';
 import { localImage, messages } from './local-image-contracts.mjs';
-import { ensureSuccess, getBuildOutput, runDocker } from './local-image-process.mjs';
+import { ensureSuccess, getBuildOutput, runDocker, runDotnet } from './local-image-process.mjs';
 
 const expectedReceiptFields = Object.freeze([
   'schemaVersion', 'state', 'provenance', 'invocationId', 'imageReference', 'inputDigest', 'imageConfigId',
@@ -54,9 +54,16 @@ async function prepare(root, tag, receiptPath) {
     buildStarted = true;
     let build;
     try {
-      build = await runDocker(snapshot.directory, [localImage.dockerImage, localImage.build, '--file', 'Dockerfile',
-        '--tag', reference, '--label', localImage.sourceContextLabelPrefix + snapshot.digest,
-        '--label', localImage.invocationLabelPrefix + invocationId, '.'], localImage.buildTimeoutMs, false, true);
+      const version = ensureSuccess(await runDotnet(snapshot.directory, ['--version'], localImage.commandTimeoutMs), messages.imageBuild);
+      if (version.stdout.trim() !== '10.0.401') throw new Error(messages.invalidContext);
+      const architecture = process.arch === 'arm64' ? 'linux-arm64' : process.arch === 'x64' ? 'linux-x64' : null;
+      if (architecture === null) throw new Error(messages.invalidContext);
+      const outputs = await prepareSdkBuildOutputs(snapshot);
+      build = await runDotnet(snapshot.directory, ['publish', 'src/KeyLoad.Server/KeyLoad.Server.csproj',
+        '/t:PublishContainer', '--disable-build-servers', '--configuration', 'Release', '--runtime', architecture, '--artifacts-path', outputs, '-warnaserror',
+        `-p:ContainerRepository=${imageRepository}`, `-p:ContainerImageTag=${tag}`,
+        `-p:KeyLoadContainerSourceDigest=${snapshot.digest}`, `-p:KeyLoadContainerInvocation=${invocationId}`],
+        localImage.buildTimeoutMs, false, true);
     } catch (error) {
       buildOutput = getBuildOutput(error) ?? emptyBuildOutput();
       throw error;
@@ -291,7 +298,7 @@ async function readReceipt(root, pathname, tag) {
     || parsed.imageReference !== imageReference(tag) || !digestPattern.test(parsed.inputDigest)
     || parsed.sourceLabel !== localImage.sourceLabel || parsed.invocationLabel !== localImage.invocationLabel
     || parsed.producerVersion !== localImage.producerVersion || !Array.isArray(parsed.pinnedBaseImages)
-    || parsed.pinnedBaseImages.length !== 2 || parsed.pinnedBaseImages.some(value => typeof value !== 'string')) {
+    || parsed.pinnedBaseImages.length !== 1 || parsed.pinnedBaseImages.some(value => typeof value !== 'string')) {
     throw new Error(messages.invalidReceipt);
   }
   if (parsed.state === localImage.readyState && !imageIdPattern.test(parsed.imageConfigId ?? '')) {

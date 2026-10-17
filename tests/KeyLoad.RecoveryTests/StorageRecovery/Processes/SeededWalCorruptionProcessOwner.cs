@@ -62,6 +62,3 @@ internal sealed class SeededWalCorruptionProcessOwner(SeededWalCorruptionTrial t
         return info;
     }
 }
-
-internal sealed record SeededWalPhaseReceipt(string Phase, string ExpectedSignal, bool SignalObserved,
-    int? ExitCode, bool OriginalExitAndBothReadersJoined, bool NativeProcessClosed);

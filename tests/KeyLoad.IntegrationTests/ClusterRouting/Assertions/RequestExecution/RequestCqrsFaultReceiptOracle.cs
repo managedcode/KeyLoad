@@ -106,5 +106,3 @@ internal sealed record RequestCqrsFaultReceiptOracle(
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }
-
-internal sealed record RequestCqrsFaultRetryResult(CommitReceipt SdkReceipt, CommitReceipt McpReceipt, Guid McpRequestId);

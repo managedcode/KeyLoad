@@ -4,20 +4,6 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-internal enum CanonicalApplyNetworkPhase
-{
-    NotAdmitted, PriorProfile, ImageProof, NativeWaveStartup, SignedDiscovery, AdminConnection,
-    PersistedIdentity, LeaderStatus, SeedState, CallerConnection, OriginalSdkAdmission,
-    BeforeSubmitObserved, BeforeSubmitReleased, CanonicalFlushObserved, OriginalSdkReceipt,
-    OriginalProducerSettled, IndependentAppendObserved, CanonicalReleased, CanonicalOwnerDisposed,
-    ArmRetirement, HealthyReplay, Completed
-}
-
-internal sealed record CanonicalApplyNetworkSnapshot(CanonicalApplyNetworkPhase Phase, TaskStatus? OriginalSdk,
-    bool? OriginalSdkSucceeded, ErrorCode? OriginalSdkError,
-    bool CallerCanceled, bool ScenarioCanceled, bool FlushMarkerObserved, bool OriginalReceiptObserved,
-    DateTimeOffset ObservedAt);
-
 internal static class CanonicalApplyNetworkEvidence
 {
     private static readonly TimeProvider ObservationClock = TimeProvider.System;

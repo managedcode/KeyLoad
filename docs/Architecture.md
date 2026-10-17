@@ -1,5 +1,23 @@
 # KeyLoad architecture and ownership map
 
+Owner correction 2026-10-17 consolidates implementation libraries by actual ownership:
+authorization evaluation is in Core; local archive transfer and native file IO are
+in Storage.ZoneTree; server-only health, discovery, resilience and OpenTelemetry
+composition are in Server. The former Security, Artifacts/BackupRestore, Storage.IO
+and ServiceDefaults projects are removed, with no forwarding assemblies.
+
+The remaining runtime projects have distinct consumers and responsibilities:
+Abstractions (shared contracts), Client (external SDK), Cli (operator executable),
+Core (database semantics), Query (SQL compilation), Clustering (Orleans routing),
+Replication (replica protocol), Storage.ZoneTree (physical storage), Server (host),
+and Diagnostics (BCL-only bounded phase telemetry shared by storage and replication).
+Diagnostics stays independent to avoid making low-level storage depend on domain
+execution or the server host. Test runners, the crash-test process, compiler
+analyzers and Aspire AppHost retain their distinct execution boundaries.
+Benchmark entry, generated-consumer fixtures, native comparison library and TUnit
+comparison host retain their actual external-consumer and process boundaries.
+This source consolidation does not establish runtime qualification.
+
 Process entry points show initialization, mode selection, composition and lifetime
 in Program.cs. Owner correction 2026-10-17 replaces forwarding-only application
 wrappers; KLD0020 and its real compiler regressions enforce the visible entry.
@@ -292,17 +310,13 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/; Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs | Node-local engine and atomic transactions; model effects and first-write logical partition registration share the ordered native commit. Complete current roster capture and cluster backup qualification remain required. |
 | src/KeyLoad.Diagnostics | Features/ResourceExecution/Models/DatabasePhaseKind.cs, Features/ResourceExecution/Models/DatabasePhaseSnapshot.cs and fixed bank | ResourceExecution; ADR-063 BCL-only callback-free scalar phase observations. No database state, public control endpoint or framework dependency; source integration and genuine native profiling pending. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs; Features/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs and Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and BackupRestore; file/WAL/checkpoint ownership stays node-local. |
-| src/KeyLoad.Storage.IO | Features/StorageRecovery/Storage/OfflineRegularFile.cs | Shared documented public-OS-ABI regular-file opening only; no database state, authorization, routing or replication authority. ADR-011/116 and CurrentFormat define its scope. |
-| src/KeyLoad.Security | Features/Authorization/Execution/AuthorizationPolicy.cs | Authorization; trusted principal and row/field policy enforcement. |
-| src/KeyLoad.Query | Features/QueryExecution/Queries/QueryEngine.cs, Features/QueryExecution/Execution/SqlParser.cs, Features/Search/Queries/SearchEngine.cs; Features/ChangeFeeds/Queries/LiveQueryExecutor.cs behind Features/ChangeFeeds/Execution/LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
-| src/KeyLoad.Artifacts | Features/BackupRestore/Execution/ArtifactTransfer.cs, Features/BackupRestore/Execution/BackupArtifact.cs | BackupRestore; verified artifact transport and format ownership. |
-| src/KeyLoad.Replication | Features/ClusterReplication/Execution/ClusterCoordinator.cs, Features/ClusterReplication/Storage/DurableReplicaLog.cs, Features/ClusterReplication/Execution/ReplicaMaterializer.cs | ClusterReplication, StorageRecovery; ordered durable apply and quorum authority behind the active Orleans server composition; delivered-SHA RF3 qualification pending. |
+| src/KeyLoad.Query | Features/QueryExecution/Queries/QueryEngine.cs, Features/QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs; Features/ChangeFeeds/Queries/LiveQueryExecutor.cs behind Features/ChangeFeeds/Execution/LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
+| src/KeyLoad.Replication | ClusterReplication/Execution/Submission/ClusterCoordinator.cs, Features/ClusterReplication/Storage/DurableReplicaLog.cs, ClusterReplication/Execution/Recovery/ReplicaMaterializer.cs | ClusterReplication, StorageRecovery; ordered durable apply and quorum authority behind the active Orleans server composition; delivered-SHA RF3 qualification pending. |
 | src/KeyLoad.Clustering | Features/ClusterRouting/Grains/{ConnectionGrain,CommandPartitionGrain}.cs; Queries/ConnectionReadExecution.cs; Topology/ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
-| src/KeyLoad.Server | Program.cs, NodeOptions.cs, Features/ClientApi/, Features/ClusterRouting/Hosting/OrleansNode.cs and feature API files | Composition root and public API; caller identity never supplies trusted roles. |
+| src/KeyLoad.Server | Program.cs, NodeOptions.cs, Features/ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs and feature API files | Composition root and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | KeyLoadClient.cs, Features/QueryExecution/Queries/KeyLoadQuery.cs | ClientApi shared transport; business operations mirror the same canonical slices as core/contracts/API/tests. |
 | src/KeyLoad.Cli | Program.cs, Features/ClientApi/Hosting/KeyLoadCliApplication.cs, Features/ClientApi/Transport/CliClientApi.cs and Features/BackupRestore/Commands/CliBackupRestore.cs | Composition-only administrative entry point and typed ClientApi/BackupRestore feature owners. |
-| src/KeyLoad.ServiceDefaults | Extensions.cs | Shared telemetry, service discovery and resilience composition. |
-| build/KeyLoad.AppHost | Program.cs, Features/BenchmarkComparisons/Resources/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality test-only collector preparation; Aspire owns resource lifecycle. |
+| build/KeyLoad.AppHost | Program.cs, BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality test-only collector preparation; Aspire owns resource lifecycle. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and focused test files | Matching product slices; pure contract/engine regression evidence. |
 | tests/KeyLoad.RecoveryTests | Features/StorageRecovery/Cases/RecoveryTests.cs, Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs, Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs, Features/ClusterRouting/ | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery and current outcome-v2 scoped-locator integrity; current source qualification pending. |
 | tests/KeyLoad.CrashHost | Program.cs, ClusterReplication/Execution/Faults/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
@@ -1144,3 +1158,11 @@ and run only in Benchmarks. `KeyLoad.UnitTests` owns functional database tests.
 Build and Tests compiles the complete solution and runs functional
 analyzer/unit/scalar/recovery/RF3 gates; RF3 prepares only the server image.
 See TestInfrastructure REQ/AC-TEST-PIPELINE-001 and ADR-074.
+
+Owner correction 2026-10-17: ordinary deployment selects silo count and physical
+copy count independently through `SiloCount` and `ReplicaCount`, retaining the
+3/3 default and all RF3 gates. Additional silos host native Orleans infrastructure
+without advertising database grains or opening storage. Product images are
+published by the .NET SDK PublishContainer target, orchestrated by Aspire;
+there is no product Dockerfile or root .dockerignore. Specialized fault/coverage
+instrumentation retains its separate test context. See [ADR-143](ADR/ADR-143-independent-silo-replica-topology.md).

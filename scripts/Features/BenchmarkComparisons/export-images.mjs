@@ -2,7 +2,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { fileName } from './image-contracts.mjs';
 import { createRunContext, validateEntryArguments } from './image-inputs.mjs';
-import { verifyDockerEngine, verifyDockerfilePins } from './image-engine.mjs';
+import { verifyDockerEngine, verifyContainerPins } from './image-engine.mjs';
 import { verifySourceCheckout } from './prepare-images.mjs';
 import { bundleDiagnostic, bundleDirectory, bundleFile, imageNames } from './image-bundle-contract.mjs';
 import { createDirectory, writeExclusive } from './image-bundle-files.mjs';
@@ -13,7 +13,7 @@ export async function exportImages(environment = process.env, argv = process.arg
   validateEntryArguments(argv);
   const context = createRunContext(environment, process.platform);
   await verifySourceCheckout(context);
-  await verifyDockerfilePins(context.workspace);
+  await verifyContainerPins(context.workspace);
   const prepared = await readPreparedImages(context.evidenceDirectory, context);
   await verifyDockerEngine(context);
   const directory = await createDirectory(path.join(context.runnerTemp, bundleDirectory));

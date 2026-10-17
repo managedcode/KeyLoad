@@ -195,7 +195,7 @@ the source. Root freezes the detailed criteria/graph in product-qualification
 acceptance/plan before approving these two economical capable writing workers.
 
 1. TASK-SERIES-UNIT-FIX-W9 owns ONLY
-   `tests/KeyLoad.UnitTests/TimeSeries/Cases/Sample/SampleAggregateTests.cs` and NEW
+   `tests/KeyLoad.UnitTests/TimeSeries/Cases/Sample/SampleAggregate/SampleAggregateTests.cs` and NEW
    `SampleAggregateIdempotencyTests.cs`. First author a real-store changed-content
    Conflict regression that compares unchanged canonical samples, verifies the
    original aggregate and a following legitimate append/aggregate. Then correct
@@ -203,7 +203,7 @@ acceptance/plan before approving these two economical capable writing workers.
    identical ID2 retry, late/equal/offset/boundary inputs and complete raw oracle;
    add explicit raw count5. Do not change any production dedup/reader/library rule.
 2. TASK-SERIES-ORACLE-FIX-W9 owns ONLY
-   `tests/KeyLoad.UnitTests/BlobStorage/Cases/Blob/BlobAgentCatalogTests.cs` PublicCount,
+   `tests/KeyLoad.UnitTests/BlobStorage/Cases/Blob/ClientApi/BlobAgentCatalogTests.cs` PublicCount,
    `tests/KeyLoad.IntegrationTests/ClientApi/Contracts/McpCallerProtocol.cs` ToolCount
    and `tests/KeyLoad.IntegrationTests/TimeSeries/Cases/TimeSeries/TimeSeriesRf3AuthorizationTests.cs`.
    Set the two independent complete-tool counts53, retaining every existing ten

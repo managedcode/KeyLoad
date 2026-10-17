@@ -1,12 +1,8 @@
 using System.Diagnostics;
-using KeyLoad.ServiceDefaults.Features.Authorization.Configuration;
+using KeyLoad.Server.Features.Authorization.Configuration;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
-internal enum AuthorizationUnsafeSpanState
-{
-    None, Event, Link, ExcessTags, ExcessBaggage, InheritedParentBaggage, ExcessParentLinks, ClientEvent, ClientTaggedLink, ClientTraceStateLink, ClientExtraLink, ClientRemoteLink
-}
 internal static class AuthorizationTelemetryUnsafeState
 {
     internal static void Apply(Activity? activity, AuthorizationUnsafeSpanState state)

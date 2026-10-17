@@ -2,15 +2,6 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal enum LiveRangeCancellationPhase
-{
-    Before,
-    BaselineObserver,
-    StagedObserver,
-    VisitorStop,
-    VisitorContinue
-}
-
 internal static class LiveRangeSelectedCancellationAssertions
 {
     internal static async Task RequireAsync(ZoneTreeStore store, bool staged, bool reverse,

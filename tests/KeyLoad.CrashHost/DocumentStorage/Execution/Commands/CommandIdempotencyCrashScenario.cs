@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Security;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 

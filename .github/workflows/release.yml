@@ -119,17 +119,19 @@ jobs:
           cp artifacts/reservation/release-version.json artifacts/distribution/
           chmod 755 artifacts/distribution/initialize.sh
           tar --owner=0 --group=0 -C artifacts/distribution -czf "artifacts/assets/keyload-database-$RELEASE_VERSION-linux-x64.tar.gz" server cli compose.yml initialize.sh README.md .env.example release-version.json
-      - name: Build release Docker images
+      - name: Publish release container images with .NET SDK
         if: env.RELEASE_ASSETS_EXISTS == '0'
         shell: bash
         run: |
           docker version
           for role in server benchmarks; do
-            dockerfile=Dockerfile
-            if [[ "$role" == benchmarks ]]; then dockerfile=benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/Dockerfile; fi
+            project=src/KeyLoad.Server/KeyLoad.Server.csproj
+            if [[ "$role" == benchmarks ]]; then project=benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj; fi
             reference="ghcr.io/managedcode/keyload-$role:$RELEASE_VERSION"
             archive="keyload-$role-$RELEASE_VERSION-linux-amd64.docker.tar.gz"
-            docker build --platform linux/amd64 --file "$dockerfile" --tag "$reference" --build-arg "KEYLOAD_RELEASE_VERSION=$RELEASE_VERSION" --build-arg "KEYLOAD_ASSEMBLY_VERSION=$RELEASE_ASSEMBLY_VERSION" --build-arg "KEYLOAD_FILE_VERSION=$RELEASE_FILE_VERSION" --label "org.opencontainers.image.version=$RELEASE_VERSION" --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/$GH_REPO" .
+            dotnet publish "$project" /t:PublishContainer --disable-build-servers --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRepository="managedcode/keyload-$role" -p:ContainerImageTag="$RELEASE_VERSION" -p:Version="$RELEASE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION" -p:SourceRevisionId="$GITHUB_SHA"
+            docker tag "managedcode/keyload-$role:$RELEASE_VERSION" "$reference"
+            docker image rm "managedcode/keyload-$role:$RELEASE_VERSION"
             docker save "$reference" | gzip -n > "artifacts/assets/$archive"
             docker image inspect "$reference" | jq --arg role "$role" --arg ref "$reference" --arg archive "$archive" '.[0] | {role:$role,reference:$ref,id:.Id,labels:.Config.Labels,archive:$archive}' >> artifacts/images.jsonl
           done

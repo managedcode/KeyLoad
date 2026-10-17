@@ -120,10 +120,10 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
                 await VerifyCatalogAsync(cancellationToken).ConfigureAwait(false);
                 return;
             }
-            catch (KeyLoadException error) when ((error.Code == ErrorCode.UnknownWriteOutcome
-                && error.Message == ReplicaProtocol.InterruptedWrite)
+            catch (KeyLoadException error) when (error.Code == ErrorCode.UnknownWriteOutcome
                 || (error.Code == ErrorCode.OwnershipLost
-                && error.Message == ReplicaProtocol.NoLeader))
+                && (error.Message == ReplicaProtocol.NoLeader
+                    || error.Message == ReplicaTransportProtocol.InvalidDiscovery)))
             {
                 await Task.Delay(partition.Configuration.HeartbeatInterval, clock, cancellationToken).ConfigureAwait(false);
             }

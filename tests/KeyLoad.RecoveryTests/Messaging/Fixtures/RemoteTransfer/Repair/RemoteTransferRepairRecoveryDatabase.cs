@@ -1,6 +1,6 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost.Features.Messaging;
-using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;

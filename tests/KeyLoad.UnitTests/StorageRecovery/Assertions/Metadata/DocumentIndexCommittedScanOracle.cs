@@ -149,8 +149,3 @@ internal static class DocumentIndexCommittedScanOracle
     private static async Task AssertIndexAsync(Dictionary<string, string[]> actual, string label, string[] expected)
         => await Assert.That(actual[label]).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
 }
-
-internal sealed record DocumentIndexCommittedScanCut(long Position, DocumentIndexCommittedDocument[] Documents,
-    Dictionary<string, string[]> IndexIds);
-
-internal sealed record DocumentIndexCommittedDocument(string Id, long Revision, string Json, bool Deleted);

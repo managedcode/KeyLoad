@@ -7,11 +7,6 @@ using Orleans.Serialization.WireProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-internal enum McpAuthenticationArrayFault
-{
-    TooManyItems, TooManyGrantProperties, Underfilled, Overfilled, WrongType, WrongReferenceType, NullElement
-}
-
 // Author real array boundaries because generated surrogate Values bypasses provider overrides.
 internal static class McpAuthenticationMalformedFixture
 {

@@ -1,10 +1,5 @@
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-internal enum ResourcePairBindingFault
-{
-    MissingLifetime, MalformedLifetime, ConflictingLifetime, MissingDefinition
-}
-
 internal static class ResourcePairBindingProtocol
 {
     internal const string Corpus = "pair-corpus";

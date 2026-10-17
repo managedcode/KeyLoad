@@ -14,10 +14,3 @@ internal enum GraphTraversalIntegrityFault
     MalformedAdjacency,
     WrongAdjacencyType
 }
-
-internal sealed record GraphTraversalOwnedFault(byte[] Key, byte[] Original);
-
-internal sealed record GraphTraversalIntegrityState(CommandRequest SeedCommand, CommitReceipt SeedReceipt,
-    EdgeRecord HealthyEdge, EdgeRecord DamagedEdge);
-
-internal sealed record GraphTraversalIntegrityContinuation(CommandRequest Command, CommitReceipt Receipt, EdgeRecord Edge);

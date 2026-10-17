@@ -16,11 +16,11 @@ $script:FcNativeMergeInput = [ordered]@{
     InvalidEvidence = 'A native coverage merge input is absent, changed or outside its evidence root.'
     InvalidSource = 'The native coverage merge source identity is incomplete or stale.'
     InvalidReceipt = 'An original native coverage terminal receipt is incomplete or mismatched.'
-    ModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Analyzers','KeyLoad.AppHost','KeyLoad.Artifacts','KeyLoad.Cli',
+    ModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Analyzers','KeyLoad.AppHost','KeyLoad.Cli',
         'KeyLoad.Client','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query','KeyLoad.Replication',
-        'KeyLoad.Security','KeyLoad.Server','KeyLoad.ServiceDefaults','KeyLoad.Storage.IO','KeyLoad.Storage.ZoneTree')
+        'KeyLoad.Server','KeyLoad.Storage.ZoneTree')
     ServerModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query',
-        'KeyLoad.Replication','KeyLoad.Security','KeyLoad.Server','KeyLoad.ServiceDefaults','KeyLoad.Storage.IO','KeyLoad.Storage.ZoneTree')
+        'KeyLoad.Replication','KeyLoad.Server','KeyLoad.Storage.ZoneTree')
 }
 
 function Assert-FcNativeExactKeys([Collections.IDictionary] $Value, [string[]] $Names) {

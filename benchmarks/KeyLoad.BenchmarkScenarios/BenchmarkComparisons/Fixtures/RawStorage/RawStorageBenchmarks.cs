@@ -1,6 +1,5 @@
 using System.Runtime.ExceptionServices;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using Microsoft.Extensions.Options;
 
@@ -205,13 +204,4 @@ public class RawStorageBenchmarks : IDisposable
         ObjectDisposedException.ThrowIf(disposed, this);
         return fixture ?? throw new InvalidOperationException(InactiveSetupMessage);
     }
-}
-
-internal sealed class RawStorageUnrollConfiguration : ManualConfig
-{
-    private const int CtorFactorSingleItemCount = 1;
-
-    /// <summary>Keeps the frozen default loop unroll without overriding the requested invocation count.</summary>
-    public RawStorageUnrollConfiguration()
-        => AddJob(Job.Default.WithUnrollFactor(CtorFactorSingleItemCount).AsMutator());
 }

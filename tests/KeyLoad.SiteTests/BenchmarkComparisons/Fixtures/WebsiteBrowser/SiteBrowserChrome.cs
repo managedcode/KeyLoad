@@ -166,5 +166,3 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
     private Task<JsonElement> StopCoverageAsync(CancellationToken cancellationToken) => StopCoverage(cancellationToken);
 
 }
-
-internal sealed record SiteBrowserError(string Event, string Message);

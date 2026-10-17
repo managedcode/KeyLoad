@@ -17,8 +17,8 @@ AC-DISPATCH-002 (REQ-003/004): Genuine preparation/read/receive/refusal/replay f
 AC-DISPATCH-003 (REQ-004/005): Genuine bounded native framing/cancellation/owner shutdown retains the original task terminal and failure identity; result allocations respect actual unchanged ceilings and all original operations join before host/storage cleanup.
 
 Canonical source map:
-- Server/Features/GraphTraversal/Execution/RemoteGraphNativeDispatch.cs: exact feature action routing and verified receiving phase construction.
-- Server/Features/GraphTraversal/Execution/RemoteGraphNativeChild.cs: genuine signed child execution, actual identity scope and native terminal/type checks.
+- Server/GraphTraversal/Execution/CrossPartition/RemoteGraphNativeDispatch.cs: exact feature action routing and verified receiving phase construction.
+- Server/GraphTraversal/Execution/CrossPartition/RemoteGraphNativeChild.cs: genuine signed child execution, actual identity scope and native terminal/type checks.
 - Server/Features/GraphTraversal/Serialization/RemoteGraphNativeResultEncoding.cs: original native measurement/admission/encoding.
 - Existing OrleansNodeRequestExecutor, GrainRequestStreamConsumer and admitted RemoteGraphNativeRuntime remain the transport, stream and physical-owner lifecycle owners.
 - Abstractions/Client public contracts and Ann Core/read/parent implementation are external frozen dependencies; there is no duplicate public API or generic dispatcher.
@@ -48,7 +48,7 @@ REQ-FRESH-004: No native RPC await occurs under either store gate. Source direct
 AC-FRESH-001 (REQ-FRESH-001/002): Actual configured source/target six-silo SDK/MCP cases prove coordinator/source-owner distinction, revoked current source policy, missing retained outcome and changed immutable intent refuse before target effects; complete original images/positions remain unchanged for the rejected operation. OPEN.
 AC-FRESH-002 (REQ-FRESH-003/004): Genuine source success, target receiving full result, same-ID reconciliation, original cancellation/joined shutdown and two complete cold phases prove receipts, current full generations and full no-effects/refusal images. Kernel envelope or source review is not this acceptance. OPEN.
 
-Canonical additional role: Server/Features/GraphTraversal/Execution/RemoteGraphFreshSourceObservation.cs owns only authenticated fresh source RPC, exact retained intent selection and native proof reconstruction. Ann Core owns current target receiving authority; Root owns captured client/runtime lifetime. SourceProof.Original is appended native field Id4; no public result exposes it or its token.
+Canonical additional role: Server/GraphTraversal/Execution/CrossPartition/RemoteGraphFreshSourceObservation.cs owns only authenticated fresh source RPC, exact retained intent selection and native proof reconstruction. Ann Core owns current target receiving authority; Root owns captured client/runtime lifetime. SourceProof.Original is appended native field Id4; no public result exposes it or its token.
 
 ```mermaid
 flowchart LR

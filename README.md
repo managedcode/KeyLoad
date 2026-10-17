@@ -189,7 +189,7 @@ flowchart LR
 
 Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests native deactivation.
 
-Connection execution under [ADR-125](docs/ADR/ADR-125-connection-owned-execution.md) passed eight local native flows and five real SDK/official MCP Aspire Docker RF3 flows. Complete Linux fault, endurance and performance qualification remains open. This transport ownership does not deliver native SQL session compatibility. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the three replicas. See the [architecture map](docs/Architecture.md) and [grain lifetime contract](docs/Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
+Connection execution under [ADR-125](docs/ADR/ADR-125-connection-owned-execution.md) passed eight local native flows and five real SDK/official MCP Aspire Docker RF3 flows. Complete Linux fault, endurance and performance qualification remains open. This transport ownership does not deliver native SQL session compatibility. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the configured physical replicas (three by default). See the [architecture map](docs/Architecture.md) and [grain lifetime contract](docs/Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
 
 ## Why .NET, Orleans and ZoneTree
 
@@ -217,29 +217,41 @@ dotnet restore KeyLoad.slnx
 dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
 ```
 
-**2. Build the server image**
-
-The cluster runs the server image pinned by its digest, so build it from source and push it to a local registry:
+**2. Start KeyLoad through Aspire**
 
 ```bash
-docker run -d --name keyload-registry -p 5050:5000 registry:3
+aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build --non-interactive
 ```
+
+For ordinary local development Aspire runs `dotnet publish /t:PublishContainer` and owns
+all server containers and the native Orleans membership emulator. No manually
+started registry or server containers are required. An explicitly configured
+`KeyLoad__ContainerImages__Server` still selects the pinned image; qualification
+and benchmark profiles retain their separate image/provenance requirements.
+
+**3. Choose silo membership and replication independently**
+
+The default is three silos and three physical replicas. For five Orleans silos
+with three voting copies of the initial partition:
 
 ```bash
-docker build -t localhost:5050/keyload/server:dev . && docker push localhost:5050/keyload/server:dev
+KeyLoad__SiloCount=5 KeyLoad__ReplicaCount=3 aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build --non-interactive
 ```
 
-```bash
-export KeyLoad__ContainerImages__Server="localhost:5050/keyload/server:dev@$(docker inspect --format '{{index .RepoDigests 0}}' localhost:5050/keyload/server:dev | cut -d@ -f2)"
-```
+`SiloCount` controls the total cluster processes. `ReplicaCount` controls
+physical storage owners and voting membership, and must be between one and
+`SiloCount`. Additional silos participate in native Orleans membership and the
+distributed directory; they do not expose database operations or own storage.
+Database grains are placed on replica-bearing silos. Counts of 1, 2, 3 and 5 are
+accepted, including even replica groups. A write requires a majority: one of
+one, both of two, two of three, or three of five. One replica has no replica
+fault tolerance; two replicas cannot acknowledge writes with either unavailable.
 
-**3. Start the three-node cluster**
-
-```bash
-dotnet run --project build/KeyLoad.AppHost --configuration Release --no-build
-```
-
-[Aspire](https://github.com/dotnet/aspire) starts three nodes at `http://localhost:5101`, `:5102` and `:5103`. Node data and your local development credentials are stored in `data/cluster/`, which git ignores. Keep that folder between restarts.
+This selects a fixed topology at startup, not live replica reconfiguration.
+Do not change a persisted database's replica group by editing these settings.
+Node data and private development credentials remain in `data/cluster/`.
+HTTP ports start at `5101`; keep the data directory between restarts.
+Stop owned resources with `aspire stop --non-interactive`.
 
 **4. Look around**
 

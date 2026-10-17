@@ -1,10 +1,5 @@
 namespace KeyLoad.CrashHost;
 
-internal enum SampleChunkEarlyCut
-{
-    Open = 0, Append = 1, Correction = 2
-}
-
 internal static class SampleChunkEarlyCrashProtocol
 {
     internal const string PrepareOpen = "sample-chunk-early-prepare-open";

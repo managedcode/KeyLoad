@@ -12,7 +12,7 @@ internal sealed class LocalRf3ImageContextSnapshotTests
         import { pathToFileURL } from 'node:url';
         const rootPath = process.argv[1];
         const moduleUrl = pathToFileURL(rootPath);
-        const { cleanupBuildContextSnapshot, createBuildContextSnapshot, readBuildInputs } =
+        const { cleanupBuildContextSnapshot, createBuildContextSnapshot, readBuildInputs, prepareSdkBuildOutputs } =
           await import(moduleUrl);
         const { localImage } = await import(new URL('./local-image-contracts.mjs', moduleUrl));
         const parent = process.argv[2];
@@ -69,13 +69,25 @@ internal sealed class LocalRf3ImageContextSnapshotTests
             'build/CodeQuality/FunctionalCompilationIdentity.targets'), 'utf8'), 'identity');
           const buildScaffold = firstSnapshot.scaffolds.find(entry =>
             entry.relative === 'build/CodeQuality');
-          assert.ok(buildScaffold, 'The standalone COPY parent chain must be captured as scaffolding.');
+          assert.ok(buildScaffold, 'The standalone source parent chain must be captured as scaffolding.');
           if (process.platform !== 'win32') {
             assert.equal((await lstat(snapshotMarker)).mode & 0o777, 0o640);
             assert.equal((await lstat(path.join(firstSnapshot.directory, 'src', 'KeyLoad.Core'))).mode & 0o777, 0o750);
             assert.equal((await lstat(path.join(firstSnapshot.directory, buildScaffold.relative))).mode & 0o777,
               buildScaffold.mode);
           }
+          const sdkOutputs = await prepareSdkBuildOutputs(firstSnapshot);
+          await mkdir(path.join(sdkOutputs, 'obj', 'KeyLoad.Core'), { recursive: true });
+          await writeFile(path.join(sdkOutputs, 'obj', 'KeyLoad.Core', 'generated.cs'), 'owned generated output');
+          await writeFile(path.join(sdkOutputs, 'server.dll'), Buffer.from([0, 1, 2, 3]));
+          const afterSdk = await readBuildInputs(firstSnapshot.directory);
+          assert.equal(afterSdk.digest, firstSnapshot.digest, 'SDK outputs must not change admitted source identity.');
+          const unsafeOutput = path.join(sdkOutputs, 'outside-link');
+          await symlink(outsidePath, unsafeOutput);
+          await assert.rejects(cleanupBuildContextSnapshot(firstSnapshot), error => error?.message === 'LocalRf3ImageContextInvalid');
+          assert.deepEqual(await readFile(outsidePath), originalOutside);
+          assert.deepEqual(await readFile(snapshotMarker), markerBytes);
+          await rm(unsafeOutput);
           await writeFile(markerPath, updatedBytes);
           await chmod(markerPath, 0o600);
           assert.deepEqual(await readFile(snapshotMarker), markerBytes);
@@ -118,23 +130,15 @@ internal sealed class LocalRf3ImageContextSnapshotTests
           await mkdir(src, { recursive: true });
           await chmod(path.join(rootDirectory, 'src'), 0o750);
           await chmod(src, 0o750);
-          const dockerfile = [
-            'FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:' + 'a'.repeat(64) + ' AS build',
-            'COPY global.json Directory.Build.props Directory.Build.targets Directory.Packages.props NuGet.Config .editorconfig LICENSE ./',
-            'COPY KeyLoad.slnx ./KeyLoad.slnx',
-            'COPY build/CodeQuality/FunctionalCompilationIdentity.targets ./build/CodeQuality/FunctionalCompilationIdentity.targets',
-            'COPY analyzers/ ./analyzers/',
-            'COPY src/ ./src/',
-            'RUN dotnet publish KeyLoad.slnx',
-            'FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:' + 'b'.repeat(64),
-            'COPY --from=build /app/publish/ ./',
-          ].join('\n') + '\n';
-          await writeFile(path.join(rootDirectory, 'Dockerfile'), dockerfile);
-          await writeFile(path.join(rootDirectory, '.dockerignore'), '');
           for (const name of ['global.json', 'Directory.Build.props', 'Directory.Build.targets',
             'Directory.Packages.props', 'NuGet.Config', '.editorconfig', 'LICENSE', 'KeyLoad.slnx']) {
             await writeFile(path.join(rootDirectory, name), name);
           }
+          const settings = path.join(rootDirectory, 'Directory.Build.props');
+          await mkdir(path.dirname(settings), { recursive: true });
+          await writeFile(settings, '<Project><PropertyGroup><ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0@sha256:'
+            + 'b'.repeat(64) + '</ContainerBaseImage></PropertyGroup></Project>');
+          await writeFile(path.join(rootDirectory, 'global.json'), JSON.stringify({ sdk: { version: '10.0.401' } }));
           const identity = path.join(rootDirectory, 'build', 'CodeQuality', 'FunctionalCompilationIdentity.targets');
           await mkdir(path.dirname(identity), { recursive: true });
           await writeFile(identity, 'identity');

@@ -1,12 +1,5 @@
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-internal static class IsolatedResourceLogSubscriberScopeFactory
-{
-    internal static IsolatedResourceLogSubscriberScope<T> Create<T>(
-        IAsyncEnumerable<T> source, CancellationToken parentToken)
-        => new(source, parentToken);
-}
-
 internal sealed class IsolatedResourceLogSubscriberScope<T> : IAsyncDisposable
 {
     private const string PendingOperations = "Native subscriber operations remain active; enumerator disposal is deferred.";

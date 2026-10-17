@@ -102,25 +102,3 @@ internal sealed class ReplicaForwardMetadataObservation : IGrainRequestPhaseObse
     {
     }
 }
-
-internal sealed record ReplicaForwardMetadataSample(IReplicaForwardedCommandWork Work,
-    ReadExecutionBudget Source, Guid ExpectedCommandId, int Sequence, long SourceBeforeBytes, int SourceBeforeRecords)
-{
-    internal Guid ActualCommandId
-    {
-        get; set;
-    }
-    internal DateTimeOffset ReceiverExpiry
-    {
-        get; set;
-    }
-    internal long ReceiverMaximumReadBytes
-    {
-        get; set;
-    }
-    internal int ReceiverMaximumRecords
-    {
-        get; set;
-    }
-    internal NativeRequestWorkLease Lease => (NativeRequestWorkLease)Work.Binding;
-}

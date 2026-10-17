@@ -3,12 +3,6 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-internal enum KestrelObservationStage
-{
-    HostStarting, HostStarted, SendStarted, ResponseReceived, SendFailed,
-    HandlerEntered, HandlerCompleted, HandlerFailed, SdkCompleted, CallerCancelled, FlowFailed
-}
-
 /// <summary>Closed bounded actual test lifecycle facts; no request or response contents are inspected.</summary>
 internal sealed class KeyLoadClientKestrelObservation
 {

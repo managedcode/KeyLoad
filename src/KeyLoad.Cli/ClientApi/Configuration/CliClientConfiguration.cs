@@ -77,7 +77,3 @@ internal static class CliClientConfiguration
         return profile.RootElement.GetProperty(AdminKeyPropertyName).GetString()!;
     }
 }
-
-internal sealed record CliClientRuntimeOptions(
-    IOptions<CliConnectionOptions> Connection, IOptions<CliExecutionOptions> Execution,
-    IOptions<KeyLoadClientExecutionOptions> ClientExecution);

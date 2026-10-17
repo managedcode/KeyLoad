@@ -11,6 +11,3 @@ internal static class CompositionReverseFinalImageData
     internal const string Json = "{\"value\":7}";
     internal const string Unavailable = "The graph vertex is unavailable.";
 }
-
-internal sealed record CompositionReverseFinalImageState(EntityRef Bound, CommandRequest Request,
-    ReplicatedOperation Original, CommitReceipt Receipt, ReplicatedOperation Seed, CommitReceipt SeedReceipt);

@@ -2,9 +2,6 @@ using System.Text.Json;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteCoverageMetadata(string BrowserVersion, IReadOnlySet<string> Origins,
-    IReadOnlyList<string> CoverageFiles);
-
 internal static class SiteCoverageArtifactMetadata
 {
     private static readonly IReadOnlySet<string> NodeEnvelopeRequired = new HashSet<string>([SiteCoverageTokens.Result], StringComparer.Ordinal);

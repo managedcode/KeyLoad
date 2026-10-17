@@ -3,7 +3,6 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Codecs;
-using Orleans.Serialization.Session;
 
 namespace KeyLoad.Features.InternalSerialization;
 
@@ -62,9 +61,3 @@ internal static class NativeSerializerProviders
 }
 
 // The context owns serializer-only services for the process lifetime, independent of silo activations.
-internal sealed class NativeSerializerContext(ServiceProvider services)
-{
-    internal SerializerSessionPool Sessions { get; } = services.GetRequiredService<SerializerSessionPool>();
-
-    internal Serializer<NativePayload> Serializer { get; } = services.GetRequiredService<Serializer<NativePayload>>();
-}

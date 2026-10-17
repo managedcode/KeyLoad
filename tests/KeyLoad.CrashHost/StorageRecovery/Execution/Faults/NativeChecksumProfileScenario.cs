@@ -2,8 +2,8 @@ using System.Numerics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost.Features.DocumentStorage;
-using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 

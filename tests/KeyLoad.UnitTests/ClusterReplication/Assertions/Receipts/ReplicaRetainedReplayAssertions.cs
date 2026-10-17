@@ -7,9 +7,6 @@ using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineSc
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
-internal sealed record ReplicaRetainedReplayCut(long Position, string[] Rows, long LastIndex,
-    long CommittedIndex, long AppliedIndex, long Term, byte[] Entry);
-
 internal static class ReplicaRetainedReplayAssertions
 {
     internal static Dictionary<string, ReplicaRetainedReplayCut> Capture(RequestCqrsCohortRuntimeFixture fixture)

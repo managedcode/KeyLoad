@@ -12,7 +12,7 @@ internal sealed class MongoReadinessResourceTests
     private const string ReadinessFile = "IsolatedMongoReadiness.js";
     private const string EntryFile = "IsolatedMongoEntry.sh";
     private const string ClientFile = "IsolatedMongoInitiate.js";
-    private const string Scripts = "Features/BenchmarkComparisons";
+    private const string Scripts = "BenchmarkComparisons/Containers/MongoDb";
     private const string TemporaryPrefix = "keyload-mongo-missing-readiness-";
     private const string NodePrefix = "isolated-mongo-";
     private const int GroupCharacters = 32;

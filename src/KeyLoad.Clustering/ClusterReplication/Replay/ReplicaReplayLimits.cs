@@ -54,8 +54,3 @@ public sealed record ReplicaReplayLimits
         _ => throw new ArgumentOutOfRangeException(nameof(pool))
     };
 }
-
-internal enum ReplicaReplayPool
-{
-    Critical, Forward, ReadBarrier, DataAppend
-}

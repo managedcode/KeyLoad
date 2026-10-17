@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.Clustering;
-using KeyLoad.ServiceDefaults;
-using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
+using KeyLoad.Server;
+using KeyLoad.Server.Features.ClusterRouting.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;

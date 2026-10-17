@@ -1,14 +1,5 @@
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-internal enum FollowerDocumentCaller
-{
-    Sdk, OfficialMcp, SqlSdk, SqlOfficialMcp
-}
-internal enum FollowerDocumentChange
-{
-    Document, Credential, Grant, FieldPolicy, Lag, Cancellation, NoQuorum
-}
-
 internal static class FollowerDocumentRf3Protocol
 {
     internal const string Tool = "keyload_documents_read_follower";

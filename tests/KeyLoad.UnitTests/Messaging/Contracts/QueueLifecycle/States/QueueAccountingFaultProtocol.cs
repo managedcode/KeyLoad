@@ -1,23 +1,5 @@
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-internal enum QueueAccountingOperation
-{
-    Ack,
-    Nack,
-    Processing,
-    Reclaim,
-    ReadyExpiry,
-    ScheduledExpiry
-}
-
-internal enum QueueAccountingColumn
-{
-    InFlightMessages,
-    InFlightBytes,
-    StoredMessages,
-    StoredBytes
-}
-
 internal static class QueueAccountingFaultProtocol
 {
     internal const string Queue = "accounting-jobs";

@@ -15,7 +15,6 @@
     <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" IsAspireProjectResource="false" />

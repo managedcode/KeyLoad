@@ -2,14 +2,6 @@ using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-internal enum NativeRequiredCommandShape
-{
-    Partition,
-    Mutations,
-    Collection,
-    Patches
-}
-
 internal sealed class NativePublicElementProfileTests
 {
     private const string Collection = "orders";

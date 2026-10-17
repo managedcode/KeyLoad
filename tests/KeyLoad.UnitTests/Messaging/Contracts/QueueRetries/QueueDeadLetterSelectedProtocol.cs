@@ -1,21 +1,5 @@
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-internal enum QueueDeadLetterSelectedOperation
-{
-    Read,
-    Cancel,
-    Redrive
-}
-
-internal enum QueueDeadLetterSelectedFault
-{
-    IndexAlias,
-    MetadataAlias,
-    WitnessMetadataAlias,
-    MissingBody,
-    ForeignBody
-}
-
 internal static class QueueDeadLetterSelectedProtocol
 {
     internal const string HistoryQueue = "selected-dlq-history";

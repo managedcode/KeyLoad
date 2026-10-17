@@ -8,11 +8,6 @@ using Orleans.Serialization.WireProtocol;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-internal enum BenchmarkMembershipDefect
-{
-    Duplicate, Missing, Unknown, WrongVersionScalar
-}
-
 // Independent native producers deliberately change one authority-field shape.
 internal sealed class BenchmarkTopologyMembershipNativeCodec(BenchmarkMembershipDefect defect)
     : IFieldCodec<ReplicaBenchmarkMembershipRecord>

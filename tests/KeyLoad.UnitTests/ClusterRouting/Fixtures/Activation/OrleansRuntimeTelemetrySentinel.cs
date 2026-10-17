@@ -3,14 +3,6 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-internal enum OrleansRuntimeTelemetryMutation
-{
-    Event,
-    Baggage,
-    Link,
-    ErrorStatus
-}
-
 internal sealed class OrleansRuntimeTelemetrySentinel : IDisposable
 {
     private readonly System.Threading.Lock gate = new();

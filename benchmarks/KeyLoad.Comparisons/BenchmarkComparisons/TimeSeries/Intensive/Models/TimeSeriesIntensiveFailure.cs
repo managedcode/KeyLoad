@@ -2,17 +2,6 @@ using Npgsql;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
-internal enum TimeSeriesIntensiveFailureOrigin
-{
-    None,
-    KeyLoad,
-    PostgreSQL,
-    HttpTransport,
-    Client,
-    Oracle,
-    Unexpected
-}
-
 internal readonly record struct TimeSeriesIntensiveFailure(TimeSeriesIntensiveFailureOrigin Origin,
     ErrorCode? KeyLoadCode, int? HttpStatus, ulong? SqlState)
 {

@@ -66,7 +66,3 @@ internal static class PartitionMovementParentOperationalCapacityRf3Preparation
         return body;
     }
 }
-
-internal sealed record PartitionMovementParentOperationalCapacityPrecut(PartitionMovementPublicParentRf3NativeCut[] Cuts,
-    PartitionMoveParentState State, PartitionMovementStoppedNativeSnapshot Inspected,
-    PartitionMovementStoppedNativeSnapshot Refused);

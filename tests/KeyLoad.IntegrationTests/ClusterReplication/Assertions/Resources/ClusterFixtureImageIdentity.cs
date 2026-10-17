@@ -112,5 +112,3 @@ internal static class ClusterFixtureImageIdentity
         return bytes;
     }
 }
-
-internal sealed record ClusterFixtureSourceImage(string Reference, string ManifestDigest, string ReceiptSha256);

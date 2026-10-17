@@ -11,7 +11,7 @@ internal sealed class ServerOnlyImagePreparationTests
     private const string EngineRejectedField = "engineRejected";
     private const string Probe = """
         import { pathToFileURL } from 'node:url';
-        import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
+        import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
         import path from 'node:path';
         import os from 'node:os';
         const [preparationModule, evidenceModule] = process.argv.slice(1);
@@ -27,10 +27,14 @@ internal sealed class ServerOnlyImagePreparationTests
         const engine = await import(pathToFileURL(path.join(path.dirname(preparationModule), 'image-engine.mjs')).href);
         const directory = await mkdtemp(path.join(os.tmpdir(), 'keyload-server-output-'));
         try {
-          await writeFile(path.join(directory, 'Dockerfile'), await readFile('Dockerfile'));
-          await engine.verifyDockerfilePins(directory, server);
+          for (const name of ['global.json', 'Directory.Build.props', 'src/KeyLoad.Server/KeyLoad.Server.csproj']) {
+            const destination = path.join(directory, name);
+            await mkdir(path.dirname(destination), {recursive: true});
+            await writeFile(destination, await readFile(name));
+          }
+          await engine.verifyContainerPins(directory, server);
           let engineRejected = false;
-          try { await engine.verifyDockerfilePins(directory); } catch { engineRejected = true; }
+          try { await engine.verifyContainerPins(directory); } catch { engineRejected = true; }
           const output = path.join(directory, 'output');
           await writeFile(output, '');
           await evidence.appendImageOutputs({githubOutput: output}, 'server-reference');

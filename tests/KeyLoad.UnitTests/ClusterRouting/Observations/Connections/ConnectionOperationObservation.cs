@@ -106,15 +106,3 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         }
     }
 }
-
-internal sealed record ConnectionObservedOperation(GrainRequestProbeIdentity Identity, GrainId GrainId,
-    ActivationId ActivationId)
-{
-    internal TaskCompletionSource Disposed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-}
-
-internal sealed record ConnectionOperationGate(GrainRequestPhase Phase, bool Fail)
-{
-    internal TaskCompletionSource Arrived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    internal TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-}

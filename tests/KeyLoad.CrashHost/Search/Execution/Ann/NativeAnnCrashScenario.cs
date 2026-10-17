@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Security;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.CQRS;

@@ -109,7 +109,7 @@ It remains administrator-authenticated, authorized and RF3 committed through
 the same unique request grain; no admission or credential bypass is introduced.
 
 Root freezes this contract, the worker changes only
-`src/KeyLoad.Core/ResourceExecution/Commands/CommandAdmissionGovernor.cs`
+`src/KeyLoad.Core/ResourceExecution/Commands/CommandAdmission/CommandAdmissionGovernor.cs`
 and its existing `CommandAdmissionGovernorTests.cs`, then root reviews and joins
 strict build/format, focused normal/scalar governor operations and the unchanged
 actual Aspire RF3 admission case. Add only the existing bootstrap operation kind

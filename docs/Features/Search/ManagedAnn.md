@@ -524,7 +524,7 @@ fixed test output stay outside the product and its execution budget.
 Traceability: REQ-ANN-018 -> AC-ANN-018 -> ADR-019 amendment ->
 TASK-ANN-RECIPROCAL-INSERTION -> independent native graph tests and original
 Aspire reports. The Luna source owner produces a hash-guarded private packet
-for `src/KeyLoad.Query/Search/Execution/PackedAnnNeighborSelection.cs`
+for `src/KeyLoad.Query/Search/Execution/PackedAnn/PackedAnnNeighborSelection.cs`
 and independent tests in the Search test slice. Root owns contract review,
 baseline/after observations, join, strict build/format and all required gates.
 No public, persistence, package, long-operation or RF3 contract changes occur.

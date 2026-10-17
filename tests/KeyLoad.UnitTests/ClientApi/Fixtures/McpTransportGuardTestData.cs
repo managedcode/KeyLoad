@@ -175,18 +175,3 @@ internal static class McpTransportGuardTestData
         return document.RootElement.GetProperty(ParametersField).GetProperty(field).GetString();
     }
 }
-
-/// <summary>Names concrete invalid HTTP header conditions.</summary>
-internal enum McpTransportHeaderFault
-{
-    MissingRevision, EmptyRevision, LegacyRevision, RevisionWhitespace, MarkerRevision, DuplicateRevision,
-    Session, EmptySession, LastEvent, EmptyLastEvent, DuplicateMethod, DuplicateName, EmptyMethod, EmptyName,
-    EmptyMethodValues, EmptyNameValues, NonAsciiMethod, NonAsciiName, ControlMethod, ControlName, DeleteMethod, DeleteName
-}
-
-/// <summary>Names concrete invalid JSON transport fields without changing business arguments.</summary>
-internal enum McpTransportFrameFault
-{
-    MethodMismatch, MethodWrongType, NameMismatch, NameWrongType, VersionMismatch, VersionWrongType, VersionNull,
-    MetaMismatch, MetaWrongType, MetaNull
-}

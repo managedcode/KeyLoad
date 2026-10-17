@@ -39,6 +39,7 @@ internal static class NativeCoverageRf3FixtureProtocol
     internal const string CoverageImagePrefix = "keyload/functional-coverage:";
     internal const string AspNetBaseImagePrefix = "mcr.microsoft.com/dotnet/aspnet:";
     internal const string ImageDigestSeparator = "@sha256:";
+    internal const string ContainerSettingsPath = "Directory.Build.props";
     internal const string DockerfileName = "Dockerfile";
     internal const string ShaHex = "0123456789abcdef";
     internal static readonly SearchValues<char> ShaCharacters = SearchValues.Create(ShaHex);

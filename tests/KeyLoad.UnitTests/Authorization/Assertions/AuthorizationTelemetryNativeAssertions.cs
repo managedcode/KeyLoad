@@ -1,4 +1,4 @@
-using KeyLoad.ServiceDefaults.Features.Authorization.Contracts;
+using KeyLoad.Server.Features.Authorization.Contracts;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 

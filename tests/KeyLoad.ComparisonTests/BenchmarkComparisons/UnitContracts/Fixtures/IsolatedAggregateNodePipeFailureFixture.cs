@@ -8,6 +8,3 @@ internal static class IsolatedAggregateNodePipeFailureFixture
         return await owner.CaptureAsync();
     }
 }
-
-internal sealed record IsolatedAggregateNodePipeFailures(
-    InvalidOperationException StandardOutput, InvalidOperationException StandardError, AggregateException Combined);

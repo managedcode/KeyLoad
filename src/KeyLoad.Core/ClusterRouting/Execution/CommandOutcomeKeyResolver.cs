@@ -5,8 +5,6 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ClusterRouting.Execution;
 
-internal readonly record struct CommandOutcomeSelection(byte[] Key, StoredOutcome? Outcome);
-
 internal static class CommandOutcomeKeyResolver
 {
     private const string InvalidScopeMessage = "The command outcome scope is invalid.";

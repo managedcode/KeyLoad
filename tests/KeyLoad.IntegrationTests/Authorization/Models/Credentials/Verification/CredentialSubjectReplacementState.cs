@@ -21,5 +21,3 @@ internal sealed record CredentialSubjectReplacementState(
         get; set;
     }
 }
-
-internal sealed record CredentialSubjectReplacementImage(DiscoveryAuthorityImage First, DiscoveryAuthorityImage Second);

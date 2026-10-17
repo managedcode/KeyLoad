@@ -1,7 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 using P = KeyLoad.IntegrationTests.Features.ClusterRouting.ControlledRetireAspireProtocol;
 
@@ -115,11 +114,4 @@ internal sealed class ControlledRetireAspireTrial
             ServerFailureObserver.Observe(original.Dispose, failures);
         }
     }
-}
-
-internal static class ControlledRetireAspirePublicIds
-{
-    internal static Guid For(PartitionMoveRequest request, long generation)
-        => PartitionMovementParentPhaseIds.For(request, PartitionMovementPublicParentRf3Administrator.PrincipalId,
-            PartitionMovementParentPhaseRole.Retire, cleanupGeneration: generation);
 }

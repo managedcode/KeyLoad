@@ -4,12 +4,13 @@ using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
+using Orleans.Placement;
 using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
-[global::Orleans.GrainType(DueCoordinatorAliases.Coordinator), global::Orleans.Placement.PreferLocalPlacement]
+[Immovable(ImmovableKind.Any)]
+[GrainType(DueCoordinatorAliases.Coordinator), PreferLocalPlacement]
 internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, DatabaseEngine database,
     Func<ICommitCoordinator> borrowCoordinator, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,

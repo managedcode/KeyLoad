@@ -7,6 +7,14 @@ const string PhysicalOwnerUnjoined = "The original physical owner has not joined
 global::KeyLoad.SimdRuntime.RequireHardwareSupport();
 _ = SerializationExecutionRegistration.Process.Value;
 var app = await ServerConfiguration.BuildAsync(args).ConfigureAwait(false);
+if (app.Services.GetService<CoordinationSiloOptions>() is not null)
+{
+    await using (app.ConfigureAwait(false))
+    {
+        await app.RunAsync().ConfigureAwait(false);
+    }
+    return;
+}
 var failures = new List<Exception>();
 OrleansNode? silo = null;
 async Task RunLifetimeAsync()

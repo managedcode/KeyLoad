@@ -30,7 +30,7 @@ internal static class AppHostOptionsRegistration
         var cluster = Bind<ClusterDeploymentOptions>(builder.Configuration, value => value.IsValid(), ClusterDeploymentOptions.ValidationMessage);
         var command = Bind<CommandAdmissionLimits>(builder.Configuration.GetSection(CommandAdmissionLimits.SectionName), value => Validate(value.Validate), CommandAdmissionLimits.ValidationMessage);
         var http = Bind<HttpAdmissionLimits>(builder.Configuration.GetSection(HttpAdmissionLimits.SectionName), value => Validate(value.Validate), HttpAdmissionLimits.ValidationMessage);
-        var replay = Bind<KeyLoad.Clustering.ReplicaReplayLimits>(builder.Configuration.GetSection(ClusterDeploymentOptions.ReplaySection), value => Validate(() => value.Validate(ClusterDeploymentOptions.VoterCount)), ClusterDeploymentOptions.ValidationMessage);
+        var replay = Bind<KeyLoad.Clustering.ReplicaReplayLimits>(builder.Configuration.GetSection(ClusterDeploymentOptions.ReplaySection), value => Validate(() => value.Validate(cluster.Value.ReplicaCount)), ClusterDeploymentOptions.ValidationMessage);
         var profile = BindProfileExecution(builder.Configuration);
         var deployment = Bind<BenchmarkDeploymentOptions>(builder.Configuration.GetSection(BenchmarkDeploymentOptions.SectionName), value => value.IsValid(), BenchmarkDeploymentOptions.ValidationMessage);
         var relay = Bind<BenchmarkRelayOptions>(builder.Configuration, _ => true, BenchmarkDeploymentOptions.ValidationMessage);
@@ -145,15 +145,3 @@ internal static class AppHostOptionsRegistration
         return options;
     }
 }
-
-internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> TestExecution, IOptions<AppHostStartupOptions> Startup,
-    IOptions<ScaleServerResourceOptions> ServerResources, IOptions<BenchmarkProvenanceOptions> Provenance,
-    IOptions<AppHostControlOptions> Control, IOptions<ContainerImageOptions> Images,
-    IOptions<ContainerImageExecutionOptions> ImageExecution, IOptions<LocalImageOptions> LocalImage,
-    IOptions<ClusterDeploymentOptions> Cluster, IOptions<CommandAdmissionLimits> CommandAdmission,
-    IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<KeyLoad.Clustering.ReplicaReplayLimits> ReplayAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
-    IOptions<BenchmarkRelayOptions> BenchmarkRelay, IOptions<RequestProbeFileOptions> RequestProbeFiles,
-    IOptions<KeyLoad.Clustering.ReplicaReplayLimits> IsolatedReplayAdmission,
-    IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> IsolatedAdmission,
-    IOptions<NativeCoverageExecutionOptions> NativeCoverage,
-    IOptions<NativeCoverageRf3ImageOptions> NativeCoverageRf3Image);

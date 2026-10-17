@@ -2,32 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>The closed vector workload axes admitted by native qualification.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum VectorIndexKind
-{
-    /// <summary>Uses native exact vector distance ordering without an ANN index.</summary>
-    Exact,
-    /// <summary>Uses a Hierarchical Navigable Small World index.</summary>
-    Hnsw,
-    /// <summary>Uses an inverted-file flat index.</summary>
-    IvfFlat,
-    /// <summary>Uses a database's native ANN method without relabeling its algorithm.</summary>
-    NativeAnn
-}
-
-/// <summary>The native vector query workload applied by a vector profile.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum VectorQueryMode
-{
-    /// <summary>Searches the complete corpus without a predicate.</summary>
-    Plain,
-    /// <summary>Searches records whose number is divisible by 100.</summary>
-    Filtered,
-    /// <summary>Searches the stable 90 percent while updating excluded records.</summary>
-    Mixed
-}
-
 /// <summary>One immutable vector workload profile with its corpus, query and accuracy bounds.</summary>
 [JsonConverter(typeof(VectorComparisonProfileJsonConverter))]
 public sealed record VectorComparisonProfile

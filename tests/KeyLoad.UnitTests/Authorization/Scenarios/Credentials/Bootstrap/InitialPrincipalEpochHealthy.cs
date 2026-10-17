@@ -3,8 +3,6 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
-internal sealed record InitialPrincipalEpochState(ReplicatedOperation Operation, CommitReceipt Receipt, byte[] Outcome);
-
 internal static class InitialPrincipalEpochHealthy
 {
     internal static async Task<InitialPrincipalEpochState> CreateAsync(InitialPrincipalEpochFixture fixture, CancellationToken token)

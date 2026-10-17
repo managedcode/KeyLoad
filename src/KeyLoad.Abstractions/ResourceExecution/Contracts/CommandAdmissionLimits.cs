@@ -1,0 +1,63 @@
+namespace KeyLoad;
+
+/// <summary>Configures node-local admission limits without changing canonical apply decisions.</summary>
+[ConfigurationOptions]
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.CommandAdmissionLimits)]
+public sealed record CommandAdmissionLimits
+{
+    /// <summary>The section bound by the server composition root.</summary>
+    public const string SectionName = "KeyLoad:CommandAdmission";
+    /// <summary>The startup rejection for invalid admission settings.</summary>
+    public const string ValidationMessage = "Command admission limits must be positive.";
+    private const int MinimumPositiveBudget = 1;
+    private const int DefaultMaxCommands = 256;
+    private const long DefaultMaxRetainedBytes = 134_217_728;
+    private const int DefaultMaxTenantCommands = 128;
+    private const int DefaultMaxPrincipalCommands = 64;
+    private const int DefaultReservedControlCommands = 16;
+    private const long DefaultReservedControlBytes = 2_097_152;
+    private const int DefaultMaxControlPayloadBytes = 65_536;
+    private const int DefaultMaxTenantControlCommands = 8;
+    private const int DefaultMaxPrincipalControlCommands = 8;
+
+    /// <summary>Gets or sets the maximum number of admitted commands.</summary>
+    [Orleans.Id(0)]
+    public int MaxCommands { get; init; } = DefaultMaxCommands;
+    /// <summary>Gets or sets the maximum bytes retained by admitted commands.</summary>
+    [Orleans.Id(1)]
+    public long MaxRetainedBytes { get; init; } = DefaultMaxRetainedBytes;
+    /// <summary>Gets or sets the maximum number of admitted commands per tenant.</summary>
+    [Orleans.Id(2)]
+    public int MaxTenantCommands { get; init; } = DefaultMaxTenantCommands;
+    /// <summary>Gets or sets the maximum number of admitted commands per principal.</summary>
+    [Orleans.Id(3)]
+    public int MaxPrincipalCommands { get; init; } = DefaultMaxPrincipalCommands;
+    /// <summary>Gets or sets the command capacity reserved for control operations.</summary>
+    [Orleans.Id(4)]
+    public int ReservedControlCommands { get; init; } = DefaultReservedControlCommands;
+    /// <summary>Gets or sets the byte capacity reserved for control operations.</summary>
+    [Orleans.Id(5)]
+    public long ReservedControlBytes { get; init; } = DefaultReservedControlBytes;
+    /// <summary>Gets or sets the maximum payload size for a control command, in bytes.</summary>
+    [Orleans.Id(6)]
+    public int MaxControlPayloadBytes { get; init; } = DefaultMaxControlPayloadBytes;
+    /// <summary>Gets or sets the maximum number of control commands per tenant.</summary>
+    [Orleans.Id(7)]
+    public int MaxTenantControlCommands { get; init; } = DefaultMaxTenantControlCommands;
+    /// <summary>Gets or sets the maximum number of control commands per principal.</summary>
+    [Orleans.Id(8)]
+    public int MaxPrincipalControlCommands { get; init; } = DefaultMaxPrincipalControlCommands;
+
+    /// <summary>Validates that all configured limits are positive.</summary>
+    /// <exception cref="ArgumentException">One or more configured limits are not positive.</exception>
+    public void Validate()
+    {
+        if (MaxCommands < MinimumPositiveBudget || MaxRetainedBytes < MinimumPositiveBudget || MaxTenantCommands < MinimumPositiveBudget || MaxPrincipalCommands < MinimumPositiveBudget
+            || ReservedControlCommands < MinimumPositiveBudget || ReservedControlBytes < MinimumPositiveBudget || MaxControlPayloadBytes < MinimumPositiveBudget
+            || MaxTenantControlCommands < MinimumPositiveBudget || MaxPrincipalControlCommands < MinimumPositiveBudget)
+        {
+            throw new ArgumentException(ValidationMessage);
+        }
+    }
+}

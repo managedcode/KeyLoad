@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.DocumentStorage;
-using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 namespace KeyLoad.RecoveryTests.Features.EventStreams;

@@ -6,6 +6,3 @@ internal sealed record RequestCqrsProbeSnapshot(
     IReadOnlyList<RequestCqrsProbeMarkerRecord> Markers,
     int FileCount,
     long AggregateBytes);
-
-internal sealed record RequestCqrsProbeLoadedArm(RequestCqrsProbeArmRecord Record, byte[] ExactBytes);
-

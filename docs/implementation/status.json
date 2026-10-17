@@ -1,4 +1,19 @@
 {
+  "PROJECT-CONSOLIDATION-20261017": {
+    "status": "in_progress",
+    "implementation": "Reviewed all23 solution projects and consolidated four redundant runtime assemblies. Authorization evaluation moved into Core; archive transfer and native file IO into Storage.ZoneTree; server-only ServiceDefaults into Server. Updated namespaces, project references, central source-module inventories and ownership policies. Runtime projects reduced from14 to10; no forwarding assemblies or behavior fallbacks.",
+    "verification": {
+      "projectGraph": "Passed:23 projects,10 runtime projects; all project references exist; dependency graph is acyclic.",
+      "governance": "Passed local structural validation for23 projects.",
+      "build": "All10 runtime projects, AppHost, benchmark projects, analyzer tests, comparison tests, integration tests, CrashHost, recovery tests and site tests compiled in Release with warning-as-error. Full solution failed in UnitTests with545 compiler errors, predominantly duplicate declarations in the shared ongoing test reorganization. No full-solution success is claimed.",
+      "unit": "Not executed on stale binaries. Current UnitTests compilation is blocked, including duplicate ReplicaMalformedBatchCodec declarations in InternalSerialization.",
+      "recovery": "Aspire-owned CommandIdempotencyProcessRecoveryTests executed:0 passed,1 failed. Recovered document revision/content did not match the canonical expected result. Original report:TestResults/project-consolidation-20261017/recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx.",
+      "rf3": "Aspire-owned ConnectionRf3AuthorizationTests selected both .NET SDK and official MCP cases. Both stopped before cluster operations because Actual GitHub RF3 image identity is required. No Docker RF3 behavior pass is claimed. Original report:TestResults/project-consolidation-20261017/rf3/KeyLoad.IntegrationTests_net10.0_arm64.trx.",
+      "cleanup": "Both Aspire test hosts exited with their real failure code and joined DCP shutdown/temporary-resource cleanup. RF3 admission stopped before Docker topology startup."
+    },
+    "fullQualificationPassed": false,
+    "localSourceChecksPassed": true
+  },
   "SOURCE-LAYOUT-20261017": {
     "status": "in_progress",
     "implementation": "Reviewed project source placement across runtime, tests, benchmarks, AppHost and analyzers. Moved 5536 C# sources into concrete responsibility and subject folders; removed generic Helpers folders, retained existing thematic Cases folders, original projects, namespaces and public/persisted identities. Updated linked sources and live source/coverage/documentation maps. Physical moves preserved all 13913 original C# sources before the separately authorized formatter pass.",
@@ -97,7 +112,7 @@
       "actualSdkBuiltProjects": [
         "KeyLoad.Abstractions",
         "KeyLoad.Analyzers",
-        "KeyLoad.Artifacts",
+        "KeyLoad.BackupRestore",
         "KeyLoad.Cli",
         "KeyLoad.Client",
         "KeyLoad.Clustering",
@@ -40932,8 +40947,8 @@
           "src/KeyLoad.Server/DocumentStorage/Execution/ControlledDocumentSourceRead.cs",
           "src/KeyLoad.Server/DocumentStorage/Execution/RemoteDocumentRouter.cs",
           "src/KeyLoad.Server/DocumentStorage/Lifecycle/RemoteDocumentRuntime.cs",
-          "src/KeyLoad.ServiceDefaults/Authorization/Diagnostics/HttpTelemetryPrivacyProcessor.cs",
-          "src/KeyLoad.ServiceDefaults/Authorization/Validation/HttpTelemetryPrivacyPolicy.cs",
+          "src/KeyLoad.Server/Authorization/Diagnostics/HttpTelemetryPrivacyProcessor.cs",
+          "src/KeyLoad.Server/Authorization/Validation/HttpTelemetryPrivacyPolicy.cs",
           "tests/KeyLoad.CrashHost/ClusterRouting/Lifecycle/ControlledPartitionMovementLoopbackListeners.cs",
           "tests/KeyLoad.CrashHost/ClusterRouting/Lifecycle/ControlledPartitionMovementNativeJournal.cs",
           "tests/KeyLoad.IntegrationTests/ClusterReplication/Fixtures/ReplicaIsolationNativeRetirementFixture.cs",
@@ -42385,7 +42400,7 @@
         "inputCount": 5276,
         "inputDrift": [],
         "uniqueErrors": [
-          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.ServiceDefaults/Authorization/Validation/HttpTelemetryPrivacyPolicy.cs(52,21): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj]"
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Authorization/Validation/HttpTelemetryPrivacyPolicy.cs(52,21): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj]"
         ],
         "qualification": "local development; source drift invalidates exact-current-source qualification"
       },
@@ -55716,7 +55731,7 @@
     "status": "done",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs",
+      "src/KeyLoad.Storage.ZoneTree/Restore/Execution/BackupArtifact.cs",
       "tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs",
       "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690"
     ],
@@ -59643,7 +59658,7 @@
     "title": "Security і telemetry baseline",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "src/KeyLoad.ServiceDefaults/Extensions.cs"
     ],
     "currentTelemetryDevelopment": {
@@ -64192,7 +64207,7 @@
       "docs/ADR/ADR-008-backup-log-retention.md",
       "docs/ADR/ADR-030-retention-paused-restore.md",
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs",
+      "src/KeyLoad.Storage.ZoneTree/Restore/Execution/BackupArtifact.cs",
       "tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs",
       "docs/ADR/ADR-123-native-rf3-cluster-restore.md",
       "src/KeyLoad.Cli/Restore/Commands/ClusterRestoreCoordinator.cs",
@@ -64721,7 +64736,7 @@
     "title": "Principals, API keys і RBAC",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs",
       "tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaTransportSecurityTests.cs"
@@ -64731,7 +64746,7 @@
     "title": "Sensitive field catalog",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs",
       "tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaTransportSecurityTests.cs",
@@ -64748,7 +64763,7 @@
     "title": "Sensitive expression usage enforcement",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs",
       "tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaTransportSecurityTests.cs",
@@ -64766,7 +64781,7 @@
     "title": "Єдиний safe projector",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs",
       "tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaTransportSecurityTests.cs",
@@ -64784,7 +64799,7 @@
     "title": "Row ACL planner і graph enforcement",
     "status": "done",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs",
       "tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaTransportSecurityTests.cs"
@@ -64886,7 +64901,7 @@
     "title": "Revocation epochs і cursor reauthorization",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs",
       "tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaTransportSecurityTests.cs",
@@ -64918,7 +64933,7 @@
     "title": "Security adversarial matrix",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs",
       "tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaTransportSecurityTests.cs"
@@ -66079,7 +66094,7 @@
     "title": "Event/message RBAC і sensitive schemas",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/Authorization/Execution/AuthorizationPolicy.cs",
       "src/KeyLoad.Core/MutationAuthorization.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/SecurityAnd/SecurityAndQueryTests.cs",
       "tests/KeyLoad.UnitTests/Messaging/Cases/Subscription/SubscriptionTests.cs",
@@ -66119,7 +66134,7 @@
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "src/KeyLoad.Core/EventStreams/Execution/EventSources.cs",
-      "src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs",
+      "src/KeyLoad.Storage.ZoneTree/Restore/Execution/BackupArtifact.cs",
       "tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs",
       "tests/KeyLoad.UnitTests/Restore/Cases/Event/EventingArtifactStateTests.cs",
       "tests/KeyLoad.UnitTests/Authorization/Cases/DeniedCommand/DeniedCommandReplayClockTests.cs"
@@ -69768,7 +69783,7 @@
         "compiledSourceCount": 3167,
         "currentAnalyzerAndAppHost": true,
         "staleProjects": [
-          "KeyLoad.Artifacts",
+          "KeyLoad.BackupRestore",
           "KeyLoad.UnitTests",
           "KeyLoad.IntegrationTests"
         ],

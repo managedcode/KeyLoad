@@ -1,12 +1,5 @@
 namespace KeyLoad.Analyzers.Features.CodeQuality;
 
-internal static class CodeQualityDiagnosticCategories
-{
-    public const string Architecture = "Architecture";
-    public const string Design = "Design";
-    public const string Reliability = "Reliability";
-}
-
 internal static class CodeQualityDiagnosticText
 {
     public const string MagicRuntimeDurationTitle = "Runtime numeric literals must use named constants";
@@ -53,34 +46,4 @@ internal static class CodeQualityDiagnosticText
     public const string TypedSynchronizationTitle = "Use typed synchronization outside grain-owned state";
     public const string TypedSynchronizationMessage = "Use System.Threading.Lock for short shared-service critical sections and Orleans turn scheduling for activation-owned state instead of '{0}'";
     public const string TypedSynchronizationDescription = "Object-typed locks and Monitor calls are prohibited. Orleans activations use turn scheduling; shared asynchronous work uses cancellation-aware SemaphoreSlim.WaitAsync.";
-}
-
-internal static class CodeQualitySourceNames
-{
-    public const string ProgramFile = "Program.cs";
-    public const string ProgramType = "Program";
-    public const string ProgramLineReplacement = " ";
-    public const string TruncationEllipsis = "...";
-    public const string MapMethodPrefix = "Map";
-    public const string OrleansNamespace = "Orleans";
-    public const string ContractsDirectorySegment = "/Contracts/";
-    public const string SystemNamespace = "System";
-}
-
-internal static class CodeQualityLifecycleMethodNames
-{
-    public const string CreateBuilder = "CreateBuilder";
-    public const string CreateDefault = "CreateDefault";
-    public const string Build = "Build";
-    public const string Run = "Run";
-    public const string RunAsync = "RunAsync";
-    public const string ConfigureAwait = "ConfigureAwait";
-}
-
-internal static class CodeQualitySourceLimits
-{
-    public const int DiagnosticExcerptLength = 96;
-    private const int TruncationEllipsisLength = 3;
-    public const int DiagnosticExcerptPrefixLength =
-        DiagnosticExcerptLength - TruncationEllipsisLength;
 }

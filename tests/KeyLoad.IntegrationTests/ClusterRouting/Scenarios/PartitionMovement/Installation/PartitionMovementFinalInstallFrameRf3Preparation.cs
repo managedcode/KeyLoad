@@ -44,7 +44,3 @@ internal static class PartitionMovementFinalInstallFrameRf3Preparation
         return new(cuts, owners, state, total, grantId, effectId, calibrated, refused);
     }
 }
-
-internal sealed record PartitionMovementFinalInstallFramePrecut(PartitionMovementPublicParentRf3NativeCut[] Cuts,
-    Dictionary<string, NodeStatus> Owners, PartitionMoveParentState State, int FinalOrdinal, Guid GrantId, Guid EffectId,
-    PartitionMovementStoppedNativeSnapshot Calibrated, PartitionMovementStoppedNativeSnapshot Refused);

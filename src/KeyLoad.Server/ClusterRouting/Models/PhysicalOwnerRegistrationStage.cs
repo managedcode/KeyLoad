@@ -9,11 +9,3 @@ internal enum PhysicalOwnerRegistrationStage
     Registration,
     DirectoryVerification
 }
-
-internal enum PhysicalOwnerRegistrationFailureCategory
-{
-    Domain,
-    Cancellation,
-    Protocol,
-    Unexpected
-}

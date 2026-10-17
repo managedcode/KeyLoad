@@ -20,8 +20,6 @@ export const fileName = Object.freeze({
   nativeCommands: 'native-commands.jsonl',
   registryHeaders: 'registry-headers.jsonl',
   registryReadiness: 'registry-readiness.jsonl',
-  serverDockerfile: 'Dockerfile',
-  runnerDockerfile: 'benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/Dockerfile',
 });
 
 export const directoryName = Object.freeze({ evidence: 'keyload-images' });
@@ -38,7 +36,7 @@ export const registry = Object.freeze({
   ownerRepositoryLabel: 'io.keyload.image-repository',
 });
 export const baseImage = Object.freeze({
-  sdk: 'mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317',
+  sdk: 'dotnet-sdk:10.0.401',
   aspnet: 'mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4',
 });
 
@@ -50,8 +48,6 @@ export const imageKind = Object.freeze({
 
 export const imageBuild = Object.freeze({
   platform: 'linux/amd64',
-  serverDockerfile: fileName.serverDockerfile,
-  runnerDockerfile: fileName.runnerDockerfile,
   context: '.',
   repository: 'managedcode/KeyLoad',
 });

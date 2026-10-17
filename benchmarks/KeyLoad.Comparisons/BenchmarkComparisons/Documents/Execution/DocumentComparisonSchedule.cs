@@ -1,7 +1,5 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>One deterministic native operation and its exact input.</summary>
-public sealed record DocumentScheduledOperation(Scenario Operation, BenchmarkDocument Input);
 /// <summary>Disjoint mutation lanes and stable read lanes shared by every native database.</summary>
 public sealed class DocumentComparisonSchedule(DocumentComparisonScenario scenario, DocumentComparisonCorpus corpus, int operations)
 {

@@ -1,0 +1,198 @@
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using MongoDB.Driver;
+
+namespace KeyLoad.Comparisons.Targets;
+
+/// <summary>Runs the comparison workload against an owned MongoDB database.</summary>
+/// <param name="connectionString">MongoDB connection string for the selected topology.</param>
+/// <param name="runId">Stable run identifier used to isolate the benchmark database.</param>
+/// <param name="image">Server image recorded in comparison provenance.</param>
+/// <param name="topology">Requested one, two or three native members.</param>
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
+public sealed partial class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
+{
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
+
+    private readonly string databaseName = MongoSchema.DatabasePrefix + Guid.Parse(runId).ToString(MongoSchema.InvariantFormat);
+    private readonly List<IMongoClient> ownedClients = [];
+    private MongoClient? primaryClient;
+    private IMongoDatabase? database;
+    private IMongoCollection<BsonDocument>? documents;
+    private IMongoCollection<BsonDocument>? edges;
+    private IMongoCollection<BsonDocument>? events;
+    private int graphDepth;
+    private int corpusCount;
+
+    /// <summary>Gets the verified server profile after initialization.</summary>
+    public TargetProfile Profile { get; private set; } = MongoProfileFactory.Create(connectionString, image, topology);
+
+    /// <summary>Reports whether the requested workload scenario has a MongoDB implementation.</summary>
+    /// <param name="scenario">The comparison scenario.</param>
+    /// <returns>Whether this target supports that scenario.</returns>
+    public bool Supports(Scenario scenario)
+        => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete or Scenario.GraphNeighbors or Scenario.GraphTraverse
+            or Scenario.StreamAppend or Scenario.StreamRead;
+
+    /// <summary>Creates collections, seeds the corpus, and verifies the selected topology.</summary>
+    /// <param name="dataset">The deterministic comparison corpus and options.</param>
+    /// <param name="cancellationToken">Cancels initialization.</param>
+    /// <returns>A task that completes after verification.</returns>
+    public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
+    {
+        const string DocumentOnlyMajorityReadContract = "primary majority document reads; S1 seeds documents only, with no edge or event records";
+        const int SingleItemCount = 1;
+
+        ArgumentNullException.ThrowIfNull(dataset);
+        graphDepth = dataset.Settings.GraphDepth;
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
+        {
+            Profile = Profile with
+            {
+                ReadContract = DocumentOnlyMajorityReadContract
+            };
+        }
+        corpusCount = dataset.Documents.Count;
+        var settings = CreateSettings(connectionString, dataset.Settings.Concurrency, executionOptions);
+        primaryClient = new MongoClient(settings);
+        ownedClients.Add(primaryClient);
+        database = primaryClient.GetDatabase(databaseName);
+        documents = database.GetCollection<BsonDocument>(MongoSchema.DocumentsCollection);
+        edges = database.GetCollection<BsonDocument>(MongoSchema.EdgesCollection);
+        events = database.GetCollection<BsonDocument>(MongoSchema.EventsCollection);
+
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
+        using (documentTiming?.MeasureIndex())
+        {
+            await CreateIndexesAsync(cancellationToken);
+        }
+
+        using (documentTiming?.MeasureLoad())
+        {
+            await MongoCorpusSeed.SeedAsync(dataset, documents, edges, events, StreamName, executionOptions, cancellationToken);
+        }
+
+        if (dataset.Settings is not ScaledComparisonProfile && dataset is not DocumentComparisonCorpus)
+        {
+            await VerifyUniqueStreamInsertionAsync(cancellationToken);
+        }
+        var version = await ReadPrimaryVersionAsync(cancellationToken);
+        var profile = Profile with
+        {
+            Version = version
+        };
+        if (ComparisonTopologies.NodeCount(topology) > SingleItemCount)
+        {
+            var proof = await MongoReplicaVerifier.VerifyAsync(connectionString: connectionString,
+                adminDatabase: primaryClient.GetDatabase(MongoSchema.AdminDatabase), database: database, documents: documents,
+                topology: topology, dataset: dataset, cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions,
+                executionOptions: executionOptions, timeProvider: timeProvider);
+            ownedClients.AddRange(proof.SecondaryClients);
+            profile = profile with
+            {
+                Cluster = proof.Evidence,
+                Version = proof.Version
+            };
+        }
+        else
+        {
+            await VerifySingleNodeAsync(cancellationToken);
+            profile = profile with
+            {
+                Cluster = new ClusterEvidence(MongoSchema.SingleNodeCount, MongoSchema.SingleNodeCount,
+                MongoSchema.SingleState, [MongoSchema.SingleObservation])
+            };
+        }
+        Profile = profile;
+    }
+
+    /// <summary>Opens a session over this initialized target.</summary>
+    /// <param name="cancellationToken">Cancellation token for the session request.</param>
+    /// <returns>A session that borrows this target's MongoDB collections.</returns>
+    public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
+    {
+        if (documents is null || edges is null || events is null)
+        {
+            throw new ComparisonFailureException(MongoSchema.FailureNotInitialized);
+        }
+        return Task.FromResult<IComparisonSession>(new MongoSession(this, documents, edges, events, graphDepth, corpusCount, executionOptions));
+    }
+
+    /// <summary>Drops the isolated benchmark database and disposes owned clients.</summary>
+    /// <returns>A task that completes when cleanup finishes.</returns>
+    public async ValueTask DisposeAsync()
+    {
+        if (primaryClient is null)
+        {
+            return;
+        }
+        using var cleanup = new CancellationTokenSource(lifecycleOptions.Value.MongoCleanupTimeout, timeProvider);
+        try
+        {
+            await primaryClient.DropDatabaseAsync(databaseName, cleanup.Token);
+        }
+        finally
+        {
+            foreach (var client in ownedClients)
+            {
+                if (ReferenceEquals(client, primaryClient))
+                {
+                    primaryClient.Dispose();
+                }
+                else
+                {
+                    client.Dispose();
+                }
+            }
+            ownedClients.Clear();
+        }
+    }
+
+    internal string StreamName(BenchmarkDocument document)
+        => MongoSchema.DatabasePrefix + databaseName + MongoSchema.DatabaseSeparator + document.Id;
+
+    internal static MongoClientSettings CreateSettings(string connectionString, int concurrency,
+        IOptions<NativeComparisonExecutionOptions> executionOptions)
+        => MongoProfileFactory.CreateSettings(connectionString, concurrency, executionOptions);
+
+    private async Task CreateIndexesAsync(CancellationToken cancellationToken)
+    {
+        var edgeCollection = Require(edges);
+        var sourceIndex = new CreateIndexModel<BsonDocument>(Builders<BsonDocument>.IndexKeys.Ascending(MongoSchema.FromField));
+        await edgeCollection.Indexes.CreateOneAsync(sourceIndex, cancellationToken: cancellationToken);
+    }
+
+    private Task VerifySingleNodeAsync(CancellationToken cancellationToken)
+        => MongoServerVerification.VerifySingleNodeAsync(primaryClient, cancellationToken);
+
+    private Task<string> ReadPrimaryVersionAsync(CancellationToken cancellationToken)
+        => MongoServerVerification.ReadPrimaryVersionAsync(database, cancellationToken);
+
+    private async Task VerifyUniqueStreamInsertionAsync(CancellationToken cancellationToken)
+    {
+        var streamId = MongoSchema.CollectionProbePrefix + Guid.NewGuid().ToString(MongoSchema.InvariantFormat);
+        var collection = Require(events);
+        await collection.InsertOneAsync(MongoSchema.Event(streamId, Guid.NewGuid(), MongoProbe.Payload), cancellationToken: cancellationToken);
+        try
+        {
+            await collection.InsertOneAsync(MongoSchema.Event(streamId, Guid.NewGuid(), MongoProbe.Payload), cancellationToken: cancellationToken);
+            throw new ComparisonFailureException(MongoSchema.FailureDuplicateStreamAccepted);
+        }
+        catch (MongoWriteException error) when (error.WriteError.Category == ServerErrorCategory.DuplicateKey)
+        {
+            // A different event ID still conflicts because this adapter promises one event per unique stream.
+        }
+        finally
+        {
+            await collection.DeleteOneAsync(new BsonDocument(MongoSchema.IdField, streamId), cancellationToken: cancellationToken);
+        }
+    }
+
+    private static T Require<T>(T? value) where T : class
+        => value ?? throw new ComparisonFailureException(MongoSchema.FailureNotInitialized);
+
+}

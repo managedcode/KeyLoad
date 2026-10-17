@@ -100,5 +100,3 @@ internal static class PartitionQueryTestSupport
         _ = database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader)).Get<PrincipalRecord>();
     }
 }
-
-internal sealed record PartitionQuerySeed(string Id, int Score, string Label, string? Secret = null);

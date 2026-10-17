@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Replication;
-using KeyLoad.Security;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging.Abstractions;
 

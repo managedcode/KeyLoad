@@ -189,5 +189,3 @@ internal static class SiteCoverageGate
     private static bool Meets(int covered, int total, int threshold) => total > SiteCoverageTokens.Zero &&
         (long)covered * SiteTokens.ErrorPercentageScale >= (long)total * threshold;
 }
-
-internal sealed record SiteCoverageCriticalResult(string Path, int CoveragePercent, bool Passed);

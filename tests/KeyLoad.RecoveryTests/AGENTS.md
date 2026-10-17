@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns recovery, durable-log, snapshot, peer-security, projection and subscription recovery tests.
-- Main suites include `StorageRecovery/Cases/RecoveryTests.cs`, `ClusterReplication/Cases/Replica/ReplicaPersistenceTests.cs`, `ClusterReplication/Cases/Replica/ReplicaSnapshotMetadataRecoveryTests.cs`, `ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs`, `ClusterReplication/Cases/Replica/ReplicaTermMetadataSnapshotTests.cs`, `EventStreams/Cases/ProjectionRecoveryTests.cs` and `ChangeFeeds/Cases/SubscriptionRecoveryTests.cs`.
+- Main suites include `StorageRecovery/Cases/RecoveryTests.cs`, `ClusterReplication/Cases/Replica/ReplicaPersistenceTests.cs`, `ClusterReplication/Cases/Replica/ReplicaSnapshot/ReplicaSnapshotMetadataRecoveryTests.cs`, `ClusterReplication/Cases/PeerDiscovery/PeerDiscoverySecurityTests.cs`, `ClusterReplication/Cases/Replica/ReplicaTerm/ReplicaTermMetadataSnapshotTests.cs`, `EventStreams/Cases/ProjectionRecoveryTests.cs` and `ChangeFeeds/Cases/SubscriptionRecoveryTests.cs`.
 
 ## Ownership and boundaries
 - Feature cases belong under matching canonical `<SliceName>/` paths; real process-host and shared recovery fixture infrastructure may remain shared.

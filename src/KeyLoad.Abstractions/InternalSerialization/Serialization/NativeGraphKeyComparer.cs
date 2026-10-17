@@ -2,8 +2,6 @@ using System.Runtime.CompilerServices;
 
 namespace KeyLoad.Features.InternalSerialization;
 
-internal readonly record struct NativeGraphKey(object Value, NativeValueValidation? Validation);
-
 // Record payloads can have expensive structural equality. Memoization always compares the
 // payload by identity while retaining the applicable collection-nullability contract.
 internal sealed class NativeGraphKeyComparer : IEqualityComparer<NativeGraphKey>

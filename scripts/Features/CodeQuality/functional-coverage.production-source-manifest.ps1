@@ -35,10 +35,9 @@ $script:Psm = [ordered]@{
     InvalidReceipt = 'The production source manifest or a referenced native image receipt is invalid.'
     Drift = 'A source, native image, compile input or producer changed during identity capture.'
     ProjectNames = @(
-        'KeyLoad.Abstractions','KeyLoad.Analyzers','KeyLoad.AppHost','KeyLoad.Artifacts',
-        'KeyLoad.Cli','KeyLoad.Client','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering',
-        'KeyLoad.Query','KeyLoad.Replication','KeyLoad.Security','KeyLoad.Server',
-        'KeyLoad.ServiceDefaults','KeyLoad.Storage.IO','KeyLoad.Storage.ZoneTree'
+        'KeyLoad.Abstractions','KeyLoad.Analyzers','KeyLoad.AppHost','KeyLoad.Cli','KeyLoad.Client','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering',
+        'KeyLoad.Query','KeyLoad.Replication','KeyLoad.Server',
+        'KeyLoad.Storage.ZoneTree'
     )
     TestProjects = @('KeyLoad.UnitTests','KeyLoad.RecoveryTests','KeyLoad.IntegrationTests')
     CentralNames = @('global.json','Directory.Build.props','Directory.Build.targets',
@@ -49,9 +48,8 @@ $script:Psm = [ordered]@{
     ContributorRegistryPath = 'scripts/Features/CodeQuality/functional-coverage.product-contributors.json'
     MaximumJsonDepth = 32
     ProductionModuleRoster = @(
-        'KeyLoad.Abstractions','KeyLoad.Artifacts','KeyLoad.Cli','KeyLoad.Client','KeyLoad.Core',
-        'KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query','KeyLoad.Replication','KeyLoad.Security',
-        'KeyLoad.Server','KeyLoad.ServiceDefaults','KeyLoad.Storage.IO','KeyLoad.Storage.ZoneTree'
+        'KeyLoad.Abstractions','KeyLoad.Cli','KeyLoad.Client','KeyLoad.Core',
+        'KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query','KeyLoad.Replication','KeyLoad.Server','KeyLoad.Storage.ZoneTree'
     )
     SettingsPath = 'scripts/Features/CodeQuality/functional-coverage.production.settings.xml'
     SettingsEvidenceName = 'functional-coverage.production.settings.xml'

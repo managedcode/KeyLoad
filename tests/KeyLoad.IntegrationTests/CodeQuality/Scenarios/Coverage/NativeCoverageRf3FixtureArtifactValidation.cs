@@ -61,7 +61,7 @@ internal static class NativeCoverageRf3FixtureArtifactValidation
                 != NativeCoverageRf3Protocol.BaseImageSchemaVersion
             || RequiredString(root, NativeCoverageRf3FixtureProtocol.SourceRevisionProperty) != sourceRevision
             || RequiredString(root, NativeCoverageRf3FixtureProtocol.SourcePathProperty)
-                != NativeCoverageRf3FixtureProtocol.DockerfileName
+                != NativeCoverageRf3FixtureProtocol.ContainerSettingsPath
             || reference != contextBaseReference || !IsPinnedBaseReference(reference) || !IsSha256(sha))
         {
             throw Invalid();

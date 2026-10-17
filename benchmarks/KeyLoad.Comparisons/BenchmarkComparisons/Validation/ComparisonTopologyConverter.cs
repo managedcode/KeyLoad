@@ -3,11 +3,6 @@ using System.Globalization;
 
 namespace KeyLoad.Comparisons;
 
-internal static class ComparisonTopologyNames
-{
-    internal const string Single = "Single";
-}
-
 /// <summary>Preserves the comparison topology's established configuration names for external type-descriptor callers.</summary>
 public sealed class ComparisonTopologyConverter : EnumConverter
 {

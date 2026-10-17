@@ -1,9 +1,5 @@
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-internal enum StrongReadSessionRoute
-{
-    SdkGet, McpGet, SdkCall, McpCall
-}
 internal static class StrongReadSessionProtocol
 {
     internal const string Collection = "strong-session-absence";

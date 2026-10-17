@@ -383,17 +383,17 @@ Frontend: N/A, internal native execution. No public database protocol, storage f
 |---|
 | `src/KeyLoad.Clustering/ClusterRouting/Contracts/IGrainActivationMigrationObserver.cs` |
 | `src/KeyLoad.Clustering/ClusterRouting/Grains/CommandPartitionGrain.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Contracts/RequestCqrsProbeMigrationProtocol.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Contracts/RequestCqrsProbeMigrationRecord.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Execution/RequestCqrsProbeMigration.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Execution/RequestCqrsProbeMigrationFiles.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Execution/RequestCqrsProbeObserver.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Hosting/OrleansSiloConfiguration.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeFiles.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeJson.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeMigrationJson.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeMigrationJsonContext.cs` |
-| `src/KeyLoad.Server/ClusterRouting/Validation/RequestCqrsProbeMigrationValidation.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Contracts/RequestExecution/RequestCqrsProbeMigrationProtocol.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Contracts/RequestExecution/RequestCqrsProbeMigrationRecord.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Execution/RequestExecution/Probe/RequestCqrsProbeMigration.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Execution/RequestExecution/Probe/RequestCqrsProbeMigrationFiles.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Execution/RequestExecution/Probe/RequestCqrsProbeObserver.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Hosting/SiloHosting/OrleansSiloConfiguration.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestExecution/Probe/RequestCqrsProbeFiles.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestExecution/Probe/RequestCqrsProbeJson.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestExecution/Probe/RequestCqrsProbeMigrationJson.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestExecution/Probe/RequestCqrsProbeMigrationJsonContext.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Validation/RequestExecution/Probe/RequestCqrsProbeMigrationValidation.cs` |
 | `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/Activation/NativeActivationMigrationRf3Ownership.cs` |
 | `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/Activation/NativeActivationRf3ColdOutcome.cs` |
 | `tests/KeyLoad.IntegrationTests/ClusterRouting/Cases/NativeDatabase/NativeDatabaseMigrationRf3Tests.cs` |
@@ -470,7 +470,7 @@ REQ-XFER-PROBE-DI-001: The actual receiver host owns one PhysicalOwnerProbeEndpo
 
 AC-XFER-PROBE-DI-001: Actual original R65 Server assembly and Microsoft DI activation reject the previous implementation-type registration with InvalidOperationException because it has zero public constructors. The scoped factory must permit the original protected six-owner public transfer operation to reach its genuine signed receiver and pass full source/target state, SDK/official MCP/Q1, original receipt replay, two same-volume cold and ACK/no-resurrection oracles. The existing ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage case and all its original capacity/deadline/assertions remain unchanged. Native activation evidence alone does not qualify the RF3 operation or establish the full original R65 exception chain.
 
-Implementation: Server/ClusterRouting/Hosting/PhysicalOwnerRegistrationServices.cs only; keep Transport/PhysicalOwnerProbeEndpoint.cs and all receiver security/work/cleanup bodies unchanged. Diagnostics predecessor is TASK-KL094-REGISTRATION-FIRST-CAUSE-025. Rollback restores only the registration factory, preserving diagnostics and original evidence. Exact-source Linux RF3 qualification remains OPEN.
+Implementation: Server/ClusterRouting/Hosting/PhysicalOwner/PhysicalOwnerRegistrationServices.cs only; keep Transport/PhysicalOwnerProbeEndpoint.cs and all receiver security/work/cleanup bodies unchanged. Diagnostics predecessor is TASK-KL094-REGISTRATION-FIRST-CAUSE-025. Rollback restores only the registration factory, preserving diagnostics and original evidence. Exact-source Linux RF3 qualification remains OPEN.
 
 
 ## TASK-KL094-PHYSICAL-PUBLISHER-ROLE-027
@@ -782,7 +782,7 @@ AC-CMD-UNC-001 maps to `ConnectionPostSubmitFailureTests.ReturnedSubmitObserverF
 
 REQ-CMD-UNC-002: when post-submit observation succeeds, an actual persisted refusal `OperationResult.Error` retains its exact code/detail; pre-submit authorization refusal must not become blanket uncertainty. AC-CMD-UNC-002 maps to the same two cases' genuine subsequent revision-conflict command and exact persisted error/detail comparison, plus existing `ConnectionNativeFailureTests.AcCrs052FailureAndRevocationLeaveNoEffectsAndFollowingCallSucceeds` for revoked authorization, absent outcome/document effects and a healthy following call.
 
-Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Clustering/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Clustering/ClusterRouting/Serialization/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/ClusterRouting/Observations/Connections/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
+Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Clustering/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Clustering/ClusterRouting/Serialization/RequestExecution/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/ClusterRouting/Observations/Connections/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
 
 ```mermaid
 flowchart LR

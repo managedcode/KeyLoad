@@ -173,6 +173,3 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
         }
     }
 }
-
-internal sealed record IsolatedAggregateNodeProcessReceipt(int Parent, int Child);
-internal sealed record IsolatedAggregateNodeIdentity(int ProcessId, long StartTimeUtcTicks);

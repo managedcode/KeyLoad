@@ -5898,7 +5898,7 @@
         "editedByDocumentationTask": false
       },
       {
-        "path": "src/KeyLoad.Artifacts/AGENTS.md",
+        "path": "src/KeyLoad.BackupRestore/AGENTS.md",
         "originalBytes": 1865,
         "originalSha256": "2aba77e28cbeafdd045805082ede46fed8af066528b479da7a6c147a32523b8b",
         "currentBytes": 1865,
@@ -8419,7 +8419,7 @@
           "tests/KeyLoad.UnitTests/ClientApi/Models/McpMutationTestData.cs",
           "tests/KeyLoad.UnitTests/ClientApi/Cases/McpPolymorphic/McpPolymorphicSchemaTests.cs",
           "tests/KeyLoad.UnitTests/ClientApi/Cases/McpRead/McpReadDecodeTests.cs",
-          "tests/KeyLoad.UnitTests/BlobStorage/Cases/Blob/BlobAgentCatalogTests.cs",
+          "tests/KeyLoad.UnitTests/BlobStorage/Cases/Blob/ClientApi/BlobAgentCatalogTests.cs",
           "tests/KeyLoad.UnitTests/BlobStorage/Cases/BlobStorageCompatibilityTests.cs"
         ],
         "contracts": [
@@ -8461,8 +8461,8 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "exact_test_files_only_no_product_contract_changes",
         "files": [
-          "tests/KeyLoad.UnitTests/TimeSeries/Cases/Sample/SampleRetentionMutationTests.cs",
-          "tests/KeyLoad.UnitTests/TimeSeries/Cases/Sample/SampleRetentionReadTests.cs"
+          "tests/KeyLoad.UnitTests/TimeSeries/Cases/Sample/SampleRetention/SampleRetentionMutationTests.cs",
+          "tests/KeyLoad.UnitTests/TimeSeries/Cases/Sample/SampleRetention/SampleRetentionReadTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-073-logged-series-retention.md"
@@ -9312,12 +9312,12 @@
         "owner": "lifecycle_wave_luna_high",
         "modelTier": "cost_efficient_bounded_caller_adaptation",
         "permissions": [
-          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/NativeTextProjectionAuthorityTests.cs",
-          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/NativeTextProjectionScopeTests.cs",
-          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/NativeTextProjectionRestartTests.cs",
-          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/NativeTextProjectionBoundsTests.cs",
-          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/NativeTextProjectionLeaseTests.cs",
-          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/NativeTextProjectionParityTests.cs"
+          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/Projection/NativeTextProjectionAuthorityTests.cs",
+          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/Projection/NativeTextProjectionScopeTests.cs",
+          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/Projection/NativeTextProjectionRestartTests.cs",
+          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/Projection/NativeTextProjectionBoundsTests.cs",
+          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/Projection/NativeTextProjectionLeaseTests.cs",
+          "tests/KeyLoad.UnitTests/Search/Cases/NativeText/Projection/NativeTextProjectionParityTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-081-awaited-native-search-execution.md"
@@ -9654,7 +9654,7 @@
         "owner": "root",
         "modelTier": "planning_integration_final_review",
         "permissions": [
-          "tests/KeyLoad.UnitTests/ResourceExecution/Cases/Cache/CacheReadPermitAcceptanceTests.cs",
+          "tests/KeyLoad.UnitTests/ResourceExecution/Cases/Cache/CacheRead/CacheReadPermitAcceptanceTests.cs",
           "docs/Features/ResourceExecution.md"
         ],
         "requirements": [
@@ -9784,8 +9784,8 @@
         "id": "TASK-DSTORE-FIELD-MUTATION-ORACLES",
         "owner": "cluster_wave_gpt_6_luna_high",
         "permissions": [
-          "new_tests/KeyLoad.UnitTests/DocumentStorage/Cases/Document/DocumentReplacementFieldAuthorizationTests.cs",
-          "new_tests/KeyLoad.UnitTests/DocumentStorage/Cases/Document/DocumentDeleteIndexAuthorizationTests.cs"
+          "new_tests/KeyLoad.UnitTests/DocumentStorage/Cases/Document/Authorization/DocumentReplacementFieldAuthorizationTests.cs",
+          "new_tests/KeyLoad.UnitTests/DocumentStorage/Cases/Document/Authorization/DocumentDeleteIndexAuthorizationTests.cs"
         ],
         "contracts": [
           "docs/Features/DocumentStorage.md",
@@ -10522,7 +10522,7 @@
         ],
         "permissions": "one_exact_test_file_no_production_or_threshold_assertion_changes",
         "fileOwnership": [
-          "tests/KeyLoad.UnitTests/ResourceExecution/Cases/Cache/CacheReadPermitAcceptanceTests.cs"
+          "tests/KeyLoad.UnitTests/ResourceExecution/Cases/Cache/CacheRead/CacheReadPermitAcceptanceTests.cs"
         ],
         "dependencies": [],
         "startCondition": "original_6e09_Linux_scalar_report_failed_real_elapsed_two_second_assertion",
@@ -12370,12 +12370,12 @@
         "fileOwnership": [
           "Directory.Packages.props",
           "src/KeyLoad.Orleans/KeyLoad.Orleans.csproj",
-          "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainRequestContextState.cs",
+          "src/KeyLoad.Orleans/ClusterRouting/Identity/RequestExecution/GrainRequestContextState.cs",
           "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainIdentityContext.cs",
-          "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainRequestIdentityScope.cs",
+          "src/KeyLoad.Orleans/ClusterRouting/Identity/RequestExecution/GrainRequestIdentityScope.cs",
           "src/KeyLoad.Server/ClientApi/Execution/CanonicalOperationGateway.cs",
           "src/KeyLoad.Server/Authorization/Identity/DatabaseCredentialResolver.cs",
-          "src/KeyLoad.Server/ClusterRouting/Hosting/OrleansSiloConfiguration.cs",
+          "src/KeyLoad.Server/ClusterRouting/Hosting/SiloHosting/OrleansSiloConfiguration.cs",
           "root_native_serializer_and_leaf_authority_context_joins"
         ],
         "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
@@ -14520,8 +14520,8 @@
       "state": "current_source_inspected_runtime_unqualified",
       "sourcePaths": [
         "Directory.Packages.props",
-        "src/KeyLoad.Orleans/Features/ClusterRouting/Contracts/GrainRoutingProtocol.cs",
-        "src/KeyLoad.Orleans/Features/ClusterRouting/Streaming/NativeCqrsStreamAdmission.cs",
+        "src/KeyLoad.Orleans/ClusterRouting/Contracts/RequestExecution/GrainRoutingProtocol.cs",
+        "src/KeyLoad.Orleans/ClusterRouting/Streaming/CqrsStreams/NativeCqrsStreamAdmission.cs",
         "src/KeyLoad.Orleans/Features/ClusterReplication/Discovery/ReplicaSiloDiscovery.cs"
       ],
       "communicationVersion": "10.3.1",

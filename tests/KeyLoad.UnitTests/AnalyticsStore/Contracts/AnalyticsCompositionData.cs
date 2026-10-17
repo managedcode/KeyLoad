@@ -44,5 +44,3 @@ internal static class AnalyticsCompositionData
                 new(owner.Source.Partition, D.AnchorCollection, D.AnchorId), Label, EmptyJson, 0),
             new AppendEvents(Events, id, [new(id, Created, EmptyJson)], ExpectedStreamRevision.NoStream)];
 }
-
-internal sealed record AnalyticsCompositionCommit(ReplicatedOperation Operation, CommitReceipt Receipt, long CreatorEpoch);

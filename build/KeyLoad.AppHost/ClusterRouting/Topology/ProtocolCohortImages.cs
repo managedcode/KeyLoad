@@ -59,20 +59,21 @@ internal static class ProtocolCohortImages
     }
 
     internal static IReadOnlyDictionary<string, RuntimeContainerImage> Read(
-        IDistributedApplicationBuilder builder, bool ephemeral, int? benchmarkNodeCount)
+        IDistributedApplicationBuilder builder, bool ephemeral, int? benchmarkNodeCount, IReadOnlyList<string>? nodeNames = null)
     {
         const string ConfigurationKeyText = ":";
 
         ArgumentNullException.ThrowIfNull(builder);
         var enabled = KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(builder).Control.Value.ProtocolCohortEnabled;
-        if (enabled && (!ephemeral || benchmarkNodeCount is not null))
+        if (enabled && (!ephemeral || benchmarkNodeCount is not null
+            || nodeNames is not null && !nodeNames.SequenceEqual(Voters)))
         {
             throw new InvalidOperationException(InvalidConfiguration);
         }
 
         var defaultImage = enabled ? null
             : RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration);
-        return Voters.ToDictionary(voter => voter,
+        return (nodeNames ?? Voters).ToDictionary(voter => voter,
             voter => defaultImage ?? RuntimeContainerImage.Read(builder, VotersSetting + ConfigurationKeyText + voter),
             StringComparer.Ordinal);
     }

@@ -2,8 +2,6 @@ using System.IO.Compression;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteIsolatedGitHubArchiveEntry(ZipArchiveEntry Entry, SiteIsolatedGitHubArchiveFile File);
-
 internal static class SiteIsolatedGitHubArchivePreflight
 {
     public static async Task<SiteIsolatedGitHubArchiveEntry[]> InspectAsync(ZipArchive archive,

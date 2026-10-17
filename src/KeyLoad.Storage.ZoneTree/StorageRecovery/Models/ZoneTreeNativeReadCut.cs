@@ -9,10 +9,3 @@ internal sealed record ZoneTreeNativeReadCut(
     bool DispatchPaused,
     long ReadGeneration,
     long Position);
-
-internal readonly record struct ZoneTreeReadCutVisitResult(
-    int Records,
-    long ExaminedBytes,
-    long NativeAdvances,
-    bool HasMore,
-    bool StoppedByVisitor);

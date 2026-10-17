@@ -37,6 +37,3 @@ internal static class NativeSagaTimeoutJournalFence
 #pragma warning restore ORLEANSEXP005
     }
 }
-
-internal sealed record NativeSagaJournalFence(string JournalName, Guid InstanceId, string NativeOwner,
-    string LocalSilo, string NativeMetadataETag, long CanonicalOwnerGeneration);

@@ -7,16 +7,6 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-internal enum JoinBudgetKind
-{
-    Work,
-    ReadBytes,
-    ResultBytes
-}
-
-internal sealed record JoinBudgetSeed(PartitionRef Partition, ImmutableArray<EntityRef> Sources,
-    long CommitPosition, string ExpectedOrderId, string ExpectedCustomerId, string ExpectedDetail, string ExpectedName);
-
 /// <summary>Builds current typed rows through the actual SDK for the bounded RF3 join cases.</summary>
 internal static class RelationalSqlRf3JoinBudgetData
 {

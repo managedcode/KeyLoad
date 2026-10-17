@@ -1,0 +1,9 @@
+namespace KeyLoad.Query.Features.QueryExecution;
+
+/// <summary>A candidate retained only while it belongs to the requested top prefix.</summary>
+internal sealed record PreparedRow(DocumentRecord? SourceDocument, byte[][]? PendingOrderKeys, byte[]? IdKey,
+    PartitionQueryCandidateV1? Candidate, long ReservedBytes)
+{
+    internal DocumentRecord Document => SourceDocument ?? throw new InvalidOperationException();
+    internal EntityRef Reference => SourceDocument?.Reference ?? Candidate!.Reference;
+}

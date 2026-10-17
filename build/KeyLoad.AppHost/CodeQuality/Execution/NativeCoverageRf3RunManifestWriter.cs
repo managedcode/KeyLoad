@@ -103,6 +103,3 @@ internal static class NativeCoverageRf3RunManifestWriter
 
     private static void FlushToDisk(FileStream stream) => stream.Flush(flushToDisk: true);
 }
-
-internal sealed record NativeCoverageRf3Run(string RunId, string ManifestPath, NativeCoverageRf3Admission Admission,
-    string ImageReference);

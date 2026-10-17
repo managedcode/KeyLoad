@@ -1,14 +1,5 @@
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-internal enum QueueDeadlineCapacityFault
-{
-    StateVersion,
-    ReadySequence,
-    ParkedSequence,
-    FullDeadLetterMaxPark,
-    ExpiryBeforeDeadLetterMaxPark
-}
-
 internal static class QueueDeadlineCapacityProtocol
 {
     internal const string Queue = "deadline-capacity-queue";

@@ -1,12 +1,5 @@
 namespace KeyLoad;
 
-/// <summary>The explicit supported follower data consistency contract.</summary>
-public enum DocumentFollowerReadMode
-{
-    /// <summary>One captured committed local data cut, projected only under fresh persisted authority.</summary>
-    FollowerCommittedSnapshot
-}
-
 /// <summary>Returns explicit data and current-authority cuts without claiming latest or offline read authority.</summary>
 /// <param name="Version">The result format version, one.</param>
 /// <param name="Mode">The explicitly selected follower consistency mode.</param>

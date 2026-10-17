@@ -51,8 +51,3 @@ internal static class NativeContractCases
         _ => throw new ArgumentOutOfRangeException(nameof(family))
     };
 }
-
-internal enum NativeContractFamily
-{
-    Document, Authorization, Messaging, Events, Graph, TimeSeries, Vector, Blob, Outbox, Relational, Query
-}

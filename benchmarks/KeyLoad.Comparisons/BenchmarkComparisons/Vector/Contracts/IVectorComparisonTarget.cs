@@ -1,35 +1,5 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>A lazily generated deterministic vector document for native ingestion.</summary>
-/// <param name="Number">The deterministic corpus number.</param>
-/// <param name="Id">The canonical ordinal record ID.</param>
-/// <param name="Embedding">The owned float32 vector.</param>
-/// <param name="Payload">The exact UTF8 payload.</param>
-public sealed record VectorDocument(int Number, string Id, ReadOnlyMemory<float> Embedding, string Payload);
-/// <summary>A document returned by native nearest-neighbor search.</summary>
-/// <param name="Id">The native document ID.</param>
-/// <param name="Distance">The native cosine distance.</param>
-public sealed record VectorNeighbor(string Id, double Distance);
-/// <summary>A deterministic embedding update in the mixed profile.</summary>
-/// <param name="Number">The corpus number being updated.</param>
-/// <param name="Id">The canonical record ID.</param>
-/// <param name="Embedding">The replacement embedding.</param>
-public sealed record VectorUpdate(int Number, string Id, ReadOnlyMemory<float> Embedding);
-/// <summary>Actual native index creation receipt.</summary>
-/// <param name="IndexKind">The method created by the database.</param>
-/// <param name="Definition">The native index definition.</param>
-/// <param name="Parameters">The actual index and query parameters.</param>
-/// <param name="BuildMilliseconds">The observed index build duration.</param>
-public sealed record VectorIndexReceipt(VectorIndexKind IndexKind, string Definition,
-    IReadOnlyDictionary<string, string> Parameters, double BuildMilliseconds);
-/// <summary>Native vector and payload values read back from persisted database state.</summary>
-/// <param name="Number">The persisted corpus number.</param>
-/// <param name="Id">The persisted record ID.</param>
-/// <param name="Dimensions">The persisted vector dimension.</param>
-/// <param name="VectorSha256">SHA256 over ordered little-endian float32 bits.</param>
-/// <param name="PayloadSha256">SHA256 over persisted UTF8 payload bytes.</param>
-public sealed record VectorReadback(int Number, string Id, int Dimensions, string VectorSha256, string PayloadSha256);
-
 /// <summary>Owns one target's actual native vector database operations.</summary>
 public interface IVectorComparisonTarget : IAsyncDisposable
 {

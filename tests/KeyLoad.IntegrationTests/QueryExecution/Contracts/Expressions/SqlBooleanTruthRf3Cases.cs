@@ -2,7 +2,6 @@ using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-internal sealed record SqlBooleanTruthRf3Case(string Clause, Predicate Predicate, string[] Ids);
 internal static class SqlBooleanTruthRf3Cases
 {
     internal const string Profile = "SQL.BooleanTruth.v1";

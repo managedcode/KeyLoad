@@ -1,6 +1,6 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Query;
-using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.RelationalStorage;

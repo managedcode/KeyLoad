@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Security;
 using KeyLoad.Server.Features.ClusterRouting;
-using KeyLoad.ServiceDefaults;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
@@ -26,6 +25,16 @@ internal static class ServerConfiguration
         startupCancellation.ThrowIfCancellationRequested();
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
+        var participation = builder.Configuration.GetSection(ServerProtocol.ConfigurationSection).Get<CoordinationSiloOptions>()
+            ?? new CoordinationSiloOptions();
+        if (participation.CoordinationOnly)
+        {
+            if (!participation.IsValid())
+            {
+                throw new InvalidOperationException(CoordinationSiloOptions.InvalidSettings);
+            }
+            return await CoordinationSiloHosting.BuildAsync(builder, participation, startupCancellation).ConfigureAwait(false);
+        }
         builder.Services.AddRuntimeOptions(builder.Configuration);
         var node = ServerNodeOptionsComposition.Read(builder.Configuration);
         var address = await OrleansNodeAddressResolver.ResolveAsync(node.Value, startupCancellation).ConfigureAwait(false);

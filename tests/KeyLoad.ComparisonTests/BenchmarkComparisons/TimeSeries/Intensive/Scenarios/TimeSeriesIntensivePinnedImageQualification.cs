@@ -4,9 +4,6 @@ using System.Text.Json;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
-internal sealed record TimeSeriesIntensivePinnedImageObservation(TimeSeriesIntensivePinnedImageConfig Image,
-    IReadOnlyDictionary<string, string> Facts, string ContainerId);
-
 internal static class TimeSeriesIntensivePinnedImageQualification
 {
     internal static async Task<TimeSeriesIntensivePinnedImageFacts> RunAsync(CancellationToken token)

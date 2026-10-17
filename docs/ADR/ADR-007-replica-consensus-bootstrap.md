@@ -164,7 +164,7 @@ REQ-CQRS-COHORT-LIFETIME-001: RequestCqrsCohortRuntimeFixture disposal returns t
 
 AC-CQRS-COHORT-LIFETIME-001: Preserve existing RequestCqrsCohort whole-flow declarations, exact native voter/incarnation/address, signed calls, generation-change oracle, startup/shutdown bounds and actual healthy/rejected/replay operations. Direct cluster disposal stays in the original ordered shutdown and every fatal/nonfatal error is retained. Required native Unit50 SIMD execution, compiled discovery and analyzer recognition are OPEN. This source-only correction does not prove causes for historical Linux cancellation or introduce a retry, timeout, authority, topology or synthetic-success seam.
 
-Source map: UnitTests/Features/ClusterReplication/Fixtures/RequestCqrsCohortRuntimeFixture.cs. Existing original scenario/native node owners remain unchanged.
+Source map: UnitTests/ClusterReplication/Fixtures/RequestExecution/RequestCqrsCohortRuntimeFixture.cs. Existing original scenario/native node owners remain unchanged.
 
 
 ## TASK-REP-TRANSPORT-DUAL-FAILURE-WHOLE-002

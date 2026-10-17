@@ -7,12 +7,6 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
 
-internal sealed record NodeEpochRf3ReadIdentity(string PrincipalId, string Secret, PrincipalRecord Principal,
-    ApiKeyRecord Credential)
-{
-    public override string ToString() => "NodeEpochRf3ReadIdentity(<private>)";
-}
-
 internal sealed record NodeEpochRf3Workload(PartitionRef Partition, string Collection, string SeriesSet,
     string SeriesId, string DocumentId, ImmutableArray<SampleData> PriorSamples,
     CommandRequest ReplayCommand, CommitReceipt ReplayReceipt, CommandRequest StaleDocumentCommand,

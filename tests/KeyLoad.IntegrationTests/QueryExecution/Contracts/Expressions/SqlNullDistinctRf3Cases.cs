@@ -2,7 +2,6 @@ using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-internal sealed record SqlNullDistinctRf3Case(string Clause, Predicate Predicate, string[] Ids);
 internal static class SqlNullDistinctRf3Cases
 {
     internal const string NumericSeparatorProfile = "SQL.NumericDigitSeparators.v1";

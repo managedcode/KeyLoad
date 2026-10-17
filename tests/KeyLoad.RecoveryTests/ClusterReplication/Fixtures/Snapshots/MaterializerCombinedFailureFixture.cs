@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
-using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests;

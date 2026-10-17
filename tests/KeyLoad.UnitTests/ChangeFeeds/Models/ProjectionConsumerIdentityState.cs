@@ -4,6 +4,3 @@ internal sealed record ProjectionConsumerIdentityState(PartitionRef Partition, P
     ProjectionConsumerDefinition Definition, ReplicatedOperation Configure, OperationResult Configured,
     ReplicatedOperation Seed, OperationResult Seeded, CommitReceipt SeedReceipt, DateTimeOffset Time,
     ProjectionBatch Batch, ReplicatedOperation Complete, ReplicatedOperation ConfigureAgain, byte[] Key, byte[] Original);
-
-internal sealed record ProjectionConsumerIdentityContinuation(OperationResult Completed,
-    ReplicatedOperation Filtered, OperationResult Advanced, string[] Image, long Position);

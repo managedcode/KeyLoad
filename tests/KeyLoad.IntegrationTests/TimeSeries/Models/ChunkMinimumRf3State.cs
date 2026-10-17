@@ -1,17 +1,7 @@
-using System.Collections.Immutable;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
-
-internal sealed record ChunkMinimumRf3Window(Guid Id, string Series, long Revision, long Sequence,
-    ImmutableArray<SampleRecord> Rows, CommitToken Minimum)
-{
-    internal ReadSampleChunkWindowRequest Request(PartitionRef partition)
-        => new(partition, TimeSeriesRf3Scenario.Set, Series, Id, null, null, Rows.Length);
-}
-
-internal sealed record ChunkMinimumRf3Original(CommandRequest Request, CommitReceipt Receipt, string Node);
 
 internal sealed record ChunkMinimumRf3State(PartitionRef Partition, string Administrator,
     McpPersistedIdentity Reader, PhysicalOwnerDirectoryV1 Directory,

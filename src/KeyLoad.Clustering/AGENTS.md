@@ -5,7 +5,7 @@
 
 ## Purpose and entry points
 - Owns Orleans grain routing and Orleans-backed membership integration.
-- Main types: `ClusterRouting/Grains/ConnectionGrain.cs`, `ClusterRouting/Grains/CommandPartitionGrain.cs`, `ClusterRouting/Queries/ConnectionReadExecution.cs` and `ClusterRouting/Topology/ReplicaMembershipTable.cs`.
+- Main types: `ClusterRouting/Grains/ConnectionGrain.cs`, `ClusterRouting/Grains/CommandPartitionGrain.cs`, `ClusterRouting/Queries/Connections/ConnectionReadExecution.cs` and `ClusterRouting/Topology/ReplicaMembershipTable.cs`.
 
 ## Ownership and boundaries
 - Owner correction 2026-10-04: every feature MUST group its actual responsibilities into feature-local role folders; do not place mixed grains, commands, queries, contracts, models, streaming, identity, serialization or topology files directly in the slice root. `ClusterRouting` uses `Grains/`, `Commands/`, `Queries/`, `Contracts/`, `Models/`, `Streaming/`, `Identity/`, `Serialization/`, `Diagnostics/` and `Topology/`. `ClusterReplication` separates grain services, discovery, transport, authentication, replay, contracts and models. `ResourceExecution` separates models, contracts, serialization, authentication and validation. Small capability slices use `Queries/`; do not create empty role folders.
@@ -26,7 +26,7 @@
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slice: `ClusterRouting`; target feature path: `ClusterRouting/`, matching `docs/Features/ClusterRouting.md`.
-- `ClusterRouting/Grains/ConnectionGrain.cs`, `ClusterRouting/Grains/CommandPartitionGrain.cs`, `ClusterRouting/Queries/ConnectionReadExecution.cs` and `ClusterRouting/Topology/ReplicaMembershipTable.cs` are current entry points; grain routing belongs in the named slice.
+- `ClusterRouting/Grains/ConnectionGrain.cs`, `ClusterRouting/Grains/CommandPartitionGrain.cs`, `ClusterRouting/Queries/Connections/ConnectionReadExecution.cs` and `ClusterRouting/Topology/ReplicaMembershipTable.cs` are current entry points; grain routing belongs in the named slice.
 
 ## ResourceExecution ownership
 - `ResourceExecution/` owns the accepted ADR-058 internal cache-control metadata and bounded wire/authentication/correlation prerequisites, with matching ResourceExecution feature docs and tests.
@@ -37,7 +37,7 @@
 
 ## Messaging due coordination
 - ADR-094 and `docs/Features/Messaging/DueCoordination.md` own `Messaging/GrainServices/`, `Grains/`, `Contracts/` and `Execution/`. Only leader discovery hints enter a partition coordinator, then a fresh signed native CQRS request grain; no grain owns open storage or bypasses canonical authorization/commit execution.
-- The existing identity publisher and admission helper are shared in `ClusterRouting/Identity/GrainRequestIdentityScope.cs` and `NativeRequestContextAdmission.cs`. Preserve the actual silo serializers, subject-only claims, limits and exact restoration; never duplicate a weaker coordinator identity path.
+- The existing identity publisher and admission helper are shared in `ClusterRouting/Identity/RequestExecution/GrainRequestIdentityScope.cs` and `NativeRequestContextAdmission.cs`. Preserve the actual silo serializers, subject-only claims, limits and exact restoration; never duplicate a weaker coordinator identity path.
 
 ## Owner-selected project and namespace boundary
 Owner direction2026-10-14 selects KeyLoad.Clustering as the project, source-directory and root-namespace name. The earlier structural-move namespace-preservation rule remains for unrelated moves; this exact owner-directed namespace rename preserves all existing native serializer/grain Alias strings, Id fields, request/receipt/domain identities, provider registrations, scheduling, RF3 and node-local storage authority. It creates no shim, legacy namespace or persistence/format migration. Orleans remains the underlying framework; KeyLoad.Core remains the separate database domain. Actual compiler and original operation qualification are required after integration.

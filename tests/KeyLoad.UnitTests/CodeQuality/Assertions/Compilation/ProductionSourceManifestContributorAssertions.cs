@@ -40,9 +40,8 @@ internal static class ProductionSourceManifestContributorAssertions
     private static readonly string[] Suites = [UnitSuite, RecoverySuite, Rf3Suite];
     private static readonly string[] ProductionModules =
     [
-        "KeyLoad.Abstractions", "KeyLoad.Artifacts", "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core",
-        "KeyLoad.Diagnostics", "KeyLoad.Clustering", "KeyLoad.Query", "KeyLoad.Replication", "KeyLoad.Security",
-        "KeyLoad.Server", "KeyLoad.ServiceDefaults", "KeyLoad.Storage.IO", "KeyLoad.Storage.ZoneTree"
+        "KeyLoad.Abstractions", "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core",
+        "KeyLoad.Diagnostics", "KeyLoad.Clustering", "KeyLoad.Query", "KeyLoad.Replication", "KeyLoad.Server", "KeyLoad.Storage.ZoneTree"
     ];
     private static readonly HashSet<string> ProductionModuleSet = new(ProductionModules, StringComparer.Ordinal);
     private static readonly Dictionary<string, string> StrengthenedQueryOperations = new(StringComparer.Ordinal)

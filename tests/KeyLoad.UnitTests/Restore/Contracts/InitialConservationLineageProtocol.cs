@@ -1,5 +1,3 @@
-using KeyLoad.Storage;
-
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class InitialConservationLineageProtocol
@@ -23,7 +21,3 @@ internal static class InitialConservationLineageProtocol
     internal static readonly string[] Endpoints =
         ["http://127.0.0.1:18001/", "http://127.0.0.1:18002/", "http://127.0.0.1:18003/"];
 }
-
-internal sealed record InitialConservationArchive(string Directory, NativeCatalogBackupCapture Capture,
-    ClusterBackupOwnerCut Cut, StoreIdentity Identity, string[] SourceRows,
-    Dictionary<string, byte[]> Files);

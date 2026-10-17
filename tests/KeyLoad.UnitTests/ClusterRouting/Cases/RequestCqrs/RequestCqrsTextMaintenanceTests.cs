@@ -23,8 +23,3 @@ internal sealed class RequestCqrsTextMaintenanceTests(RequestCqrsHostedRuntimeFi
     public Task MalformedTextProgressJoinsOriginalProducerThenHealthyWithoutChangingTheNativeCut(RequestCqrsTextFault fault)
         => RequestCqrsTextMaintenanceFlow.RunAsync(fixture, TextIndexMaintenanceMode.Build, fault);
 }
-
-internal enum RequestCqrsTextFault
-{
-    WrongIdentity, UnexpectedPhase, MixedPhase, ExtraCompleted, AfterFinal, FrameBudget
-}

@@ -3,10 +3,6 @@ using System.Text.RegularExpressions;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteIsolatedSelection(string Scenario, int NodeCount, object Repetition, string Metric, string Target);
-internal sealed record SiteIsolatedExpectedRow(string Name, string Status, double? Value, int NodeCount,
-    string WorkerId, long JobId, long ArtifactId);
-
 /// <summary>Independent native arithmetic for a single original case or concurrent lane, without repetition pooling.</summary>
 internal static class SiteIsolatedOracle
 {

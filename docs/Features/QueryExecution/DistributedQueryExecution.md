@@ -159,7 +159,7 @@ Orleans routing and physical catalog are N/A for this stage.
 
 | Owner | Exact owned paths |
 |---|---|
-| QueryExecution native values | `src/KeyLoad.Query/QueryExecution/Contracts/PartitionQueryPlanV1.cs`, `PartitionQueryLeafPlanV1.cs`, `PartitionQueryCandidateV1.cs`, `PartitionQueryLeafResultV1.cs`, `PartitionQueryResultV1.cs` |
+| QueryExecution native values | `src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryPlanV1.cs`, `PartitionQueryLeafPlanV1.cs`, `PartitionQueryCandidateV1.cs`, `PartitionQueryLeafResultV1.cs`, `PartitionQueryResultV1.cs` |
 | Query validation and execution | QueryExecution feature-local `Validation/` and `Execution/`, with `Execution/PartitionQueryExecution.cs` and one internal owner accessor in `Queries/QueryEngine.cs` |
 | Native regression cases | `tests/KeyLoad.UnitTests/QueryExecution/Cases/PartitionQuery*Tests.cs`, with actual fixtures and assertions in their owning role folders |
 | Core grant dependency | Existing `src/KeyLoad.Core/ReadExecutionBudget.cs` and a ResourceExecution role-owned grant helper, only after its exact contract is separately frozen below |
@@ -184,7 +184,7 @@ KL-037 distributed stage before any public SDK or MCP route is delivered.
 `ReadExecutionBudget.CreateReadGrant(long maximumBytes, int maximumRecords)` is internal and
 returns the internal `ReadExecutionBudgetReadGrant`. Core exposes these only
 to its explicitly declared `KeyLoad.Query` friend assembly. The helper lives
-at `src/KeyLoad.Core/ResourceExecution/Execution/ReadExecutionBudgetReadGrant.cs`;
+at `src/KeyLoad.Core/ResourceExecution/Execution/ReadExecution/ReadExecutionBudgetReadGrant.cs`;
 its genuine native tests are `ReadExecutionBudgetGrantPointTests`,
 `ReadExecutionBudgetGrantRangeTests`, `ReadExecutionBudgetGrantReservationTests`
 and `ReadExecutionBudgetGrantCancellationTests` under UnitTests

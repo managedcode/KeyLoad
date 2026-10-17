@@ -51,10 +51,3 @@ internal sealed class SiteIsolatedGitHubSelectionTests
         await Assert.That((await scope.ProveAsync(token)).GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
     }
 }
-
-internal static class SiteIsolatedGitHubSelectionFields
-{
-    public const string RunId = "runId";
-    public const string AggregateJobId = "aggregateJobId";
-    public const string Jobs = "jobs";
-}

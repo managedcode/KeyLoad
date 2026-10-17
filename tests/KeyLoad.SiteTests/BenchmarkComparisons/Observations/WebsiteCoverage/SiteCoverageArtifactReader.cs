@@ -2,28 +2,6 @@ using System.Text.Json;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteCoverageReceipt(string Path, string Sha256, string Runtime, string RuntimeVersion,
-    int MappedFunctions);
-
-internal sealed record SiteCoverageBrowserSession(string Id, string Version, string MetadataPath, string MetadataSha256,
-    IReadOnlyList<string> Origins, IReadOnlyList<string> ReceiptPaths);
-
-internal sealed class SiteCoverageCollection
-{
-    public Dictionary<string, List<SiteCoverageScriptSnapshot>> SnapshotsBySource { get; } = new(StringComparer.Ordinal);
-    public List<SiteCoverageReceipt> Receipts { get; } = [];
-    public List<SiteCoverageBrowserSession> BrowserSessions { get; } = [];
-    public SortedSet<string> Errors { get; } = new(StringComparer.Ordinal);
-    public long BytesRead
-    {
-        get; set;
-    }
-    public int FilesRead
-    {
-        get; set;
-    }
-}
-
 internal static class SiteCoverageArtifactReader
 {
     public static async Task<SiteCoverageCollection> ReadAsync(string repository, string artifactRoot,

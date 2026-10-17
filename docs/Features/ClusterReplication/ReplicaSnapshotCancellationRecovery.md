@@ -25,7 +25,7 @@ revision5, original native receipt and replay. The fixed original model is never
 asked to fabricate operation6.
 
 All three acceptance criteria map to
-[ReplicaSnapshotCancellationRecoveryTests.CancelledNativeBeginAndFullInstallRetainExactTransferThenSameOwnerTailTwoColdAndHealthyReplay](../../../tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/Replica/ReplicaSnapshotCancellationRecoveryTests.cs)
+[ReplicaSnapshotCancellationRecoveryTests.CancelledNativeBeginAndFullInstallRetainExactTransferThenSameOwnerTailTwoColdAndHealthyReplay](../../../tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/Replica/ReplicaSnapshot/ReplicaSnapshotCancellationRecoveryTests.cs)
 and its [whole-operation owner](../../../tests/KeyLoad.RecoveryTests/ClusterReplication/Scenarios/Snapshots/ReplicaSnapshotCancellationRecoveryFlow.cs).
 This closes a source regression gap beyond the existing complete-image canceled
 install and synchronous transfer-fencing cases. It does not allege a product

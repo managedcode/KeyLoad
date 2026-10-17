@@ -1,8 +1,8 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Replication;
-using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;

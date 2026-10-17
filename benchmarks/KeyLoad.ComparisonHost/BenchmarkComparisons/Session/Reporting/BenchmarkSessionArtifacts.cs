@@ -7,17 +7,6 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-internal sealed record BenchmarkSessionArtifact(string Id, string Path, string Sha256);
-internal sealed record BenchmarkSessionAssembly(string Path, string Sha256, string PdbSha256);
-internal sealed record BenchmarkSessionImages(string? Server, string Runner);
-internal sealed record BenchmarkSessionRuntime(string OperatingSystem, string Architecture, int LogicalProcessors,
-    string Framework, string Storage);
-internal sealed record BenchmarkSessionState(string SchemaVersion, string SessionId, string Target, int NodeCount,
-    string SourceRevision, long RunId, int Attempt, long JobId, string Repository, string Ref, string Workflow,
-    BenchmarkSessionImages Images, TargetProfile? TargetProfile, BenchmarkSessionRuntime Runtime,
-    ImmutableArray<BenchmarkSessionAssembly> Assemblies,
-    ImmutableArray<BenchmarkSessionArtifact> Cases, string Outcome, string? Reason);
-
 /// <summary>Retains immutable original reports before their native test assertion can fail.</summary>
 internal static class BenchmarkSessionArtifacts
 {

@@ -1,8 +1,5 @@
 namespace KeyLoad.Core.Features.TimeSeries;
 
-internal sealed record SampleChunkDecodedText(string SeriesId, string[] EventIds,
-    string[] TagDictionary, int[] TagIndexes);
-
 internal static class SampleChunkTextDecoder
 {
     internal static SampleChunkDecodedText Decode(SampleChunkPayload payload, SampleChunkWork budget, int hashChunkBytes)

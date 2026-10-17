@@ -31,7 +31,7 @@ internal sealed class IsolatedGitHubTransientTests
     {
         var module = SessionNodeProcess.Module("isolated-github-rate.mjs");
         var original = Path.Combine(SessionNodeProcess.RepositoryRoot(), "tests", "KeyLoad.ComparisonTests",
-            "BenchmarkComparisons", "UnitContracts", "IsolatedGitHubTransientOriginal.headers");
+            "BenchmarkComparisons", "UnitContracts", "Fixtures", "OriginalReceipts", "IsolatedGitHubTransientOriginal.headers");
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubTransientProgram.Source, module, input, original],
             TestContext.Current!.Execution.CancellationToken);

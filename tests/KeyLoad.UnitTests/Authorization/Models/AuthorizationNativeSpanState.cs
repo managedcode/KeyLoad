@@ -1,0 +1,6 @@
+namespace KeyLoad.UnitTests.Features.Authorization;
+
+internal sealed record AuthorizationNativeSpanState(string Source, bool Recorded, string TraceId,
+    string SpanId, string ParentSpanId, string[] Events, AuthorizationNativeLinkState[] Links,
+    int LocalParentCount, string[] ParentOperations, KeyValuePair<string, string?>[] Baggage,
+    KeyValuePair<string, string?>[] Tags, int MaximumParents, int MaximumBaggage, int MaximumTags);

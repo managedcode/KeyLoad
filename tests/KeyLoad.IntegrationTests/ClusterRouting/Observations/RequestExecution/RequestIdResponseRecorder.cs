@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestIdResponseRecorder : DelegatingHandler
@@ -57,5 +55,3 @@ internal sealed class RequestIdResponseRecorder : DelegatingHandler
         return response;
     }
 }
-
-internal sealed record RequestIdReceipt(string Path, HttpStatusCode StatusCode, string[] HeaderValues);

@@ -420,7 +420,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "measures the real left scan and right probes, admits the exact work bound, rejects over-bound work without changing committed position, and completes a healthy join"
@@ -442,7 +441,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "measures actual ZoneTree scan/probe bytes, admits the exact read-byte bound, rejects omitted-probe and one-byte-short budgets without mutation, and repeats the healthy join"
@@ -464,7 +462,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "admits the exact serialized page including both source identities, rejects one byte below without store mutation, and confirms identical healthy output"
@@ -486,7 +483,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "admits two actual joined rows, rejects a request requiring a third with BudgetExceeded and unchanged position, then rereads both rows"
@@ -508,7 +504,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "cancels the original query token only after observed native range progress, asserts the same cancellation token and unchanged position, then verifies exact healthy joined rows and source revisions"
@@ -530,7 +525,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "expires the configured query deadline after observed native range progress, asserts BudgetExceeded and unchanged position, then verifies exact healthy joined rows and source revisions"
@@ -552,7 +546,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "executes SQL and AST Q2 against real ZoneTree rows; verifies exact ordinal matches, projections, both source identities/revisions, access path and cut while null, missing, empty, unmatched and overlong keys emit no pairs"
@@ -575,7 +568,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "rejects Q1 join, unknown SQL/AST versions and EXPLAIN before storage position changes, then executes and verifies a healthy Q2 result"
@@ -597,7 +589,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "executes a Q1 alias named inner, rejects the join under Q1 without changing position, then executes the same join under Q2"
@@ -619,7 +610,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "uses persisted resource and field-use grants; asserts each denied attempt is PermissionDenied with unchanged position, then checks the permitted join redacts the private projected field and a root-authorized healthy read succeeds"
@@ -641,7 +631,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "runs concurrent actual commits and joins; each returned page has matching left/right generation and source revisions from one committed read cut"
@@ -663,7 +652,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "reopens canonical ZoneTree after a committed pair and verifies joined values, source revisions and a cut at or after the commit"
@@ -685,7 +673,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "proves Unicode key byte order differs from ordinal SQL order and verifies the real joined results follow ordinal SQL ordering"
@@ -707,7 +694,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "checks row-level denial on either join side omits rows without changing position, confirms root visibility, persists ownership changes, and verifies the authorized reader then sees both pairs"
@@ -726,7 +712,6 @@
       "executedModules": [
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "scans canonical document and scalar-index records in a real ZoneTree read callback while an atomic writer blocks at the committed read gate; compares old and new document/index state to an independent model, joins scan and writer, reopens exact committed state, then applies and verifies a healthy command"
@@ -770,7 +755,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -793,7 +777,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -816,7 +799,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -842,7 +824,6 @@
         "KeyLoad.Clustering",
         "KeyLoad.Query",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -869,7 +850,6 @@
         "KeyLoad.Clustering",
         "KeyLoad.Query",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -896,7 +876,6 @@
         "KeyLoad.Clustering",
         "KeyLoad.Query",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -923,7 +902,6 @@
         "KeyLoad.Clustering",
         "KeyLoad.Query",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -950,7 +928,6 @@
         "KeyLoad.Clustering",
         "KeyLoad.Query",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -977,7 +954,6 @@
         "KeyLoad.Clustering",
         "KeyLoad.Query",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -1004,7 +980,6 @@
         "KeyLoad.Clustering",
         "KeyLoad.Query",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -1026,8 +1001,6 @@
         "KeyLoad.Core",
         "KeyLoad.Diagnostics",
         "KeyLoad.Replication",
-        "KeyLoad.Security",
-        "KeyLoad.Storage.IO",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "Two distinct actual CrashHost processes execute the same command around process termination and restart; complete receipt and single document/event/queue/outbox effects survive retries, changed content conflicts without replacing outcome or effects, and an authorized healthy follow-up persists."
@@ -1052,7 +1025,6 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Query",
-        "KeyLoad.Security",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "executes the exact accepted JOIN SQL and admitted primary-key/source_revision values on real ZoneTree; verifies complete literal projections, SQL/AST page parity, both source identities/revisions and cut, unchanged committed position and a healthy Q1 metadata read"

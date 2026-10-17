@@ -1,0 +1,160 @@
+using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.Server;
+
+internal sealed class AdminStorageScan
+{
+    private readonly string rootPath;
+    private readonly AdminObservationOptions settings;
+    private readonly CancellationToken cancellationToken;
+    private const string Canonical = "canonical";
+    private const string Replica = "replica";
+    private const string Backup = "backup";
+    private const string Other = "other";
+    private const string BackupDirectory = "backups";
+    private const string Incomplete = "Storage observation is incomplete because files changed, were unavailable, or exceeded observation bounds.";
+    private readonly TimeProvider time;
+    private readonly long started;
+    private readonly List<AdminFileInfo> files = [];
+    private readonly Stack<DirectoryInfo> directories = [];
+    private long canonicalBytes;
+    private long replicaBytes;
+    private long backupBytes;
+    private long totalBytes;
+    private int observedFiles;
+    private int entries;
+    private bool complete = true;
+
+    internal AdminStorageScan(string rootPath, IOptions<AdminObservationOptions> options,
+        CancellationToken cancellationToken, TimeProvider? clock = null)
+    {
+        this.rootPath = rootPath;
+        settings = options.Value;
+        this.cancellationToken = cancellationToken;
+        time = clock ?? TimeProvider.System;
+        started = time.GetTimestamp();
+    }
+
+    internal void Run(DirectoryInfo root)
+    {
+        const int DirectoriesCountValidationBoundary = 0;
+
+        directories.Push(root);
+        while (directories.Count > DirectoriesCountValidationBoundary && WithinBudget())
+        {
+            VisitDirectory(directories.Pop());
+        }
+        _ = WithinBudget();
+    }
+
+    private bool WithinBudget()
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (entries < settings.MaximumEntries
+            && time.GetElapsedTime(started) < settings.ScanDeadline)
+        {
+            return true;
+        }
+        complete = false;
+        return false;
+    }
+
+    private void VisitDirectory(DirectoryInfo directory)
+    {
+        const int EmptyDirectoryAttributesFileAttributesReparsePoint = 0;
+
+        try
+        {
+            if ((directory.Attributes & FileAttributes.ReparsePoint) != EmptyDirectoryAttributesFileAttributesReparsePoint)
+            {
+                complete = false;
+                return;
+            }
+            using var iterator = directory.EnumerateFileSystemInfos().GetEnumerator();
+            while (WithinBudget() && iterator.MoveNext())
+            {
+                entries++;
+                VisitEntry(iterator.Current);
+            }
+        }
+        catch (Exception error) when (AdminStorageObserver.FileFailure(error))
+        {
+            complete = false;
+        }
+    }
+
+    private void VisitEntry(FileSystemInfo entry)
+    {
+        const int EmptyEntryAttributesFileAttributesReparsePoint = 0;
+
+        try
+        {
+            if ((entry.Attributes & FileAttributes.ReparsePoint) != EmptyEntryAttributesFileAttributesReparsePoint)
+            {
+                complete = false;
+                return;
+            }
+            if (entry is DirectoryInfo directory)
+            {
+                directories.Push(directory);
+                return;
+            }
+            if (entry is FileInfo file)
+            {
+                ObserveFile(file);
+            }
+        }
+        catch (Exception error) when (AdminStorageObserver.FileFailure(error))
+        {
+            complete = false;
+        }
+    }
+
+    private void ObserveFile(FileInfo file)
+    {
+        const char SlashCharacter = '/';
+
+        cancellationToken.ThrowIfCancellationRequested();
+        var relative = Path.GetRelativePath(rootPath, file.FullName).Replace(Path.DirectorySeparatorChar, SlashCharacter);
+        var category = Category(relative);
+        var length = file.Length;
+        totalBytes = checked(totalBytes + length);
+        observedFiles++;
+        switch (category)
+        {
+            case Canonical:
+                canonicalBytes = checked(canonicalBytes + length);
+                break;
+            case Replica:
+                replicaBytes = checked(replicaBytes + length);
+                break;
+            case Backup:
+                backupBytes = checked(backupBytes + length);
+                break;
+        }
+        if (files.Count < settings.MaximumRetainedFiles)
+        {
+            files.Add(new(relative, category, length));
+        }
+    }
+
+    private static string Category(string relative)
+    {
+        const char SlashCharacter = '/';
+        const int SeparatorValidationBoundary = 0;
+
+        var separator = relative.IndexOf(SlashCharacter, StringComparison.Ordinal);
+        var parent = separator < SeparatorValidationBoundary ? relative : relative[..separator];
+        return parent switch
+        {
+            PartitionStoreProtocol.CanonicalDirectory => Canonical,
+            ReplicaProtocol.ReplicaDirectory => Replica,
+            BackupDirectory => Backup,
+            _ => Other
+        };
+    }
+
+    internal AdminStorageSnapshot Snapshot() => new(canonicalBytes, replicaBytes, backupBytes, totalBytes,
+        observedFiles, complete, [.. files], complete ? null : Incomplete);
+}

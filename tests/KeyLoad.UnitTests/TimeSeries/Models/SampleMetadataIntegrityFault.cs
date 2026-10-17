@@ -13,5 +13,3 @@ internal enum SampleMetadataIntegrityFault
     BucketFloor,
     BucketVersion
 }
-
-internal sealed record SampleMetadataIntegrityCut(long Position, byte[] Identity, string Image);

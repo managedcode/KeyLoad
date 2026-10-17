@@ -210,38 +210,3 @@ public sealed partial class DatabaseEngine
         return new(entry.Sequence, entry.Commit, entry.CommittedAt, before, after);
     }
 }
-/// <summary>One change whose historical and current row visibility passed authorization.</summary>
-/// <param name="Sequence">Outbox sequence.</param>
-/// <param name="Commit">Commit token of the source mutation.</param>
-/// <param name="CommittedAt">Original commit time.</param>
-/// <param name="Before">Visible previous document, when available.</param>
-/// <param name="After">Visible document after the mutation.</param>
-
-[global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.AuthorizedDocumentChange)]
-public sealed record AuthorizedDocumentChange(
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Sequence)] long Sequence,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Commit)] CommitToken Commit,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.CommittedAt)] DateTimeOffset CommittedAt,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Before)] DocumentRecord? Before,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.After)] DocumentRecord After);
-/// <summary>Immutable authorized changes and continuation state from one read cut.</summary>
-/// <typeparam name="T">Owned projected change type.</typeparam>
-/// <param name="Changes">Ordered owned projections.</param>
-/// <param name="Cursor">Signed continuation cursor.</param>
-/// <param name="ThroughSequence">Last examined outbox sequence.</param>
-/// <param name="Tail">Tail of the captured outbox.</param>
-/// <param name="FirstAvailable">First retained outbox sequence.</param>
-/// <param name="HasMore">Whether later source entries remain.</param>
-/// <param name="CutPosition">Storage position represented by this page.</param>
-
-[global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.AuthorizedDocumentChangePage)]
-public sealed record AuthorizedDocumentChangePage<T>(
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Changes)] ImmutableArray<T> Changes,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Cursor)] string Cursor,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.ThroughSequence)] long ThroughSequence,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Tail)] long Tail,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.FirstAvailable)] long FirstAvailable,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.HasMore)] bool HasMore,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.CutPosition)] long CutPosition);

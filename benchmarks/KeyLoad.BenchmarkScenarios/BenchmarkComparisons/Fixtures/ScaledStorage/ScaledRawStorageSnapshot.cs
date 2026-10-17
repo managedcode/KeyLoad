@@ -83,5 +83,3 @@ internal sealed record ScaledRawStorageSnapshot
         get; init;
     }
 }
-
-internal readonly record struct ScaledRawStorageNativeSnapshot(long ResidentRecords);

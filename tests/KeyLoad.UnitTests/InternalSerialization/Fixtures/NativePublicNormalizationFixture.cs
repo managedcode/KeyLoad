@@ -3,13 +3,6 @@ using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-internal enum NativePublicShape
-{
-    NullMutation,
-    NullPatch,
-    NullGrant
-}
-
 internal static class NativePublicNormalizationFixture
 {
     internal const string TargetPrincipal = "native-null-grants";

@@ -11,28 +11,3 @@ internal static class SharedDomainChildProgressProtocol
     internal const int InitialOrdinal = 0;
     internal const long EmptyPosition = 0L;
 }
-
-[Orleans.Alias(SharedDomainChildProgressProtocol.PhaseAlias)]
-internal enum SharedDomainChildProgressPhase
-{
-    DatabaseBootstrap = 1,
-    ResourceConfiguration = 2,
-    SeedProducer = 3,
-    QueueReceive = 4,
-    QueueAcknowledgement = 5,
-    SaveOriginalOperation = 6,
-    SaveSeedOperations = 7,
-    SaveSeedResults = 8,
-    SaveSeedImage = 9,
-    SaveSeedPosition = 10,
-    SaveIdentityDigest = 11,
-    ArmingOriginalBoundary = 12
-}
-
-[Orleans.GenerateSerializer, Orleans.Alias(SharedDomainChildProgressProtocol.Alias)]
-internal sealed record SharedDomainChildProgressV1(
-    [property: Orleans.Id(0)] int Version,
-    [property: Orleans.Id(1)] SharedDomainChildProgressPhase Phase,
-    [property: Orleans.Id(2)] int SeedOrdinal,
-    [property: Orleans.Id(3)] double ElapsedMilliseconds,
-    [property: Orleans.Id(4)] long StorePosition);

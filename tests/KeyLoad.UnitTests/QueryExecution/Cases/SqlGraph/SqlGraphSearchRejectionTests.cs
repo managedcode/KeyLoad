@@ -87,7 +87,7 @@ internal sealed class SqlGraphSearchRejectionTests
     public async Task ParameterCountAndCompleteRequestBoundsAreEnforced()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
+        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Features.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryBytes = 512
         }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());

@@ -164,3 +164,5 @@ flowchart LR
 | [ADR-132: Native CREATE TABLE and caller-stable SQL command identity](ADR-132-native-create-table-command-identity.md) | Accepted; qualification pending |
 | [ADR-136: Orleans owns partition execution and silo-local storage lifetime](ADR-136-native-orleans-partition-ownership.md) | Accepted implementation contract; qualification pending |
 | [ADR-142: Shared live benchmark sessions](ADR-142-shared-live-benchmark-sessions.md) | Owner-selected; implementation and Linux qualification pending |
+
+| [ADR-143: Independent silo and replica topology](ADR-143-independent-silo-replica-topology.md) | Owner-selected; qualification pending |

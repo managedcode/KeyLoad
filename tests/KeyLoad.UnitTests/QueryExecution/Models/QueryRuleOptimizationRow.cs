@@ -11,9 +11,3 @@ internal readonly record struct QueryRuleOptimizationRow(
     private const string RankWireName = "rank";
     private const string NestedWireName = "nested";
 }
-
-internal readonly record struct QueryRuleOptimizationNested(
-    [property: JsonPropertyName(QueryRuleOptimizationNested.RevisionWireName)] decimal Revision)
-{
-    private const string RevisionWireName = "@revision";
-}

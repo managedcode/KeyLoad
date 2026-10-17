@@ -59,9 +59,3 @@ internal static class SiteIsolatedGitHubArchivePaths
                 && cellIds?.Contains(value[prefix.Length..^suffix.Length]) == true);
     }
 }
-
-internal static class SiteIsolatedGitHubArchiveNumbers
-{
-    public const int PageGroup = 2;
-    public const int Pages = 40;
-}

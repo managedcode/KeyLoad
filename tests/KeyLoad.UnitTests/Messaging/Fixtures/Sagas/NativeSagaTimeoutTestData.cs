@@ -102,6 +102,3 @@ internal static class NativeSagaTimeoutTestData
 
     internal static TimeSpan SagaTimeoutTtlValue { get; } = TimeSpan.FromHours(1);
 }
-
-internal sealed record NativeSagaTimeoutCase(QueueLaneRef Lane, QueueLaneRef TimeoutLane, Guid Id,
-    DateTimeOffset Deadline, DueWorkHint Hint);

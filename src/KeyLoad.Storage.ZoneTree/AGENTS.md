@@ -33,3 +33,7 @@
 ## Feature-local responsibility folders
 
 - Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+
+## Consolidated local storage ownership, 2026-10-17
+
+Owns archive packing/transfer/staging under `Restore/` and regular-file native primitives under `StorageRecovery/`. The separate archive and IO assemblies are removed. Preserve untrusted archive validation, no-follow/nonblocking regular-file admission, retained handle identity, platform ABI checks and lock/cleanup contracts. Unsafe compilation is required only for generated LibraryImport implementations. Cartograph remains an optional archive format, never the canonical transaction journal.

@@ -37,5 +37,3 @@ internal static class SiteBuilderDiagnostics
     internal static string PreChromeFailure(SiteProcessResult result)
         => $"{SiteBuilderTokens.BuilderFailurePrefix} {result.ExitCode}{SiteBuilderTokens.ErrorSeparator}{result.StandardError}";
 }
-
-internal sealed record SiteBuilderSourceReceipt(string Path, string Sha256);

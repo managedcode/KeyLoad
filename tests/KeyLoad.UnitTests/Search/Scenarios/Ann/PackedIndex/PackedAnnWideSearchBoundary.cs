@@ -4,8 +4,6 @@ using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-internal readonly record struct PackedAnnStartedSearch(Task<AnnSearchResult> Search, AnnWorkBudget Budget);
-
 internal static class PackedAnnWideSearchBoundary
 {
     private const int SearchLimit = 1_000;

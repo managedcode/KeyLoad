@@ -8,10 +8,3 @@ internal sealed record D2ResourceInventoryImportImage(
     PartitionMovementPageResult[] Pages,
     PartitionMovePhaseResult Captured,
     PartitionMoveSourceFenceRecord Fence);
-
-internal sealed record D2ResourceInventoryImportResult(
-    D2ResourceInventoryImportImage Image,
-    ReplicatedOperation ConcurrentOperation,
-    OperationResult ConcurrentResult,
-    ReplicatedOperation InstalledOperation,
-    OperationResult InstalledResult);

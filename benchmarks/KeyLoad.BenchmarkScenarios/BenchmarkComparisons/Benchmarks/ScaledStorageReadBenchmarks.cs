@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using Microsoft.Extensions.Options;
 
@@ -174,12 +173,4 @@ public class ScaledStorageReadBenchmarks : IDisposable
 
         return actual;
     }
-}
-
-internal sealed class ScaledStorageReadUnrollConfiguration : ManualConfig
-{
-    private const int UnrollFactor = 1;
-
-    public ScaledStorageReadUnrollConfiguration()
-        => AddJob(Job.Default.WithUnrollFactor(UnrollFactor).AsMutator());
 }

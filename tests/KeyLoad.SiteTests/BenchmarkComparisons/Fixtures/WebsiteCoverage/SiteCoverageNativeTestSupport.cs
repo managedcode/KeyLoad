@@ -4,9 +4,6 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteCoverageNativeReceipt(byte[] Bytes, string Identity, string Sha256,
-    string StandardOutput);
-
 internal static class SiteCoverageNativeTestSupport
 {
     public const string FixtureSource = "const marker = \"🟩\";\r\nfunction choose(flag) {\r\n  if (flag) {\r\n    const lazy = () => \"unused\"; return marker;\r\n  } else {\r\n    return \"none\";\r\n  }}\r\nfunction neverCalled() { return 123; }\r\nconsole.log(choose(process.argv[2] === \"yes\"));\r\n";

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Security;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;

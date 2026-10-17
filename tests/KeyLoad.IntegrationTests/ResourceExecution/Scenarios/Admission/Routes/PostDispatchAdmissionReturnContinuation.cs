@@ -64,5 +64,3 @@ internal static class PostDispatchAdmissionReturnContinuation
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 }
-
-internal sealed record PostDispatchAdmissionReturnOutcome(CommitReceipt Receipt, OutboxStatus Outbox);

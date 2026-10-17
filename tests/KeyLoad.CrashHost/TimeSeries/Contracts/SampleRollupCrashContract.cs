@@ -43,6 +43,3 @@ internal static class SampleRollupCrashContract
     internal static string[] Modes(bool drop) => [PrepareMode,
         drop ? DropFaultMode : RefreshFaultMode, drop ? DropRecoverMode : RefreshRecoverMode, VerifyMode];
 }
-
-internal sealed record SampleRollupCrashSnapshot(SampleRecord[] Samples, SampleRollupResult Rollup,
-    string RawImage, long Position, string AcknowledgedReceipt);

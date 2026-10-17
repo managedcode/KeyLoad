@@ -39,5 +39,3 @@ internal sealed class QueueViewLeaseIsolationState(SqlModelViewRf3Scenario scena
     internal Delivery Delivery => OriginalDelivery?.Deliveries.Single()
         ?? throw new InvalidOperationException(QueueViewLeaseIsolationProtocol.Absent);
 }
-internal sealed record QueueViewLeaseIsolationReceipt(DeliveryCommand Command, CommitReceipt Receipt);
-internal sealed record QueueViewLeaseIsolationImage(MessageInspection[] Messages, StreamPage Source, OutboxStatus Outbox);

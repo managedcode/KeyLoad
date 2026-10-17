@@ -140,8 +140,3 @@ internal static class RawStorageReportNodeProcess
         return new(response.ExitCode, response.Error, cases);
     }
 }
-
-internal sealed record RawStorageReportProbeResponse(int ExitCode, string StandardError,
-    RawStorageReportCaseResult[] Cases);
-
-internal sealed record RawStorageReportCaseResult(string Name, bool Accepted, bool Unchanged, string Error);

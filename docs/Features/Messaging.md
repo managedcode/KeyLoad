@@ -211,7 +211,7 @@ It does not close those tasks or qualify the full EventStreams/Messaging feature
 The owning unit cases are
 [EventAppendWholeFlowTests](../../tests/KeyLoad.UnitTests/EventStreams/Cases/Event/EventAppendWholeFlowTests.cs)
 (two concurrent Exact append instances and four rejection instances),
-[QueueLostResponseWholeFlowTests](../../tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueLostResponseWholeFlowTests.cs)
+[QueueLostResponseWholeFlowTests](../../tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueLifecycle/QueueLostResponseWholeFlowTests.cs)
 (one claim/ACK retry workflow with real ZoneTree reopen), and
 [QueueAdmissionCancellationWholeFlowTests](../../tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueAdmissionCancellationWholeFlowTests.cs)
 (two pre-admission cancellation instances). They use actual native storage,
@@ -514,7 +514,7 @@ QueuePolicy retains Id0..7 and original defaults. Append Id8 nullable MaxDeadLet
 
 MessageState original Scheduled0..Expired6 remain exact; append PendingDeadLetter=7. Existing DeadLettered=4 is the admitted parked state; do not invent a second synonymous Parked enum. MessageMetadata retains Id0..11, appends Id12 ParkedSequence (zero outside admitted DLQ), Id13 OriginalEnqueueSequence (immutable), Id14 ActiveOrderSequence (new generation gets new sequence). QueueCounters retains Id0..4, appends Id5 DeadLetterMessages, Id6 DeadLetterBytes, Id7 NextParkedSequence, Id8 NextEnqueueSequence. Zero initial counts, checked monotonic sequence arithmetic; overflow refuses without partial effects. StoredBytes continues actual native MessageBody serialized bytes, not claimed total CLR/physical index heap bytes; original atomic encoded-frame and record/scan admission still bound all added records.
 
-Append three public typed Batch mutations in Abstractions/Features/Messaging/Contracts/QueueLifecycleContracts.cs, each derived from existing Mutation(Queue), generated native serializer, exact per-derived field IDs (base Resource Id0 remains in its own serializer scope):
+Append three public typed Batch mutations in Abstractions/Messaging/Contracts/QueueLifecycle/QueueLifecycleContracts.cs, each derived from existing Mutation(Queue), generated native serializer, exact per-derived field IDs (base Resource Id0 remains in its own serializer scope):
 - RedriveQueueMessage: Id0 Queue, Id1 MessageId, Id2 ExpectedStateVersion, Id3 ExpectedDeliveryGeneration, Id4 NotBefore nullable; discriminator redriveQueueMessage, alias keyload.contract.redrive-queue-message.v1.
 - CancelQueueMessage: Id0 Queue, Id1 MessageId, Id2 ExpectedStateVersion, Id3 ExpectedDeliveryGeneration; discriminator cancelQueueMessage, alias keyload.contract.cancel-queue-message.v1.
 - ParkPendingQueueMessage: Id0 Queue, Id1 MessageId, Id2 ExpectedStateVersion, Id3 ExpectedDeliveryGeneration; discriminator parkPendingQueueMessage, alias keyload.contract.park-pending-queue-message.v1.
@@ -581,7 +581,7 @@ Keep the current command dispatch, actual ConnectionGrain call-local child, sign
 
 If definition is byte/fingerprint-identical, return actual unchanged state under the same valid CAS and pause prerequisites. Otherwise bound the current-generation window scan using the actual existing Policy.MaxWindow+1 and current native batch/read guards; reject over-bound/corrupt rows before any mutation. Delete ONLY actual old-generation window rows in the SAME atomic transaction. Set the freshly validated Definition, Generation+1, OwnershipEpoch+1, IssuedPosition=existing.Checkpoint, Paused=true, SafeFailureCode=null; retain existing.Checkpoint and original completed historic rows/outcomes. Store through existing native GroupState codec and GroupInfo (no GroupState field/alias change). An explicit existing SetSubscriptionPaused with actual new generation is still required to deliver. Old tokens fail TokenInvalidated; new filter deterministically evaluates retained pending positions from Checkpoint+1. No lease retry, deadline/quota/default change, fake time or second dispatcher.
 
-Core owner: Features/Messaging/Commands/SubscriptionDefinitionUpdates.cs new small native partial helper reached ONLY from the existing validated ConfigureSubscription branch in Execution/SubscriptionGroups.cs. Do not alter seek/ordinary Configure/Receive/ACK behavior. New constants are feature-local domain-named; no public error-detail weakening. Existing native apply/WAL/RF3 rollback and original failed-outcome retention remain authoritative. Storage ownership remains PartitionHost.
+Core owner: Messaging/Commands/Subscriptions/SubscriptionDefinitionUpdates.cs new small native partial helper reached ONLY from the existing validated ConfigureSubscription branch in Execution/SubscriptionGroups.cs. Do not alter seek/ordinary Configure/Receive/ACK behavior. New constants are feature-local domain-named; no public error-detail weakening. Existing native apply/WAL/RF3 rollback and original failed-outcome retention remain authoritative. Storage ownership remains PartitionHost.
 
 ## Complete regression and rollout gates
 
@@ -1227,8 +1227,8 @@ AC-QUEUE-DEADLINE-UNIT-002: inside the original bounded discovery loop, wait for
 
 | Requirement / acceptance | Original automated source |
 |---|---|
-| REQ-QUEUE-DEADLINE-UNIT-001 / AC-QUEUE-DEADLINE-UNIT-002 | tests/KeyLoad.UnitTests/Messaging/Scenarios/QueueScheduling/Deadlines/QueueDeadlineNativeDiscovery.cs |
-| AC-QUEUE-DEADLINE-UNIT-001 | tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueDeadlineNativeWholeFlowTests.cs; Helpers/QueueDeadlineNativeTrial.cs and original continuation helpers |
+| REQ-QUEUE-DEADLINE-UNIT-001 / AC-QUEUE-DEADLINE-UNIT-002 | tests/KeyLoad.UnitTests/Messaging/Scenarios/QueueScheduling/Deadlines/QueueDeadline/QueueDeadlineNativeDiscovery.cs |
+| AC-QUEUE-DEADLINE-UNIT-001 | tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueDeadline/QueueDeadlineNativeWholeFlowTests.cs; Helpers/QueueDeadlineNativeTrial.cs and original continuation helpers |
 | Clock ownership | tests/KeyLoad.UnitTests/Messaging/Fixtures/QueueScheduling/DueWork/DueDiscoveryClock.cs |
 
 +### TASK-REMOTE-TRANSFER-UNIT-CLOCK-001

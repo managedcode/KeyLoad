@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using KeyLoad.ServiceDefaults.Features.Authorization.Configuration;
+using KeyLoad.Server.Features.Authorization.Configuration;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 

@@ -105,15 +105,3 @@ internal static class McpResponseBoundaryTestData
         return TransportFrame(method, parameters, fault == McpMissingTargetFault.MissingParameters);
     }
 }
-
-/// <summary>Names real encoded JSON string representations with different byte and character counts.</summary>
-internal enum McpIdentifierEncoding
-{
-    Ascii, Utf8, UnicodeEscape, QuoteEscape
-}
-
-/// <summary>Names native target omissions and concrete JSON type failures.</summary>
-internal enum McpMissingTargetFault
-{
-    MissingParameters, NullParameters, ScalarParameters, ArrayParameters, MissingTarget, NullTarget, WrongTarget
-}

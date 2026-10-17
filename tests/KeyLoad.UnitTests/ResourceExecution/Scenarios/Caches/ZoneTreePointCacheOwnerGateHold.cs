@@ -1,5 +1,4 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -30,36 +29,4 @@ internal sealed class ZoneTreePointCacheOwnerGateHold
         release.Task.WaitAsync(HoldTimeout, TimeProvider.System).GetAwaiter().GetResult();
         return true;
     }
-}
-
-internal readonly record struct ZoneTreePointCacheOwnerObservation(
-    ZoneTreePointCacheOwnerStatus Status, ZoneTreePointCacheOwnerIdentity Identity);
-
-internal sealed class ZoneTreePointCacheOwnerProbe
-{
-    private const string MissingObservation = "No owner observation is registered.";
-    private Task<ZoneTreePointCacheOwnerObservation>? operation;
-
-    internal void Start(ZoneTreePointCacheControl control)
-    {
-        ArgumentNullException.ThrowIfNull(control);
-        operation = ZoneTreeCoordinatedPointCacheTestSupport.StartLongRunning(() =>
-        {
-            var status = control.TryReadOwnerIdentity(out var identity);
-            return new ZoneTreePointCacheOwnerObservation(status, identity);
-        });
-    }
-
-    internal async Task<ZoneTreePointCacheOwnerObservation> WaitAsync()
-    {
-        var current = operation ?? throw new InvalidOperationException(MissingObservation);
-        var result = await current.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
-        operation = null;
-        return result;
-    }
-
-    internal Task JoinAsync(List<Exception> failures)
-        => operation is { } current
-            ? ZoneTreeCoordinatedPointCacheTestSupport.JoinAndCollectAsync(current, failures)
-            : Task.CompletedTask;
 }

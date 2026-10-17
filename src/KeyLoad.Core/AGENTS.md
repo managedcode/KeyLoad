@@ -32,3 +32,7 @@
 ## Feature-local responsibility folders
 
 - Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+
+## Consolidated authorization ownership, 2026-10-17
+
+Authorization policy evaluation and replay input policy are owned here under `Authorization/`; the separate Security assembly is removed. Preserve fresh persisted permission checks and all negative authorization flows.

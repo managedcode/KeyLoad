@@ -2,8 +2,6 @@ using System.Text;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-internal sealed record IsolatedAggregateNodeResult(int ExitCode, string Output, string Error);
-
 internal static class IsolatedAggregateNodeOutput
 {
     private const int BufferCharacters = 4096;

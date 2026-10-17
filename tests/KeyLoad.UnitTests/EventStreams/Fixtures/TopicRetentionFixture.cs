@@ -122,7 +122,7 @@ internal sealed class TopicRetentionFixture : IDisposable
     }
     internal void SetLimits(DatabaseLimits limits)
     {
-        Database = new(Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits),
+        Database = new(Store, new KeyLoad.Core.Features.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
             UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);

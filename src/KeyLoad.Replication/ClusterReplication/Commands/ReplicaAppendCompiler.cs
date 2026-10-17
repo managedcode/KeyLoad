@@ -90,5 +90,3 @@ internal static class ReplicaAppendCompiler
         };
     }
 }
-
-internal sealed record ReplicaAppendBatch(ReplicaEntry[] Entries, byte[][] Encoded);

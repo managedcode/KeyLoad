@@ -83,7 +83,7 @@ internal static class RequestCqrsProbeFileValidation
         length = 0;
         try
         {
-            var identity = KeyLoad.Storage.IO.OfflineRegularFile.Inspect(info.FullName);
+            var identity = KeyLoad.Storage.ZoneTree.IO.OfflineRegularFile.Inspect(info.FullName);
             if (File.GetUnixFileMode(info.FullName) != PrivateFileMode)
             {
                 throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);

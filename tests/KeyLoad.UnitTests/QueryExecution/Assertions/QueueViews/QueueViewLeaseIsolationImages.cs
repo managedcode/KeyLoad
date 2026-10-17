@@ -1,12 +1,8 @@
-using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
-
-internal sealed record QueueViewLeaseIsolationImage(StoreIdentity Identity, long Position, string[] Rows,
-    long LastIndex, long CommittedIndex, long Term);
 
 internal static class QueueViewLeaseIsolationImages
 {

@@ -6,11 +6,6 @@ using Orleans.Serialization.WireProtocol;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-internal enum NativeImmutableDictionaryFault
-{
-    MissingValues, NullValues, DuplicateValues, IncompletePairs, OversizedCount, AlienMember, BaseScope, UnknownComparer, TypedNullComparer, DuplicateComparer, UnknownKeyComparer
-}
-
 // Official native headers/scalars author malformed frames, never an alternate decoder.
 internal static class NativeImmutableDictionaryFixture
 {
@@ -97,13 +92,4 @@ internal static class NativeImmutableDictionaryFixture
 
         writer.WriteEndObject();
     }
-}
-
-[Orleans.GenerateSerializer, Orleans.Alias(NativeImmutableDictionaryUnknownComparer.ContractAlias)]
-internal sealed class NativeImmutableDictionaryUnknownComparer : IEqualityComparer<string>
-{
-    internal const string ContractAlias = "keyload.test.native-immutable-map-unknown-comparer.v1";
-
-    public bool Equals(string? x, string? y) => StringComparer.Ordinal.Equals(x, y);
-    public int GetHashCode(string obj) => StringComparer.Ordinal.GetHashCode(obj);
 }

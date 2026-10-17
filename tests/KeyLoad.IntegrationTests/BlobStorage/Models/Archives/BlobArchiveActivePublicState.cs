@@ -16,8 +16,3 @@ internal sealed class BlobArchiveActivePublicState(BlobArchiveActivePublicVersio
     } = new(Guid.NewGuid(), active.Begin.Blob, active.Begin.UploadId,
         2, BlobArchiveActivePublicPublication.Bytes(2, 17), BlobIntegrity.PartHash(BlobArchiveActivePublicPublication.Bytes(2, 17)));
 }
-
-internal sealed record BlobArchiveActivePublicVersion(BeginBlobUploadRequest Begin,
-    BlobCommitResult<BlobUploadInfo> Begun, WriteBlobPartRequest[] Parts,
-    BlobCommitResult<BlobUploadInfo>[] Written, CompleteBlobUploadRequest? Complete,
-    BlobCommitResult<BlobMetadata>? Completed);

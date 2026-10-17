@@ -48,8 +48,3 @@ internal static class NativeEnvelopeFixture
         }
     }
 }
-
-internal enum NativeEnvelopeFault
-{
-    WrongRoot, MissingVersion, MissingValue, DuplicateVersion, DuplicateValue, UnknownField
-}

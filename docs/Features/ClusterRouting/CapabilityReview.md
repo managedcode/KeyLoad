@@ -115,9 +115,9 @@ flowchart LR
 
 ## Actual source joins and qualification
 
-- [OrleansSiloConfiguration](../../../src/KeyLoad.Server/ClusterRouting/Hosting/OrleansSiloConfiguration.cs) owns borrowed DI, message bound, services, serializer registration, native directory/repartitioner and Graph transitions.
+- [OrleansSiloConfiguration](../../../src/KeyLoad.Server/ClusterRouting/Hosting/SiloHosting/OrleansSiloConfiguration.cs) owns borrowed DI, message bound, services, serializer registration, native directory/repartitioner and Graph transitions.
 - [Replica service](../../../src/KeyLoad.Clustering/ClusterReplication/GrainServices/PartitionReplicaGrainService.cs), [transport lifecycle](../../../src/KeyLoad.Clustering/ClusterReplication/Transport/ReplicaTransportLifecycle.cs) and [due service](../../../src/KeyLoad.Clustering/Messaging/GrainServices/RecurringDueGrainService.cs) own real per-silo startup/dispatch/stop joins.
-- [Native request owner](../../../src/KeyLoad.Clustering/ClusterRouting/Streaming/NativeRequestWorkOwner.cs) and [OrleansNode](../../../src/KeyLoad.Server/ClusterRouting/Hosting/OrleansNode.cs) own bounded admission, cancellation and drain before physical cleanup.
+- [Native request owner](../../../src/KeyLoad.Clustering/ClusterRouting/Streaming/RequestWork/NativeRequestWorkOwner.cs) and [OrleansNode](../../../src/KeyLoad.Server/ClusterRouting/Hosting/SiloHosting/OrleansNode.cs) own bounded admission, cancellation and drain before physical cleanup.
 - [StorageContracts](../../../src/KeyLoad.Abstractions/Storage/Contracts/StorageContracts.cs), [EventStreams](../EventStreams.md), [Messaging](../Messaging.md), [ChangeFeeds](../ChangeFeeds.md) and [ResourceExecution](../ResourceExecution.md) retain canonical data/effect/cursor/cache contracts.
 
 REQ/AC-ORL-007..010 and TASK-ORL-SERVICES/MESSAGING/STATE/CAPABILITY-REVIEW in the

@@ -57,5 +57,3 @@ internal static class AnalyticsStoreNativeTestData
         => new(ImmutableDictionary<string, string>.Empty.Add(Kind, kind),
             ImmutableDictionary<string, double>.Empty.Add(Count, count).Add(Sum, sum).Add(Average, average).Add(Minimum, min).Add(Maximum, max));
 }
-
-internal sealed record AnalyticsStoreTestCommit(ReplicatedOperation Operation, CommitReceipt Receipt);

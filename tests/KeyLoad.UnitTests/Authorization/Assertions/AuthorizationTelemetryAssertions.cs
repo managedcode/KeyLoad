@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
-using KeyLoad.ServiceDefaults.Features.Authorization.Contracts;
+using KeyLoad.Server.Features.Authorization.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 

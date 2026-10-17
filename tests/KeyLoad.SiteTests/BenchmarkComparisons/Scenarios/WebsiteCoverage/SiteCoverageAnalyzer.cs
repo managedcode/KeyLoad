@@ -2,13 +2,6 @@ using System.Text;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteCoverageFileResult(string Path, string Sha256, int ExecutableLines, int CoveredLines,
-    int BlockOutcomes, int CoveredBlockOutcomes);
-
-internal sealed record SiteCoverageTotals(int ExecutableLines, int CoveredLines, int BlockOutcomes,
-    int CoveredBlockOutcomes);
-internal sealed record SiteCoverageLineCoverage(IReadOnlySet<int> Executable, IReadOnlySet<int> Covered);
-
 internal static class SiteCoverageAnalyzer
 {
     public static SiteCoverageFileResult Analyze(SiteCoverageSourceEntry source, string repository,

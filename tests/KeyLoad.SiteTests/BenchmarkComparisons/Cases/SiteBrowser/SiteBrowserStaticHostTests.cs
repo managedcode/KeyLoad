@@ -101,10 +101,3 @@ internal sealed class SiteBrowserStaticHostTests
         await Assert.That(await recovered.Content.ReadAsStringAsync()).IsEqualTo(SiteBrowserStaticHostTokens.HtmlBody);
     }
 }
-
-internal static class SiteBrowserStaticHostTokens
-{
-    public const string HtmlBody = "<!doctype html>";
-    public const string StyleBody = "body{}";
-    public const string ModuleBody = "export {};";
-}

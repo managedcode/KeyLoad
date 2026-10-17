@@ -5,17 +5,6 @@ using static KeyLoad.Storage.KeyCodecTokens;
 
 namespace KeyLoad.Storage;
 
-/// <summary>Represents an indexed key component which is absent rather than explicitly null.</summary>
-public sealed class MissingValue
-{
-    private MissingValue()
-    {
-    }
-
-    /// <summary>Gets the singleton missing-value marker.</summary>
-    public static MissingValue Instance { get; } = new();
-}
-
 /// <summary>Version 1 binary keys; strings use UTF-8 byte order and zero escaping.</summary>
 public static class KeyCodec
 {
@@ -202,17 +191,4 @@ public static class KeyCodec
         stream.WriteByte(EscapedZeroByte);
     }
 
-}
-
-/// <summary>Compares encoded keys using unsigned lexicographic byte ordering.</summary>
-public sealed class BinaryKeyComparer : IComparer<byte[]>
-{
-    /// <summary>Gets the shared binary key comparer.</summary>
-    public static BinaryKeyComparer Instance { get; } = new();
-
-    /// <summary>Compares two byte arrays lexicographically; null is treated as an empty array.</summary>
-    /// <param name="x">The first key to compare.</param>
-    /// <param name="y">The second key to compare.</param>
-    /// <returns>A negative value when <paramref name="x"/> precedes <paramref name="y"/>, zero when they are equal, or a positive value otherwise.</returns>
-    public int Compare(byte[]? x, byte[]? y) => x.AsSpan().SequenceCompareTo(y.AsSpan());
 }

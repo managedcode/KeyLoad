@@ -7,8 +7,3 @@ internal sealed record RequestCqrsRf3McpRejectionRecord(
     string Node,
     McpTransportStage Stage,
     McpTransportMethodCategory MethodCategory);
-
-internal sealed record RequestCqrsRf3McpRejectionArtifact(
-    int Version,
-    Guid WaveId,
-    RequestCqrsRf3McpRejectionRecord[] Rejections);

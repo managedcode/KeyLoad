@@ -186,5 +186,3 @@ internal static class KeyCodecMixedCorpus
         entries[11] = new(11, ["prefix", null, null]);
     }
 }
-
-internal sealed record KeyCodecCorpusEntry(int Index, object?[] Components);

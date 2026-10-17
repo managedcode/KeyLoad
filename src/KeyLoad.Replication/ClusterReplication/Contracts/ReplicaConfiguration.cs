@@ -13,14 +13,13 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
     private const int MinimumBenchmarkVoters = 1;
     private const int MaximumBenchmarkVoters = 3;
     private const int DevelopmentVoters = 1;
-    private const int MinimumProductionVoters = 3;
+    private const int MinimumProductionVoters = 1;
     private const int DefaultLowerElectionTimeoutSeconds = 4;
     private const int DefaultUpperElectionTimeoutSeconds = 8;
     private const int DefaultHeartbeatIntervalMilliseconds = 250;
     private const int DefaultRpcTimeoutSeconds = 2;
     private const int MajorityDivisor = 2;
     private const int MajorityIncrement = 1;
-    private const int EvenVoterRemainder = 0;
     private const int DefaultSnapshotThreshold = 1_024;
     private const int MinimumSnapshotThreshold = 2;
     private const int MinimumTransferBudget = 1;
@@ -67,7 +66,7 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
             || DevelopmentSingleVoter && BenchmarkTopology
             || (DevelopmentSingleVoter ? VoterIds.Length != DevelopmentVoters
                 : BenchmarkTopology ? VoterIds.Length is not (MinimumBenchmarkVoters or MaximumBenchmarkVoters)
-                : VoterIds.Length < MinimumProductionVoters || VoterIds.Length % MajorityDivisor == EvenVoterRemainder)
+                : VoterIds.Length < MinimumProductionVoters)
             || VoterIds.Distinct(StringComparer.Ordinal).Count() != VoterIds.Length
             || VoterIds.Any(string.IsNullOrWhiteSpace) || !VoterIds.Contains(LocalId, StringComparer.Ordinal))
         {

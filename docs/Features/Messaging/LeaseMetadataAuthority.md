@@ -32,7 +32,7 @@ compiler/analyzers/formatter, focused current-SIMD wholeflows, process recovery,
 Aspire RF3 SDK/official MCP and delivered-source Linux are separate mandatory
 gates. Source authoring is not runtime proof or KL-087 acceptance.
 
-Ownership: Core Features/Messaging/Validation/QueueLeaseAuthority.cs and the
+Ownership: Core Messaging/Validation/QueueLeases/QueueLeaseAuthority.cs and the
 existing Unit Messaging Cases/Contracts/Helpers/Assertions owners. No shared
 Messaging.cs, public contract, native serializer ID, storage format, migration,
 retry/scheduler setting, timeout, clock, role or dependency is changed. Rollback

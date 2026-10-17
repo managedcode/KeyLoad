@@ -2,13 +2,6 @@ using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal enum NativeJournalEntryKind
-{
-    Symlink,
-    Fifo,
-    Missing
-}
-
 internal sealed class NativeJournalRefusalFiles(ZoneTreeExistingStoreFixture files)
 {
     private const string HiddenSuffix = ".original";

@@ -4,8 +4,6 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-internal sealed record MetamorphicPublicRow(string Id, string Status, decimal? Score, bool Missing, int Bucket, string Tag, string Json);
-
 internal static class MetamorphicPublicData
 {
     private const string StatusProperty = "status";

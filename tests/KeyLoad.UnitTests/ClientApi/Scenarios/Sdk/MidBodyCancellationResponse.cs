@@ -3,23 +3,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-internal enum FirstRequestStage
-{
-    WaitingForHandler,
-    HandlerEntered,
-    WritingFirstChunk,
-    FirstChunkWritten,
-    FlushingFirstChunk,
-    FirstChunkFlushed,
-    WaitingForSecondWriteRelease,
-    WritingSecondChunk,
-    SecondChunkWritten,
-    FlushingSecondChunk,
-    SecondChunkFlushed,
-    WaitingForRequestAborted,
-    RequestAborted
-}
-
 internal sealed class MidBodyCancellationResponse(byte[] partialResponse, NodeStatus nextResponse, int chunkSize)
 {
     private const string JsonContentType = "application/json";

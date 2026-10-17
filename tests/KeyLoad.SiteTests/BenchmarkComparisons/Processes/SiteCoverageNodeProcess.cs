@@ -2,8 +2,6 @@ using System.Diagnostics;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record SiteCoverageProcessResult(int ExitCode, string StandardOutput, string StandardError);
-
 internal static class SiteCoverageNodeProcess
 {
     public static async Task<SiteCoverageProcessResult> RunAsync(ProcessStartInfo startInfo,

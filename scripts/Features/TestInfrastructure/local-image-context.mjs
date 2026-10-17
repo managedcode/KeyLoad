@@ -13,19 +13,24 @@ const expectedCopies = Object.freeze([
   Object.freeze({ sources: Object.freeze(['analyzers/']), destination: './analyzers/' }),
   Object.freeze({ sources: Object.freeze(['src/']), destination: './src/' }),
 ]);
-const expectedRuntimeCopy = 'COPY --from=build /app/publish/ ./';
-const pinnedBasePattern = /^FROM (\S+@sha256:[a-f0-9]{64})(?: AS [a-z0-9_-]+)?$/;
+const sdkVersion = '10.0.401';
+const runtimeBasePattern = /<ContainerBaseImage>(mcr\.microsoft\.com\/dotnet\/aspnet:[^<]+@sha256:[a-f0-9]{64})<\/ContainerBaseImage>/gu;
+const ignoredBuildInputs = Object.freeze(['.git', '**/bin', '**/obj', '**/TestResults', '**/packages.lock.json', '**/.aspire',
+  'artifacts', 'data', '.data', 'backups', 'BenchmarkDotNet.Artifacts', 'node_modules', '.env', '.env.*', '*.log', '*.binlog', '*.tmp', '.DS_Store']);
 
 export async function enumerateBuildInputs(root) {
   root = path.resolve(root);
   const selected = new Map();
   const scaffolds = new Map();
   const admission = { bytes: 0, entries: 0 };
-  const dockerfile = await readTopLevelInput(root, 'Dockerfile', selected, admission);
-  const ignore = await readTopLevelInput(root, '.dockerignore', selected, admission);
-  const copies = parseCopies(dockerfile.bytes.toString('utf8'));
-  const bases = parsePinnedBases(dockerfile.bytes.toString('utf8'));
-  const ignored = parseIgnore(ignore.bytes.toString('utf8'));
+  const settings = await readTopLevelInput(root, 'Directory.Build.props', selected, admission);
+  const global = await readTopLevelInput(root, 'global.json', selected, admission);
+  if (JSON.parse(global.bytes.toString('utf8')).sdk?.version !== sdkVersion) throw new Error(messages.invalidContext);
+  const matches = [...settings.bytes.toString('utf8').matchAll(runtimeBasePattern)];
+  if (matches.length !== 1) throw new Error(messages.invalidContext);
+  const bases = [matches[0][1]];
+  const copies = expectedCopies;
+  const ignored = ignoredBuildInputs;
   for (const copy of copies) {
     for (const source of copy.sources) {
       const normalized = source.endsWith('/') ? source.slice(0, -1) : source;
@@ -142,48 +147,6 @@ async function readBoundedFile(absolute, expected) {
   if (failures.length === 1) throw failures[0];
   if (failures.length > 1) throw new AggregateError(failures, messages.invalidContext);
   return bytes;
-}
-
-function parseCopies(dockerfile) {
-  const copies = [];
-  let runtimeCopySeen = false;
-  for (const line of dockerfile.split(/\r?\n/u)) {
-    if (!/^\s*COPY\b/iu.test(line)) continue;
-    if (line === expectedRuntimeCopy) {
-      if (runtimeCopySeen) throw new Error(messages.invalidContext);
-      runtimeCopySeen = true;
-      continue;
-    }
-    const match = /^COPY\s+(.+?)\s+([^\s]+)\s*$/u.exec(line);
-    if (!match || match[1].includes('--') || match[1].includes('*')) throw new Error(messages.invalidContext);
-    const sources = match[1].split(/\s+/u);
-    copies.push({ sources, destination: match[2] });
-  }
-  if (!runtimeCopySeen || copies.length !== expectedCopies.length || copies.some((copy, index) =>
-    copy.destination !== expectedCopies[index].destination
-    || copy.sources.length !== expectedCopies[index].sources.length
-    || copy.sources.some((source, sourceIndex) => source !== expectedCopies[index].sources[sourceIndex]))) {
-    throw new Error(messages.invalidContext);
-  }
-  return copies;
-}
-
-function parsePinnedBases(dockerfile) {
-  const bases = dockerfile.split(/\r?\n/u).filter(line => /^FROM\s/u.test(line)).map(line => {
-    const match = pinnedBasePattern.exec(line);
-    if (!match) throw new Error(messages.invalidContext);
-    return match[1];
-  });
-  if (bases.length !== 2) throw new Error(messages.invalidContext);
-  return bases;
-}
-
-function parseIgnore(text) {
-  const rules = text.split(/\r?\n/u).filter(line => line.length > 0 && !line.startsWith('#'));
-  const supported = new Set(['.git', '**/bin', '**/obj', '**/TestResults', '**/packages.lock.json', '**/.aspire', 'artifacts', 'data', '.data', 'backups',
-    'BenchmarkDotNet.Artifacts', 'node_modules', '.env', '.env.*', '*.log', '*.binlog', '*.tmp', '.DS_Store']);
-  if (rules.some(rule => !supported.has(rule))) throw new Error(messages.invalidContext);
-  return rules;
 }
 
 function isIgnored(relative, rules) {

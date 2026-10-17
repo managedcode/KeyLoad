@@ -4,8 +4,6 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-internal sealed record MetamorphicReferenceRow(string Id, string Status, decimal? Score, bool Missing, int Bucket, string Tag, string Json);
-
 internal static class MetamorphicReferenceData
 {
     private const string StatusProperty = "status";

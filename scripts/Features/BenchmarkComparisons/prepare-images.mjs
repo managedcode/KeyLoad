@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { baseImage, fileName, imageKind, imageReference, message, outputFormat, processLimit, receiptField, registry, safeErrorMessage } from './image-contracts.mjs';
 import { createRunContext, assertCleanSourceRevision, validateEntryArguments } from './image-inputs.mjs';
 import { appendImageOutputs, createImmutableManifest, createImmutableReceipt, ensureEvidenceDirectory } from './image-evidence.mjs';
-import { buildProductImage, makeImageTag, makeTaggedReference, pushProductImage, startOwnedRegistry, verifyBuildx, verifyDockerEngine, verifyDockerfilePins } from './image-engine.mjs';
+import { buildProductImage, makeImageTag, makeTaggedReference, pushProductImage, startOwnedRegistry, verifyDockerEngine, verifyContainerPins } from './image-engine.mjs';
 import { fetchManifest, waitForRegistry } from './image-manifest.mjs';
 import { runBounded } from './image-process.mjs';
 
@@ -18,9 +18,8 @@ export async function prepareImages(environment = process.env, argv = process.ar
   const context = createRunContext(environment, process.platform);
   await ensureEvidenceDirectory(context);
   await verifySourceCheckout(context);
-  await verifyDockerfilePins(context.workspace, kinds);
+  await verifyContainerPins(context.workspace, kinds);
   await verifyDockerEngine(context);
-  await verifyBuildx(context);
 
   const tag = makeImageTag(context);
   await startOwnedRegistry(context);

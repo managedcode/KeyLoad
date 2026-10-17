@@ -1,7 +1,6 @@
 using System.Net;
 using KeyLoad.Core;
 using KeyLoad.Server;
-using KeyLoad.ServiceDefaults;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -84,7 +83,7 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
                 exportIntervalMilliseconds: options.Value.ExportIntervalMilliseconds)));
         builder.Logging.AddOpenTelemetry(logs => logs.AddProcessor(new SimpleLogRecordExportProcessor(Logs)));
         app = builder.Build();
-        NativeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.ServiceDefaults.Features.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
+        NativeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.Server.Features.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         if (useServerErrorMiddleware)
         {
@@ -202,4 +201,3 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         AuthorizationTelemetryOwnedDisposal.Run(client, app, completedRequests, Database);
     }
 }
-internal sealed record AuthorizationTelemetryFailure(ErrorCode Code, string? Detail);

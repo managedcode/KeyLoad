@@ -3,9 +3,6 @@ using C = KeyLoad.UnitTests.Features.DatabaseComposition.QueueGraphIdentityState
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-internal sealed record SqlCompositionParameterOriginal(CommandRequest Command, ReplicatedOperation Operation,
-    CommitReceipt Expected, Mutation Effect);
-
 internal static class SqlCompositionParameterData
 {
     internal const string CommandParameter = "command";

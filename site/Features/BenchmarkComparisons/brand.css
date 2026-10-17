@@ -1,7 +1,7 @@
 /*
  * KeyLoad brand system (ADR-053, design overhaul 2026-10-02): editorial paper, black display type, Prostir graphite
  * instruments and Managed Code's pastel iridescence (peach, lilac, periwinkle) used as a marker, never as a fill wash.
- * Canonical source: src/KeyLoad.Server/AdminDashboard/Assets/brand.css.
+ * Canonical source: src/KeyLoad.Server/AdminDashboard/Assets/Styles/brand.css.
  * Byte-identical mirror: site/Features/BenchmarkComparisons/brand.css (drift test enforced).
  */
 :root {

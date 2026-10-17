@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Orleans.Placement;
 using Orleans.Runtime.Placement;
 
 namespace KeyLoad.Clustering;
@@ -15,8 +16,8 @@ namespace KeyLoad.Clustering;
 /// <param name="diagnostics">Logs unexpected node failures without serializing exceptions.</param>
 /// <param name="services">Native silo services for opt-in physical command routing.</param>
 /// <param name="options">The centrally validated signed request lifetime settings.</param>
-[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
-[Orleans.GrainType(GrainRoutingProtocol.CommandAlias), Orleans.Placement.PreferLocalPlacement]
+[Immovable(ImmovableKind.Any)]
+[GrainType(GrainRoutingProtocol.CommandAlias), PreferLocalPlacement]
 public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
     TimeProvider clock, Func<NativeRequestWorkOwner> borrowWorkOwner, ILogger<CommandPartitionGrain> diagnostics,
     IOptions<GrainRoutingOptions> options, IServiceProvider services)

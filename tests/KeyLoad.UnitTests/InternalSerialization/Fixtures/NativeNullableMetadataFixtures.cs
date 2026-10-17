@@ -26,14 +26,3 @@ internal static class NativeNullableMetadataFixtures
         => NativeSerializerProviders.Get(typeof(T)).Serializer.SerializeToArray(
             new NativePayload { Version = NativePayloadVersion.Current, Value = value });
 }
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeNullableMetadataFixtures.ScalarsAlias)]
-internal sealed record NativeNullableMetadataScalars(
-    [property: global::Orleans.Id(0)] long? Number,
-    [property: global::Orleans.Id(1)] DateTimeOffset? Date,
-    [property: global::Orleans.Id(2)] ErrorCode? Error);
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeNullableMetadataFixtures.CollectionsAlias)]
-internal sealed record NativeNullableMetadataCollections(
-    [property: global::Orleans.Id(0)] ImmutableArray<string>? Values,
-    [property: global::Orleans.Id(1)] ImmutableArray<ImmutableArray<string>?>? Nested);

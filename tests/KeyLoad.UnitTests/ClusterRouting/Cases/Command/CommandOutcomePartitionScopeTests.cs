@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using static KeyLoad.UnitTests.Features.ClusterRouting.CommandOutcomePartitionScopeTestData;

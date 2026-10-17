@@ -122,17 +122,3 @@ internal sealed record ComparisonHostStartupDiagnostics(ComparisonHostStartupSta
         ComparisonHostCaptureState StderrState, int StderrLength,
         bool MissingKeyLoadSetting, bool MissingQdrantSetting, bool InvalidDimensions);
 }
-
-internal enum ComparisonHostStartupStage
-{
-    Unavailable,
-    ProcessExit,
-    OutputDrain
-}
-
-internal enum ComparisonHostProcessExitState
-{
-    Unavailable,
-    Running,
-    Exited
-}

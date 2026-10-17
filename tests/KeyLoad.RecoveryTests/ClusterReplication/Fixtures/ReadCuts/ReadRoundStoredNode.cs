@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
-using KeyLoad.Security;
 
 namespace KeyLoad.RecoveryTests;
 

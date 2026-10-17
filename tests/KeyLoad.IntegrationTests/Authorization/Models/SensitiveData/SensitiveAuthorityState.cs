@@ -5,4 +5,3 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal sealed record SensitiveAuthorityState(McpDocumentScenario Scenario, McpPersistedIdentity Identity,
     CommandRequest Denied, CommandRequest Healthy, CommitReceipt Receipt);
-internal sealed record SensitiveAuthorityImage(DocumentResult Document, OutboxStatus Outbox);

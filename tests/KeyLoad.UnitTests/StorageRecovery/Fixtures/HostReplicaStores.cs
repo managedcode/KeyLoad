@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Replication;
-using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 

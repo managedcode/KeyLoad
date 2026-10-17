@@ -9,11 +9,6 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-internal enum PartitionMovementCapturePointerFault
-{
-    Missing, AbsentRow, NonCaptureRow
-}
-
 /// <summary>Only stopped, file-locked fixture roots are opened; every native owner is joined on all paths.</summary>
 internal static class PartitionMovementCapturePointerRf3Fault
 {

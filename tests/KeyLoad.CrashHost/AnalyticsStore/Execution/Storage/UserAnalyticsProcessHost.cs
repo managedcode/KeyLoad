@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Replication;
-using KeyLoad.Security;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

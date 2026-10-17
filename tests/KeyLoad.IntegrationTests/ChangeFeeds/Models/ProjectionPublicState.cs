@@ -8,8 +8,3 @@ internal sealed record ProjectionPublicState(PartitionRef Partition, McpPersiste
     ProjectionConsumerInfo Configured, ProjectionBatch OriginalBatch,
     CommitProjectionBatchRequest Complete, ProjectionBatchResult Completed,
     CommitProjectionBatchRequest Filtered, ProjectionBatchResult Advanced);
-
-internal sealed record ProjectionPublicSettlement(ProjectionPublicState Original, PrincipalRecord Current,
-    CommitProjectionBatchRequest CurrentReplay, ProjectionBatchResult CurrentResult,
-    ReleaseProjectionConsumerRequest Release, ProjectionConsumerInfo Released,
-    PurgeOutboxRequest Purge, OutboxHead Purged);

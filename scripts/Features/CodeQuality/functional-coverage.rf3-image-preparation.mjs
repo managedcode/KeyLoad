@@ -309,7 +309,7 @@ async function verifyBaseReceipt(root, maximumBytes, sourceRevision) {
   const receipt = JSON.parse(bytes.toString('utf8'));
   const keys = Object.keys(receipt).sort();
   if (keys.join(',') !== 'imageReference,schemaVersion,sourcePath,sourceRevision,sourceSha256' ||
-      receipt.schemaVersion !== 1 || receipt.sourceRevision !== sourceRevision || receipt.sourcePath !== 'Dockerfile' ||
+      receipt.schemaVersion !== 1 || receipt.sourceRevision !== sourceRevision || receipt.sourcePath !== 'Directory.Build.props' ||
       !/^[0-9a-f]{64}$/.test(receipt.sourceSha256) || typeof receipt.imageReference !== 'string' ||
       !receipt.imageReference.startsWith('mcr.microsoft.com/dotnet/aspnet:') ||
       !/@sha256:[0-9a-f]{64}$/.test(receipt.imageReference)) {

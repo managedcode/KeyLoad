@@ -150,6 +150,3 @@ internal static class EmptyReplicaSnapshotAssertions
     internal static async Task ExactAsync<T>(T actual, T expected)
         => await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 }
-
-internal sealed record EmptyReplicaSnapshotBaseline(SubscriptionInfo Subscription, OutboxStatus Outbox,
-    EventSourcePage Events, ChangeFeedPage Changes);

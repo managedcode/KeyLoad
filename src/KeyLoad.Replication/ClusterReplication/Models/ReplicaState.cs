@@ -169,5 +169,3 @@ internal sealed class ReplicaState
             Materializer.Database.LastApplied, log.Snapshot?.Index ?? BeforeFirstLogPosition, Ready && Volatile.Read(ref failure) is null);
     }
 }
-
-internal sealed record ReplicaProgress(long NextIndex, long MatchedIndex);

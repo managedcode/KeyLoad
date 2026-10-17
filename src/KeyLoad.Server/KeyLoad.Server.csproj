@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
-    <EmbeddedResource Include="AdminDashboard/Assets/*" LogicalName="KeyLoad.AdminDashboard.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="AdminDashboard/Assets/**/*" LogicalName="KeyLoad.AdminDashboard.%(Filename)%(Extension)" />
     <Content Include="ResourceExecution/Analytics/Assets/ZoneTree.Analytics.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
@@ -12,9 +12,14 @@
     <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../KeyLoad.Clustering/KeyLoad.Clustering.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
-    <ProjectReference Include="../KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
-    <ProjectReference Include="../KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="ManagedCode.Communication.AspNetCore" />
     <PackageReference Include="ManagedCode.MCPGateway" />
     <PackageReference Include="ManagedCode.MarkdownLd.Kb" />

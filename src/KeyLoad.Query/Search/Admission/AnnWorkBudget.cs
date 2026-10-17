@@ -75,33 +75,3 @@ internal sealed class AnnWorkBudget
         edgeVisits = checked(edgeVisits + AdjacentElementOffset);
     }
 }
-
-internal enum AnnSearchMode
-{
-    ExactSmallSet,
-    Approximate,
-    ExactAfterInsufficientCandidates
-}
-
-internal readonly record struct AnnCandidate(int SourceOrdinal, string DocumentId, long DocumentRevision, double Score);
-
-internal sealed record AnnSearchResult(AnnCandidate[] Candidates, AnnSearchMode Mode,
-    long WorkUnits, long DistanceEvaluations, long EdgeVisits)
-{
-    internal long ScratchBytesUpperBound
-    {
-        get; init;
-    }
-    internal int EligibleCount
-    {
-        get; init;
-    }
-    internal int ExpansionPasses
-    {
-        get; init;
-    }
-    internal long FallbackDistanceEvaluations
-    {
-        get; init;
-    }
-}

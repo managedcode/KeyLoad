@@ -2,24 +2,6 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
-/// <summary>Full collection-and-ID identity in the independent graph model.</summary>
-internal readonly record struct GraphTraversalReferenceVertex(string Collection, string Id);
-
-/// <summary>Independent directed edge input for bounded reachability expectations.</summary>
-internal sealed record GraphTraversalReferenceEdge(
-    string Id,
-    GraphTraversalReferenceVertex From,
-    GraphTraversalReferenceVertex To,
-    string Label);
-
-/// <summary>Reference membership, minimum depths, and candidate-work result.</summary>
-internal sealed record GraphTraversalReferenceResult(
-    ImmutableArray<GraphTraversalReferenceVertex> Vertices,
-    ImmutableArray<GraphTraversalReferenceEdge> Edges,
-    ImmutableDictionary<GraphTraversalReferenceVertex, int> ShortestDepths,
-    int ExaminedEdges,
-    bool BudgetExceeded);
-
 /// <summary>Computes a test-owned BFS without using production graph readers or key encodings.</summary>
 internal static class GraphTraversalReferenceBfsOracle
 {

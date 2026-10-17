@@ -1,22 +1,5 @@
 namespace KeyLoad.UnitTests.Features.Search;
 
-internal enum PackedAnnBuildScenario
-{
-    AdaptiveSelectivity,
-    AdaptiveFallback,
-    WideSearchSetup,
-    RecallMetric,
-    FilteredFallback
-}
-
-internal enum PackedAnnBuildOutcome
-{
-    Success,
-    BudgetExceeded,
-    Canceled,
-    Failure
-}
-
 internal readonly record struct PackedAnnBuildObservation(
     PackedAnnBuildScenario Scenario,
     int RecordCount,

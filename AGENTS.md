@@ -694,3 +694,9 @@ A bounded website qualification candidate contains the20-project historical runt
 
 - Every `dotnet build` invocation must use `-warnaserror`; warnings are build failures. Preserve central `TreatWarningsAsErrors` and `CodeAnalysisTreatWarningsAsErrors`. Do not disable analyzers, suppress diagnostics or lower severity to obtain a successful build.
 - After source/layout changes, run the canonical `dotnet format KeyLoad.slnx --no-restore` to apply required fixes, verify with `--verify-no-changes`, then build the complete solution in Release with `-warnaserror`. Repair reported compiler, formatting and analyzer failures and repeat the relevant checks. Record actual outcomes separately from the required TUnit, recovery, RF3 and Linux qualification gates.
+
+## Independent silo and replica counts, owner correction 2026-10-17
+
+- Ordinary deployments configure Orleans silo membership independently from the physical replication factor, including counts 1, 2, 3 and 5. Preserve RF3 as the default and all original RF3 qualification suites; the earlier fixed-three default is not a prohibition on independently configured deployments.
+- Replication factors must be positive and cannot exceed available silo nodes. Preserve majority acknowledgement, node-local ZoneTree ownership, persisted authorization and native Orleans membership. Additional coordination-only silos do not own physical replicas or expose database operations. Do not claim live replica resizing or storage-free database execution from startup configuration.
+- See docs/ADR/ADR-143-independent-silo-replica-topology.md. Even replica groups retain true majority semantics; RF2 requires both voters and RF1 has no replica fault tolerance.

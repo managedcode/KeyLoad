@@ -5,13 +5,6 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-internal enum NativePublicQueryShape
-{
-    Projection,
-    Ordering,
-    InValues
-}
-
 internal static class NativePublicReadFixture
 {
     internal const string Collection = "orders";

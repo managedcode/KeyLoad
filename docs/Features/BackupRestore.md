@@ -68,7 +68,7 @@ BackupRestore creates an offline backup of canonical storage and restores it int
 | Surface | Current source | Target owner |
 |---|---|---|
 | Storage backup/restore | `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs` delegates to `Features/BackupRestore/ZoneTreeBackupRestore.cs` and its file/restore helpers | Private behavior is owned by `src/KeyLoad.Storage.ZoneTree/Restore/`; the public facade remains the shared entry point |
-| Archive and transfer | `src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs`, `ArtifactTransfer.cs` and focused helpers | Same canonical slice; legacy declarations removed |
+| Archive and transfer | `src/KeyLoad.Storage.ZoneTree/Restore/Execution/BackupArtifact.cs`, `ArtifactTransfer.cs` and focused helpers | Same canonical slice; legacy declarations removed |
 | CLI | `src/KeyLoad.Cli/Restore/Commands/CliBackupRestore.cs` behind the aggregate Program runner | Slice-local offline operations; exact dispatch/text/disposal parity under AC-CQ-010 and ADR-033 |
 | HTTP backup entry | `src/KeyLoad.Server/ApiEndpoints.cs` | Shared server boundary; no public restore route is defined |
 | Tests | `tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs`; `tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/RecoveryTests.cs` | Unit source is slice-local; remaining recovery layout debt targets matching `Features/BackupRestore/` |
@@ -475,19 +475,19 @@ The source implementation uses ADR-123 stages above and the following exact resp
 
 - `docs/ADR/ADR-123-native-rf3-cluster-restore.md`
 - `docs/Features/BackupRestore.md`
-- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackupOwnerCut.cs`
-- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackupOwnerReceipt.cs`
-- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackupOwnerRequest.cs`
-- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackupPartitionCut.cs`
-- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackupProtocol.cs`
-- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterRestoreMarker.cs`
-- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterRestoreOwnerMapping.cs`
+- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackup/ClusterBackupOwnerCut.cs`
+- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackup/ClusterBackupOwnerReceipt.cs`
+- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackup/ClusterBackupOwnerRequest.cs`
+- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackup/ClusterBackupPartitionCut.cs`
+- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterBackup/ClusterBackupProtocol.cs`
+- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterRestore/ClusterRestoreMarker.cs`
+- `src/KeyLoad.Abstractions/Restore/Contracts/ClusterRestore/ClusterRestoreOwnerMapping.cs`
 - `src/KeyLoad.Abstractions/Restore/Contracts/INativeCatalogBackupStore.cs`
-- `src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs`
-- `src/KeyLoad.Artifacts/Restore/Execution/CatalogBackupArtifactOperations.cs`
-- `src/KeyLoad.Artifacts/Restore/Staging/BackupArtifactExtraction.cs`
-- `src/KeyLoad.Artifacts/Restore/Staging/BackupArtifactStaging.cs`
-- `src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Execution/BackupArtifact.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Execution/CatalogBackupArtifactOperations.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Staging/BackupArtifactExtraction.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Staging/BackupArtifactStaging.cs`
+- `src/KeyLoad.BackupRestore/KeyLoad.BackupRestore.csproj`
 - `src/KeyLoad.Cli/Restore/Commands/CliClusterRestore.cs`
 - `src/KeyLoad.Cli/Restore/Commands/ClusterRestoreCoordinator.cs`
 - `src/KeyLoad.Cli/Restore/Configuration/CliStorageConfiguration.cs`
@@ -513,13 +513,13 @@ The source implementation uses ADR-123 stages above and the following exact resp
 - `src/KeyLoad.Core/Restore/Queries/ClusterBackupOwnerCapture.cs`
 - `src/KeyLoad.Core/Restore/Queries/ClusterBackupPlacementRead.cs`
 - `src/KeyLoad.Core/Restore/Queries/ClusterBackupRosterCapture.cs`
-- `src/KeyLoad.Core/Restore/Validation/ClusterBackupMetadataEquality.cs`
-- `src/KeyLoad.Core/Restore/Validation/ClusterBackupNativeCutVerification.cs`
-- `src/KeyLoad.Core/Restore/Validation/ClusterBackupOwnerClosureValidation.cs`
-- `src/KeyLoad.Core/Restore/Validation/ClusterBackupPartitionVectorValidation.cs`
-- `src/KeyLoad.Core/Restore/Validation/ClusterBackupRequestValidation.cs`
-- `src/KeyLoad.Core/Restore/Validation/ClusterRestoreMappingValidation.cs`
-- `src/KeyLoad.Core/Restore/Validation/ClusterRestoreOperatorValidation.cs`
+- `src/KeyLoad.Core/Restore/Validation/ClusterBackup/ClusterBackupMetadataEquality.cs`
+- `src/KeyLoad.Core/Restore/Validation/ClusterBackup/ClusterBackupNativeCutVerification.cs`
+- `src/KeyLoad.Core/Restore/Validation/ClusterBackup/ClusterBackupOwnerClosureValidation.cs`
+- `src/KeyLoad.Core/Restore/Validation/ClusterBackup/ClusterBackupPartitionVectorValidation.cs`
+- `src/KeyLoad.Core/Restore/Validation/ClusterBackup/ClusterBackupRequestValidation.cs`
+- `src/KeyLoad.Core/Restore/Validation/ClusterRestore/ClusterRestoreMappingValidation.cs`
+- `src/KeyLoad.Core/Restore/Validation/ClusterRestore/ClusterRestoreOperatorValidation.cs`
 - `src/KeyLoad.Clustering/Restore/Queries/ClusterBackupOwnerReadExecution.cs`
 - `src/KeyLoad.Clustering/ClusterRouting/Contracts/INodeAdministration.cs`
 - `src/KeyLoad.Orleans/Features/ClusterRouting/Grains/DatabaseReadGrain.cs`
@@ -527,32 +527,32 @@ The source implementation uses ADR-123 stages above and the following exact resp
 - `src/KeyLoad.Server/Restore/Authentication/ClusterBackupCredentialCapability.cs`
 - `src/KeyLoad.Server/Restore/Execution/ClusterBackupOwnerArchive.cs`
 - `src/KeyLoad.Server/Restore/Transport/ClusterBackupApi.cs`
-- `src/KeyLoad.Server/ClientApi/Contracts/McpReadCatalog.cs`
-- `src/KeyLoad.Server/ClientApi/Contracts/McpToolDescriptions.cs`
-- `src/KeyLoad.Server/ClientApi/Contracts/McpToolHints.cs`
+- `src/KeyLoad.Server/ClientApi/Contracts/Mcp/McpReadCatalog.cs`
+- `src/KeyLoad.Server/ClientApi/Contracts/McpTool/McpToolDescriptions.cs`
+- `src/KeyLoad.Server/ClientApi/Contracts/McpTool/McpToolHints.cs`
 - `src/KeyLoad.Server/ClientApi/Execution/CanonicalOperationGateway.cs`
 - `src/KeyLoad.Server/ClientApi/Transport/ApiEndpoints.cs`
 - `src/KeyLoad.Server/ClusterRouting/Transport/NodeAdministration.cs`
 - `src/KeyLoad.Storage.ZoneTree/Restore/Contracts/ZoneTreeCatalogBackupMetadata.cs`
-- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTreeBackupRestore.cs`
-- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTreeBackupRestoreRestore.cs`
-- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTreeCatalogBackupPublication.cs`
-- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTreeCatalogRestoreEntry.cs`
-- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTreeCatalogRestoreVerification.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTree/Archives/ZoneTreeBackupRestore.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTree/Archives/ZoneTreeBackupRestoreRestore.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTree/Catalog/ZoneTreeCatalogBackupPublication.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTree/Catalog/ZoneTreeCatalogRestoreEntry.cs`
+- `src/KeyLoad.Storage.ZoneTree/Restore/Recovery/ZoneTree/Catalog/ZoneTreeCatalogRestoreVerification.cs`
 - `src/KeyLoad.Storage.ZoneTree/Restore/Serialization/ZoneTreeCatalogBackupMetadataFile.cs`
 - `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3EventingReadOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3EventingReceiptOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3EventingReceiveOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3EventingSourceOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3ModelOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3TargetAuthority.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3EventingReadOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3EventingReceiptOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3EventingReceiveOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3EventingSourceOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3ModelOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3TargetAuthority.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3Tests.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Contracts/ClusterRestoreRf3EventingProtocol.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Contracts/ClusterRestoreRf3OperatorReceipt.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Contracts/ClusterRestoreRf3Protocol.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Fixtures/ClusterRestoreRf3Fixture.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3AuthorityTrial.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3AuthorityTrial.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Scenarios/Faults/ClusterRestoreRf3AuthorityTrialVector.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Lifecycle/ClusterRestoreRf3BuilderCleanup.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Lifecycle/ClusterRestoreRf3CallerOwner.cs`
@@ -560,7 +560,7 @@ The source implementation uses ADR-123 stages above and the following exact resp
 - `tests/KeyLoad.IntegrationTests/Restore/Scenarios/Faults/ClusterRestoreRf3CaptureAuthorityTrial.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Scenarios/Faults/ClusterRestoreRf3CredentialTrial.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Scenarios/Eventing/ClusterRestoreRf3EventingContinuation.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3EventingFences.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3EventingFences.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Scenarios/Eventing/ClusterRestoreRf3EventingHealthy.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Fixtures/Eventing/ClusterRestoreRf3EventingSeed.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Fixtures/ClusterRestoreRf3Graph.cs`
@@ -568,11 +568,11 @@ The source implementation uses ADR-123 stages above and the following exact resp
 - `tests/KeyLoad.IntegrationTests/Restore/Fixtures/Archives/ClusterRestoreRf3NativeArchive.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Fixtures/ClusterRestoreRf3Operator.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Observations/ClusterRestoreRf3OperatorObservation.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3ResumeConflict.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3RpoOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3ResumeConflict.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3RpoOracle.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Scenarios/ClusterRestoreRf3Scenario.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Fixtures/Capture/ClusterRestoreRf3SecondaryPartition.cs`
-- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestoreRf3TargetRead.cs`
+- `tests/KeyLoad.IntegrationTests/Restore/Assertions/ClusterRestore/Rf/ClusterRestoreRf3TargetRead.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Models/ClusterRestoreRf3EventingState.cs`
 - `tests/KeyLoad.IntegrationTests/Restore/Models/ClusterRestoreRf3SecondaryState.cs`
 - `tests/KeyLoad.IntegrationTests/ClusterRouting/Fixtures/PartitionMovement/ParentOperations/PartitionMovementPublicParentRf3Seed.cs`

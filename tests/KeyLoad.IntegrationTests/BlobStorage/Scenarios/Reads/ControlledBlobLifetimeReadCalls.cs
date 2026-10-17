@@ -5,8 +5,6 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
-internal sealed record ControlledBlobLifetimeReadObservation(bool Failed, object? Value, string? Code);
-
 internal static class ControlledBlobLifetimeReadCalls
 {
     private const long FirstOffset = 0;

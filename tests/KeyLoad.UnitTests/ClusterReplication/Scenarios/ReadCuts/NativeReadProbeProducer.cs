@@ -8,13 +8,6 @@ using Orleans.Serialization.Buffers;
 
 namespace KeyLoad.UnitTests;
 
-internal enum NativeReadProbeFault
-{
-    None, MissingTerm, MissingPreviousIndex, MissingPreviousTerm, MissingCommittedIndex,
-    ZeroTerm, NegativePreviousIndex, ConflictingPreviousTerm, NegativeCommittedIndex,
-    NullEntries, DuplicateEntries, UnknownEntries, MissingEntries, TrailingObject
-}
-
 // Genuine official native envelope and owning AppendRequest; the writer changes one strict field boundary.
 internal static class NativeReadProbeProducer
 {

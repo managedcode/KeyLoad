@@ -31,7 +31,7 @@ internal static class NativeDiscoveryOmissionFileAdmission
     }
     internal static long Measure(string path, IOptions<RequestProbeExecutionOptions> options)
     {
-        var identity = KeyLoad.Storage.IO.OfflineRegularFile.Inspect(path);
+        var identity = KeyLoad.Storage.ZoneTree.IO.OfflineRegularFile.Inspect(path);
         RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
         if (identity.Length > options.Value.MaximumRecordBytes
             || Path.GetFileName(path) == NativeDiscoveryOmissionProtocol.LockFile && identity.Length != NativeDiscoveryOmissionProtocol.EmptyCount)

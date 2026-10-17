@@ -30,6 +30,7 @@ internal sealed class SiteMetadataTests
         await Assert.That(result.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
 
         var consoleRoot = Path.Combine(inputs.Repository, SiteMetadataTokens.ConsoleAssetsPath);
+        var consoleIcons = Path.Combine(consoleRoot, SiteMetadataTokens.ConsoleIconsDirectory);
         var siteRoot = Path.Combine(inputs.Repository, SiteAssetTokens.SiteRootDirectory);
         var consoleHtml = await File.ReadAllTextAsync(Path.Combine(consoleRoot, SiteMetadataTokens.HtmlFile), token);
         await Assert.That(consoleHtml).Contains(SiteMetadataTokens.ConsoleNoIndex);
@@ -42,23 +43,23 @@ internal sealed class SiteMetadataTests
         {
             await Assert.That(consoleHtml.Contains(link, StringComparison.Ordinal)).IsTrue();
         }
-        var sourceLogo = await File.ReadAllBytesAsync(Path.Combine(consoleRoot, SiteMetadataTokens.SourceSvgLogo), token);
+        var sourceLogo = await File.ReadAllBytesAsync(Path.Combine(consoleIcons, SiteMetadataTokens.SourceSvgLogo), token);
         await SiteMetadataBinaryAssertions.AssertBytesEqual(sourceLogo, await File.ReadAllBytesAsync(Path.Combine(siteRoot, SiteAssetTokens.FaviconSvg), token));
         await SiteMetadataBinaryAssertions.AssertBytesEqual(sourceLogo, await File.ReadAllBytesAsync(Path.Combine(temporary.Output, SiteAssetTokens.FaviconSvg), token));
 
         foreach (var asset in MetadataAssetNames)
         {
-            var canonical = await File.ReadAllBytesAsync(Path.Combine(consoleRoot, asset), token);
+            var canonical = await File.ReadAllBytesAsync(Path.Combine(consoleIcons, asset), token);
             await SiteMetadataBinaryAssertions.AssertBytesEqual(canonical, await File.ReadAllBytesAsync(Path.Combine(siteRoot, asset), token));
             await SiteMetadataBinaryAssertions.AssertBytesEqual(canonical, await File.ReadAllBytesAsync(Path.Combine(temporary.Output, asset), token));
         }
 
         foreach (var (file, size) in PngAssets)
         {
-            await SiteMetadataBinaryAssertions.AssertPngDimensions(Path.Combine(consoleRoot, file), size, token);
+            await SiteMetadataBinaryAssertions.AssertPngDimensions(Path.Combine(consoleIcons, file), size, token);
         }
 
-        await SiteMetadataBinaryAssertions.AssertIcoFrames(Path.Combine(consoleRoot, SiteMetadataTokens.FaviconIco), token);
+        await SiteMetadataBinaryAssertions.AssertIcoFrames(Path.Combine(consoleIcons, SiteMetadataTokens.FaviconIco), token);
         var outputCard = await File.ReadAllBytesAsync(Path.Combine(temporary.Output, SiteMetadataTokens.OutputCard), token);
         var sourceCard = await File.ReadAllBytesAsync(Path.Combine(inputs.Repository, SiteMetadataTokens.FeaturePath,
             SiteMetadataTokens.SourceCardPng), token);

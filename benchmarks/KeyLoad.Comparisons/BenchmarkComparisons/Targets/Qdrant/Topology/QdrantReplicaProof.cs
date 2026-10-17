@@ -1,0 +1,159 @@
+using System.Runtime.InteropServices;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.Comparisons.Targets;
+
+internal static class QdrantReplicaProof
+{
+    private const string BuildResultPeerText = "peer=";
+    private const string BuildResultShardText = "; shard=";
+    private const string BuildResultLocalActiveCopiesText = "; localActiveCopies=";
+    private const string BuildResultPointsText = "; points=";
+    private const string BuildResultRFText = "RF";
+    private const string BuildResultWriteConsistencyFactorText = "; write_consistency_factor=";
+
+    private const string ClusterPath = "/cluster";
+    private const string CollectionClusterSuffix = "/cluster";
+    private const string CollectionsPath = "/collections/";
+    private const string ResultField = "result";
+    private const string StatusField = "status";
+    private const string DisabledState = "disabled";
+
+    public static async Task<QdrantReplicaResult> VerifyAsync(HttpClient[] clients, string collection, int expectedPoints, ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
+    {
+        const int FirstElementIndex = 0;
+        const string QdrantReplicaReadinessTimeoutDetail = "QdrantReplicaReadinessTimeout";
+
+        var lifecycle = lifecycleOptions.Value;
+        var required = ComparisonTopologies.NodeCount(topology);
+        ValidateClients(clients, topology);
+        using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
+        deadline.CancelAfter(lifecycle.ReadinessTimeout);
+        while (true)
+        {
+            try
+            {
+                var proof = topology == ComparisonTopology.Standalone
+                    ? await ReadStandaloneAndDelayAsync(client: clients[FirstElementIndex], collection: collection,
+                        expectedPoints: expectedPoints, token: deadline.Token, pollInterval: lifecycle.HttpReadinessPollInterval, timeProvider: timeProvider)
+                    : await ReadReplicatedAsync(clients, collection, expectedPoints, required, topology, deadline.Token);
+                if (proof is not null)
+                {
+                    return proof;
+                }
+                if (topology == ComparisonTopology.Standalone)
+                {
+                    continue;
+                }
+            }
+            catch (HttpRequestException) when (!deadline.IsCancellationRequested) { }
+            catch (JsonException) when (!deadline.IsCancellationRequested) { }
+            try
+            {
+                await Task.Delay(lifecycle.HttpReadinessPollInterval, timeProvider, deadline.Token);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                throw new ComparisonFailureException(QdrantReplicaReadinessTimeoutDetail);
+            }
+        }
+    }
+
+    internal static void ValidateClients(HttpClient[] clients, ComparisonTopology topology)
+    {
+        const string QdrantInvalidNodeClientsDetail = "QdrantInvalidNodeClients";
+
+        var required = ComparisonTopologies.NodeCount(topology);
+        if (clients.Length != required || clients.Any(client => client.BaseAddress is null) ||
+            clients.Select(client => client.BaseAddress!.Authority).Distinct(StringComparer.OrdinalIgnoreCase).Count() != required)
+        {
+            throw new ComparisonFailureException(QdrantInvalidNodeClientsDetail);
+        }
+    }
+
+    private static async Task<QdrantReplicaResult?> ReadStandaloneAndDelayAsync(HttpClient client, string collection, int expectedPoints, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken token)
+    {
+        var proof = await ReadStandaloneAsync(client, collection, expectedPoints, token);
+        if (proof is null)
+        {
+            await Task.Delay(pollInterval, timeProvider, token);
+        }
+
+        return proof;
+    }
+
+    private static async Task<QdrantReplicaResult?> ReadStandaloneAsync(HttpClient client, string collection,
+        int expectedPoints, CancellationToken token)
+    {
+        const string RootHttpPath = "/";
+        const int SingleItemCount = 1;
+
+        using var root = await GetJsonAsync(client, RootHttpPath, token);
+        using var collectionInfo = await GetJsonAsync(client, CollectionsPath + collection, token);
+        using var cluster = await GetJsonAsync(client, ClusterPath, token);
+        QdrantNodeProof.VerifySingleNode(cluster);
+        if (cluster.RootElement.GetProperty(ResultField).GetProperty(StatusField).GetString() == DisabledState)
+        {
+            return QdrantNodeProof.ReadDisabled(root.RootElement, cluster.RootElement, collectionInfo.RootElement, expectedPoints);
+        }
+        using var local = await GetJsonAsync(client, CollectionsPath + collection + CollectionClusterSuffix, token);
+        var proof = QdrantNodeProof.ReadNode(root.RootElement, cluster.RootElement, collectionInfo.RootElement,
+            local.RootElement, expectedPoints, ComparisonTopology.Standalone);
+        return QdrantNodeProof.Ready([proof], ComparisonTopology.Standalone, SingleItemCount)
+            ? BuildResult([proof], expectedPoints, SingleItemCount) : null;
+    }
+
+    private static async Task<QdrantReplicaResult?> ReadReplicatedAsync(HttpClient[] clients, string collection,
+        int expectedPoints, int requiredNodes, ComparisonTopology topology, CancellationToken token)
+    {
+        var proofs = new List<(string Version, string Peer, string[] Peers, int Copies, int Shard)>();
+        foreach (var client in clients)
+        {
+            proofs.Add(await ReadNodeAsync(client, collection, expectedPoints, topology, token));
+        }
+
+        if (!QdrantNodeProof.Ready(proofs, topology, requiredNodes))
+        {
+            return null;
+        }
+        return BuildResult(proofs, expectedPoints, requiredNodes);
+    }
+
+    private static QdrantReplicaResult BuildResult(
+        List<(string Version, string Peer, string[] Peers, int Copies, int Shard)> proofs, int expectedPoints, int nodes)
+    {
+        const int MajorityDivisor = 2;
+        const int MajorityVoteOffset = 1;
+        const string HealthyNativeClusterToken = "healthy native cluster";
+        const int FirstElementIndex = 0;
+
+        var observations = proofs.Select(proof =>
+            $"{BuildResultPeerText}{proof.Peer}{BuildResultShardText}{proof.Shard}{BuildResultLocalActiveCopiesText}{proof.Copies}{BuildResultPointsText}{expectedPoints}")
+            .Append($"{BuildResultRFText}{nodes}{BuildResultWriteConsistencyFactorText}{nodes / MajorityDivisor + MajorityVoteOffset}")
+            .ToArray();
+        var evidence = new ClusterEvidence(nodes, nodes, HealthyNativeClusterToken,
+            ImmutableCollectionsMarshal.AsImmutableArray(observations));
+        return new(proofs[FirstElementIndex].Version, evidence);
+    }
+
+    private static async Task<(string Version, string Peer, string[] Peers, int Copies, int Shard)> ReadNodeAsync(
+        HttpClient client, string collection, int expectedPoints, ComparisonTopology topology, CancellationToken token)
+    {
+        const string RootHttpPath = "/";
+
+        using var root = await GetJsonAsync(client, RootHttpPath, token);
+        using var cluster = await GetJsonAsync(client, ClusterPath, token);
+        using var collectionInfo = await GetJsonAsync(client, CollectionsPath + collection, token);
+        using var local = await GetJsonAsync(client, CollectionsPath + collection + CollectionClusterSuffix, token);
+        return QdrantNodeProof.ReadNode(root.RootElement, cluster.RootElement, collectionInfo.RootElement,
+            local.RootElement, expectedPoints, topology);
+    }
+
+    private static async Task<JsonDocument> GetJsonAsync(HttpClient client, string path, CancellationToken token)
+    {
+        using var response = await client.GetAsync(new Uri(path, UriKind.RelativeOrAbsolute), token);
+        response.EnsureSuccessStatusCode();
+        return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(token), cancellationToken: token);
+    }
+}

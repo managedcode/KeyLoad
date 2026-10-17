@@ -10,8 +10,6 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 
-internal sealed record LocalImageSnapshotProcessResult(int ExitCode, string StandardOutput, string StandardError);
-
 internal static class LocalImageSnapshotProcess
 {
     private const string NodeCommand = "node";

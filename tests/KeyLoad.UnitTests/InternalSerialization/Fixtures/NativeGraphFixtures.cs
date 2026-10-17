@@ -37,23 +37,3 @@ internal static class NativeGraphFixtures
         => NativeSerializerProviders.Get(typeof(T)).Serializer.SerializeToArray(
             new NativePayload { Version = NativePayloadVersion.Current, Value = value });
 }
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeGraphFixtures.NodeAlias)]
-internal sealed class NativeGraphNode
-{
-    [global::Orleans.Id(0)]
-    public NativeGraphNode? Next
-    {
-        get; set;
-    }
-}
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeGraphFixtures.BranchAlias)]
-internal sealed record NativeGraphBranches(
-    [property: global::Orleans.Id(0)] NativeGraphNode Shallow,
-    [property: global::Orleans.Id(1)] NativeGraphNode Deep);
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeGraphFixtures.CollectionsAlias)]
-internal sealed record NativeGraphCollections(
-    [property: global::Orleans.Id(0)] string?[] NullableValues,
-    [property: global::Orleans.Id(1)] string[] RequiredValues);

@@ -1,5 +1,5 @@
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Security;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;

@@ -1,9 +1,5 @@
 namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
 
-internal enum EarlyAdmissionQualificationRoute
-{
-    SdkQuery, McpQuery, SdkSql, McpSql
-}
 internal static class EarlyAdmissionQualificationProtocol
 {
     internal const string Collection = "early_sql_admission";

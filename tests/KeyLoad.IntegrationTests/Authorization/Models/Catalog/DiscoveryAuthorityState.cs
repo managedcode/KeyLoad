@@ -11,4 +11,3 @@ internal sealed record DiscoveryAuthorityState(McpDocumentScenario Scenario, Mcp
         get; set;
     }
 }
-internal sealed record DiscoveryAuthorityImage(DocumentResult? Document, OutboxStatus Outbox);

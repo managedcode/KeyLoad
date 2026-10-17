@@ -1,12 +1,5 @@
 namespace KeyLoad.CrashHost.Features.ResourceExecution;
 
-internal enum D2InventoryCrashCut
-{
-    EntryAcknowledged,
-    CommitAcknowledged,
-    AppliedAcknowledged
-}
-
 internal static class D2InventoryCrashProtocol
 {
     private const string SelectedIdText = "46171b42-477b-45c7-b83a-195d052242a8";
@@ -60,12 +53,3 @@ internal static class D2InventoryCrashProtocol
     internal static readonly Guid P1Id = Guid.Parse(P1IdText);
     internal static PartitionRef Partition(string key) => new(Tenant, Database, Domain, key);
 }
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(D2InventoryCrashProtocol.EvidenceAlias)]
-internal sealed record D2InventoryCrashEvidence(
-    [property: global::Orleans.Id(D2InventoryCrashProtocol.FirstField)] ReplicatedOperation Original,
-    [property: global::Orleans.Id(D2InventoryCrashProtocol.SecondField)] ReplicatedOperation PrefixOriginal,
-    [property: global::Orleans.Id(D2InventoryCrashProtocol.ThirdField)] CommitReceipt PrefixReceipt,
-    [property: global::Orleans.Id(D2InventoryCrashProtocol.FourthField)] long SelectedIndex,
-    [property: global::Orleans.Id(D2InventoryCrashProtocol.FifthField)] long PrefixPosition,
-    [property: global::Orleans.Id(D2InventoryCrashProtocol.SixthField)] ReplicatedOperation BeforeSelectedOperation);

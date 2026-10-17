@@ -667,8 +667,9 @@ build/KeyLoad.AppHost/aspire.config.json
 **/coverage/
 # CodeQuality C# sources remain tracked; generated coverage contents stay ignored.
 !/tests/*/CodeQuality/**/Coverage/
-/tests/*/CodeQuality/**/Coverage/*
-!/tests/*/CodeQuality/**/Coverage/*.cs
+/tests/*/CodeQuality/**/Coverage/**
+!/tests/*/CodeQuality/**/Coverage/**/
+!/tests/*/CodeQuality/**/Coverage/**/*.cs
 BenchmarkDotNet.Artifacts/
 .env
 .env.*

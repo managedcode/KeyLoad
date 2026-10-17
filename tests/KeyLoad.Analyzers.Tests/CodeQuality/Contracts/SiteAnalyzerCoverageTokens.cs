@@ -79,7 +79,7 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string ModuleLineFailure = "module line threshold";
     internal const string ModuleBranchFailure = "module branch threshold";
     internal const string CriticalPipelineId = "KLD0013";
-    internal const string CriticalPipelineSource = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramEndpointMappingAnalyzer.cs";
+    internal const string CriticalPipelineSource = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramComposition/ProgramEndpointMappingAnalyzer.cs";
     internal const string AnalyzerDirectoryRelativePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers";
     internal const string AnalysisDirectoryRelativePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis";
     internal const string MissingLinkTargetRelativePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/MissingTarget.cs";

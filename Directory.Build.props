@@ -28,10 +28,28 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Visible="false" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'KeyLoad.Analyzers' and '$(MSBuildProjectName)' != 'KeyLoad.Analyzers.Tests'">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false"
-                      IsAspireProjectResource="false"
-                      PrivateAssets="all" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'KeyLoad.Server' or '$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4</ContainerBaseImage>
+    <ContainerUser>app</ContainerUser>
+    <ContainerWorkingDirectory>/app/</ContainerWorkingDirectory>
+    <ContainerAppCommandInstruction>Entrypoint</ContainerAppCommandInstruction>
+    <ContainerRepository Condition="'$(MSBuildProjectName)' == 'KeyLoad.Server'">keyload/server</ContainerRepository>
+    <ContainerRepository Condition="'$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">keyload/comparisons</ContainerRepository>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'KeyLoad.Server'">
+    <ContainerEnvironmentVariable Include="ASPNETCORE_HTTP_PORTS" Value="8080" />
+    <ContainerEnvironmentVariable Include="KeyLoad__DataDirectory" Value="/data" />
+    <ContainerPort Include="8080" Type="tcp" />
+    <ContainerPort Include="11111" Type="tcp" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">
+    <ContainerAppCommandArgs Include="--output;Detailed;--maximum-parallel-tests;1;--report-trx;--results-directory;/reports/NativeTestResults" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'KeyLoad.Server' or '$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">
+    <ContainerLabel Include="io.keyload.local.source-context-sha256" Value="$(KeyLoadContainerSourceDigest)" Condition="'$(KeyLoadContainerSourceDigest)' != ''" />
+    <ContainerLabel Include="io.keyload.local.invocation" Value="$(KeyLoadContainerInvocation)" Condition="'$(KeyLoadContainerInvocation)' != ''" />
   </ItemGroup>
 </Project>

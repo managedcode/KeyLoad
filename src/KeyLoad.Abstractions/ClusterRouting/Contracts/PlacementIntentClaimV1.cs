@@ -13,8 +13,3 @@ public sealed record PlacementIntentClaimV1(
     [property: global::Orleans.Id(2)] string CohortFingerprint,
     [property: global::Orleans.Id(3)] Guid Nonce,
     [property: global::Orleans.Id(4)] DateTimeOffset ExpiresAt);
-
-internal static class PlacementIntentClaimV1Aliases
-{
-    internal const string PlacementIntentClaimV1Alias = "keyload.cluster-routing.placement-intent-claim.v1";
-}

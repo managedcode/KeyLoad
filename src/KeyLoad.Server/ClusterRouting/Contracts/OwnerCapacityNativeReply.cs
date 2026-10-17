@@ -11,8 +11,3 @@ internal sealed record OwnerCapacityNativeReply(
     [property: global::Orleans.Id(4)] ErrorCode? Error,
     [property: global::Orleans.Id(5)] string? SafeDetail,
     [property: global::Orleans.Id(6)] string Signature);
-
-internal static class OwnerCapacityNativeReplyAliases
-{
-    internal const string OwnerCapacityNativeReplyAlias = "keyload.cluster-routing.owner-capacity-native-reply.v1";
-}

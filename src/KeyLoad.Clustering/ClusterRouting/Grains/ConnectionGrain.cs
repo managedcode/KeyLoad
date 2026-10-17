@@ -5,6 +5,7 @@ using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Orleans.Placement;
 using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
@@ -17,8 +18,8 @@ namespace KeyLoad.Clustering;
 /// <param name="borrowWorkOwner">Borrows the silo-local owner for active request stream work.</param>
 /// <param name="options">The centrally validated request execution snapshot.</param>
 /// <param name="services">Borrowed native silo services for independent lane composition.</param>
-[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
-[Orleans.GrainType(GrainRoutingProtocol.RequestAlias), Orleans.Placement.PreferLocalPlacement]
+[Immovable(ImmovableKind.Any)]
+[GrainType(GrainRoutingProtocol.RequestAlias), PreferLocalPlacement]
 public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionGrain> diagnostics,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer, TimeProvider clock,
     Func<NativeRequestWorkOwner> borrowWorkOwner, IOptions<GrainRoutingOptions> options, IServiceProvider services)
@@ -65,7 +66,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
     }
 
     /// <inheritdoc />
-    public override async Task OnDeactivateAsync(Orleans.DeactivationReason reason, CancellationToken cancellationToken)
+    public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
     {
         var ownedFailure = await NativeRequestWorkSettlement.JoinAsync(DisposeAsync().AsTask()).ConfigureAwait(true);
         var nativeFailure = await NativeRequestWorkSettlement.JoinAsync(base.OnDeactivateAsync(reason, cancellationToken)).ConfigureAwait(true);
@@ -94,7 +95,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
 
     private Guid OperationRequestId(string signedRequest)
     {
-        if (Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is GrainRequestContextState state
+        if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is GrainRequestContextState state
             && state.RequestId != Guid.Empty)
         {
             return state.RequestId;

@@ -1,37 +1,20 @@
 <Project>
   <PropertyGroup>
-    <KeyLoadCodeQualityDirectory>$(MSBuildThisFileDirectory)artifacts/code-quality/$(MSBuildProjectName)/$(Configuration)/$(TargetFramework)</KeyLoadCodeQualityDirectory>
+    <KeyLoadCodeQualityDirectory Condition="'$(UseArtifactsOutput)' != 'true'">$(MSBuildThisFileDirectory)artifacts/code-quality/$(MSBuildProjectName)/$(Configuration)/$(TargetFramework)</KeyLoadCodeQualityDirectory>
+    <KeyLoadCodeQualityDirectory Condition="'$(UseArtifactsOutput)' == 'true'">$(ArtifactsPath)/code-quality/$(MSBuildProjectName)/$(Configuration)/$(TargetFramework)</KeyLoadCodeQualityDirectory>
     <ErrorLog Condition="'$(ErrorLog)' == ''">$(KeyLoadCodeQualityDirectory)/diagnostics.sarif,version=2.1</ErrorLog>
   </PropertyGroup>
   <Target Name="EnforceKeyLoadCodeQuality" BeforeTargets="CoreCompile">
-    <Error Condition="'$(TreatWarningsAsErrors)' != 'true' or '$(CodeAnalysisTreatWarningsAsErrors)' != 'true'"
-           Text="KeyLoad requires compiler and analyzer warnings to be treated as errors." />
-    <Error Condition="'$(EnableNETAnalyzers)' != 'true' or '$(EnforceCodeStyleInBuild)' != 'true' or '$(RunAnalyzers)' != 'true' or '$(RunAnalyzersDuringBuild)' != 'true' or '$(RunAnalyzersDuringLiveAnalysis)' != 'true'"
-           Text="KeyLoad requires SDK, style, build and live analyzers in every project." />
-    <Error Condition="'$(AnalysisLevel)' != 'latest-all'"
-           Text="KeyLoad requires the latest-all SDK analysis level." />
-    <Error Condition="'$(GenerateDocumentationFile)' != 'true'"
-           Text="KeyLoad requires XML documentation generation so IDE0005 runs during builds." />
+    <Error Condition="'$(TreatWarningsAsErrors)' != 'true' or '$(CodeAnalysisTreatWarningsAsErrors)' != 'true'" Text="KeyLoad requires compiler and analyzer warnings to be treated as errors." />
+    <Error Condition="'$(EnableNETAnalyzers)' != 'true' or '$(EnforceCodeStyleInBuild)' != 'true' or '$(RunAnalyzers)' != 'true' or '$(RunAnalyzersDuringBuild)' != 'true' or '$(RunAnalyzersDuringLiveAnalysis)' != 'true'" Text="KeyLoad requires SDK, style, build and live analyzers in every project." />
+    <Error Condition="'$(AnalysisLevel)' != 'latest-all'" Text="KeyLoad requires the latest-all SDK analysis level." />
+    <Error Condition="'$(GenerateDocumentationFile)' != 'true'" Text="KeyLoad requires XML documentation generation so IDE0005 runs during builds." />
     <MakeDir Directories="$(KeyLoadCodeQualityDirectory)" />
   </Target>
-  <Import Project="$(MSBuildThisFileDirectory)build/CodeQuality/FunctionalCompilationIdentity.targets"
-          Condition="'$(MSBuildProjectName)' == 'KeyLoad.Abstractions' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Analyzers' or
-              '$(MSBuildProjectName)' == 'KeyLoad.AppHost' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Artifacts' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Cli' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Client' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Core' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Diagnostics' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Clustering' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Query' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Replication' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Security' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Server' or
-              '$(MSBuildProjectName)' == 'KeyLoad.ServiceDefaults' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Storage.IO' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Storage.ZoneTree' or
-              '$(MSBuildProjectName)' == 'KeyLoad.UnitTests' or
-              '$(MSBuildProjectName)' == 'KeyLoad.RecoveryTests' or
-              '$(MSBuildProjectName)' == 'KeyLoad.IntegrationTests'" />
+  <Import Project="$(MSBuildThisFileDirectory)build/CodeQuality/FunctionalCompilationIdentity.targets" Condition="'$(MSBuildProjectName)' == 'KeyLoad.Abstractions' or               '$(MSBuildProjectName)' == 'KeyLoad.Analyzers' or               '$(MSBuildProjectName)' == 'KeyLoad.AppHost' or               '$(MSBuildProjectName)' == 'KeyLoad.Cli' or               '$(MSBuildProjectName)' == 'KeyLoad.Client' or               '$(MSBuildProjectName)' == 'KeyLoad.Core' or               '$(MSBuildProjectName)' == 'KeyLoad.Diagnostics' or               '$(MSBuildProjectName)' == 'KeyLoad.Clustering' or               '$(MSBuildProjectName)' == 'KeyLoad.Query' or               '$(MSBuildProjectName)' == 'KeyLoad.Replication' or               '$(MSBuildProjectName)' == 'KeyLoad.Server' or               '$(MSBuildProjectName)' == 'KeyLoad.Storage.ZoneTree' or               '$(MSBuildProjectName)' == 'KeyLoad.UnitTests' or               '$(MSBuildProjectName)' == 'KeyLoad.RecoveryTests' or               '$(MSBuildProjectName)' == 'KeyLoad.IntegrationTests'" />
+  <Target Name="ValidateKeyLoadSdkContainer" BeforeTargets="PublishContainer" Condition="'$(MSBuildProjectName)' == 'KeyLoad.Server' or '$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">
+    <Error Condition="'$(NETCoreSdkVersion)' != '10.0.401'" Text="KeyLoad container publishing requires the SDK pinned in global.json." />
+    <Error Condition="'$(ContainerBaseImage)' != 'mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4'" Text="KeyLoad container publishing requires the source-pinned runtime image." />
+    <Error Condition="'$(ContainerUser)' != 'app'" Text="KeyLoad product images must retain the native non-root app user." />
+  </Target>
 </Project>

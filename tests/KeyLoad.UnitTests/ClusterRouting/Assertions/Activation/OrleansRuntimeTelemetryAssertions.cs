@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
+using KeyLoad.Server.Features.ClusterRouting.Configuration;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

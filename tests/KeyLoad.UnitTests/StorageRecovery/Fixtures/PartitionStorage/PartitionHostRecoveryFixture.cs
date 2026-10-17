@@ -8,24 +8,6 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal enum PendingPrincipal
-{
-    Missing, Modified, Valid
-}
-
-internal sealed class VerifiedSnapshotInterruption : Exception
-{
-    public VerifiedSnapshotInterruption()
-    {
-    }
-    public VerifiedSnapshotInterruption(string message) : base(message)
-    {
-    }
-    public VerifiedSnapshotInterruption(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-}
-
 internal sealed class PartitionHostRecoveryFixture : IDisposable
 {
     internal const long SnapshotCut = 2;

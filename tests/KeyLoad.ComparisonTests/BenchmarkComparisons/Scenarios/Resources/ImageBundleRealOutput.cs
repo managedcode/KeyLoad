@@ -2,8 +2,6 @@ using System.Text;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-internal sealed record ImageBundleRealResult(int ExitCode, string Output, string Error);
-
 internal static class ImageBundleRealOutput
 {
     internal static async Task<string> ReadAsync(StreamReader reader, CancellationToken cancellationToken)

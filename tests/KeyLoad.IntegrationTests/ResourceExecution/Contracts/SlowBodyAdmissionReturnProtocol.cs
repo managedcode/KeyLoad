@@ -1,10 +1,5 @@
 namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
 
-internal enum SlowBodyAdmissionReturnMode
-{
-    CallerCancellation, PhysicalDisconnect
-}
-
 internal static class SlowBodyAdmissionReturnProtocol
 {
     internal const long MaximumBytes = 130_000;

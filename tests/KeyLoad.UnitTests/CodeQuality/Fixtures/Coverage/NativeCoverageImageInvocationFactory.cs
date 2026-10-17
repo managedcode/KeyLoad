@@ -7,13 +7,9 @@ using KeyLoad.AppHost.Features.CodeQuality;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 
-internal sealed record NativeCoverageImageInvocation(string Path, string InvocationId, string ContextPath,
-    string ServerDirectory, string ServerDllSha256, string ServerPdbSha256, string Mvid,
-    string BaseReference, string SourceReceiptPath, string BaseReceiptPath);
-
 internal static partial class NativeCoverageImageInvocationFactory
 {
-    private const string DockerfilePinPattern = "^FROM (?<reference>mcr\\.microsoft\\.com/dotnet/aspnet:[^\\s]+@sha256:[0-9a-f]{64})\\s+AS runtime$";
+    private const string DockerfilePinPattern = "^<ContainerBaseImage>(?<reference>mcr\\.microsoft\\.com/dotnet/aspnet:[^\\s]+@sha256:[0-9a-f]{64})</ContainerBaseImage>$";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     internal static async Task<NativeCoverageImageInvocation> CreateAsync(NativeCoverageImageFixture fixture,
@@ -58,13 +54,13 @@ internal static partial class NativeCoverageImageInvocationFactory
 
     private static string WriteBaseReceipt(NativeCoverageImageFixture fixture, string reference)
     {
-        var sourcePath = Path.Combine(NativeCoverageImageFixture.RepositoryRoot, NativeCoverageImageConstants.Dockerfile);
+        var sourcePath = Path.Combine(NativeCoverageImageFixture.RepositoryRoot, NativeCoverageImageConstants.ContainerSettings);
         var path = Path.Combine(fixture.Inputs, $"{NativeCoverageImageConstants.BaseReceiptName}-{Guid.NewGuid():N}");
         var receipt = new
         {
             schemaVersion = NativeCoverageImageConstants.SchemaVersion,
             evidenceKind = NativeCoverageImageConstants.LocalEvidenceKind,
-            sourcePath = NativeCoverageImageConstants.Dockerfile,
+            sourcePath = NativeCoverageImageConstants.ContainerSettings,
             sourceSha256 = Hash(sourcePath, fixture.Options.Coverage.Value.MaximumManifestBytes),
             imageReference = reference
         };
@@ -74,17 +70,17 @@ internal static partial class NativeCoverageImageInvocationFactory
 
     private static string ReadPinnedImage(int maximumBytes)
     {
-        var path = Path.Combine(NativeCoverageImageFixture.RepositoryRoot, NativeCoverageImageConstants.Dockerfile);
+        var path = Path.Combine(NativeCoverageImageFixture.RepositoryRoot, NativeCoverageImageConstants.ContainerSettings);
         if (new FileInfo(path).Length > maximumBytes)
         {
-            throw new InvalidDataException("The source Dockerfile exceeds its configured metadata bound.");
+            throw new InvalidDataException("The source container settings exceed its configured metadata bound.");
         }
         var lines = System.Text.Encoding.UTF8.GetString(NativeCoverageImageOracleSupport.ReadBounded(path, maximumBytes))
             .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        var matches = lines.Select(line => DockerfilePin().Match(line)).Where(match => match.Success).ToArray();
+        var matches = lines.Select(line => DockerfilePin().Match(line.Trim())).Where(match => match.Success).ToArray();
         if (matches.Length != 1)
         {
-            throw new InvalidDataException("The repository Dockerfile does not have one pinned ASP.NET runtime image.");
+            throw new InvalidDataException("The repository container settings do not have one pinned ASP.NET runtime image.");
         }
         return matches[0].Groups[NativeCoverageImageFields.Reference].Value;
     }

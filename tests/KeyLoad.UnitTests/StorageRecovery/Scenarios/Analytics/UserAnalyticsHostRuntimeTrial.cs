@@ -53,5 +53,3 @@ internal static class UserAnalyticsHostRuntimeTrial
         await UserAnalyticsHostAssertions.EmptyAsync(host, bound.Runtime);
     }
 }
-
-internal sealed record UserAnalyticsHostBoundRuntime(UserAnalyticsRuntime Runtime, UserAnalyticsHostBoundWork Work);

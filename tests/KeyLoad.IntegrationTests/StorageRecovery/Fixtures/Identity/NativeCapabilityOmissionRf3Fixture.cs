@@ -131,7 +131,7 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
         if (File.Exists(publication))
         {
             NodeEpochRf3OfflineFiles.AssertExclusive(publication);
-            if (KeyLoad.Storage.IO.OfflineRegularFile.Inspect(publication).Length != NativeDiscoveryOmissionProtocol.EmptyCount)
+            if (KeyLoad.Storage.ZoneTree.IO.OfflineRegularFile.Inspect(publication).Length != NativeDiscoveryOmissionProtocol.EmptyCount)
             {
                 throw new InvalidOperationException(NativeDiscoveryOmissionProtocol.Invalid);
             }

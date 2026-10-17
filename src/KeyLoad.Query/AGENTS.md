@@ -4,7 +4,7 @@
 
 ## Purpose and entry points
 - Owns query parsing, validation, execution, search and live-query behavior.
-- Entry points/types: `QueryExecution/Execution/SqlParser.cs`, `QueryExecution/Validation/QueryValidation.cs`, `QueryExecution/Queries/QueryEngine.cs`, `Search/Queries/SearchEngine.cs`, `ChangeFeeds/Execution/LiveQueries.cs`, and query AST definitions.
+- Entry points/types: `QueryExecution/Execution/SqlParser.cs`, `QueryExecution/Validation/QuerySemantics/QueryValidation.cs`, `QueryExecution/Queries/QueryEngine.cs`, `Search/Queries/QueryExecution/SearchEngine.cs`, `ChangeFeeds/Execution/LiveQueries.cs`, and query AST definitions.
 
 ## Ownership and boundaries
 - Query feature work belongs under `<SliceName>/` with matching canonical feature documentation. Query code consumes abstractions and database capabilities; it does not own storage, command routing, credentials, or physical placement.

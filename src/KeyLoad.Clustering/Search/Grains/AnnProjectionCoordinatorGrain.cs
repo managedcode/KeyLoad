@@ -4,20 +4,21 @@ using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
+using Orleans.Placement;
 using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
 #pragma warning disable ORLEANSEXP005 // ADR-110: native journal-backed ANN durable coordinator only.
-[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
-[global::Orleans.GrainType(AnnProjectionJobProtocol.GrainAlias), global::Orleans.Placement.PreferLocalPlacement]
+[Immovable(ImmovableKind.Any)]
+[GrainType(AnnProjectionJobProtocol.GrainAlias), PreferLocalPlacement]
 internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, ILocalDurableJobManager jobs,
     DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator, RuntimeJournalAdmission runtime,
     PhysicalShardRecord physicalOwner,
     Func<INativeAnnMaintenance> borrowNative, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal)
-    : global::Orleans.Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
+    : Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
 {
     private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly AnnProjectionJobStateOwner owner = new(state, journal, database.Limits.MaxBatchBytes);

@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Globalization;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
-using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 

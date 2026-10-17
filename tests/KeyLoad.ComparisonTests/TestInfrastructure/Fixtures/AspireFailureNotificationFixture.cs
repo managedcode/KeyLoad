@@ -83,5 +83,3 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
 
     public async ValueTask DisposeAsync() => await Application.DisposeAsync();
 }
-
-internal sealed class AspireFailureConfigurationResource(string name) : Resource(name), IResourceWithoutLifetime;

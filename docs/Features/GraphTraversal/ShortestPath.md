@@ -118,7 +118,7 @@ aggregate RSS bound.
 ## Ordered ownership, verification and rollout
 
 1. Root freezes this spec/ADR before the Luna worker prepares private new
-   Abstractions/Features/GraphTraversal/Contracts/GraphShortestPathRequest.cs and
+   Abstractions/GraphTraversal/Contracts/GraphShortest/GraphShortestPathRequest.cs and
    GraphShortestPathResult.cs with feature-local GraphShortestPathContractAliases.cs;
    Core/Features/GraphTraversal/Queries/
    DatabaseEngine.GraphShortestPath.cs, GraphShortestPathReader.cs and cohesive

@@ -93,5 +93,3 @@ internal static class ComparisonSessionCleanup
         }
     }
 }
-
-internal sealed record ComparisonSessionCloseResult(bool ThresholdExpired, ImmutableArray<Exception> Failures);

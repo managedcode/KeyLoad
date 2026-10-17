@@ -164,5 +164,3 @@ internal static class EmptyReplicaSnapshotStorage
         }
     }
 }
-
-internal sealed record EmptyReplicaSnapshotCut(ReplicaHardState State, ReplicaEntry Tail);

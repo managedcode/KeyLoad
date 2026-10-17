@@ -5,6 +5,7 @@ internal static class SiteMetadataTokens
     internal const string CanonicalUrl = "https://www.keyload.cloud/";
     internal const string SocialImageUrl = "https://www.keyload.cloud/og-image.png";
     internal const string ConsoleAssetsPath = "src/KeyLoad.Server/AdminDashboard/Assets";
+    internal const string ConsoleIconsDirectory = "Icons";
     internal const string FaviconSvgPath = "site/favicon.svg";
     internal const string FeaturePath = "site/Features/BenchmarkComparisons";
     internal const string SiteDirectory = "site";

@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Artifacts;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage.ZoneTree.Restore;
 
 namespace KeyLoad.IntegrationTests.Features.BackupRestore;
 

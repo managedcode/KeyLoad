@@ -157,8 +157,3 @@ internal static class ZoneTreeIdentityFile
         File.Move(temporary, path, true);
     }
 }
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(ZoneTreeMetadataAliases.IdentityEnvelope)]
-internal sealed record ZoneTreeIdentityEnvelope(
-    [property: global::Orleans.Id(0)] byte[] Payload,
-    [property: global::Orleans.Id(1)] byte[] Checksum);

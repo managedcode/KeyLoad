@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
-    <ProjectReference Include="../KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" />
     <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
@@ -12,5 +14,8 @@
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
     <PackageReference Include="ZoneTree" />
     <PackageReference Include="ManagedCode.Storage.FileSystem" />
+    <PackageReference Include="Cartograph.Catalog" />
+    <InternalsVisibleTo Include="KeyLoad.AppHost" />
+    <InternalsVisibleTo Include="KeyLoad.Replication" />
   </ItemGroup>
 </Project>

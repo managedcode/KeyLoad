@@ -55,4 +55,3 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
 
 // Native references retain only bounded projection metadata. They never retain user string bytes
 // or pretend to be executable PrincipalRecord/ScopeGrant instances.
-internal sealed record McpAuthenticationReference(Type NativeType, McpFrameShape Shape);

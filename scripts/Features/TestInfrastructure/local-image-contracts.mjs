@@ -2,7 +2,7 @@ export const localImage = Object.freeze({
   provenance: 'local-development',
   imageRepository: 'keyload/local-server',
   schemaVersion: 1,
-  producerVersion: '1',
+  producerVersion: '2',
   sourceLabel: 'io.keyload.local.source-context-sha256',
   invocationLabel: 'io.keyload.local.invocation',
   imageTagPrefix: 'local-',

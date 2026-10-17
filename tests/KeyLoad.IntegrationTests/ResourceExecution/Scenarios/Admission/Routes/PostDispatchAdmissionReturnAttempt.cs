@@ -2,7 +2,6 @@ using System.Net.Http.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
 
@@ -60,6 +59,3 @@ internal static class PostDispatchAdmissionReturnAttempt
             await scenario.Administrator.OutboxStatusAsync(scenario.Identity.Partition, token)));
     }
 }
-
-internal sealed record PostDispatchAdmissionReturnState(bool Disconnected, ConnectionRf3Caller OriginalCaller,
-    CommandRequest Command, ConnectionProbeWitness OriginalOwner, OutboxStatus Before);

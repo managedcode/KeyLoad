@@ -10,5 +10,3 @@ internal enum QueueDeadLetterAdmissionFault
     WitnessWithoutUsage,
     MissingWitnessMetadata
 }
-
-internal sealed record QueueDeadLetterAdmissionOwnedRow(byte[] Key, byte[] Original);

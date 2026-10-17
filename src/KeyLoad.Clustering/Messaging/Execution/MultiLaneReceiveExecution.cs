@@ -188,5 +188,3 @@ internal static class MultiLaneReceiveExecution
     }
 
 }
-
-internal sealed record MultiLaneReceiveDispatchResult(GrainOperationReply? Reply, KeyLoadException? Stopped);

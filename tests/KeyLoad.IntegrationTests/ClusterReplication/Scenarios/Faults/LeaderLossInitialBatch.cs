@@ -24,5 +24,3 @@ internal static class LeaderLossInitialBatch
         return new(command, committed);
     }
 }
-
-internal sealed record LeaderLossInitialCommand(CommandRequest Command, CommitReceipt Receipt);

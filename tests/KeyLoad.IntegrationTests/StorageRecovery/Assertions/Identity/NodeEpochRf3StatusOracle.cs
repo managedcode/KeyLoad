@@ -3,8 +3,6 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
 
-internal sealed record NodeEpochRf3NodeObservation(string Name, NodeStatus Status, AdminNodeSnapshot Admin);
-
 internal static class NodeEpochRf3StatusOracle
 {
     private static readonly string[] ExpectedVoters =

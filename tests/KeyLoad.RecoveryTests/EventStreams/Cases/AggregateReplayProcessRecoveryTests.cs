@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
-using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;

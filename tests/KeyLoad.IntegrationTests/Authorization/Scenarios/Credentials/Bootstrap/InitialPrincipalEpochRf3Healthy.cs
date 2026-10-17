@@ -4,8 +4,6 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-internal sealed record InitialPrincipalEpochRf3HealthyState(CommandRequest Command, CommitReceipt Receipt);
-
 internal static class InitialPrincipalEpochRf3Healthy
 {
     internal static async Task<InitialPrincipalEpochRf3HealthyState> CreateAsync(ClusterFixture fixture,

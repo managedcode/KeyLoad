@@ -3,8 +3,6 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
 
-internal sealed record NodeEpochRf3ExpectedSample(SampleData Sample, long Sequence, string Tags);
-
 internal static class NodeEpochRf3ReadOracle
 {
     private const int WindowMinutes = 10;

@@ -2,12 +2,10 @@ using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.Security;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
-
-internal sealed record GraphStorageExpectedEdge(string Id, string From, string To, string Label, string Json, long Revision);
 
 internal static class GraphStorageReferenceFixture
 {

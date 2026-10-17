@@ -3,11 +3,6 @@ using static KeyLoad.UnitTests.Features.QueryExecution.QueryEquivalentIntegerDec
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-internal enum QueryEquivalentIntegerKind
-{
-    Byte, SignedByte, Short, UnsignedShort, Int, UnsignedInt, Long, UnsignedLong, CheckedInt
-}
-
 internal readonly record struct QueryEquivalentIntegerDecimalRow(
     [property: JsonPropertyName(ByteField)] byte ByteNumber,
     [property: JsonPropertyName(SignedByteField)] sbyte SignedByteNumber,

@@ -22,5 +22,3 @@ internal static class RequestCqrsNativeCaptureArtifact
         file.Flush(true);
     }
 }
-
-internal sealed record RequestCqrsNativeCaptureArtifactRecord(int Version, Guid WaveId, RequestCqrsNativeCaptureSnapshot[] Nodes);

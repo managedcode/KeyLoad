@@ -77,5 +77,3 @@ internal static class TransactionalReadViewConcurrency
         return new(rows.ToArray(), result);
     }
 }
-
-internal sealed record TransactionalReadViewObserved(string[] Rows, ZoneTreeReadCutVisitResult Result);

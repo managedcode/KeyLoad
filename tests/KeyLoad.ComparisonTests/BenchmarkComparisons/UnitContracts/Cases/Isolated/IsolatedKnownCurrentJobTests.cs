@@ -15,7 +15,7 @@ internal sealed class IsolatedKnownCurrentJobTests
     public async Task KnownJobAndFreshResponseRequireTheSameCurrentAttemptBeforeContinuation(string corruption)
     {
         var fixture = Path.Combine(SessionNodeProcess.RepositoryRoot(), "tests", "KeyLoad.ComparisonTests",
-            "BenchmarkComparisons", "UnitContracts", "IsolatedCurrentJobOriginal.json");
+            "BenchmarkComparisons", "UnitContracts", "Fixtures", "OriginalReceipts", "IsolatedCurrentJobOriginal.json");
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedCurrentJobNodeProgram.KnownPolicy,
                 SessionNodeProcess.Module("isolated-github-api.mjs"), fixture, corruption],

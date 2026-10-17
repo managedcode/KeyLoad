@@ -195,8 +195,3 @@ internal sealed class NativeStoreOpenPreflightTests
             .IsEquivalentTo(NativeStoreOpenPreflightFiles.TailValue, CollectionOrdering.Matching);
     }
 }
-
-internal enum NativeStoreOpenPreflightDefect
-{
-    Checksum, Sequence, Semantics, UnsupportedTornPayload, Checkpoint, PayloadLengthMismatch
-}

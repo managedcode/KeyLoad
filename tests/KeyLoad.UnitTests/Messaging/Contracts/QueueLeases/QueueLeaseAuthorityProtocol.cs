@@ -1,29 +1,5 @@
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-internal enum QueueLeaseAuthorityOperation
-{
-    Ack,
-    Nack,
-    Renew,
-    Processing
-}
-
-internal enum QueueLeaseAuthorityFault
-{
-    MissingReference,
-    ForeignReference,
-    ForeignBodyIdentity,
-    ForeignMetadataIdentity,
-    MissingMetadataDeadline,
-    NegativeAttempts,
-    ZeroAttempts,
-    NegativeStateVersion,
-    ZeroStateVersion,
-    UnclaimedStateVersion,
-    NegativeReadySequence,
-    ZeroReadySequence
-}
-
 internal static class QueueLeaseAuthorityProtocol
 {
     internal const string Root = "root";

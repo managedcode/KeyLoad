@@ -15,14 +15,3 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 internal sealed record McpToolExpectation(string Name, bool ReadOnly, bool Idempotent, bool Destructive,
     McpExpectedBody Body, bool OuterCommandId, ImmutableArray<string> BodyFields,
     ImmutableArray<string> ResultFields = default, ImmutableArray<string> BodyPropertyFields = default);
-
-/// <summary>The public canonical request root, independent of any native schema implementation.</summary>
-internal enum McpExpectedBody
-{
-    /// <summary>The tool accepts no arguments.</summary>
-    None,
-    /// <summary>The tool requires its actual canonical object request.</summary>
-    Object,
-    /// <summary>The dispatch control tool requires a boolean request.</summary>
-    Boolean
-}

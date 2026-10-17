@@ -5,8 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-internal sealed record RequestCqrsRf3Images(string Current);
-
 internal static class RequestCqrsRf3ImageProof
 {
     private const string DigestMarker = "@sha256:";
