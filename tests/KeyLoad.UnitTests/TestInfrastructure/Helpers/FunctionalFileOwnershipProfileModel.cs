@@ -32,7 +32,7 @@ internal static class FunctionalFileOwnershipProfileModel
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            KeyLoadAppHostApplication.AddKeyLoad(builder);
+            KeyLoadResources.AddKeyLoad(builder);
             await Assert.That(AppHostOptionsRegistration.Get(builder).Control.Value.ExclusiveOwnerContention).IsTrue();
             app = builder.Build();
             var model = app.Services.GetRequiredService<DistributedApplicationModel>();

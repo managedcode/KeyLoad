@@ -26,7 +26,7 @@ internal sealed class WholeClassRf3PreparationModelTests
     private const string PreparationMode = "prepare";
     private const string Node = "node";
     private const string Solution = "KeyLoad.slnx";
-    private const string AppHostDirectory = "src/KeyLoad.AppHost";
+    private const string AppHostDirectory = "build/KeyLoad.AppHost";
     private const string Script = "scripts/Features/TestInfrastructure/local-server-image.mjs";
     private const int SuccessExit = 0;
     private const string MaximumParallelTests = "--maximum-parallel-tests";
@@ -124,7 +124,7 @@ internal sealed class WholeClassRf3PreparationModelTests
         foreach (var argument in ForeignIdentity)
         {
             var builder = CreateBuilder(filter, argument);
-            await Assert.That(() => KeyLoadAppHostApplication.AddKeyLoad(builder)).Throws<InvalidOperationException>();
+            await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<InvalidOperationException>();
             await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
         }
     }
@@ -132,7 +132,7 @@ internal sealed class WholeClassRf3PreparationModelTests
     private static DistributedApplication Create(string filter)
     {
         var builder = CreateBuilder(filter);
-        KeyLoadAppHostApplication.AddKeyLoad(builder);
+        KeyLoadResources.AddKeyLoad(builder);
         return builder.Build();
     }
 

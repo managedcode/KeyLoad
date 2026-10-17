@@ -15,15 +15,6 @@ internal static class SampleChunkCrashScenario
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
-        if (await ChunkMultiblockCrashScenario.TryRunAsync(args).ConfigureAwait(false))
-        {
-            return true;
-        }
-        if (args.Length == Arguments && SampleChunkEarlyCrashProtocol.IsMode(args[ModeArgument]))
-        {
-            await SampleChunkEarlyCrashScenario.RunAsync(args).ConfigureAwait(false);
-            return true;
-        }
         if (args.Length != Arguments || !SampleChunkCrashContract.IsMode(args[ModeArgument]))
         {
             return false;

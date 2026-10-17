@@ -14,7 +14,7 @@
            Text="KeyLoad requires XML documentation generation so IDE0005 runs during builds." />
     <MakeDir Directories="$(KeyLoadCodeQualityDirectory)" />
   </Target>
-  <Import Project="$(MSBuildThisFileDirectory)tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets"
+  <Import Project="$(MSBuildThisFileDirectory)build/CodeQuality/FunctionalCompilationIdentity.targets"
           Condition="'$(MSBuildProjectName)' == 'KeyLoad.Abstractions' or
               '$(MSBuildProjectName)' == 'KeyLoad.Analyzers' or
               '$(MSBuildProjectName)' == 'KeyLoad.AppHost' or

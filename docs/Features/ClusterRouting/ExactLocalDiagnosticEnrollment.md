@@ -39,7 +39,7 @@ profile APIs; they neither launch a custom network nor qualify public RF3.
 No new Case, UID, selector, permission, configuration, file mutation, clock,
 retry, timeout, fixture or callback is introduced.
 
-Canonical source map: src/KeyLoad.AppHost/ClusterRouting/Helpers/
+Canonical source map: build/KeyLoad.AppHost/ClusterRouting/Helpers/
 TwoRf3QueryProbe.cs owns the existing admission predicate; tests/KeyLoad.UnitTests/
 Features/ClusterRouting/Cases/ owns the original two complete controls.
 UI/public SDK/MCP/benchmarks are N/A: this repair is private AppHost profile

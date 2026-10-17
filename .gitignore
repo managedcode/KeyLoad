@@ -543,7 +543,7 @@ Generated_Code/
 # because we have git ;-)
 _UpgradeReport_Files/
 Backup*/
-!**/Features/BackupRestore/
+!**/Cases/Backup/
 UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/
@@ -663,7 +663,7 @@ data/
 backups/
 **/packages.lock.json
 **/.aspire/
-src/KeyLoad.AppHost/aspire.config.json
+build/KeyLoad.AppHost/aspire.config.json
 **/coverage/
 BenchmarkDotNet.Artifacts/
 .env
@@ -690,3 +690,4 @@ output/playwright/
 !/docs/implementation/status.json
 !/docs/implementation/foundation-dependencies.json
 !/docs/implementation/kl-033-linux-acceptance-20261009.json
+.junie

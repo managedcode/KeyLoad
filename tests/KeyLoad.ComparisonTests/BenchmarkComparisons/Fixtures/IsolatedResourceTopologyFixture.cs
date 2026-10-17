@@ -17,7 +17,7 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
         + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     private const string TemporaryPrefix = "keyload-isolated-model-";
     private const string SolutionFile = "KeyLoad.slnx";
-    private const string AppHostDirectory = "src/KeyLoad.AppHost";
+    private const string AppHostDirectory = "build/KeyLoad.AppHost";
     private DistributedApplication? application;
 
     internal IsolatedResourceTopologyFixture(string target, int nodes, string? projectDirectory = null)

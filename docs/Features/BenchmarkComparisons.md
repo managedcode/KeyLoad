@@ -330,12 +330,12 @@ Status: in progress. Owner: lead benchmark integrator. Product scope and authori
 
 - Harness/adapters: benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/; existing flat files are migration debt tracked by ADR-032.
 - Embedded scenario library: benchmarks/KeyLoad.BenchmarkScenarios/BenchmarkComparisons/; existing KeyLoad.Benchmarks retains only its typed executable runner under ADR-047. New boundary implementation/qualification is pending; exact accepted contract is ../ADR/ADR-047-embedded-benchmark-host.md and its ordered working plan.
-- Aspire engine resources: src/KeyLoad.AppHost/BenchmarkComparisons/; shared Program.cs composition has one integration owner.
+- Aspire engine resources: build/KeyLoad.AppHost/BenchmarkComparisons/; shared Program.cs composition has one integration owner.
 - Tests: `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/`, including the sole benchmark-contract owner `UnitContracts/`; only helpers with actual functional consumers remain shared.
 - Evidence/chart tooling: scripts/Features/BenchmarkComparisons/.
 - Site: site/Features/BenchmarkComparisons/; existing root assets are migration debt and updated only under serialized integration ownership.
 - Docs: this spec, ADR-034, implementation/comparative-benchmarks.md and the README presentation.
-- Time-series profile: root-owned Aspire resource in `src/KeyLoad.AppHost/BenchmarkComparisons/`; profile/targets under `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
+- Time-series profile: root-owned Aspire resource in `build/KeyLoad.AppHost/BenchmarkComparisons/`; profile/targets under `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
 - Product persisted schema/public API changes: N/A; engines use isolated per-run benchmark databases/collections/streams. Core optimizations require their own business-slice contract and serialized ownership.
 
 ## Immutable harness collection and naming repair

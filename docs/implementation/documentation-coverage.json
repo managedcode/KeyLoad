@@ -5880,7 +5880,7 @@
         "editedByDocumentationTask": false
       },
       {
-        "path": "src/KeyLoad.Analyzers/AGENTS.md",
+        "path": "analyzers/KeyLoad.Analyzers/AGENTS.md",
         "originalBytes": 1456,
         "originalSha256": "f7d228398162e76ed8dde4222ba17a9d7338c6a524e585460587dbd4fae71e06",
         "currentBytes": 1456,
@@ -5889,7 +5889,7 @@
         "editedByDocumentationTask": false
       },
       {
-        "path": "src/KeyLoad.AppHost/AGENTS.md",
+        "path": "build/KeyLoad.AppHost/AGENTS.md",
         "originalBytes": 2109,
         "originalSha256": "7e9c1c7cdcb6765a6e50ecee5e5f41e9fda8d46bb4aa168b61dec7809400e658",
         "currentBytes": 2109,
@@ -9996,7 +9996,7 @@
           "tests/KeyLoad.CrashHost/StorageRecovery/Fixtures/EpochUpgradeFixture.cs",
           "tests/KeyLoad.CrashHost/Program.cs",
           "tests/KeyLoad.RecoveryTests/StorageRecovery/Fixtures/EpochPriorExecutableFixture.cs",
-          "tests/KeyLoad.CrashHost/StorageRecovery/Helpers/CrashHostApplication.cs",
+          "tests/KeyLoad.CrashHost/Program.cs",
           "src/KeyLoad.Storage.IO/AGENTS.md",
           "src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj",
           "root_owned_solution_and_project_references"
@@ -10046,7 +10046,7 @@
         "model": "gpt-6",
         "effort": "high",
         "fileOwnership": [
-          "src/KeyLoad.AppHost/TestInfrastructure",
+          "build/KeyLoad.AppHost/TestInfrastructure",
           "tests/KeyLoad.IntegrationTests/StorageRecovery/NodeEpoch*",
           "tests/KeyLoad.IntegrationTests/ClusterFixture*",
           ".github/workflows/ci.yml",

@@ -79,10 +79,10 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string ModuleLineFailure = "module line threshold";
     internal const string ModuleBranchFailure = "module branch threshold";
     internal const string CriticalPipelineId = "KLD0013";
-    internal const string CriticalPipelineSource = "src/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramEndpointMappingAnalyzer.cs";
-    internal const string AnalyzerDirectoryRelativePath = "src/KeyLoad.Analyzers/CodeQuality/Analyzers";
-    internal const string AnalysisDirectoryRelativePath = "src/KeyLoad.Analyzers/CodeQuality/Analysis";
-    internal const string MissingLinkTargetRelativePath = "src/KeyLoad.Analyzers/CodeQuality/Analyzers/MissingTarget.cs";
+    internal const string CriticalPipelineSource = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramEndpointMappingAnalyzer.cs";
+    internal const string AnalyzerDirectoryRelativePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers";
+    internal const string AnalysisDirectoryRelativePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis";
+    internal const string MissingLinkTargetRelativePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/MissingTarget.cs";
     internal const string CoveragePackagePrefix = "<coverage><packages><package name=\"";
     internal const string CoveragePackagePrefixWithSource = "<coverage><sources><source>";
     internal const string SourceRepeatOpen = "</source><source>";
@@ -159,7 +159,7 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string MalformedInteger = "many";
     internal const string UnsafePath = "../outside.cs";
     internal const string UnsafePathError = "Contract or Cobertura path is unsafe or outside the repository.";
-    internal const string UnknownSourcePath = "src/KeyLoad.Analyzers/CodeQuality/Unknown.cs";
+    internal const string UnknownSourcePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Unknown.cs";
     internal const string ParentPathSegment = "..";
     internal const string CounterOverflowFailure = "Coverage counter aggregation overflowed Int64.";
     internal const string InvalidBranchBoolean = "branch=\"invalid\"";
@@ -167,7 +167,7 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string DuplicateLinePathSuffix = "\"/><line number=\"1\" hits=\"0\"/>";
     internal const string DuplicateBranchSuffix = ")\"/><line number=\"1\" hits=\"1\" branch=\"true\" condition-coverage=\"69% (69/100)\"/>";
     internal const string DuplicateBranchCaseVariantSuffix = ")\"/><line number=\"1\" hits=\"1\" branch=\"True\" condition-coverage=\"70% (70/100)\"/>";
-    internal const string HashFileRelativePath = "src/KeyLoad.Analyzers/CodeQuality/Analyzers/LiteralMachineKeyAnalyzer.cs";
+    internal const string HashFileRelativePath = "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/LiteralMachineKeyAnalyzer.cs";
     internal const string UnexpectedSourceFileName = "Unexpected.cs";
     internal const string ProcessName = "pwsh";
     internal const string ModePrepare = "Prepare";

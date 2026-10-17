@@ -32,7 +32,7 @@ internal static class FunctionalFileOwnershipProfileRefusals
             values.AddRange(changes);
             var builder = P.Create(root, Voters, true, true, [.. values]);
             var original = builder.Resources.Count;
-            _ = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadAppHostApplication.AddKeyLoad(builder));
+            _ = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(builder));
             await Assert.That(builder.Resources.Count).IsEqualTo(original);
             await Assert.That(Directory.Exists(root) || File.Exists(root)).IsFalse();
             foreach (var probe in changes.Where(value => value.Key == RequestCqrsProbeProfile.Section + ProbeRoot))

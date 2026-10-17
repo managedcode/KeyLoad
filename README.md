@@ -236,7 +236,7 @@ export KeyLoad__ContainerImages__Server="localhost:5050/keyload/server:dev@$(doc
 **3. Start the three-node cluster**
 
 ```bash
-dotnet run --project src/KeyLoad.AppHost --configuration Release --no-build
+dotnet run --project build/KeyLoad.AppHost --configuration Release --no-build
 ```
 
 [Aspire](https://github.com/dotnet/aspire) starts three nodes at `http://localhost:5101`, `:5102` and `:5103`. Node data and your local development credentials are stored in `data/cluster/`, which git ignores. Keep that folder between restarts.
@@ -360,7 +360,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 | [`src/KeyLoad.Server`](src/KeyLoad.Server) | The database server: HTTP API, MCP server and admin console |
 | [`src/KeyLoad.Client`](src/KeyLoad.Client) | The .NET SDK |
 | [`src/KeyLoad.Cli`](src/KeyLoad.Cli) | Command-line tool for operators and workers |
-| [`src/KeyLoad.AppHost`](src/KeyLoad.AppHost) | Aspire host for the local cluster and every test suite |
+| [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | Aspire host for the local cluster and every test suite |
 | [`src/KeyLoad.Abstractions`](src/KeyLoad.Abstractions) | Shared public contracts |
 | `src/KeyLoad.Core`, `Query`, `Orleans`, `Replication`, `Security`, `Storage.*` | Database engine, SQL, cluster, replication, permissions and storage |
 | [`tests/`](tests) | Unit, crash-recovery, three-node and website tests ([TUnit](https://github.com/thomhurst/TUnit)) |

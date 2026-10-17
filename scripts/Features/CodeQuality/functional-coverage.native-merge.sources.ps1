@@ -10,7 +10,7 @@ function Assert-FcNativeCurrentSourceGeneration([object] $Plan) {
 
 function Assert-FcNativeProductSourceTrees([object] $Manifest, [object] $Bounds) {
     foreach ($product in $Manifest.compiledProducts) {
-        $directory = 'src/' + [string] $product.module
+        $directory = Get-FcProjectSourceDirectory ([string] $product.module) $false
         Assert-FcNativeSourceTree $directory @($product.sources) $Bounds
     }
 }

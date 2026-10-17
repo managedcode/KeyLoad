@@ -40,7 +40,7 @@ jobs:
       - name: Build the complete solution once
         run: dotnet build KeyLoad.slnx --no-restore --configuration Release -p:AspireCliInvocationMode=DnxPinned
       - name: Build current Debug analyzer for native formatting
-        run: dotnet build src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug
+        run: dotnet build analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug
       - name: Check code formatting
         run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Check repository rules

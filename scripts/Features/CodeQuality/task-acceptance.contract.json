@@ -5032,7 +5032,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
               "methodName": "ActualNativeCaptureOverloadRejectsWithoutEffectsThenSettledFailuresPermitHealthyBackup",
               "instanceName": "ActualNativeCaptureOverloadRejectsWithoutEffectsThenSettledFailuresPermitHealthyBackup",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/ClusterBackup/ClusterBackupAdmissionWholeFlowTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/ClusterBackup/ClusterBackupAdmissionWholeFlowTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5040,7 +5040,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
               "methodName": "ActualNativeShutdownJoinsEveryAcceptedCaptureAndRejectsNewDirectAdmission",
               "instanceName": "ActualNativeShutdownJoinsEveryAcceptedCaptureAndRejectsNewDirectAdmission",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/ClusterBackup/ClusterBackupAdmissionWholeFlowTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/ClusterBackup/ClusterBackupAdmissionWholeFlowTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5055,7 +5055,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore",
               "instanceName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore(0)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
               "parameterTypeFullNames": [
                 "System.Int64"
               ]
@@ -5065,7 +5065,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore",
               "instanceName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore(1)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
               "parameterTypeFullNames": [
                 "System.Int64"
               ]
@@ -5075,7 +5075,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002ForgedHistoricalOriginRefusesWithoutEffectsThenOriginalIsHealthy",
               "instanceName": "AcBackupRoster002ForgedHistoricalOriginRefusesWithoutEffectsThenOriginalIsHealthy",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5083,7 +5083,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002MissingOriginAndChangedHistoricalRowRefuseThenExactRepairIsHealthy",
               "instanceName": "AcBackupRoster002MissingOriginAndChangedHistoricalRowRefuseThenExactRepairIsHealthy",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5091,7 +5091,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002CorruptPriorOriginCannotPublishRestoreAndExactRepairContinuesCold",
               "instanceName": "AcBackupRoster002CorruptPriorOriginCannotPublishRestoreAndExactRepairContinuesCold",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5099,7 +5099,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002OwningRestoreIdentityCannotBeMissingOrForgedBeforeHealthyContinuation",
               "instanceName": "AcBackupRoster002OwningRestoreIdentityCannotBeMissingOrForgedBeforeHealthyContinuation",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterRestoreTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5114,7 +5114,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterFrameBudgetTests",
               "methodName": "AcBackup004RosterFrameExhaustionPersistsRejectedOutcomeWithoutEffect",
               "instanceName": "AcBackup004RosterFrameExhaustionPersistsRejectedOutcomeWithoutEffect",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterFrameBudgetTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterFrameBudgetTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5129,7 +5129,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
               "methodName": "AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore",
               "instanceName": "AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreFlowTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreFlowTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5137,7 +5137,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
               "methodName": "AcBackup002CliRestoreRejectsNonemptyDestinationWithoutChangingEitherStore",
               "instanceName": "AcBackup002CliRestoreRejectsNonemptyDestinationWithoutChangingEitherStore",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreFlowTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreFlowTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5145,7 +5145,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
               "methodName": "AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup",
               "instanceName": "AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreFlowTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreFlowTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5160,7 +5160,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreMissingInputTests",
               "methodName": "AcBackup002CliMissingRequiredBackupFilesRejectWithoutPublicationAndRestoreAfterRepair",
               "instanceName": "AcBackup002CliMissingRequiredBackupFilesRejectWithoutPublicationAndRestoreAfterRepair",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreMissingInputTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreMissingInputTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5175,7 +5175,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreInvalidCatalogTests",
               "methodName": "AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal",
               "instanceName": "AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreInvalidCatalogTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreInvalidCatalogTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5190,7 +5190,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreLengthMismatchTests",
               "methodName": "AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup",
               "instanceName": "AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreLengthMismatchTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreLengthMismatchTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5205,7 +5205,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
               "instanceName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(False)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5215,7 +5215,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
               "instanceName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(True)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5225,7 +5225,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
               "instanceName": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5233,7 +5233,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004CompleteJournalRequiresExactManifestCut",
               "instanceName": "AcIs004CompleteJournalRequiresExactManifestCut(-1)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Int64"
               ]
@@ -5243,7 +5243,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004CompleteJournalRequiresExactManifestCut",
               "instanceName": "AcIs004CompleteJournalRequiresExactManifestCut(1)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Int64"
               ]
@@ -5253,7 +5253,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
               "instanceName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(False)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5263,7 +5263,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
               "instanceName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(True)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5273,7 +5273,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
               "instanceName": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5281,7 +5281,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
               "instanceName": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5289,7 +5289,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
               "instanceName": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5297,7 +5297,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
               "instanceName": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5305,7 +5305,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
               "instanceName": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5313,7 +5313,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
               "instanceName": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5321,7 +5321,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
               "instanceName": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5329,7 +5329,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
               "instanceName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(False)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5339,7 +5339,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
               "instanceName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(True)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5349,7 +5349,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold",
               "instanceName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold(False)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5359,7 +5359,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold",
               "instanceName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold(True)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5376,7 +5376,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
               "methodName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
               "instanceName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(False)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5386,7 +5386,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
               "methodName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
               "instanceName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(True)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5396,7 +5396,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
               "methodName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
               "instanceName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(False)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5406,7 +5406,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
               "methodName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
               "instanceName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(True)",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
@@ -5423,7 +5423,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
               "methodName": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
               "instanceName": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/MissingBackup/MissingBackupManifestTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/MissingBackup/MissingBackupManifestTests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5431,7 +5431,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
               "methodName": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
               "instanceName": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/MissingBackup/MissingBackupManifestTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/MissingBackup/MissingBackupManifestTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5446,7 +5446,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupExecutionPolicyTests",
               "methodName": "ConfiguredArchivePiecesRoundTripAndInvalidPolicyCreatesNoArchive",
               "instanceName": "ConfiguredArchivePiecesRoundTripAndInvalidPolicyCreatesNoArchive",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupExecutionPolicyTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupExecutionPolicyTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5461,7 +5461,7 @@
               "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTransferRejectedInputFlowTests",
               "methodName": "AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds",
               "instanceName": "AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds",
-              "sourcePath": "tests/KeyLoad.UnitTests/BackupRestore/Cases/ArtifactTransfer/ArtifactTransferRejectedInputFlowTests.cs",
+              "sourcePath": "tests/KeyLoad.UnitTests/Restore/Cases/ArtifactTransfer/ArtifactTransferRejectedInputFlowTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5476,7 +5476,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
               "methodName": "ActualTwoRf3ArchiveRestoresAllRegisteredOwnersAndLinkedModelsWithFencedOriginalReceiptsAndColdContinuation",
               "instanceName": "ActualTwoRf3ArchiveRestoresAllRegisteredOwnersAndLinkedModelsWithFencedOriginalReceiptsAndColdContinuation",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3Tests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5484,7 +5484,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
               "methodName": "ActualSplitMovementVectorRefusesPublicationThenFreshCaptureRestoresMovedLinkedModelsAndColdContinuation",
               "instanceName": "ActualSplitMovementVectorRefusesPublicationThenFreshCaptureRestoresMovedLinkedModelsAndColdContinuation",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3Tests.cs",
               "parameterTypeFullNames": []
             },
             {
@@ -5492,7 +5492,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
               "methodName": "ActualCapturedRevokedAndExpiredCredentialsRefuseOfflinePublicationAndRestoredRequestsThenValidCredentialContinuesCold",
               "instanceName": "ActualCapturedRevokedAndExpiredCredentialsRefuseOfflinePublicationAndRestoredRequestsThenValidCredentialContinuesCold",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3Tests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -5507,7 +5507,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
               "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(PlanPublished)",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
               ]
@@ -5517,7 +5517,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
               "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(SourcePrefixPersisted)",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
               ]
@@ -5527,7 +5527,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
               "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(Reconciled)",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
               ]
@@ -5537,7 +5537,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
               "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(IdentityPublished)",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
               ]
@@ -5547,7 +5547,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
               "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(AuthorityReset)",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
               ]
@@ -5557,7 +5557,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
               "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(ReadyPublished)",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
               ]
@@ -5567,7 +5567,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
               "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(NodesPublished)",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
               ]
@@ -5584,7 +5584,7 @@
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.AdminBackupClientParityTests(ClusterFixture)",
               "methodName": "AcClient004SdkAndOfficialMcpCreateDistinctAdministratorBackups",
               "instanceName": "AcClient004SdkAndOfficialMcpCreateDistinctAdministratorBackups",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/AdminBackupClientParityTests.cs",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Restore/Cases/AdminBackupClientParityTests.cs",
               "parameterTypeFullNames": []
             }
           ]

@@ -11,7 +11,7 @@
 
 ## Commands and evidence
 - The helper is built as part of the GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Owner correction2026-10-03 requires invocation only by the native child of `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery` (or the mapped guarded-store unit suite). AppHost owns the runner, prerequisites, artifacts, execution and shutdown. Local development is authorized; exact-source Linux GitHub qualification remains mandatory.
+- Owner correction2026-10-03 requires invocation only by the native child of `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery` (or the mapped guarded-store unit suite). AppHost owns the runner, prerequisites, artifacts, execution and shutdown. Local development is authorized; exact-source Linux GitHub qualification remains mandatory.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
@@ -38,3 +38,8 @@
 - Place every feature-owned source file under `<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
 - Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
 - Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.
+
+
+## Explicit entry point, owner correction 2026-10-17
+- Program.cs owns process initialization, special-mode selection, argument decoding and the canonical store lifetime. Do not hide this composition behind Application.RunAsync forwarding wrappers or make the general entry point belong to one model such as TimeSeries.
+- Individual scenarios own their actual model operations. StorageRecovery/Execution/CrashScenarioDispatcher.cs owns only canonical mode dispatch. Preserve original selection order, short-circuit behavior, fault boundaries, process/pipe contracts and joined cleanup.

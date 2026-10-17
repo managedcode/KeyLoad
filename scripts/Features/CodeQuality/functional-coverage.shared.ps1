@@ -216,3 +216,10 @@ function Test-FcTaskAcceptanceScriptName([string] $Name) {
     }
     return $false
 }
+
+function Get-FcProjectSourceDirectory([string] $ProjectName, [bool] $IsTest) {
+    if ($IsTest) { return 'tests/' + $ProjectName }
+    if ($ProjectName -ceq 'KeyLoad.Analyzers') { return 'analyzers/' + $ProjectName }
+    if ($ProjectName -ceq 'KeyLoad.AppHost') { return 'build/' + $ProjectName }
+    return 'src/' + $ProjectName
+}

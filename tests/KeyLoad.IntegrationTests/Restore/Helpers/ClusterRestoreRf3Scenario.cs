@@ -1,0 +1,216 @@
+using System.Collections.Immutable;
+using System.Globalization;
+using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.Features.RelationalStorage;
+
+namespace KeyLoad.IntegrationTests.Features.BackupRestore;
+
+/// <summary>Real complete caller flow; no result from its source replaces native Linux qualification.</summary>
+internal static class ClusterRestoreRf3Scenario
+{
+    private const string OffNodeDirectory = "off-node";
+    private const string DurationLabel = "Actual whole RF3 capture/off-node/CLI/restore/cold duration: ";
+    private const string DurationFormat = "c";
+    private const int FirstOwnerIndex = 0;
+    private const string PostCaptureId = "after-backup";
+    private const string PostCaptureJson = "{\"afterBackup\":true}";
+
+    internal static Task RunAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+        string ownedRoot, CancellationToken cancellationToken)
+        => RunAsync(source, seed, ownedRoot, null, cancellationToken);
+
+    internal static Task RunAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+        string ownedRoot, IReadOnlyList<string>? invalidCredentials, CancellationToken cancellationToken)
+        => RunAsync(source, seed, ownedRoot, invalidCredentials, null, cancellationToken);
+
+    internal static Task RunAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+        string ownedRoot, IReadOnlyList<string>? invalidCredentials, ClusterRestoreMixedRetentionRf3State? mixed,
+        CancellationToken cancellationToken)
+        => RunCoreAsync(source, seed, ownedRoot, invalidCredentials, mixed, null, cancellationToken);
+
+    internal static Task RunWithCaptureReplayAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+        string ownedRoot, IReadOnlyList<string>? invalidCredentials, Func<CancellationToken, Task> replay,
+        CancellationToken cancellationToken)
+        => RunCoreAsync(source, seed, ownedRoot, invalidCredentials, null, replay, cancellationToken);
+
+    private static async Task RunCoreAsync(TwoRf3MembershipWave source, PartitionMovementPublicParentRf3Seed seed,
+        string ownedRoot, IReadOnlyList<string>? invalidCredentials, ClusterRestoreMixedRetentionRf3State? mixed,
+        Func<CancellationToken, Task>? replay, CancellationToken cancellationToken)
+    {
+        var started = TimeProvider.System.GetTimestamp();
+        var drill = new ClusterRestoreDrillEvidence(TimeProvider.System);
+        var secondary = await ClusterRestoreRf3SecondaryPartition.SeedAsync(source, seed, cancellationToken).ConfigureAwait(false);
+        var eventing = await ClusterRestoreRf3EventingSeed.CreateAsync(source, seed, cancellationToken).ConfigureAwait(false);
+        drill.BeginCapture();
+        var originals = await ClusterRestoreRf3Capture.CaptureAsync(source, seed.Partition, Guid.NewGuid(),
+            cancellationToken).ConfigureAwait(false);
+        drill.EndCapture();
+        var postCapture = seed.Models.Command(new PutDocument(RelationalSqlRf3Tokens.Documents,
+            PostCaptureId, PostCaptureJson));
+        var postCaptureReceipt = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.CommitAsync(postCapture,
+            cancellationToken).ConfigureAwait(false));
+        await ClusterRestoreRf3RpoOracle.RequireAsync(seed, originals, postCapture, postCaptureReceipt,
+            PostCaptureId, cancellationToken).ConfigureAwait(false);
+        var archives = await ClusterRestoreRf3NativeArchive.CopyAsync(source, originals,
+            Path.Combine(ownedRoot, OffNodeDirectory), cancellationToken).ConfigureAwait(false);
+        if (mixed is not null)
+        {
+            await ClusterRestoreMixedRetentionRf3NativeCut.SourceAsync(originals, archives, mixed, cancellationToken).ConfigureAwait(false);
+        }
+        await ClusterRestoreRf3ColdCapture.RequireWithReplayAsync(source, seed, originals, archives,
+            replay, cancellationToken).ConfigureAwait(false);
+        var target = new ClusterRestoreRf3Fixture(ownedRoot, source.Profile.AdminKey, originals, archives);
+        Exception? initiatingFailure = null;
+        var cleanupCompleted = false;
+        try
+        {
+            try
+            {
+                await target.StartRejectedManifestAsync(cancellationToken).ConfigureAwait(false);
+                await ClusterRestoreRf3NativeArchive.RequireOriginalAsync(originals, archives, cancellationToken).ConfigureAwait(false);
+                await ClusterRestoreRf3ArchiveOmissionTrial.RequireAsync(target, originals, archives, ownedRoot,
+                    cancellationToken).ConfigureAwait(false);
+                var repairedArchives = await ClusterRestoreRf3ArchiveMutationTrial.RequireAndRepairAsync(target,
+                    originals, archives, ownedRoot, cancellationToken).ConfigureAwait(false);
+                await ClusterRestoreRf3Verification.RunAsync(target, seed, originals, eventing, secondary,
+                    invalidCredentials, repairedArchives, mixed, source.Profile.AdminKey, drill, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception original)
+            {
+                initiatingFailure = original;
+                throw;
+            }
+            finally { await target.DisposeAsync().ConfigureAwait(false); cleanupCompleted = true; }
+        }
+        catch (Exception terminal)
+        {
+            if (initiatingFailure is not null && !cleanupCompleted)
+            {
+                throw new AggregateException(initiatingFailure, terminal);
+            }
+            throw;
+        }
+        await drill.WriteAsync(originals).ConfigureAwait(false);
+        var elapsed = TimeProvider.System.GetElapsedTime(started);
+        await Assert.That(elapsed).IsLessThan(ClusterRestoreRf3Protocol.ParentDeadline);
+        await TestContext.Current!.OutputWriter.WriteLineAsync(DurationLabel
+            + elapsed.ToString(DurationFormat, CultureInfo.InvariantCulture));
+    }
+
+    internal static async Task<(CommandRequest Command, CommitReceipt Receipt)> CallersAsync(ClusterRestoreRf3Fixture target, PartitionMovementPublicParentRf3Seed seed,
+        ImmutableArray<ClusterBackupOwnerReceipt> originals, ClusterRestoreRf3EventingState eventing, (CommandRequest Command, CommitReceipt Receipt)? fresh,
+        CancellationToken cancellationToken)
+    {
+        var effective = originals.SelectMany(receipt => receipt.Cut.Partitions)
+            .First(partition => partition.Roster.Partition == seed.Partition).Placement.PhysicalShardId;
+        var index = Array.FindIndex(target.Mappings.ToArray(), mapping => mapping.Source.PhysicalShardId == effective);
+        if (index < FirstOwnerIndex)
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
+        var node = index == FirstOwnerIndex ? TwoRf3MembershipProtocol.Node1 : TwoRf3MembershipProtocol.Node4;
+        return await ClusterRestoreRf3CallerOwner.RunAsync(target.Application, node,
+            seed.Credential, (sdk, official) => RequireCallersAsync(target, seed, originals, eventing, fresh,
+                sdk, official, cancellationToken), cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task<(CommandRequest Command, CommitReceipt Receipt)> RequireCallersAsync(
+        ClusterRestoreRf3Fixture target, PartitionMovementPublicParentRf3Seed seed,
+        ImmutableArray<ClusterBackupOwnerReceipt> originals, ClusterRestoreRf3EventingState eventing, (CommandRequest Command, CommitReceipt Receipt)? fresh,
+        KeyLoadClient sdk, McpOfficialClient official, CancellationToken cancellationToken)
+    {
+        var placement = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadAtomicPartitionPlacementAsync(
+            new(ClusterRestoreRf3Protocol.CurrentVersion, seed.Partition), cancellationToken).ConfigureAwait(false));
+        var originalPartition = originals.SelectMany(receipt => receipt.Cut.Partitions)
+            .First(partition => partition.Roster.Partition == seed.Partition);
+        var mapping = target.Mappings.Single(item => item.Source.PhysicalShardId == originalPartition.Placement.PhysicalShardId);
+        var old = originalPartition.Placement;
+        await SqlRf3Protocol.EqualAsync(new AtomicPartitionPlacementResolution(old.Version, seed.Partition,
+            mapping.Target.PhysicalShardId, mapping.Target.Incarnation, mapping.Target.VoterIds,
+            mapping.Target.PlacementEpoch, old.DirectoryRevision, old.Revision, old.IsFallback), placement);
+        var original = originals.Single(receipt => receipt.Cut.Owner.PhysicalShardId == mapping.Source.PhysicalShardId);
+        await ClusterRestoreRf3AuthorityTrial.RequireOldFencesAsync(sdk, official, seed, cancellationToken).ConfigureAwait(false);
+        await ClusterRestoreRf3ModelOracle.RequireAsync(sdk, official, seed,
+            original.Cut.StorePosition, cancellationToken).ConfigureAwait(false);
+        await PostCaptureAbsentAsync(sdk, official, seed.Partition, cancellationToken).ConfigureAwait(false);
+        await ClusterRestoreRf3EventingReadOracle.RequireAsync(sdk, official, eventing, cancellationToken).ConfigureAwait(false);
+        if (fresh is null)
+        {
+            await ClusterRestoreRf3EventingFences.RequireAsync(sdk, official, eventing, cancellationToken).ConfigureAwait(false);
+            await PauseThenResumeAsync(target, sdk, official, seed, original.Cut.StorePosition, cancellationToken).ConfigureAwait(false);
+            await ClusterRestoreRf3EventingContinuation.RunAsync(sdk, official, eventing, mapping.Target,
+                cancellationToken).ConfigureAwait(false);
+            var current = await ClusterRestoreRf3AuthorityTrial.RequireFreshAsync(sdk, official, seed.Partition,
+                mapping.Target, cancellationToken).ConfigureAwait(false);
+            eventing.FinalOutbox = await McpCallerAssertions.SdkSuccessAsync(await sdk.OutboxStatusAsync(seed.Partition,
+                cancellationToken).ConfigureAwait(false));
+            return current;
+        }
+        await ClusterRestoreRf3AuthorityTrial.RequireColdFreshAsync(sdk, official, fresh.Value,
+            cancellationToken).ConfigureAwait(false);
+        return fresh.Value;
+    }
+
+    private static async Task PostCaptureAbsentAsync(KeyLoadClient sdk, McpOfficialClient official,
+        PartitionRef partition, CancellationToken cancellationToken)
+    {
+        var reference = new EntityRef(partition, RelationalSqlRf3Tokens.Documents, PostCaptureId);
+        var expected = new DocumentReadResult(null);
+        var sdkRead = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference,
+            cancellationToken).ConfigureAwait(false));
+        await SqlRf3Protocol.EqualAsync(expected, sdkRead);
+        await Assert.That(sdkRead.Document).IsNull();
+        var request = new GetDocumentRequest(reference);
+        var mcpRead = (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(await official.CallAsync(
+            McpCallerTools.DocumentsGet, request, cancellationToken).ConfigureAwait(false))).Value;
+        await SqlRf3Protocol.EqualAsync(expected, mcpRead);
+        await Assert.That(mcpRead.Document).IsNull();
+        var sql = SqlRf3Protocol.Call(partition, McpCallerTools.DocumentsGet, request);
+        var sdkSqlRead = await SqlRf3Protocol.SdkAsync<DocumentReadResult>(sdk, sql, cancellationToken).ConfigureAwait(false);
+        await SqlRf3Protocol.EqualAsync(expected, sdkSqlRead);
+        await Assert.That(sdkSqlRead.Document).IsNull();
+        var mcpSqlRead = await SqlRf3Protocol.McpAsync<DocumentReadResult>(official, sql, cancellationToken).ConfigureAwait(false);
+        await SqlRf3Protocol.EqualAsync(expected, mcpSqlRead);
+        await Assert.That(mcpSqlRead.Document).IsNull();
+    }
+
+    private static async Task PauseThenResumeAsync(ClusterRestoreRf3Fixture target, KeyLoadClient sdk, McpOfficialClient official,
+        PartitionMovementPublicParentRf3Seed seed, long originalCanonicalPosition, CancellationToken cancellationToken)
+    {
+        var receive = new ReceiveRequest(Guid.NewGuid(), new(seed.Partition, RelationalSqlRf3Tokens.Queue));
+        await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.ReceiveAsync(receive,
+            cancellationToken).ConfigureAwait(false), ErrorCode.DispatchPaused);
+        await McpCallerAssertions.ErrorAsync(await official.CallAsync(McpCallerTools.MessagesReceive, receive,
+            cancellationToken).ConfigureAwait(false), ErrorCode.DispatchPaused, dispatched: true);
+        await ResumeAllAsync(target, seed.Credential, seed.Partition, cancellationToken).ConfigureAwait(false);
+        await ClusterRestoreRf3ModelOracle.RequireAsync(sdk, official, seed,
+            originalCanonicalPosition, cancellationToken).ConfigureAwait(false);
+    }
+    private static async Task ResumeAllAsync(ClusterRestoreRf3Fixture target, string actualCredential,
+        PartitionRef partition, CancellationToken cancellationToken)
+    {
+        foreach (var node in new[] { TwoRf3MembershipProtocol.Node1, TwoRf3MembershipProtocol.Node4 })
+        {
+            _ = await ClusterRestoreRf3CallerOwner.RunAsync(target.Application, node, actualCredential,
+                async (sdk, official) =>
+                {
+                    var commandId = Guid.NewGuid();
+                    await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.SetDispatchAsync(commandId,
+                        paused: false, cancellationToken).ConfigureAwait(false))).IsTrue();
+                    var arguments = McpOfficialClient.Arguments(false);
+                    arguments.Add(McpCallerProtocol.CommandId, commandId);
+                    await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(await official.Client.InvokeKeyLoadToolAsync(
+                        McpCallerTools.AdminDispatch, arguments, cancellationToken: cancellationToken).ConfigureAwait(false))).Value).IsTrue();
+                    var sql = SqlRf3Protocol.Call(partition, McpCallerTools.AdminDispatch, false, commandId);
+                    await Assert.That(await SqlRf3Protocol.SdkAsync<bool>(sdk, sql, cancellationToken)).IsTrue();
+                    await Assert.That(await SqlRf3Protocol.McpAsync<bool>(official, sql, cancellationToken)).IsTrue();
+                    await ClusterRestoreRf3ResumeConflict.RequireAsync(sdk, official, partition, commandId,
+                        cancellationToken).ConfigureAwait(false);
+                    return true;
+                }, cancellationToken).ConfigureAwait(false);
+        }
+    }
+}

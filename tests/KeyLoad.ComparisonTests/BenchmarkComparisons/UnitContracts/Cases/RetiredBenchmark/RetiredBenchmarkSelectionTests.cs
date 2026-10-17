@@ -24,7 +24,7 @@ internal sealed class RetiredBenchmarkSelectionTests
     private const string Assignment = "=";
     private const string Whitespace = " ";
     private const string RetiredValue = "retired";
-    private const string SourceDirectory = "src";
+    private const string SourceDirectory = "build";
     private const string AppHostDirectory = "KeyLoad.AppHost";
     private const int NoResources = 0;
     private const int IsolatedRunnerCount = 1;
@@ -74,7 +74,7 @@ internal sealed class RetiredBenchmarkSelectionTests
         var original = builder.Configuration.AsEnumerable().ToArray();
         Assert.ThrowsExactly<InvalidOperationException>(() => AppHostOptionsRegistration.BindTestBootstrap(builder.Configuration));
         Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Read(builder.Configuration));
-        Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadAppHostApplication.AddKeyLoad(builder));
+        Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(builder));
         await Assert.That(builder.Resources.Count).IsEqualTo(NoResources);
         await Assert.That(builder.Configuration.AsEnumerable().ToArray())
             .IsEquivalentTo(original, CollectionOrdering.Matching);
@@ -94,7 +94,7 @@ internal sealed class RetiredBenchmarkSelectionTests
         await Assert.That(builder.Resources.Count).IsEqualTo(NoResources);
         await Assert.That(builder.Configuration.AsEnumerable().ToArray())
             .IsEquivalentTo(original, CollectionOrdering.Matching);
-        KeyLoadAppHostApplication.AddKeyLoad(builder);
+        KeyLoadResources.AddKeyLoad(builder);
         await using var app = builder.Build();
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
         await Assert.That(model.Resources.Count).IsEqualTo(IsolatedRunnerCount);

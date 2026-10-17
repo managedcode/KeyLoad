@@ -122,7 +122,7 @@ runs:
         dotnet --info > "$EVIDENCE_DIR/dotnet-info.txt"
         pwsh --version > "$EVIDENCE_DIR/powershell-version.txt"
         dotnet restore KeyLoad.slnx
-        dotnet build src/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release
+        dotnet build build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release
         dotnet build tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-restore --configuration Release
         node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
         node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SessionCohortContractTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
@@ -146,7 +146,7 @@ runs:
       working-directory: website
       shell: bash
       run: |
-        dotnet format src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzers.txt" 2>&1
+        dotnet format analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzers.txt" 2>&1
         dotnet format tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzer-tests.txt" 2>&1
         dotnet format tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-site-tests.txt" 2>&1
         node scripts/Features/RepositoryGovernance/verify.mjs

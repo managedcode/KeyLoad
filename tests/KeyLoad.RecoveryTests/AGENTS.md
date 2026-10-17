@@ -10,7 +10,7 @@
 - These tests establish process-recovery behavior only. They must never be presented as power-loss durability, endurance or complete production qualification; do not substitute mocks/fakes or weaken fault assertions.
 
 ## Commands and evidence
-- Local and GitHub Actions caller entry, following solution restore/build: `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery`. AppHost owns the native TUnit child process, dependencies, artifacts, execution and shutdown; direct test execution is not an alternative caller entry.
+- Local and GitHub Actions caller entry, following solution restore/build: `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery`. AppHost owns the native TUnit child process, dependencies, artifacts, execution and shutdown; direct test execution is not an alternative caller entry.
 - Execute only in GitHub Actions. Record exact SHA, run/job URL and artifacts; every required recovery suite must run for a pass claim.
 
 ## Skills and protected risks

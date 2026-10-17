@@ -31,7 +31,7 @@ internal sealed class NativeCoverageRf3PreparationTests
                 DisableDashboard = true,
                 Args = arguments
             });
-            KeyLoadAppHostApplication.AddKeyLoad(builder);
+            KeyLoadResources.AddKeyLoad(builder);
             await using var application = builder.Build();
             var resources = application.Services.GetRequiredService<DistributedApplicationModel>()
                 .Resources.OfType<ContainerResource>().ToArray();

@@ -44,7 +44,7 @@ internal static class NativeLoggerModelControlRejectionFlow
     private static async Task AssertAdmissionRejectedAsync(IDistributedApplicationBuilder builder, string name,
         string expectedRejectionMessage)
     {
-        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadAppHostApplication.AddKeyLoad(builder));
+        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(builder));
         await Assert.That(failure.Message).IsEqualTo(expectedRejectionMessage).Because(name);
     }
 

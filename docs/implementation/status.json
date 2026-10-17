@@ -63,7 +63,7 @@
         "benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/TimeSeries/TimeSeriesComparisonReportWriter.cs",
         "scripts/Features/BenchmarkComparisons/session-aggregate.mjs",
         "scripts/Features/BenchmarkComparisons/session-report-validation.mjs",
-        "src/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
+        "build/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
         "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/Assertions/ComparisonReportIdentityAssertions.cs",
         "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/Assertions/ComparisonTestReportAssertions.cs",
         "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/Cases/Vector/VectorProfileTests.cs",
@@ -98,7 +98,7 @@
         "KeyLoad.Storage.IO",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "globalAnalyzerProject": "src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
+      "globalAnalyzerProject": "analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
       "correction": "Previous static XML traversal counted16 explicitProjectReferenceprojects; SDKactualclosurealso includesgloballyregisteredKeyLoad.Analyzers. Runtimecountsandallsource/DLLchecksunchanged.",
       "supersedes": "TestResults/stage61-native-join/root-r722-recovery21-current-evidence.original.json",
       "supersededSha256": "350301ff57925ca7f5b534de35c3da4c2dae8d7811d6efb6262a7154ab0b822b",
@@ -4483,12 +4483,12 @@
         "targetSourceDrift": [],
         "broadCompiledImageDrift": [
           {
-            "path": "src/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.Orleans.dll",
+            "path": "build/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.Orleans.dll",
             "before": "45ef1769f8fb8430254911a9a0aa43f1bd8fe6c104466563f0d36ce3ee421715",
             "after": "638dfa95d55e070e71942b7bfb080a88c1b532cbaf420643b776a3dc04516900"
           },
           {
-            "path": "src/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.Orleans.pdb",
+            "path": "build/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.Orleans.pdb",
             "before": "28a41c0bdf1ebe1c325c707afa723fc4ac1e02def3906a76865a895ae3b336be",
             "after": "a783725c3a317910b9a8b91ed432b2a1a064573b10d8a7565ed4648731ddcef2"
           },
@@ -13236,77 +13236,77 @@
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   },
                   {
                     "test": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
                     "outcome": "Failed",
                     "duration": "00:00:00.0000000",
                     "message": "BeforeTestSessionException: BeforeTestSession hook failed: One or more errors occurred. (Original RF3 coverage image preparation failed.) (Native TUnit coverage prerequisite cleanup failed. (The owned original-node coverage image cleanup failed.))",
-                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/src/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
+                    "stack": "   at TUnit.Engine.Services.HookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 65\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 54\n--- Inner exception stack trace (System.AggregateException) ---\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.CleanupAsync() in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 109\n   at KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageTUnitSession.PrepareAsync(CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/CodeQuality/Lifecycle/NativeCoverageTUnitSession.cs:line 64\n--- Inner exception stack trace (System.InvalidOperationException) ---\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 49\n   at KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3Cleanup.CleanupAsync(CancellationToken cancellationToken) in /_/build/KeyLoad.AppHost/CodeQuality/Execution/NativeCoverageRf3Cleanup.cs:line 60"
                   }
                 ]
               },
@@ -14098,7 +14098,7 @@
         "inputCount": 4518,
         "inputDrift": [],
         "uniqueErrors": [
-          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/ClusterRouting/Resources/TwoRf3ClusterResources.cs(87,13): error KLD0037: 'builder.Configuration[TwoRf3ProfileProtocol.RegistrationSetting]' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/KeyLoad.AppHost.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/ClusterRouting/Resources/TwoRf3ClusterResources.cs(87,13): error KLD0037: 'builder.Configuration[TwoRf3ProfileProtocol.RegistrationSetting]' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/KeyLoad.AppHost.csproj]",
           "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/ClusterReplication/Helpers/ReplicaCrashNode.cs(26,36): error CA2213: 'ReplicaCrashNode' contains field 'replicaStore' that is of IDisposable type 'ZoneTreeStore', but it is never disposed. Change the Dispose method on 'ReplicaCrashNode' to call Close or Dispose on this field. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2213) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
           "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/ClusterReplication/Helpers/ReplicaCrashNode.cs(26,5): error IDE0032: Use auto property (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0032) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
           "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/ClusterReplication/Helpers/ReplicaPrefixGcCrashScenario.cs(2,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]"
@@ -22483,85 +22483,85 @@
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterRegistrationTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterRegistrationTests.cs",
               "sha256": "0ca07359e15eb86ec7911db5cc725f1213b1bb013d0a47da6c8003afc78c68a4",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterPlacementTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterPlacementTests.cs",
               "sha256": "e2438cbe12a1ff24f6d9e2b9525e66abdcb8eba094fab1281e6b8f6fe4dc3fe2",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterFrameBudgetTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterFrameBudgetTests.cs",
               "sha256": "b510ac49a862d7b556aca0b9f026d89a80811defb3897f7c182811c97e89eebb",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterBudgetTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterBudgetTests.cs",
               "sha256": "889f9a2d7ef35c0412697e2099d37e63c419e6b6342e74dbff78d5c01dbf427e",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/ArtifactTransfer/ArtifactTransferRejectedInputFlowTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/ArtifactTransfer/ArtifactTransferRejectedInputFlowTests.cs",
               "sha256": "3a2044d3faf1a3e69c5923204f10725717111ad069ee1b7c4ea54e6156136c44",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Artifact/ArtifactTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs",
               "sha256": "04db690bf551f4e6bf5a2e59306f0f5a779193c3f8b7da5a946d443deefd01d7",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Assertions/MetadataRestoreAssertions.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Assertions/MetadataRestoreAssertions.cs",
               "sha256": "aeee4737da2a1c2689b07e8268fccf82c9effafbfcf15d2ee4abbd27de6164ff",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Assertions/EventingArtifactState.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Assertions/EventingArtifactState.cs",
               "sha256": "dc6ce8efd8644312c51b54b4d9fb7a08934d038c0dd72d4eb1337791efc27004",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Assertions/EventingArtifactHealthyAssertions.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Assertions/EventingArtifactHealthyAssertions.cs",
               "sha256": "a6ba6565dda5e0b0faa4e78656fce78b0d744f0dfdeebf8a48223e5e6e5b95b2",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Assertions/EventingArtifactFences.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Assertions/EventingArtifactFences.cs",
               "sha256": "a7810b1101543dd74526ccd079cb3d6232602175abbcb4443be7b33fe1d75384",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Assertions/CliBackupRestoreAssertions.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Assertions/CliBackupRestoreAssertions.cs",
               "sha256": "f8fa2dc5ec97dfb26f12e3130eb5a2d47e80d2b38b352c1da676b76fcabe92a3",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Assertions/BackupIndexedDocumentDedupAssertions.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Assertions/BackupIndexedDocumentDedupAssertions.cs",
               "sha256": "3c9a1a2fdd4c921d5b8ff586c19b3b9149898583b5e15b13de5590b5e47c2dbe",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Atomic/AtomicPartitionRosterValidationTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Atomic/AtomicPartitionRosterValidationTests.cs",
               "sha256": "b431ba57432196a2311f135e52c1f7f29043a7de41fb440e666b69964b2b2229",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Assertions/ArtifactTransferFlowAssertions.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Assertions/ArtifactTransferFlowAssertions.cs",
               "sha256": "58f509b5cdd93453e1f7c4305d5aaa229b5168925a1be9255177e2be8788a1c7",
               "generated": false,
               "disposition": "native source document"
@@ -22645,19 +22645,19 @@
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Backup/BackupIndexedDocumentDedupCases.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Backup/BackupIndexedDocumentDedupCases.cs",
               "sha256": "dea2bab6da7de0a8595df37e4d3a42d528d2d61f88c96db0a431d50cc60f7499",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Backup/BackupRestoreStagingJoinTests.cs",
               "sha256": "5d0f94473652f076fd52bcd141b158337561614b769484bf7353b90124110b3e",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupExecutionPolicyTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupExecutionPolicyTests.cs",
               "sha256": "39596f33f2b959b19c027102310a76278657a6a43c53b6442bdbf533a6326a3d",
               "generated": false,
               "disposition": "native source document"
@@ -22669,157 +22669,157 @@
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Processes/CliBackupRestoreProcessOutput.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Processes/CliBackupRestoreProcessOutput.cs",
               "sha256": "0b2dd097517a9d0f4e09ef0ea023a20fe5c4532f5c450a38a482f8c5babbd62a",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Processes/CliBackupRestoreProcess.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Processes/CliBackupRestoreProcess.cs",
               "sha256": "98a2ae42afb421c2dcf810c8a8984157acd77200b211c302fcc15a42601932e9",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Helpers/MetadataTestFiles.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Helpers/MetadataTestFiles.cs",
               "sha256": "715487531a6cb388b05450a773ad1d9bfeae6f250faae76d8f1da96d0d1d565a",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Helpers/EventingArtifactSeed.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Helpers/EventingArtifactSeed.cs",
               "sha256": "1c20c6640b32fd0f625589c603040e180a59125e91bdc6aaaa1bddd2d9ee420a",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Helpers/EventingArtifactContinuation.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Helpers/EventingArtifactContinuation.cs",
               "sha256": "4c54a5956a3635295b953aae08a78905fc1b72146fffe5c15bd5d6b621f4d54c",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Helpers/ArtifactTransferFlowFixture.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Helpers/ArtifactTransferFlowFixture.cs",
               "sha256": "8401bf7c2c590e8e95fee19e5ee7bb827ab86230016d7a06ba9635d7974676bb",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/NativeBackupCutFixture.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/NativeBackupCutFixture.cs",
               "sha256": "f696e00dcdee66bbbb8f638b50cc21f3ebda55ca2df14aae5ed6f8877d1e05e6",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/MetadataTestContract.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/MetadataTestContract.cs",
               "sha256": "d63dc41429013741ef1eb5526379fa428ff58052187c69f3aad5021a6a054ff9",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/MetadataBackupFixture.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/MetadataBackupFixture.cs",
               "sha256": "cfb3e1fdc4da70a064ac999476c5db23fdb4c79d33d0ccc0a0a9063979006ba7",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/EventingArtifactFixture.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/EventingArtifactFixture.cs",
               "sha256": "a37e941843cde804a8bd65636941f3048d3200bda951d17b4a416d6b81ffdbfc",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/CliBackupRestoreInvalidCatalogArtifact.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/CliBackupRestoreInvalidCatalogArtifact.cs",
               "sha256": "b73e752d9ffdab9aaff338153336ed52ac4d1f452d9e1bb2b965a87d9bd69921",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/CliBackupRestoreFixture.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/CliBackupRestoreFixture.cs",
               "sha256": "b3af13b92364e28ddf1dc933259bb36c9b874dc17c6fb0715d5bd9ce4d7514fe",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/BackupIndexedDocumentDedupFixture.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/BackupIndexedDocumentDedupFixture.cs",
               "sha256": "ee1401d2e32616dd5f4fc406ce77f0e264bb885c4fea7c1b3ef6374c4f5aa453",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Fixtures/AtomicPartitionRosterFixture.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Fixtures/AtomicPartitionRosterFixture.cs",
               "sha256": "447fb62b1b120edc9185fba907060abc60e93e18b1ef0847a992cb56b7ea6d49",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeMetadata/NativeMetadataFormatTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/NativeMetadata/NativeMetadataFormatTests.cs",
               "sha256": "4ed0685ac98f8fe41ee657a06ebe68a0cd73804793bcf000d1cb3dfb7e0b3fb2",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
               "sha256": "04d954da594ce23aaf9b6feb7b0a4ec9a66fe0eab599e4df1aae1960bcb71aed",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/MissingBackup/MissingBackupManifestTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/MissingBackup/MissingBackupManifestTests.cs",
               "sha256": "8e8a79c91780633b6287288d281205303808c6cb9801467769a50de980ffd7c0",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/MetadataIntegrity/MetadataIntegrityTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/MetadataIntegrity/MetadataIntegrityTests.cs",
               "sha256": "38e5575a95664ac04a4ab93519ee965048a63b2111a41623dbdaaa72ef900067",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/MetadataFormat/MetadataFormatFailureTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/MetadataFormat/MetadataFormatFailureTests.cs",
               "sha256": "e8d83782abe4c4c4ebe2041a13c4380279359f5bbccc7576bad23a8ca2aa6c6b",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/MetadataBoundary/MetadataBoundaryTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/MetadataBoundary/MetadataBoundaryTests.cs",
               "sha256": "bdbf40f6b1ab129e1d4cdd3a11f8c37df3bf82c650f0a46170a3f524c254e603",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/MetadataAllocation/MetadataAllocationTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/MetadataAllocation/MetadataAllocationTests.cs",
               "sha256": "e3f828419d5b615793841ef5c6714fadb423306fca759ef37cfd47459c5f0f11",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Event/EventingArtifactStateTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Event/EventingArtifactStateTests.cs",
               "sha256": "1269b709d18c422693a07826b4c27d127802b65de3c1360a70e831e8172a33f3",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreMissingInputTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreMissingInputTests.cs",
               "sha256": "b78c4da1524d9cb5d45b2e57748db276c31c585237a9e6a534d51f668a37ff2d",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreLengthMismatchTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreLengthMismatchTests.cs",
               "sha256": "a5354e6a48435d929c610cdaeabe3f1be3e1c215d1af70f776f727b70394eced",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreInvalidCatalogTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreInvalidCatalogTests.cs",
               "sha256": "a1ae65b833d351c8f95334eb8499fa726ec1f375c350d50dda40ce1282b75c6a",
               "generated": false,
               "disposition": "native source document"
             },
             {
-              "path": "tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreFlowTests.cs",
+              "path": "tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreFlowTests.cs",
               "sha256": "05c5d6ce83b2f871ea123787b9326b704f4d7453beccf1244a378e858c4ee6bb",
               "generated": false,
               "disposition": "native source document"
@@ -30155,7 +30155,7 @@
           "KeyLoad.slnx",
           "--no-restore",
           "--include",
-          "src/KeyLoad.AppHost/ClusterRouting/Helpers/TwoRf3QueryProbe.cs",
+          "build/KeyLoad.AppHost/ClusterRouting/Helpers/TwoRf3QueryProbe.cs",
           "src/KeyLoad.Core/ClusterRouting/Queries/PhysicalCommandOwnerVerification.cs",
           "src/KeyLoad.Core/ClusterRouting/Queries/RegisteredAtomicPartitionPlacementReader.cs",
           "src/KeyLoad.Core/ClusterRouting/Validation/LocalPhysicalResourceFence.cs",
@@ -30257,7 +30257,7 @@
         "observedCorrectionPaths": 89,
         "changedPaths": [
           {
-            "path": "src/KeyLoad.AppHost/ClusterRouting/Helpers/TwoRf3QueryProbe.cs",
+            "path": "build/KeyLoad.AppHost/ClusterRouting/Helpers/TwoRf3QueryProbe.cs",
             "beforeSha256": "db862b5299e046ea6450d6e49bc26d3e1dc5ffdfa294259098e724a7f69edbb6",
             "afterSha256": "ec8d2ebe8af40cfd7adf784a34a36e0c42b277fb9cf59a8fa77048b19fa77d17"
           },
@@ -38611,7 +38611,7 @@
             "src/KeyLoad.Core/ClusterRouting/Identity/PartitionMoveNativeAuthority.cs",
             "src/KeyLoad.Core/AtomicCommandCommit.cs",
             "src/KeyLoad.Core/ResourceExecution/Execution/BudgetedReadView.cs",
-            "src/KeyLoad.Core/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs",
+            "src/KeyLoad.Core/Restore/Execution/AtomicPartitionRosterTransaction.cs",
             "tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ControlledMovementUnconfiguredEngine.cs",
             "tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ControlledMovementOwnerAdmissionAssertions.cs",
             "tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ControlledPartitionMovementPrepareFlow.cs",
@@ -38633,7 +38633,7 @@
             "src/KeyLoad.Core/ClusterRouting/Identity/PartitionMoveNativeAuthority.cs",
             "src/KeyLoad.Core/AtomicCommandCommit.cs",
             "src/KeyLoad.Core/ResourceExecution/Execution/BudgetedReadView.cs",
-            "src/KeyLoad.Core/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs",
+            "src/KeyLoad.Core/Restore/Execution/AtomicPartitionRosterTransaction.cs",
             "tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ControlledMovementUnconfiguredEngine.cs",
             "tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ControlledMovementOwnerAdmissionAssertions.cs",
             "tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ControlledPartitionMovementPrepareFlow.cs",
@@ -39717,7 +39717,7 @@
               "baseKind": "current live"
             },
             {
-              "path": "src/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs",
+              "path": "build/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs",
               "baseAbsent": false,
               "baseSha256": "f542eb8e86148b5ddae89a8c11aace04b333e7973a431707deb67f6db1e741f2",
               "proposedSha256": "cdb0757a88514f2c7378fde9a2303a346824615667ecef35ee7ffdeb5124b3da",
@@ -40444,9 +40444,9 @@
         "inputCount": 5236,
         "inputDrift": [],
         "uniqueErrors": [
-          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs(57,53): error KLD0037: 'TimeSpan.FromSeconds(ProtectedMovementSetupSeconds)' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/KeyLoad.AppHost.csproj]",
-          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs(59,55): error KLD0037: 'TimeSpan.FromSeconds(ProtectedMovementOutcomeSeconds)' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/KeyLoad.AppHost.csproj]",
-          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs(61,54): error KLD0037: 'TimeSpan.FromSeconds(ProtectedMovementCleanupSeconds)' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.AppHost/KeyLoad.AppHost.csproj]"
+          "/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs(57,53): error KLD0037: 'TimeSpan.FromSeconds(ProtectedMovementSetupSeconds)' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/KeyLoad.AppHost.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs(59,55): error KLD0037: 'TimeSpan.FromSeconds(ProtectedMovementOutcomeSeconds)' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/KeyLoad.AppHost.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/TestInfrastructure/Configuration/TestExecutionOptions.cs(61,54): error KLD0037: 'TimeSpan.FromSeconds(ProtectedMovementCleanupSeconds)' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/build/KeyLoad.AppHost/KeyLoad.AppHost.csproj]"
         ],
         "qualification": "local development; source drift invalidates exact-current-source qualification"
       },
@@ -55701,8 +55701,8 @@
     "status": "done",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Artifacts/BackupRestore/Execution/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/BackupRestore/Cases/Artifact/ArtifactTests.cs",
+      "src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs",
       "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690"
     ],
     "verification": {
@@ -56239,7 +56239,7 @@
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
       "docs/Features/TimeSeries.md",
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
-      "src/KeyLoad.AppHost/BenchmarkComparisons/Resources/BenchmarkResources.cs",
+      "build/KeyLoad.AppHost/BenchmarkComparisons/Resources/BenchmarkResources.cs",
       "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/Cases/ComparisonHarnessTests.cs",
       "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/",
       "docs/implementation/comparative-benchmarks.md",
@@ -57259,9 +57259,9 @@
         "rootIndependentValidationSha256": "aa296da1479ede198753f72b42d372945b83d46dfecaa78419769c58a239640b",
         "nonAppHostProductSourcesCurrentAndOriginalPdbMatched": 1142,
         "currentChangedProductPaths": [
-          "src/KeyLoad.AppHost/Hosting/AppHostControlOptions.cs",
-          "src/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
-          "src/KeyLoad.AppHost/Hosting/KeyLoadAppHostApplication.cs"
+          "build/KeyLoad.AppHost/Hosting/AppHostControlOptions.cs",
+          "build/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
+          "build/KeyLoad.AppHost/Hosting/KeyLoadResources.cs"
         ],
         "originalTestImageIsProvenanceNotStandaloneQualification": true,
         "originalRf3TaskReports": [
@@ -58543,9 +58543,9 @@
         "rootIndependentValidationSha256": "aa296da1479ede198753f72b42d372945b83d46dfecaa78419769c58a239640b",
         "nonAppHostProductSourcesCurrentAndOriginalPdbMatched": 1142,
         "currentChangedProductPaths": [
-          "src/KeyLoad.AppHost/Hosting/AppHostControlOptions.cs",
-          "src/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
-          "src/KeyLoad.AppHost/Hosting/KeyLoadAppHostApplication.cs"
+          "build/KeyLoad.AppHost/Hosting/AppHostControlOptions.cs",
+          "build/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
+          "build/KeyLoad.AppHost/Hosting/KeyLoadResources.cs"
         ],
         "originalTestImageIsProvenanceNotStandaloneQualification": true,
         "originalRf3TaskReports": [
@@ -60835,7 +60835,7 @@
               "currentMatchesAuthenticatedManifest": null
             },
             {
-              "path": "tests/KeyLoad.CrashHost/StorageRecovery/Helpers/CrashHostApplication.cs",
+              "path": "tests/KeyLoad.CrashHost/Program.cs",
               "currentSha256": "56dad81212fac0af35e1d374316ace2698782a74ed5d70e05499114bd813db34",
               "gitOriginalSha256": "56dad81212fac0af35e1d374316ace2698782a74ed5d70e05499114bd813db34",
               "currentMatchesGitOriginal": true,
@@ -64177,12 +64177,12 @@
       "docs/ADR/ADR-008-backup-log-retention.md",
       "docs/ADR/ADR-030-retention-paused-restore.md",
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Artifacts/BackupRestore/Execution/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/BackupRestore/Cases/Artifact/ArtifactTests.cs",
+      "src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs",
       "docs/ADR/ADR-123-native-rf3-cluster-restore.md",
-      "src/KeyLoad.Cli/BackupRestore/Commands/ClusterRestoreCoordinator.cs",
-      "src/KeyLoad.Cli/BackupRestore/Execution/ClusterRestoreProgressOwner.cs",
-      "tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs"
+      "src/KeyLoad.Cli/Restore/Commands/ClusterRestoreCoordinator.cs",
+      "src/KeyLoad.Cli/Restore/Execution/ClusterRestoreProgressOwner.cs",
+      "tests/KeyLoad.IntegrationTests/Restore/Cases/ClusterRestoreRf3ResumeTests.cs"
     ],
     "sourceStage": "native_rf3_catalog_cut_capture_restore_and_stable_operation_cli_resume_source_present_seven_genuine_process_cut_flows_current_build_linux_qualification_pending",
     "qualification": {
@@ -64245,8 +64245,8 @@
       "tests/KeyLoad.UnitTests/StorageRecovery/Cases/CurrentWal/CurrentWalRejectionTests.cs",
       "tests/KeyLoad.UnitTests/StorageRecovery/Cases/NativeMissing/NativeMissingIdentityTests.cs",
       "tests/KeyLoad.UnitTests/StorageRecovery/Cases/RuntimeJournal/RuntimeJournalReaderFenceTests.cs",
-      "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeMetadata/NativeMetadataFormatTests.cs",
-      "tests/KeyLoad.UnitTests/BackupRestore/Cases/NativeBackup/NativeBackupCutTests.cs",
+      "tests/KeyLoad.UnitTests/Restore/Cases/NativeMetadata/NativeMetadataFormatTests.cs",
+      "tests/KeyLoad.UnitTests/Restore/Cases/NativeBackup/NativeBackupCutTests.cs",
       "tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/RecoveryTests.cs",
       "tests/KeyLoad.IntegrationTests/ClusterReplication/Cases/Cluster/ClusterTests.cs"
     ],
@@ -65486,7 +65486,7 @@
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-074-aspire-owned-test-entry.md",
-      "src/KeyLoad.AppHost/TestInfrastructure/Hosting/TestSuiteResources.cs",
+      "build/KeyLoad.AppHost/TestInfrastructure/Hosting/TestSuiteResources.cs",
       "tests/KeyLoad.ComparisonTests/TestInfrastructure/Cases/Aspire/AspireTestEntryModelTests.cs",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "https://github.com/managedcode/KeyLoad/actions/runs/37245840909",
@@ -66104,9 +66104,9 @@
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "src/KeyLoad.Core/EventStreams/Execution/EventSources.cs",
-      "src/KeyLoad.Artifacts/BackupRestore/Execution/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/BackupRestore/Cases/Artifact/ArtifactTests.cs",
-      "tests/KeyLoad.UnitTests/BackupRestore/Cases/Event/EventingArtifactStateTests.cs",
+      "src/KeyLoad.Artifacts/Restore/Execution/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs",
+      "tests/KeyLoad.UnitTests/Restore/Cases/Event/EventingArtifactStateTests.cs",
       "tests/KeyLoad.UnitTests/Authorization/Cases/DeniedCommand/DeniedCommandReplayClockTests.cs"
     ],
     "currentStageXLIVWholeTaskDevelopment": {
@@ -66301,7 +66301,7 @@
       "docs/Features/CodeQuality.md",
       "docs/ADR/ADR-033-code-quality.md",
       "docs/implementation/code-quality.md",
-      "src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
+      "analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
       "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
       "Directory.Build.targets",
       "https://github.com/managedcode/KeyLoad/actions/runs/37060131271",
@@ -68661,7 +68661,7 @@
         "sourceRevision": "3aeb8cb7201ade69682d3f7106abd80ef137155e",
         "candidatePatchSha256": "67c6834fb7a390e59684b7d8516c54b0fe3ef76c0500d216ff1dd0a26b86ac62",
         "sourceFiles": {
-          "src/KeyLoad.AppHost/BenchmarkComparisons/Resources/IsolatedRedisResources.cs": "283621f15aeb23adc7b40319ab45a030458242e45542763c785908952f1519b9",
+          "build/KeyLoad.AppHost/BenchmarkComparisons/Resources/IsolatedRedisResources.cs": "283621f15aeb23adc7b40319ab45a030458242e45542763c785908952f1519b9",
           "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/Cases/IsolatedResource/IsolatedResourceTopologyRedisTests.cs": "9909e073cb2faba4ad330dc79e90623ab798c1eb328c0e41ff5cd268ffdc3e77",
           "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/Helpers/RedisNativeReadinessRegression.cs": "f3c10491d7c5f1377591039f2111893ae6505e85edc3fe98481e9c46af130e72"
         },

@@ -36,7 +36,7 @@ internal sealed class AspireTestEntryModelTests
         foreach (var (suite, project) in Suites)
         {
             var builder = CreateBuilder($"--KeyLoadTests:Suite={suite}");
-            KeyLoadAppHostApplication.AddKeyLoad(builder);
+            KeyLoadResources.AddKeyLoad(builder);
             var app = builder.Build();
             try
             {
@@ -72,7 +72,7 @@ internal sealed class AspireTestEntryModelTests
     {
         await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit-scalar");
         var builder = CreateBuilder("--KeyLoadTests:Suite=unit", FilterArgument);
-        KeyLoadAppHostApplication.AddKeyLoad(builder);
+        KeyLoadResources.AddKeyLoad(builder);
         var app = builder.Build();
         try
         {
@@ -107,7 +107,7 @@ internal sealed class AspireTestEntryModelTests
         {
             var builder = CreateBuilder("--KeyLoadTests:Suite=unit",
                 "--KeyLoadTests:Execution:MaximumParallelTests=" + parallelism);
-            KeyLoadAppHostApplication.AddKeyLoad(builder);
+            KeyLoadResources.AddKeyLoad(builder);
             var app = builder.Build();
             try
             {
@@ -133,7 +133,7 @@ internal sealed class AspireTestEntryModelTests
         {
             var builder = CreateBuilder("--KeyLoadTests:Suite=unit",
                 "--KeyLoadTests:Execution:MaximumParallelTests=" + parallelism);
-            await Assert.That(() => KeyLoadAppHostApplication.AddKeyLoad(builder)).Throws<OptionsValidationException>();
+            await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<OptionsValidationException>();
             await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
         }
         await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit",
@@ -144,7 +144,7 @@ internal sealed class AspireTestEntryModelTests
     public async Task AcTunitEntry013ComparisonModelRejectsOverlapThenCreatesHealthySingleRunner()
     {
         var rejected = CreateBuilder("--KeyLoadTests:Suite=comparison", "--KeyLoadTests:Execution:MaximumParallelTests=20");
-        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadAppHostApplication.AddKeyLoad(rejected));
+        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(rejected));
         await Assert.That(failure.Message).IsEqualTo(ComparisonIsolationMessage);
         await Assert.That(rejected.Resources).IsEmpty();
         await Assert.That(rejected.Configuration[ParallelismSetting]).IsEqualTo(ExplicitComparisonOverlap);
@@ -153,7 +153,7 @@ internal sealed class AspireTestEntryModelTests
             new[] { "--KeyLoadTests:Suite=comparison", "--KeyLoadTests:Execution:MaximumParallelTests=1" } })
         {
             var builder = CreateBuilder(args);
-            KeyLoadAppHostApplication.AddKeyLoad(builder);
+            KeyLoadResources.AddKeyLoad(builder);
             await using var app = builder.Build();
             var model = app.Services.GetRequiredService<DistributedApplicationModel>();
             var runner = model.Resources.OfType<ExecutableResource>().Single();
@@ -172,7 +172,7 @@ internal sealed class AspireTestEntryModelTests
     private static async Task AssertRejectedBeforeResourcesAsync(params string[] args)
     {
         var builder = CreateBuilder(args);
-        await Assert.That(() => KeyLoadAppHostApplication.AddKeyLoad(builder)).Throws<InvalidOperationException>();
+        await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<InvalidOperationException>();
         await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
     }
 
@@ -189,7 +189,7 @@ internal sealed class AspireTestEntryModelTests
         => DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {
             DisableDashboard = true,
-            ProjectDirectory = Path.Combine(RepositoryRoot(), "src", "KeyLoad.AppHost"),
+            ProjectDirectory = Path.Combine(RepositoryRoot(), "build", "KeyLoad.AppHost"),
             Args = args
         });
 

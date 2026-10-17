@@ -53,7 +53,7 @@ internal static class ProductionSourceManifestAssertions
     private const string BindingProperty = "binding";
     private const string SourceRevisionProperty = "sourceRevision";
     private const string ExpectedRepository = "managedcode/KeyLoad";
-    private const string ExpectedProducerPath = "tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets";
+    private const string ExpectedProducerPath = "build/CodeQuality/FunctionalCompilationIdentity.targets";
     private const string ProducerPathProperty = "path";
 
     private static readonly string[] ExpectedModules =
@@ -103,11 +103,12 @@ internal static class ProductionSourceManifestAssertions
             await Assert.That(product.GetProperty(RoleProperty).GetString()).IsEqualTo(expectedRole);
             var sourceRows = product.GetProperty(SourcesProperty).EnumerateArray().ToArray();
             await Assert.That(sourceRows.Length).IsGreaterThan(MinimumOwnedSourceCount);
+            var sourceRoot = index == AnalyzerModuleIndex ? "analyzers/" : index == AppHostModuleIndex ? "build/" : "src/";
             foreach (var source in sourceRows)
             {
                 var path = source.GetProperty(PathProperty).GetString()!;
                 await AssertFieldsAsync(source, [PathProperty, Sha256Property]);
-                await Assert.That(path.StartsWith("src/" + ExpectedModules[index] + "/", StringComparison.Ordinal)).IsTrue();
+                await Assert.That(path.StartsWith(sourceRoot + ExpectedModules[index] + "/", StringComparison.Ordinal)).IsTrue();
                 await Assert.That(Regex.IsMatch(source.GetProperty(Sha256Property).GetString()!, Sha256Pattern, RegexOptions.CultureInvariant)).IsTrue();
             }
             var compiledIdentity = product.GetProperty(CompiledIdentityProperty);

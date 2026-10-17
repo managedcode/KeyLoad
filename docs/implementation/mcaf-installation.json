@@ -17,8 +17,8 @@
     "benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj",
     "benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj",
     "src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj",
-    "src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
-    "src/KeyLoad.AppHost/KeyLoad.AppHost.csproj",
+    "analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
+    "build/KeyLoad.AppHost/KeyLoad.AppHost.csproj",
     "src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj",
     "src/KeyLoad.Cli/KeyLoad.Cli.csproj",
     "src/KeyLoad.Client/KeyLoad.Client.csproj",
@@ -41,10 +41,12 @@
     "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj"
   ],
   "modules": [
-    "site",
     ".github/workflows",
+    "analyzers",
+    "build",
     "docs",
-    "scripts"
+    "scripts",
+    "site"
   ],
   "skillFiles": [],
   "skillsInstalled": false,

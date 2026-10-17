@@ -55,7 +55,7 @@ $script:Psm = [ordered]@{
     )
     SettingsPath = 'scripts/Features/CodeQuality/functional-coverage.production.settings.xml'
     SettingsEvidenceName = 'functional-coverage.production.settings.xml'
-    ProducerPath = 'tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets'
+    ProducerPath = 'build/CodeQuality/FunctionalCompilationIdentity.targets'
     IdentityQualification = 'static native identity inspection only; no test, coverage or build qualification'
 }
 
@@ -71,7 +71,7 @@ function Resolve-PsmRoot([string] $Path) {
 }
 
 function Get-PsmCompiledSources([string] $Root, [string] $ProjectName, [bool] $IsTest, [string] $DllRelative) {
-    $tree = if ($IsTest) { 'tests/' + $ProjectName } else { 'src/' + $ProjectName }
+    $tree = Get-FcProjectSourceDirectory $ProjectName $IsTest
     $dllPath = Resolve-FcCompiledFile $Root $DllRelative
     $stream = [IO.File]::OpenRead($dllPath)
     $pe = $null
@@ -113,7 +113,7 @@ function Get-PsmCompiledSources([string] $Root, [string] $ProjectName, [bool] $I
 }
 
 function Assert-PsmSourceTree([string] $Root, [string] $ProjectName, [bool] $IsTest, [object[]] $CompiledSources) {
-    $tree = if ($IsTest) { 'tests/' + $ProjectName } else { 'src/' + $ProjectName }
+    $tree = Get-FcProjectSourceDirectory $ProjectName $IsTest
     $directory = Resolve-FcPath $Root $tree
     $pending = [Collections.Generic.Stack[string]]::new()
     $pending.Push($directory)
@@ -141,8 +141,8 @@ function Assert-PsmSourceTree([string] $Root, [string] $ProjectName, [bool] $IsT
 }
 
 function Get-PsmCentralInputs([string] $Root, [string] $ProjectName, [bool] $IsTest) {
-    $prefix = if ($IsTest) { 'tests/' } else { 'src/' }
-    $projectPath = $prefix + $ProjectName + '/' + $ProjectName + '.csproj'
+    $tree = Get-FcProjectSourceDirectory $ProjectName $IsTest
+    $projectPath = $tree + '/' + $ProjectName + '.csproj'
     $inputs = [Collections.Generic.List[object]]::new()
     foreach ($relative in @($script:Psm.CentralNames) + @($projectPath)) {
         $path = Resolve-FcPath $Root $relative
@@ -153,7 +153,7 @@ function Get-PsmCentralInputs([string] $Root, [string] $ProjectName, [bool] $IsT
 }
 
 function Get-PsmProjectIdentity([string] $Root, [string] $ProjectName, [bool] $IsTest) {
-    $tree = if ($IsTest) { 'tests/' + $ProjectName } else { 'src/' + $ProjectName }
+    $tree = Get-FcProjectSourceDirectory $ProjectName $IsTest
     $dll = $tree + '/bin/Release/net10.0/' + $ProjectName + '.dll'
     $pdb = $tree + '/bin/Release/net10.0/' + $ProjectName + '.pdb'
     $sources = @(Get-PsmCompiledSources $Root $ProjectName $IsTest $dll)

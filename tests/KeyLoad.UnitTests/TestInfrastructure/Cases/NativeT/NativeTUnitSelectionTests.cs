@@ -91,7 +91,7 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(args[Array.IndexOf(args, "--treenode-filter") + 1]).IsEqualTo("/*/*/ActualCase/*");
         await Assert.That(args).Contains("--report-trx");
         await Assert.That(args).Contains("--coverage");
-        await Assert.That(args).DoesNotContain("src/KeyLoad.AppHost");
+        await Assert.That(args).DoesNotContain("build/KeyLoad.AppHost");
         await Assert.That(environment.GetProperty(RevisionEnvironment).GetString()).IsEqualTo("original-revision");
         await Assert.That(environment.TryGetProperty(SuiteEnvironment, out _)).IsFalse();
         await Assert.That(environment.TryGetProperty(LocalArgumentsEnvironment, out _)).IsFalse();

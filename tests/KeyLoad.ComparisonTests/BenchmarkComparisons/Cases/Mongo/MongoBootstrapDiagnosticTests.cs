@@ -124,7 +124,7 @@ internal static class MongoDiagnosticProcess
     private const int TimeoutSeconds = 30;
     private const string Node = "node", Eval = "-e";
     private const string Failure = "MongoDiagnosticProjectionFailed";
-    private const string SourcePath = "src/KeyLoad.AppHost/BenchmarkComparisons/IsolatedMongoInitiate.js";
+    private const string SourcePath = "build/KeyLoad.AppHost/BenchmarkComparisons/IsolatedMongoInitiate.js";
 
     internal static async Task<string> RunAsync(string harness, string scenario)
     {

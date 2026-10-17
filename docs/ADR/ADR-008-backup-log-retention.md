@@ -18,7 +18,7 @@ ClusterReplication `REQ-REP-004`/`AC-REP-004`, StorageRecovery `REQ-STORAGE-004`
 
 1. Freeze authoritative manifest, per-partition cut, retention pins, event-history guarantees, paused restore, and external-effect reconciliation.
 2. Add real-store tests for current-format backup consistency, interruption, corruption, retention pins, restore-old-cut token invalidation, and absence of automatic dispatch; qualify replica erase/reinstall separately.
-3. Implement in `src/KeyLoad.Core/BackupRestore/`, `src/KeyLoad.Storage.ZoneTree/BackupRestore/`, and replication snapshot ownership under `src/KeyLoad.Replication/ClusterReplication/`.
+3. Implement in `src/KeyLoad.Core/Restore/`, `src/KeyLoad.Storage.ZoneTree/Restore/`, and replication snapshot ownership under `src/KeyLoad.Replication/ClusterReplication/`.
 4. Validate the current manifest version and every resource before restore. Reject unsupported versions and preserve original archive bytes; stop dispatch if any resource/cut is unknown.
 5. GitHub CI runs TUnit, recovery, and RF3 restore drills. Root owns the manifest/cut contract; Messaging/EventStreams join with checkpoint/inbox/retention proof and exact artifacts.
 

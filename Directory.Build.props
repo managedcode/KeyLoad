@@ -28,7 +28,7 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Visible="false" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'KeyLoad.Analyzers' and '$(MSBuildProjectName)' != 'KeyLoad.Analyzers.Tests'">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj"
+    <ProjectReference Include="$(MSBuildThisFileDirectory)analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"
                       IsAspireProjectResource="false"

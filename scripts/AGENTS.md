@@ -18,7 +18,7 @@ This module contains repository tooling that supports documented product and gov
 
 - Static governance validation: `node scripts/Features/RepositoryGovernance/verify.mjs`.
 - Isolated validation root: `node scripts/Features/RepositoryGovernance/verify.mjs --root <path>`.
-- Owner correction 2026-10-03 permits local development tests and bounded experiments through the actual Aspire-owned caller: after restore/build, run `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`. AppHost owns native runners, required topology and complete shutdown. Delivered-source Linux qualification and public comparison evidence still require genuine GitHub Actions artifacts; local results cannot substitute for them.
+- Owner correction 2026-10-03 permits local development tests and bounded experiments through the actual Aspire-owned caller: after restore/build, run `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`. AppHost owns native runners, required topology and complete shutdown. Delivered-source Linux qualification and public comparison evidence still require genuine GitHub Actions artifacts; local results cannot substitute for them.
 
 ## Skills
 

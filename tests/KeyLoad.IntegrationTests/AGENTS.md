@@ -10,7 +10,7 @@
 - Preserve atomic partition versus physical placement and node-local `PartitionHost` ownership; use real Orleans routing. Do not replace external dependencies with mocks, fakes or in-memory/single-node proofs.
 
 ## Commands and evidence
-- Local and GitHub Actions caller entry after solution restore/build: `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3`. The native TUnit child is composed by AppHost; direct test execution is not an alternative caller entry.
+- Local and GitHub Actions caller entry after solution restore/build: `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3`. The native TUnit child is composed by AppHost; direct test execution is not an alternative caller entry.
 - Owner-authorized local tests are development evidence. Delivered qualification runs on exact-source Linux GitHub Actions. Capture the exact workflow run, SHA, job URL and original artifacts; no skipped suite counts as passing.
 
 ## Skills and protected risks

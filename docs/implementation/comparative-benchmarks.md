@@ -8,7 +8,7 @@ Docker must be running. From the repository root:
 
 ```sh
 dotnet restore KeyLoad.slnx
-dotnet run -c Release --project src/KeyLoad.AppHost -- --Benchmarks:Enabled=true
+dotnet run -c Release --project build/KeyLoad.AppHost -- --Benchmarks:Enabled=true
 ```
 
 The Aspire dashboard shows three KeyLoad voters, the five external engines and `comparisons`. The runner starts after resources become healthy, performs the suite, prints results and exits with code 0 only when every supported case passes correctness. The AppHost stays open so logs and the dashboard remain available; stop it normally when finished. Each invocation uses a new cluster directory and report directory under `artifacts/comparisons/<run>/`, separate from the normal `data/cluster` profile. External containers belong to this AppHost lifecycle.
@@ -18,7 +18,7 @@ All engine data lives in isolated host directories: `cluster/` for KeyLoad and `
 Configuration is forwarded from the AppHost to the runner:
 
 ```sh
-dotnet run -c Release --project src/KeyLoad.AppHost -- \
+dotnet run -c Release --project build/KeyLoad.AppHost -- \
   --Benchmarks:Enabled=true \
   --Benchmarks:Documents=1000 --Benchmarks:Operations=1000 \
   --Benchmarks:PayloadBytes=1024 --Benchmarks:Dimensions=32 --Benchmarks:TopK=10 \

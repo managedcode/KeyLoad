@@ -19,7 +19,7 @@ internal sealed class NativeLoggerModelControlSelectionTests
     private const string ContainerNamePrefix = "keyload-";
     private const string ImageDigestMarker = "@sha256:";
     private const string SolutionFileName = "KeyLoad.slnx";
-    private const string SourceDirectoryName = "src";
+    private const string SourceDirectoryName = "build";
     private const string AppHostProjectName = "KeyLoad.AppHost";
     private const string MissingRepositoryMessage = "The native AppHost model requires the source checkout.";
     private const string GuidFormat = "N";
@@ -70,7 +70,7 @@ internal sealed class NativeLoggerModelControlSelectionTests
         var builder = CreateBuilder(root, includeImage: true);
         var failures = new List<Exception>();
         DistributedApplication? app = null;
-        ServerFailureObserver.Observe(() => KeyLoadAppHostApplication.AddKeyLoad(builder), failures);
+        ServerFailureObserver.Observe(() => KeyLoadResources.AddKeyLoad(builder), failures);
         LocalProfile? profile = null;
         if (failures.Count == 0)
         {

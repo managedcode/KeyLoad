@@ -11,7 +11,7 @@ export const runtimeBundle = Object.freeze({
   timeoutMs: 1800000, sha256: /^[a-f0-9]{64}$/,
   assemblies: Object.freeze([
     ['outer-tests', 'tests/KeyLoad.ComparisonTests/bin/Release/net10.0/KeyLoad.ComparisonTests'],
-    ['apphost', 'src/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.AppHost'],
+    ['apphost', 'build/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.AppHost'],
   ]),
 });
 

@@ -7,7 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj" />

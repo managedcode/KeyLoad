@@ -24,7 +24,7 @@ internal static class FunctionalColdReopenProfileModel
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            KeyLoadAppHostApplication.AddKeyLoad(builder);
+            KeyLoadResources.AddKeyLoad(builder);
             var settings = AppHostOptionsRegistration.Get(builder).Control.Value;
             await Assert.That(settings.FunctionalColdReopen).IsEqualTo(cold);
             await Assert.That(settings.ContainerFaults).IsEqualTo(faults);

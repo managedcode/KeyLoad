@@ -6,7 +6,7 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
+    <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj" />
     <ProjectReference Include="../KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" IsAspireProjectResource="false" />

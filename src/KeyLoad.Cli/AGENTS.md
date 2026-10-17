@@ -19,7 +19,7 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `ClientApi` and `BackupRestore`; target paths: `ClientApi/` and `BackupRestore/`.
+- Owned slices: `ClientApi` and `BackupRestore`; target paths: `ClientApi/` and `Restore/`.
 - Keep `Program.cs` as the CLI composition/dispatch entry point; feature command behavior belongs in its named slice.
 
 ## Vertical-slice responsibility folders

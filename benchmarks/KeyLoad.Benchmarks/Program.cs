@@ -1,3 +1,5 @@
-using KeyLoad.Benchmarks.Hosting;
+using KeyLoad;
+using KeyLoad.Benchmarks.Features.BenchmarkComparisons;
 
-BenchmarkApplication.Run(args);
+_ = SerializationExecutionRegistration.Process.Value;
+BenchmarkComparisonRunner.Run(args);

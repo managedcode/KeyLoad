@@ -13,7 +13,7 @@
 
 ## Commands and evidence
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Owner correction2026-10-03 requires query tests through `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit`, or `unit-scalar`; public clients use `rf3` through that same AppHost entry. Preserve every complete suite, native artifacts and AppHost-owned resource cleanup. Local development is authorized; delivered-source Linux GitHub qualification remains mandatory.
+- Owner correction2026-10-03 requires query tests through `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit`, or `unit-scalar`; public clients use `rf3` through that same AppHost entry. Preserve every complete suite, native artifacts and AppHost-owned resource cleanup. Local development is authorized; delivered-source Linux GitHub qualification remains mandatory.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.

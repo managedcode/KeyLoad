@@ -1,5 +1,14 @@
 # KeyLoad architecture and ownership map
 
+Process entry points show initialization, mode selection, composition and lifetime
+in Program.cs. Owner correction 2026-10-17 replaces forwarding-only application
+wrappers; KLD0020 and its real compiler regressions enforce the visible entry.
+
+Owner correction 2026-10-17: `src/` contains runtime product code only.
+Compiler rules live in `analyzers/`; Aspire AppHost and shared build targets
+live in `build/`. Tests and benchmarks retain their separate roots. Runtime
+Diagnostics and ServiceDefaults remain part of the running database server.
+
 Owner correction 2026-10-17: every C# project under `src/`, `tests/` and
 `benchmarks/` places named slices directly under its project directory as
 `<project>/<SliceName>/<Role>/`, with thematic folders retained inside `Cases/`.
@@ -287,7 +296,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | src/KeyLoad.Client | KeyLoadClient.cs, Features/QueryExecution/Queries/KeyLoadQuery.cs | ClientApi shared transport; business operations mirror the same canonical slices as core/contracts/API/tests. |
 | src/KeyLoad.Cli | Program.cs, Features/ClientApi/Hosting/KeyLoadCliApplication.cs, Features/ClientApi/Transport/CliClientApi.cs and Features/BackupRestore/Commands/CliBackupRestore.cs | Composition-only administrative entry point and typed ClientApi/BackupRestore feature owners. |
 | src/KeyLoad.ServiceDefaults | Extensions.cs | Shared telemetry, service discovery and resilience composition. |
-| src/KeyLoad.AppHost | Program.cs, Features/BenchmarkComparisons/Resources/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality test-only collector preparation; Aspire owns resource lifecycle. |
+| build/KeyLoad.AppHost | Program.cs, Features/BenchmarkComparisons/Resources/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality test-only collector preparation; Aspire owns resource lifecycle. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and focused test files | Matching product slices; pure contract/engine regression evidence. |
 | tests/KeyLoad.RecoveryTests | Features/StorageRecovery/Cases/RecoveryTests.cs, Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs, Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs, Features/ClusterRouting/ | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery and current outcome-v2 scoped-locator integrity; current source qualification pending. |
 | tests/KeyLoad.CrashHost | Program.cs, Features/ClusterReplication/Helpers/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
@@ -325,7 +334,7 @@ classDiagram
     Neo4jHarnessRegression --> Neo4jQueryResponse : real protocol input checks
 ```
 | scripts | Features/RepositoryGovernance/verify.mjs | RepositoryGovernance; real-repository static verification with Node built-ins. |
-| src/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, Features/CodeQuality/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage/routing. |
+| analyzers/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, Features/CodeQuality/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage/routing. |
 | tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, Features/CodeQuality/ | CodeQuality; real Roslyn/Orleans metadata regressions, TUnit and CI-only execution. |
 
 ## Feature ownership convention

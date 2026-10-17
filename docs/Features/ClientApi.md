@@ -121,7 +121,7 @@ business operation methods retain their typed canonical contracts. CLI profile
 adaptation belongs to ClientApi; shared AppHost composition is lead-owned.
 Frontend/database/schema changes: N/A, transport decoding only.
 
-CLI composition now lives in `src/KeyLoad.Cli/ClientApi/Hosting/KeyLoadCliApplication.cs`;
+CLI composition now lives in `src/KeyLoad.Cli/ClientApi/Commands/CliCommandDispatcher.cs`;
 status/profile/help behavior lives in its `Features/ClientApi/CliClientApi.cs` and
 original-text resource. The preserving contract and review exception are
 AC-CQ-010 in [quality-gates acceptance](CodeQuality.md), under

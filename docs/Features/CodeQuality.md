@@ -238,7 +238,7 @@ flowchart LR
     PR[New PR submission] --> Replace[Cancel prior PR workflow]
 ```
 
-- Backend/tooling: `src/KeyLoad.Analyzers/CodeQuality/`.
+- Backend/tooling: `analyzers/KeyLoad.Analyzers/CodeQuality/`.
 - Tests: `tests/KeyLoad.Analyzers.Tests/CodeQuality/`.
 - Shared build infrastructure: root `Directory.Build.props/targets`, `.editorconfig`,
   `KeyLoad.slnx`; CI infrastructure: `.github/workflows/build-and-tests.yml`.
@@ -1150,7 +1150,7 @@ actual execution; consumers have no duplicate defaults or raw policy reads.
 
 Ownership is `scripts/Features/CodeQuality/` for closed manifests, native tool
 invocation, test-only image/wrapper, identity/report verification and retained
-artifacts; `src/KeyLoad.AppHost/CodeQuality/{Configuration,Contracts,Identity,Resources}/`
+artifacts; `build/KeyLoad.AppHost/CodeQuality/{Configuration,Contracts,Identity,Resources}/`
 for validated test-only preparation and resource dependencies; and
 `tests/KeyLoad.IntegrationTests/CodeQuality/{Configuration,Fixtures,Helpers}/`
 for scoped fixture selection/export. Root owns the existing TestSuiteResources,
@@ -2419,3 +2419,9 @@ private Unit helper change, and an actual Integration source change. Preserve
 original build diagnostics, source/binary identities, test discovery and the
 before/after source-drift refusal. Full product and Linux qualification gates
 remain unchanged and open until their own original evidence exists.
+
+
+## Owner correction: visible process entry, 2026-10-17
+- Program.cs must show actual initialization, mode selection, host composition, run and joined shutdown. Do not replace it with a single Application.Run/RunAsync forwarding call or chain general application startup through one model such as TimeSeries.
+- Keep meaningful model operations and reusable resource registration in their owning code. Local process-lifecycle helpers may remain visible in Program.cs. Preserve ordering, CLI arguments, failure aggregation, cancellation, ownership, RF3, persisted identities and cleanup.
+- KLD0020 enforces this visible-entry requirement and supersedes its earlier thin-wrapper-only policy. Keep the rule enabled and regression-tested; this correction does not relax endpoint, authorization, boundedness or resource-safety rules.

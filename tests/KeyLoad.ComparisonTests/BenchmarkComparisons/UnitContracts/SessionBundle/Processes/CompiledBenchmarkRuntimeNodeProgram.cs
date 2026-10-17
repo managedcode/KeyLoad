@@ -31,8 +31,8 @@ internal static class CompiledBenchmarkRuntimeNodeProgram
         const badFiles = structuredClone(inventory);
         const badDescriptor = structuredClone(descriptor);
         if (variant !== 'valid') {
-          if (variant === 'source-path') badFiles[0].path = 'src/KeyLoad.AppHost/Program.cs';
-          if (variant === 'traversal') badFiles[0].path = 'src/KeyLoad.AppHost/obj/../../../Program.cs';
+          if (variant === 'source-path') badFiles[0].path = 'build/KeyLoad.AppHost/Program.cs';
+          if (variant === 'traversal') badFiles[0].path = 'build/KeyLoad.AppHost/obj/../../../Program.cs';
           if (variant === 'backslash') badFiles[0].path = 'src\\KeyLoad.AppHost\\obj\\Program.cs';
           if (variant === 'duplicate') badFiles.push(structuredClone(badFiles[0]));
           if (variant === 'oversized') badFiles[0].bytes = runtimeBundle.maximumFileBytes + 1;

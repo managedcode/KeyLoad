@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="Aspire.AppHost.Sdk" />
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configuration>Release</Configuration>
+    <IsAspireHost>true</IsAspireHost>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="KeyLoadNativeCoverageToolVersion" Value="$(KeyLoadNativeCoverageToolVersion)" />
+    <AssemblyMetadata Include="KeyLoadNativeCoveragePackageRoot" Value="$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'dotnet-coverage', '$(KeyLoadNativeCoverageToolVersion)'))" />
+    <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadNativeCoverageToolVersion)]" />
+    <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj" />
+    <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" IsAspireProjectResource="false" />
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.Qdrant" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
+    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
+  </ItemGroup>
+</Project>

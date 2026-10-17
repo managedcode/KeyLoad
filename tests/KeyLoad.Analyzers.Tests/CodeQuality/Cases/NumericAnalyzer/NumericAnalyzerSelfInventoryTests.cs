@@ -9,7 +9,7 @@ internal sealed class NumericAnalyzerSelfInventoryTests
     public async Task AnalyzerAndAnalyzerTestsSourcesSatisfyNumericPolicyAsync()
     {
         var root = FindRepositoryRoot();
-        var analyzerSources = ReadSources(Path.Combine(root, "src", "KeyLoad.Analyzers"));
+        var analyzerSources = ReadSources(Path.Combine(root, "analyzers", "KeyLoad.Analyzers"));
         var testProject = Path.Combine(root, "tests", "KeyLoad.Analyzers.Tests");
         var testSources = ReadSources(testProject)
             .Append(ReadGeneratedTestGlobalUsings(testProject))

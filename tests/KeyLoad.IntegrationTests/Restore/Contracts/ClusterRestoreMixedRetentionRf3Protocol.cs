@@ -1,0 +1,55 @@
+namespace KeyLoad.IntegrationTests.Features.BackupRestore;
+
+internal static class ClusterRestoreMixedRetentionRf3Protocol
+{
+    internal const string TenantPrefix = "mixed-retention-";
+    internal const string Database = "database";
+    internal const string Domain = "mixed";
+    internal const string TargetKey = "target";
+    internal const string SourceKey = "source";
+    internal const string Input = "mixed-held-input";
+    internal const string Inbox = "mixed-target-inbox";
+    internal const string Output = "mixed-inbox-output";
+    internal const string Documents = "mixed-documents";
+    internal const string Events = "mixed-events";
+    internal const string Stream = "mixed-processed";
+    internal const string Filtered = "mixed-filtered-topic";
+    internal const string Purged = "mixed-purged-topic";
+    internal const string Group = "mixed-filtered-gap";
+    internal const string PurgeGroup = "mixed-purge-pin";
+    internal const string AcceptedType = "MixedAccepted";
+    internal const string SkippedType = "MixedSkipped";
+    internal const string EventPayload = """{"retained":"full mixed native cut"}""";
+    internal const string EventHeaders = """{"lineage":"actual RF3 archive"}""";
+    internal const string OriginalInput = "mixed-original-input";
+    internal const string FreshInput = "mixed-current-input";
+    internal const string OriginalEffect = "mixed-original-effect";
+    internal const string FreshEffect = "mixed-current-effect";
+    internal const string PutKind = "putDocument";
+    internal const string AppendKind = "appendEvents";
+    internal const string EnqueueKind = "enqueue";
+    internal const string AckKind = "Ack";
+    internal const string TopicIdentitySpace = "topic-event-id";
+    internal const string RetainedDigest = "retained-digest";
+    internal const string QueueCounterSpace = "queue-counters";
+    internal const string Handler = "mixed-handler";
+    internal const string PrivateGrant = "mixed-private";
+    internal const string CredentialSuffix = ".native-mixed-retention-key";
+    internal const string OperatorPrefix = "mixed-operator-";
+    internal const string InspectorPrefix = "mixed-inspector-";
+    internal const int CurrentVersion = 1;
+    internal const long InitialGeneration = 1;
+    internal const long InitialEpoch = 1;
+    internal const long RevokedEpoch = 2;
+    internal const long RepairedEpoch = 3;
+    internal const long NoRevision = 0;
+    internal const long FirstRevision = 1;
+    internal const int NoAttempts = 0;
+    internal const int FirstIndex = 0;
+    internal const int ThirdIndex = 2;
+    internal const int MatchingEvents = 3;
+    internal const int FilteredEvents = 4;
+    internal const long PurgePosition = 2;
+    internal const long PurgedTail = 3;
+    internal const long FilteredTail = 4;
+}

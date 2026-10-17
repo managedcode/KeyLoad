@@ -21,7 +21,7 @@ internal sealed class AspireTestEntryArtifactModelTests
             "--KeyLoadTests:ReportTrx=true",
             "--KeyLoadTests:CoverageSettings=config/coverage settings.runsettings",
             "--KeyLoadTests:CoverageOutput=artifacts/coverage results");
-        KeyLoadAppHostApplication.AddKeyLoad(builder);
+        KeyLoadResources.AddKeyLoad(builder);
         var app = builder.Build();
         try
         {
@@ -48,7 +48,7 @@ internal sealed class AspireTestEntryArtifactModelTests
     public async Task ComparisonTargetPassesOnlyToItsSingleChildRunner()
     {
         var builder = CreateBuilder("--KeyLoadTests:Suite=comparison", "--Benchmarks:Target=ZoneTree");
-        KeyLoadAppHostApplication.AddKeyLoad(builder);
+        KeyLoadResources.AddKeyLoad(builder);
         var app = builder.Build();
         try
         {
@@ -94,7 +94,7 @@ internal sealed class AspireTestEntryArtifactModelTests
     private static async Task AssertRejectedBeforeResourcesAsync(params string[] args)
     {
         var builder = CreateBuilder(args);
-        await Assert.That(() => KeyLoadAppHostApplication.AddKeyLoad(builder)).Throws<InvalidOperationException>();
+        await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<InvalidOperationException>();
         await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
     }
 
@@ -111,7 +111,7 @@ internal sealed class AspireTestEntryArtifactModelTests
         => DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {
             DisableDashboard = true,
-            ProjectDirectory = Path.Combine(RepositoryRoot(), "src", "KeyLoad.AppHost"),
+            ProjectDirectory = Path.Combine(RepositoryRoot(), "build", "KeyLoad.AppHost"),
             Args = args
         });
 

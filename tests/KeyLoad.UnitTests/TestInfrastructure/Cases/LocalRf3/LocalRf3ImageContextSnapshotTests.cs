@@ -66,9 +66,9 @@ internal sealed class LocalRf3ImageContextSnapshotTests
           assert.deepEqual(await readFile(path.join(firstSnapshot.directory, largeRelative)), largeBytes);
           assert.deepEqual(await readFile(path.join(firstSnapshot.directory, emptyRelative)), Buffer.alloc(0));
           assert.equal(await readFile(path.join(firstSnapshot.directory,
-            'tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets'), 'utf8'), 'identity');
+            'build/CodeQuality/FunctionalCompilationIdentity.targets'), 'utf8'), 'identity');
           const buildScaffold = firstSnapshot.scaffolds.find(entry =>
-            entry.relative === 'tests/KeyLoad.UnitTests/CodeQuality/Build');
+            entry.relative === 'build/CodeQuality');
           assert.ok(buildScaffold, 'The standalone COPY parent chain must be captured as scaffolding.');
           if (process.platform !== 'win32') {
             assert.equal((await lstat(snapshotMarker)).mode & 0o777, 0o640);
@@ -113,6 +113,7 @@ internal sealed class LocalRf3ImageContextSnapshotTests
           await assert.rejects(lstat(directory), error => error?.code === 'ENOENT');
         }
         async function createContext(rootDirectory, marker) {
+          await mkdir(path.join(rootDirectory, 'analyzers'), { recursive: true });
           const src = path.join(rootDirectory, 'src', 'KeyLoad.Core');
           await mkdir(src, { recursive: true });
           await chmod(path.join(rootDirectory, 'src'), 0o750);
@@ -121,7 +122,8 @@ internal sealed class LocalRf3ImageContextSnapshotTests
             'FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:' + 'a'.repeat(64) + ' AS build',
             'COPY global.json Directory.Build.props Directory.Build.targets Directory.Packages.props NuGet.Config .editorconfig LICENSE ./',
             'COPY KeyLoad.slnx ./KeyLoad.slnx',
-            'COPY tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets ./tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets',
+            'COPY build/CodeQuality/FunctionalCompilationIdentity.targets ./build/CodeQuality/FunctionalCompilationIdentity.targets',
+            'COPY analyzers/ ./analyzers/',
             'COPY src/ ./src/',
             'RUN dotnet publish KeyLoad.slnx',
             'FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:' + 'b'.repeat(64),
@@ -133,8 +135,7 @@ internal sealed class LocalRf3ImageContextSnapshotTests
             'Directory.Packages.props', 'NuGet.Config', '.editorconfig', 'LICENSE', 'KeyLoad.slnx']) {
             await writeFile(path.join(rootDirectory, name), name);
           }
-          const identity = path.join(rootDirectory, 'tests', 'KeyLoad.UnitTests', 'Features', 'CodeQuality',
-            'Build', 'FunctionalCompilationIdentity.targets');
+          const identity = path.join(rootDirectory, 'build', 'CodeQuality', 'FunctionalCompilationIdentity.targets');
           await mkdir(path.dirname(identity), { recursive: true });
           await writeFile(identity, 'identity');
           const payload = path.join(src, 'marker.txt');

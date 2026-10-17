@@ -8,8 +8,9 @@ const expectedCopies = Object.freeze([
   Object.freeze({ sources: Object.freeze(['global.json', 'Directory.Build.props', 'Directory.Build.targets',
     'Directory.Packages.props', 'NuGet.Config', '.editorconfig', 'LICENSE']), destination: './' }),
   Object.freeze({ sources: Object.freeze(['KeyLoad.slnx']), destination: './KeyLoad.slnx' }),
-  Object.freeze({ sources: Object.freeze(['tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets']),
-    destination: './tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets' }),
+  Object.freeze({ sources: Object.freeze(['build/CodeQuality/FunctionalCompilationIdentity.targets']),
+    destination: './build/CodeQuality/FunctionalCompilationIdentity.targets' }),
+  Object.freeze({ sources: Object.freeze(['analyzers/']), destination: './analyzers/' }),
   Object.freeze({ sources: Object.freeze(['src/']), destination: './src/' }),
 ]);
 const expectedRuntimeCopy = 'COPY --from=build /app/publish/ ./';

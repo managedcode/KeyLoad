@@ -131,7 +131,7 @@ async function walkRepository(root, currentDirectory, inventory) {
     const absolutePath = join(currentDirectory, entry.name);
     if (entry.isDirectory()) {
       if (SKIPPED_DIRECTORY_NAMES.has(entry.name)) continue;
-      if (/^(?:src|tests|benchmarks)\/[^/]+\/Features$/.test(toRepositoryPath(root, absolutePath))) {
+      if (/^(?:src|tests|benchmarks|analyzers|build)\/[^/]+\/Features$/.test(toRepositoryPath(root, absolutePath))) {
         inventory.flatFeatureSources.push(toRepositoryPath(root, absolutePath));
       }
       if (entry.name.toLowerCase() === 'skills') inventory.skillDirectories.push(toRepositoryPath(root, absolutePath));
@@ -141,8 +141,9 @@ async function walkRepository(root, currentDirectory, inventory) {
     if (!entry.isFile()) continue;
     const repositoryPath = toRepositoryPath(root, absolutePath);
     if (WORKING_FILE_SUFFIXES.some(suffix => entry.name.endsWith(suffix))) inventory.workingFiles.push(repositoryPath);
-    const projectSlice = /^(?:src|tests|benchmarks)\/[^/]+\/([^/]+)\/[^/]+\.cs$/.exec(repositoryPath);
-    if (projectSlice && await exists(root, `docs/Features/${projectSlice[1]}.md`)) inventory.flatFeatureSources.push(repositoryPath);
+    const projectSlice = /^(?:src|tests|benchmarks|analyzers|build)\/[^/]+\/([^/]+)\/[^/]+\.cs$/.exec(repositoryPath);
+    const specificationSlice = projectSlice?.[1] === 'Restore' ? 'BackupRestore' : projectSlice?.[1];
+    if (projectSlice && await exists(root, `docs/Features/${specificationSlice}.md`)) inventory.flatFeatureSources.push(repositoryPath);
     if (entry.name.endsWith('.csproj')) inventory.projects.push(repositoryPath);
     if (entry.name === 'SKILL.md') inventory.skillFiles.push(repositoryPath);
   }

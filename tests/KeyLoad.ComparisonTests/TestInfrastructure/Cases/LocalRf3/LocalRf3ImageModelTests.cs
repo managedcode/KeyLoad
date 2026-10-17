@@ -122,7 +122,7 @@ internal sealed class LocalRf3ImageModelTests
     private static async Task AssertRejectedAsync(params string[] args)
     {
         var builder = CreateBuilder(args);
-        await Assert.That(() => KeyLoadAppHostApplication.AddKeyLoad(builder)).Throws<InvalidOperationException>();
+        await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<InvalidOperationException>();
         await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
     }
 
@@ -138,7 +138,7 @@ internal sealed class LocalRf3ImageModelTests
     private static DistributedApplication CreateApplication(params string[] args)
     {
         var builder = CreateBuilder(args);
-        KeyLoadAppHostApplication.AddKeyLoad(builder);
+        KeyLoadResources.AddKeyLoad(builder);
         return builder.Build();
     }
 
@@ -146,7 +146,7 @@ internal sealed class LocalRf3ImageModelTests
         => DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {
             DisableDashboard = true,
-            ProjectDirectory = Path.Combine(RepositoryRoot(), "src", "KeyLoad.AppHost"),
+            ProjectDirectory = Path.Combine(RepositoryRoot(), "build", "KeyLoad.AppHost"),
             Args = args
         });
 

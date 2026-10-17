@@ -11,7 +11,7 @@ internal sealed class NativeCompilationIdentityPackageRootFixture : IAsyncDispos
 {
     internal const string ProjectRelativePath = "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj";
     internal const string SourceRelativePath = "tests/KeyLoad.UnitTests/Owned.cs";
-    internal const string ProducerRelativePath = "tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets";
+    internal const string ProducerRelativePath = "build/CodeQuality/FunctionalCompilationIdentity.targets";
     internal const string CounterfeitRelativePath = "tests/KeyLoad.UnitTests/Counterfeit.props";
     private const string FixturePrefix = "keyload-native-compile-package-root-";
     private const string GuidFormat = "N";
@@ -46,7 +46,7 @@ internal sealed class NativeCompilationIdentityPackageRootFixture : IAsyncDispos
           <Import Project="$(TUnitPropsPath)" />
           <Import Project="Counterfeit.props" Condition="'$(IncludeCounterfeit)' == 'true'" />
           <ItemGroup>
-            <ProjectReference Remove="$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj'))" />
+            <ProjectReference Remove="$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj'))" />
           </ItemGroup>
         </Project>
         """;
