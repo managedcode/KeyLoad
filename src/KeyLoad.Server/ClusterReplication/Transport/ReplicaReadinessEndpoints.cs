@@ -21,7 +21,6 @@ internal static class ReplicaReadinessEndpoints
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
-            await node.EnsureCompatibleCohortAsync(deadline.Token).ConfigureAwait(false);
             await node.EnsureCatalogAdmissionAsync(deadline.Token).ConfigureAwait(false);
             var partition = owner.Borrow();
             return Results.Ok(new ReadyReply(ServerProtocol.ReadyStatus, partition.Configuration.VoterIds.Length));

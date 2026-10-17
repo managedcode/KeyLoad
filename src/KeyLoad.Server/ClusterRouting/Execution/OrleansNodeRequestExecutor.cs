@@ -46,8 +46,6 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         var clock = services.GetRequiredService<TimeProvider>();
         using var deadline = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        await services.GetRequiredService<ReplicaSiloDiscoveryClient>()
-            .EnsureCompatibleCohortAsync(execution.Token).ConfigureAwait(false);
         if (requireCatalogAdmission && catalog is not null)
         {
             if (!catalog.IsReady)

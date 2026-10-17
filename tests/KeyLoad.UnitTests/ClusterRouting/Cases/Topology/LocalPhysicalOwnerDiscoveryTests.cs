@@ -56,8 +56,11 @@ internal sealed class LocalPhysicalOwnerDiscoveryTests
         var foreign = PhysicalOwnerConfiguredTuples.Destination(options, configuration);
         foreach (var voter in trust.ForeignVoterIds)
         {
-            await Assert.That(PhysicalOwnerConfiguredTuples.ForVoter(options, configuration, voter).Owner)
-                .IsEqualTo(foreign.Owner);
+            var selected = PhysicalOwnerConfiguredTuples.ForVoter(options, configuration, voter).Owner;
+            await Assert.That(selected.PhysicalShardId).IsEqualTo(foreign.Owner.PhysicalShardId);
+            await Assert.That(selected.Incarnation).IsEqualTo(foreign.Owner.Incarnation);
+            await Assert.That(selected.PlacementEpoch).IsEqualTo(foreign.Owner.PlacementEpoch);
+            await Assert.That(selected.VoterIds.SequenceEqual(foreign.Owner.VoterIds, StringComparer.Ordinal)).IsTrue();
         }
         await Assert.That(PartitionMovementNativeDiscoveryIdentity.Secret(options, configuration, foreign))
             .IsEqualTo(trust.ForeignPeerSecret);

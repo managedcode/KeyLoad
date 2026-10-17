@@ -5,12 +5,6 @@ namespace KeyLoad.Server;
 
 internal static class OrleansNodeRuntimeAccess
 {
-    /// <summary>Checks all configured voters within the caller's deadline before routing or readiness.</summary>
-    /// <param name="node">Original running native silo and borrowed service owner.</param>
-    /// <param name="cancellationToken">Bounds the actual discovery attempts and their cleanup.</param>
-    internal static Task EnsureCompatibleCohortAsync(this OrleansNode node, CancellationToken cancellationToken)
-        => node.RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryClient>().EnsureCompatibleCohortAsync(cancellationToken);
-
     internal static KeyLoad.Query.QueryEngine BorrowPartitionQueries(this OrleansNode node) => node.RuntimeServices.GetRequiredService<KeyLoad.Query.QueryEngine>();
 
     internal static GrainRequestCodec CatalogRequestCodec(this OrleansNode node) => node.RuntimeServices.GetRequiredService<GrainRequestCodec>();

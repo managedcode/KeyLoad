@@ -33,12 +33,6 @@ internal static class OrleansSiloConfiguration
             cluster.ServiceId = OrleansNodeProtocol.ServiceId;
         });
         OrleansNativeClustering.Configure(silo, options, replica, address, localhostClustering);
-        silo.Services.AddOptions<ClusterMembershipOptions>().Configure<IOptions<OrleansMembershipOptions>>(
-            (membership, configured) =>
-            {
-                membership.IAmAliveTablePublishTimeout = configured.Value.MembershipRefresh;
-                membership.TableRefreshTimeout = configured.Value.MembershipRefresh;
-            });
         ConfigureMessaging(silo.Services);
         PartitionStorageRegistration.Register(silo);
         silo.AddGrainService<PartitionReplicaGrainService>();

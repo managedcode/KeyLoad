@@ -3,17 +3,16 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Owns fixed-voter compatibility observations and bounded sequential admission.</summary>
-internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
+/// <summary>Resolves an individual data peer through authenticated native Orleans calls.</summary>
+internal sealed class ReplicaPeerDiscovery : IDisposable, IAsyncDisposable
 {
     private readonly ReplicaConfiguration configuration;
     private readonly ReplicaDiscoveryObservationCache observations;
     private readonly ReplicaDiscoveryResourceAccess resources;
-    private readonly ReplicaCohortAdmission admission;
     private readonly ReplicaDiscoveryLifetime lifetime;
     private readonly TimeProvider clock;
 
-    internal ReplicaCohortDiscovery(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
+    internal ReplicaPeerDiscovery(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
         ReplicaNativeDiscoveryClient native, ReplicaNativeDiscoveryMembership membership, ReplicaDiscoveryProbe? probe = null)
     {
@@ -29,15 +28,8 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         observations = new(configurationOptions, local, clock, membership);
         var ownedResources = new ReplicaDiscoveryResources(configurationOptions, peerSettings, authentication, clock, native, membership, probe);
         resources = new(ownedResources);
-        admission = new(configurationOptions, observations, GetObservationAsync);
         lifetime = new(ownedResources);
     }
-
-    internal bool HasCompatibleCohort => !lifetime.IsStopping && admission.HasCompatibleCohort;
-
-    internal ReplicaCohortAdmissionStatus ObserveCompatibleCohort()
-        => lifetime.IsStopping ? ReplicaCohortAdmissionStatus.Unavailable(ReplicaCohortAdmissionCode.DiscoveryStopping)
-            : admission.ObserveCompatibleCohort();
 
     internal async Task<SiloAddress> ResolveAsync(string voterId, bool refresh, CancellationToken cancellationToken)
     {
@@ -66,48 +58,6 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         var address = ReplicaDiscoveryObservationCache.RequireCompatible(observation);
         request.Token.ThrowIfCancellationRequested();
         return address;
-    }
-
-    internal async Task EnsureCompatibleCohortAsync(CancellationToken cancellationToken)
-    {
-        using var operation = EnterOperation();
-        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, operation.ShutdownToken);
-        request.Token.ThrowIfCancellationRequested();
-        await admission.EnsureCompatibleCohortAsync(request.Token).ConfigureAwait(false);
-    }
-
-    internal async Task<bool> HasNativeJournalCohortAsync(CancellationToken cancellationToken)
-    {
-        using var operation = EnterOperation();
-        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, operation.ShutdownToken);
-        var local = observations.ReadLocal();
-        if (!local.CurrentContractCompatible)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.IncompatibleCohort);
-        }
-        if (!local.TransportReady)
-        {
-            return false;
-        }
-        foreach (var voterId in configuration.VoterIds)
-        {
-            request.Token.ThrowIfCancellationRequested();
-            if (voterId == configuration.LocalId)
-            {
-                continue;
-            }
-            var voter = await GetObservationAsync(voterId, true, request.Token).ConfigureAwait(false);
-            if (voter is not null && !voter.CurrentContractCompatible)
-            {
-                throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.IncompatibleCohort);
-            }
-            if (voter is null || !voter.TransportReady)
-            {
-                return false;
-            }
-        }
-        request.Token.ThrowIfCancellationRequested();
-        return true;
     }
 
     private ReplicaDiscoveryLifetime.Operation EnterOperation()

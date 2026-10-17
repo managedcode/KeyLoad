@@ -16,8 +16,7 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
         await scenario.RemoteTwo.StopListeningAsync(deadline.Token);
-        await scenario.Client.EnsureCompatibleCohortAsync(deadline.Token);
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsTrue();
+        await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, false, deadline.Token);
         await Assert.That(scenario.RemoteOne.Requests).IsGreaterThan(0);
         await VerifySubstitutedBytesAreNotCachedAsync(scenario, runtime.RuntimeAddress(1), deadline.Token);
         await VerifySignedWrongIdentityIsNotCachedAsync(scenario, runtime.RuntimeAddress(1), deadline.Token);
@@ -48,7 +47,7 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
     }
 
     [Test]
-    public async Task ReachableAuthenticatedThirdMismatchRejectsAnExistingMajority()
+    public async Task UnsupportedPeerDoesNotProbeOrBlockHealthyPeer()
     {
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
@@ -56,16 +55,18 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
             ReplicaTransportProtocol.Version);
 
         var mismatch = await Assert.ThrowsExactlyAsync<KeyLoadException>(
-            () => scenario.Client.EnsureCompatibleCohortAsync(deadline.Token));
+            () => scenario.Client.ResolveAsync(RequestCqrsCohortScenario.SecondRemote, false, deadline.Token));
         await AssertFailureAsync(mismatch, IncompatibleDetail);
-        await Assert.That(scenario.RemoteOne.Requests).IsEqualTo(1);
+        await Assert.That(scenario.RemoteOne.Requests).IsEqualTo(0);
         await Assert.That(scenario.RemoteTwo.Requests).IsEqualTo(1);
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsFalse();
 
         var cachedMismatch = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             scenario.Client.ResolveAsync(RequestCqrsCohortScenario.SecondRemote, false, deadline.Token));
         await AssertFailureAsync(cachedMismatch, IncompatibleDetail);
         await Assert.That(scenario.RemoteTwo.Requests).IsEqualTo(1);
+        var healthy = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, false, deadline.Token);
+        await Assert.That(healthy).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
+        await Assert.That(scenario.RemoteOne.Requests).IsEqualTo(1);
     }
 
     private static async Task VerifySubstitutedBytesAreNotCachedAsync(
@@ -117,7 +118,6 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
         scenario.PublishCompatibleRemoteOne(1);
         var replacement = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, cancellationToken);
         await Assert.That(replacement).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsTrue();
     }
 
     private static async Task VerifySignedMismatchAsync(RequestCqrsCohortScenario scenario,
@@ -132,7 +132,6 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
             scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, false, cancellationToken));
         await AssertFailureAsync(cachedMismatch, IncompatibleDetail);
         await Assert.That(scenario.RemoteOne.Requests).IsEqualTo(mismatchRequests);
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsFalse();
     }
 
     private static async Task AssertFailureAsync(KeyLoadException? failure, string detail)

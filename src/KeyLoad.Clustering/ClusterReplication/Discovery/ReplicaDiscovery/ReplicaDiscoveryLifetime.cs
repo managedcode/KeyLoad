@@ -33,17 +33,6 @@ internal sealed class ReplicaDiscoveryLifetime : IAsyncDisposable
         cancelStopping = resources.StoppingSource.CancelAsync;
     }
 
-    internal bool IsStopping
-    {
-        get
-        {
-            lock (sync)
-            {
-                return shutdownStarted;
-            }
-        }
-    }
-
     internal Operation? TryEnter()
     {
         lock (sync)

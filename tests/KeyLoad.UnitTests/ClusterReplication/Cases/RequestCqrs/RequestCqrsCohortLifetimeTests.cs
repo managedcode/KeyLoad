@@ -35,6 +35,5 @@ internal sealed class RequestCqrsCohortLifetimeTests
         await firstShutdown.WaitAsync(TestBound, TimeProvider.System);
         await resourcesReleased.Task.WaitAsync(TestBound, TimeProvider.System);
         await Assert.That(Volatile.Read(ref releaseCount)).IsEqualTo(1);
-        await Assert.That(lifetime.IsStopping).IsTrue();
     }
 }

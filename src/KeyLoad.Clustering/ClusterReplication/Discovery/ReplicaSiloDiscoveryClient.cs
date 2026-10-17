@@ -6,7 +6,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Resolves bounded authenticated runtime addresses from actual active native silo membership.</summary>
 public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
 {
-    private readonly ReplicaCohortDiscovery cohort;
+    private readonly ReplicaPeerDiscovery discovery;
 
     /// <summary>Retains the original configured discovery owner and native authentication lifetime.</summary>
     /// <param name="configurationOptions">The local voter set, incarnation and cache freshness bound.</param>
@@ -32,7 +32,7 @@ public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(oracle);
         ArgumentNullException.ThrowIfNull(membership);
-        cohort = new(configurationOptions ?? throw new ArgumentNullException(nameof(configurationOptions)),
+        discovery = new(configurationOptions ?? throw new ArgumentNullException(nameof(configurationOptions)),
             options ?? throw new ArgumentNullException(nameof(options)),
             local ?? throw new ArgumentNullException(nameof(local)),
             authentication ?? throw new ArgumentNullException(nameof(authentication)),
@@ -46,29 +46,11 @@ public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
     /// <param name="cancellationToken">Cancellation for the original joined native discovery RPC.</param>
     /// <returns>The current Orleans silo address including its generation.</returns>
     public Task<SiloAddress> ResolveAsync(string voterId, bool refresh, CancellationToken cancellationToken)
-        => cohort.ResolveAsync(voterId, refresh, cancellationToken);
-
-    /// <summary>Authenticates the fixed voter cohort before public request admission.</summary>
-    /// <param name="cancellationToken">The outer request or readiness deadline.</param>
-    public Task EnsureCompatibleCohortAsync(CancellationToken cancellationToken)
-        => cohort.EnsureCompatibleCohortAsync(cancellationToken);
-
-    internal Task<bool> HasNativeJournalCohortAsync(CancellationToken cancellationToken)
-        => cohort.HasNativeJournalCohortAsync(cancellationToken);
-
-    /// <summary>Whether fresh authenticated observations prove the compatible replicated majority.</summary>
-    public bool HasCompatibleCohort => cohort.HasCompatibleCohort;
-
-    /// <summary>Observes the same fixed-voter predicate without refreshing or authorizing discovery.</summary>
-    /// <returns>Native-local closed status and counts; it is never readiness authority.</returns>
-    public ReplicaCohortAdmissionStatus ObserveCompatibleCohort() => cohort.ObserveCompatibleCohort();
-
-    internal Task<ReplicaCohortAdmissionStatus> AcquireCompatibleCohortAsync(CancellationToken token)
-        => ReplicaCohortStartupAcquisition.AcquireAsync(this, token);
+        => discovery.ResolveAsync(voterId, refresh, cancellationToken);
 
     /// <inheritdoc />
-    public void Dispose() => cohort.Dispose();
+    public void Dispose() => discovery.Dispose();
 
     /// <inheritdoc />
-    public ValueTask DisposeAsync() => cohort.DisposeAsync();
+    public ValueTask DisposeAsync() => discovery.DisposeAsync();
 }

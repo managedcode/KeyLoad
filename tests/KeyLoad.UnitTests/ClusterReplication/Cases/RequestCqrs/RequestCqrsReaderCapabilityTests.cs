@@ -18,7 +18,7 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
     }
 
     [Test]
-    public async Task ReachableNotReadyThirdVoterWithUnsupportedReaderRejectsMajority()
+    public async Task UnsupportedReaderRejectsOnlyTheRequestedPeer()
     {
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
@@ -31,11 +31,10 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
         scenario.PublishRemoteTwoRecord(unsupported);
 
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(
-            () => scenario.Client.EnsureCompatibleCohortAsync(deadline.Token));
+            () => scenario.Client.ResolveAsync(RequestCqrsCohortScenario.SecondRemote, true, deadline.Token));
         await RequestCqrsReaderCapabilityAssertions.AssertIncompatibleAsync(failure);
-        await Assert.That(scenario.RemoteOne.Requests).IsGreaterThan(0);
+        await Assert.That(scenario.RemoteOne.Requests).IsEqualTo(0);
         await Assert.That(scenario.RemoteTwo.Requests).IsGreaterThan(0);
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsFalse();
         var readsAfterAdmission = scenario.RemoteTwo.Requests;
         var cachedFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             scenario.Client.ResolveAsync(RequestCqrsCohortScenario.SecondRemote, false, deadline.Token));
@@ -46,8 +45,8 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
             runtimeJournalReaderContract: StoreReaderContract.RuntimeJournal));
         var healthy = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.SecondRemote, true, deadline.Token);
         await Assert.That(healthy).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(2)));
-        await scenario.Client.EnsureCompatibleCohortAsync(deadline.Token);
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsTrue();
+        var unrelated = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, false, deadline.Token);
+        await Assert.That(unrelated).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
     }
 
     private static async Task VerifyNonCurrentMarkerAsync(RequestCqrsCohortRuntimeFixture runtime,
@@ -57,10 +56,9 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
         scenario.PublishRemoteOneRecord(scenario.Discovery(RequestCqrsCohortScenario.FirstRemote, 1,
             runtimeJournalReaderContract: readerCapability));
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(
-            () => scenario.Client.EnsureCompatibleCohortAsync(cancellationToken));
+            () => scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, cancellationToken));
         await RequestCqrsReaderCapabilityAssertions.AssertIncompatibleAsync(failure);
         await Assert.That(scenario.RemoteOne.Requests).IsGreaterThan(0);
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsFalse();
         var readsAfterAdmission = scenario.RemoteOne.Requests;
         var cachedFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, false, cancellationToken));
@@ -70,7 +68,5 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
         scenario.PublishCompatibleRemoteOne(1);
         var healthy = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, cancellationToken);
         await Assert.That(healthy).IsEqualTo(SiloAddress.FromParsableString(scenario.RuntimeAddress(1)));
-        await scenario.Client.EnsureCompatibleCohortAsync(cancellationToken);
-        await Assert.That(scenario.Client.HasCompatibleCohort).IsTrue();
     }
 }

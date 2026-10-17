@@ -86,7 +86,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
 
     private Task AwaitNativeReplicaPrerequisiteCoreAsync(PhysicalShardCatalogPrerequisiteObservation observation,
         CancellationToken cancellationToken)
-        => NativeReplicaStartupPrerequisite.WaitAsync(node, partition, clock, observation, cancellationToken);
+        => NativeReplicaStartupPrerequisite.WaitAsync(partition, clock, observation, cancellationToken);
 
     internal Task<PrincipalRecord> AuthenticateBootstrapAdministratorAsync(CancellationToken cancellationToken)
         => NativeAdministratorAuthenticationRequests.StartupAsync(node, options.AdminKey,

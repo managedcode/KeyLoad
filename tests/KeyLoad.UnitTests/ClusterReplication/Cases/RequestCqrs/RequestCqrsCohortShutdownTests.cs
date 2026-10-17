@@ -41,7 +41,6 @@ internal sealed class RequestCqrsCohortShutdownTests(RequestCqrsCohortRuntimeFix
 
             disposal = scenario.Client.DisposeAsync().AsTask();
             await AssertAdmissionStoppedAsync(scenario);
-            await Assert.That(scenario.Client.HasCompatibleCohort).IsFalse();
             await AssertShutdownCancellationAsync(attempt);
             await gate.Aborted.WaitAsync(TestBound, TimeProvider.System);
             await disposal.WaitAsync(TestBound, TimeProvider.System);

@@ -49,14 +49,11 @@ internal sealed class ReplicaDiscoveryObservationCache
     internal SiloAddress ResolveLocal() => RequireCompatible(ReadLocal());
 
     internal bool TryFresh(string voterId, out ReplicaDiscoveryObservation? observation)
-        => ReadFresh(voterId, out observation) == ReplicaObservationFreshness.Fresh;
-
-    internal ReplicaObservationFreshness ReadFresh(string voterId, out ReplicaDiscoveryObservation? observation)
     {
         observation = null;
         if (!observations.TryGetValue(voterId, out var found))
         {
-            return ReplicaObservationFreshness.Missing;
+            return false;
         }
 
         if (!membership.IsCurrent(voterId, found.Address)
@@ -64,11 +61,11 @@ internal sealed class ReplicaDiscoveryObservationCache
         {
             ((ICollection<KeyValuePair<string, ReplicaDiscoveryObservation>>)observations)
                 .Remove(new(voterId, found));
-            return ReplicaObservationFreshness.Expired;
+            return false;
         }
 
         observation = found;
-        return ReplicaObservationFreshness.Fresh;
+        return true;
     }
 
     internal void Remove(string voterId) => observations.TryRemove(voterId, out _);

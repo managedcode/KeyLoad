@@ -13,6 +13,8 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
     private const string NativeMembershipProvider = "Orleans.Runtime.MembershipService.AzureBasedMembershipTable";
     private const short Silos = 6;
     private const int GroupVoters = 3;
+    private const int StartupMinutes = 2;
+    private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(StartupMinutes);
     private readonly TimeProvider clock = TimeProvider.System;
     private readonly IOptions<OrleansMembershipOptions> membershipOptions = Options.Create(new OrleansMembershipOptions());
     private TestCluster? cluster;
@@ -79,7 +81,7 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
     internal async Task DeployAsync(CancellationToken token)
     {
         infrastructure = new NativeSixMembershipInfrastructure();
-        using var deadline = new CancellationTokenSource(membershipOptions.Value.StartupTimeout, clock);
+        using var deadline = new CancellationTokenSource(StartupTimeout, clock);
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
         var connection = await infrastructure.StartAsync(startup.Token).ConfigureAwait(false);
         var builder = new TestClusterBuilder(Silos);
@@ -103,7 +105,7 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
     private async Task<MembershipReadinessSnapshot> WaitForCurrentAsync(NodeOptions options,
         SiloAddress address, OrleansMembershipOptions bounds, CancellationToken token)
     {
-        using var deadline = new CancellationTokenSource(bounds.StartupTimeout, clock);
+        using var deadline = new CancellationTokenSource(StartupTimeout, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
         try
         {

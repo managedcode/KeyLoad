@@ -19,7 +19,7 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
         var initial = await AwaitInitialMembershipAsync(call, cancellationToken).ConfigureAwait(false);
         trace.Stage = PhysicalOwnerProbeStage.NativeStartup;
         await node.WaitForNativeStartupAsync(cancellationToken).ConfigureAwait(false);
-        await NativeReplicaStartupPrerequisite.WaitAsync(node, partition, clock,
+        await NativeReplicaStartupPrerequisite.WaitAsync(partition, clock,
             new PhysicalShardCatalogPrerequisiteObservation(), cancellationToken).ConfigureAwait(false);
         Validate(call, cancellationToken);
         trace.Stage = PhysicalOwnerProbeStage.Authentication;

@@ -34,15 +34,14 @@ internal static class RuntimeJournalStartup
         var requests = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(),
             services.GetRequiredService<GrainRequestCodec>(), partition.Database, partition.Coordinator,
             services, clock, runtime.GrainRouting);
-        var discovery = services.GetRequiredService<ReplicaSiloDiscoveryClient>();
         var commandId = BootstrapCommandId(options.PhysicalShardId, partition.Configuration.Incarnation);
-        await InitializeAuthorityAsync(requests, discovery, authenticateAdministrator, commandId, runtime, clock, token)
+        await InitializeAuthorityAsync(requests, authenticateAdministrator, commandId, runtime, clock, token)
             .ConfigureAwait(false);
         services.GetRequiredService<RuntimeJournalAdmission>().Open(token);
     }
 
     private static async Task InitializeAuthorityAsync(RuntimeJournalStartupRequests requests,
-        ReplicaSiloDiscoveryClient discovery, Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, Guid commandId,
+        Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, Guid commandId,
         ServerRuntimeOptions runtime, TimeProvider clock, CancellationToken token)
     {
         while (true)
@@ -52,13 +51,7 @@ internal static class RuntimeJournalStartup
             {
                 if (await requests.TryVerifyAsync(token).ConfigureAwait(false))
                 {
-                    await discovery.EnsureCompatibleCohortAsync(token).ConfigureAwait(false);
                     return;
-                }
-                while (!await discovery.HasNativeJournalCohortAsync(token).ConfigureAwait(false))
-                {
-                    await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token)
-                        .ConfigureAwait(false);
                 }
                 var administrator = await authenticateAdministrator(token).ConfigureAwait(false);
                 await requests.BootstrapAsync(administrator, commandId, token).ConfigureAwait(false);

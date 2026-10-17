@@ -61,9 +61,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     /// <summary>Early runtime discovery remains available during membership bootstrap.</summary>
     public ReplicaSiloDiscoveryState? Discovery => localRuntime.Discovery;
 
-    internal Task<KeyLoad.Clustering.ReplicaCohortAdmissionStatus> AcquireCohortAdmissionAsync(CancellationToken token)
-        => RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryClient>().AcquireCompatibleCohortAsync(token);
-
     internal bool CatalogReady => Grains is not null && databaseBootstrap.Catalog?.IsReady == true;
 
     internal bool DatabaseReady => localRuntime.IsDatabaseReady(nodeOptions.Value, databaseBootstrap, CatalogReady);
@@ -81,10 +78,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
 
     /// <summary>Authenticator for exact discovery response bytes.</summary>
     public ReplicaEnvelopeAuthenticator? Authentication => localRuntime.Authentication;
-
-    /// <summary>True only while authenticated compatible fixed-voter observations establish a fresh cohort.</summary>
-    public bool HasCompatibleCohort => Grains is not null
-        && localRuntime.DiscoveryClient?.HasCompatibleCohort == true;
 
     public Guid InternalConnectionId => connectionOwner.Id;
 

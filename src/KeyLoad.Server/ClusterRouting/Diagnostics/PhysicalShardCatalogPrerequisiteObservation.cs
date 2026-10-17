@@ -9,27 +9,14 @@ internal sealed partial class PhysicalShardCatalogPrerequisiteObservation
         "Catalog startup NativeReplicaPrerequisite failed: Cancelled={Cancelled} Code={Code} "
         + "TransportReady={TransportReady} LeaderPresent={LeaderPresent} Role={Role} Term={Term} "
         + "CommittedIndex={CommittedIndex} MaterializedPosition={MaterializedPosition} "
-        + "CompatibleCohort={CompatibleCohort} LeaderConfirmed={LeaderConfirmed} "
-        + "CohortCode={CohortCode} RequiredMajority={RequiredMajority} EvaluatedRemote={EvaluatedRemote} "
-        + "FreshRemote={FreshRemote} MissingRemote={MissingRemote} ExpiredRemote={ExpiredRemote} Ready={Ready}.";
+        + "LeaderConfirmed={LeaderConfirmed}.";
     private ReplicaNodeState? state;
-    private bool? compatibleCohort;
-    private KeyLoad.Clustering.ReplicaCohortAdmissionStatus cohortAdmission;
     private bool? leaderConfirmed;
 
     internal void Capture(ReplicaNodeState actual)
     {
         state = actual;
-        compatibleCohort = null;
-        cohortAdmission = default;
         leaderConfirmed = null;
-    }
-
-    internal bool Cohort(KeyLoad.Clustering.ReplicaCohortAdmissionStatus actual)
-    {
-        cohortAdmission = actual;
-        compatibleCohort = actual.Compatible;
-        return actual.Compatible;
     }
 
     internal bool Leader(bool actual)
@@ -44,18 +31,13 @@ internal sealed partial class PhysicalShardCatalogPrerequisiteObservation
         ServerFailureObserver.Observe(() => WriteFailure(logger, original is OperationCanceledException,
             original is KeyLoadException known ? known.Code : ErrorCode.UnknownWriteOutcome,
             state?.TransportReady, state is null ? null : state.LeaderId is not null, state?.Role,
-            state?.Term, state?.CommittedIndex, state?.MaterializedPosition, compatibleCohort, leaderConfirmed,
-            cohortAdmission.Code, cohortAdmission.RequiredMajority, cohortAdmission.EvaluatedRemote,
-            cohortAdmission.FreshRemote, cohortAdmission.MissingRemote, cohortAdmission.ExpiredRemote,
-            cohortAdmission.Ready), failures);
+            state?.Term, state?.CommittedIndex, state?.MaterializedPosition, leaderConfirmed), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     [LoggerMessage(EventId = PrerequisiteFailureEvent, Level = LogLevel.Warning, Message = PrerequisiteFailureMessage)]
     private static partial void WriteFailure(ILogger logger, bool cancelled, ErrorCode code,
         bool? transportReady, bool? leaderPresent, ReplicaRole? role, long? term, long? committedIndex,
-        long? materializedPosition, bool? compatibleCohort, bool? leaderConfirmed,
-        KeyLoad.Clustering.ReplicaCohortAdmissionCode cohortCode, int requiredMajority, int evaluatedRemote, int freshRemote,
-        int missingRemote, int expiredRemote, int ready);
+        long? materializedPosition, bool? leaderConfirmed);
 }
 
