@@ -421,7 +421,7 @@ Capture the source `backup.json` SHA-256 before restore and require the same
 digest after restore; the complete native verifier must again validate every
 manifest file and the original position. This retains the unchanged-archive
 requirement without changing identity equality, serialization or restore behavior.
-`BackupRestore/Helpers/AdminBackupArchiveIntegrity` owns the bounded manifest
+`Restore/Archives/Serialization/AdminBackupArchiveIntegrity` owns the bounded manifest
 digest; the existing verifier owns the full native identity/file checks.
 Hash the fixture-owned manifest through a streaming file reader, with cancellation
 and joined disposal; never emit identity payloads, signing keys or archive data.
