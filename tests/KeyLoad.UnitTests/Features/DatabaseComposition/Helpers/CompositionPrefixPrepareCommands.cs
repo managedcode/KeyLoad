@@ -20,9 +20,10 @@ internal static class CompositionPrefixPrepareCommands
     }
 
     internal static async Task<CompositionPrefixPrepareCommand> CommitAsync(CompositionPrefixPrepareOwner owner,
-        ImmutableArray<Mutation> mutations, ImmutableArray<MutationReceipt> receipts, int? bindings = null)
+        ImmutableArray<Mutation> mutations, ImmutableArray<MutationReceipt> receipts, int? bindings = null,
+        string principal = D.Root)
     {
-        var issued = Issue(owner, mutations);
+        var issued = Issue(owner, mutations, principal);
         if (bindings is { } count)
         {
             var admission = ResourceEffectAdmissionValidation.Read(issued.Original, owner.Database.OperationLimitsOptions.Value);

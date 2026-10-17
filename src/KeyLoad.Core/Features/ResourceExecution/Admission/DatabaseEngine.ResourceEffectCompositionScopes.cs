@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
         {
             var batch = Payload<CommandRequest>(operation);
             return !batch.Mutations.IsDefault && batch.Mutations.Any(static mutation
-                => mutation is QueueToGraph or GraphToQueueMutation);
+                => mutation is QueueToGraph or GraphToQueueMutation or UpsertEdge or DeleteEdge);
         }
         if (operation.Kind == OperationKind.PartitionMovementPhase)
         {

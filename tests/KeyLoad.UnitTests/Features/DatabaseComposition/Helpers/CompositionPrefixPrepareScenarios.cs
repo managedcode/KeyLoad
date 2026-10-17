@@ -25,19 +25,21 @@ internal static class CompositionPrefixPrepareScenarios
                 CompositionPrefixPrepareSeed.Bound(owner, D.From, D.First), D.FirstRevision, D.Json, false, []),
                 owner.Database.GetDocument(D.Root, CompositionPrefixPrepareSeed.Fresh(owner, D.From, D.First)));
             await Assert.That(owner.Database.InspectMessage(D.Root, new(owner.Source.Partition, D.Queue), D.Message)!.PayloadJson)
-                .IsEqualTo(payload);
+                .IsEqualTo(CompositionPrefixPrepareExpectedPayload.Link(owner));
         });
     }
 
     internal static async Task CancelledAsync(CompositionPrefixPrepareOwner owner)
     {
         await CompositionPrefixPrepareSeed.VerticesAsync(owner);
+        var administrator = await CompositionPrefixPrepareSeed.QueueAdministratorAsync(owner);
         // Valid opaque JSON, intentionally not a QueueGraphLink. Cancellation must remove selection before parsing.
         await CompositionPrefixPrepareCommands.CommitAsync(owner,
             [new EnqueueMessage(D.Queue, D.Message, D.EmptyJson),
              new CancelQueueMessage(D.Queue, D.Message, D.FirstRevision, D.FirstRevision),
              CompositionPrefixPrepareCommands.Forward()],
-            [new(D.Enqueue, D.Queue, D.Message, D.FirstRevision), new(D.Cancel, D.Queue, D.Message, D.CancelRevision)]);
+            [new(D.Enqueue, D.Queue, D.Message, D.FirstRevision), new(D.Cancel, D.Queue, D.Message, D.CancelRevision)],
+            principal: administrator);
         await CompositionPrefixPrepareAssertions.ColdAsync(owner, async () =>
         {
             await Assert.That(owner.Database.Traverse(D.Root, owner.Source.Partition, D.Graph,

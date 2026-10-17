@@ -65,6 +65,11 @@ internal static class ResourceRetirementPreparationValidationAssertions
         await Assert.That(refused.Message).IsEqualTo(ResourceRetirementNativeProtocol.Unavailable);
     }
 
+    // Every native field of this DTO is public JSON, including complete nested values and ordered arrays.
+    // Compare values without treating Orleans object-reference aliases as control identity.
+    internal static async Task EqualAsync(ResourceRetirementControlV1 actual, ResourceRetirementControlV1 expected)
+        => await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+
     internal static async Task EqualAsync<T>(T actual, T expected)
         => await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(actual)))
             .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(expected)));

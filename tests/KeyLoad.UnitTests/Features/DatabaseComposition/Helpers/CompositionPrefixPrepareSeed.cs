@@ -30,6 +30,24 @@ internal static class CompositionPrefixPrepareSeed
         }
     }
 
+    internal static async Task<string> QueueAdministratorAsync(CompositionPrefixPrepareOwner owner)
+    {
+        const string administratorId = "prefix-queue-administrator";
+        var partition = owner.Source.Partition;
+        var administrator = new PrincipalRecord(administratorId, partition.TenantId,
+            [new(partition.DatabaseId, D.Queue, Capability.QueuePublish | Capability.QueueCancel | Capability.QueueInspect),
+             new(partition.DatabaseId, D.Graph, Capability.GraphWrite),
+             new(partition.DatabaseId, D.From, Capability.DocumentsRead),
+             new(partition.DatabaseId, D.To, Capability.DocumentsRead)], [])
+        {
+            ClusterAdministrator = true
+        };
+        var original = owner.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
+            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(administrator)));
+        await CompositionPrefixPrepareAssertions.EqualAsync(administrator, owner.Submit(original).Get<PrincipalRecord>());
+        return administratorId;
+    }
+
     internal static EntityRef Bound(CompositionPrefixPrepareOwner owner, string collection, string id)
         => new(owner.Source.Partition, collection, id)
         {

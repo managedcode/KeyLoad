@@ -56,8 +56,9 @@ internal sealed class DatabaseCompositionBudgetTests
         {
             var request = new CommandRequest(Guid.NewGuid(), db.Partition,
                 [new QueueToGraph(Graph, Queue, prefix + "a-"), new QueueToGraph(Graph, Queue, prefix + "b-")]);
-            var operation = new ReplicatedOperation(request.CommandId, OperationKind.Batch, "root",
-                TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
+            // Prepare the genuine original through the fixture before measuring deterministic apply's source ledger.
+            var operation = db.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, "root",
+                TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(request));
             return engine.Apply(operation).Get<CommitReceipt>();
         }
         var accepted = Send(exact, "exact-");

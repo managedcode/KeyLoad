@@ -12,7 +12,5 @@ internal static class ComparisonContractJson
         options.Converters.Add(JsonDefaults.Options.GetConverter(typeof(ImmutableArray<FoundDocument>)));
         options.Converters.Add(JsonDefaults.Options.GetConverter(typeof(ImmutableArray<string>)));
         options.Converters.Add(JsonDefaults.Options.GetConverter(typeof(ImmutableArray<OperationSample>)));
-        options.Converters.Add(JsonDefaults.Options.GetConverter(typeof(ImmutableArray<TargetProfile>)));
-        options.Converters.Add(JsonDefaults.Options.GetConverter(typeof(ImmutableArray<ComparisonCase>)));
     }
 }

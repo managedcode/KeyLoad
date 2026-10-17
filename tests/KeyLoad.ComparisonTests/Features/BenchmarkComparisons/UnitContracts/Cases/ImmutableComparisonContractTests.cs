@@ -9,46 +9,6 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class ImmutableComparisonContractTests
 {
-    private const string SchemaVersionProperty = "schemaVersion";
-    private const string TargetsProperty = "targets";
-    private const string CasesProperty = "cases";
-    private const string RequiredArraysJson = "{\"schemaVersion\":3,\"runId\":\"be464719-904b-4ca8-8c14-fb48886f116b\",\"startedAt\":\"2026-10-02T00:00:00+00:00\",\"options\":{\"topology\":\"Single\",\"seed\":1729,\"documents\":1000,\"operations\":1000,\"warmup\":50,\"repetitions\":3,\"concurrency\":8,\"payloadBytes\":1024,\"dimensions\":32,\"topK\":10,\"timeoutSeconds\":30,\"graphVertices\":256,\"graphFanOut\":3,\"graphDepth\":3},\"datasetSha256\":\"sha\",\"loadModel\":\"closed\",\"hostOs\":\"linux\",\"architecture\":\"x64\",\"logicalProcessors\":4,\"runtime\":\".NET 10\",\"storage\":\"disk\",\"sourceRevision\":null,\"targets\":[],\"cases\":[],\"provenance\":null,\"loadGeneratorImage\":null}";
-    private const string FormattedRequiredArraysJson = """
-        {
-          "schemaVersion": 3,
-          "runId": "be464719-904b-4ca8-8c14-fb48886f116b",
-          "startedAt": "2026-10-02T00:00:00+00:00",
-          "options": {
-            "topology": "Single",
-            "seed": 1729,
-            "documents": 1000,
-            "operations": 1000,
-            "warmup": 50,
-            "repetitions": 3,
-            "concurrency": 8,
-            "payloadBytes": 1024,
-            "dimensions": 32,
-            "topK": 10,
-            "timeoutSeconds": 30,
-            "graphVertices": 256,
-            "graphFanOut": 3,
-            "graphDepth": 3
-          },
-          "datasetSha256": "sha",
-          "loadModel": "closed",
-          "hostOs": "linux",
-          "architecture": "x64",
-          "logicalProcessors": 4,
-          "runtime": ".NET 10",
-          "storage": "disk",
-          "sourceRevision": null,
-          "targets": [],
-          "cases": [],
-          "provenance": null,
-          "loadGeneratorImage": null
-        }
-        """;
-
     [Test]
     public async Task AcBct001HarnessCollectionContractsExposeImmutableArraysWithoutPublicArrayAliases()
     {
@@ -59,8 +19,6 @@ internal sealed class ImmutableComparisonContractTests
             [(typeof(ComparisonOperationResult), nameof(ComparisonOperationResult.Vertices))] = typeof(ImmutableArray<string>?),
             [(typeof(ClusterEvidence), nameof(ClusterEvidence.Observations))] = typeof(ImmutableArray<string>),
             [(typeof(ComparisonCase), nameof(ComparisonCase.Samples))] = typeof(ImmutableArray<OperationSample>),
-            [(typeof(ComparisonReport), nameof(ComparisonReport.Targets))] = typeof(ImmutableArray<TargetProfile>),
-            [(typeof(ComparisonReport), nameof(ComparisonReport.Cases))] = typeof(ImmutableArray<ComparisonCase>),
             [(typeof(BenchmarkDataset), nameof(BenchmarkDataset.Documents))] = typeof(ImmutableArray<BenchmarkDocument>),
             [(typeof(BenchmarkDataset), nameof(BenchmarkDataset.Edges))] = typeof(ImmutableArray<BenchmarkEdge>)
         };
@@ -76,40 +34,6 @@ internal sealed class ImmutableComparisonContractTests
             .Where(property => property.PropertyType.IsArray)
             .Select(property => $"{property.DeclaringType!.Name}.{property.Name}").ToArray();
         await Assert.That(mutableAliases).IsEmpty();
-    }
-
-    [Test]
-    public async Task AcBct002IndependentSchema3JsonKeepsTopologyAndRequiredArraysOnTheWire()
-    {
-        var expected = new ComparisonReport(3, Guid.Parse("be464719-904b-4ca8-8c14-fb48886f116b"),
-            new DateTimeOffset(2026, 10, 2, 0, 0, 0, TimeSpan.Zero), new ComparisonOptions(), "sha", "closed",
-            "linux", "x64", 4, ".NET 10", "disk", null, ImmutableArray<TargetProfile>.Empty,
-            ImmutableArray<ComparisonCase>.Empty);
-
-        var actual = JsonSerializer.Serialize(expected, ComparisonJson.Options);
-        await Assert.That(actual).IsEqualTo(FormattedRequiredArraysJson);
-        using var document = JsonDocument.Parse(actual);
-        await Assert.That(document.RootElement.GetProperty(SchemaVersionProperty).GetInt32()).IsEqualTo(3);
-        await Assert.That(document.RootElement.GetProperty(TargetsProperty).GetArrayLength()).IsEqualTo(0);
-        await Assert.That(document.RootElement.GetProperty(CasesProperty).GetArrayLength()).IsEqualTo(0);
-        await Assert.That(actual).Contains("\"topology\": \"Single\"");
-        await Assert.That(actual).Contains("\"targets\": []");
-        await Assert.That(actual).Contains("\"cases\": []");
-    }
-
-    [Test]
-    public void AcBct002RequiredReportArraysRejectMissingNullAndDefaultValues()
-    {
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, omit: "cases"), ComparisonJson.Options));
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, nullValue: "targets"), ComparisonJson.Options));
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, omit: "targets"), ComparisonJson.Options));
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ComparisonReport>(
-            RewriteRequiredArrays(RequiredArraysJson, nullValue: "cases"), ComparisonJson.Options));
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(ReportWithDefaultTargets(), ComparisonJson.Options));
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Serialize(ReportWithDefaultCases(), ComparisonJson.Options));
     }
 
     [Test]
@@ -203,24 +127,5 @@ internal sealed class ImmutableComparisonContractTests
 
         await Assert.That(document.Vector)
             .IsEquivalentTo(ImmutableArray.Create(0.25f, -0.5f), TUnit.Assertions.Enums.CollectionOrdering.Matching);
-    }
-
-    private static ComparisonReport ReportWithDefaultTargets() => new(3,
-        Guid.Parse("be464719-904b-4ca8-8c14-fb48886f116b"), new DateTimeOffset(2026, 10, 2, 0, 0, 0, TimeSpan.Zero),
-        new ComparisonOptions(), "sha", "closed", "linux", "x64", 4, ".NET 10", "disk", null,
-        default, ImmutableArray<ComparisonCase>.Empty);
-
-    private static ComparisonReport ReportWithDefaultCases() => new(3,
-        Guid.Parse("be464719-904b-4ca8-8c14-fb48886f116b"), new DateTimeOffset(2026, 10, 2, 0, 0, 0, TimeSpan.Zero),
-        new ComparisonOptions(), "sha", "closed", "linux", "x64", 4, ".NET 10", "disk", null,
-        ImmutableArray<TargetProfile>.Empty, default);
-
-    private static string RewriteRequiredArrays(string json, string? omit = null, string? nullValue = null)
-    {
-        if (omit is not null)
-        {
-            return json.Replace($",\"{omit}\":[]", string.Empty, StringComparison.Ordinal);
-        }
-        return json.Replace($"\"{nullValue}\":[]", $"\"{nullValue}\":null", StringComparison.Ordinal);
     }
 }

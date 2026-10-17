@@ -9,9 +9,9 @@ internal static class OrleansMovementServiceRegistration
     internal static void Register(IServiceCollection services, NodeOptions options)
     {
         global::KeyLoad.Server.Features.ResourceExecution.NativeDropTableRegistration.Register(services);
+        services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
         if (options.PhysicalGroupTrust.RemoteDocumentReads)
         {
-            services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
             services.AddSingleton<IRemoteDocumentReadRouter>(provider => Node(provider).RemoteDocuments?.Router!);
             services.AddSingleton<IRemoteBlobReadRouter>(provider => Node(provider).RemoteDocuments?.BlobRouter!);
             services.AddSingleton<IRemotePartitionQueryRouter>(provider => Node(provider).RemoteDocuments?.QueryRouter!);

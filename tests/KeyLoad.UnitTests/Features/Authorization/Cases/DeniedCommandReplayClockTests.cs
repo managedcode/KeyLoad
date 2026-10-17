@@ -56,7 +56,7 @@ internal sealed class DeniedCommandReplayClockTests
     public async Task AcAuthReplay001RemovedGrantRejectsCachedSuccessWithoutChangingItsReceiptOrClock()
     {
         using var fixture = new TestDatabase();
-        fixture.Configure(Collection, ResourceKind.Collection);
+        var expectedReference = DeniedCommandRepairContinuation.Configure(fixture);
         var writer = new PrincipalRecord(Reader, fixture.Partition.TenantId,
             [new ScopeGrant(fixture.Partition.DatabaseId, Collection, Capability.DocumentsWrite)], []);
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(writer)).Get<PrincipalRecord>();
@@ -92,7 +92,7 @@ internal sealed class DeniedCommandReplayClockTests
         fixture.Commit(new PutDocument(Collection, Healthy, Json, 1));
         await Assert.That(fixture.Database.GetDocument("root", new(fixture.Partition, Collection, Healthy))!.Revision)
             .IsEqualTo(2L);
-        await DeniedCommandRepairContinuation.RunAsync(fixture, writer, original, outcome);
+        await DeniedCommandRepairContinuation.RunAsync(fixture, writer, original, outcome, expectedReference);
     }
 
     private static async Task<DateTimeOffset> VerifyReplicaApplyAsync(TestDatabase fixture, OperationResult expected,

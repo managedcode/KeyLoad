@@ -1,7 +1,7 @@
 {
   "NATIVE-FOUNDATION-REPAIR-20261017": {
     "status": "in_progress",
-    "implementation": "The follow-up118-source native foundation repair is integrated. The current seven-file native test-host repair transfers the logger lifetime to native DI and moves routing creation to the existing factory, preserving initial-only logging and cold/cleanup flows. R738 strict Unit, Integration and Recovery projects plus their real dependency graph passed with zero warnings/errors and zero source drift. Related current Unit70, Recovery21 and expanded public ONE/RF3/cold/file execution remain open; old R722 Recovery21 PASS retains its original source scope. Original105 acceptance states remain20 done/85 in_progress.",
+    "implementation": "The native foundation repair now includes20 files for public ONE placement registration, bounded resource inventory capture, graph endpoint effect closure, complete authorization/composition replay expectations, and heartbeat liveness during original command preparation. R751 strict Unit, Integration and Recovery with actual dependencies passed with zero warnings/errors and zero source drift. R739 previously failed62 of216 selected Unit cases and public ONE before workload; R740 Recovery21 passed on its earlier source. Fresh current Unit72, Recovery21 and public ONE/RF3/cold/file execution remain OPEN. Original105 acceptance states remain20 done/85 in_progress.",
     "sourceIdentity": {
       "evidence": "TestResults/stage61-native-join/root-r720-native118-current-source.original.json",
       "sha256": "d2a3f345efe45c7982811817d1597f17214737e6e107a3800c403f076f05fca1",
@@ -20,7 +20,7 @@
       "sourceRepairEvidence": "TestResults/stage61-native-join/root-r728-main-ci6-source.original.json",
       "sourceRepairSha256": "daaab72358b90b57eb1cee14ecb0bb7c4b22ff3cf3189765266d7c3ea7b0b28b",
       "sourceRepairStatus": "Original six-file fixes are checkpointed at c7c5ed489. Linux c7 stopped before tests on the remaining CA2000 logger ownership diagnostic. The current seven-file native DI/creation-factory follow-up passed local strict R738; fresh exact-head Linux/runtime qualification remains OPEN.",
-      "localIntegrationCompiler": "R738 native solution filter compiled Unit, Integration and Recovery together with all actual ProjectReferences/analyzers: zero warnings/errors in169.70172954094596 seconds, source drift0. Full solution and Linux qualification remain separate OPEN gates."
+      "localIntegrationCompiler": "R751 native solution filter compiled Unit, Integration and Recovery together with all actual ProjectReferences/analyzers: zero warnings/errors in166.51122362492606 seconds, source drift0. Full solution and Linux qualification remain separate OPEN gates."
     },
     "strictRecoveryCompiler": {
       "label": "root-r720-foundation-recovery-release",
@@ -130,7 +130,8 @@
       "boundary": "Original R700 prior-source selected Unit results, not current118-source acceptance."
     },
     "remaining": [
-      "Full solution and current Unit70 through exact committed CI source",
+      "Full solution and current Unit72, Recovery21 through exact committed CI source",
+      "Resolve actual native connection bootstrap cause with privacy-safe original evidence",
       "Expanded public ONE then RF3 and cold SDK/official MCP/T-SQL scenarios",
       "Both requested physical-file cases; current negative owner-lock proof does not qualify concurrent same-files engines",
       "Original Linux fault/endurance/security/performance/coverage/release requirements"
@@ -141,6 +142,27 @@
       "in_progress": 85
     },
     "currentFoundationCompiler": {
+      "label": "root-r751-foundation-repair-release",
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 166.51122362492606,
+      "scope": "Unit, Integration and Recovery projects in one native solution filter with actual dependencies and unchanged analyzers; not full solution, Linux or benchmark-stage qualification",
+      "sourceDrift": [],
+      "expectedCompiledImageUpdates": 46,
+      "stdout": "TestResults/stage61-native-join/root-r751-foundation-repair-release.stdout.original.txt",
+      "stdoutSha256": "001ab3d102eb49812034ed4a2d90b0e50a20f5e1b59efbe01b4605a2f47f6794",
+      "completion": "TestResults/stage61-native-join/root-r751-foundation-repair-release.completion.original.json",
+      "completionSha256": "b3d4c341e82e3fd6484bb9f6c4dd463ae6fa816d71e281ba9c329b51d0456917"
+    },
+    "nativeDiLoggerRepair": {
+      "sourceFiles": 7,
+      "sourceManifest": "TestResults/stage61-native-join/root-r738-main-native-di7-source.prepared.json",
+      "sourceManifestSha256": "0c8d2e524b224409ffc61e479bc009626f76e0bd9378fc31127c1674a707930f",
+      "contract": "Factory-created singleton ILoggerProvider is owned by native DI before host Build; initial six log identities and assertions remain, cold reopen does not replay that callback. Existing creation factory owns routing creation; no cap raise or suppression. Arbitrary native Build-failure cleanup is not claimed from source inspection.",
+      "qualification": "Strict local compiler PASS. R739 native/public runtime failures retain their original scope; fresh current Unit72, Recovery21, public ONE/RF3/cold/file and exact-head Linux qualification OPEN."
+    },
+    "previousFoundationCompilerR738": {
       "label": "root-r738-foundation-client-filter-release",
       "result": "passed",
       "warnings": 0,
@@ -154,13 +176,56 @@
       "completion": "TestResults/stage61-native-join/root-r738-foundation-client-filter-release.completion.original.json",
       "completionSha256": "c9ceeb092a8f2c57e605b0ca32a65a3bf9be47335d049152ac485b909cc3ba63"
     },
-    "nativeDiLoggerRepair": {
-      "sourceFiles": 7,
-      "sourceManifest": "TestResults/stage61-native-join/root-r738-main-native-di7-source.prepared.json",
-      "sourceManifestSha256": "0c8d2e524b224409ffc61e479bc009626f76e0bd9378fc31127c1674a707930f",
-      "contract": "Factory-created singleton ILoggerProvider is owned by native DI before host Build; initial six log identities and assertions remain, cold reopen does not replay that callback. Existing creation factory owns routing creation; no cap raise or suppression. Arbitrary native Build-failure cleanup is not claimed from source inspection.",
-      "qualification": "Strict local compiler PASS only. Fresh Unit, Recovery and public ONE/RF3/cold/file runtime and exact-head Linux qualification OPEN."
-    }
+    "currentRepairSource": {
+      "pathCount": 36,
+      "foundationFiles": 20,
+      "separateBenchmarkCleanupPaths": 16,
+      "evidence": "TestResults/stage61-native-join/root-r751-integrated36-source.prepared.json",
+      "sha256": "cad6a59361ac392143c64fec81074b55a2c470f704442eb7d5bfe19404b75c05",
+      "qualification": "Strict native compiler only. Runtime and exact-source Linux qualification remain OPEN; no task acceptance promotion."
+    },
+    "latestUnitR739": {
+      "total": 216,
+      "passed": 154,
+      "failed": 62,
+      "skipped": 0,
+      "nativeDurationSeconds": 175.984,
+      "elapsedSeconds": 176.61453220807016,
+      "trx": "TestResults/root-r739-related-unit/unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "trxSha256": "b376ce26aa9f75782ea74ea51f9589e29026bcc98d7e89150c470128923909a7",
+      "nativeMaximumParallelTests": 50,
+      "coverageCollector": false,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "scope": "Original R739 pre-repair result. One authorization and13 composition failures informed repairs; native connection bootstrap and hosted failures still require fresh actual evidence. Heartbeat source counterexample is not proven cause of those failures."
+    },
+    "latestPublicOneR739": {
+      "result": "failed_before_workload",
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "elapsedSeconds": 270.6237964169122,
+      "trx": "TestResults/root-r739-functional-one/normal-one/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "trxSha256": "4253ab4c2ac5e387543f408c68fac9f060b6baf84580bdb9c83742814c5f4c9e",
+      "firstNativeError": "Missing IPhysicalRequestPlacement during PartitionMovementGrainService.Init in the ONE profile. Registration is now unconditional; fresh runtime proof remains OPEN.",
+      "scope": "The all-model SDK/MCP/T-SQL workload and users were not entered. Not a functional PASS."
+    },
+    "latestRecoveryR740": {
+      "total": 21,
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "nativeDurationSeconds": 55.027,
+      "elapsedSeconds": 55.53398508299142,
+      "nativeMaximumParallelTests": 50,
+      "coverageCollector": false,
+      "sourceDrift": 0,
+      "compiledDrift": 0,
+      "trx": "TestResults/root-r740-related-recovery21/recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+      "trxSha256": "6751e56ec3921ea30392aef78159f1fee0d32e6f282d802290ac4a194d67b712",
+      "scope": "Original earlier-source related selection only; current Core/Replica changes require a fresh run. Not entire Recovery/Linux/power-loss qualification."
+    },
+    "nativeBootstrapBoundary": "R742 isolated native connection control reached all six Active hosts then failed original BootstrapPhysicalShardCatalog with CapabilityExecution/Unexpected/UnknownWriteOutcome. Underlying CLR cause remains unproven. R748 transient exception capture observed only late cleanup I/O exceptions; those do not identify the bootstrap cause. No raw exception type/message or private payload logging was added."
   },
   "BENCHMARK-SOURCE-REDESIGN-20261017": {
     "status": "in_progress",
@@ -168,7 +233,8 @@
     "qualification": "Source checkpoint only. Full vector/graph/queue/event/time-series workloads, ingestion at1/10/500 clients, complete comparable workload inventory and exact-source Linux benchmark qualification remain OPEN. Foundation integration compilation does not qualify benchmark behavior or performance.",
     "contract": "docs/Features/BenchmarkComparisons/SessionExecution.md",
     "adr": "docs/ADR/ADR-142-shared-live-benchmark-sessions.md",
-    "taskAcceptance": "Original105 tasks remain20 done/85 in_progress; no acceptance promotion."
+    "taskAcceptance": "Original105 tasks remain20 done/85 in_progress; no acceptance promotion.",
+    "orphanCleanup": "A separate16-path source cleanup removes13 orphan vector/report files and updates3 exclusive report references/tests, preserving native adapters, independent corpus/oracles and current session contracts. This is not benchmark runtime/performance qualification. Time-series cleanup is not included; meaningful retained ledger assertions must be preserved first."
   },
   "RESOURCE-OWNER-INVENTORY-20261016": {
     "title": "Native resource-owner inventory and all-model recovery development stage",

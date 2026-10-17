@@ -9,7 +9,6 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     private const int ExclusiveRoundPermit = 1;
     private const int UnelectedTerm = 0;
 
-    private const int HeartbeatAdmissionWaitMilliseconds = 0;
     private readonly SemaphoreSlim rounds = new(ExclusiveRoundPermit, ExclusiveRoundPermit);
 
     /// <inheritdoc />
@@ -171,24 +170,13 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
 
     internal async Task HeartbeatAsync(CancellationToken cancellationToken)
     {
-        if (!await rounds.WaitAsync(HeartbeatAdmissionWaitMilliseconds, cancellationToken).ConfigureAwait(false))
+        var term = await state.LockedAsync(() =>
         {
-            return;
-        }
-        try
+            return state.Role == ReplicaRole.Leader ? state.Log.State.Term : UnelectedTerm;
+        }, cancellationToken).ConfigureAwait(false);
+        if (term > UnelectedTerm)
         {
-            var term = await state.LockedAsync(() =>
-            {
-                return state.Role == ReplicaRole.Leader ? state.Log.State.Term : UnelectedTerm;
-            }, cancellationToken).ConfigureAwait(false);
-            if (term > UnelectedTerm)
-            {
-                await RoundAsync(term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
-            }
-        }
-        finally
-        {
-            rounds.Release();
+            await RoundAsync(term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
         }
     }
 

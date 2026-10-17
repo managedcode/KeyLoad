@@ -230,66 +230,6 @@ public sealed record ComparisonCase(string Target, Scenario Scenario, int Repeti
     }
 }
 
-/// <summary>Contains the configuration, environment, targets, and cases for one comparison run.</summary>
-/// <param name="SchemaVersion">The serialized report schema version.</param>
-/// <param name="RunId">The unique identifier for the comparison run.</param>
-/// <param name="StartedAt">The run start time.</param>
-/// <param name="Options">The validated workload configuration.</param>
-/// <param name="DatasetSha256">The SHA-256 hash of the generated dataset.</param>
-/// <param name="LoadModel">The harness load model description.</param>
-/// <param name="HostOs">The operating system running the harness.</param>
-/// <param name="Architecture">The processor architecture running the harness.</param>
-/// <param name="LogicalProcessors">The number of logical processors reported by the host.</param>
-/// <param name="Runtime">The runtime description reported for the run.</param>
-/// <param name="Storage">The storage description reported for the run.</param>
-/// <param name="SourceRevision">The source revision associated with the run, when known.</param>
-/// <param name="Targets">The target profiles included in the run.</param>
-/// <param name="Cases">The target/scenario repetition results.</param>
-public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOffset StartedAt,
-    [property: SerializedOptionsSnapshot] ComparisonOptions? Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
-    int LogicalProcessors, string Runtime, string Storage, string? SourceRevision,
-    [property: JsonRequired] ImmutableArray<TargetProfile> Targets,
-    [property: JsonRequired] ImmutableArray<ComparisonCase> Cases)
-{
-    /// <summary>Gets or initializes GitHub Actions provenance for the comparison run.</summary>
-    public GitHubProvenance? Provenance
-    {
-        get; init;
-    }
-    /// <summary>Gets or initializes the load-generator container image reference, when used.</summary>
-    public string? LoadGeneratorImage
-    {
-        get; init;
-    }
-    private const int AbsentConfigurationCount = 0;
-    private const int PresentConfigurationCount = 1;
-    private const string ExclusiveConfigurationRequired = "A comparison report must carry exactly one configuration.";
-
-    /// <summary>Validates that exactly one control, scaled or vector configuration is present.</summary>
-    public void ValidateConfiguration()
-    {
-        if ((Options is null ? AbsentConfigurationCount : PresentConfigurationCount)
-            + (ScaledProfile is null ? AbsentConfigurationCount : PresentConfigurationCount)
-            + (VectorProfile is null ? AbsentConfigurationCount : PresentConfigurationCount) != PresentConfigurationCount)
-        {
-            throw new InvalidOperationException(ExclusiveConfigurationRequired);
-        }
-    }
-    /// <summary>Gets the exact scaled profile when this report is not a materialized control run.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ScaledComparisonProfile? ScaledProfile
-    {
-        get; init;
-    }
-
-    /// <summary>Gets the exact vector qualification profile when this is a vector run.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public VectorComparisonProfile? VectorProfile
-    {
-        get; init;
-    }
-}
-
 /// <summary>Identifies the GitHub Actions workflow run and selected comparison profile.</summary>
 /// <param name="RunId">The GitHub Actions run identifier.</param>
 /// <param name="Attempt">The run attempt number.</param>
