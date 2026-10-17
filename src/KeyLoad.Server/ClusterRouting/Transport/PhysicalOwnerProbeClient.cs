@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Storage;
 using Microsoft.AspNetCore.WebUtilities;
@@ -39,7 +38,7 @@ internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions
             var discovery = node.Discovery?.Read()
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
             string? fingerprint = null;
-            for (var index = FirstVoter; index < PhysicalOwnerDirectoryProtocol.VoterCount; index++)
+            for (var index = FirstVoter; index < destination.Owner.VoterIds.Length; index++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var call = new PhysicalOwnerProbeCallV1(PhysicalOwnerProbeProtocol.Version, Guid.NewGuid(),

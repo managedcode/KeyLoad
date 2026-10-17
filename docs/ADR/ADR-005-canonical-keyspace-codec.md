@@ -22,7 +22,7 @@ One codec enables deterministic storage ordering, scans, and independent provide
 4. The current codec has one reader and writer. Unsupported versions and malformed encodings fail closed; no alternate reader or rewrite path is permitted.
 5. GitHub CI runs storage TUnit and recovery/open-existing-store checks; feature and storage owners join on golden fixtures and exact format IDs.
 
-Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-006](ADR-006-strict-derived-indexes.md), [ADR-008](ADR-008-backup-log-retention.md), and [ADR-016](ADR-016-atomic-physical-placement.md). Stop if ordering or current bytes are uncertain. Do not export provider-native types or infer qualification from source presence.
+Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-006](ADR-006-strict-derived-indexes.md), and [ADR-008](ADR-008-backup-log-retention.md). Stop if ordering or current bytes are uncertain. Do not export provider-native types or infer qualification from source presence.
 
 ```mermaid
 flowchart LR

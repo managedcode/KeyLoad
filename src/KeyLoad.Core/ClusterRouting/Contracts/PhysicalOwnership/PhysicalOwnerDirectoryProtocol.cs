@@ -4,7 +4,6 @@ internal static class PhysicalOwnerDirectoryProtocol
 {
     internal const int Version = 1;
     internal const int MaximumOwners = 2;
-    internal const int VoterCount = 3;
     internal const int MaximumEndpointBytes = 2048;
     internal const int MaximumEncodedBytes = 65_536;
     internal const int MaximumRegistrationBytes = 16_384;

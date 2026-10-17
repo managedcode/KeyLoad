@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ResourceExecution;
 
-/// <summary>Commits actual all-voter work evidence through the existing owner and source RF3 phase execution.</summary>
+/// <summary>Commits actual all-voter work evidence through the existing owner and source replicated phase execution.</summary>
 internal sealed class ResourceRetirementWorkBarrier(ResourceOwnerInventoryNativeClient client,
     ResourceOwnerInventoryNativeTrust trust, IOptions<DatabaseLimits> limits,
     IOptions<GrainRoutingOptions> routing, TimeProvider clock)

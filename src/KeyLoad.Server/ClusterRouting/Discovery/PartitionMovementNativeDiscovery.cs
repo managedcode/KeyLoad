@@ -108,27 +108,8 @@ internal sealed class PartitionMovementNativeDiscovery(PartitionHost partition, 
     }
 
     internal RegisteredPhysicalOwnerV1 RequireDestination(string voter)
-    {
-        var control = PhysicalOwnerConfiguredTuples.Control(settings, partition.Configuration);
-        var destination = PhysicalOwnerConfiguredTuples.Destination(settings, partition.Configuration);
-        if (control.Owner.VoterIds.Contains(voter, StringComparer.Ordinal))
-        {
-            return control;
-        }
-        if (destination.Owner.VoterIds.Contains(voter, StringComparer.Ordinal))
-        {
-            return destination;
-        }
-        throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
-    }
+        => PhysicalOwnerConfiguredTuples.ForVoter(settings, partition.Configuration, voter);
 
     private Dictionary<SiloAddress, SiloStatus> Active()
-    {
-        var active = oracle.GetApproximateSiloStatuses(onlyActive: true);
-        if (active.Count > membership.Value.MaximumRows)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable);
-        }
-        return active;
-    }
+        => oracle.GetApproximateSiloStatuses(onlyActive: true);
 }

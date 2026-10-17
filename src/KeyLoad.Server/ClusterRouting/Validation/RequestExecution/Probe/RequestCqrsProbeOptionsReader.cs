@@ -56,7 +56,6 @@ internal static class RequestCqrsProbeOptionsReader
         bool allowPrivateNetworkHttp, bool rootConfigured = false)
     {
         const int EmptySessionIdLength = 0;
-        const int EmptyVoterIdsLength = 3;
 
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(replica);
@@ -71,7 +70,7 @@ internal static class RequestCqrsProbeOptionsReader
         replica.Validate();
         if (options.Root != RequestCqrsProbeProtocol.FixedRoot || string.IsNullOrWhiteSpace(options.SessionId)
             || !IsSessionId(options.SessionId)
-            || replica.BenchmarkTopology || replica.VoterIds.Length != EmptyVoterIdsLength
+            || replica.BenchmarkTopology
             || !allowPrivateNetworkHttp || replica.VoterIds.Any(voter => !IsPrivateNetworkOrigin(voter)))
         {
             throw Invalid();

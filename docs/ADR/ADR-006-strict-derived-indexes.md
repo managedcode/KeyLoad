@@ -20,9 +20,9 @@ Implicitly indexing arbitrary JSON fields risks uncontrolled write amplification
 2. Add real-store tests for insert/replace/delete key changes, unique conflict rollback, null/missing, rebuild consistency, stale projection revision, and result provenance.
 3. Keep strict index ownership in `src/KeyLoad.Core/DocumentStorage/`; derived projection/provider ownership stays in the existing `src/KeyLoad.Query/Search/` slice. Catalog generation and status remain explicit; do not create a separate KeyLoad.Search technical root.
 4. Rebuild creates a new generation from a committed cut plus retained deltas, validates it, swaps atomically, and retires the old generation after reader leases. Until those steps are proven, rebuild stays maintenance-scoped. Rollback restores the prior generation only while its source history remains available.
-5. GitHub Actions runs TUnit, recovery, and RF3 tests that inspect canonical data and projections; root owns cross-slice generation/manifest review.
+5. GitHub Actions runs TUnit, recovery, and replicated-cluster tests that inspect canonical data and projections; root owns cross-slice generation/manifest review.
 
-Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-009](ADR-009-search-provider-boundaries.md), [ADR-010](ADR-010-query-budgets-security.md), [ADR-015](ADR-015-sensitive-data-lineage.md), and [ADR-016](ADR-016-atomic-physical-placement.md). Escalate any claim of global uniqueness or online rebuild without a domain/movement protocol.
+Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-009](ADR-009-search-provider-boundaries.md), [ADR-010](ADR-010-query-budgets-security.md), and [ADR-015](ADR-015-sensitive-data-lineage.md). Escalate any claim of global uniqueness or online rebuild without a domain protocol.
 
 ```mermaid
 flowchart LR

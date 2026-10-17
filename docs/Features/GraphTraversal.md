@@ -25,7 +25,7 @@ GraphTraversal owns graph edge records, adjacency maintenance, and authorized bo
 | UI | No dedicated graph-management or traversal frontend is specified | N/A: graph traversal is a database/API query capability, not a separate frontend surface |
 | External graph provider | None is selected or implemented for canonical edge ownership | N/A: provider-backed/ranked graph retrieval is separate planned search work |
 
-Current layer-first locations are migration debt under ADR-032. GraphTraversal does not own document CRUD, physical placement, query ranking, or vector/text providers. Graph vertices are references to visible collection documents; graph and vertex permissions remain distinct checks.
+Current layer-first locations are migration debt under ADR-032. GraphTraversal does not own document CRUD, query ranking, or vector/text providers. Graph vertices are references to visible collection documents; graph and vertex permissions remain distinct checks.
 
 ## Accepted TASK-MP-007C resource repair
 
@@ -107,7 +107,7 @@ Positive: an authorized edge write binds both visible document endpoints to the 
 
 ## Decisions and verification
 
-Related decisions: [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-004](../ADR/ADR-004-committed-read-views.md), [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-014](../ADR/ADR-014-principals-rbac-row-policy.md), and [ADR-016](../ADR/ADR-016-atomic-physical-placement.md). Cross-partition physical placement and movement follow [ADR-017](../ADR/ADR-017-ownership-session-tokens.md); they do not change the current same-partition write contract.
+Related decisions: [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-004](../ADR/ADR-004-committed-read-views.md), [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-014](../ADR/ADR-014-principals-rbac-row-policy.md), and [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md). Cross-partition edges follow [CrossPartitionEdges](GraphTraversal/CrossPartitionEdges.md) and [ADR-102](../ADR/ADR-102-cross-partition-graph-edges.md); they do not change the current same-partition write contract.
 
 ```mermaid
 flowchart LR
@@ -124,7 +124,7 @@ The listed TUnit names are source mappings only; this authoring task ran no prod
 
 ## KL-022 deterministic storage mutation reference stage
 
-TASK-GRAPH-STORAGE-REFERENCE-001 implements existing REQ-GRAPH-001 / AC-GRAPH-001 and the original KL-022 random graph reference, local mutation atomicity and duplicate-command criteria. This adds test acceptance coverage only; production/API/storage/revision contracts do not change. ADR: no new boundary; existing ADR-016/057 atomic commands and ADR-102 monotonic graph owner revisions remain authoritative.
+TASK-GRAPH-STORAGE-REFERENCE-001 implements existing REQ-GRAPH-001 / AC-GRAPH-001 and the original KL-022 random graph reference, local mutation atomicity and duplicate-command criteria. This adds test acceptance coverage only; production/API/storage/revision contracts do not change. ADR: no new boundary; existing ADR-057 atomic commands and ADR-102 monotonic graph owner revisions remain authoritative.
 
 Before implementation, freeze two real ZoneTree whole-operation regressions: GraphStorageMutationReferenceTests executes seeded deterministic insert/update/rebind/delete/reinsert sequences against independent test-owned literal edge state, compares all outgoing and incoming edges including revisions/attributes after each operation, retries each exact command without new effects, rejects changed payload for the same command identity, closes/reopens actual storage, compares persisted reference state and completes another healthy mutation. GraphStorageAtomicEffectsTests commits entity/edge/event/queue together, retries the complete batch, then places effects before a stale-edge failure and proves every model unchanged/absent followed by a healthy operation. Missing endpoint and stale expected revision are real command rejections, not injected provider faults.
 
@@ -133,7 +133,7 @@ Ownership: tests/KeyLoad.UnitTests/GraphTraversal/Cases/Graph/GraphStorageMutati
 
 ## KL-022 persisted rejection and exact retry correction
 
-TASK-GRAPH-REJECTED-OUTCOME-002 corrects the test oracle for REQ-GRAPH-001 / AC-GRAPH-001 under existing ADR-016/057/102; production behavior and acceptance thresholds do not change. The original Stage VIII normal/scalar reports retain the stale Conflict and unchanged-position expectations as actual failures.
+TASK-GRAPH-REJECTED-OUTCOME-002 corrects the test oracle for REQ-GRAPH-001 / AC-GRAPH-001 under existing ADR-057/102; production behavior and acceptance thresholds do not change. The original Stage VIII normal/scalar reports retain the stale Conflict and unchanged-position expectations as actual failures.
 
 Freeze before implementation: a valid fresh batch whose execution rejects a stale edge revision returns exactly RevisionConflict with “The expected revision does not match.”; a missing endpoint returns exactly NotFound with “The graph vertex is unavailable.”. DatabaseEngine.Apply resets staged model changes and persists the failed command outcome, so its first rejection advances the native store position by exactly one. Repeating the identical CommandId/payload returns the complete identical OperationResult and identical persisted native outcome bytes without advancing that post-rejection position. Changed content under an existing CommandId remains the distinct Conflict contract covered by GraphStorageMutationReferenceTests. Pre-admission/decode failures are outside this execution-rejection assertion.
 
@@ -208,18 +208,18 @@ request after a joined cold open, repair only the owned row, replay the original
 seed receipt, then perform fresh graph work and a second cold.
 
 REQ-GRAPH-ADJACENCY-002 maps to AC-GRAPH-ADJACENCY-003: preserve valid canonical
-source edges which reference another same-owner atomic partition (ADR-102).
+source edges which reference another atomic partition (ADR-102).
 Those visible endpoints remain full EntityRef results; they are not expanded as
 frontiers in this partition-scoped traversal. A foreign vertex whose textual
 collection/ID collides with a local vertex must not expand the local vertex's
 edges or inherit another partition's graph authority. This does not introduce
-cross-partition traversal or alter reverse delivery/placement contracts.
+cross-partition traversal or alter reverse delivery contracts.
 
 Source map: Core GraphTraversal Queries/GraphTraversalReader and existing
 Validation/GraphCrossPartitionValidation; Unit GraphTraversal new Cases/Fixtures/
 Helpers/Assertions/Models integrity flows. Existing ADR-004/005/010/014/102 define
 read-cut, native-key, budget, authority and cross-reference boundaries; no new
-public API, format, dependency or physical ownership is added. Source-only until
+public API, format or dependency is added. Source-only until
 original native build/analyzer/formatter and TUnit results; exact-source Linux,
 process/RF3 SDK/MCP and resource/performance qualification remain separate gates.
 Rollback removes the new guards and additive tests/map together.
@@ -242,7 +242,7 @@ Canonical slice map: Unit `Features/GraphTraversal/Cases/GraphShortestPathSelect
 
 ## TASK-GRAPH-VERTEX-CANONICAL-AUTHORITY-005 — selected vertex identity and complete graph operations
 
-This refinement implements original KL-022/KL-023 REQ/AC-GRAPH-001/002/004 and the canonical EntityRef contract of DatabaseComposition REQ/AC-002 under existing ADR-004/005/010/014/016/057/102. A decoded DocumentRecord selected by the graph vertex's canonical document key must have exactly that EntityRef before it becomes write endpoint or traversal visibility authority. Typed composition already enforces this identity; the ordinary graph paths currently omit it. A mismatching selected record returns Corruption, not a substituted vertex, partial traversal or successful edge mutation. Current authorization, row visibility leases, read budgets, missing/deleted/hidden errors, storage wire shape, public API and physical-owner boundaries remain unchanged. This repairs existing canonical authority rather than adding a new relational constraint or SQL dialect rule.
+This refinement implements original KL-022/KL-023 REQ/AC-GRAPH-001/002/004 and the canonical EntityRef contract of DatabaseComposition REQ/AC-002 under existing ADR-004/005/010/014/057/102. A decoded DocumentRecord selected by the graph vertex's canonical document key must have exactly that EntityRef before it becomes write endpoint or traversal visibility authority. Typed composition already enforces this identity; the ordinary graph paths currently omit it. A mismatching selected record returns Corruption, not a substituted vertex, partial traversal or successful edge mutation. Current authorization, row visibility leases, read budgets, missing/deleted/hidden errors, storage wire shape, public API and storage-ownership boundaries remain unchanged. This repairs existing canonical authority rather than adding a new relational constraint or SQL dialect rule.
 
 The native whole-operation gate selects a genuine valid start or a genuine downstream vertex, captures its original owned serialized row, and persists the same valid DocumentRecord type with a different Reference under the selected key. Real traversal and shortest-path operations must refuse with Corruption without changing any canonical byte or read cut. Mixed PutDocument plus UpsertEdge and PutDocument plus DeleteEdge must refuse atomically: Corruption is thrown through the existing atomic boundary and does not create a scoped outcome, commit or domain effect. The original native exceptions are retained, and each unchanged GUID re-refuses while every canonical row and position remains byte-identical. A joined same-root cold reopen preserves the entire corrupt image and repeats both original typed refusals; exact original row-byte repair changes only that row and one commit, restores independently constructed complete graph/path results, and restores the unchanged original Upsert GUID to genuine success because corruption never persisted a poisoned receipt. Complete independent witness/edge mutation receipts and revision2 are required; original seed receipt replay, a distinct genuine healthy graph mutation, both full successful receipt replays, and a second joined cold reopen preserve full canonical image/cut/results. The immutable source-preview correction retains the original erroneous stored-Corruption assumption as history; no production failure contract changes.
 

@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Actual same-transaction offline restore commit evidence, never an RF3 receipt or token.</summary>
+/// <summary>Actual same-transaction offline restore commit evidence, never an replicated receipt or token.</summary>
 /// <param name="Version">Original operation-owned Version value.</param>
 /// <param name="Context">Original operation-owned Context value.</param>
 /// <param name="OriginalCut">Original operation-owned OriginalCut value.</param>

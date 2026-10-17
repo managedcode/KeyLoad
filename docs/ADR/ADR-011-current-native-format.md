@@ -11,11 +11,11 @@ REQ/AC-BLOB-001–007, REQ/AC-DSTORE-009 and REQ/AC-BACKUP-004.
 Use one current native reader and writer: identity epoch7, WAL4, checkpoint5,
 KeyCodec v1 and the frozen generated Orleans aliases and field IDs. Unknown or
 corrupt mandatory records fail closed before publication, without rewrite,
-alternate-key lookup or loss of the original bytes. One homogeneous current RF3
-cohort uses node-local ZoneTree ownership, ordered commit/apply, persisted
+alternate-key lookup or loss of the original bytes. One homogeneous current
+cluster uses silo-local ZoneTree owners, ordered commit/apply, persisted
 credentials and authorization, and the original receipt barriers.
 
-Current reopen, compaction, same-incarnation snapshot install, crash recovery and
+Current reopen, compaction, crash recovery and
 verified backup/restore are supported operations. Restoring a verified current
 backup creates a new authority incarnation; bounded restore normalization changes
 only authority metadata while preserving content provenance. It does not change
@@ -27,18 +27,16 @@ writable service until every required phase completes.
 TASK-KL042-CATALOG-001A in [BackupRestore](../Features/BackupRestore.md) owns the
 `keyload.backup.atomic-partition-catalog-entry.v1` record: Id0 Version, Id1
 Partition, Id2 FirstSeenStorePosition, Id3 FirstSeenAppliedIndex. Registration and
-its outcome share one native atomic commit. Local registration records a positive
-store position and applied index0; replicated registration records store position0
-and a positive applied index. Unsupported, negative, future or contradictory
-coordinates fail closed before effects. A complete RF3-fenced current census is
-required before cluster capture; row presence alone is not readiness. Current
-snapshot copies retain exact row bytes. Cluster restore must bind roster authority
-to its verified destination cut before admitting writes. Full cluster capture and
-restore remain separate required acceptance gates.
+its outcome share one native atomic commit. Unsupported, negative, future or
+contradictory coordinates fail closed before effects. A complete current census is
+required before capture; row presence alone is not readiness. Current snapshot
+copies retain exact row bytes. Restore must bind roster authority to its verified
+destination cut before admitting writes. Full cluster capture and restore remain
+separate required acceptance gates.
 
 ## Current scoped command outcomes
 
-[DocumentStorage](../Features/DocumentStorage.md), ADR-002 and ADR-017 own the
+[DocumentStorage](../Features/DocumentStorage.md), ADR-002 owns the
 operation-aware identity and replay contract. Current outcome-v2 partition keys
 contain the complete PartitionRef; Global and Unknown have distinct explicit
 identities. A partition locator contains its exact matching outcome key.
@@ -84,10 +82,10 @@ Outcomes from another incarnation after restore remain invalid and are not rebou
 
 
 Native ZoneTree backup Restore copies the journal, changes authority incarnation/
-signing key and clears applied/clock/membership. It does not rewrite feature
+signing key and clears applied/clock state. It does not rewrite feature
 records; DispatchPaused is delivery-only. The integration lead invokes the
-Core BlobStorage normalizer with borrowed IAtomicStore before the physical host
-starts serving requests, consensus apply or background data work. It also resumes
+Core BlobStorage normalizer with borrowed IAtomicStore before the silo-local ZoneTree owner
+starts serving requests or background data work. It also resumes
 an interrupted marker before writable startup. No provider->Core dependency.
 
 Private state stores current authority Incarnation separately from immutable
@@ -152,15 +150,15 @@ gates passed.
 
 Root owns shared format/replay/host joins and qualification. Workers own disjoint
 Core BlobStorage normalization and real unit/process/RF3 tests under the feature
-contracts. Start only the current RF3 cohort after validating all stores and
+contracts. Start the cluster only after validating all stores and
 completing required current-format restoration. Rollback restores a coherent
 source checkpoint and a verified compatible current-format cut; it cannot reset
-quotas, discard acknowledged outcomes or reuse stale ownership epochs.
+quotas or discard acknowledged outcomes.
 
 Required evidence: enabled Release build/format/governance, current native
 record/enum goldens, exact scope/lifetime/permission/error flows, bounded quota
 and corruption rejection, real reopen/kill restore phases and counters,
-same-incarnation snapshot install, actual Aspire SDK/official MCP RF3, functional
+actual Aspire SDK/official MCP RF3, functional
 coverage and exact-source Linux qualification. Compilation alone closes no gate.
 
 ```mermaid
@@ -169,6 +167,6 @@ flowchart LR
     Restore --> Fence[Persisted restore fence]
     Fence --> Normalize[Bounded authority metadata phases]
     Normalize --> Verify[Verify accounts and content provenance]
-    Verify --> Serve[Current homogeneous RF3]
+    Verify --> Serve[Current homogeneous cluster]
     Unsupported[Unknown or corrupt mandatory format] --> Reject[Fail before publication]
 ```

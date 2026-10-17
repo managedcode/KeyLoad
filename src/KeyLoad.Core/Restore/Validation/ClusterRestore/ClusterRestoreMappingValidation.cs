@@ -8,8 +8,7 @@ namespace KeyLoad.Core;
 public static class ClusterRestoreMappingValidation
 {
     private const int RequiredOwnerCount = 1;
-    private const int RequiredVoters = PhysicalOwnerDirectoryProtocol.VoterCount;
-    private const string Invalid = "The restore configuration must map every original owner to a distinct new RF3 identity.";
+    private const string Invalid = "The restore configuration must map every original owner to a distinct new replica-group identity.";
 
     /// <summary>Enforces the existing native owner bound before offline filesystem work.</summary>
     /// <param name="count">Actual configured archive-owner count.</param>
@@ -66,7 +65,7 @@ public static class ClusterRestoreMappingValidation
         HashSet<Guid> targetIds, HashSet<Guid> incarnations)
     {
         if (target is null || target.PhysicalShardId == Guid.Empty || target.Incarnation == Guid.Empty
-            || target.VoterIds.IsDefault || target.VoterIds.Length != RequiredVoters
+            || target.VoterIds.IsDefaultOrEmpty
             || target.PlacementEpoch != PhysicalShardCatalogProtocol.InitialPlacementEpoch
             || sources.ContainsKey(target.PhysicalShardId) || originalIncarnations.Contains(target.Incarnation)
             || !targetIds.Add(target.PhysicalShardId) || !incarnations.Add(target.Incarnation))

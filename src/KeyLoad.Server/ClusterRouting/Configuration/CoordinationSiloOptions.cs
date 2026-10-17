@@ -16,7 +16,7 @@ internal sealed record CoordinationSiloOptions
     public int SiloCount { get; init; }
     public int SiloPort { get; init; }
 
-    internal bool IsValid() => SiloCount is >= MinimumSilos and <= KeyLoad.Clustering.OrleansMembershipOptions.MaximumSupportedRows && !string.IsNullOrWhiteSpace(ClusterId)
+    internal bool IsValid() => SiloCount >= MinimumSilos && !string.IsNullOrWhiteSpace(ClusterId)
         && Uri.TryCreate(PublicEndpoint, UriKind.Absolute, out var origin)
         && (origin.Scheme == Uri.UriSchemeHttp || origin.Scheme == Uri.UriSchemeHttps) && string.IsNullOrEmpty(origin.UserInfo)
         && string.IsNullOrEmpty(origin.Query) && string.IsNullOrEmpty(origin.Fragment) && origin.AbsolutePath == OriginPath

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -8,10 +9,6 @@ internal static class PhysicalGroupTrustValidator
     private const int EmptyCount = 0;
     private const int LookaheadCount = 1;
     private const string RootPath = "/";
-    private const string FirstArrayIndex = "0";
-    private const string SecondArrayIndex = "1";
-    private const string ThirdArrayIndex = "2";
-    private static readonly string[] ArrayIndices = [FirstArrayIndex, SecondArrayIndex, ThirdArrayIndex];
 
     internal static void Validate(PhysicalGroupTrustOptions trust, NodeOptions node)
     {
@@ -30,12 +27,12 @@ internal static class PhysicalGroupTrustValidator
             || trust.RemotePartitionQueries && !trust.RemoteDocumentReads
             || trust.RemoteDocumentReads && !trust.RegisterPhysicalOwners
             || node.BenchmarkTopology || !node.AllowPrivateNetworkHttp
-            || node.Peers.Count != PhysicalGroupTrustProtocol.RequiredMembers
+            || !node.Peers.Any()
             || string.IsNullOrWhiteSpace(node.ClusterId) || node.PhysicalShardId == Guid.Empty || node.Incarnation == Guid.Empty
             || trust.ForeignPhysicalShardId == Guid.Empty || trust.ForeignIncarnation == Guid.Empty
             || trust.ForeignPhysicalShardId == node.PhysicalShardId || trust.ForeignIncarnation == node.Incarnation
-            || trust.ForeignVoterIds.Length != PhysicalGroupTrustProtocol.RequiredMembers
-            || trust.ForeignVoterIds.Distinct(StringComparer.Ordinal).Count() != PhysicalGroupTrustProtocol.RequiredMembers
+            || trust.ForeignVoterIds.Length == EmptyCount
+            || trust.ForeignVoterIds.Distinct(StringComparer.Ordinal).Count() != trust.ForeignVoterIds.Length
             || trust.ForeignVoterIds.Any(value => !ValidOrigin(value))
             || trust.ForeignVoterIds.Intersect(node.Peers, StringComparer.Ordinal).Any()
             || !ValidSecret(trust.ForeignPeerSecret)
@@ -73,10 +70,12 @@ internal static class PhysicalGroupTrustValidator
             throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid);
         }
         var array = section.GetSection(nameof(PhysicalGroupTrustOptions.ForeignVoterIds));
-        var values = array.GetChildren().Take(PhysicalGroupTrustProtocol.RequiredMembers + LookaheadCount).ToArray();
+        var values = array.GetChildren().Take(checked(trust.ForeignVoterIds.Length + LookaheadCount)).ToArray();
+        var expected = Enumerable.Range(EmptyCount, trust.ForeignVoterIds.Length)
+            .Select(index => index.ToString(CultureInfo.InvariantCulture)).ToHashSet(StringComparer.Ordinal);
         if (array.Value is not null
             || trust.Role == PhysicalGroupTrustRole.Disabled && values.Length != EmptyCount
-            || trust.Role != PhysicalGroupTrustRole.Disabled && !values.Select(value => value.Key).SequenceEqual(ArrayIndices, StringComparer.Ordinal)
+            || trust.Role != PhysicalGroupTrustRole.Disabled && (values.Length != trust.ForeignVoterIds.Length || !expected.SetEquals(values.Select(value => value.Key)))
             || values.Any(value => value.Value is null || value.GetChildren().Any()))
         {
             throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid);

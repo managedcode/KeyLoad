@@ -8,12 +8,12 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
 {
     private const long InitialPolicyEpoch = 0;
     private const int FirstArmIndex = 0;
+    private const int EmptyCount = 0;
     private const int DigestHexCharacters = 64;
     private const char FirstDecimalHexCharacter = '0';
     private const char LastDecimalHexCharacter = '9';
     private const char FirstLowercaseHexCharacter = 'a';
     private const char LastLowercaseHexCharacter = 'f';
-    private const int Rf3VoterCount = 3;
     private static readonly UTF8Encoding Utf8 = new(false, true);
 
     internal void RequireOwner(NativeBlobWireOwner owner)
@@ -95,7 +95,8 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
     private void Tuple(NativeBlobWireOwnerTuple tuple)
     {
         if (tuple is null || tuple.PhysicalShardId == Guid.Empty || tuple.Incarnation == Guid.Empty
-            || tuple.VoterIds is not { Length: Rf3VoterCount } || tuple.VoterIds.Distinct(StringComparer.Ordinal).Count() != Rf3VoterCount)
+            || tuple.VoterIds is null || tuple.VoterIds.Length == EmptyCount
+            || tuple.VoterIds.Distinct(StringComparer.Ordinal).Count() != tuple.VoterIds.Length)
         {
             throw Invalid();
         }

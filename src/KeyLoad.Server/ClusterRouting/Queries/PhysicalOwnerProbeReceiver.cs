@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using Microsoft.Extensions.Options;
 
@@ -29,7 +28,7 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
         var status = await requests.ReadStatusAsync(administrator, cancellationToken).ConfigureAwait(false);
         trace.Stage = PhysicalOwnerProbeStage.StatusGuard;
         if (trace.Refused(PhysicalOwnerProbePredicate.StatusIncarnation, status.Incarnation != partition.Configuration.Incarnation)
-            || trace.Refused(PhysicalOwnerProbePredicate.StatusVoters, status.Voters != PhysicalOwnerDirectoryProtocol.VoterCount) || trace.Refused(PhysicalOwnerProbePredicate.StatusRoutingReady, !status.RoutingReady))
+            || trace.Refused(PhysicalOwnerProbePredicate.StatusVoters, status.Voters != partition.Configuration.VoterIds.Length) || trace.Refused(PhysicalOwnerProbePredicate.StatusRoutingReady, !status.RoutingReady))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
         }

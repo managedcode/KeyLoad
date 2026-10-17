@@ -71,16 +71,8 @@ internal static partial class GrainFailureDiagnostics
         var parentReadOperands = global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.ReadText(error);
         var causeKind = CauseKind(error, category);
         var level = category == GrainFailureCategory.Unexpected ? LogLevel.Error : LogLevel.Warning;
-        if (logger.IsEnabled(level))
-        {
-            IEnumerable<Exception> failures = error is AggregateException aggregate ? aggregate.Flatten().InnerExceptions : [error];
-            var diagnostic = new InvalidOperationException(string.Join(Environment.NewLine,
-                failures.Take(MaximumAggregateDepth).Select(failure => failure.GetType().FullName
-                    + (failure is KeyLoadException domain ? Environment.NewLine + domain.Code : string.Empty)
-                    + Environment.NewLine + failure.StackTrace)));
-            LogFailure(logger, level, requestId, stage, category, safeCode, movementOwnerGuard,
-                parentReadOperands, causeKind, diagnostic);
-        }
+        LogFailure(logger, level, requestId, stage, category, safeCode, movementOwnerGuard,
+            parentReadOperands, causeKind, null);
         ReplicaReadFailureLog.Observe(logger, error, requestId);
     }
 

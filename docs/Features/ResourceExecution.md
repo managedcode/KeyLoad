@@ -53,24 +53,20 @@ N/A in this stage; existing public database operations remain the visible bounda
 | Cache requirement | Acceptance | Task and automated proof |
 |---|---|---|
 | REQ-CACHE-001: shared validated retained-byte/entry reservations and lifetime | AC-CACHE-001/002 | TASK-CACHE-MEMORY-R26; real CacheMemoryBudget capacity/overflow/index/concurrent/disposal TUnit |
-| REQ-CACHE-002: exact-key coherence and store-generation/recovery fencing | AC-CACHE-003/004/015 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; actual ZoneTree transactions/snapshots/reopen; R83 genuine fixture identity regressions |
-| REQ-CACHE-003: owned/scoped buffers and bounded local work | AC-CACHE-005/006/015 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; real pins/callbacks/eviction/logical-charge tests; R83 typed owned-copy oracle |
-| REQ-CACHE-004: bounded authenticated Orleans physical-node policy coordination | AC-CACHE-007/011/012/013/014 | TASK-CACHE-CONTROL-R26; native RF3 grain/service restart/migration/forged-message tests; R69/R81 genuine local prerequisites and R82 bounded wire/crypto remain separately qualified |
+| REQ-CACHE-002: exact-key coherence and store-generation/recovery fencing | AC-CACHE-003/004 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; actual ZoneTree transactions/snapshots/reopen |
+| REQ-CACHE-003: owned/scoped buffers and bounded local work | AC-CACHE-005/006 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; real pins/callbacks/eviction/logical-charge tests |
+| REQ-CACHE-004: bounded node-local cache policy coordination through ordinary Orleans calls | AC-CACHE-007/011 | TASK-CACHE-CONTROL-R26; Orleans grain/service restart and activation-movement tests on a replicated cluster |
 | REQ-CACHE-005: current grants, barriers and field/tenant decisions | AC-CACHE-008 | TASK-CACHE-CONTROL-R26; current public SDK/MCP authorization flows |
 | REQ-CACHE-006: honest closed resource metrics and comparable benefit | AC-CACHE-009 | TASK-CACHE-NATIVE-R26; repeated GitHub cache-on/off resource JSON |
-| REQ-CACHE-007: complete delivered-source/native qualification | AC-CACHE-010/014/015 | TASK-CACHE-NATIVE-R26; build/format/analyzers/complexity/governance + unit/scalar/recovery/RF3 and real coverage |
+| REQ-CACHE-007: complete delivered-source/native qualification | AC-CACHE-010 | TASK-CACHE-NATIVE-R26; build/format/analyzers/complexity/governance + unit/scalar/recovery/RF3 and real coverage |
 
 #### Cache acceptance and testing methodology
 
 AC-CACHE-011 adds the exact local provider binding under ADR-058 R69. An actual
 opened store creates one configured-cold control with no index charge. Embedded
 or existing owners reject another configuration; held/same-thread storage gates
-return Busy, and permanent close cannot reopen. Exact ready receipt application
-is idempotent; genuine continuous predecessor renewal retains entries/counters,
-while skipped predecessor, withdrawal or expiry makes a fresh cold helper.
-Dispose the old helper under the real writer before reserving a new index. Real
-one-index-budget and pressure-release cases must progress without lost native data.
-Delayed old retirement cannot disable a newer binding. Withdraw in an actual
+return Busy, and permanent close cannot reopen. Real one-index-budget and
+pressure-release cases must progress without lost native data. Withdraw in an actual
 native observer must perform one lookup/charge/callback and publish no candidate;
 already admitted pinned readers retain charges until completion or exception.
 Actual Dispose publishes admission-close before draining its held reader; all
@@ -79,131 +75,17 @@ thread's actual Read/Commit callback with LockRecursionException before closing
 publication. Rejection leaves current eligibility, data and charges intact;
 external close and same-directory reopen must then succeed. The exact preserving
 repair, ownership and regression sequence are in ADR-058 R75.
-Tests use genuine ZoneTree/files,
-CacheMemoryBudget and System-clock CacheReadPermit in new
+Tests use genuine ZoneTree/files and
+CacheMemoryBudget in new
 `ZoneTreeCoordinatedPointCache*Tests.cs` and real fixture/support files under
 UnitTests/ResourceExecution, executed only by GitHub unit normal/scalar.
-
-The2026-10-04 full Aspire development run retained an unchanged real-clock
-expiry observation failure in AcceptedReceiptExpiresFromItsRealPrepareTimestamp:
-the observation arrived after its original upper bound while concurrent local
-solution verification was active. TASK-CACHE-REALCLOCK-ISOLATION applies only a
-method-level keyless TUnit NotInParallel to that case. Preserve TimeProvider.System,
-the2second preparation delay,10second preparation limit,15second lease,
-30second test deadline, original lower/upper age assertions and renewal/revision
-checks. No production clock, lease, retry, tolerance, skip or other test changes.
-Root owns full normal/scalar qualification; source isolation does not prove
-against external process interference or VM preemption.
-
-AC-CACHE-012 requires `IsCurrentAcceptance` to validate the complete immutable
-accepted receipt and existing prepare-origin15second lease from one state read.
-Default, stale, altered PreviousRevision/Continuous, withdrawn, expired or closed
-receipts reject. The10second ceiling is acceptance-only. Real
-`CacheReadPermitAcceptanceTests.cs` and the provider expiry cases cover this
-local prerequisite; freely constructed equal values do not certify wire origin.
-
-AC-CACHE-013 adds the accepted R81 actual physical-owner observation in ADR-058.
-Control.TryReadOwnerIdentity returns Healthy/Busy/Closed and only actual
-NodeId/incarnation/control RuntimeId. It attempts the actual reader with timeout
-zero; same-thread operations/foreign writer are Busy, foreign reader may coexist,
-closing is Closed, and acquired-gate runtime.Check preserves RecoveryRequired.
-No index/lookup/lease, complete identity, secret, cache/pool lock or I/O is involved.
-Real ZoneTreePointCacheOwner*Tests cover cold/warm counters, callback/held gates,
-pre-drain/permanent closure, faulted apply and same-directory recovery. Root owns
-the local seam/shared fixture; Luna owns only new tests. GitHub normal/scalar and
-required recovery/RF3 qualify the source; tiny closure interleavings require
-independent review. Observation is not full silo readiness or a remote grant.
-
-AC-CACHE-014 implements only the accepted [exact internal v1 wire/primitive
-contract](ResourceExecution/CacheControlV1.md) and ADR-058 R82 stages.
-Thirteen immutable generated metadata types, closed byte enums, dedicated
-bounded canonical bytes/HMAC, nested-proof validation and exact original-request
-correlation have no production caller or eligibility side effect in this stage.
-Actual pinned Orleans serialization and independent literal golden C/S/MAC/digest
-vectors, per-field/null/enum/address/range mutations, signed policy mismatch,
-flat rejection, valid-outer/invalid-nested MAC, accepted binding/sequence and real
-concurrent signer disposal map to new CacheControlWire* TUnit files. Complete
-size preflight and constant-time/private-key/disposal/alias/Id contracts receive
-independent review; the unreachable64KiB edge has the explicit size-arithmetic
-exception recorded in the exact contract. Root owns generated contracts and
-primitives; Luna owns only new acceptance-led tests after freeze. Full enabled
-source gates and a new exact-SHA GitHub run qualify them. Receiver, replay,
-coordinator, timers, DI, native probes and RF3 enablement remain later stages.
-
-AC-CACHE-015 repairs only the native test-fixture and assertion failures from
-exact source2ecbeee4d/run37093992229:1539 normal cases,1522 pass,17 errors;
-scalar skipped. A null byte[] signing key must remain absent nullable
-ReadOnlyMemory, explicit valid32byte keys retain their genuine configured
-incarnation, and explicit empty remains present and rejects TokenInvalidated.
-ZoneTreePointCacheFixtureIdentityTests proves default real-store open/reopen,
-configured valid-key peers and empty-key rejection without emitting secrets.
-ZoneTreeCoordinatedPointCacheReadTests uses one named byte77 for assignment and
-comparison, retaining independent warm copied bytes and all cache counters.
-The existing fixture collects body and every store/directory/pool cleanup
-independently and starts Dispose once before cleanup. Root owns traceability,
-enabled source gates, independent review and exact-SHA normal/scalar/recovery/
-RF3 qualification; Luna owns only these three test files. All17 failing IDs
-must pass on the next delivered source. No product identity validation, key
-generation, provider error, cache data or dependency behavior changes.
-ADR-058/035/041 already govern these unchanged boundaries; no new migration.
-
-R86 exact source397a89c46df8caaf0cc89a51e2e1c7b9208adcc6/
-run37097831105 passes63 RF3,164 recovery/1000 seeded process-cut rows and118
-analyzer cases. Normal1583 has1566 pass/17 identity errors; scalar/comparisons
-are skipped. The historical byte77 case passes,16 prior identity errors persist
-and the new genuine default-key/reopen case fails. R88 explicitly casts the
-absent conditional branch to ReadOnlyMemory<byte>?; a bare null branch still
-permits natural present-empty memory conversion. The already shared one-line
-source correction preserves all genuine original/empty-key assertions and product
-validation. Every current identity failure and the historical byte case must pass
-on the next exact source. Seven R81 owner-observation cases pass in normal mode,
-with no full-ready, signer/controller, scalar or coverage qualification. The
-original native receipt (report removed from repository)
-is the canonical result and artifact join.
-
-R93 delivered sourced45d7f253d309610d7cce66684f155170277252a/run37098964980
-closes AC-CACHE-015: all1583 native unit cases pass in normal and scalar modes,
-with identical complete ID/status sets and no skips. All17 R86 identity failures
-and the historical byte77 oracle pass in both modes. Recovery164/164 plus1000
-seeded rows, analyzer118/118 and actual SDK/MCP RF363/63 pass. Root joined the
-original API/run/SHA/ZIP digests, every native ID,20 seed files and four genuine
-container restart receipts in the R93 source-gates receipt (report removed from repository).
-The comparison workflow concluded failure:24/27 preflight jobs succeeded,3 failed
-(MongoDB n2 image import, MongoDB n3 NotPrimary reads, KurrentDB n2 cleanup).
-Two successful Neo4j Community jobs report unsupported topology; the270-cell
-matrix and aggregate did not execute. The R100 wire source receipt (report removed from repository)
-binds the independent34-product/26-test review and root's complete hash comparison.
-This source is absent from d45 and requires fresh integrated gates and its own
-delivered native codec/crypto/lifetime qualification. Full-ready control, coverage, matched
-cache profiles, endurance and power-loss gates remain open; RF3 caches stay off.
-
-The later ALL186-file5bb checkpoint/run37104211481 passes actual RF363/63 and
-analyzer118/118, with exact native reports, six original ZIP digests and four
-new-container restart receipts in the [R104 terminal receipt](https://github.com/managedcode/KeyLoad/actions/runs/37104211481).
-Full solution verify fails20 Node test-helper diagnostics; normal/scalar units,
-recovery and comparison lanes are skipped. AC-CACHE-014 wire tests were not
-executed. Current preserving helper corrections, complete development gates and
-a new delivered-SHA native run remain required; this checkpoint is not full
-AC-CACHE-010 qualification.
-
-TASK-CACHE-BINDING-INTEGRATION-R69 is root-only: shared contracts, permit join,
-public control/facade/runtime/lifecycle/read admission and durable docs.
-TASK-CACHE-BINDING-STATE-R69 owns only new private ResourceExecution binding/state
-helpers; TASK-CACHE-BINDING-TESTS-R69 owns only the new acceptance-led real tests.
-The full ordered implementation, exact APIs/result subsets, disjoint file owners,
-dependencies, rollback and join gates are in ADR-058 R69. Shared lifecycle and
-transition order and tiny post-pin/create-close interleavings receive explicit
-independent source review because deterministic forcing would require forbidden
-production hooks. Real callback, pressure, revoke, close and concurrent lifecycle
-tests remain mandatory; that exception does not substitute for signed RF3 proof.
 
 Coordinated snapshots report effective eligibility and configured-cold state.
 Closed means permanent admission closure; retained pinned/index bytes remain
 visible until actual release. Current-helper counters reset on cold replacement
 and have no-helper gaps; Hits counts successful pins, including rejected pins.
 Store diagnostics remain cumulative logical read work across both cache hits and
-native reads. A fresh local RuntimeId is not actual RF3 readiness, membership or
-physical permit certification. Production composition remains cold.
+native reads. Production composition remains cold.
 
 - AC-CACHE-001 passes only when one shared node pool atomically reserves validated
   positive modeled bytes/nonnegative entries before optional owned allocations;
@@ -236,18 +118,14 @@ physical permit certification. Production composition remains cold.
   oversized, disabled, pin-limited or unavailable. Logical charges/observer order
   and typed errors remain exact; unexpected invalidation failures fail closed.
   Real native diagnostics and shared-store pressure cases prove these conditions.
-- AC-CACHE-007 requires authenticated bounded Orleans exchange binding actual
-  fixed-voter readiness, silo generation, physical store/incarnation, exact local
-  policy and receiver-owned finite lease. Server starts cold. Forged/replayed,
-  stale/expired/wrong-node, unavailable control, restart and migration cannot
-  enable a node without its own valid acceptance. No grant precedes complete RF3
-  readiness and cohort preparation. Partial final acceptance stops renewals and
-  attempts bounded revocation; nodes without acceptance stay cold, while an
-  already accepted node may remain locally accelerated only until its receiver
-  lease expires within15seconds. Instant atomic RF3 cache activation/revocation
-  is not promised. Every request still uses the original fresh quorum and current
-  authorization path. No control message moves data/files or grants access.
-  Actual RF3 grain/service SDK/MCP tests are mandatory; embedded opt-in is separate.
+- AC-CACHE-007 requires cache policy to reach each silo through ordinary Orleans
+  calls. Every silo-local cache starts cold, stays bounded and disposable, and
+  is never the authority for data, files or access. A silo without the current
+  policy stays cold; restart and activation movement start cold and neither move
+  data/files nor grant access. Every request still uses the original fresh
+  persisted authorization path. Instant atomic cache activation or revocation
+  across all silos is not promised. Actual grain/service SDK/MCP tests on a
+  replicated cluster are mandatory; embedded opt-in is separate.
 - AC-CACHE-008 requires fresh current authentication, credential time/revocation,
   quorum, row/field policy and command replay fingerprint/incarnation checks on
   every public operation. Coherent raw principal/StoredOutcome bytes may be
@@ -272,16 +150,11 @@ exception requiring independent inspection; it does not replace native cases.
 Rollback disables ephemeral admission, drains readers and removes optional joins
 together. No persisted format, authorization, ACK or production RF3 migration.
 
-Baseline63ac27c run37082449440 failed the solution build with IDE0032/IDE0290
-in the website receipt source; normal/scalar/recovery/comparisons were skipped.
-Separate native analyzer118/118 and RF3 63/63 passed, including new dependency
-consumption on that source. Current cache source awaits a later exact-SHA run.
-
 | Requirement | Acceptance | Task / test ownership |
 |---|---|---|
 | REQ-MP-001: all current operation/resource paths reviewed and evidenced defects closed | AC-MP-001 | TASK-MP-001/002/003/004; located inventory and independent final review |
 | REQ-MP-002: bounded consistent read/mutation work without redundant materialization | AC-MP-002..006 | TASK-MP-005/006/007; real StoreRecovery, QueryExecution, Search, core feature tests |
-| REQ-MP-003: bounded cluster lifetime/transfer and crash-safe retention | AC-MP-007/008 | TASK-MP-009; real ClusterReplication persistence, recovery and RF3 |
+| REQ-MP-003: bounded resource lifetime and crash-safe retention | AC-MP-007/008 | TASK-MP-009; real node-local persistence and recovery tests |
 | REQ-MP-004: bounded streaming caller/report transport | AC-MP-009/010 | TASK-MP-008; ClientApi and BenchmarkComparisons real contracts |
 | REQ-MP-005: honest integrated qualification and resource measurement | AC-MP-011/012 | TASK-MP-010/011; exact-SHA GitHub full suites and resource JSON |
 | REQ-MP-006: remove avoidable JSON text byte copies and cached-receive request parses | AC-MP-006/009/011/012 | TASK-MP-007J under ADR-035; public strict text/byte, Unicode/error, owned lifetime, allocation and real-store replay cases |
@@ -302,10 +175,9 @@ the private R1 review artifact; the R111 census itself was failed/non-final.
 | REQ-MP-006 / AC-MP-006; REQ-MP-002 / AC-MP-003 | `CanonicalJsonTests`; `CanonicalJsonAllocationTests`; `JsonPathTests`; `JsonTextProtocolTests`; `JsonTextAllocationTests`; `PreparedScalarTests` | Exact canonical bytes/fingerprints, pointer/scalar behavior, strict text/byte decoding, malformed-input cleanup, persisted retry and bounded allocation cases. These cover named serializer paths, not all public API transports. |
 | REQ-MP-006 / AC-MP-006; REQ-MSG-001 / AC-MSG-001; REQ-MSG-003 / AC-MSG-003 | `JsonTextQueueReplayTests` and `JsonTextSubscriptionReplayTests` | Actual receive/replay preserves delivery identity, rejects changed raw request/result data, rechecks current principal or subscription generation, and rejects stale lease/token use. This is a replay/lease subset, not the full messaging API or official-client proof. |
 | REQ-ROC-001..004 / AC-ROC-001..004 | `ReadOnlyCollectionContractTests`; `ReadOnlyCollectionValidationTests`; `ReadOnlyCollectionWireTests`; `CanonicalKeyContractTests`; relevant `ReadBudgetAllocationTests` typed owned-read case | Reflection/API shape, exact wire/fingerprint bytes, required collection validation and real independent owned buffers/read results. AC-ROC-005/006 caller-wide build/delivery gates remain separate. |
-| REQ-CACHE-001..004 / AC-CACHE-001..008, AC-CACHE-011..015 (only per-method subset) | `CacheMemoryBudget*Tests`; `CacheReadPermit*Tests`; `ZoneTreeCoordinatedPointCache*Tests`; `ZoneTreePointCache*Tests` | Actual budget, permit, ZoneTree cache, owner-gate, coherence, authorization, pin/retirement and wire-primitive subflows as enumerated per case. `CacheControlWire*Tests` map only to the internal wire primitive AC-CACHE-014. No unit case here proves remote coordinator/RF3 activation, AC-CACHE-009 measured benefit or AC-CACHE-010 full qualification. |
+| REQ-CACHE-001..004 / AC-CACHE-001..008, AC-CACHE-011 (only per-method subset) | `CacheMemoryBudget*Tests`; `CacheReadPermit*Tests`; `ZoneTreeCoordinatedPointCache*Tests`; `ZoneTreePointCache*Tests` | Actual budget, permit, ZoneTree cache, owner-gate, coherence, authorization and pin/retirement subflows as enumerated per case. No unit case here proves cross-node cache enablement on a replicated cluster, AC-CACHE-009 measured benefit or AC-CACHE-010 full qualification. |
 | REQ-RESOURCE-003/004 / AC-DBPROF-001..004 | `DatabasePhaseSchemaTests`; `DatabasePhaseBankTests`; `DatabasePhaseBankConcurrencyTests`; `DatabasePhaseArithmeticTests`; `DatabasePhaseAllocationTests` | Fixed bank shape, independent lanes, bounded arithmetic/contention/saturation, detached snapshots and configured primitive allocation. These do not prove all 32 production phase boundaries, private capture or overhead/benefit (AC-DBPROF-005..008). |
 | REQ-RESOURCE-003 / REQ-CQ-013; AC-DBPROF-002 / AC-CQ-034/035 | `DatabasePhaseExecutionOptionsTests` | Actual central options binding/validation and bank-construction ordering, including malformed/unknown/scalar settings and allowed bounds. This does not qualify enabled production startup or profiling output. |
-| REQ-CQ-013 / AC-CQ-034/035 | `CurrentPeerOptionsOwnerTests.AcNativePeerDiscoveryConfigurationReachesSocketBeforePhysicalOwnership`; `AcNativeDiscoveryDeadlineAtRpcBoundaryRejectsBeforePhysicalOwnership` | Actual IOptions values reach the socket handler and invalid settings reject before creating a physical data directory. Their source comment IDs `AC-NATIVE-004..006` do not match the current-format meanings; keep those IDs unmapped until their owner corrects the source traceability. |
 | REQ-AISQL-003 / AC-AISQL-007 | `SqlAdmissionTests` | Actual HTTP governor treats SQL as heavy data work, reserves before verified-scope binding, preserves direct-control progress during data saturation and exposes nonrecursive dynamic-effect discovery. Unit evidence does not replace the official .NET/MCP RF3 flow. |
 | REQ-DSTORE-001/002/004; REQ-EVENT-004; REQ-MSG-005; REQ-ROUTE-004; REQ-AUTH-004/005 | `TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`; `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`; `ConcurrentCompareAndSwapHasOneWinner`; `SameLiteralPartitionKeyCannotCrossTransactionDomains`; `TransactionAuthorizationTests` | Preserve the existing many-to-many associations in DocumentStorage, EventStreams, Messaging, ClusterRouting and Authorization. These are actual single-partition DatabaseEngine operations with narrow effects/denial assertions; they do not prove cross-partition atomicity or RF3. `TransactionProtocolTests.MalformedMutationElementsBecomePersistedRejectionsRatherThanApplyExceptions` has per-argument candidate rows for document patch, event revision, topic, and sample negatives in the JSON sidecar; each is a narrow malformed-input persisted-rejection subflow, not its owning feature’s complete AC. The null generic mutation and oversized-frame scenario retain their separate proposals/unmapped reason. |
 
@@ -355,26 +227,6 @@ Admission/inbox ownership and the related CLR type migration are governed by
 AC-ADM-001..003 extend REQ-RESOURCE-001 / AC-RESOURCE-001 and AC-MP-006/012.
 TASK-MP-010J owns disjoint admission source/tests; the lead joins actual callers
 and exact GitHub evidence. Semaphore disposal must follow registered-reader drain.
-
-TASK-ADM-CATALOG-BOOTSTRAP refines REQ-RESOURCE-001 / AC-RESOURCE-001 and
-REQ-ADM-001 / AC-ADM-001 before integration. Original Linux RF3 startup with a
-4,096-byte data ceiling rejects the administrator-authenticated
-`BootstrapPhysicalShardCatalog` through the ordinary data lane before the test
-can exercise its public operations. Classify only that existing system startup
-command into the existing reserved control lane. Keep its control payload/byte,
-node/tenant/principal count ceilings, native queue ordering, authentication,
-authorization, one request grain and RF3 acknowledgement unchanged. The native
-governor regression must hold a full data reservation, reject another data
-command without counters changing, admit bootstrap through the bounded control
-reserve, reject exhausted control capacity, release both leases exactly once
-and admit a healthy following operation. The existing actual Aspire RF3
-`AdmissionClusterTests.FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable`
-must still start all three voters, reject `ConfigureResource` without claiming
-its command ID, reuse that ID for the authorized control operation, and report
-zero settled usage plus ready three-voter routing. No budget increase, bypass,
-bootstrap retry or alternate dispatcher is permitted. ADR-042 owns the ordered
-two-file implementation and original Linux qualification; local proof remains
-development evidence.
 
 No cache may outlive its authority/read cut without explicit invalidation. Mutable
 storage arrays cannot escape through a borrowing optimization. Cancellation and
@@ -533,115 +385,6 @@ measurement claim follows from authored counters or local static validation.
 
 Shared primitive/config/telemetry composition мають одного integration owner; бізнес-work і matching tests залишаються в owning `Features/<SliceName>/`. Configuration validation, invalid bounds, zero/empty work, overflow, cancellation/deadline і healthy follow-up входять до AC. Freeze shared limits → real regression source → feature fixes → integrated GitHub gates → actual measurements. Local doc review не доводить numeric coverage, memory ceilings чи performance gain; metrics публікуються тільки з successful GitHub JSON.
 
-### TASK-CACHE-EXPIRY-ORACLE: real prepare-origin expiry measurement
-
-REQ-CACHE-EXPIRY-ORACLE-001 preserves REQ-CACHE-004/005 and the existing
-15-second prepare-origin lease and 10-second acceptance ceiling. A real-clock
-test must distinguish prepare age from receipt age while observing the actual
-permit and native ZoneTree cache. Source clocks, production bounds and persisted
-authority are unchanged. ADR-058 already specifies this contract; no new boundary
-or timing semantics are introduced.
-
-AC-CACHE-EXPIRY-ORACLE-001 maps to
-`CacheReadPermitExpiryTests.LeaseExpiresAtFifteenSecondsFromItsPrepareTimestamp`
-and `ZoneTreeCoordinatedPointCacheReadTests.ExpiredWarmReceiptFallsBackToOneNativeReadWithIdenticalBytes`.
-Only these two methods are isolated with TUnit `NotInParallel`. Accept at a
-measured prepare age of at least six seconds and below the unchanged ten-second
-ceiling; use monotonic elapsed-time polling with a one-millisecond minimum delay.
-Observe after prepare age reaches fifteen seconds plus the existing fifty-
-millisecond boundary margin, and still require receipt age below fifteen seconds.
-Keep the original thirty-second caller bound, stale capture/revision rejection,
-renewal proof, identical bytes and exactly one native fallback lookup. Open, seed
-and compose the real ZoneTree store before starting its lease measurement.
-Neither a fake clock nor an increased lease/deadline or removed assertion is an
-acceptable correction. Preserve the two failed original Linux reports from
-run 37249197752 before recording any new local or exact-source Linux result.
-
-The lead freezes and reviews this scope, joins the source and owns Aspire tests,
-receipts and commits. The query worker owns a private patch for only the two
-existing Cases files and, if required, one cohesive real-clock Helpers file.
-Other test methods, cache admission and production code are outside this stage.
-
-## TASK-ADM-RUNTIME-JOURNAL-BOOTSTRAP (2026-10-07)
-
-This narrow refinement of REQ-RESOURCE-001 / AC-RESOURCE-001 and
-REQ-ADM-001 / AC-ADM-001 follows the actual R199 admission regression. The
-existing4096-byte user-data ceiling rejects the separately authenticated native
-`RuntimeJournalMutation(BootstrapIdentity)` at startup after catalog bootstrap.
-The fixture never reaches its unchanged user admission assertions. This private
-startup identity mutation must use the existing bounded control reservation.
-
-Classify only the native `OperationKind.RuntimeJournal`, typed action
-`BootstrapIdentity` and exact current empty bootstrap shape: empty journal name,
-Guid.Empty instance, zero owner/content revisions, null metadata ETag, empty
-data, initialized empty set/remove collections. Preserve current native HMAC
-authority validation, signed RuntimeJournalPurpose, verified principal binding,
-persisted administrator validation, protected-identity rejection and execution
-reauthorization. The lane is not authority; no caller-supplied purpose, role or
-lane flag may grant it. Kind-only RuntimeJournal remains data, as do Create,
-UpdateMetadata, Append, Replace and Delete. Malformed, unsupported, unauthenticated
-or oversized candidates must not gain control admission or state effects.
-
-Reuse native generated serialization/inspection and existing shape validation.
-Bound candidate inspection with the existing control payload ceiling, rejecting
-large candidates from control eligibility before materializing their body; do
-not decode large ordinary journal content solely for lane classification, copy
-a codec or let borrowed proxy strings escape as executable operations. Replica
-classification remains after native authority and exact payload validation.
-Record the admitted lane immutably once in the lease/command and route the inbox
-from that owned reservation, retaining native FIFO and bounded control-burst
-fairness. Preserve all data/control payload, bytes, count, tenant and principal
-limits, original cancellation, exactly-once reservation release, unique request
-grain, ordered node-local ownership and RF3 acknowledgement barriers.
-
-Root freezes ADR-042 and this contract. The Luna worker owns a private guarded
-packet in Core ResourceExecution/Commands (governor, inbox, lanes, admitted
-command and a cohesive classifier helper if needed),
-Replication/ClusterReplication/Admission/ReplicaNativeOperationAdmission.cs,
-and whole-operation UnitTests/Features/ResourceExecution cases/helpers. A new
-helper must preserve400-file/200-type/64-method syntax-token limits; do not
-expand a type or duplicate code to bypass them. Existing signed native APIs,
-wire fields, aliases, persisted format, dependency and public routes stay exact.
-Root reviews/joins and owns all native gates.
-
-Required positive/negative/edge flows fill the data reserve, reject a second
-ordinary mutation without quota/state effects, admit and execute the genuine
-identity bootstrap through bounded control, reject exhausted control capacity,
-and complete/fail/dispose/cancel with exact settled counters and a healthy
-following command. Ordinary journal actions, nonempty bootstrap shape, wrong
-principal/purpose/native authority and oversized candidates cannot use the
-startup reserve. Assert actual operation/state and owned queue settlement,
-not just classifier booleans or getters. Existing journal authority regressions
-remain mandatory. The unchanged actual native Aspire Docker RF3
-`AdmissionClusterTests.FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable`
-must start all three voters, reject data before claiming its command ID, reuse
-that ID for authorized control, keep3-voter readiness and report settled usage.
-Run normal/scalar focused operations, full Release/formatter/governance and
-actual SDK/official MCP RF3, then retain exact-source Linux evidence. All gates
-remain required; no increased cap, retry, alternate dispatcher or fixture-only
-authorization bypass repairs this product defect.
-
-The unit saturation cohort must retain valid signed evaluation times when the
-reserved bootstrap is dequeued before an already-admitted data command. R214
-passed98/99 owning cases; the new flow admitted/applied bootstrap successfully,
-then its earlier-timestamp data command correctly failed the existing
-ClockUncertain guard. Create the data operation first, sign its bootstrap
-control peer at that same captured evaluation instant, and create the later
-malformed/oversized candidates in their eventual apply order. Preserve the
-production committed-clock check, all authority and capacity assertions, exact
-state/error expectations and healthy following operations. This is fixture
-ordering under the existing contract, not a product clock exception.
-
-Local Stage V evidence now passes the actual owning operation cohort99/99 in
-normal R216 and scalar R217, without skips or source/assembly drift. R219 actual
-Aspire-owned Docker RF3 admission cases2/2 pass the unchanged data/control
-assertions through real SDK/MCP callers after native bootstrap admission.
-R222 full Release remains clean with zero warnings/errors. The original
-Stage III Linux RF3 node1 admission-exhaustion failure is retained separately;
-these local results do not qualify full Linux, mixed-load performance or every
-ResourceExecution acceptance gate. Those remain open.
-
-
 ## Independent query output ceiling, TASK-QUERY-RESULT-CAP-001
 
 REQ-QUERY-007 / AC-QUERY-007-JOIN-001 and AC-REL-004-JOIN-004/006 require the literal4096 complete joined-result rejection without disabling native RF3 startup. Authentic run37612238705 attempt1 SHA24c0ac47 job112762012221 retains node1/node2/node3 native startup failures: RuntimeJournalClient.ValidateOptions rejects default MaximumJournalBytes2097152 against MaxBatchBytes4096 minus required EnvelopeMetadataBytes65536. Even a minimum journal cannot fit a negative capacity. These are actual original log diagnostics; no bind or image mismatch is established. Raising4096 or reducing invalid journal quotas is inadmissible.
@@ -666,10 +409,6 @@ REQ-QUERY-001/003, AC-MP-003/012 and REQ/AC-FEED-002/003 under ADR-004/010/013/0
 
 LiveQueryResultCompositionTests use actual ZoneTree Start->multirow mutation->Read, individually fitting changes whose combined output exceeds4096, exact terminal error/noPartial/fullnative store bytes and position invariance, healthy smaller literal projection and complete checkpoint/cut/receipt/row metadata. A separate original request.MaxBytes page/resume flow proves candidates excluded by original pagination are not charged against retained query cap. Root owns discovery/native normal/scalar/full RF3 proof; source-only packet is unexecuted. Rollback removes internal callback, live admission helper and matching cases together; R2 default cap/native journal/auth contracts remain unchanged.
 
-### Scoped movement reconciliation read-grant view
-REQ-RESOURCE-001/002 and REQ-MOVE-002/007 under ADR-106 require original uncertain-phase reconciliation to share the actual initiating operation budget. The existing BudgetedReadView receives an optional already-owned native ReadExecutionBudgetReadGrant; its actual point/range storage observers charge that grant through the existing ChargeReadGrant rather than inventing a metric wrapper. The owning CreateView overload rejects a grant from another budget. Original un-granted callers keep their exact byte accounting, cancellation, deadline and view lifetime. Receiver query reports actual grant.ReadBytes/ExaminedRecords, authenticated parent imports those before retaining the original result. One explicit original-phase reconciliation query per actual request is the first contract; no implicit retry/query loop or new allowance exists. Original phase expiry/body remain immutable; fresh query expiry is constrained by the actual parent request. AC-MP-003/012 and AC-MOVE-002/007 require real retained-outcome/missing-outcome/changed-content/cancellation/healthy operation flows and native RF3 transport; source API inspection is not qualification.
-
-
 ### TASK-DBPROF-INVALID-RESERVATION-ORACLE-001
 
 REQ-RESOURCE-003/004 and AC-DBPROF-002 map `DatabasePhaseExecutionOptionsTests.StandaloneBclBoundaryRejectsBeforeEnabledOrDisabledCounterReservation` to actual BCL invalid stripe/CAS rejection with exact ArgumentOutOfRangeException.ParamName in BOTH enabled and disabled modes. Each measured rejected construction independently remains below the unchanged MinimumStripeCounterBytes counter-array lower bound. Runtime exception allocation need not be identical between modes; authentic eb0 normal4,-1 observed1088 versus1336 bytes, which does not establish counter reservation or a product defect. Preserve that failed original and every existing invalid-input case. No threshold growth, added prewarming, retry, skip or product/configuration change is permitted.
@@ -691,12 +430,7 @@ TASK-KL076-SEMANTIC-RECEIPT-003 retains the corrected runtime original failure: 
 
 TASK-KL076-ORIGINAL-FAILURE-004: the whole operation decodes its original native result before the full replay oracle, preserving the actual returned ErrorCode/SafeDetail exception on rejection rather than replacing it with a missing-value assertion. Every existing full result/model/raw-cut assertion remains. Original R3 failure is retained; no cause is assigned until original result evidence.
 
-TASK-KL076-NATIVE-SELECTED-CLOCK-005: original R4 returned ClockUncertain because the test submitted preissued commands with explicitTime=true after fair reordering. Actual ReplicaLeader.AppendOwned evaluates using state.Clock inside its selected leader gate before native append. The complete operation now uses existing TestDatabase.SubmitIssuedEmbedded with original cancellation; literal UpdatedAt is bound to the genuine retained native entry, with original command ID/principal/body equality, original complete receipt/replay and unchanged raw/cold assertions. No production clock, native authority, guard, quota or outcome changes. Original R4 remains failed and does not establish a product scheduler defect.
-
 REQ-RESOURCE-TENANT-SHUTDOWN-001 / AC-RESOURCE-TENANT-SHUTDOWN-001 / TASK-KL076-TENANT-SHUTDOWN-001: the existing complete tenant operation now additionally owns an independent native fixture proving Stop releases queued A/B leases with exact UnknownWriteOutcome/503/original detail and no storage/journal effects while retaining the selected original reservation. The selected genuine native producer ACKs; a fresh inbox re-admits the unchanged never-applied IDs, proves full literal receipts/models/replay, joins both inboxes and reopens the same native root for complete cold replay and healthy continuation. No new declaration/UID/product policy/clock/budget/timeout is introduced.
-
-REQ-TIME-PEER-001 / AC-TIME-PEER-001 / TASK-TIME-PEER-001: the genuine native peer signer and receiver use the same borrowed fixture TimeProvider. An unchanged original signed envelope expires without nonce or canonical effects; fresh real request/reply preserves every field/body/MAC and exact provider timestamp, then original duplicate refuses with unchanged complete native state. Existing System-clock controls and product clocks/config/defaults/aliases/quotas remain unchanged. The fixture-only optional provider and complete operation do not qualify RF3, database effects or the global call-site audit.
-
 
 ## Queue-owned command reservation transfer
 
@@ -714,7 +448,7 @@ Owned source: Core ResourceExecution AdmittedCommand and CommandTenantLane; exis
 REQ-MP-002/005, AC-MP-004/005/012; TASK-KL076-READ-GRANT-SETTLEMENT-001.
 The original scoped native grant retains its unused bytes/records while the real borrowed callback and scope own the read. CompleteSettledReadGrant rejects an active scope without mutation. A consumer IOException retains its original identity; native accepted bytes/record stay charged. After the original scope has exited, original caller cancellation rejects ordinary completion; cancellation-independent settled completion returns only the actual unused reservation, once. A fresh independent operation reads both original literal records under its unchanged aggregate ceiling. Full raw image and committed position remain unchanged throughout refusal/cleanup/healthy reads and same-root cold reopen.
 
-This is one complete Unit ZoneTree read/lifetime acceptance flow, not a new governor policy or proven production defect. No cancellation reset, deadline renewal, quota change, storage mutation, wire/schema/alias/API change, public transport, RF3 or physical-memory claim. Cross-owner ordinary CompleteReadGrant active-scope semantics remain untouched; the native movement caller audit is retained independently. No new native UID is assigned before authentic discovery. Current source-only; compiler/runtime/Linux gates remain open.
+This is one complete Unit ZoneTree read/lifetime acceptance flow, not a new governor policy or proven production defect. No cancellation reset, deadline renewal, quota change, storage mutation, wire/schema/alias/API change, public transport, RF3 or physical-memory claim. Cross-owner ordinary CompleteReadGrant active-scope semantics remain untouched. No new native UID is assigned before authentic discovery. Current source-only; compiler/runtime/Linux gates remain open.
 
 Owned paths: existing ResourceExecution settled-grant case; new feature-local failure settlement helper; ResourceExecution feature and ADR035 append-only contract. Original existing methods/assertions remain unchanged. Root alone integrates/builds/tests. Normal SIMD/default native50 entry applies when executed.
 

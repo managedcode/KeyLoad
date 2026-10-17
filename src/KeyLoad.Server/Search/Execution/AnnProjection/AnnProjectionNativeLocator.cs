@@ -9,7 +9,7 @@ internal sealed record AnnProjectionNativeLocator(int VoterIndex, string SiloAdd
         RegisteredPhysicalOwnerV1 owner, string principalId, AnnMaintenanceRequest original,
         DateTimeOffset expiry, global::KeyLoad.Core.ReadExecutionBudget work, CancellationToken cancellationToken)
     {
-        if (owner.Owner.VoterIds.Length != AnnProjectionNativeProtocol.RequiredVoters)
+        if (owner.Owner.VoterIds.IsDefaultOrEmpty)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid);
         }

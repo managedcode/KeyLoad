@@ -56,7 +56,7 @@ public enum OperationKind
     BootstrapPhysicalShardCatalog,
     /// <summary>Commits an explicit atomic-partition assignment to its physical shard.</summary>
     BindAtomicPartitionPlacement,
-    /// <summary>Changes private native runtime journal infrastructure through RF3.</summary>
+    /// <summary>Changes private native runtime journal infrastructure through replicated.</summary>
     RuntimeJournal,
     /// <summary>Composes independent queue receives through request grains; never replicated as one command.</summary>
     ReceiveAcrossLanes,
@@ -66,7 +66,7 @@ public enum OperationKind
     MaintainAnnIndex,
     /// <summary>Runs protected native text generation maintenance through independently authorized child requests.</summary>
     MaintainTextIndex,
-    /// <summary>Applies one receiver-verified private physical movement phase through RF3.</summary>
+    /// <summary>Applies one receiver-verified private physical movement phase through replicated.</summary>
     PartitionMovementPhase,
     /// <summary>Coordinates protected partition movement through separately authorized child requests.</summary>
     MovePartition,
@@ -94,7 +94,7 @@ public enum OperationKind
     DeliverRemoteGraphEdge = 44,
     /// <summary>Commits a freshly verified private BM25 corpus publication; excluded from generic public factories.</summary>
     Bm25CorpusPublicationPhase = 45,
-    /// <summary>Persists an authorized capacity placement policy at Control RF3.</summary>
+    /// <summary>Persists an authorized capacity placement policy at Control replicated.</summary>
     ConfigurePlacementPolicy = 46,
     /// <summary>Persists one original signed complete placement plan.</summary>
     PersistPlacementIntent = 47,

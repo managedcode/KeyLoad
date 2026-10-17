@@ -46,7 +46,7 @@ TASK-BC-PRESENTATION-005 maps REQ/AC-BC-PRESENTATION-005 to
 [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md). It explicitly supersedes
 the client/silo/mark illustration requirements in REQ/AC/TASK-BC-SCENE-001..003
 and the earlier hero topology/caption/SQL-terminal details in PRESENTATION-001/004;
-it does not change Orleans, RF3 or physical database ownership. Ordered stages:
+it does not change the Orleans cluster, replication or database storage. Ordered stages:
 freeze this contract before source writes; construct and batch native geometry;
 use the original fallback in the canonical emitted asset inventory; update native
 TUnit/Chrome assertions; join focused native tests and desktop/mobile animated
@@ -423,7 +423,7 @@ throughput, tail-latency or winner claim.
 | Task / acceptance | Owning paths | Caller-visible verification |
 |---|---|---|
 | TASK-PERF-002 / AC-PERF-004 | Harness PostgresComparisonSession; ComparisonTests PostgresStreamPublicRegression and existing PostgresSchemaPublicFlow join | Existing real Aspire PG target: seeded, absent, append, conflicting duplicate/no corruption, cancelled and healthy following event reads; no new SQL or doubles. |
-| TASK-PERF-003 / AC-PERF-002/003 | ComparisonHost settings/constants/owner and host-only validation; UnitTests real-child startup/bindings/cleanup cases | Exactly three distinct HTTP(S) peer origins with index0 matching primary; safe early invalid config; actual Basic-auth management client; all existing precedence/cleanup/secret checks retained. |
+| TASK-PERF-003 / AC-PERF-002/003 | ComparisonHost settings/constants/owner and host-only validation; UnitTests real-child startup/bindings/cleanup cases | Exactly three distinct HTTP(S) node origins with index0 matching primary; safe early invalid config; actual Basic-auth management client; all existing precedence/cleanup/secret checks retained. |
 | TASK-PERF-004 / AC-PERF-002/003 | AppHost Features/BenchmarkComparisons/BenchmarkCallerBindings and existing composition call | Actual node endpoints and broker management/user/password references; native three-copy and queue-member proofs remain mandatory. |
 | TASK-PERF-005 / AC-PERF-001/009 | Private GitHub native evidence; root-owned durable receipt/status | Exact c486 full relevant main baseline run37060131271, byte hashes/counts/failing cases; source-only builds cannot qualify tests. |
 | TASK-PERF-006/007 / AC-PERF-005–007 | Lead-owned native resource graph/registration, Docker load generator, bounded CI | Historical initial scope was nine engines and six profiles; current coverage follows the 11-target source plan and current scaled/vector profile inventory above. |
@@ -440,7 +440,7 @@ owned separately under BC028 and retains its distinct source/evidence boundary.
 
 ```mermaid
 flowchart LR
-    Aspire[Actual Aspire resources] --> Bindings[Three peers and broker references]
+    Aspire[Actual Aspire resources] --> Bindings[Three node endpoints and broker references]
     Bindings --> Host[Validated CLI composition]
     Host --> RF3[KeyLoad SDK and three-copy proof]
     Host --> Rabbit[Authenticated broker and queue proof]
@@ -662,7 +662,6 @@ qualification of the new matrix. Source and full GitHub/publication gates are pe
 | REQ-BC-050 Linux-only complete qualification | AC-ISO-001 | TASK-ISO-007/010/012; workflow inventory + actual fullLinux CI |
 | REQ-BC-051 one isolated agent per engine/node/scenario | AC-ISO-002 | TASK-ISO-007/009/010; closed current source plan (220 control, 176 scaled and 528 vector worker cells; 418 separately admitted pure/mixed/ingestion document cells) and native resource inventory |
 | REQ-BC-052 actual native1/3 and honest unsupported topology | AC-ISO-003 | TASK-ISO-005/009/010; independent membership/copies/ACK proof |
-| REQ-BC-053 explicit benchmark fixed-voter safety | AC-ISO-004 | TASK-ISO-005/010; negative configuration, SDK/MCP restart/quorum loss andRF3 |
 | REQ-BC-054 intensive shared CRUD correctness and raw failures | AC-ISO-005 | TASK-ISO-008/009/010; deterministic plan/oracle + real native full body/cardinality/absence |
 | REQ-BC-055 exact per-worker versioned JSON/provenance | AC-ISO-006 | TASK-ISO-008/010; strict single-target/scenario report and actual job identity |
 | REQ-BC-056 complete authenticated aggregation | AC-ISO-007 | TASK-ISO-006/010; real Node/files/TUnit corruption checks + GitHub job/artifact manifest |
@@ -679,9 +678,8 @@ mandatory under ADR-056's canonical worker-version admission repair.
 Canonical slice map: BenchmarkComparisons in Comparisons library, ComparisonHost,
 AppHost/Features, UnitTests/ComparisonTests/SiteTests/Features, scripts/Features,
 site/Features and this durable feature doc; shared workflow/architecture remain
-root-owned infrastructure. Benchmark voter validation remains ClusterReplication
-with ADR-007. Other public SQL/MCP contracts areN/A changed because existing native
-operations/authorization remain. No duplicate feature behavior belongs in a layer.
+root-owned infrastructure. Public SQL/MCP contracts are N/A changed because
+existing native operations/authorization remain. No duplicate feature behavior belongs in a layer.
 
 ```mermaid
 flowchart LR
@@ -739,7 +737,7 @@ flowchart LR
 
 
 Native baseline repair traceability is frozen in ADR056 TASK-ISO-026K/R/PG/M:
-REQ-BC-052/053/055 map to AC-ISO-002/003/004/005/006, original failing GitHub
+REQ-BC-052/055 map to AC-ISO-002/003/005/006, original failing GitHub
 jobs and new genuine per-engine SDK/Redis-copy/PostgreSQL-slot/Mongo-auth
 regressions. Root joins these only in each selected engine's isolated topology
 job. The exact2f source/native receipt (report removed from repository)
@@ -776,8 +774,7 @@ ADR056 TASK-ISO-032H/AC-HT-032-001..003 retains one referenced original HTTP lif
 REQ-BC059/061/063/064 and AC-TSI001/003/006/007/008 now map staged
 AC-TB009-001/AC-TH009-001..004 to ADR059 TASK-ISO-TS009B/H-A/H-S/H-I. The
 TS009B source receipt (report removed from repository)
-records the actual incarnation parameter and canonical voter bindings, all three
-original model cases, development build/formatter and explicit native limitations.
+records all three original model cases, development build/formatter and explicit native limitations.
 H-A owns one selected native composition and original family hash/cell identity;
 H-S owns closed private settings using shared actual source/image provenance.
 Neither dispatches the incomplete native lifecycle. Caller-visible positive,

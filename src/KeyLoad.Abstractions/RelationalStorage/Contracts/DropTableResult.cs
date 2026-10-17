@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Reports the actual final catalog RF3 commit after completed owner settlement and logical cleanup.</summary>
+/// <summary>Reports the actual final catalog replicated commit after completed owner settlement and logical cleanup.</summary>
 /// <param name="TenantId">The tenant scope.</param>
 /// <param name="DatabaseId">The database scope.</param>
 /// <param name="ResourceName">The resolved table name.</param>

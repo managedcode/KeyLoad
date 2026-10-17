@@ -700,3 +700,26 @@ A bounded website qualification candidate contains the20-project historical runt
 - Ordinary deployments configure Orleans silo membership independently from the physical replication factor, including counts 1, 2, 3 and 5. Preserve RF3 as the default and all original RF3 qualification suites; the earlier fixed-three default is not a prohibition on independently configured deployments.
 - Replication factors must be positive and cannot exceed available silo nodes. Preserve majority acknowledgement, node-local ZoneTree ownership, persisted authorization and native Orleans membership. Additional coordination-only silos do not own physical replicas or expose database operations. Do not claim live replica resizing or storage-free database execution from startup configuration.
 - See docs/ADR/ADR-143-independent-silo-replica-topology.md. Even replica groups retain true majority semantics; RF2 requires both voters and RF1 has no replica fault tolerance.
+
+## Owner correction: configurable replication, 2026-10-17
+
+The owner rejects RF3 as an active product name or fixed copy-count restriction.
+`KeyLoad:SiloCount` configures cluster participants and `KeyLoad:ReplicaCount`
+independently configures physical copies (positive, no larger than the node count).
+Three is only the default. Product catalogs, routing, validation and restore use
+actual configured group sizes; no product operation may require exactly three
+copies. Preserve majority acknowledgement, native Orleans membership, node-local
+ZoneTree ownership, current credentials and immutable historical receipts. Explicit
+three-copy qualification scenarios remain examples with their true topology.
+
+The owner explicitly rejects `ClusterTopologyLimits` and a KeyLoad-imposed maximum
+silo count. Orleans exclusively owns cluster membership, failure detection,
+directory, placement and activation movement. Do not add a parallel cluster
+manager or reinterpret metadata/RPC byte budgets as a cluster-size restriction.
+
+## Super rule: Orleans is the whole cluster, owner correction 2026-10-18
+
+- Microsoft Orleans does all clustering: membership, silo discovery, failure detection, distributed grain directory, placement, activation migration/repartitioning, internal communication and scaling. Copying data to replicas also happens only through ordinary Orleans grain/Grain Service calls; `KeyLoad:ReplicaCount` is just the number of copies. KeyLoad MUST NOT design, implement or document its own clustering: no own consensus/terms/leaders/votes, membership tables or providers, silo discovery, peer transports, physical owner directories, shard catalogs, placement/packing/capacity managers, partition movement/transfer/split/merge protocols, ownership epochs/session tokens/leases for cluster authority, coordination-only silo roles or topology limits.
+- The whole execution concept is: public API → one Orleans grain per connected client → grains call the silo-local ZoneTree owner on their own node or on other nodes through Orleans, gather the results and return them. Every silo has its own ZoneTree that owns its files (stores, WAL, locks, ordered apply); files never move with activations. Write clear Orleans code for this; nothing more.
+- Documentation (Architecture, ADRs, feature specs, design docs, README) MUST describe only this concept. Delete documents and passages describing self-written cluster mechanisms instead of keeping them as history or open plans. This rule-specific owner direction supersedes every earlier root/local/ADR/feature requirement for KeyLoad-owned replica consensus, physical placement/movement, peer discovery/authentication protocols and coordination-only silos (including the 2026-10-17 coordination-only silo clause); keep persisted authorization, bounded admission, node-local ZoneTree ownership and real Aspire/TUnit SDK/MCP tests.
+- Owner correction 2026-10-18: background work (queue deadlines/due and recurring work, remote queue transfers, ANN projection, time-series chunking and similar) MUST NOT check leadership (`IsLeaderAsync()` or any leader/consensus gate). Use Orleans `[StatelessWorker]` grains: each worker accepts events, buffers them, and on an Orleans timer (for example every 5 seconds; the interval is a typed option) writes the batch to the database through the normal grain → ZoneTree owner path. This is the only accepted pattern for such work.

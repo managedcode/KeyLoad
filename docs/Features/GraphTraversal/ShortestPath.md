@@ -16,7 +16,7 @@ borrows that original budget without restarting or disposing it.
 Find one shortest directed outgoing path between full document EntityRef values
 inside one atomic partition and one current persisted-authorized committed
 ZoneTree read cut. Explicit breadth-first depth frontiers execute in the
-node-local storage owner. Orleans uses one request grain and native ManagedCode
+node-local storage owner. Orleans routes the request from the client's connection grain with native ManagedCode
 CQRS. No per-edge RPC or borrowed storage value escapes the gate.
 
 `GraphShortestPathRequest` version1 generated IDs: 0 Version, 1 Partition,
@@ -69,7 +69,7 @@ foreign endpoint, which fails UnsupportedCapability.
 | REQ-GRAPH-007: shortest path and explicit depth frontiers | AC-GRAPH-006: independent input-model BFS agrees on ordered full EntityRef vertices and edges for direct/longer/converging paths, shuffled insertion, overlapping IDs across collections, cycles/self-loops, unreachable and depth0/exact/one-short cases. Equal-hop ties follow frontier discovery order then native ordinal edge-ID order. GraphShortestPathTests and independent GraphPath reference oracle. |
 | REQ-GRAPH-008: one authorized current read cut | AC-GRAPH-007: denied graph/source collection propagates PermissionDenied; missing/hidden/deleted source is NotFound. Hidden/missing/denied/deleted target and hidden intermediate give the same closed no-path result. A nonempty label filter requires the persisted graph `/label` field policy `RawUseGrant`; `RawReadGrant` is distinct and does not authorize filter use. A missing use grant returns `PermissionDenied` before adjacency traversal; null/empty labels do not apply this field-use check. Edge `AttributesJson` is projected by current persisted graph policy. Actual-store revocation/read-cut plus SDK/official MCP Linux RF3 failover cases exclude stale/hidden payload. |
 | REQ-GRAPH-009: finite node/edge/time/byte work | AC-GRAPH-008: charge every examined candidate before label/visibility filtering. Exact required node/edge cap succeeds; one less throws BudgetExceeded without partial success. Check cancellation/deadline during every frontier, scan, dereference, predecessor walk and output. Retention is admitted before insertion; exact output includes protocol metadata. Real during-work cancellation and healthy follow-up preserve committed position. |
-| REQ-GRAPH-010: shared SQL/SDK/MCP execution | AC-GRAPH-009: literal/parameter SQL matches direct result/CutPosition/errors. Reject malformed versions/syntax/parameters, extra statements, foreign partitions and exhausted bounds. Real Aspire RF3 SDK/official MCP preserve one request grain and native CQRS lifecycle; official discovery verifies both `keyload_graph_shortest_path` and `keyload_query_graph_path`, exact typed request/result schemas, and read-only/idempotent/non-destructive hints against the independent ClientApi oracle. Nested `PartitionRef` has exactly its four identity fields plus computed `atomicPartitionId`; only the four identity fields are required. |
+| REQ-GRAPH-010: shared SQL/SDK/MCP execution | AC-GRAPH-009: literal/parameter SQL matches direct result/CutPosition/errors. Reject malformed versions/syntax/parameters, extra statements, foreign partitions and exhausted bounds. Real Aspire replicated-cluster SDK/official MCP preserve the connection-grain and native CQRS lifecycle; official discovery verifies both `keyload_graph_shortest_path` and `keyload_query_graph_path`, exact typed request/result schemas, and read-only/idempotent/non-destructive hints against the independent ClientApi oracle. Nested `PartitionRef` has exactly its four identity fields plus computed `atomicPartitionId`; only the four identity fields are required. |
 
 ## Execution and bounds
 
@@ -117,61 +117,50 @@ aggregate RSS bound.
 
 ## Ordered ownership, verification and rollout
 
-1. Root freezes this spec/ADR before the Luna worker prepares private new
+1. The spec/ADR is frozen before implementation adds
    Abstractions/GraphTraversal/Contracts/GraphShortest/GraphShortestPathRequest.cs and
    GraphShortestPathResult.cs with feature-local GraphShortestPathContractAliases.cs;
    Core/Features/GraphTraversal/Queries/
    DatabaseEngine.GraphShortestPath.cs, GraphShortestPathReader.cs and cohesive
    local Models/Execution/Validation files. The only existing helper edit is
-   Execution/GraphVertexVisibility.cs admission hooks. No shared routing/Git edits.
-2. A separate independent worker owns new UnitTests GraphTraversal/Cases,
-   Assertions and Helpers against real TestDatabase/ZoneTree state, covering the
-   reference, policy, exact/excess budgets and actual cancellation matrix.
-3. Root owns the SQL integration. After the Core packet is frozen, the separate
-   Luna Query worker may prepare only new QueryExecution contract/parser/value/
-   syntax/executor files and independent SQL parity/rejection cases privately.
-   The exact public method is QueryEngine.ShortestPathSql(string principalId,
+   Execution/GraphVertexVisibility.cs admission hooks.
+2. New UnitTests GraphTraversal/Cases, Assertions and Helpers run against real
+   TestDatabase/ZoneTree state, covering the reference, policy, exact/excess
+   budgets and actual cancellation matrix.
+3. SQL integration adds new QueryExecution contract/parser/value/syntax/executor
+   files and independent SQL parity/rejection cases after the Core contract is
+   frozen. The exact public method is QueryEngine.ShortestPathSql(string principalId,
    SqlGraphPathRequest request, TimeProvider? timeProvider=null,
    CancellationToken cancellationToken=default), returning GraphShortestPathResult.
    It starts one budget before parse/admission and calls the internal Core
-   budget-taking entry. Root alone joins QueryEngine's existing capability list,
-   native dispatch, any required friend boundary and all source/gates/Git.
-4. Root owns appended Orleans read-kind/capability/result dispatch; Server
+   budget-taking entry. QueryEngine's existing capability list and native dispatch
+   are the only join points.
+4. Orleans read-kind/capability/result dispatch is appended; Server
    POST /v1/graph/shortest-path and POST /v1/query/graph-path; official MCP catalog
-   and tools following its existing naming/schema contract; typed Client calls;
-   IntegrationTests real SDK/official MCP graph/SQL revocation/failover joins.
-   The separately assigned Luna integration worker may prepare only new
-   IntegrationTests/Features/GraphTraversal/Cases, Helpers and Assertions files
-   privately. Frozen tools are keyload_graph_shortest_path and
+   and tools follow the existing naming/schema contract; typed Client calls;
+   IntegrationTests real SDK/official MCP graph/SQL revocation/failover cases.
+   Frozen tools are keyload_graph_shortest_path and
    keyload_query_graph_path; SDK extensions are ShortestPathAsync and
-   ShortestPathSqlAsync, each returning Result<GraphShortestPathResult>. A leader
-   loss uses the explicit graph-path-rf3-leader-loss fault scope and only the
-   fixture-owned RF3 resource. The current fixture has no centralized scenario
-   allowlist; its named call-site scope and resource ownership are retained.
-   Use the real shared Aspire ClusterFixture
-   and official MCP client; recover/restart every owned stopped node and retain
-   primary/cleanup failures. No independent Docker launch or fabricated topology.
-   A separately assigned Luna client worker may prepare only new
-   Client/Features/GraphTraversal/Transport/GraphPathClient.cs and
-   Client/Features/QueryExecution/Transport/GraphPathQueryClient.cs privately,
-   using the existing KeyLoadClient.Send transport, cancellation and Result
-   contract. Root reviews and joins these calls with the routes and real client
-   tests; the worker cannot introduce another dispatcher or change transport.
-5. Root reviews base/post hashes and all code, runs strict Release/format/
-   governance plus actual Aspire normal/scalar/process/RF3 gates, retains original
-   exact Linux SHA/run/artifacts, updates the full KL-023 acceptance chain honestly,
-   and commits all current code after each stage. Focused passes cannot close
-   KL-023 or waive complete required suites.
+   ShortestPathSqlAsync, each returning Result<GraphShortestPathResult>. Cases
+   use the real shared Aspire ClusterFixture and official MCP client; recover and
+   restart every owned stopped node and retain primary/cleanup failures. No
+   independent Docker launch or fabricated topology. The typed Client calls use
+   the existing KeyLoadClient.Send transport, cancellation and Result contract
+   and introduce no other dispatcher.
+5. Strict Release build, format, governance and the actual Aspire
+   normal/scalar/process/replicated-cluster gates run with exact Linux
+   SHA/run/artifacts retained, and the full KL-023 acceptance chain is updated
+   honestly. Focused passes cannot close KL-023 or waive complete required suites.
 
 Frontend is N/A: a database read capability. Weighted/cross-partition paths
-require separate contracts. No canonical format, data migration, replica
-membership or acknowledgement changes. Rollout adds explicit version1 reads;
+require separate contracts. No canonical format, data migration or
+acknowledgement changes. Rollout adds explicit version1 reads;
 unsupported versions fail closed. Rollback removes new read registration; existing
 operations and acknowledged ZoneTree data require no rewrite.
 
 ```mermaid
 flowchart LR
-    SQL[Bounded SQL compile] --> Request[One signed request grain]
+    SQL[Bounded SQL compile] --> Request[Client connection grain]
     SDK[SDK or official MCP] --> Request
     Request --> Owner[Authorized node-local committed read]
     Owner --> Frontier[Depth frontiers and charged native adjacency]
@@ -179,14 +168,6 @@ flowchart LR
     Path --> Result[Bounded native CQRS result]
 ```
 
-
-## TASK-GRAPH-RF3-UNKNOWN-RECONCILIATION-001 (source-only acceptance amendment)
-
-Preserves REQ-GRAPH-010 / AC-GRAPH-009 and REQ/AC-REP-003 stable-command outcomes under original fixture-owned graph-path-rf3-leader-loss. Original Linux run37612238705/attempt1/job112762012221/SHA24c0ac47 actual AcGraph009 failed on UnknownWriteOutcome after leader loss; that failure is immutable. Unknown does not establish either commit or absence. Native KeyLoadClient.CommitAsync is the existing public canonical CommitReceipt operation with caller-owned stable command identity. There is no generic public read-only command receipt lookup; specialized queue-transfer inspection is unrelated and cannot substitute.
-
-Freeze before code: capture the original CommandRequest exactly once, preserve its original partition/mutation bytes, existing administrator principal/client and unchanged original initiating deadline/token. Only an actual first UnknownWriteOutcome admits ONE awaited same-object CommitAsync reconciliation. Any other first error, any unsuccessful reconciliation (including another unknown), and cancellation remain failure. No loops, new IDs, alternate caller, sleep/backoff, generic election retry, health-only success or deadline extension. A successful receipt must come from the real SDK, never inferred from readiness or path existence. After actual canonical success, one same-command receipt replay must return byte-identical complete CommandId/token/mutations/durability. Literal mutation upsertEdge/exact graph+edge/revision1 and complete shortcut edge endpoints/label/attributes{} /revision1 prove one logical graph effect. This also applies when initial call succeeds.
-
-Owning paths: existing IntegrationTests GraphTraversal Helpers/GraphPathRf3LeaderLoss.cs and cohesive Helpers/GraphPathRf3CommandReconciliation.cs. The existing real AcGraph009 flow is the regression; no fake provider/probe is introduced. All original survivor SDK and official MCP path checks, restored-node health/native status/catchup, every replica SDK path and restored-node official MCP path remain, strengthened with exact shortcut edge equality. Cleanup retains primary and all original stop/restart errors. Dependencies unchanged; no migration/public dispatcher/consensus repair. Root guards/joins/builds and runs exact native AcGraph009 plus mandatory full gates. Source reconstruction is unqualified. Rollback removes helper/calls/oracle amendments together, without changing canonical identity or RF3 policies.
 
 ## TASK-GRAPH-PATH-CORRUPTION-001 — actual persisted adjacency refusal
 

@@ -9,7 +9,6 @@ internal static class RemoteModelNativeIdentity
 {
     private const int NativeNonceCharacters = 32;
     private const string NonceFormat = "N";
-    private const int RequiredReplicaVoters = 3;
     private const int EmptySignatureCharacters = 0;
 
     internal static bool ValidNonce(string? value)
@@ -43,7 +42,6 @@ internal static class RemoteModelNativeIdentity
             || !Signature(request.Signature) || !Signature(request.SenderSignature)
             || request.SourceOwner is null || request.DestinationOwner is null
             || request.SourceOwner.VoterIds.IsDefaultOrEmpty || request.DestinationOwner.VoterIds.IsDefaultOrEmpty
-            || request.SourceOwner.VoterIds.Length != RequiredReplicaVoters || request.DestinationOwner.VoterIds.Length != RequiredReplicaVoters
             || string.IsNullOrEmpty(request.CallerVoter) || string.IsNullOrEmpty(request.DestinationVoter)
             || request.CallerVoter.Length > ReplicaTransportProtocol.MaximumIdentityCharacters
             || request.DestinationVoter.Length > ReplicaTransportProtocol.MaximumIdentityCharacters

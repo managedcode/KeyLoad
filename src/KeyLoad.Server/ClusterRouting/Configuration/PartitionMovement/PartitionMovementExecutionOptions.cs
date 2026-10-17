@@ -7,7 +7,7 @@ internal sealed class PartitionMovementExecutionOptions
     internal const string SectionName = "KeyLoad:PartitionMovementExecution";
     internal const string ValidationMessage = "Partition movement requires a typed execution configuration.";
 
-    /// <summary>Enables configured movement receivers; default RF3 admission remains closed.</summary>
+    /// <summary>Enables configured movement receivers; default replicated admission remains closed.</summary>
     public bool Enabled
     {
         get; set;

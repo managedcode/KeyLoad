@@ -86,9 +86,9 @@ Workers must stop on ambiguity, overlapping ownership, changed contracts or a po
 ## Traceability and evidence
 
 TASK-DOCS-CURRENT-PATHS refines AC-DOCS-005/008 and AC-MCAF-010 after the owner's
-responsibility-folder migration. Root owns integration; Luna cluster_wave owns
-only a private proposed update of docs/implementation/status.json evidence paths
-and its explicit mapping receipt. Replace a moved path only after identifying its
+responsibility-folder migration. Root owns integration and the proposed update of
+docs/implementation/status.json evidence paths with its explicit mapping.
+Replace a moved path only after identifying its
 actual current file and owning task semantics; expand split files to the relevant
 current slice files. Unique basename matches are evidence, not permission to
 guess a renamed implementation. Preserve every task, status, title, requirement,

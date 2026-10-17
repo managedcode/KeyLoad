@@ -56,7 +56,7 @@ public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
     internal Task<bool> HasNativeJournalCohortAsync(CancellationToken cancellationToken)
         => cohort.HasNativeJournalCohortAsync(cancellationToken);
 
-    /// <summary>Whether fresh authenticated observations prove the compatible RF3 majority.</summary>
+    /// <summary>Whether fresh authenticated observations prove the compatible replicated majority.</summary>
     public bool HasCompatibleCohort => cohort.HasCompatibleCohort;
 
     /// <summary>Observes the same fixed-voter predicate without refreshing or authorizing discovery.</summary>

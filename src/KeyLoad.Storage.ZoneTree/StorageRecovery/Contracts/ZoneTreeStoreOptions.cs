@@ -52,7 +52,7 @@ public sealed record ZoneTreeStoreOptions(string Directory)
         init => maxSnapshotBytesOverride = value;
     }
     /// <summary>Explicit embedded-only cache opt-in with an externally owned shared node budget.</summary>
-    /// <remarks>RF3 server composition stays cold until authenticated Orleans coordination is enabled.</remarks>
+    /// <remarks>replicated server composition stays cold until authenticated Orleans coordination is enabled.</remarks>
     public ZoneTreePointCacheOptions? EmbeddedPointCache
     {
         get; init;

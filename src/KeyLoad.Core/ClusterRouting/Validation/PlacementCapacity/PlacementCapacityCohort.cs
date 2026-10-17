@@ -6,18 +6,16 @@ namespace KeyLoad.Core.Features.ClusterRouting.Validation;
 internal static class PlacementCapacityCohort
 {
     private const int PhysicalOwnerGroups = 2;
-    private const int CohortSize = 6;
-    private const int OwnerVoters = 3;
     private const int NoCapacity = 0;
 
     internal static ImmutableArray<OwnerCapacitySnapshotV1> Require(
         ImmutableArray<OwnerCapacitySnapshotV1> snapshots, string cohort, DateTimeOffset now)
     {
-        if (snapshots.IsDefault || snapshots.Length != CohortSize
-            || snapshots.Select(item => item.VoterId).Distinct(StringComparer.Ordinal).Count() != CohortSize
-            || snapshots.Select(item => item.SiloAddress).Distinct(StringComparer.Ordinal).Count() != CohortSize
-            || snapshots.Select(item => item.Nonce).Distinct().Count() != CohortSize
-            || snapshots.Select(item => item.RequestId).Distinct().Count() != CohortSize
+        if (snapshots.IsDefault || snapshots.Length < PhysicalOwnerGroups
+            || snapshots.Select(item => item.VoterId).Distinct(StringComparer.Ordinal).Count() != snapshots.Length
+            || snapshots.Select(item => item.SiloAddress).Distinct(StringComparer.Ordinal).Count() != snapshots.Length
+            || snapshots.Select(item => item.Nonce).Distinct().Count() != snapshots.Length
+            || snapshots.Select(item => item.RequestId).Distinct().Count() != snapshots.Length
             || snapshots.Any(item => item.CohortFingerprint != cohort || item.Nonce == Guid.Empty
                 || item.RequestId == Guid.Empty || item.Resource.SampledAt > now || item.Resource.ExpiresAt <= now
                 || string.IsNullOrWhiteSpace(item.Resource.HostDomain) || item.Resource.MemoryLimitBytes <= NoCapacity
@@ -33,7 +31,8 @@ internal static class PlacementCapacityCohort
             throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
         }
         var groups = snapshots.GroupBy(item => item.Owner.PhysicalShardId).ToArray();
-        if (groups.Length != PhysicalOwnerGroups || groups.Any(group => group.Count() != OwnerVoters))
+        if (groups.Length != PhysicalOwnerGroups || groups.Any(group => group.First().Owner.VoterIds.IsDefaultOrEmpty
+            || group.Count() != group.First().Owner.VoterIds.Length))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
         }

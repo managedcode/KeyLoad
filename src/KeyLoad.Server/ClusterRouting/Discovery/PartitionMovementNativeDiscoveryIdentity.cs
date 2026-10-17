@@ -57,17 +57,21 @@ internal static class PartitionMovementNativeDiscoveryIdentity
 
     internal static string Secret(NodeOptions options, ReplicaConfiguration configuration, RegisteredPhysicalOwnerV1 owner)
     {
+        var local = PhysicalOwnerConfiguredTuples.Local(options, configuration);
+        if (PhysicalOwnerEntryValidation.SameOwner(owner.Owner, local.Owner))
+        {
+            return options.PeerSecret;
+        }
+        if (options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var control = PhysicalOwnerConfiguredTuples.Control(options, configuration);
         var destination = PhysicalOwnerConfiguredTuples.Destination(options, configuration);
         if (!PhysicalOwnerEntryValidation.SameOwner(owner.Owner, control.Owner)
             && !PhysicalOwnerEntryValidation.SameOwner(owner.Owner, destination.Owner))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
-        }
-        var local = PhysicalOwnerConfiguredTuples.Local(options, configuration);
-        if (PhysicalOwnerEntryValidation.SameOwner(owner.Owner, local.Owner))
-        {
-            return options.PeerSecret;
         }
         return options.PhysicalGroupTrust.ForeignPeerSecret
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);

@@ -6,11 +6,10 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Cli.Features.BackupRestore;
 
-/// <summary>Owns one all-groups unpublished offline restore; it never starts or bypasses an RF3 host.</summary>
+/// <summary>Owns one all-groups unpublished offline restore; it never starts or bypasses an replicated host.</summary>
 internal static class ClusterRestoreCoordinator
 {
     private const string Invalid = "The configured cluster restore vector or node binding is invalid.";
-    private const int RequiredVoters = 3;
     private const int MaximumSigningKeyCharacters = 44;
 
     internal static ClusterRestoreExecutionReceipt Run(IOptions<ClusterRestoreOperatorConfiguration> configuration,
@@ -86,7 +85,7 @@ internal static class ClusterRestoreCoordinator
     internal static void RequireNodes(string root, ClusterRestoreOperatorConfiguration options,
         ImmutableArray<ClusterRestoreOwnerMapping> mappings)
     {
-        if (options.Nodes.Length != checked(mappings.Length * RequiredVoters))
+        if (options.Nodes.Length != mappings.Sum(mapping => mapping.Target.VoterIds.Length))
         {
             throw Errors.Fail(ErrorCode.Validation, Invalid);
         }
@@ -94,7 +93,7 @@ internal static class ClusterRestoreCoordinator
         foreach (var mapping in mappings)
         {
             var nodes = options.Nodes.Where(node => node.SourceOwnerId == mapping.Source.PhysicalShardId).ToArray();
-            if (nodes.Length != RequiredVoters
+            if (nodes.Length != mapping.Target.VoterIds.Length
                 || !nodes.Select(node => node.VoterId).Order(StringComparer.Ordinal)
                     .SequenceEqual(mapping.Target.VoterIds.Order(StringComparer.Ordinal), StringComparer.Ordinal))
             {

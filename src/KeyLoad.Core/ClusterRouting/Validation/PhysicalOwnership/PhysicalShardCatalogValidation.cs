@@ -28,8 +28,7 @@ internal static class PhysicalShardCatalogValidation
     {
         if (request is null || request.Version != PhysicalShardCatalogProtocol.CurrentVersion
             || request.PhysicalShardId == Guid.Empty
-            || request.Incarnation == Guid.Empty || request.VoterIds.IsDefaultOrEmpty
-            || request.VoterIds.Length > PhysicalShardCatalogProtocol.MaximumVoters)
+            || request.Incarnation == Guid.Empty || request.VoterIds.IsDefaultOrEmpty)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
@@ -86,7 +85,7 @@ internal static class PhysicalShardCatalogValidation
     }
 
     private static bool ValidVoters(ImmutableArray<string> voterIds)
-        => !voterIds.IsDefaultOrEmpty && voterIds.Length <= PhysicalShardCatalogProtocol.MaximumVoters
+        => !voterIds.IsDefaultOrEmpty
             && voterIds.All(static id => !string.IsNullOrWhiteSpace(id)
                 && id.Length <= PhysicalShardCatalogProtocol.MaximumVoterIdBytes
                 && Encoding.UTF8.GetByteCount(id) <= PhysicalShardCatalogProtocol.MaximumVoterIdBytes)

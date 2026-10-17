@@ -13,10 +13,6 @@ internal sealed class ReplicaNativeDiscoveryMembership(ISiloStatusOracle oracle,
     internal SiloAddress? Resolve(string voter)
     {
         var active = oracle.GetApproximateSiloStatuses(onlyActive: true);
-        if (active.Count > options.Value.MaximumRows)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.InvalidDiscovery);
-        }
         SiloAddress? selected = null;
         foreach (var entry in active)
         {
@@ -43,10 +39,6 @@ internal sealed class ReplicaNativeDiscoveryMembership(ISiloStatusOracle oracle,
     internal ImmutableArray<ReplicaNativeMembershipEntry> ReadActive()
     {
         var active = oracle.GetApproximateSiloStatuses(onlyActive: true);
-        if (active.Count > options.Value.MaximumRows)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.InvalidDiscovery);
-        }
         var names = new HashSet<string>(StringComparer.Ordinal);
         var rows = new List<(SiloAddress Address, ReplicaNativeMembershipEntry Entry)>(active.Count);
         foreach (var item in active)
@@ -64,10 +56,6 @@ internal sealed class ReplicaNativeDiscoveryMembership(ISiloStatusOracle oracle,
             rows.Add((item.Key, new(name!, address)));
         }
         var current = oracle.GetApproximateSiloStatuses(onlyActive: true);
-        if (current.Count > options.Value.MaximumRows)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.InvalidDiscovery);
-        }
         if (current.Count != rows.Count)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);

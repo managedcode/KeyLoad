@@ -6,8 +6,8 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class ReplicaMembershipReadiness
 {
-    private const int ExpectedActiveSilos = 6;
     private const int SnapshotVersion = 1;
+    private const int EmptyCount = 0;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     internal static async Task<MembershipReadinessSnapshot?> ReadNodeAsync(bool siloJoined, IServiceProvider? services,
@@ -47,7 +47,7 @@ internal static class ReplicaMembershipReadiness
     {
         token.ThrowIfCancellationRequested();
         bounds.Validate();
-        if (view.IsDefault || view.Length != ExpectedActiveSilos || view.Length > bounds.MaximumRows)
+        if (view.IsDefault)
         {
             return null;
         }
@@ -80,8 +80,8 @@ internal static class ReplicaMembershipReadiness
 
     private static HashSet<string>? ExpectedNames(NodeOptions options, OrleansMembershipOptions bounds)
     {
-        const int GroupVoters = 3;
-        if (options.Peers.Count != GroupVoters || options.PhysicalGroupTrust.ForeignVoterIds.Length != GroupVoters)
+        if (!options.Peers.Any()
+            || options.PhysicalGroupTrust.ForeignVoterIds.Length == EmptyCount)
         {
             return null;
         }

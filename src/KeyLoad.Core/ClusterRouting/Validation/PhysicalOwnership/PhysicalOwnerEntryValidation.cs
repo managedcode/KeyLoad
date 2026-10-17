@@ -19,8 +19,8 @@ internal static class PhysicalOwnerEntryValidation
         var owner = entry.Owner;
         if (owner is null || owner.PhysicalShardId == Guid.Empty || owner.Incarnation == Guid.Empty
             || owner.PlacementEpoch != PhysicalOwnerDirectoryProtocol.InitialEpoch
-            || owner.VoterIds.IsDefault || owner.VoterIds.Length != PhysicalOwnerDirectoryProtocol.VoterCount
-            || entry.Endpoints.IsDefault || entry.Endpoints.Length != PhysicalOwnerDirectoryProtocol.VoterCount)
+            || owner.VoterIds.IsDefaultOrEmpty
+            || entry.Endpoints.IsDefault || entry.Endpoints.Length != owner.VoterIds.Length)
         {
             return false;
         }

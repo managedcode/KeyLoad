@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
-/// <summary>Persists only actual owner RF3 work acknowledgements, independently of volatile join handles.</summary>
+/// <summary>Persists only actual owner replicated work acknowledgements, independently of volatile join handles.</summary>
 internal static class ResourceRetirementWorkStorage
 {
     private const string OwnerSpace = "resource-retirement-owner-work-v1";

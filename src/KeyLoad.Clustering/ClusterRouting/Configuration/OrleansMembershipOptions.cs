@@ -13,8 +13,6 @@ public sealed class OrleansMembershipOptions
     private const int MaximumReplyBytesCeiling = 262_144;
     private const int MaximumSnapshotBytesCeiling = 262_144;
     private const int MaximumRowBytesCeiling = 4_096;
-    /// <summary>Existing supported native membership admission ceiling, shared with deployment validation.</summary>
-    public const int MaximumSupportedRows = 48;
     private const int MaximumSuspectsCeiling = 6;
     private const int MaximumAddressBytesCeiling = 256;
     private const int MaximumHeaderBytesCeiling = 4_096;
@@ -69,8 +67,6 @@ public sealed class OrleansMembershipOptions
     public int MaximumSnapshotBytes { get; set; } = MaximumSnapshotBytesCeiling;
     /// <summary>Gets or sets the bounded native row bytes.</summary>
     public int MaximumRowBytes { get; set; } = MaximumRowBytesCeiling;
-    /// <summary>Gets or sets the bounded authority rows.</summary>
-    public int MaximumRows { get; set; } = MaximumSupportedRows;
     /// <summary>Gets or sets the bounded suspects per row.</summary>
     public int MaximumSuspects { get; set; } = MaximumSuspectsCeiling;
     /// <summary>Gets or sets the bounded identity and address bytes.</summary>
@@ -102,7 +98,6 @@ public sealed class OrleansMembershipOptions
         && MaximumReplyBytes is >= MinimumPositiveCount and <= MaximumReplyBytesCeiling
         && MaximumSnapshotBytes is >= MinimumPositiveCount and <= MaximumSnapshotBytesCeiling
         && MaximumRowBytes is >= MinimumPositiveCount and <= MaximumRowBytesCeiling
-        && MaximumRows is >= MinimumPositiveCount and <= MaximumSupportedRows
         && MaximumSuspects is >= MinimumPositiveCount and <= MaximumSuspectsCeiling
         && MaximumAddressBytes is >= MinimumPositiveCount and <= MaximumAddressBytesCeiling
         && MaximumHeaderBytes is >= MinimumPositiveCount and <= MaximumHeaderBytesCeiling

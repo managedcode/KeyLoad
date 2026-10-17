@@ -1,6 +1,6 @@
 namespace KeyLoad.Core.Features.ClusterRouting.Contracts;
 
-/// <summary>Canonical RF3 parent authority, retained for the original move replay scope.</summary>
+/// <summary>Canonical replicated parent authority, retained for the original move replay scope.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveParentContractNames.PartitionMoveParentHeaderAlias)]
 internal sealed record PartitionMoveParentHeader(
     [property: Orleans.Id(0)] int Version,

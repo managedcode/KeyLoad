@@ -57,9 +57,9 @@ Task graph: TASK-BC-LIVE-CONTRACT(root) -> TASK-BC-LIVE-RUNNER(workerA) and
 TASK-BC-LIVE-CAPTURE(workerB) -> TASK-BC-LIVE-ENTRY(root) ->
 TASK-BC-LIVE-VERIFY(root). Workers have disjoint source/test ownership. Root alone
 owns shared docs, policy, workflow, build, integration, commit and delivery.
-Baseline failures remain ResourceExhausted at 100000 unconsumed outbox records,
-and multi-node OwnershipLost/internal replica RPC timeouts. Engine repair belongs
-to its existing owning task; progress changes do not make these failures pass.
+Baseline failure remains ResourceExhausted at 100000 unconsumed outbox records.
+Engine repair belongs to its existing owning task; progress changes do not make
+this failure pass.
 
 Verification: Release solution build, Aspire-owned focused unit/comparison
 regressions, formatter/governance, then delivered-source CI and native Benchmarks.

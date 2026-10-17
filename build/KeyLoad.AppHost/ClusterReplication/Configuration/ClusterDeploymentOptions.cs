@@ -32,7 +32,7 @@ internal sealed record ClusterDeploymentOptions
     public int FirstPublicPort { get; init; } = DefaultFirstPublicPort;
     [ConfigurationKeyName(LoggingKey)]
     public string LoggingLevel { get; init; } = DefaultLoggingLevel;
-    internal bool IsValid() => SiloCount is >= MinimumPositive and <= KeyLoad.Clustering.OrleansMembershipOptions.MaximumSupportedRows
+    internal bool IsValid() => SiloCount >= MinimumPositive
         && ReplicaCount >= MinimumPositive && ReplicaCount <= SiloCount
         && SnapshotThreshold >= MinimumPositive && !string.IsNullOrWhiteSpace(LoggingLevel)
         && FirstPublicPort >= MinimumPositive

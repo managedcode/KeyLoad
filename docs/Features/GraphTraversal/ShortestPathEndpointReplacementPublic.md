@@ -1,6 +1,6 @@
 # Shortest-path endpoint replacement public lifecycle
 
-Canonical slice: GraphTraversal. This SOURCE_N acceptance extension maps existing REQ-GRAPH-001/AC-GRAPH-001 and shortest-path AC-GRAPH-009. Public SDK and official MCP, real Aspire RF3, existing credential/connection/owned cold seams. No product API, library, serializer, deadline, provider or topology change.
+Canonical slice: GraphTraversal. This SOURCE_N acceptance extension maps existing REQ-GRAPH-001/AC-GRAPH-001 and shortest-path AC-GRAPH-009. Public SDK and official MCP, real Aspire replicated cluster, existing credential/connection/owned cold seams. No product API, library, serializer, deadline, provider or topology change.
 
 ## Requirements frozen before implementation
 
@@ -10,11 +10,11 @@ AC-GRAPH-PATH-REBIND-001: own S/A/B/T literal documents and four edges 0-sa:S→
 
 REQ-GRAPH-PATH-REBIND-002: stale revision rejection and every original successful receipt replay leave current public model results unchanged; a refused fresh command may persist a legitimate failure outcome/clock. No raw journal/no-write claim follows from public reads.
 
-AC-GRAPH-PATH-REBIND-002: after revision2, actual ExpectedRevision1 fresh update refuses strict RevisionConflict through both clients. Each response is independently followed by current+healthy complete route matrix, before a later response can conceal it. Original full seed/revision2/revision3 receipts replay individually, each immediately followed by current matrix; verify original GUID, complete mutation output, durability and independent pre-publication administrator SDK/MCP placement tuple. Retain original refusal identity/result where existing cached contracts permit; exact native revision and MCP safe-detail contracts require explicit proof before code readiness.
+AC-GRAPH-PATH-REBIND-002: after revision2, actual ExpectedRevision1 fresh update refuses strict RevisionConflict through both clients. Each response is independently followed by current+healthy complete route matrix, before a later response can conceal it. Original full seed/revision2/revision3 receipts replay individually, each immediately followed by current matrix; verify original GUID, complete mutation output and durability. Retain original refusal identity/result where existing cached contracts permit; exact native revision and MCP safe-detail contracts require explicit proof before code readiness.
 
-REQ-GRAPH-PATH-REBIND-003: bounded original lifetime and current results survive actual joined RF3 cold ownership changes.
+REQ-GRAPH-PATH-REBIND-003: bounded original lifetime and current results survive actual joined cold restarts of the replicated cluster.
 
-AC-GRAPH-PATH-REBIND-003: strengthen ONLY existing GraphPathRf3LeaderLossTests.AcGraph009CommittedPathMutationSurvivesLeaderLossAndRestoredNodeCatchup. Preserve every original statement/invocation first and original McpCallerDeadline; wrap original node clients in a lexical scope so they join before this continuation. No new Test/Arguments/UID. First all-three cold observes revision2 routing, then legitimate revision3 replacement/healthy matrix, second all-three cold observes revision3 and each original full receipt. Fresh owned admin/reader SDK and official MCP callers after each cold; joined original failure and cleanup ledger. No power-loss/latency/raw cross-store cut claim.
+AC-GRAPH-PATH-REBIND-003: strengthen ONLY the existing shortest-path committed-mutation case that survives the loss and restart of a node. Preserve every original statement/invocation first and original McpCallerDeadline; wrap original node clients in a lexical scope so they join before this continuation. No new Test/Arguments/UID. First all-three cold observes revision2 routing, then legitimate revision3 replacement/healthy matrix, second all-three cold observes revision3 and each original full receipt. Fresh owned admin/reader SDK and official MCP callers after each cold; joined original failure and cleanup ledger. No power-loss/latency/raw cross-store cut claim.
 
 ## Independent bounded oracle
 
@@ -22,13 +22,13 @@ Source BFS facts: adjacency candidates charged before labels/visited; canonical 
 
 ## Coverage exclusion and scope
 
-Existing canonical vertex full flow rebinds/deletes/reinserts edge and checks both adjacency directions, but does not assert shortest tied route changes. Existing path parity is warm static paths; leader loss adds a NEW shortcut, with one stopped owner, without same-ID endpoint replacement. Cycle/label packets qualify BFS visibility/filter/caps, field-use and RawRead packets policy/projection. This continuation preserves all those originals.
+Existing canonical vertex full flow rebinds/deletes/reinserts edge and checks both adjacency directions, but does not assert shortest tied route changes. Existing path parity is warm static paths; the node-loss case adds a NEW shortcut, with one stopped node, without same-ID endpoint replacement. Cycle/label packets qualify BFS visibility/filter/caps, field-use and RawRead packets policy/projection. This continuation preserves all those originals.
 
 New role targets planned under IntegrationTests/Features/GraphTraversal/{Models,Helpers,Assertions}; owning doc docs/Features/GraphTraversal/ShortestPathEndpointReplacementPublic.md. Root approval/source-N peer and native NF/checkOnly remain required before selection. Fresh source body prefix/full existing post UNKNOWN until actual Main native Y.
 
 ```mermaid
 flowchart LR
-  Original[Original leader-loss case joined] --> Seed[Four literal edges]
+  Original[Original node-loss case joined] --> Seed[Four literal edges]
   Seed --> RebindFrom[Revision2 moves source]
   RebindFrom --> Stale[Stale expected revision refused]
   Stale --> Healthy[Full current route matrix]

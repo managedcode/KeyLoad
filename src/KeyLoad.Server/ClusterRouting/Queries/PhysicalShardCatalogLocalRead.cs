@@ -5,7 +5,7 @@ using KeyLoad.Core.Features.ResourceExecution.Execution;
 
 namespace KeyLoad.Server;
 
-/// <summary>Reads only the actual node-local committed catalog after its existing RF3 barrier.</summary>
+/// <summary>Reads only the actual node-local committed catalog after its existing replicated barrier.</summary>
 internal static class PhysicalShardCatalogLocalRead
 {
     internal const string CatalogMissing = "The physical shard catalog is not initialized.";

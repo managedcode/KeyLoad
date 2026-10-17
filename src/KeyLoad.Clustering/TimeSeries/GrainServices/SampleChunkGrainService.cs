@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Discovers bounded canonical chunk work on the current RF3 leader and joins original scheduling.</summary>
+/// <summary>Discovers bounded canonical chunk work on the current replicated leader and joins original scheduling.</summary>
 public sealed class SampleChunkGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
     IServiceProvider services,
     ILogger<SampleChunkGrainService> diagnostics) : GrainService(id, silo, loggerFactory), ISampleChunkGrainService

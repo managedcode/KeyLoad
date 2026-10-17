@@ -16,7 +16,7 @@ implementation contract; the complete root [LICENSE](../../LICENSE) is authorita
 
 TASK-LIC-001 freezes the contract, TASK-LIC-002 updates the license/metadata and
 existing site assertions, and TASK-LIC-003 checks exact text, package output,
-governance and the final canonical solution build. Runtime RF3, coverage and
+governance and the final canonical solution build. Runtime replicated-cluster, coverage and
 performance gates remain unchanged; license metadata does not qualify the database.
 
 ```mermaid
@@ -46,14 +46,13 @@ The owner subsequently deferred packaging because the product is unfinished.
 Release remains manual and prepared for a later explicit release/readiness request;
 current workflow implementation and CI checks do not authorize dispatch or publication.
 
-Requirements/acceptance are REQ/AC-PIPE-001..004 and REQ/AC-REL-001..003 in the
-[acceptance matrix](../implementation/pipeline-release-v2-acceptance.md).
+Requirements/acceptance are REQ/AC-PIPE-001..004 and REQ/AC-REL-001..003.
 [ADR-064](../ADR/ADR-064-workflow-release-delivery.md) is required for release
 permissions, version identity, deployment artifacts and current-producer handoff.
 
 ```mermaid
 flowchart LR
-    PR[PR or main source] --> CI[Build and Tests solution rules tests RF3]
+    PR[PR or main source] --> CI[Build and Tests solution rules tests replicated cluster]
     Main[Own main push or manual] --> Benchmarks[All native load comparisons]
     Benchmarks --> Aggregate[Complete authenticated JSON aggregate]
     WebSource[Trusted main source or manual] --> Website[Separate Website workflow]
@@ -79,10 +78,11 @@ Canonical ownership:
   existing measurements without changing database or webpage behavior.
 
 Build artifacts contain all actual packable projects, a self-contained Linux x64
-server distribution, RF3 persistent-container configuration, and version-labelled
-images built from the existing owned Dockerfiles. Database credentials are runtime
-configuration and are never bundled into source/assets. Existing RF3 membership,
-Orleans routing and node-local ownership are retained; distribution packaging does
+server distribution, persistent-container configuration for a replicated cluster
+(`KeyLoad:SiloCount` silos, `KeyLoad:ReplicaCount` copies; three is the default), and
+version-labelled images built from the existing owned Dockerfiles. Database credentials
+are runtime configuration and are never bundled into source/assets. Native Orleans
+clustering and node-local ZoneTree ownership are retained; distribution packaging does
 not establish production readiness, endurance or power-loss durability.
 
 Reservation is source/run/date bound and retained before expensive work. Its daily

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad;
 
-/// <summary>Bounded derived node history from native hourly rollups; it grants no canonical read cut or RF3 receipt.</summary>
+/// <summary>Bounded derived node history from native hourly rollups; it grants no canonical read cut or replicated receipt.</summary>
 /// <param name="From">Inclusive UTC hour boundary.</param>
 /// <param name="To">Exclusive UTC hour boundary.</param>
 /// <param name="NativePlanComplete">Native planning coverage, never complete sampled history or zero loss.</param>

@@ -19,14 +19,14 @@ behind broad feature, audit or performance campaigns.
 |---|---|
 | REQ-FOUNDATION-001: review every task, not only its title. | AC-FOUNDATION-001: exactly 105 unique IDs retain their original dependency/deliverable/acceptance snapshot, a concrete definition review and implementation prerequisites; no required task disappears. |
 | REQ-FOUNDATION-002: distinguish implementation prerequisites from complete qualification. | AC-FOUNDATION-002: all graph references exist and the implementation graph is acyclic; bounded sub-milestones identify their owning existing task. Passing a sub-milestone never marks a whole task done. |
-| REQ-FOUNDATION-003: qualify native cluster/storage foundations before broad model expansion. | AC-FOUNDATION-003: the integrated foundation operation below succeeds through actual Aspire-owned Docker RF3, real SDK and official MCP callers, with original receipts and joined cleanup. |
+| REQ-FOUNDATION-003: qualify native cluster/storage foundations before broad model expansion. | AC-FOUNDATION-003: the integrated foundation operation below succeeds through an actual Aspire-owned Docker replicated cluster (`KeyLoad:SiloCount` silos, `KeyLoad:ReplicaCount` copies; three by default), real SDK and official MCP callers, with original receipts and joined cleanup. |
 | REQ-FOUNDATION-004: instrument the first working host. | AC-FOUNDATION-004: real native telemetry registration, early listener lifetime, effective container OTLP configuration, actual export and privacy have explicit evidence; dashboard logs or registration alone do not prove all three signals. |
-| REQ-FOUNDATION-005: reuse native Orleans ownership correctly. | AC-FOUNDATION-005: actual provider/directory/activation registrations and callers are inspected; no duplicate membership framework is added. Node-local ZoneTree, ordered apply, RF3 authority and physical owner fences remain separate. |
+| REQ-FOUNDATION-005: reuse native Orleans clustering correctly. | AC-FOUNDATION-005: actual provider/directory/activation registrations and callers are inspected; Orleans owns membership, discovery, directory, placement, activation migration and internal communication, and KeyLoad adds none of its own. Node-local ZoneTree and ordered apply stay with the silo-local owner; copies are written through ordinary Orleans calls with majority acknowledgement. |
 | REQ-FOUNDATION-006: keep public operations safe from their first exposure. | AC-FOUNDATION-006: connection-owned execution, fresh persisted authentication/permissions, output/field/row guards, revocation and admission protect the first command; failures never open readiness. |
 | REQ-FOUNDATION-007: run independent ready work concurrently. | AC-FOUNDATION-007: each worker owns a distinct task/path scope, completes a coherent implementation and whole-operation checks, then takes another ready scope. Root owns shared joins, SDK/test execution and delivery. |
 | REQ-FOUNDATION-008: finish audits, measurements and release after functional work. | AC-FOUNDATION-008: broad matrices and Linux comparison/profiling receipts precede final release; focused correctness/recovery/security checks stay in every implementation stage. Mandatory normal SIMD and existing licenses/pins apply from the start. |
 | REQ-FOUNDATION-009: native silo-local Grain Service owns physical ZoneTree files under one host. | AC-FOUNDATION-009: actual awaited service Init opens/publishes one original owner; eager DI does not borrow unpublished storage; original partial startup, cancel, request/replica drain, late close and same-root cold continuation pass without nested-host or pre-opened-fixture fallback. |
-| REQ-FOUNDATION-010: choose native placement, movement and transaction boundaries explicitly. | AC-FOUNDATION-010: each grain's eligibility/automatic and manual movement policy is reviewed; storage never moves with activation; wrong-owner calls fail before effects. Any selected cross-grain ACID path has a real participating ZoneTree/RF3 provider and commit/abort/conflict/recovery proof. The first same-partition operation does not wait for an unimplemented transaction provider. |
+| REQ-FOUNDATION-010: choose native placement, activation migration and transaction boundaries explicitly. | AC-FOUNDATION-010: each grain's placement and migration policy (including the native `[Immovable]` attribute where locality requires it) is reviewed; storage never moves with an activation, and a migrated grain simply calls the ZoneTree owners again through Orleans. Any selected cross-grain ACID path has a real participating ZoneTree provider and commit/abort/conflict/recovery proof. The first same-partition operation does not wait for an unimplemented transaction provider. |
 
 Verification of AC-001/002/005/007 is an explicit complete-inventory, graph and
 source-review exception; getter/setter or source-string unit tests are unsuitable.
@@ -37,7 +37,8 @@ A documentation check cannot satisfy them.
 
 ## Foundation order and ownership
 
-1. Freeze stable identities, atomic versus physical partition boundaries, current
+1. Freeze stable identities, atomic partition boundaries versus the silo-local
+   ZoneTree owner, current
    format, native CPU support and approved dependency pins: KL-001/002/069 and
    the current-format part of KL-043. Start KL-015 native OpenTelemetry here.
    Orleans is the host: use its native membership, distributed directory,
@@ -49,14 +50,17 @@ A documentation check cannot satisfy them.
    correctness starts here; the full fault/power-reset campaign is later. Physical
    files open in the original awaited silo-local storage Grain Service Init, not
    a migrating grain or an independently managed application host.
-3. Start native host identity and transport (KL-018 host milestone), then native
-   Orleans membership (KL-019 native milestone), then database RF3 (KL-017/020).
-   Only afterward publish/verify the persisted catalog (KL-018 catalog), expose
-   authoritative partition routing (KL-019 authority), and admit public work.
-   This staging removes the bootstrap inversion without inventing another provider.
+3. Start the one Orleans host (KL-018 host milestone) with its native clustering
+   (KL-019 native milestone), then replicated apply: the partition grain sends each
+   write through ordinary Orleans calls to the ZoneTree owners of the
+   `KeyLoad:ReplicaCount` silos and acknowledges after a majority confirm durable
+   local apply (KL-020). Only afterward admit public work. Orleans placement and
+   the logical partition grains provide routing; KeyLoad adds no membership,
+   catalog or placement protocol of its own.
 4. Before public admission, complete the bounded connection/auth/output path:
    KL-052/053/061/062 and native subsets of KL-063/064/065/066. Strong/session
-   cuts are KL-021; real replica catch-up/recovery is KL-035. KL-005 supplies
+   cuts are KL-021; a copy that was offline catches up from another copy through
+   Orleans calls (KL-035). KL-005 supplies
    current closed backup; KL-040/076 expand the early resource baseline later.
 5. Prove `FOUNDATION.usable-core`, then minimum ScriptDOM T-SQL semantics,
    actual parsing/lowering and SDK/MCP/SQL parity. `FOUNDATION.usable-database`
@@ -70,20 +74,20 @@ document field guards do not wait for every SQL operator, but each SQL operator
 must gain its own guard before being exposed. Generic stable-command dedup does
 not wait for every index feature; indexed whole-operation qualification still does.
 
-Native Azure Orleans clustering, distributed grain directory, activation
+Native Orleans clustering, distributed grain directory, activation
 repartitioning and activity propagation are already registered. Verify and qualify
-them rather than rebuilding them. Native activation movement does not transfer open
-ZoneTree handles or replace physical replica movement in KL-036/070/071/072.
+them rather than rebuilding them. Native activation migration does not transfer open
+ZoneTree handles; the files stay with the silo-local owner ([ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md)).
 
 ```mermaid
 flowchart TD
-    C[Contracts identities pins current format] --> H[Stable host and native Orleans join]
+    C[Contracts identities pins current format] --> H[One Orleans host and native clustering]
     C --> S[Node-local ZoneTree ordered commit and recovery]
     C --> A[Persisted identity connection bounds and safe outputs]
     C --> O[Native OpenTelemetry from first host]
-    H --> R[RF3 coordination and replicated apply]
+    H --> R[Replicated apply through Orleans calls]
     S --> R
-    R --> B[Committed catalog verified routing and readiness]
+    R --> B[Verified routing and readiness]
     A --> B
     B --> G[SDK MCP write replay strong read failover recovery]
     O --> G
@@ -96,9 +100,9 @@ flowchart TD
 
 ## Integrated foundation gate
 
-Use one actual test-owned Aspire topology: native membership resource plus three
-Docker database voters, explicit cohort, discovered endpoints and genuine SDK and
-official MCP clients. Authenticate a real connection, commit one bounded write,
+Use one actual test-owned Aspire topology: the native Orleans clustering resource
+plus the configured Docker database silos (`KeyLoad:SiloCount`, `KeyLoad:ReplicaCount`;
+three by default), discovered endpoints and genuine SDK and official MCP clients. Authenticate a real connection, commit one bounded write,
 retry the same business ID without duplicate effects, read at its receipt/session
 cut, revoke and repair current permissions, inject scoped node/minority failure,
 recover the original current-format storage, and repeat the exact read/replay.
@@ -120,7 +124,7 @@ fix the same defect or wait for a shared test run to write independent code.
 
 | Batch / existing tasks | Owned change and join contract |
 |---|---|
-| One-host composition / KL-014/018/019 | OrleansSiloConfiguration, OrleansNode, ServerConfiguration, ServerApplication, native remote-model construction and both real movement fixture callers. One native host, same storage publication, catalog after Active, no pre-opened test fallback. |
+| One-host composition / KL-014/018/019 | OrleansSiloConfiguration, OrleansNode, ServerConfiguration, ServerApplication and native remote-model construction. One native host, same storage publication, no pre-opened test fallback. |
 | Physical storage service / KL-008/018/019 | PartitionHostApplicationOwner, silo-local storage Grain Service, replica service/lifecycle deferred borrowers and genuine partial-start/cold-owner operations. Exact OpenAsync/Borrow/DisposeAsync publication contract, no second store owner. |
 | Native journal/jobs / KL-018/092/093 | Existing RuntimeJournal and Durable Jobs registration/provider seams, operation-time borrower resolution and database drain. Remove duplicate runtime reflection/lifecycle only with native equivalent original-task settlement. |
 | Main integration / KL-019/021/040/053/064 | Explicit per-grain placement/migration, current original SDK failures, graph/contract review and combined source intake. Root alone mutates shared files, builds, runs selected native TUnit operations and commits/pushes the joined stage. |
@@ -143,13 +147,14 @@ subsets named above protect public work even if a task has later model/audit sco
 | Band | Direction | Tasks |
 |---|---|---|
 | F0 | Contracts and native observability | 001, 002, 015, 069 |
-| F1 | Storage ownership, current format and native cluster startup | 003, 004, 007, 008, 009, 017, 018, 019, 043 |
-| F2 | Protected real RF3 operation, session cuts and recovery | 005, 010, 011, 012, 014, 016, 020, 021, 035, 040, 052, 053, 061, 062, 063, 064, 065, 066, 076 |
+| F1 | Storage ownership, current format and native cluster startup | 003, 004, 007, 008, 009, 018, 019, 043 |
+| F2 | Protected real replicated-cluster operation, session cuts and recovery | 005, 010, 011, 012, 014, 016, 020, 021, 035, 040, 052, 053, 061, 062, 063, 064, 065, 066, 076 |
 | F3 | SQL, graph, series, search, events and queues; independent after actual prerequisites | 013, 022, 023, 024, 025, 026, 027, 028, 029, 030, 031, 032, 033, 034, 045, 046, 047, 048, 049, 050, 051, 054, 055, 056, 058, 059, 060, 067, 078, 079, 081, 082, 083, 084, 085, 086, 087, 088, 089, 090, 091, 092, 093, 095, 096, 098 |
-| F4 | Physical movement and distributed/cross-model composition | 036, 037, 038, 039, 057, 070, 071, 072, 094, 097, 099, 100 |
+| F4 | Distributed and cross-model composition | 037, 038, 039, 057, 094, 097, 100 |
 | F5 | Complete capability fault/security/restore matrices | 041, 042, 068, 102, 103 |
 | F6 | Actual profiles, measured repairs and equivalent Linux comparisons | 006, 073, 074, 075, 077, 101, 105 |
 | F7 | Final operational/release manifests and provenance | 044, 080, 104 |
+| — | Superseded by native Orleans clustering ([ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md)); the IDs stay accounted for, no KeyLoad-owned implementation remains | 017, 036, 070, 071, 072, 099 |
 
 Document/typed-row SQL execution, graphs, series, search and events/queues can
 proceed independently after their actual authorized storage/read prerequisites.
@@ -165,13 +170,14 @@ their real ownership/delivery contract; do not invent another scheduler framewor
 - KL-001: centrally pinned packages, no packages.lock.json; Linux qualification.
   Existing approved pins/original dependency licenses apply immediately; full audit
   is later. No new dependency is implicitly approved.
-- KL-006 is not a coding prerequisite for consensus, admission, selected text/ANN
+- KL-006 is not a coding prerequisite for admission, selected text/ANN
   integration or time-series chunks. Full comparable performance gates remain.
-- KL-017/018/019: remove .NEXT/custom membership and metadata-before-native-host
-  assumptions. Staged native join and database authority above are different owners.
-- KL-014/015: first server is real RF3, with native OTel and authorization from
+- KL-017/018/019: native Orleans clustering replaces .NEXT and every custom
+  membership, consensus or metadata-bootstrap assumption; KL-017 is superseded and
+  KeyLoad owns none of these mechanisms.
+- KL-014/015: first server is a real replicated cluster, with native OTel and authorization from
   inception. A standalone/no-external-services demo is not the product foundation.
-- KL-043/072/081: current-format recovery and current ownership/domain outcomes;
+- KL-043/081: current-format recovery and current domain outcomes;
   no legacy conversion, old routing fallback or format migration is introduced.
   Immutable historical evidence keeps its actual original identity only.
 - KL-046/047: selected T-SQL/ScriptDOM replaces PostgreSQL grammar and handwritten
@@ -179,8 +185,8 @@ their real ownership/delivery contract; do not invent another scheduler framewor
 - KL-053: ADR-125 connection-owned execution supersedes optional SessionGrain or
   separately activated query/request-grain clauses. Operations stay separately
   signed, bounded and freshly authorized.
-- KL-069 identity precedes routing; physical movement does not block static-owner
-  model kernels. Common generation leases precede provider-specific swap integration.
+- KL-069 identity precedes routing. Common generation leases precede provider-specific
+  swap integration.
 - KL-075 uses genuine one/three-node Linux comparisons, actual 100k/1m records
   and the unchanged minimum operation/correctness/durability/resource contracts.
 - KL-077 normal SIMD/hardware validation is mandatory at the first applicable
@@ -195,9 +201,8 @@ their real ownership/delivery contract; do not invent another scheduler framewor
   cohort; bounded diagnosis of a concrete active runtime symptom may use its actual
   process earlier. It neither starts a broad optimization campaign nor closes105.
 - KL-092 uses native Orleans scheduling and ordinary TimeProvider; deterministic
-  follower application uses committed timestamps. Its complete durable delivery
-  behavior follows the queue state machine. A custom clock provider, ABI producer
-  or separate scheduling runtime is not a host prerequisite. KL-090 target-inbox contract precedes
+  replica application uses committed timestamps. Its complete durable delivery
+  behavior follows the queue state machine. KL-090 target-inbox contract precedes
   KL-094 transfer integration; complete remote integration is not an early cycle.
 
 Every original acceptance paragraph is retained as review input. Current owner

@@ -1,7 +1,7 @@
 namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 
 /// <summary>Controls optional point-value admission for one actual opened storage runtime.</summary>
-/// <remarks>This process-local owner grants no read authority and provides no RF3 readiness certificate.</remarks>
+/// <remarks>This process-local owner grants no read authority and provides no replicated readiness certificate.</remarks>
 public sealed class ZoneTreePointCacheControl
 {
     private readonly ZoneTreeStoreRuntime runtime;

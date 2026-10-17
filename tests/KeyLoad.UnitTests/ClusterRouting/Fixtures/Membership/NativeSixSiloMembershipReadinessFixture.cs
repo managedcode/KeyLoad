@@ -53,7 +53,6 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
         };
         await Assert.That(Read(wrong, original.SiloAddress, bounds, token)).IsNull();
         await NativeMembershipProviderRows.RequireAsync(Cluster, handles, providerRows, token).ConfigureAwait(false);
-        await Assert.That(Read(options, original.SiloAddress, new OrleansMembershipOptions { MaximumRows = Silos - 1 }, token)).IsNull();
         await NativeMembershipProviderRows.RequireAsync(Cluster, handles, providerRows, token).ConfigureAwait(false);
         await Assert.That(Read(options, original.SiloAddress, new OrleansMembershipOptions { MaximumAddressBytes = 1 }, token)).IsNull();
         await NativeMembershipProviderRows.RequireAsync(Cluster, handles, providerRows, token).ConfigureAwait(false);

@@ -9,12 +9,8 @@ internal static class ResourceRetirementConservation
     private const int Version = 1;
     private const long EmptyRecords = 0;
     private const long RecordStep = 1;
-    private const int FirstVoterIndex = 0;
-    private const int SecondVoterIndex = 1;
-    private const int ThirdVoterIndex = 2;
     private const int DigestBytes = 32;
     private const int IncarnationCharacters = 64;
-    private const int VoterCount = 3;
     private const string Domain = "keyload.resource-retirement.conservation-step.v1";
     private const string Invalid = "The native retirement conservation proof is invalid.";
 
@@ -127,20 +123,20 @@ internal static class ResourceRetirementConservation
             throw Errors.Fail(ErrorCode.Corruption, Invalid);
         }
         var owner = step.PhysicalOwner;
-        return SHA256.HashData(KeyCodec.Encode(Domain, Version, owner.PhysicalShardId, owner.Incarnation,
-            owner.PlacementEpoch, VoterCount, owner.VoterIds[FirstVoterIndex], owner.VoterIds[SecondVoterIndex], owner.VoterIds[ThirdVoterIndex],
+        return SHA256.HashData(KeyCodec.Encode([Domain, Version, owner.PhysicalShardId, owner.Incarnation,
+            owner.PlacementEpoch, owner.VoterIds.Length, .. owner.VoterIds,
             step.Revision, lifetime.TenantId, lifetime.DatabaseId, lifetime.ResourceName,
             lifetime.TransactionDomainId, (int)lifetime.Kind, lifetime.Incarnation.Value,
             lifetime.CreationFingerprint, step.RetirementId, step.ReleaseCommandId, step.AppliedPosition,
-            step.PreviousDigest.ToArray(), step.AddedAuthorityRecords, step.AddedAuthorityDigest.ToArray()));
+            step.PreviousDigest.ToArray(), step.AddedAuthorityRecords, step.AddedAuthorityDigest.ToArray()]));
     }
 
     internal static void ValidateOwner(PhysicalShardRecord owner)
     {
         if (owner is null || owner.PhysicalShardId == Guid.Empty || owner.Incarnation == Guid.Empty
-            || owner.PlacementEpoch <= EmptyRecords || owner.VoterIds.IsDefault || owner.VoterIds.Length != VoterCount
+            || owner.PlacementEpoch <= EmptyRecords || owner.VoterIds.IsDefaultOrEmpty
             || owner.VoterIds.Any(string.IsNullOrWhiteSpace)
-            || owner.VoterIds.Distinct(StringComparer.Ordinal).Count() != VoterCount)
+            || owner.VoterIds.Distinct(StringComparer.Ordinal).Count() != owner.VoterIds.Length)
         {
             throw Errors.Fail(ErrorCode.Corruption, Invalid);
         }

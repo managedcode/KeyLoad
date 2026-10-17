@@ -4,7 +4,7 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 
 /// <summary>Fixed limits for disposable embedded or exact local-binding positive point-value acceleration.</summary>
 /// <param name="MemoryBudget">Externally owned, shared node retention budget.</param>
-/// <remarks>Server RF3 admission requires the separate authenticated Orleans lease contract.</remarks>
+/// <remarks>Server replicated admission requires the separate authenticated Orleans lease contract.</remarks>
 public sealed record ZoneTreePointCacheOptions(ICacheMemoryBudget MemoryBudget)
 {
     private int? maxEntriesOverride;

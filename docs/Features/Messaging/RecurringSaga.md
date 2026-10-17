@@ -5,21 +5,11 @@ Root accepts S1 on 2026-10-04 for KL-100 under
 durable schedules, stable occurrences, saga CAS and atomic timeout messages;
 general workflow replay or external exactly-once execution is not advertised.
 
-TASK-JOBS-RF3-PROJECTED-DELIVERY preserves REQ/AC-JOBS-003/004/005 and
-AC-DUE-003 after original run37242346547. Luna query_wave owns only private
-SagaTimeoutRf3Assertions and DueSagaRf3Assertions, plus only their two receive
-helper callsites in SagaTimeoutRf3Tests and SagaDueRf3Tests to pass the actual
-already-owned identity.Secret for the no-disclosure oracle. The existing creator has
-protected field use/write grants but lacks read permission; receiving a timeout
-must therefore return the independently expected empty payload/header objects,
-while retaining exact request/message identity, one delivery, lease metadata,
-ACK/replay parity and the empty subsequent receive. Add direct no-disclosure
-checks on the official MCP receive reply for the protected payload/header and
-credential; preserve all existing projected inspection and one-transition
-checks. Do not grant new read authority, weaken field policies, change product
-projection or omit the receipt/lease oracle. Existing ADR-092/094 suffice since
-this corrects the fixture's contradictory read expectation only. Root reviews,
-joins and runs the actual Aspire RF3 clients before recording runtime evidence.
+Receiving a timeout for a creator that has protected field use/write grants but no
+read permission returns the independently expected empty payload/header objects while
+retaining exact request/message identity, one delivery, lease metadata, ACK/replay
+parity and the empty subsequent receive; the official MCP receive reply must not
+disclose the protected payload/header or credential. No read authority is added.
 
 ## Frozen S1 contracts
 
@@ -146,26 +136,17 @@ Each reuses the native separate request grain and existing bounded read transpor
 | REQ-JOBS-002: stable durable occurrences | AC-JOBS-002: duplicate timer/command, different command at same time, lost-response retry, replacement and real-store reopen leave one message per full occurrence identity and preserve pending backlog. `RecurringOccurrenceTests` |
 | REQ-JOBS-003: explicit saga/timeout CAS | AC-JOBS-003: restart preserves Waiting/state; completion/cancel vs due timeout has one serialized winner, one timeout message at most, and capacity/error rolls back state. `SagaStateTests`, `SagaTimeoutTests` |
 | REQ-JOBS-004: persisted authority and finite retained work | AC-JOBS-004: current creator/caller revocation, protected template/header/state writes/uses/projection, cross-partition inputs and exact record/byte/queue caps fail safely; cancellation followed by healthy inspection passes. `RecurringSagaPolicyTests`, `RecurringSagaBudgetTests` |
-| REQ-JOBS-005: restartable Orleans scheduling and public qualification | AC-JOBS-005: S2 native CQRS coordinator reconstructs current authority, scans bounded due records fairly and produces logged-time commands after restart; genuine Aspire RF3 .NET/official MCP timer/lost-ACK/leader-loss cases pass. Planned `RecurringSagaRf3Tests`; not closed by S1 |
+| REQ-JOBS-005: restartable Orleans scheduling and public qualification | AC-JOBS-005: S2 native CQRS coordinator reconstructs current authority, scans bounded due records fairly and produces logged-time commands after restart; genuine Aspire replicated-cluster .NET/official MCP timer/lost-ACK/silo-loss cases pass. Planned `RecurringSagaRf3Tests`; not closed by S1 |
 
-Ordered execution: root freezes this contract and ADR; Luna cluster_wave owns
-new Abstractions/Core Messaging contracts/commands/storage/authorization/inspection
-and mapped new Messaging UnitTests, without changing transfer F1 or shared files.
-Root joins central source and public APIs, reviews, builds/formats and runs actual
-Aspire development gates while other agents implement their scopes, then commits
-the coherent stage. S2 freezes the periodic coordinator/fair due-index and real
-process/RF3 failure contract before implementation. Root records all original
-Linux acceptance and source/run/job/artifact results before complete KL-100 closure.
-
-After S1 source handoff, Luna cluster_wave owns new IntegrationTests Messaging
-Cases/Helpers for S1 public mutation and inspection parity over the existing
-genuine Aspire RF3 fixture: SDK/official MCP configure, emit/catch-up/CAS,
-unknown-response replay, timeout atomicity, current creator revocation and
-redacted inspection. These qualify the canonical S1 transitions, not autonomous
-S2 scheduling. The same worker may add the already-required F1 RemoteTransfers
-public intent/accept/receipt/complete and repeated target acceptance oracles.
-Do not change shared fixtures/topology, manufacture failures, bypass discovered
-endpoints, weaken outcomes or run gates. Root owns combined execution and faults.
+Ordered execution: Abstractions and Core Messaging own the contracts, commands,
+storage, authorization and inspection with their Messaging unit tests; central source
+and public APIs are integrated once. S2 adds the periodic coordinator and fair due
+scan described in [DueCoordination](DueCoordination.md), with real process and
+replicated-cluster failure tests. Public S1 mutation and inspection parity (SDK and
+official MCP configure, emit/catch-up/CAS, unknown-response replay, timeout atomicity,
+current creator revocation and redacted inspection) runs over the Aspire-owned
+replicated cluster; it qualifies the canonical S1 transitions, not autonomous S2
+scheduling.
 
 ### S1 canonical process recovery stage
 
@@ -195,17 +176,11 @@ Waiting before deadline, TimedOut revision2, one timeout ID/message, ACK replay
 and no second transition.
 The service is always active; no fake clock, private expiry call, weakened
 terminal assertion or expected-response race may stand in for these proofs.
-Luna cluster_wave owns only the three existing Messaging RF3 cases and their
-RecurringSagaRf3Support/SagaTimeoutRf3Assertions helpers plus a feature-local
-test identity helper. Root owns integration, all gates and original evidence.
 
-Luna cluster_wave next owns new CrashHost Messaging Helpers and RecoveryTests
-Messaging Cases/Assertions/Helpers for recurring emission and saga expiry at the
-existing canonical CommitStage boundaries: HeaderWritten, PayloadWritten,
-JournalFlushed, MutationApplied and ApplyCompleted. Use the actual
-CanonicalCrashBoundary and existing owned child/StorageTrialLease/readiness
-mechanisms. Root alone joins the new modes into CrashHostApplication; do not add
-another test caller or modify the physical recovery observer.
+Process-recovery tests cover recurring emission and saga expiry at the existing
+canonical CommitStage boundaries: HeaderWritten, PayloadWritten, JournalFlushed,
+MutationApplied and ApplyCompleted, using the actual CanonicalCrashBoundary and the
+existing owned child/StorageTrialLease/readiness mechanisms.
 
 AC-JOBS-001/002/003 require genuine process kill, reopen and stable retry through
 the real ZoneTree/Core path: schedule watermark plus its single due occurrence,
@@ -217,30 +192,18 @@ one message and unchanged outbox tail. Never relax the atomicity oracle. Use a
 real past recurring due instant with the next interval safely in the future;
 configure the saga with a valid future deadline and await that actual deadline
 before arming expiry. No clock double, direct timestamp rewrite or power-loss
-claim is permitted. Root runs the actual Aspire recovery suite; this process
-stage does not qualify autonomous S2 coordination or RF3.
+claim is permitted. The Aspire-owned recovery suite runs this stage; it does not qualify autonomous S2
+coordination or the replicated cluster.
 
 TASK-JOBS-S1-RECOVERY-RECEIPTS refines the retry oracle for AC-JOBS-001/002/003:
 compare the complete receipt's deterministic native serialized value, including
 every nested mutation result and array, rather than record reference equality.
 Recovered, repeated and resolved outcomes must equal that same complete value;
 retain the independent exact token, queue counters, retained state and outbox
-tail assertions. Luna cluster_wave owns only the two Messaging recovery
-assertion files and a feature-local assertion helper if needed, in a private
-patch. No production serialization, fault timing or atomicity contract changes.
-Root reviews the patch, joins it after the active compiled gate, and runs the
-actual Aspire recovery suite before recording evidence.
+tail assertions. No production serialization, fault timing or atomicity contract
+changes.
 
-The worker prepares its scoped source patch outside the checkout while root
-verifies the prior frozen compilation, with exact base/post hashes and explicit
-dispatch join instructions. It runs no builds/tests/formatter/Git. Root reviews,
-applies the complete harness and dispatch together, then executes the mapped
-cases and required full gates before recording runtime evidence.
-
-No dependency or automatic migration is introduced. New persisted contracts need
-the epoch7 old-reader rejection/explicit stopped-copy upgrade workstream before
-delivery; rollback never opens these stores using an unaware reader. Interactive
-UI N/A; SDK/MCP inspect and Batch mutations are this database capability's surface.
+No dependency or migration is introduced. Interactive UI N/A; SDK/MCP inspect and Batch mutations are this database capability's surface.
 
 ```mermaid
 flowchart LR

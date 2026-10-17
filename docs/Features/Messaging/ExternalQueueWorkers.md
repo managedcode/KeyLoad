@@ -34,7 +34,7 @@ flowchart TD
 
 The helper uses the existing `ReceiveAsync` and `CompleteAsync` operations. Every
 operation still crosses the native authenticated connection stream, Orleans routing,
-fresh persisted authorization and physical storage owner. It adds no coordinator,
+fresh persisted authorization and the node-local ZoneTree owner. It adds no coordinator,
 server dispatcher, storage gate, wire enum, trusted caller role, or handler loader.
 The application chooses and owns any external effects and their idempotency.
 There is no exactly-once external side-effect guarantee.
@@ -54,7 +54,7 @@ actual bounded private fixture profile and independently expected lane, message,
 principal, lease version, delivery generation and current incarnation. Private keys
 and tokens are not diagnostic evidence. Public commit positions are opaque: tests
 assert positive positions and exact stable replay, with the independently read
-public placement incarnation/ownership epoch and literal mutation/durability fields.
+store incarnation and literal mutation/durability fields.
 
 ## Policy and accounting
 
@@ -144,17 +144,17 @@ require actual runtime capture and their declared operation/state controls.
 The stable `ConnectionGrain` owns native bounded CQRS streams and close joins their
 lifetimes. Native admission permits eight concurrent operations per connection;
 long application callbacks happen after Receive's own stream has settled. The
-connection routes through `CommandPartitionGrain` to the physical node-local owner.
-Existing `RecurringDueCoordinatorGrain`, `QueueDeadlineCoordination` and subscription
-paths own shard scheduler, queue and group effects. A service on every silo is not
-claimed to be a cluster singleton.
+connection routes through `CommandPartitionGrain` to the node-local ZoneTree owner.
+The `[StatelessWorker]` due-work grains described in
+[DueCoordination](DueCoordination.md) and the subscription paths own scheduler,
+queue and group effects; they are not cluster singletons and check no leadership.
 
 Queue `ReceiveRequest` currently has fields 0..4 and no wait/resume policy. Its API
 dispatches a single Receive command. The existing EventFeed advisory subscription
 has bounded recheck and joined unsubscribe, but is not queue long polling. Finite
 client `EmptyPollDelay` does not satisfy native server bounded long polling. Whole
 KL-093 long-poll/resume and silo-restart qualification remain open pending a reviewed
-routed-readiness/connection-lifetime contract and genuine SDK/MCP execution. This
+connection-lifetime contract and genuine SDK/MCP execution. This
 helper batch does not close whole KL-093.
 
 Applicable backend, SDK, tests and documentation live in the Messaging slice.
@@ -164,7 +164,7 @@ chosen by an application; this helper adds no transactional external-effect API.
 
 Source review and prepared syntax/numeric checks are separate from compilation,
 full analyzers, discovered tests and actual execution. Native TUnit fixtures own
-Aspire RF3 resources under [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md).
+Aspire replicated-cluster resources under [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md).
 Exact-source Linux unit/process/RF3 gates, original reports and cleanup evidence
 remain required. No local source declaration establishes production readiness,
 endurance, power-loss durability, measured memory bounds or performance.

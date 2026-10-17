@@ -25,9 +25,6 @@ internal sealed class PhysicalShardCatalogValidationTests
         AssertValidation(new(1, 0, ShardId, Incarnation, ImmutableArray.CreateRange<string>([null!])));
         AssertValidation(new(1, 0, ShardId, Incarnation, ["\t "]));
         AssertValidation(new(1, 0, ShardId, Incarnation, [Voters[0], Voters[0]]));
-        var tooMany = ImmutableArray.Create(
-            "http://node1:8080", "http://node2:8080", "http://node3:8080", "http://node4:8080");
-        AssertValidation(new(1, 0, ShardId, Incarnation, tooMany));
         AssertValidation(new(1, 0, ShardId, Incarnation, [new string('x', 513)]));
         PhysicalShardCatalogValidation.ValidateEncodedRequestLength(MaximumCatalogBytes);
         var sizeFailure = Assert.ThrowsExactly<KeyLoadException>(() =>

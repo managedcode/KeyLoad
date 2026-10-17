@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Storage;
 
@@ -19,8 +20,7 @@ internal static class ControlledPartitionMovementNativeModels
         await VectorAsync(owner, cancellationToken);
         var database = owner.Database;
         var partition = ControlledPartitionMovementCorpus.Partition;
-        var reference = new EntityRef(partition, ControlledPartitionMovementCorpus.Collection,
-            ControlledPartitionMovementCorpus.DocumentId);
+        var reference = Reference(owner);
         var document = database.GetDocument(PhysicalShardCatalogFixture.RootPrincipalId,
             reference, cancellationToken: cancellationToken);
         await EqualAsync(document, new DocumentResult(reference, FirstPosition,
@@ -67,10 +67,22 @@ internal static class ControlledPartitionMovementNativeModels
             PhysicalShardCatalogFixture.RootPrincipalId, new(partition, ControlledPartitionMovementCorpus.Collection,
                 VectorField: ControlledPartitionMovementCorpus.VectorField, Vector: [1f, 0f],
                 Space: ControlledPartitionMovementCorpus.Space), cancellationToken);
-        var document = new DocumentResult(new(partition, ControlledPartitionMovementCorpus.Collection,
-            ControlledPartitionMovementCorpus.DocumentId), FirstPosition,
+        var document = new DocumentResult(Reference(owner), FirstPosition,
             ControlledPartitionMovementCorpus.OriginalJson, false, []);
         await EqualAsync(rows.ToArray(), new[] { new RankedDocument(document, SingleRank) });
+    }
+
+    private static EntityRef Reference(ControlledPartitionMovementNativeHost owner)
+    {
+        var partition = ControlledPartitionMovementCorpus.Partition;
+        var lifetime = owner.Store.Read(view => ResourceLifetimeCatalog.Read(view,
+            partition.TenantId, partition.DatabaseId, ControlledPartitionMovementCorpus.Collection,
+            new ResourceDefinition(ControlledPartitionMovementCorpus.Collection, ResourceKind.Collection,
+                partition.TransactionDomainId)))
+            ?? throw new InvalidOperationException("The acknowledged collection lifetime is absent.");
+        return new(partition, ControlledPartitionMovementCorpus.Collection,
+            ControlledPartitionMovementCorpus.DocumentId)
+        { Lifetime = new(lifetime.Incarnation.Value) };
     }
 
     private static async Task EqualAsync<T>(T actual, T expected)

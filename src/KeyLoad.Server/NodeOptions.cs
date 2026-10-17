@@ -123,7 +123,7 @@ internal sealed record NodeOptions
         if (Peers is null || DevelopmentSingleVoter && (BenchmarkTopology || !AllowPrivateNetworkHttp && !AllowLoopbackHttp)
             || (DevelopmentSingleVoter ? Peers.Count != NodeDefaults.DevelopmentVoters : BenchmarkTopology
                 ? Peers.Count is not (NodeDefaults.MinimumBenchmarkVoters or NodeDefaults.MaximumBenchmarkVoters)
-                : Peers.Count < NodeDefaults.MinimumVoters)
+                : Peers.Count == NodeDefaults.EmptyPeers)
             || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Count
             || !Peers.Contains(PublicEndpoint, StringComparer.Ordinal)
             || string.IsNullOrWhiteSpace(DataDirectory) || string.IsNullOrWhiteSpace(SiloAddress))
@@ -198,8 +198,8 @@ internal sealed record NodeOptions
         internal const string InvalidIdentity = "Cluster identity, credentials or silo port are invalid.";
         internal const string InvalidPeers = "Cluster origins require distinct fixed voters, private development HTTP or HTTPS, and a local member.";
         internal const string InvalidAddress = "A remote voter requires a routable advertised silo address.";
+        internal const int EmptyPeers = 0;
         internal const int DevelopmentVoters = 1;
-        internal const int MinimumVoters = 1;
         internal const int MinimumBenchmarkVoters = 1;
         internal const int MaximumBenchmarkVoters = 3;
         internal const int SiloPort = 11_111;

@@ -5,7 +5,7 @@ namespace KeyLoad;
 /// <summary>Explicit operator configuration; no credential, key or database role is carried here.</summary>
 /// <param name="Version">Independent mapping schema version.</param>
 /// <param name="Source">Exact verified original owner tuple.</param>
-/// <param name="Target">New configured RF3 tuple, never an original signed authority.</param>
+/// <param name="Target">New configured replicated tuple, never an original signed authority.</param>
 /// <param name="Endpoints">Exact ordered target server bases matching target voter order.</param>
 [Orleans.GenerateSerializer, Orleans.Alias(ClusterRestoreOwnerMapping.SerializerAlias)]
 public sealed record ClusterRestoreOwnerMapping(

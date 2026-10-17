@@ -240,7 +240,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     /// <param name="destination">Clean operator-owned unpublished target canonical directory.</param>
     /// <param name="executionOptions">Original centrally validated native storage execution policy.</param>
     /// <param name="verifyCatalog">Synchronous actual credential and complete cut validator; it cannot retain or re-enter the view.</param>
-    /// <param name="newIncarnation">Explicit new RF3 group incarnation.</param>
+    /// <param name="newIncarnation">Explicit new replicated group incarnation.</param>
     /// <param name="newSigningKey">Actual new group signing key, retained only in private operator configuration.</param>
     /// <param name="cancellationToken">Original owning offline workflow cancellation.</param>
     /// <returns>The genuinely restored native identity with dispatch paused.</returns>

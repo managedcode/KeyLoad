@@ -8,24 +8,35 @@ Requirements and acceptance: REQ/AC-ORL-001..013 in
 ## Context and decision
 
 The owner asks KeyLoad to use Orleans' StatelessWorker, OneWay, durable jobs and
-reentrancy/interleaving facilities where their guarantees fit. The current unique
-request/read grains already allow independent requests; partition commands and
-due coordination carry stronger ordered-effect and reliable-outcome contracts.
+reentrancy/interleaving facilities where their guarantees fit. The connection-owned
+execution grain ([ADR-125](ADR-125-connection-owned-execution.md)) already allows
+independent operations; partition commands and background work carry stronger
+ordered-effect and reliable-outcome contracts.
 Increasing grain concurrency without auditing awaits, identity, storage lifetime
 and admission can violate those contracts while multiplying retained work.
 
 The owner's follow-up explicitly includes local Orleans services and a broad
 documentation review, including messaging/pub-sub and transactions. Extend the
 selection inventory before choosing new providers or contracts; preserve the
-existing native replica/due GrainServices and silo-local storage/lifecycle owners.
+silo-local ZoneTree owner Grain Service and its lifecycle
+([ADR-136](ADR-136-native-orleans-partition-ownership.md)).
 The canonical reviewed capability inventory and proposed priorities are in
 [CapabilityReview](../Features/ClusterRouting/CapabilityReview.md).
 
 Adopt a per-grain/method selection contract rather than enabling attributes
 globally. The owning feature contains the canonical source audit, candidate
 matrix, bounds, REQ/AC, planned tests and execution joins. Its decisions preserve
-ADR-036's separate request grain, ADR-082's native CQRS lifetime/identity, ADR-003's
-RF3 receipt and ADR-094's canonical recurring/saga due state.
+ADR-125's connection-owned execution, ADR-082's native CQRS lifetime/identity, the
+majority acknowledgement receipt and ADR-094's canonical recurring/saga due state.
+
+Background workers are the one accepted use of `[StatelessWorker]` for state-changing
+work: queue deadlines, due recurring and saga work, remote queue transfers, ANN
+projection and time-series chunking run in bounded StatelessWorker pools that accept
+events, buffer them in memory and, on an Orleans timer (typed interval option), write
+the batch to the database through the ordinary connection grain -> partition grain ->
+ZoneTree owner path ([ADR-094](ADR-094-orleans-due-coordination.md)). These workers
+never check leadership, elect a coordinator or run as singletons; duplicates are
+absorbed by deterministic command identities and canonical compare-and-set.
 
 Use bounded StatelessWorker pools for proven interchangeable computation;
 loss-tolerant OneWay for advisory hints with an independent recovery path; narrow
@@ -36,10 +47,9 @@ attributes grants CPU parallelism within one Orleans turn or moves file ownershi
 
 Evaluate native Durable Jobs for one-time persistent wake-ups with idempotent
 canonical effects. The repository pins Orleans 10.4.0, whose matching Durable
-Jobs package remains `10.4.0-alpha.1`. The owner implementation approval now selects the bounded RF3-backed native
-journal provider frozen in [RuntimeJournal](../Features/ClusterRouting/RuntimeJournal.md),
-including private bootstrap, owner/content fencing, quotas, and already-due saga
-handoff. Runtime qualification remains pending. Canonical ZoneTree schedule/saga
+Jobs package remains `10.4.0-alpha.1`. The owner implementation approval now selects the bounded native journal
+provider frozen in [RuntimeJournal](../Features/ClusterRouting/RuntimeJournal.md),
+including quotas and already-due saga handoff. Runtime qualification remains pending. Canonical ZoneTree schedule/saga
 state and creator-authorized effects remain authoritative.
 
 Retain native GrainServices for per-silo/partitioned runtime support, borrowed
@@ -56,8 +66,8 @@ remain separate implementation joins; the review does not enable them.
 Blanket Reentrant/AlwaysInterleave would admit turns beside mutable operations
 and weaken the existing partition/due serialization. ReadOnly on the generic
 read dispatcher would include heterogeneous backup/admin lifecycle work. Marking
-request/read grains StatelessWorker would multiply identities/pools and change
-the unique signed request boundary without a demonstrated benefit. Those options
+the connection or partition grains StatelessWorker would multiply identities/pools and
+change the signed operation boundary without a demonstrated benefit. Those options
 are rejected for the inspected methods.
 
 Converting command/due RPCs to OneWay loses callee errors and terminal receipts.
@@ -129,7 +139,7 @@ New public control APIs, provider formats or dependency defects need the owning
 contract and, for ManagedCode defects, its mandatory published repair/release.
 
 Rollout/rollback retain original request aliases, persisted authorization,
-ZoneTree state, ordered apply and RF3 recovery journals. Stop admission and join
+ZoneTree state, ordered apply and recovery journals. Stop admission and join
 live work before disabling a candidate. Reconcile persistent job delivery against
 canonical generations before provider removal; this documentation stage changes
 no persisted format or data.
@@ -147,13 +157,7 @@ no persisted format or data.
 Native journal implementation stage, 2026-10-06: REQ/AC-ORL-013 in
 [RuntimeJournal](../Features/ClusterRouting/RuntimeJournal.md) owns the exact Core,
 Orleans and Server joins, ordered worker tasks, rollout/rollback, private identity
-and real recovery/RF3 acceptance. Scoped ORLEANSEXP005 is owner authorized. The
-native manager starts background work without awaiting its catalog at silo start;
-provider async calls wait on a separately canceled readiness gate until signed
-RF3 bootstrap and verification complete. Both physical stores must already satisfy
-the current required reader contract before first journal admission; fresh stores
-are created with that contract and unsupported capabilities fail closed.
-
+and real recovery/RF3 acceptance. Scoped ORLEANSEXP005 is owner authorized. 
 The REQ/AC-ORL-013 call graph copies every existing default-deny edge and admits
 the native RuntimeJournalClient's exact ReadCoreAsync and SendCommandAsync calls
 to IRequestGrain.ExecuteStreamAsync. Native JournaledStateManager suppresses
@@ -186,8 +190,17 @@ Rollback and source-inventory constraints are in the owning feature contract.
 The original228/230 local result leaves the label and later assertions open;
 source reasoning is not runtime proof and this ADR is not fully implemented.
 
-## TASK-ANN-NATIVE-COMPILER-BOUNDS-001
+## ANN projection maintenance
 
-REQ/AC-ORL-013 and REQ/AC-ANN native maintenance retain the existing validated IOptions<RuntimeJournalOptions> and IOptions<DatabaseLimits> through the original coordinator/state owner and silo-local producer. Do not reconstruct options from a DatabaseEngine value inside execution. The original limits, cancellation, journal-before-effects and RF3 settlement contracts remain unchanged. The exact private ANN binding identity remains generated Orleans binary serialization with the original alias and Id0..2; its nested declaration is internal so the actual generated codec can access it. No public operation contract, field number, wire identity or compatibility fallback changes.
-
-The pre-authorized ADR-110 ORLEANSEXP005 opt-in is scoped to the native journal-backed ANN coordinator and state owner declarations only, restored immediately afterward; every other diagnostic and existing analyzer severity stays required. Generated codec accessibility, centrally bound read limits and original state corruption bounds are required compiler checks. The unchanged actual replay/settlement/retirement, durable scheduling, process and Aspire RF3 cohorts require fresh compiled source and Linux qualification. Source repair alone closes none of those runtime gates.
+REQ/AC-ORL-013 and REQ/AC-ANN native maintenance follow the background-worker
+pattern above: StatelessWorker grains accept projection events, buffer them and, on
+an Orleans timer, write the batch through the ordinary path; they do not check
+leadership or use a singleton coordinator. They retain the existing validated
+`IOptions<RuntimeJournalOptions>` and `IOptions<DatabaseLimits>` instead of
+reconstructing options inside execution. The original limits, cancellation and
+journal-before-effects contracts remain unchanged; the private ANN binding keeps
+generated Orleans binary serialization with its original alias and Id0..2. The
+ORLEANSEXP005 opt-in stays scoped to the native journal declarations only; every
+other diagnostic and analyzer severity stays required. Source repair alone closes
+none of the runtime gates, which require fresh compiled source and Linux
+qualification.

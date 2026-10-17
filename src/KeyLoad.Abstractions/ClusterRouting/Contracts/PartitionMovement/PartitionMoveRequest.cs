@@ -3,7 +3,7 @@ namespace KeyLoad;
 /// <summary>Requests a real controlled move; supplied physical fields are expectations, never grants.</summary>
 /// <param name="MoveId">Stable administrator operation identity.</param>
 /// <param name="Partition">Complete unchanged logical partition scope.</param>
-/// <param name="DestinationPhysicalShardId">Expected registered destination RF3 owner.</param>
+/// <param name="DestinationPhysicalShardId">Expected registered destination replicated owner.</param>
 /// <param name="ExpectedPlacementRevision">Expected current committed PMAP revision.</param>
 /// <param name="Mode">Original transfer, bounded resume or unpublished abort.</param>
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveAliases.Request)]

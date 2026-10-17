@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.Cli.Features.BackupRestore;
 
-/// <summary>Nonsecret observed offline publication receipt; it is not an RF3 durability receipt.</summary>
+/// <summary>Nonsecret observed offline publication receipt; it is not an replicated durability receipt.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(ClusterRestoreExecutionReceipt.SerializerAlias)]
 internal sealed record ClusterRestoreExecutionReceipt([property: Orleans.Id(ClusterRestoreExecutionReceipt.CaptureField)] Guid CaptureId,
     [property: Orleans.Id(ClusterRestoreExecutionReceipt.NodesField)] ImmutableArray<ClusterRestoreNodeReceipt> Nodes,
