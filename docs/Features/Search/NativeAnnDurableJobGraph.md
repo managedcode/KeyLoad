@@ -6,7 +6,7 @@ AC-KL097-JOB-GRAPH-001 requires a genuine hosted persisted configure, durable in
 
 The source correction adds only the concrete ExecuteJobAsync-to-ExecuteStreamAsync transition. Existing client, grain-service, connection, command-partition and private-probe edges are retained. The graph admission does not supply database authority: signed server identity, fresh persisted authorization, bounded work, node-local storage and RF3 acknowledgements remain mandatory.
 
-Canonical source map: src/KeyLoad.Server/Features/ClusterRouting/Hosting/ConnectionGrainGraphRegistration.cs owns registration; the Search coordinator owns durable execution and its existing caller context. The server, Orleans, integration tests and this Search specification retain their original feature ownership. Frontend and additional public contracts are N/A for this internal graph edge.
+Canonical source map: src/KeyLoad.Server/ClusterRouting/Hosting/ConnectionGrainGraphRegistration.cs owns registration; the Search coordinator owns durable execution and its existing caller context. The server, Orleans, integration tests and this Search specification retain their original feature ownership. Frontend and additional public contracts are N/A for this internal graph edge.
 
 ```mermaid
 flowchart LR

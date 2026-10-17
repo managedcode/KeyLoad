@@ -50,7 +50,7 @@ sequenceDiagram
 1. Read-only R resolves installed Aspire connection API and one existing fixture;
    lead accepts detailed criteria and this ADR before any write-capable delegation.
 2. T authors NEW internal PostgresSchema* real integration helpers under
-   tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons. They exercise public
+   tests/KeyLoad.ComparisonTests/BenchmarkComparisons. They exercise public
    targets and native metadata against the existing PG resource after measurement.
    First-authored packet is a dependency of C, no local test execution.
 3. C owns ONLY Targets/PostgresTarget.cs and NEW feature PostgresSchema* production

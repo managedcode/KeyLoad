@@ -188,7 +188,7 @@ RF3 checks. No performance or numeric-coverage result is inferred from source.
 
 ## Повний query contract
 
-Актори: .NET/SQL/JSON caller і authorized reader. Entry points: [QueryEngine](../../src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs), [SqlParser](../../src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs), [public AST](../../src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/QueryAst.cs), [SDK query builder](../../src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs), [HTTP query operations](../../src/KeyLoad.Server/ApiEndpoints.cs). Current Q1 — bounded read-only scalar dialect, а не PostgreSQL wire/full SQL compatibility.
+Актори: .NET/SQL/JSON caller і authorized reader. Entry points: [QueryEngine](../../src/KeyLoad.Query/QueryExecution/Queries/QueryEngine.cs), [SqlParser](../../src/KeyLoad.Query/QueryExecution/Execution/SqlParser.cs), [public AST](../../src/KeyLoad.Abstractions/QueryExecution/Contracts/QueryAst.cs), [SDK query builder](../../src/KeyLoad.Client/QueryExecution/Queries/KeyLoadQuery.cs), [HTTP query operations](../../src/KeyLoad.Server/ApiEndpoints.cs). Current Q1 — bounded read-only scalar dialect, а не PostgreSQL wire/full SQL compatibility.
 
 | Вимога | Acceptance / flows | Test mapping |
 |---|---|---|

@@ -189,7 +189,7 @@ verified stage while other feature workers continue.
 ### G2 public RF3 test stage
 
 Luna lifecycle_wave now owns only new
-`tests/KeyLoad.IntegrationTests/Features/Search/Cases/GraphSearchRf3Tests.cs`
+`tests/KeyLoad.IntegrationTests/Search/Cases/Graph/GraphSearchRf3Tests.cs`
 and graph-specific `Helpers/` or `Assertions/` files, plus new
 `Features/QueryExecution/Cases/SqlGraphSearchRf3Tests.cs` and matching
 SQL-graph-specific helpers. AC-GSEARCH-006 requires the actual shared Aspire

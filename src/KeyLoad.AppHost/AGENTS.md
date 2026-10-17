@@ -2,10 +2,10 @@
 
 ## Purpose and entry points
 - Owns Aspire application composition for KeyLoad services and infrastructure resources.
-- Entry point: `Program.cs`; benchmark resource composition: `Features/BenchmarkComparisons/Resources/BenchmarkResources.cs`.
+- Entry point: `Program.cs`; benchmark resource composition: `BenchmarkComparisons/Resources/BenchmarkResources.cs`.
 
 ## Ownership and boundaries
-- Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `Features/<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
+- Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
 - Aspire owns resource orchestration, not database storage state or atomic partition identity. Each node-local `PartitionHost` owns storage, journals, file locks and the apply gate; Orleans grains route commands and physical placement remains separate from atomic partition identity.
 - ClusterResources composes actual Docker RF3 resources. Do not replace the required Docker/Aspire RF3 topology with an in-memory or single-node demonstration. The accepted ADR-082 protocol-cohort test seam preserves fixed three-voter membership and node-local storage ownership.
 
@@ -20,13 +20,13 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned composition slices: `ClusterReplication`, `ClusterRouting`, `ClientApi`, `TestInfrastructure` and `BenchmarkComparisons`; target paths use the same `Features/<SliceName>/` convention. ClusterRouting's protocol image overrides follow NativeCqrsRequestV2 and ADR-082; they are allowed only in an explicitly selected ephemeral fixed-three-voter child test topology, never benchmark or ordinary production composition.
-- `Features/ClientApi/Resources/ClusterConnectionEndpointResources.cs` owns the named direct HTTP/2 container endpoint under ADR-125, preserving original HTTP/1.1 endpoints, peer identity, readiness and genuine RF3 resources. Actual parallel-connection SDK/official MCP tests discover this endpoint through Aspire; no proxy or synthetic session can substitute for its accepted TCP connection.
+- Owned composition slices: `ClusterReplication`, `ClusterRouting`, `ClientApi`, `TestInfrastructure` and `BenchmarkComparisons`; target paths use the same `<SliceName>/` convention. ClusterRouting's protocol image overrides follow NativeCqrsRequestV2 and ADR-082; they are allowed only in an explicitly selected ephemeral fixed-three-voter child test topology, never benchmark or ordinary production composition.
+- `ClientApi/Resources/ClusterConnectionEndpointResources.cs` owns the named direct HTTP/2 container endpoint under ADR-125, preserving original HTTP/1.1 endpoints, peer identity, readiness and genuine RF3 resources. Actual parallel-connection SDK/official MCP tests discover this endpoint through Aspire; no proxy or synthetic session can substitute for its accepted TCP connection.
 - Keep `Program.cs` as the shared Aspire composition entry point; put feature-owned resource definitions under their named slice.
-- `Features/CodeQuality/` owns the test-only native functional coverage configuration and Aspire preparation/resource dependencies under ADR-033 and CodeQuality AC-CQ-039..042. Use the same centrally pinned Microsoft engine as MTP, downloaded as a package; do not install a global tool. Preserve exact contributor/source/DLL/PDB/image identity, original process settlement and all full mandatory suites. Runtime coverage still comes from the original owned server processes, not the AppHost assembly.
+- `CodeQuality/` owns the test-only native functional coverage configuration and Aspire preparation/resource dependencies under ADR-033 and CodeQuality AC-CQ-039..042. Use the same centrally pinned Microsoft engine as MTP, downloaded as a package; do not install a global tool. Preserve exact contributor/source/DLL/PDB/image identity, original process settlement and all full mandatory suites. Runtime coverage still comes from the original owned server processes, not the AppHost assembly.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
 
 ## Native TUnit entry, owner correction 2026-10-07
 - ADR-117 supersedes the earlier outer AppHost caller requirements: CI starts TUnit directly after build with Detailed output. Test fixtures own Aspire infrastructure startup, readiness, client operations and cleanup. scripts/Features/TestInfrastructure/run-tests.mjs only selects native test arguments/environment; it cannot execute database workloads. RF3 coverage preparation belongs to the TUnit session lifecycle. Preserve every original qualification/artifact gate and separate Benchmarks ownership.

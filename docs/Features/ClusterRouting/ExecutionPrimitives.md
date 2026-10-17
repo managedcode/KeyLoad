@@ -81,7 +81,7 @@ source callbacks alone do not prove RAM recovery or performance improvement.
 | `RecurringDueCoordinatorGrain.ExecuteJobAsync` and native saga wake-up adapter | Approved source integration under RuntimeJournal, pending qualification. Native Durable Jobs trigger canonical due processing after reloading current persisted creator and saga state, with a fresh signed request and RF3 effect. Canonical schedule, saga watermark and command outcomes retain their authority. |
 
 Current grain/service paths in the first five rows are relative to
-[KeyLoad.Clustering/Features](../../../src/KeyLoad.Clustering/Features/).
+[KeyLoad.Clustering/Features](../../../src/KeyLoad.Clustering/).
 Worker, control and advisory-hint candidates remain unimplemented; native jobs
 source integration does not close its acceptance criteria.
 

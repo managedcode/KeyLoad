@@ -54,7 +54,7 @@ rollback rejects filtered capability on older nodes rather than dropping IDs.
 ## F1 public RF3 test stage
 
 Luna query_wave owns new
-`tests/KeyLoad.IntegrationTests/Features/Search/Cases/FilteredSearchRf3Tests.cs`
+`tests/KeyLoad.IntegrationTests/Search/Cases/Filtered/FilteredSearchRf3Tests.cs`
 and uniquely named filtered-search `Helpers/` or `Assertions/` files. Map
 AC-FILTER-001/002/003 and the F1 portion of AC-FILTER-005 to actual shared
 Aspire Docker RF3 discovered endpoints, real .NET SDK and official MCP search

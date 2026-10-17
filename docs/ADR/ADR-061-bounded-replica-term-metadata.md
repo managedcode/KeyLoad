@@ -78,7 +78,7 @@ flowchart LR
    replacement, restore, poison/disposal and gate order. Source findings are not
    native profile attribution.
 2. R15 Luna owns ONLY NEW `ReplicaTermMetadata*.cs` tests/helpers under
-   `tests/KeyLoad.RecoveryTests/Features/ClusterReplication/`. Author genuine
+   `tests/KeyLoad.RecoveryTests/ClusterReplication/`. Author genuine
    ZoneTree tests first for exact term/errors, cold/warm/alternating indices,
    large retained payload logical reads, direct mutation/corruption/missing record,
    suffix replacement, snapshot cut and same-position valid install, real

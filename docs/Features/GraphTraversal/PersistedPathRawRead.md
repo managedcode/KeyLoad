@@ -16,7 +16,7 @@ AuthorizationPolicy and GraphShortestPathResultProjector apply fresh principal f
 
 ## Canonical map and limits
 
-Existing Case remains in `tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/`. New Models/State, Helpers/Commands+Replay+Trial, Assertions/Current+Reads remain feature-local. Specification: `docs/Features/GraphTraversal/PersistedPathRawRead.md`; canonical root `../GraphTraversal.md`. Existing ADR-010/014/098/117/125 govern authorization, bounded reads, native caller entry and connection-owned execution. UI N/A; this is database public caller acceptance, not a UI. New product/backend/shared fixture/library work N/A.
+Existing Case remains in `tests/KeyLoad.IntegrationTests/GraphTraversal/Cases/`. New Models/State, Helpers/Commands+Replay+Trial, Assertions/Current+Reads remain feature-local. Specification: `docs/Features/GraphTraversal/PersistedPathRawRead.md`; canonical root `../GraphTraversal.md`. Existing ADR-010/014/098/117/125 govern authorization, bounded reads, native caller entry and connection-owned execution. UI N/A; this is database public caller acceptance, not a UI. New product/backend/shared fixture/library work N/A.
 
 ```mermaid
 flowchart LR

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
-    <EmbeddedResource Include="Features/AdminDashboard/Assets/*" LogicalName="KeyLoad.AdminDashboard.%(Filename)%(Extension)" />
-    <Content Include="Features/ResourceExecution/Analytics/Assets/ZoneTree.Analytics.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="AdminDashboard/Assets/*" LogicalName="KeyLoad.AdminDashboard.%(Filename)%(Extension)" />
+    <Content Include="ResourceExecution/Analytics/Assets/ZoneTree.Analytics.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />

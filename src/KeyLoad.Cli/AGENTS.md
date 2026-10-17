@@ -5,7 +5,7 @@
 - Entry point: `Program.cs`; project definition: `KeyLoad.Cli.csproj`.
 
 ## Ownership and boundaries
-- CLI workflows belong under their canonical `Features/<SliceName>/` paths and matching feature specs. Keep `Program.cs` as composition/dispatch only.
+- CLI workflows belong under their canonical `<SliceName>/` paths and matching feature specs. Keep `Program.cs` as composition/dispatch only.
 - The CLI is an untrusted client: it cannot supply trusted roles or bypass persisted database credentials and authorization policies. It does not own server persistence, replication, or physical placement.
 - Existing root-level executable layout is migration debt; do not add duplicate SDK behavior or undocumented fallback paths.
 
@@ -19,8 +19,8 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `ClientApi` and `BackupRestore`; target paths: `Features/ClientApi/` and `Features/BackupRestore/`.
+- Owned slices: `ClientApi` and `BackupRestore`; target paths: `ClientApi/` and `BackupRestore/`.
 - Keep `Program.cs` as the CLI composition/dispatch entry point; feature command behavior belongs in its named slice.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

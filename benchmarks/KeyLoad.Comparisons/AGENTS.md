@@ -2,11 +2,11 @@
 
 ## Purpose and entry points
 - Owns the reusable comparative benchmark harness library and its database targets under ADR-043; the sole executable belongs to KeyLoad.ComparisonHost in this repository.
-- Library entry point: `Features/BenchmarkComparisons/Session/Execution/BenchmarkSession.cs`; native target adapters and shared corpora remain in the same feature slice. Native TUnit test composition belongs to KeyLoad.ComparisonHost.
+- Library entry point: `BenchmarkComparisons/Session/Execution/BenchmarkSession.cs`; native target adapters and shared corpora remain in the same feature slice. Native TUnit test composition belongs to KeyLoad.ComparisonHost.
 
 ## Ownership and boundaries
 - Own comparative workload definitions, target adapters, sampling and report serialization. Product semantics remain owned by their product slices; CI callers own qualification and publication decisions.
-- Target feature path is `Features/BenchmarkComparisons/`, aligned with `docs/Features/BenchmarkComparisons.md` when that feature spec is established. The current flat files are recorded migration debt; do not expand it.
+- Target feature path is `BenchmarkComparisons/`, aligned with `docs/Features/BenchmarkComparisons.md` when that feature spec is established. The current flat files are recorded migration debt; do not expand it.
 - Keep the corpus and measurement contract stable and reproducible. Do not substitute an in-memory/single-node KeyLoad target for the required RF3 topology.
 
 ## Commands and evidence
@@ -19,9 +19,9 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slice: `BenchmarkComparisons`; target feature path: `Features/BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
+- Owned slice: `BenchmarkComparisons`; target feature path: `BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
 - The sole executable entry point is now KeyLoad.ComparisonHost/Program.cs under ADR-043; all comparison behavior retains the same named slice. Do not restore a duplicate entry or internalize the public library API.
 - Owner correction2026-10-17 and ADR-142 retire the former per-cell runners, selectors and report producers. All measured tests in a database/node-count job share one live database, with measured initial loading and no warmup, reset or reseed. Keep genuine native adapters and correctness oracles; do not reintroduce a legacy execution path. Source completion does not establish GitHub runtime qualification.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

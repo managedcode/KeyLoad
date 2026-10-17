@@ -16,4 +16,4 @@ flowchart LR
     L --> A[Original state assignment and acknowledgement]
 ```
 
-Map: src/KeyLoad.Replication/Features/ClusterReplication/Storage/DurableReplicaLog.cs owns protocol/state/lifetime; Storage/ReplicaLogRecordAccess.cs owns private synchronous record access and exact atomic record writes. Frontend, new public API, serialization-contract changes and topology changes are N/A because this scope preserves the existing replication implementation.
+Map: src/KeyLoad.Replication/ClusterReplication/Storage/DurableReplicaLog.cs owns protocol/state/lifetime; Storage/ReplicaLogRecordAccess.cs owns private synchronous record access and exact atomic record writes. Frontend, new public API, serialization-contract changes and topology changes are N/A because this scope preserves the existing replication implementation.

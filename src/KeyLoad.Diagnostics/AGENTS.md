@@ -1,7 +1,7 @@
 # KeyLoad.Diagnostics
 
 ## Purpose and entry points
-- Owns generic bounded callback-free database phase diagnostics in `Features/ResourceExecution/`, under ADR-063 and its feature contract.
+- Owns generic bounded callback-free database phase diagnostics in `ResourceExecution/`, under ADR-063 and its feature contract.
 - Entry points: immutable phase/outcome/quality/snapshot schema, DatabasePhaseBank and root-owned process startup facade.
 
 ## Ownership and boundaries
@@ -23,4 +23,4 @@
 - Preserve root400/type200/function50/nesting3 limits, compiler/style diagnostics and all independent ownership. Stop on package/public/wire/security change or scope conflict.
 ## Feature-local responsibility folders
 
-- Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

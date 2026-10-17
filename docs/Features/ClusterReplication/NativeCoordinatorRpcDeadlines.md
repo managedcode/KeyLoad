@@ -13,9 +13,9 @@ This refines REQ-REP-003 and AC-REP-003 in the
 | REQ-REP-RPC-DEADLINE-004: the receiving read deadline is independent of the command deadline; read interruption cannot report write uncertainty. | AC-REP-RPC-DEADLINE-004: genuine cross-silo application/control reads with command5s/read10s remain pending beyond5s without a majority, then refuse within the original10s bound as OwnershipLost, with the original caller live and canonical state unchanged. |
 
 The first two criteria map to
-[ReplicaCoordinatorBarrierDeadlineTests](../../../tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaCoordinatorBarrierDeadlineTests.cs).
+[ReplicaCoordinatorBarrierDeadlineTests](../../../tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaCoordinatorBarrierDeadlineTests.cs).
 The fourth criterion maps to
-[ReplicaReceiverBarrierDeadlineTests](../../../tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReceiverBarrierDeadlineTests.cs).
+[ReplicaReceiverBarrierDeadlineTests](../../../tests/KeyLoad.UnitTests/ClusterReplication/Cases/Replica/ReplicaReceiverBarrierDeadlineTests.cs).
 Actual public-client qualification remains the separate
 [functional database gates](../DatabaseComposition/FunctionalDatabaseGates.md).
 These mappings record required evidence, not passing results.

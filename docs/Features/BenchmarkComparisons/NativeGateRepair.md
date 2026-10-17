@@ -33,8 +33,8 @@ flowchart LR
 
 The owning slice is `BenchmarkComparisons`: current-job and diagnostic tooling in
 `scripts/Features/BenchmarkComparisons/`, real Node and unit regressions in
-`tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/`, native Kurrent cases in
-`tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/`, and the existing
+`tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/`, native Kurrent cases in
+`tests/KeyLoad.ComparisonTests/BenchmarkComparisons/`, and the existing
 benchmark adapter/host and AppHost-owned topology. Root owns the workflow, shared
 source and evidence inventories, schema, documentation, final integration, and
 qualification joins. Tests must exercise production context and real native

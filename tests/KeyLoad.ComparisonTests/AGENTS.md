@@ -2,11 +2,11 @@
 
 ## Benchmark contract ownership, owner correction 2026-10-06
 
-- Own all benchmark/comparison contract tests previously held in KeyLoad.UnitTests, including corpus, progress, process-entry and counter checks. Keep them under Features/BenchmarkComparisons/UnitContracts with responsibility folders and preserve their existing namespaces and assertions during this structural move. Execute them through the Aspire comparison suite exclusively in Benchmarks; Build and Tests must not execute this project.
+- Own all benchmark/comparison contract tests previously held in KeyLoad.UnitTests, including corpus, progress, process-entry and counter checks. Keep them under BenchmarkComparisons/UnitContracts with responsibility folders and preserve their existing namespaces and assertions during this structural move. Execute them through the Aspire comparison suite exclusively in Benchmarks; Build and Tests must not execute this project.
 
 ## Purpose and entry points
 - Owns TUnit comparison-harness checks and the CI comparison workload entry point.
-- Native session entry: `Features/BenchmarkComparisons/Session/Cases/BenchmarkSessionTests.cs`; project: `KeyLoad.ComparisonTests.csproj`.
+- Native session entry: `BenchmarkComparisons/Session/Cases/BenchmarkSessionTests.cs`; project: `KeyLoad.ComparisonTests.csproj`.
 
 ## Ownership and boundaries
 - Tests and comparison artifacts belong to the `BenchmarkComparisons` slice and matching `docs/Features/BenchmarkComparisons.md`.
@@ -24,10 +24,10 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned test slice: `BenchmarkComparisons`; target path: `Features/BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
-- `Features/BenchmarkComparisons/Session/Cases/BenchmarkSessionTests.cs` is the current entry point; keep test scenarios under the same named slice.
+- Owned test slice: `BenchmarkComparisons`; target path: `BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
+- `BenchmarkComparisons/Session/Cases/BenchmarkSessionTests.cs` is the current entry point; keep test scenarios under the same named slice.
 ## Feature slice responsibility folders
-- Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
+- Place every feature-owned source file under `<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
 - Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
 - Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.
 

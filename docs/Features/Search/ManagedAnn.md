@@ -82,8 +82,8 @@ Empty/small eligible sets use exact scoring. Larger sets use ef at least max(Lim
 
 | Stage / owner | Exact file ownership and permissions | Dependencies, artifacts, verification and join |
 |---|---|---|
-| R1 algorithm / query_wave, gpt-6-luna high | NEW src/KeyLoad.Query/Features/Search/PackedAnn*.cs and AnnWorkBudget.cs only; no shared/public/Core/Server/package/project/docs/CI/test edits | Accepted API above; actual complete algorithm/bounds; static inspection only in worker. Root checks diff, numeric complexity, strict build, formatter and independent tests. |
-| R1 independent tests / cluster_wave, gpt-6-luna high | NEW tests/KeyLoad.UnitTests/Features/Search/PackedAnn*.cs only; no existing tests/helpers/contracts edited | Accepted API; real TestDatabase/canonical ZoneTree and existing public exact metric oracle. Author positive/negative/edge/error cases for AC-ANN-001–006; no runtime/build/commit in worker. |
+| R1 algorithm / query_wave, gpt-6-luna high | NEW src/KeyLoad.Query/Search/PackedAnn*.cs and AnnWorkBudget.cs only; no shared/public/Core/Server/package/project/docs/CI/test edits | Accepted API above; actual complete algorithm/bounds; static inspection only in worker. Root checks diff, numeric complexity, strict build, formatter and independent tests. |
+| R1 independent tests / cluster_wave, gpt-6-luna high | NEW tests/KeyLoad.UnitTests/Search/PackedAnn*.cs only; no existing tests/helpers/contracts edited | Accepted API; real TestDatabase/canonical ZoneTree and existing public exact metric oracle. Author positive/negative/edge/error cases for AC-ANN-001–006; no runtime/build/commit in worker. |
 | R2 assessment / lifecycle_wave, gpt-6-luna high | Read-only existing Core/Server/Search/outbox/ZoneTree lifecycle sources; no writes or execution | Report exact source-cut, replay, publication, serialization, lock and memory join points/gaps. No invented format/contract implementation. |
 | Root integration and evidence | ADR/spec/task graph/shared joins; exclusive build/test/commit ownership | Inspect every diff, resolve API/bounds issues, run strict solution build/format/governance then TUnit through Aspire normal/scalar; retain original evidence. Commit completed stage, push main, qualify delivered SHA on Linux. |
 
@@ -524,7 +524,7 @@ fixed test output stay outside the product and its execution budget.
 Traceability: REQ-ANN-018 -> AC-ANN-018 -> ADR-019 amendment ->
 TASK-ANN-RECIPROCAL-INSERTION -> independent native graph tests and original
 Aspire reports. The Luna source owner produces a hash-guarded private packet
-for `src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborSelection.cs`
+for `src/KeyLoad.Query/Search/Execution/PackedAnnNeighborSelection.cs`
 and independent tests in the Search test slice. Root owns contract review,
 baseline/after observations, join, strict build/format and all required gates.
 No public, persistence, package, long-operation or RF3 contract changes occur.

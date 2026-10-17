@@ -72,7 +72,7 @@ Canonical ownership:
 - shared infrastructure: `.github/workflows/build-and-tests.yml`, `benchmarks.yml`, `website.yml`, `release.yml`,
   root Dockerfile, the existing comparison Dockerfile and `Directory.Build.props`;
 - tooling: `scripts/Features/ReleaseDelivery/` version/asset helpers and distribution;
-- focused contracts/tests: `tests/KeyLoad.UnitTests/Features/ReleaseDelivery/`;
+- focused contracts/tests: `tests/KeyLoad.UnitTests/ReleaseDelivery/`;
 - source/provenance handoff: existing BenchmarkComparisons production adapters and
   their TUnit suites, preserving their existing canonical slice;
 - frontend/public API/storage/schema: N/A; this task changes delivery and consumes

@@ -58,8 +58,8 @@ flowchart LR
 
 | Surface | Ownership / стан |
 |---|---|
-| Public contracts | `src/KeyLoad.Abstractions/Features/BlobStorage/`; інтегратор owns DTO/enums/identity/error semantics за ADR-038 |
-| Engine/storage | Source `src/KeyLoad.Core/Features/BlobStorage/` + node-local provider building blocks; files/locks/apply належать PartitionHost, не grains |
+| Public contracts | `src/KeyLoad.Abstractions/BlobStorage/`; інтегратор owns DTO/enums/identity/error semantics за ADR-038 |
+| Engine/storage | Source `src/KeyLoad.Core/BlobStorage/` + node-local provider building blocks; files/locks/apply належать PartitionHost, не grains |
 | Server/.NET SDK | Source matching `Features/BlobStorage/`; feature-owned BlobClientExtensions use shared [ClientApi](ClientApi.md) transport |
 | MCP/agent | Source owning-operation mapping через [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md), ті самі grants та semantics; qualification pending |
 | Tests | Source unit/recovery/blob fixtures and SQL RF3 differential cases; реальні stores/processes/RF3, без doubles; exact-SHA execution remains required |

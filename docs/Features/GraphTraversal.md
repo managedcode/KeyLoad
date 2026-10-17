@@ -15,12 +15,12 @@ GraphTraversal owns graph edge records, adjacency maintenance, and authorized bo
 
 | Surface | Current source | Target owner |
 |---|---|---|
-| Contracts | `src/KeyLoad.Abstractions/Contracts.cs`, `Queries.cs` | `src/KeyLoad.Abstractions/Features/GraphTraversal/` |
-| Backend | `src/KeyLoad.Core/GraphAndSeries.cs`, mutation dispatch/authorization in `DatabaseEngine.cs` and `MutationAuthorization.cs` | `src/KeyLoad.Core/Features/GraphTraversal/` |
-| Tests | `tests/KeyLoad.UnitTests/GraphAndSearchTests.cs`, `ReadExecutionTests.cs`, `HttpAdmissionTests.cs` | `tests/KeyLoad.UnitTests/Features/GraphTraversal/` |
+| Contracts | `src/KeyLoad.Abstractions/Contracts.cs`, `Queries.cs` | `src/KeyLoad.Abstractions/GraphTraversal/` |
+| Backend | `src/KeyLoad.Core/GraphAndSeries.cs`, mutation dispatch/authorization in `DatabaseEngine.cs` and `MutationAuthorization.cs` | `src/KeyLoad.Core/GraphTraversal/` |
+| Tests | `tests/KeyLoad.UnitTests/GraphAndSearchTests.cs`, `ReadExecutionTests.cs`, `HttpAdmissionTests.cs` | `tests/KeyLoad.UnitTests/GraphTraversal/` |
 | Durable specification | This file | `docs/Features/GraphTraversal.md` |
-| HTTP | `src/KeyLoad.Server/ApiEndpoints.cs`: `POST /v1/graph/traverse`; edge mutations enter through shared `POST /v1/commands` | Shared HTTP transport belongs to `src/KeyLoad.Server/Features/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/Features/GraphTraversal/` |
-| .NET SDK | `src/KeyLoad.Client/KeyLoadClient.cs`: `TraverseAsync` and `CommitAsync` for graph mutations | Shared client transport belongs to `src/KeyLoad.Client/Features/ClientApi/`; typed graph behavior maps to this GraphTraversal slice |
+| HTTP | `src/KeyLoad.Server/ApiEndpoints.cs`: `POST /v1/graph/traverse`; edge mutations enter through shared `POST /v1/commands` | Shared HTTP transport belongs to `src/KeyLoad.Server/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/GraphTraversal/` |
+| .NET SDK | `src/KeyLoad.Client/KeyLoadClient.cs`: `TraverseAsync` and `CommitAsync` for graph mutations | Shared client transport belongs to `src/KeyLoad.Client/ClientApi/`; typed graph behavior maps to this GraphTraversal slice |
 | Official MCP | The authenticated official C# SDK exposes `keyload_graph_incoming` and shortest-path tools through the shared ClientApi gateway/catalog | Real RF3 schema oracles preserve exact properties/required fields and hints; nested `PartitionRef` includes computed `atomicPartitionId` as an optional property |
 | UI | No dedicated graph-management or traversal frontend is specified | N/A: graph traversal is a database/API query capability, not a separate frontend surface |
 | External graph provider | None is selected or implemented for canonical edge ownership | N/A: provider-backed/ranked graph retrieval is separate planned search work |
@@ -74,7 +74,7 @@ Count outgoing candidates before label/visibility filtering. Preserve the
 existing cancellation/deadline and healthy-follow-up cases.
 
 TASK-KL023-ORACLE owns only
-`tests/KeyLoad.UnitTests/Features/GraphTraversal/Assertions/GraphTraversalReferenceBfsOracle.cs`
+`tests/KeyLoad.UnitTests/GraphTraversal/Assertions/GraphTraversalReferenceBfsOracle.cs`
 and `Cases/GraphTraversalReferenceOracleTests.cs`. Root freezes this contract,
 reviews and joins the private packet, and runs Aspire normal/scalar followed by
 exact-source Linux and real SDK/official MCP RF3 qualification. Existing
@@ -128,7 +128,7 @@ TASK-GRAPH-STORAGE-REFERENCE-001 implements existing REQ-GRAPH-001 / AC-GRAPH-00
 
 Before implementation, freeze two real ZoneTree whole-operation regressions: GraphStorageMutationReferenceTests executes seeded deterministic insert/update/rebind/delete/reinsert sequences against independent test-owned literal edge state, compares all outgoing and incoming edges including revisions/attributes after each operation, retries each exact command without new effects, rejects changed payload for the same command identity, closes/reopens actual storage, compares persisted reference state and completes another healthy mutation. GraphStorageAtomicEffectsTests commits entity/edge/event/queue together, retries the complete batch, then places effects before a stale-edge failure and proves every model unchanged/absent followed by a healthy operation. Missing endpoint and stale expected revision are real command rejections, not injected provider faults.
 
-Ownership: tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphStorageMutationReferenceTests.cs and GraphStorageAtomicEffectsTests.cs, cohesive feature-local Fixtures/GraphStorageReferenceFixture.cs and Assertions/GraphStorageReferenceAssertions.cs. Root guards/joins docs and tests, compiles and executes normal/scalar native TUnit plus required recovery/RF3 gates. Authored tests and source review alone do not close KL-022; native original reports and real client qualification remain required. Existing KL-023 traversal oracle and its independent budgets remain unchanged. Rollback removes these test/docs additions only; no migration or production format change.
+Ownership: tests/KeyLoad.UnitTests/GraphTraversal/Cases/Graph/GraphStorageMutationReferenceTests.cs and GraphStorageAtomicEffectsTests.cs, cohesive feature-local Fixtures/GraphStorageReferenceFixture.cs and Assertions/GraphStorageReferenceAssertions.cs. Root guards/joins docs and tests, compiles and executes normal/scalar native TUnit plus required recovery/RF3 gates. Authored tests and source review alone do not close KL-022; native original reports and real client qualification remain required. Existing KL-023 traversal oracle and its independent budgets remain unchanged. Rollback removes these test/docs additions only; no migration or production format change.
 
 
 ## KL-022 persisted rejection and exact retry correction

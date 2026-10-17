@@ -5,7 +5,7 @@
 - Composition extension: `Extensions.cs`; project definition: `KeyLoad.ServiceDefaults.csproj`.
 
 ## Ownership and boundaries
-- Keep only genuinely solution-wide service defaults here. Feature behavior belongs under its canonical `Features/<SliceName>/` path and matching feature spec.
+- Keep only genuinely solution-wide service defaults here. Feature behavior belongs under its canonical `<SliceName>/` path and matching feature spec.
 - Defaults do not own database policy, storage, partition placement or feature-specific request behavior. Root-level extension is a shared composition point, not a feature layer.
 - Do not introduce secrets, project-specific hidden coupling or analyzer/formatting exceptions without a documented owner contract.
 
@@ -20,7 +20,7 @@
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - This project owns shared telemetry, service discovery, and resilience composition; the architecture map assigns no product feature slice here.
-- Keep `Extensions.cs` as a shared building block; feature-specific behavior belongs in the owning project’s named `Features/<SliceName>/` path.
+- Keep `Extensions.cs` as a shared building block; feature-specific behavior belongs in the owning project’s named `<SliceName>/` path.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

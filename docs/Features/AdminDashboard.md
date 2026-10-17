@@ -38,12 +38,12 @@ flowchart LR
 
 ## Canonical slice map
 
-- Public DTO/protocol: `src/KeyLoad.Abstractions/Features/AdminDashboard/`.
-- Gated catalog/queue behavior: `src/KeyLoad.Core/Features/AdminDashboard/`.
+- Public DTO/protocol: `src/KeyLoad.Abstractions/AdminDashboard/`.
+- Gated catalog/queue behavior: `src/KeyLoad.Core/AdminDashboard/`.
 - Grain composition: existing ClusterRouting read enum, unique request/read actors and borrowed INodeAdministration; no new durable grain state or grain-owned filesystem.
-- API, observations, exact static hosting and frontend: `src/KeyLoad.Server/Features/AdminDashboard/`, with frontend `Assets/` fully colocated executable artifacts. Existing shared server configuration is composition only.
-- .NET SDK: `src/KeyLoad.Client/Features/AdminDashboard/`; official MCP/agent declarations consume these same typed capabilities.
-- Tests: `tests/KeyLoad.UnitTests/Features/AdminDashboard/`, `tests/KeyLoad.IntegrationTests/Features/AdminDashboard/`.
+- API, observations, exact static hosting and frontend: `src/KeyLoad.Server/AdminDashboard/`, with frontend `Assets/` fully colocated executable artifacts. Existing shared server configuration is composition only.
+- .NET SDK: `src/KeyLoad.Client/AdminDashboard/`; official MCP/agent declarations consume these same typed capabilities.
+- Tests: `tests/KeyLoad.UnitTests/AdminDashboard/`, `tests/KeyLoad.IntegrationTests/AdminDashboard/`.
 - Infrastructure: existing canonical `ci.yml` RF3/unit/recovery gates; public `site/` and Pages publication N/A because operational administration is hosted by the database server, not the public benchmark site.
 - Persisted schema/migrations N/A: observation uses existing records and writes no new database state. Benchmark workload N/A: observation does not establish performance superiority. SMID/Orleans Streams N/A to implementation; their priority/qualification remain separately tracked.
 

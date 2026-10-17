@@ -35,7 +35,7 @@ Related requirements: REQ-VQ-001..007; acceptance: AC-VQ-001..007.
 1. TASK-VQ-001 (lead): freeze shared profile/report/interfaces and corpus/query/
    recall contracts with focused real-flow TUnit tests before adapter integration.
 2. TASK-VQ-002 (native-engine worker): native SurrealDB/HelixDB adapters under
-   `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/`; matching
+   `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/Targets/`; matching
    Aspire resources, immutable image/source pins, host factory registration and
    native comparison regressions. The worker owns these new engine paths and
    reports every shared join to the lead. No global tool installation.

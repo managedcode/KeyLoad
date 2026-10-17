@@ -110,7 +110,7 @@ subject to their exact storage and trust joins.
 3. TASK-ORL-WORKERS, CONTROL and HINTS start only when the owning feature's
    concrete operation, quotas, exact methods and immutable/lifetime/trust
    contracts are resolved. Writes are disjoint feature-local role folders in
-   `src/KeyLoad.Clustering/Features/ClusterRouting/` and the actual affected slice;
+   `src/KeyLoad.Clustering/ClusterRouting/` and the actual affected slice;
    tests mirror those slices. Root alone joins generated contracts and call graph.
 4. TASK-ORL-JOBS resolves the native API and persistent provider/reconciliation
    gate first. Messaging owns `Features/Messaging/Grains/`, `Contracts/` and

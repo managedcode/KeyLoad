@@ -8,7 +8,7 @@ REQ-EVENT-PUBSUB-CAS-STATE-002: compose the single test successor after immutabl
 
 AC-EVENT-PUBSUB-CAS-STATE-002: exact predecessor hash guards the replacement test; the actual current test type must remain native NotFound at authoring. Private patch check/apply and posthash receipts are source evidence only. Actual compiler, TUnit, native UID, Linux, RF3 and recovery gates remain OPEN.
 
-Source map: tests/KeyLoad.UnitTests/Features/EventStreams/Cases/EventFeedPubSubScratchFailureTests.cs. Requirements map to ActualRegisteredSerializerScratchRefusalKeepsCompleteCasStateAndHealthyReplacement, with unchanged direct writer cases. The disposable provider proof is independent of canonical persisted EventStreams/RF3 durability.
+Source map: tests/KeyLoad.UnitTests/EventStreams/Cases/Event/EventFeedPubSubScratchFailureTests.cs. Requirements map to ActualRegisteredSerializerScratchRefusalKeepsCompleteCasStateAndHealthyReplacement, with unchanged direct writer cases. The disposable provider proof is independent of canonical persisted EventStreams/RF3 durability.
 
 REQ-EVENT-PUBSUB-CAS-STATE-003: actual registered provider and storage cleanup must preserve original test/body and every real constructor/disposal failure, including genuine fatal failures; no cleanup can replace the initiating failure.
 

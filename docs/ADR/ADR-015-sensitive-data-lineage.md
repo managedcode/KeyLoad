@@ -1,6 +1,6 @@
 # ADR-015: Sensitive-data omission, use, and lineage
 
-Status: Accepted; complete cross-projection privacy qualification pending. Current policy contracts are in `src/KeyLoad.Abstractions/Contracts.cs`, enforcement in `src/KeyLoad.Core/MutationAuthorization.cs` and `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs`; product source [sections 14, 26, 29–30, and 44](../design/architecture-v0.3.uk.md).
+Status: Accepted; complete cross-projection privacy qualification pending. Current policy contracts are in `src/KeyLoad.Abstractions/Contracts.cs`, enforcement in `src/KeyLoad.Core/MutationAuthorization.cs` and `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs`; product source [sections 14, 26, 29–30, and 44](../design/architecture-v0.3.uk.md).
 
 ## Context and decision
 
@@ -18,7 +18,7 @@ Authorization `REQ-AUTH-001..003` plus [REQ-AUTH-004..009 and matching AC-AUTH-0
 
 1. Freeze classification vocabulary, schema lineage, required-input behavior, omission rules, derived-provider metadata, and safe diagnostic format.
 2. Add canary tests across document, event/header, queue/DLQ, SQL alias/sort, graph edge, search/vector, export, trace, and replay; assert both allowed raw use and denied omission/failure.
-3. Target owners: `src/KeyLoad.Security/Features/Authorization/`, each canonical source slice, and the existing `src/KeyLoad.Query/Features/Search/` projection slice; no generic endpoint may bypass source ownership or create a separate search technical root.
+3. Target owners: `src/KeyLoad.Security/Authorization/`, each canonical source slice, and the existing `src/KeyLoad.Query/Search/` projection slice; no generic endpoint may bypass source ownership or create a separate search technical root.
 4. Reclassification increments policy/schema epochs and invalidates stale derived generations before exposing output. Rollback cannot restore permissive reads without restoring authorized policy state; purge operations must report replica/archive boundaries.
 5. GitHub CI runs TUnit and real RF3 SDK/MCP privacy cases. Root joins Security, Search, Messaging, and backup owners; retain sanitized evidence only.
 

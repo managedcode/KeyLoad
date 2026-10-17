@@ -114,14 +114,14 @@ and transport behavior remain exact; all compiled consumers recompile together.
 | REQ-CLIENT-002: bounded error parse, cancellation and disposal preserve caller outcomes | AC-MP-009 | Real server malformed/oversized errors, mid-body cancellation, subsequent request |
 | REQ-CLIENT-003: operator profiles are bounded and valid generated profiles preserve semantics | AC-MP-010 | Real temporary profile files in TUnit, oversized rejection before full allocation |
 
-Canonical ownership: transport/helpers in src/KeyLoad.Client/Features/ClientApi;
-tests in tests/KeyLoad.UnitTests/Features/ClientApi or the matching integration
+Canonical ownership: transport/helpers in src/KeyLoad.Client/ClientApi;
+tests in tests/KeyLoad.UnitTests/ClientApi or the matching integration
 slice. Existing KeyLoadClient.cs is the cross-feature transport entry point;
 business operation methods retain their typed canonical contracts. CLI profile
 adaptation belongs to ClientApi; shared AppHost composition is lead-owned.
 Frontend/database/schema changes: N/A, transport decoding only.
 
-CLI composition now lives in `src/KeyLoad.Cli/Features/ClientApi/Hosting/KeyLoadCliApplication.cs`;
+CLI composition now lives in `src/KeyLoad.Cli/ClientApi/Hosting/KeyLoadCliApplication.cs`;
 status/profile/help behavior lives in its `Features/ClientApi/CliClientApi.cs` and
 original-text resource. The preserving contract and review exception are
 AC-CQ-010 in [quality-gates acceptance](CodeQuality.md), under
@@ -246,11 +246,11 @@ and SDK/API shape are N/A because this is internal failure evidence only. ADR039
 governs ordered implementation and source-only rollback. No protocol downgrade,
 dependency patch, broad exception fallback, trusted caller role or timeout change.
 
-Актори: application developer, operator CLI, durable worker і required MCP/agent caller. Source-present: typed [.NET SDK](../../src/KeyLoad.Client/KeyLoadClient.cs), [query builder](../../src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs), [CLI](../../src/KeyLoad.Cli/Program.cs) та [HTTP routes](../../src/KeyLoad.Server/ApiEndpoints.cs). Public capability/operation semantics визначає owning Feature; SDK не є другим engine.
+Актори: application developer, operator CLI, durable worker і required MCP/agent caller. Source-present: typed [.NET SDK](../../src/KeyLoad.Client/KeyLoadClient.cs), [query builder](../../src/KeyLoad.Client/QueryExecution/Queries/KeyLoadQuery.cs), [CLI](../../src/KeyLoad.Cli/Program.cs) та [HTTP routes](../../src/KeyLoad.Server/ApiEndpoints.cs). Public capability/operation semantics визначає owning Feature; SDK не є другим engine.
 
 | Вимога | Measurable acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-CLIENT-004: supported typed operations і capabilities дзеркалять canonical server contracts | AC-CLIENT-004: existing document/event/queue/group/graph/series/query/search/feed/admin calls повертають typed values/outcomes; unsupported capability/version дає явну помилку; equivalent query adapters дають однаковий result/authority | Existing `SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract` у [ClusterTests](../../tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs), [QueryAdapterTests](../../tests/KeyLoad.UnitTests/QueryAdapterTests.cs); operation-manifest parity expansion PLANNED |
+| REQ-CLIENT-004: supported typed operations і capabilities дзеркалять canonical server contracts | AC-CLIENT-004: existing document/event/queue/group/graph/series/query/search/feed/admin calls повертають typed values/outcomes; unsupported capability/version дає явну помилку; equivalent query adapters дають однаковий result/authority | Existing `SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract` у [ClusterTests](../../tests/KeyLoad.IntegrationTests/ClusterReplication/Cases/Cluster/ClusterTests.cs), [QueryAdapterTests](../../tests/KeyLoad.UnitTests/QueryAdapterTests.cs); operation-manifest parity expansion PLANNED |
 | REQ-CLIENT-005: retry/error/cancellation зберігають stable command identity та unknown outcome | AC-CLIENT-005: transient disconnect після committed write не спричиняє другу logical operation; same ID/content replay стабільний, different payload conflict; typed errors, cancellation, bounded decode/disposal зберігають caller semantics без fabricated success | Existing `ReplicatedAtomicBatchSurvivesLeaderProcessKillAndMinorityRejectsWrites` у ClusterTests; transport edge/error cases з AC-MP-009 PLANNED/GitHub pending |
 | REQ-CLIENT-006: official MCP SDK adapter виконує ті самі authorized operations | AC-CLIENT-006 and AC-MCP-001–008: real official MCP C# SDK caller на Docker RF3 має operation/result/error/cancellation parity з .NET SDK; AC-MCP-001 independently checks all 68 accepted names, exact schemas and hints, including both GraphPath tools and `keyload_admin_partition_placement_bind` / `keyload_admin_partition_placement_read`; invalid/forged/revoked grants та unsupported calls fail before effects; search/storage coverage включено лише після owning capability implementation | Source IntegrationTests `Features/ClientApi/` MCP parity/adversarial suite; [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md) owns the versioned stateless `/mcp` catalog and bounded admission contract; runtime pending |
 | REQ-CLIENT-007: simple agent/worker API має bounded capability та processing contract | AC-CLIENT-007: PLANNED versioned agent calls користуються тим самим persisted principal, typed operations, quotas і outcome semantics; queue worker stale lease/duplicate handler, empty input та cancellation не дають unauthorized/duplicate effects | Existing processing semantics у [MessagingTests](../../tests/KeyLoad.UnitTests/MessagingTests.cs); agent surface tests PLANNED після ADR-039 acceptance |
@@ -287,7 +287,7 @@ schemas, excess bounds and failed
 writes fail; no credentials, caller data or private inventory is recorded.
 
 ADR-039 freezes the test-only helper
-`tests/KeyLoad.IntegrationTests/Features/ClientApi/Helpers/NativeMcpSchemaEvidence.cs`
+`tests/KeyLoad.IntegrationTests/ClientApi/Helpers/NativeMcpSchemaEvidence.cs`
 and the three existing case call sites. Use the existing repository-root helper
 and uploaded `artifacts/qualification/mcp-schema-evidence/` ownership. Root owns
 contract, review, native RF3 evidence and delivery; a Luna worker prepares the
@@ -989,7 +989,7 @@ Freeze those literal inventories before correcting only Unit ClientApi Contracts
 
 REQ-MCP-PIPELINE-DIAG-001 / AC-MCP-PIPELINE-DIAG-001 require failure-only native evidence at actual IncomingAdmission and OutgoingNativeOutput KeyLoadException catch sites. Typed event5 contains only closed stage, canonical ErrorCode and closed Initialize/ServerDiscover/ToolsCall/Other category from the ACTUAL original request method. Response validation with no original request uses Other, without invented correlation. Never export arbitrary method text, exception text, ID/body/header/payload/principal/credentials or caller data. Native ILogger<McpSessionPipeline> comes from original HttpContext services; original first failure remains in ServerFailureObserver, diagnostic service/logger failures are separately retained and do not mask it or change success.
 
-Pinned official SDK2.2.0/explicit2026-07-28 uses server/discover; a helper named Initialize does not establish a different original method. Existing outgoing replacement behavior remains unchanged. This observation does not prove the original connection cause or repair negotiation. Exact ownership: src/KeyLoad.Server/Features/ClientApi/Transport/McpSessionPipeline.cs, Contracts/McpPipelineFailureStage.cs, Contracts/McpPipelineMethodCategory.cs, Diagnostics/McpPipelineFailureDiagnostic.cs. Frontend N/A; no public endpoint/protocol/schema/catalog/persisted format/provider/quota/deadline/retry/fallback/cancellation change. ADR: [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md).
+Pinned official SDK2.2.0/explicit2026-07-28 uses server/discover; a helper named Initialize does not establish a different original method. Existing outgoing replacement behavior remains unchanged. This observation does not prove the original connection cause or repair negotiation. Exact ownership: src/KeyLoad.Server/ClientApi/Transport/McpSessionPipeline.cs, Contracts/McpPipelineFailureStage.cs, Contracts/McpPipelineMethodCategory.cs, Diagnostics/McpPipelineFailureDiagnostic.cs. Frontend N/A; no public endpoint/protocol/schema/catalog/persisted format/provider/quota/deadline/retry/fallback/cancellation change. ADR: [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md).
 
 Root freezes/joins/docs/CI/Git; KL-021 whole-task owner obtains actual catch execution evidence, repairs only a proven owning cause, and retains genuine official SDK/MCP healthy/refusal/cancellation/full receipt/cold cases. Ordered stages: contract; coherent source; Linux build/format/native discovery; original source/image-bound native failing-branch observation; proven repair; complete normal/scalar-caller RF3. Existing unsupported-protocol/healthy flows do not themselves prove catch coverage. No getters/metadata/synthetic PASS qualify. Rollback removes only observation while original native failure/cleanup remain. Actual native branch coverage, compilation and Linux results are OPEN.
 

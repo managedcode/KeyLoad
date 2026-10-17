@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns the shared regular-file opening primitive used by current StorageRecovery, native index metadata and scoped process/RF3 inspection under ADR-011/116 and the CurrentFormat contract. Do not introduce storage conversion or prior-format admission.
-- Internal entry point: `Features/StorageRecovery/Storage/OfflineRegularFile.cs`; project: `KeyLoad.Storage.IO.csproj`.
+- Internal entry point: `StorageRecovery/Storage/OfflineRegularFile.cs`; project: `KeyLoad.Storage.IO.csproj`.
 
 ## Ownership and boundaries
 - Keep filesystem implementation in the canonical StorageRecovery slice. This project references only BCL and existing KeyLoad.Abstractions error contracts; it owns no database state, engine, authorization, routing, placement, receipt codec or replication.
@@ -23,4 +23,4 @@
 - FIFO/device/socket input must be rejected before reading data; bind the checked object to its open handle and retain primary/cleanup failures. Files created privately by an owned retained CreateNew handle remain under their existing creation contract.
 ## Feature-local responsibility folders
 
-- Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

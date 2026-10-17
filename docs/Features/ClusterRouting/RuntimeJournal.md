@@ -157,21 +157,21 @@ restart/adoption, no-quorum, creator revocation, schedule-ACK uncertainty and
 single timeout effect must pass through Aspire RF3 and real SDK/official MCP.
 No source or native local fixture closes those gates.
 
-The root join owns [RuntimeJournalStartupRequests](../../../src/KeyLoad.Clustering/Features/ClusterRouting/Hosting/RuntimeJournalStartupRequests.cs),
-[RuntimeJournalStartup](../../../src/KeyLoad.Server/Features/ClusterRouting/Hosting/RuntimeJournalStartup.cs),
-[OrleansNodeRequestExecutor](../../../src/KeyLoad.Server/Features/ClusterRouting/Execution/OrleansNodeRequestExecutor.cs),
+The root join owns [RuntimeJournalStartupRequests](../../../src/KeyLoad.Clustering/ClusterRouting/Hosting/RuntimeJournalStartupRequests.cs),
+[RuntimeJournalStartup](../../../src/KeyLoad.Server/ClusterRouting/Hosting/RuntimeJournalStartup.cs),
+[OrleansNodeRequestExecutor](../../../src/KeyLoad.Server/ClusterRouting/Execution/OrleansNodeRequestExecutor.cs),
 the exact native lifecycle registration/observer, and both store reader fences.
 The executor retains the existing cohort check, catalog admission, execution
 deadline and complete native CQRS stream; it adds no dispatch or storage owner.
 
 Authored AC-ORL-013 development cases are mapped to
-[native storage and binary DurableGrain replay across confirmed new activations](../../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RuntimeJournalNativeStorageTests.cs),
-[canonical quota and protected identity](../../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RuntimeJournalQuotaAndIdentityTests.cs),
-[journal reopen](../../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RuntimeJournalReopenTests.cs),
-[reader backup/checkpoint/reopen lifecycle](../../../tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderLifecycleTests.cs),
-[reader rejection](../../../tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs),
-and [actual native saga expiry, stale completion and creator revocation](../../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/NativeSagaTimeoutFunctionalTests.cs),
-plus [native runtime restart and retained-shard reclaim](../../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/NativeSagaTimeoutRestartTests.cs).
+[native storage and binary DurableGrain replay across confirmed new activations](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalNativeStorageTests.cs),
+[canonical quota and protected identity](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalQuotaAndIdentityTests.cs),
+[journal reopen](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalReopenTests.cs),
+[reader backup/checkpoint/reopen lifecycle](../../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/RuntimeJournal/RuntimeJournalReaderLifecycleTests.cs),
+[reader rejection](../../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/RuntimeJournal/RuntimeJournalReaderFenceTests.cs),
+and [actual native saga expiry, stale completion and creator revocation](../../../tests/KeyLoad.UnitTests/Messaging/Cases/NativeSaga/NativeSagaTimeoutFunctionalTests.cs),
+plus [native runtime restart and retained-shard reclaim](../../../tests/KeyLoad.UnitTests/Messaging/Cases/NativeSaga/NativeSagaTimeoutRestartTests.cs).
 The latter preserves the genuine store across two native runtimes and asserts
 the actual recovered shard, stable canonical journal instance, changed owner/fence,
 settled native work and exact timeout effect. It makes no process-restart claim.

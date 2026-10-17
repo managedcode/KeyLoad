@@ -83,7 +83,7 @@ operation, not a general workflow-engine compatibility claim.
 ## P1 public RF3 test stage
 
 Luna query_wave owns new
-`tests/KeyLoad.IntegrationTests/Features/Search/Cases/EventProjectionRf3Tests.cs`
+`tests/KeyLoad.IntegrationTests/Search/Cases/Event/EventProjectionRf3Tests.cs`
 and uniquely named projection `Helpers/` or `Assertions/` files. Map
 AC-LINEAGE-001/002/003 to real event/document/vector mutations and reads through
 the .NET SDK and official MCP client on the existing Aspire-owned Docker RF3

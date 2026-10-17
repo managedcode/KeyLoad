@@ -22,7 +22,7 @@ This makes authorization, command routing, transaction scope, and idempotency ag
 
 1. Freeze canonical identity fields, catalog binding validation, movement fixtures, and token lineage before changing routing.
 2. Add real tests for cross-domain key reuse, valid shared resources, authorization, stable command scope, and split/movement boundaries.
-3. Implement in `src/KeyLoad.Abstractions/Features/ClusterRouting/` and `src/KeyLoad.Core/Features/ClusterRouting/`; route via the owning Orleans request/partition grains. Preserve the current node-local `PartitionHost` ownership of stores and locks.
+3. Implement in `src/KeyLoad.Abstractions/ClusterRouting/` and `src/KeyLoad.Core/ClusterRouting/`; route via the owning Orleans request/partition grains. Preserve the current node-local `PartitionHost` ownership of stores and locks.
 4. Create resources under the canonical catalog binding and reject ambiguous or absent bindings. A physical move fences the current owner, publishes only after a verified catalog/ownership epoch and complete committed cut, and returns to that owner on rollback only while its state remains complete and fenced.
 5. GitHub Actions must run TUnit, recovery, and Aspire RF3 through .NET and MCP SDKs; compare stable outcomes across failover and movement. Root owns shared resolver/contracts; worker joins only after exact tests and changed paths are reported.
 

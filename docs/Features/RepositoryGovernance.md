@@ -1,5 +1,12 @@
 # RepositoryGovernance
 
+Owner correction 2026-10-17: every C# project under `src/`, `tests/` and
+`benchmarks/` places named slices directly under its project directory as
+`<project>/<SliceName>/<Role>/`, with thematic folders retained inside `Cases/`.
+The intermediate project `Features/` directory is removed. This supersedes prior
+project-layout examples below; namespaces and persisted identities stay stable.
+Script, site and documentation module paths retain their existing layout.
+
 Owner correction 2026-10-15: [FoundationDelivery](RepositoryGovernance/FoundationDelivery.md)
 owns the complete KL-001..KL-105 definition review, implementation dependency graph,
 foundation gates and later independent directions. It preserves every required

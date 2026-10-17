@@ -1,5 +1,12 @@
 # ADR-032: Current MCAF governance and repository layout
 
+Owner correction 2026-10-17: every C# project under `src/`, `tests/` and
+`benchmarks/` places named slices directly under its project directory as
+`<project>/<SliceName>/<Role>/`, with thematic folders retained inside `Cases/`.
+The intermediate project `Features/` directory is removed. This supersedes prior
+project-layout examples below; namespaces and persisted identities stay stable.
+Script, site and documentation module paths retain their existing layout.
+
 Status: Accepted governance contract; outstanding architecture-layout debt and delivered-source qualification remain tracked separately. Requirements: REQ-MCAF-001..010; acceptance: AC-MCAF-001..010. The owning contracts are in [RepositoryGovernance](../Features/RepositoryGovernance.md), the [architecture map](../Architecture.md), and the mandatory [root policy](../../AGENTS.md).
 
 | Requirement | Acceptance | Current contract |

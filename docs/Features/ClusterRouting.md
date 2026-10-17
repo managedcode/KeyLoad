@@ -83,7 +83,7 @@ flowchart LR
     Migration[Activation repartitioner] --> Request
 ```
 
-Slice map: `src/KeyLoad.Clustering/Features/ClusterRouting/` owns request routing/membership; Server composition wires it. ClientApi owns HTTP/MCP adapters. Tests mirror ClusterRouting in IntegrationTests. Frontend: N/A, routing has no independent UI. Credentials remain in Authorization's persisted catalog.
+Slice map: `src/KeyLoad.Clustering/ClusterRouting/` owns request routing/membership; Server composition wires it. ClientApi owns HTTP/MCP adapters. Tests mirror ClusterRouting in IntegrationTests. Frontend: N/A, routing has no independent UI. Credentials remain in Authorization's persisted catalog.
 
 Traceability: AC-ROUTE-001/002/003 map to client-visible RF3 scenarios and targeted migration evidence in TASK-REP-TRANSPORT/INTEGRATE/VERIFY. Existing `CommandRouterGrain` and membership files are replaced in the same migration. No result is qualified until the exact GitHub Actions SHA/run/artifacts are recorded.
 
@@ -95,7 +95,7 @@ TASK-ROUTE-MEMBERSHIP uses the selected native Azure Orleans membership provider
 
 | Вимога | Acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-ROUTE-004: atomic partition identity відокремлена від physical placement | AC-ROUTE-004: equal literal key у різних domains не створює shared transaction; server catalog resolution фіксує eligible shared resources; packing/activation placement не змінює CAS/unique/dedup scope | Existing `SameLiteralPartitionKeyCannotCrossTransactionDomains` у [TransactionTests](../../tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs); expanded placement fixtures PLANNED |
+| REQ-ROUTE-004: atomic partition identity відокремлена від physical placement | AC-ROUTE-004: equal literal key у різних domains не створює shared transaction; server catalog resolution фіксує eligible shared resources; packing/activation placement не змінює CAS/unique/dedup scope | Existing `SameLiteralPartitionKeyCannotCrossTransactionDomains` у [TransactionTests](../../tests/KeyLoad.UnitTests/ResourceExecution/Cases/Transaction/TransactionTests.cs); expanded placement fixtures PLANNED |
 | REQ-ROUTE-005: physical partition movement/split має fenced restartable protocol | AC-ROUTE-005: PLANNED prepare/copy/catch-up/validate/ownership-switch/release tests з process interruption і real RF3 доводять complete cut, stable outcomes and current ownership-session token identity or explicit invalidation, with no old-owner write after switch | PLANNED KL-036/069–072 suites; [ADR-016](../ADR/ADR-016-atomic-physical-placement.md), [ADR-017](../ADR/ADR-017-ownership-session-tokens.md) |
 
 Distributed directory/repartitioning — required in-progress source migration. Automatic physical split/merge, broad placement balancing і migration-aware tokens не оголошені готовими. Resource packing/placement і routing contracts freeze одним integration owner за [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-007](../ADR/ADR-007-replica-consensus-bootstrap.md). Target Abstractions/Orleans/replication host/tests mirror `Features/ClusterRouting/` для routing behavior, StorageRecovery owns files, ClientApi owns caller transport. Frontend N/A; placement/operator controls потребують власного accepted API до implementation.
@@ -381,30 +381,30 @@ Frontend: N/A, internal native execution. No public database protocol, storage f
 
 | Exact source/test path |
 |---|
-| `src/KeyLoad.Clustering/Features/ClusterRouting/Contracts/IGrainActivationMigrationObserver.cs` |
-| `src/KeyLoad.Clustering/Features/ClusterRouting/Grains/CommandPartitionGrain.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Contracts/RequestCqrsProbeMigrationProtocol.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Contracts/RequestCqrsProbeMigrationRecord.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Execution/RequestCqrsProbeMigration.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Execution/RequestCqrsProbeMigrationFiles.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Execution/RequestCqrsProbeObserver.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansSiloConfiguration.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Serialization/RequestCqrsProbeFiles.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Serialization/RequestCqrsProbeJson.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Serialization/RequestCqrsProbeMigrationJson.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Serialization/RequestCqrsProbeMigrationJsonContext.cs` |
-| `src/KeyLoad.Server/Features/ClusterRouting/Validation/RequestCqrsProbeMigrationValidation.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/NativeActivationMigrationRf3Ownership.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/NativeActivationRf3ColdOutcome.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/NativeDatabaseMigrationRf3Tests.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Contracts/NativeActivationMigrationRf3Protocol.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/NativeActivationDuplicateRf3Operation.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/NativeActivationMigrationRf3Attempt.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/NativeActivationMigrationRf3Control.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/NativeActivationMigrationRf3Operation.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/NativeActivationMigrationRf3Scenario.cs` |
-| `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/RequestCqrsProbeFileValidation.cs` |
-| `tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ReplicaMembershipNativeStoreTests.cs` |
+| `src/KeyLoad.Clustering/ClusterRouting/Contracts/IGrainActivationMigrationObserver.cs` |
+| `src/KeyLoad.Clustering/ClusterRouting/Grains/CommandPartitionGrain.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Contracts/RequestCqrsProbeMigrationProtocol.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Contracts/RequestCqrsProbeMigrationRecord.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Execution/RequestCqrsProbeMigration.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Execution/RequestCqrsProbeMigrationFiles.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Execution/RequestCqrsProbeObserver.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Hosting/OrleansSiloConfiguration.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeFiles.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeJson.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeMigrationJson.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeMigrationJsonContext.cs` |
+| `src/KeyLoad.Server/ClusterRouting/Validation/RequestCqrsProbeMigrationValidation.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/NativeActivationMigrationRf3Ownership.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/NativeActivationRf3ColdOutcome.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Cases/NativeDatabase/NativeDatabaseMigrationRf3Tests.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Contracts/NativeActivationMigrationRf3Protocol.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationDuplicateRf3Operation.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Attempt.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Control.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Operation.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Scenario.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/RequestCqrsProbeFileValidation.cs` |
+| `tests/KeyLoad.UnitTests/ClusterRouting/Cases/ReplicaMembershipNativeStoreTests.cs` |
 
 
 TASK-CLUSTER-NATIVE-MAINTENANCE-READ-002 retains the existing native request-grain contract and strict64/200 executable-unit/type bounds. Colocate interchangeable text/ANN maintenance capability selection in one typed ClusterRouting Queries helper, behind the same unique request grain. Preserve fresh persisted principal reload, RequireAdministrator before service resolution or payload decoding, exact typed native service/payload pairs, the existing cancellation token, Orleans scheduler continuation and all phase/readiness/admission/disposal behavior. Existing SDK/MCP/RF3 full maintenance flows remain the regression map. ADR: existing request-grain/routing and native-maintenance decisions are sufficient because no public schema, authority, service registration, storage ownership, scheduling attribute or failure contract changes. The caller still owns every lifetime; a helper introduces no dispatcher or request-grain substitute.
@@ -782,7 +782,7 @@ AC-CMD-UNC-001 maps to `ConnectionPostSubmitFailureTests.ReturnedSubmitObserverF
 
 REQ-CMD-UNC-002: when post-submit observation succeeds, an actual persisted refusal `OperationResult.Error` retains its exact code/detail; pre-submit authorization refusal must not become blanket uncertainty. AC-CMD-UNC-002 maps to the same two cases' genuine subsequent revision-conflict command and exact persisted error/detail comparison, plus existing `ConnectionNativeFailureTests.AcCrs052FailureAndRevocationLeaveNoEffectsAndFollowingCallSucceeds` for revoked authorization, absent outcome/document effects and a healthy following call.
 
-Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Clustering/Features/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Clustering/Features/ClusterRouting/Serialization/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
+Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Clustering/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Clustering/ClusterRouting/Serialization/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
 
 ```mermaid
 flowchart LR

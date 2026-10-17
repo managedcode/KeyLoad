@@ -58,7 +58,7 @@ cut must remain exact. A runner-only close/reopen is not process-restart proof,
 and process kill is not power-loss qualification.
 
 Ordered ownership: root freezes this contract and owns the minimal mode dispatch
-join in `tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/CrashHostApplication.cs`.
+join in `tests/KeyLoad.CrashHost/StorageRecovery/Helpers/CrashHostApplication.cs`.
 The query worker owns new scenario/helper files only under CrashHost and
 RecoveryTests `Features/DocumentStorage/`; one canonical DocumentStorage slice
 applies on both surfaces. Root reviews, joins, runs the actual Aspire recovery

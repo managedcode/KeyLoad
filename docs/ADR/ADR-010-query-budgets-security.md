@@ -18,7 +18,7 @@ QueryExecution `REQ-QUERY-001..003`/`AC-MP-003`, GraphTraversal `REQ-GRAPH-002..
 
 1. Freeze per-request budget dimensions, operator charge points, error behavior, and authorization-before-observation rules.
 2. Add real tests for scan/index/point accounting, metadata/result bytes, cancel/deadline, hidden rows/fields, aliases, explain, and following-operation health.
-3. Implement shared budgets under `src/KeyLoad.Abstractions/Features/ResourceExecution/` and `src/KeyLoad.Core/Features/ResourceExecution/`; each canonical slice owns its operators under `Features/<Slice>/`.
+3. Implement shared budgets under `src/KeyLoad.Abstractions/ResourceExecution/` and `src/KeyLoad.Core/ResourceExecution/`; each canonical slice owns its operators under `Features/<Slice>/`.
 4. Any budget or policy change is versioned/configured explicitly; rollback restores the prior bound without allowing an unbounded fallback. Capability manifests list only operators with an enforced budget.
 5. GitHub CI executes TUnit and real RF3 API scenarios with the same caller-visible errors; root joins security/search/query owners and checks retained diagnostics without sensitive payloads.
 

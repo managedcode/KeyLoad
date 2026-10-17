@@ -238,8 +238,8 @@ flowchart LR
     PR[New PR submission] --> Replace[Cancel prior PR workflow]
 ```
 
-- Backend/tooling: `src/KeyLoad.Analyzers/Features/CodeQuality/`.
-- Tests: `tests/KeyLoad.Analyzers.Tests/Features/CodeQuality/`.
+- Backend/tooling: `src/KeyLoad.Analyzers/CodeQuality/`.
+- Tests: `tests/KeyLoad.Analyzers.Tests/CodeQuality/`.
 - Shared build infrastructure: root `Directory.Build.props/targets`, `.editorconfig`,
   `KeyLoad.slnx`; CI infrastructure: `.github/workflows/build-and-tests.yml`.
 - Durable docs: this file, ADR-033, global Architecture and implementation status.
@@ -1150,9 +1150,9 @@ actual execution; consumers have no duplicate defaults or raw policy reads.
 
 Ownership is `scripts/Features/CodeQuality/` for closed manifests, native tool
 invocation, test-only image/wrapper, identity/report verification and retained
-artifacts; `src/KeyLoad.AppHost/Features/CodeQuality/{Configuration,Contracts,Identity,Resources}/`
+artifacts; `src/KeyLoad.AppHost/CodeQuality/{Configuration,Contracts,Identity,Resources}/`
 for validated test-only preparation and resource dependencies; and
-`tests/KeyLoad.IntegrationTests/Features/CodeQuality/{Configuration,Fixtures,Helpers}/`
+`tests/KeyLoad.IntegrationTests/CodeQuality/{Configuration,Fixtures,Helpers}/`
 for scoped fixture selection/export. Root owns the existing TestSuiteResources,
 ClusterFixture, central package, solution source map and CI joins. Workers supply
 guarded private packets. No product request, persisted format, replica receipt,
@@ -1756,7 +1756,7 @@ to that row's results directory. Existing recovery/RF3 inputs remain separate.
 The existing `NativeCoverageMergeTests` operation owns the post-descriptor phase
 through `NativeCoverageProductEvidenceRejection.cs` and the bounded immutable
 snapshot/rewrite helper `NativeCoverageProductEvidenceFiles.cs`, both under
-`tests/KeyLoad.UnitTests/Features/CodeQuality/Helpers/`. Require
+`tests/KeyLoad.UnitTests/CodeQuality/Helpers/`. Require
 `KEYLOAD_NATIVE_PRODUCT_ADMISSION_REQUIRED=true` and
 `KEYLOAD_NATIVE_PRODUCT_DESCRIPTOR_PATH` together for that CI phase; inconsistent,
 missing or malformed required inputs fail. With both absent the ordinary real

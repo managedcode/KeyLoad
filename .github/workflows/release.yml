@@ -126,7 +126,7 @@ jobs:
           docker version
           for role in server benchmarks; do
             dockerfile=Dockerfile
-            if [[ "$role" == benchmarks ]]; then dockerfile=benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Dockerfile; fi
+            if [[ "$role" == benchmarks ]]; then dockerfile=benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/Dockerfile; fi
             reference="ghcr.io/managedcode/keyload-$role:$RELEASE_VERSION"
             archive="keyload-$role-$RELEASE_VERSION-linux-amd64.docker.tar.gz"
             docker build --platform linux/amd64 --file "$dockerfile" --tag "$reference" --build-arg "KEYLOAD_RELEASE_VERSION=$RELEASE_VERSION" --build-arg "KEYLOAD_ASSEMBLY_VERSION=$RELEASE_ASSEMBLY_VERSION" --build-arg "KEYLOAD_FILE_VERSION=$RELEASE_FILE_VERSION" --label "org.opencontainers.image.version=$RELEASE_VERSION" --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/$GH_REPO" .

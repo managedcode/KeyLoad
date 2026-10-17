@@ -5,7 +5,7 @@
 - Executable entry point: `Program.cs`; project definition: `KeyLoad.Benchmarks.csproj`.
 
 ## Ownership and boundaries
-- New benchmark behavior belongs under `Features/<SliceName>/`; use the same canonical slice name as the corresponding product feature and `docs/Features/<SliceName>.md`.
+- New benchmark behavior belongs under `<SliceName>/`; use the same canonical slice name as the corresponding product feature and `docs/Features/<SliceName>.md`.
 - This project measures code paths; it does not own database behavior, comparison corpus/report contracts, cluster orchestration, or qualification claims.
 - The current root-level `Program.cs` is an executable entry point and existing layout migration debt. Do not expand layer-first or root-level feature ownership.
 
@@ -20,7 +20,7 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slice: `BenchmarkComparisons`; target feature path: `Features/BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
+- Owned slice: `BenchmarkComparisons`; target feature path: `BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
 - `Program.cs` remains the executable entry point; benchmark behavior and scenarios belong in that named slice.
 
 ## ADR-047 generated consumer boundary
@@ -33,4 +33,4 @@
 - The explicit root owner correction supersedes the historical local execution prohibitions above for development verification. Run genuine local BenchmarkDotNet for code optimization, retaining exact source, settings, machine and original outputs. Internal raw/code measurements must not appear in benchmarks.yml. Website database figures require authenticated original GitHub full-database comparisons and matched verified hardware, resources, topology, durability and workloads; local results remain development evidence.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

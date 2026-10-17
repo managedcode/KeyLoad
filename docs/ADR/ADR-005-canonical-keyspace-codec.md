@@ -18,7 +18,7 @@ One codec enables deterministic storage ordering, scans, and independent provide
 
 1. Freeze namespace allocation, type ordering, escaping, null/missing representation, and version vectors before introducing a new key family.
 2. Add golden ordering/round-trip/collision tests for each current resource key plus unknown-version rejection; include range lower/upper-bound and malformed-input cases. Tests exercise only the accepted current format.
-3. Implement codec changes only in `src/KeyLoad.Abstractions/Storage/` and shared Core key builders in `src/KeyLoad.Core/Features/StorageRecovery/`; feature-owned key construction stays in its slice.
+3. Implement codec changes only in `src/KeyLoad.Abstractions/Storage/` and shared Core key builders in `src/KeyLoad.Core/StorageRecovery/`; feature-owned key construction stays in its slice.
 4. The current codec has one reader and writer. Unsupported versions and malformed encodings fail closed; no alternate reader or rewrite path is permitted.
 5. GitHub CI runs storage TUnit and recovery/open-existing-store checks; feature and storage owners join on golden fixtures and exact format IDs.
 

@@ -89,7 +89,7 @@ and healthy exact search assertions. No new synthetic argument-only test replace
 these actual operation flows.
 
 Root owns the one-index repair in
-`tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeTextCrashScenario.cs`,
+`tests/KeyLoad.CrashHost/Search/Helpers/NativeTextCrashScenario.cs`,
 source review, current Release build and the Aspire recovery gate. ADR-078 freezes
 this helper protocol; product data/wire formats and dependencies do not change.
 Local native results remain development evidence. Complete exact-source Linux

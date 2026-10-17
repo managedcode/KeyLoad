@@ -1,6 +1,6 @@
 # ADR-006: Strict synchronous indexes and derived projections
 
-Status: Accepted; implementation and GitHub qualification pending. Product source: [sections 7, 12, and 27](../design/architecture-v0.3.uk.md); current implementation: `src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs`.
+Status: Accepted; implementation and GitHub qualification pending. Product source: [sections 7, 12, and 27](../design/architecture-v0.3.uk.md); current implementation: `src/KeyLoad.Core/DocumentStorage/Execution/Documents.cs`.
 
 ## Context and decision
 
@@ -18,7 +18,7 @@ Implicitly indexing arbitrary JSON fields risks uncontrolled write amplification
 
 1. Freeze supported scalar types, composite ordering, unique scope, sparse/null/missing semantics, and projection freshness contract.
 2. Add real-store tests for insert/replace/delete key changes, unique conflict rollback, null/missing, rebuild consistency, stale projection revision, and result provenance.
-3. Keep strict index ownership in `src/KeyLoad.Core/Features/DocumentStorage/`; derived projection/provider ownership stays in the existing `src/KeyLoad.Query/Features/Search/` slice. Catalog generation and status remain explicit; do not create a separate KeyLoad.Search technical root.
+3. Keep strict index ownership in `src/KeyLoad.Core/DocumentStorage/`; derived projection/provider ownership stays in the existing `src/KeyLoad.Query/Search/` slice. Catalog generation and status remain explicit; do not create a separate KeyLoad.Search technical root.
 4. Rebuild creates a new generation from a committed cut plus retained deltas, validates it, swaps atomically, and retires the old generation after reader leases. Until those steps are proven, rebuild stays maintenance-scoped. Rollback restores the prior generation only while its source history remains available.
 5. GitHub Actions runs TUnit, recovery, and RF3 tests that inspect canonical data and projections; root owns cross-slice generation/manifest review.
 

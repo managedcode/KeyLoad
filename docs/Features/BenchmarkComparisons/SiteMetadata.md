@@ -29,7 +29,7 @@ Scope: recognizable shared icons for the public landing and operational console,
 
 The lead freezes scope/criteria before three disjoint scopes:
 
-- Exports: six icon files under `src/KeyLoad.Server/Features/AdminDashboard/Assets/`
+- Exports: six icon files under `src/KeyLoad.Server/AdminDashboard/Assets/`
   and exact site-root mirrors; `site/Features/BenchmarkComparisons/assets/og-image.svg/png`
   and `site.webmanifest`.
 - Production: only `site/Features/BenchmarkComparisons/index.html` head and

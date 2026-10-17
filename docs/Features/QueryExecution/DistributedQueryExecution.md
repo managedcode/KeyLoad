@@ -39,7 +39,7 @@ failed observer is still a test failure, never a successful cancellation or
 retry-to-green. No larger corpus, changed limit, fake clock/provider, product
 test hook or weaker assertion is permitted. The observed native OCE and exact
 caller token establish the passing flow; an armed thread alone is not that proof.
-Ownership is `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryCancellationTests.cs`
+Ownership is `tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryCancellationTests.cs`
 and populated QueryExecution `Helpers/` for its observer/failure settlement.
 ADR-100 already defines the same native synchronous/cancellation boundary;
 this test-only correction adds no public, persisted or runtime contract.
@@ -132,12 +132,12 @@ be added only with their owning KL-037 stage.
 The original architecture acceptance is
 [`architecture-v0.3.uk.md:765-770`](../../design/architecture-v0.3.uk.md).
 Current Q1 contracts are `QueryRequest`/`AstQueryRequest`, `QueryPage`, and
-`QueryRow` under `src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/`.
-The local operator is `src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs`;
+`QueryRow` under `src/KeyLoad.Abstractions/QueryExecution/Contracts/`.
+The local operator is `src/KeyLoad.Query/QueryExecution/Queries/QueryEngine.cs`;
 `PreparedQuery` owns canonical encoded order keys and currently ties on only
 encoded `EntityId`; `QueryCandidateReader` applies the existing native read
 budget and candidate scan. `DatabaseEngine.WithQueryView` at
-`src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs:107` provides
+`src/KeyLoad.Core/DocumentStorage/Execution/Documents.cs:107` provides
 per-leaf persisted authorization and scoped native read view.
 `ReadExecutionBudget` at `src/KeyLoad.Core/ReadExecutionBudget.cs` provides
 current token, time, raw-byte and output bounds. `TestDatabase` opens a
@@ -159,9 +159,9 @@ Orleans routing and physical catalog are N/A for this stage.
 
 | Owner | Exact owned paths |
 |---|---|
-| QueryExecution native values | `src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryPlanV1.cs`, `PartitionQueryLeafPlanV1.cs`, `PartitionQueryCandidateV1.cs`, `PartitionQueryLeafResultV1.cs`, `PartitionQueryResultV1.cs` |
+| QueryExecution native values | `src/KeyLoad.Query/QueryExecution/Contracts/PartitionQueryPlanV1.cs`, `PartitionQueryLeafPlanV1.cs`, `PartitionQueryCandidateV1.cs`, `PartitionQueryLeafResultV1.cs`, `PartitionQueryResultV1.cs` |
 | Query validation and execution | QueryExecution feature-local `Validation/` and `Execution/`, with `Execution/PartitionQueryExecution.cs` and one internal owner accessor in `Queries/QueryEngine.cs` |
-| Native regression cases | `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQuery*Tests.cs`, with actual fixtures and assertions in their owning role folders |
+| Native regression cases | `tests/KeyLoad.UnitTests/QueryExecution/Cases/PartitionQuery*Tests.cs`, with actual fixtures and assertions in their owning role folders |
 | Core grant dependency | Existing `src/KeyLoad.Core/ReadExecutionBudget.cs` and a ResourceExecution role-owned grant helper, only after its exact contract is separately frozen below |
 | Durable ADR | [ADR-100](../../ADR/ADR-100-local-partition-query-merge.md) |
 
@@ -184,7 +184,7 @@ KL-037 distributed stage before any public SDK or MCP route is delivered.
 `ReadExecutionBudget.CreateReadGrant(long maximumBytes, int maximumRecords)` is internal and
 returns the internal `ReadExecutionBudgetReadGrant`. Core exposes these only
 to its explicitly declared `KeyLoad.Query` friend assembly. The helper lives
-at `src/KeyLoad.Core/Features/ResourceExecution/Execution/ReadExecutionBudgetReadGrant.cs`;
+at `src/KeyLoad.Core/ResourceExecution/Execution/ReadExecutionBudgetReadGrant.cs`;
 its genuine native tests are `ReadExecutionBudgetGrantPointTests`,
 `ReadExecutionBudgetGrantRangeTests`, `ReadExecutionBudgetGrantReservationTests`
 and `ReadExecutionBudgetGrantCancellationTests` under UnitTests
@@ -345,7 +345,7 @@ Root registers one immutable `PhysicalShardRecord` in `OrleansSiloConfiguration.
 
 `PartitionQueryExecution.ExecutePartitionQuery` retains its existing internal calls unchanged and gains the typed expected-owner overload used by the public wrapper. Metadata checks run only in that overload; existing internal local primitive tests retain their stated local contract. Query's public entry accepts the server tuple as an explicit composition argument; neither the HTTP/SDK/MCP request nor native grain payload accepts that argument. Public normalization validates every requested partition first and uses the first canonical sorted partition as the server-generated `AstQueryRequest.Partition` anchor. All leaves remain in the plan and are authorized separately.
 
-REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests`, `PartitionQueryPublicBudgetTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to real ZoneTree `AtomicPartitionPlacementQueryViewTests` under `tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/` and `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicRf3Tests` under `tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/`. Root joins the append-only native read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/native-codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/RF3/fault/endurance evidence remains required.
+REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests`, `PartitionQueryPublicBudgetTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.UnitTests/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to real ZoneTree `AtomicPartitionPlacementQueryViewTests` under `tests/KeyLoad.UnitTests/ClusterRouting/Cases/` and `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicRf3Tests` under `tests/KeyLoad.IntegrationTests/QueryExecution/Cases/`. Root joins the append-only native read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/native-codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/RF3/fault/endurance evidence remains required.
 
 The same-view Core helper is static because it uses only the already authorized borrowed view, complete partition and actual leaf grant. This implementation modifier adds no API, authority, storage view or state.
 
@@ -419,7 +419,7 @@ Ordered join: Query native leaf plan/result API + original merge expected-owner 
 
 TASK-PQUERY-REMOTE-001..005 follows the ordered join above. REQ/AC-PQUERY-REMOTE-001..004 map to `PartitionQueryRemoteExecution`, `PartitionQueryLeafExecution`, `RemotePartitionQueryLeafRead` and the existing physical-owner transport's typed query branch. The source charged scope reads the actual native principal/resource bytes before decoding; resource byte digest, principal epoch, PMAP and directory fences are rechecked after each actual leaf and after the final source quorum barrier. A changed source resource policy rejects even when the projected field remains readable. This digest is source-local and never part of peer/public/log metadata. Child grants reserve source metadata rechecks without new quotas; validated actual leaf counters are imported before result retention.
 
-REQ/AC-PQUERY-REMOTE-005 maps to `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/RemotePartitionQueryNativeTests.cs` (five authored real two-store methods) and `tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/RemotePartitionQueryRf3Tests.cs` (one authored actual six-silo SDK/MCP/CALL scenario). Native discovery must establish the actual identities: intended filters `/*/*/RemotePartitionQueryNativeTests/*` and `/*/*/RemotePartitionQueryRf3Tests/*`; no native UID/count/PASS is fabricated. Unit cancellation occurs after the first actual native leaf has settled; public SDK cancellation is pre-submit admission only. These do not establish in-flight remote cancellation. Destination work ownership remains retained until actual native settlement and joined shutdown, rather than treating source HTTP abortion as remote settlement proof.
+REQ/AC-PQUERY-REMOTE-005 maps to `tests/KeyLoad.UnitTests/QueryExecution/Cases/Remote/RemotePartitionQueryNativeTests.cs` (five authored real two-store methods) and `tests/KeyLoad.IntegrationTests/QueryExecution/Cases/Remote/RemotePartitionQueryRf3Tests.cs` (one authored actual six-silo SDK/MCP/CALL scenario). Native discovery must establish the actual identities: intended filters `/*/*/RemotePartitionQueryNativeTests/*` and `/*/*/RemotePartitionQueryRf3Tests/*`; no native UID/count/PASS is fabricated. Unit cancellation occurs after the first actual native leaf has settled; public SDK cancellation is pre-submit admission only. These do not establish in-flight remote cancellation. Destination work ownership remains retained until actual native settlement and joined shutdown, rather than treating source HTTP abortion as remote settlement proof.
 
 The public flow compares complete independently literal projected rows/redaction/ranks, checks each owner's own observed cut without equating A/B cuts, verifies independently literal A/B write receipt identity/token/mutation contracts and byte-identical original command replay without advancing that owner's applied position, then repeats healthy operations after the owned B restart. Parallel independent leaf dispatch, generic owner fanout, global policy, movement, in-flight remote cancellation and performance qualification remain open. Default RF3 and catalog admission remain unchanged. The unpublished R2 private read-kind additions must be carried forward after current live AnnMaintenance without renumbering a published ordinal. Fresh build/native schema, tool graph, census and module/source/image receipts are required after join; source review is not qualification.
 

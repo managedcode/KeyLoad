@@ -18,7 +18,7 @@ QueryExecution [REQ-QUERY-004](../Features/QueryExecution.md#повний-query-
 
 1. Freeze canonical AST node set, versioning, binding semantics, field lineage, and unsupported behavior.
 2. Add differential TUnit fixtures for SQL/JSON/C# success, denial, NULL/edge cases, ordering/ties, cursor, budget exhaustion, and unsupported constructs.
-3. Own shared AST in `src/KeyLoad.Abstractions/Features/QueryExecution/`; adapters in `src/KeyLoad.Query/Features/QueryExecution/`; authorization and operators remain with their owning security/search/data slices.
+3. Own shared AST in `src/KeyLoad.Abstractions/QueryExecution/`; adapters in `src/KeyLoad.Query/QueryExecution/`; authorization and operators remain with their owning security/search/data slices.
 4. Rollout adds an AST version only with compatible capability negotiation. Rollback disables that version; no interface may retain an independent weaker executor as a fallback.
 5. GitHub CI runs semantic TUnit and real RF3 SDK calls across supported interfaces; root joins Query, Authorization, and Search owners on exact result/error comparisons.
 

@@ -72,6 +72,7 @@ const namedMessages = {
   unresolvedPlaceholder: value => `${value} contains an unresolved placeholder.`,
   missingGovernanceFile: value => `Required governance file is missing: ${value}`,
   flatFeatureSource: value => `Feature source requires a responsibility folder: ${value}`,
+  obsoleteProjectFeatures: value => `Project slices must live directly under the project: ${value}`,
   workingFile: value => `Working planning file is present: ${value}`,
   missingRootPolicy: value => `Root AGENTS.md is missing required policy ${value}.`,
   missingCommand: value => `Root AGENTS.md is missing the required command: ${value}.`,
@@ -130,6 +131,9 @@ async function walkRepository(root, currentDirectory, inventory) {
     const absolutePath = join(currentDirectory, entry.name);
     if (entry.isDirectory()) {
       if (SKIPPED_DIRECTORY_NAMES.has(entry.name)) continue;
+      if (/^(?:src|tests|benchmarks)\/[^/]+\/Features$/.test(toRepositoryPath(root, absolutePath))) {
+        inventory.flatFeatureSources.push(toRepositoryPath(root, absolutePath));
+      }
       if (entry.name.toLowerCase() === 'skills') inventory.skillDirectories.push(toRepositoryPath(root, absolutePath));
       await walkRepository(root, absolutePath, inventory);
       continue;
@@ -137,7 +141,8 @@ async function walkRepository(root, currentDirectory, inventory) {
     if (!entry.isFile()) continue;
     const repositoryPath = toRepositoryPath(root, absolutePath);
     if (WORKING_FILE_SUFFIXES.some(suffix => entry.name.endsWith(suffix))) inventory.workingFiles.push(repositoryPath);
-    if (entry.name.endsWith('.cs') && /(?:^|\/)Features\/[^/]+\/[^/]+\.cs$/.test(repositoryPath)) inventory.flatFeatureSources.push(repositoryPath);
+    const projectSlice = /^(?:src|tests|benchmarks)\/[^/]+\/([^/]+)\/[^/]+\.cs$/.exec(repositoryPath);
+    if (projectSlice && await exists(root, `docs/Features/${projectSlice[1]}.md`)) inventory.flatFeatureSources.push(repositoryPath);
     if (entry.name.endsWith('.csproj')) inventory.projects.push(repositoryPath);
     if (entry.name === 'SKILL.md') inventory.skillFiles.push(repositoryPath);
   }
@@ -281,7 +286,8 @@ async function validate(root) {
   inventory.skillDirectories.sort();
   inventory.workingFiles.sort();
   for (const repositoryPath of inventory.workingFiles) diagnostics.push(namedMessages.workingFile(repositoryPath));
-  for (const repositoryPath of inventory.flatFeatureSources) diagnostics.push(namedMessages.flatFeatureSource(repositoryPath));
+  for (const repositoryPath of inventory.flatFeatureSources) diagnostics.push(repositoryPath.endsWith('/Features')
+    ? namedMessages.obsoleteProjectFeatures(repositoryPath) : namedMessages.flatFeatureSource(repositoryPath));
   const collections = await validateRecordAndInventory(root, record, inventory, diagnostics);
   await validateRootPolicy(root, diagnostics);
   await validateRequiredFiles(root, diagnostics);

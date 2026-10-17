@@ -1,7 +1,7 @@
 # KeyLoad.ComparisonHost
 
 ## Purpose and entry points
-- Owns the native TUnit comparison executable and feature-owned helpers under Features/BenchmarkComparisons/.
+- Owns the native TUnit comparison executable and feature-owned helpers under BenchmarkComparisons/.
 - Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons feature, ADR-033/034/043 and comparison-host acceptance/plan before implementation.
 
 ## Ownership and boundaries
@@ -20,8 +20,8 @@
 - Preserve every unrelated shared-checkout change. Workers own only this new project; the lead alone changes library, solution, AppHost, inventory, docs and tests references.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
 
 ## Native benchmark test execution, owner correction 2026-10-07
 - The comparisons container MUST be a native TUnit executable. Its test invokes the existing real C# client workload and asserts the original report outcome after Aspire prerequisite readiness. Preserve separate database jobs, measured client operations, timings, resource observations, cancellation and report provenance. This supersedes the former CLI entry; no standalone non-test workload entry remains.
-- Owner correction2026-10-17 requires separate native workload tests sharing one live database per database/node-count job, with measured million-record loading and no warmup, reset or reseed. The current session fixture belongs under `Features/BenchmarkComparisons/Session/`; retain each test's original outcome and the shared owned shutdown.
+- Owner correction2026-10-17 requires separate native workload tests sharing one live database per database/node-count job, with measured million-record loading and no warmup, reset or reseed. The current session fixture belongs under `BenchmarkComparisons/Session/`; retain each test's original outcome and the shared owned shutdown.

@@ -5,10 +5,10 @@
 
 ## Purpose and entry points
 - Owns the KeyLoad server process, HTTP API composition and Orleans silo/node configuration.
-- Entry point: `Program.cs`; API routes: `Features/ClientApi/Transport/ApiEndpoints.cs`; Orleans node setup: `Features/ClusterRouting/Hosting/OrleansNode.cs`; configuration: `NodeOptions.cs`.
+- Entry point: `Program.cs`; API routes: `ClientApi/Transport/ApiEndpoints.cs`; Orleans node setup: `ClusterRouting/Hosting/OrleansNode.cs`; configuration: `NodeOptions.cs`.
 
 ## Ownership and boundaries
-- Server routes public requests to database/grain behavior. New endpoint behavior belongs under `Features/<SliceName>/` and matching `docs/Features/<SliceName>.md`; keep the process entry point as composition.
+- Server routes public requests to database/grain behavior. New endpoint behavior belongs under `<SliceName>/` and matching `docs/Features/<SliceName>.md`; keep the process entry point as composition.
 - Orleans is the cluster foundation. A separate request grain invokes required database grains; node-local `PartitionHost` owns storage, journals, file locks and apply gate. Atomic partition identity remains distinct from physical placement.
 - Existing root-level endpoints and host-process RF3 topology are migration debt. Do not accept client-supplied trusted roles or replace Docker/Aspire RF3 with an in-memory/single-node demo. Do not expand DotNext cluster use.
 
@@ -23,8 +23,8 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Shared API transport, identity and routing follow `ClientApi`, `Authorization` and `ClusterRouting` under their matching `Features/` paths. Business endpoint behavior MUST mirror its owning business slice under `Features/<same-business-SliceName>/`, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution` and `ChangeFeeds`.
-- `Program.cs` is the shared composition root; `Features/ClientApi/Transport/ApiEndpoints.cs`, `Features/ClusterRouting/Hosting/OrleansNode.cs`, and `NodeOptions.cs` are current entry points, not separate feature names.
+- Shared API transport, identity and routing follow `ClientApi`, `Authorization` and `ClusterRouting` under their matching `` paths. Business endpoint behavior MUST mirror its owning business slice under `<same-business-SliceName>/`, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution` and `ChangeFeeds`.
+- `Program.cs` is the shared composition root; `ClientApi/Transport/ApiEndpoints.cs`, `ClusterRouting/Hosting/OrleansNode.cs`, and `NodeOptions.cs` are current entry points, not separate feature names.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

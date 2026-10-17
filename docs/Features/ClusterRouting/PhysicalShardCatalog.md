@@ -172,7 +172,7 @@ Docker Running alone does not prove that an HTTP request can be admitted.
 Preserve exact survivor HTTP200, conflicting-voter HTTP503 or observed terminal
 process denial, denied SDK/MCP write and complete post-correction state checks.
 Root owns the two native waits in
-`tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/PhysicalShardCatalogRf3MismatchAssertions.cs`
+`tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/PhysicalShardCatalogRf3MismatchAssertions.cs`
 and actual owned RF3 verification. No server policy, topology, timeout, retry,
 assertion or image provenance contract changes; ADR-099 remains the governing
 architecture. The original R197 flow failed at node1's first HTTP request with

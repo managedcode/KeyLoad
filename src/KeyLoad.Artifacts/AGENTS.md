@@ -2,10 +2,10 @@
 
 ## Purpose and entry points
 - Owns artifact transfer and backup artifact representations.
-- Entry points and principal types: `Features/BackupRestore/Execution/ArtifactTransfer.cs`, `Features/BackupRestore/Execution/BackupArtifact.cs`; project: `KeyLoad.Artifacts.csproj`.
+- Entry points and principal types: `BackupRestore/Execution/ArtifactTransfer.cs`, `BackupRestore/Execution/BackupArtifact.cs`; project: `KeyLoad.Artifacts.csproj`.
 
 ## Ownership and boundaries
-- Artifact feature behavior belongs under `Features/<SliceName>/` and its matching `docs/Features/<SliceName>.md`.
+- Artifact feature behavior belongs under `<SliceName>/` and its matching `docs/Features/<SliceName>.md`.
 - This project owns artifact-format/transfer primitives only. It does not own database command routing, authorization policy, physical storage placement, or cluster replication.
 - Current files at project root are migration debt; preserve stable format contracts and do not add consumer-side workarounds for defects owned by dependencies.
 
@@ -19,8 +19,8 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slice: `BackupRestore`; target feature path: `Features/BackupRestore/`, matching `docs/Features/BackupRestore.md`.
-- `Features/BackupRestore/Execution/ArtifactTransfer.cs` and `Features/BackupRestore/Execution/BackupArtifact.cs` are current entry points; feature behavior belongs under that path.
+- Owned slice: `BackupRestore`; target feature path: `BackupRestore/`, matching `docs/Features/BackupRestore.md`.
+- `BackupRestore/Execution/ArtifactTransfer.cs` and `BackupRestore/Execution/BackupArtifact.cs` are current entry points; feature behavior belongs under that path.
 ## Feature-local responsibility folders
 
-- Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

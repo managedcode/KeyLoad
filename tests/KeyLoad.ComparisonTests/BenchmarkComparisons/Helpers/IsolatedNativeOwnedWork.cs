@@ -1,0 +1,196 @@
+using System.Runtime.ExceptionServices;
+using Aspire.Hosting;
+using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
+
+internal sealed class IsolatedNativeOwnedWork : IAsyncDisposable
+{
+    private const string IncompleteRunnerOwnership = "Native runner ownership was incomplete.";
+    private const string CaptureOwnershipFailure = "Native log capture ownership was incomplete or already assigned.";
+    private const string RunnerCancelFailureStage = "runner-cancel";
+    private const string RunnerJoinFailureStage = "runner-join";
+    private const string RunnerDisposeFailureStage = "runner-lifetime-dispose";
+    internal ScaleServerResourceEvidenceCollector? Collector
+    {
+        get; set;
+    }
+    internal Task? Observation
+    {
+        get; set;
+    }
+    internal Task? CollectorSettlement
+    {
+        get; private set;
+    }
+    private bool captureClosed;
+    internal ComparisonTestLogCapture? Capture
+    {
+        get; private set;
+    }
+    private readonly System.Threading.Lock stopGate = new();
+    private CancellationTokenSource? runnerLifetime;
+    private Task<int>? runnerCompletion;
+    private Task? runnerStop;
+    private Task? disposing;
+
+    internal IsolatedNativeOwnedWork(IOptions<NativeComparisonHarnessOptions> executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        ExecutionOptions = executionOptions;
+    }
+
+    internal IOptions<NativeComparisonHarnessOptions> ExecutionOptions
+    {
+        get;
+    }
+
+    internal void BeginCapture(DistributedApplication application, IEnumerable<string> resources,
+        string progressPath, Action<string>? nativeLineObserver = null)
+    {
+        if (Capture is not null || captureClosed)
+        {
+            throw new InvalidOperationException(CaptureOwnershipFailure);
+        }
+        Capture = new(application, ExecutionOptions, resources, progressPath, nativeLineObserver);
+    }
+
+    internal Task DisposeCaptureAsync(ComparisonTestLogCapture borrowed)
+    {
+        if (Capture is null || !ReferenceEquals(Capture, borrowed))
+        {
+            throw new InvalidOperationException(CaptureOwnershipFailure);
+        }
+        return Capture.DisposeAsync().AsTask();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        lock (stopGate)
+        {
+            captureClosed = true;
+            if (disposing is null)
+            {
+                var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                disposing = DisposeAndJoinAsync(registered.Task);
+                registered.SetResult();
+            }
+            GC.SuppressFinalize(this);
+            return new ValueTask(disposing);
+        }
+    }
+
+    private async Task DisposeAndJoinAsync(Task registered)
+    {
+        await registered;
+        try
+        {
+            var runnerFailure = await NativeComparisonFailure.ObserveAsync(StopRunnerAsync());
+            var captureFailure = await NativeComparisonFailure.ObserveAsync(DisposeCaptureCoreAsync());
+            var combined = NativeComparisonFailure.Combine(runnerFailure, captureFailure is null ? [] : [captureFailure]);
+            if (combined is not null)
+            {
+                ExceptionDispatchInfo.Capture(combined).Throw();
+            }
+        }
+        finally
+        {
+            runnerLifetime?.Dispose();
+            runnerLifetime = null;
+        }
+    }
+
+    private async Task DisposeCaptureCoreAsync()
+    {
+        if (Capture is not null)
+        {
+            await Capture.DisposeAsync();
+        }
+    }
+
+    internal async Task<int> RunAsync(DistributedApplication app, string resourceName, CancellationToken token)
+    {
+        Task<int> original;
+        lock (stopGate)
+        {
+            if (runnerLifetime is not null || runnerCompletion is not null || runnerStop is not null || captureClosed)
+            {
+                throw new InvalidOperationException(IncompleteRunnerOwnership);
+            }
+            runnerLifetime = CancellationTokenSource.CreateLinkedTokenSource(token);
+            original = AspireResourceCompletion.RunToExitAsync(app, resourceName, runnerLifetime.Token);
+            runnerCompletion = original;
+        }
+        return await original;
+    }
+
+    internal Task StopRunnerAsync()
+    {
+        lock (stopGate)
+        {
+            if (runnerStop is null)
+            {
+                var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                runnerStop = StopRunnerAndJoinAsync(registered.Task);
+                registered.SetResult();
+            }
+            return runnerStop;
+        }
+    }
+
+    private async Task StopRunnerAndJoinAsync(Task registered)
+    {
+        await registered;
+        var lifetime = runnerLifetime;
+        var original = runnerCompletion;
+        if (lifetime is null && original is null)
+        {
+            return;
+        }
+        if (lifetime is null || original is null)
+        {
+            throw new InvalidOperationException(IncompleteRunnerOwnership);
+        }
+
+        var failures = new IsolatedNativeTeardownFailures(null);
+        var execution = ExecutionOptions;
+        async Task StopOwnedAsync()
+        {
+            try
+            {
+                await IsolatedNativeOriginalTaskSettlement.RunAsync(lifetime.CancelAsync, RunnerCancelFailureStage, failures, execution);
+                await IsolatedNativeOriginalTaskSettlement.RunAsync(() => original, RunnerJoinFailureStage, failures, execution);
+            }
+            finally
+            {
+                DisposeRunnerLifetime(lifetime);
+            }
+        }
+        await IsolatedNativeOriginalTaskSettlement.RunAsync(StopOwnedAsync, RunnerDisposeFailureStage, failures, execution);
+        failures.ThrowIfAny();
+    }
+
+    private void DisposeRunnerLifetime(CancellationTokenSource borrowed)
+    {
+        if (runnerLifetime is null || !ReferenceEquals(runnerLifetime, borrowed))
+        {
+            throw new InvalidOperationException(IncompleteRunnerOwnership);
+        }
+        runnerLifetime.Dispose();
+        runnerLifetime = null;
+    }
+
+    internal Task StartSettlement()
+    {
+        if (Collector is null || Observation is null)
+        {
+            throw new InvalidOperationException("Server resource observation is not owned.");
+        }
+
+        return CollectorSettlement ??= Collector.CompleteAsync(Observation);
+    }
+}

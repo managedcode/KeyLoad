@@ -2,11 +2,11 @@
 
 ## Purpose and entry points
 - Owns the public embedded microbenchmark fixture library required by BenchmarkDotNet's external generated runner.
-- Project entry: KeyLoad.BenchmarkScenarios.csproj; scenario entry: Features/BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs.
+- Project entry: KeyLoad.BenchmarkScenarios.csproj; scenario entry: BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs.
 - Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons REQ-BC-022, ADR-047 and embedded-benchmark acceptance/plan before implementation.
 
 ## Ownership and boundaries
-- All scenario/fixture/seeding/lifetime behavior belongs to Features/BenchmarkComparisons and docs/Features/BenchmarkComparisons.md.
+- All scenario/fixture/seeding/lifetime behavior belongs to BenchmarkComparisons and docs/Features/BenchmarkComparisons.md.
 - The fixture remains public and unsealed with public Benchmark/GlobalSetup/GlobalCleanup methods because the actual generated external consumer inherits it. Document its public contract with XML; never suppress CA1515 or spoof output/test metadata.
 - KeyLoad.Benchmarks owns the executable and typed BenchmarkSwitcher application; this library owns no CLI, comparative corpus/report/site, database implementation, RF3 orchestration or qualification claim.
 - Preserve the three original timed operations, inputs, real engine/store and MemoryDiagnoser. No fake storage, in-process toolchain substitution, optional fallback, payload duplication or local load evidence.
@@ -27,4 +27,4 @@
 - The explicit root owner correction supersedes the historical local execution prohibitions above for development verification. Use real local BenchmarkDotNet processes and bounded native fixtures to optimize code, retaining actual source, settings, machine and originals. Ordinary correctness tests also execute in CI; internal raw/code measurements must not appear in benchmarks.yml. Public database figures require authenticated original GitHub full-database comparisons with verified comparable hardware, resources, topology, durability and workloads.
 
 ## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

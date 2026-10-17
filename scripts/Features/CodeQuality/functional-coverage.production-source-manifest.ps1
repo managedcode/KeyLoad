@@ -55,7 +55,7 @@ $script:Psm = [ordered]@{
     )
     SettingsPath = 'scripts/Features/CodeQuality/functional-coverage.production.settings.xml'
     SettingsEvidenceName = 'functional-coverage.production.settings.xml'
-    ProducerPath = 'tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets'
+    ProducerPath = 'tests/KeyLoad.UnitTests/CodeQuality/Build/FunctionalCompilationIdentity.targets'
     IdentityQualification = 'static native identity inspection only; no test, coverage or build qualification'
 }
 

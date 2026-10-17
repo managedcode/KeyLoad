@@ -29,12 +29,12 @@ Messaging owns durable work-queue state, topic event sources, persistent subscri
 
 | Surface | Current source | Target owner |
 |---|---|---|
-| Contracts | `src/KeyLoad.Abstractions/Contracts.cs`, `Subscriptions.cs` | `src/KeyLoad.Abstractions/Features/Messaging/` |
-| Backend | `src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs`, `EventSources.cs`, `SubscriptionGroups.cs`, `DatabaseEngine.cs` dispatch | `src/KeyLoad.Core/Features/Messaging/` |
-| Tests | `tests/KeyLoad.UnitTests/Features/Messaging/` message/subscription suites; atomic batch cases in `Features/ResourceExecution/TransactionTests.cs` | Messaging and shared ResourceExecution slices; legacy declarations removed with assertions preserved |
+| Contracts | `src/KeyLoad.Abstractions/Contracts.cs`, `Subscriptions.cs` | `src/KeyLoad.Abstractions/Messaging/` |
+| Backend | `src/KeyLoad.Core/Messaging/Execution/Messaging.cs`, `EventSources.cs`, `SubscriptionGroups.cs`, `DatabaseEngine.cs` dispatch | `src/KeyLoad.Core/Messaging/` |
+| Tests | `tests/KeyLoad.UnitTests/Messaging/` message/subscription suites; atomic batch cases in `Features/ResourceExecution/TransactionTests.cs` | Messaging and shared ResourceExecution slices; legacy declarations removed with assertions preserved |
 | Durable specification | This file | `docs/Features/Messaging.md` |
-| HTTP | `src/KeyLoad.Server/ApiEndpoints.cs`: command submit, queue receive/delivery/process/inspect, event read, and subscription configure/seek/pause/receive/delivery/process/status | Shared HTTP transport belongs to `src/KeyLoad.Server/Features/ClientApi/`; business behavior belongs to this Messaging slice. Publish/enqueue mutations use the shared command endpoint. |
-| .NET SDK | `src/KeyLoad.Client/KeyLoadClient.cs`: `CommitAsync`, `ReceiveAsync`, `CompleteAsync`, `CommitProcessingAsync`, `InspectAsync`, event-source and subscription methods | Shared client transport belongs to `src/KeyLoad.Client/Features/ClientApi/`; typed queue/topic/group behavior maps to this Messaging slice |
+| HTTP | `src/KeyLoad.Server/ApiEndpoints.cs`: command submit, queue receive/delivery/process/inspect, event read, and subscription configure/seek/pause/receive/delivery/process/status | Shared HTTP transport belongs to `src/KeyLoad.Server/ClientApi/`; business behavior belongs to this Messaging slice. Publish/enqueue mutations use the shared command endpoint. |
+| .NET SDK | `src/KeyLoad.Client/KeyLoadClient.cs`: `CommitAsync`, `ReceiveAsync`, `CompleteAsync`, `CommitProcessingAsync`, `InspectAsync`, event-source and subscription methods | Shared client transport belongs to `src/KeyLoad.Client/ClientApi/`; typed queue/topic/group behavior maps to this Messaging slice |
 | Official MCP | Not present in current source; official C# SDK MCP integration is planned through ClientApi | Messaging operations must map to this slice after ADR-039 freezes capability/tool mapping; no tool names or routes are asserted |
 | UI | No dedicated database messaging UI is specified | N/A: producer/consumer and operations behavior is exposed through API/SDK/MCP, not a separate frontend surface |
 | External brokers | No AMQP/Kafka/Redis wire compatibility is implemented here | N/A: adapters are independent, future capabilities with separate contracts and qualification |
@@ -209,11 +209,11 @@ claim/ACK reply recovery) and KL-091 (same-domain batch precondition rollback).
 It does not close those tasks or qualify the full EventStreams/Messaging feature.
 
 The owning unit cases are
-[EventAppendWholeFlowTests](../../tests/KeyLoad.UnitTests/Features/EventStreams/Cases/EventAppendWholeFlowTests.cs)
+[EventAppendWholeFlowTests](../../tests/KeyLoad.UnitTests/EventStreams/Cases/Event/EventAppendWholeFlowTests.cs)
 (two concurrent Exact append instances and four rejection instances),
-[QueueLostResponseWholeFlowTests](../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLostResponseWholeFlowTests.cs)
+[QueueLostResponseWholeFlowTests](../../tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueLostResponseWholeFlowTests.cs)
 (one claim/ACK retry workflow with real ZoneTree reopen), and
-[QueueAdmissionCancellationWholeFlowTests](../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueAdmissionCancellationWholeFlowTests.cs)
+[QueueAdmissionCancellationWholeFlowTests](../../tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueAdmissionCancellationWholeFlowTests.cs)
 (two pre-admission cancellation instances). They use actual native storage,
 joined workers, literal complete results, persisted-state assertions, stable
 receipt replay and a healthy follow-up. Failed commands may retain authorized
@@ -1201,7 +1201,7 @@ REQ-DUE-UNIT-001: fixed-tail/count algorithm regressions use an explicitly owned
 
 AC-DUE-UNIT-001: preserve both original AlternatesPrefixesAndBoundsRealZoneTreePages and FixedTailDefersHigherKeysUntilTheFollowingSweep UIDs and complete literal count/order/fixed-tail oracles against real canonical ZoneTree. AC-DUE-UNIT-002: extend the original cancellation whole operation with an elapsed deadline refusal armed only after actual native range bytes were examined, exact BudgetExceeded/owning detail, unchanged complete canonical rows/store position/identity/seed receipt, then a fresh healthy read and same-root reopen with exact original receipt replay and complete row/hint equality. The observed original clock advance remains retained; disarm clears only observation and never rewinds time. Scope is Unit behavior, not RF3 or timing qualification; the unchanged system-clock/Linux production deadline gate stays open.
 
-Source ownership: tests/KeyLoad.UnitTests/Features/Messaging/Helpers/RecurringSagaDatabase.cs supplies the optional borrowed clock to both initial/reopened genuine engine; the two original positive methods opt in. Feature-local DueDiscoveryClock and DueDiscoveryDeadlineFlow own elapsed observation and full refusal/healthy/cold assertions. No product API, policy, persisted format, quota, retry or scheduling changes.
+Source ownership: tests/KeyLoad.UnitTests/Messaging/Helpers/RecurringSagaDatabase.cs supplies the optional borrowed clock to both initial/reopened genuine engine; the two original positive methods opt in. Feature-local DueDiscoveryClock and DueDiscoveryDeadlineFlow own elapsed observation and full refusal/healthy/cold assertions. No product API, policy, persisted format, quota, retry or scheduling changes.
 
 ### TASK-DUE-BYTE-UNIT-CLOCK-001
 
@@ -1213,9 +1213,9 @@ AC-DUE-BYTE-UNIT-002: retain AC-DUE-UNIT-002's original cancellation whole opera
 
 | Requirement / acceptance | Original automated source |
 |---|---|
-| REQ-DUE-BYTE-UNIT-001 / AC-DUE-BYTE-UNIT-001 | tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkPageBudgetTests.cs: both original methods |
-| AC-DUE-BYTE-UNIT-002 | tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkDiscoveryTests.cs: CancellationRejectsTheWholeDiscoveryPage; Assertions/DueDiscoveryDeadlineFlow.cs |
-| Clock ownership | tests/KeyLoad.UnitTests/Features/Messaging/Helpers/DueDiscoveryClock.cs; Helpers/RecurringSagaDatabase.cs |
+| REQ-DUE-BYTE-UNIT-001 / AC-DUE-BYTE-UNIT-001 | tests/KeyLoad.UnitTests/Messaging/Cases/Due/DueWorkPageBudgetTests.cs: both original methods |
+| AC-DUE-BYTE-UNIT-002 | tests/KeyLoad.UnitTests/Messaging/Cases/Due/DueWorkDiscoveryTests.cs: CancellationRejectsTheWholeDiscoveryPage; Assertions/DueDiscoveryDeadlineFlow.cs |
+| Clock ownership | tests/KeyLoad.UnitTests/Messaging/Helpers/DueDiscoveryClock.cs; Helpers/RecurringSagaDatabase.cs |
 
 ### TASK-QUEUE-DEADLINE-UNIT-CLOCK-001
 
@@ -1227,9 +1227,9 @@ AC-QUEUE-DEADLINE-UNIT-002: inside the original bounded discovery loop, wait for
 
 | Requirement / acceptance | Original automated source |
 |---|---|
-| REQ-QUEUE-DEADLINE-UNIT-001 / AC-QUEUE-DEADLINE-UNIT-002 | tests/KeyLoad.UnitTests/Features/Messaging/Helpers/QueueDeadlineNativeDiscovery.cs |
-| AC-QUEUE-DEADLINE-UNIT-001 | tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueDeadlineNativeWholeFlowTests.cs; Helpers/QueueDeadlineNativeTrial.cs and original continuation helpers |
-| Clock ownership | tests/KeyLoad.UnitTests/Features/Messaging/Helpers/DueDiscoveryClock.cs |
+| REQ-QUEUE-DEADLINE-UNIT-001 / AC-QUEUE-DEADLINE-UNIT-002 | tests/KeyLoad.UnitTests/Messaging/Helpers/QueueDeadlineNativeDiscovery.cs |
+| AC-QUEUE-DEADLINE-UNIT-001 | tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueDeadlineNativeWholeFlowTests.cs; Helpers/QueueDeadlineNativeTrial.cs and original continuation helpers |
+| Clock ownership | tests/KeyLoad.UnitTests/Messaging/Helpers/DueDiscoveryClock.cs |
 
 +### TASK-REMOTE-TRANSFER-UNIT-CLOCK-001
 

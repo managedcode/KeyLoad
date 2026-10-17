@@ -35,7 +35,7 @@ is defined here.
 4. Lead verifies restore returns the current identity and no corrupt frame is partially accepted. Existing SDK/MCP contracts remain.
 5. Qualify build/analyzers/format/governance and real TUnit unit/process/RF3 exact-SHA GitHub gates. Keep ADR Accepted until all required source/tests/docs/evidence exists. Measured speed, power-loss and endurance remain separate unproven gates.
 
-Canonical slice: src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery and tests/KeyLoad.UnitTests/Features/StorageRecovery; existing real RecoveryTests and RF3 integration suites are mandatory. Frontend/client API:N/A, private durable payload only. No authored public model change. The working task graph and test mapping are in the root WAL plan/acceptance.
+Canonical slice: src/KeyLoad.Storage.ZoneTree/StorageRecovery and tests/KeyLoad.UnitTests/StorageRecovery; existing real RecoveryTests and RF3 integration suites are mandatory. Frontend/client API:N/A, private durable payload only. No authored public model change. The working task graph and test mapping are in the root WAL plan/acceptance.
 
 ## Preserving recovery successor refinement
 

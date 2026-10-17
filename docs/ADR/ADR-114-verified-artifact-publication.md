@@ -76,12 +76,12 @@ flowchart LR
    before-runtime rule permits proceeding while a shared compilation drift is
    repaired; no failed build or source inspection qualifies an acceptance gate.
 2. One Luna worker authors a private guarded packet for
-   `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs`
+   `src/KeyLoad.Artifacts/BackupRestore/Execution/BackupArtifact.cs`
    and cohesive populated `Staging/` and, if needed, `Execution/` helpers.
    Each file/type/method obeys the existing 400/200/64/3 limits. The worker
    owns no shared contracts, docs, configuration, builds or live checkout writes.
 3. The same bounded packet updates only
-   `tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreLengthMismatchTests.cs`.
+   `tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreLengthMismatchTests.cs`.
    The first-entry case uses an absent destination and the last-entry case an
    initially empty destination. Both real rejected-output restore attempts,
    actual process/pipe settlement, original byte-preservation checks and the

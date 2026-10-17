@@ -8,7 +8,7 @@ REQ-RESOURCE-001 / AC-RESOURCE-001.
 ## Decision and acceptance
 
 `AdmittedCommandInbox` is the current bounded two-lane admission queue in
-`src/KeyLoad.Core/Features/ResourceExecution/Commands/`. It owns one registered
+`src/KeyLoad.Core/ResourceExecution/Commands/`. It owns one registered
 reader, command-lane signals and the reservation transfer to each `AdmittedCommand`.
 The current public CLR declarations are the top-level `AdmittedCommand`,
 `CommandAdmissionLease` and `HttpAdmissionLease`; current callers use these APIs
@@ -64,7 +64,7 @@ flowchart LR
 
 ## Current ownership and verification contract
 
-1. `src/KeyLoad.Core/Features/ResourceExecution/Commands/` owns the inbox, lanes,
+1. `src/KeyLoad.Core/ResourceExecution/Commands/` owns the inbox, lanes,
    admitted command and reservation leases. The current server/HTTP callers remain
    in their owning slices and use these same declarations; do not add a parallel
    queue, dispatcher or alternate routing path.
@@ -109,7 +109,7 @@ It remains administrator-authenticated, authorized and RF3 committed through
 the same unique request grain; no admission or credential bypass is introduced.
 
 Root freezes this contract, the worker changes only
-`src/KeyLoad.Core/Features/ResourceExecution/Commands/CommandAdmissionGovernor.cs`
+`src/KeyLoad.Core/ResourceExecution/Commands/CommandAdmissionGovernor.cs`
 and its existing `CommandAdmissionGovernorTests.cs`, then root reviews and joins
 strict build/format, focused normal/scalar governor operations and the unchanged
 actual Aspire RF3 admission case. Add only the existing bootstrap operation kind

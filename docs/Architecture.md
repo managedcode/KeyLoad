@@ -1,5 +1,12 @@
 # KeyLoad architecture and ownership map
 
+Owner correction 2026-10-17: every C# project under `src/`, `tests/` and
+`benchmarks/` places named slices directly under its project directory as
+`<project>/<SliceName>/<Role>/`, with thematic folders retained inside `Cases/`.
+The intermediate project `Features/` directory is removed. This supersedes prior
+project-layout examples below; namespaces and persisted identities stay stable.
+Script, site and documentation module paths retain their existing layout.
+
 The owner-selected [foundation-first delivery contract](Features/RepositoryGovernance/FoundationDelivery.md)
 and [all-105 dependency graph](implementation/foundation-dependencies.json) control
 execution order. Native Orleans, node-local ZoneTree/RF3, current persisted identity,
@@ -146,7 +153,7 @@ classDiagram
     RelationalRowValidation --> DocumentRecord : validates final row image
 ```
 
-The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/Features/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the connection actors with call-local authorized reads and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Both surfaces share one light visual identity under [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical `brand.css`/`logo.svg`, and the site keeps byte-identical mirrors checked by SiteTests. Exact-SHA dashboard unit/RF3/native browser cases pass and retained desktop/mobile images are visually reviewed; complete recovery/comparison and numeric coverage qualification remains open.
+The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the connection actors with call-local authorized reads and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Both surfaces share one light visual identity under [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical `brand.css`/`logo.svg`, and the site keeps byte-identical mirrors checked by SiteTests. Exact-SHA dashboard unit/RF3/native browser cases pass and retained desktop/mobile images are visually reviewed; complete recovery/comparison and numeric coverage qualification remains open.
 
 [SiteMetadata](Features/BenchmarkComparisons/SiteMetadata.md) extends that identity
 with mirrored PNG/ICO exports, static landing SEO/OG/Twitter/JSON-LD and an authored
@@ -1117,7 +1124,7 @@ and Release remains manual. This four-workflow correction supersedes the earlier
 three-workflow map without changing database qualification.
 
 Owner correction 2026-10-06: benchmark unit contracts and their exclusive helpers
-are owned by `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/`
+are owned by `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/`
 and run only in Benchmarks. `KeyLoad.UnitTests` owns functional database tests.
 Build and Tests compiles the complete solution and runs functional
 analyzer/unit/scalar/recovery/RF3 gates; RF3 prepares only the server image.

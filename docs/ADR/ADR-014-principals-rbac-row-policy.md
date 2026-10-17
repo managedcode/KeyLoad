@@ -1,6 +1,6 @@
 # ADR-014: Persisted principals, scoped RBAC, and row policy
 
-Status: Accepted; all-interface GitHub qualification pending. Current persisted contract: principal/grant/api-key records in `src/KeyLoad.Abstractions/Contracts.cs`; current authorization enforcement is in `src/KeyLoad.Core/MutationAuthorization.cs`, identity/command persistence helpers in `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs`; product source [sections 14 and 29](../design/architecture-v0.3.uk.md).
+Status: Accepted; all-interface GitHub qualification pending. Current persisted contract: principal/grant/api-key records in `src/KeyLoad.Abstractions/Contracts.cs`; current authorization enforcement is in `src/KeyLoad.Core/MutationAuthorization.cs`, identity/command persistence helpers in `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/Authorization/Execution/AuthorizationPolicy.cs`; product source [sections 14 and 29](../design/architecture-v0.3.uk.md).
 
 ## Context and decision
 
@@ -18,7 +18,7 @@ Authorization `REQ-AUTH-001..003`/`AC-REP-005`, `AC-AUTH-002/003`, plus [REQ-AUT
 
 1. Freeze principal identity, grant vocabulary, scope resolution, row/field policy, internal membership privilege, and revocation boundary.
 2. Add real TUnit and SDK/MCP tests for missing/invalid/expired/revoked credentials, forged tenant/row scope, protected field use, policy epoch change, page/delivery/cursor reauthorization, and immutable internal principal.
-3. Target ownership: `src/KeyLoad.Abstractions/Features/Authorization/`, `src/KeyLoad.Security/Features/Authorization/`, plus replicated persistence through `src/KeyLoad.Core/Features/Authorization/`; endpoints enforce the same policy through shared command/read boundaries.
+3. Target ownership: `src/KeyLoad.Abstractions/Authorization/`, `src/KeyLoad.Security/Authorization/`, plus replicated persistence through `src/KeyLoad.Core/Authorization/`; endpoints enforce the same policy through shared command/read boundaries.
 4. Create current principal and grant records only through authorized administrative operations with least privilege. Publish credentials only after replicated verifier/grants commit; rollback revokes newly issued keys and preserves audit state. No trusted-role input field is accepted.
 5. GitHub CI runs TUnit, real recovery, and RF3 SDK/MCP adversarial calls before/after failover and revocation. Security owner joins root with exact unchanged-effect assertions and redacted artifacts.
 

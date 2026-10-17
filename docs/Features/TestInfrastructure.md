@@ -253,7 +253,7 @@ TASK-TEST-LOCAL-CONTEXT-REALIZATION implements this existing REQ/AC-TEST-015
 snapshot and cleanup contract. Root freezes and owns the joins; unpack_atomicity
 Luna owns only `scripts/Features/TestInfrastructure/local-image-context.mjs`,
 the new cohesive `local-image-snapshot.mjs`, `local-server-image.mjs` and
-`tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/LocalRf3ImageContextSnapshotTests.cs`.
+`tests/KeyLoad.UnitTests/TestInfrastructure/Cases/LocalRf3/LocalRf3ImageContextSnapshotTests.cs`.
 The reviewed R2 correction is assigned to ci_failure_evidence Luna and adds only
 `scripts/Features/TestInfrastructure/local-image-process.mjs` and the cohesive
 `UnitTests/Features/TestInfrastructure/Processes/LocalImageSnapshotProcess.cs`.

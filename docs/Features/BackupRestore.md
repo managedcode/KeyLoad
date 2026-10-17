@@ -67,11 +67,11 @@ BackupRestore creates an offline backup of canonical storage and restores it int
 
 | Surface | Current source | Target owner |
 |---|---|---|
-| Storage backup/restore | `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs` delegates to `Features/BackupRestore/ZoneTreeBackupRestore.cs` and its file/restore helpers | Private behavior is owned by `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/`; the public facade remains the shared entry point |
-| Archive and transfer | `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs`, `ArtifactTransfer.cs` and focused helpers | Same canonical slice; legacy declarations removed |
-| CLI | `src/KeyLoad.Cli/Features/BackupRestore/Commands/CliBackupRestore.cs` behind the aggregate Program runner | Slice-local offline operations; exact dispatch/text/disposal parity under AC-CQ-010 and ADR-033 |
+| Storage backup/restore | `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs` delegates to `Features/BackupRestore/ZoneTreeBackupRestore.cs` and its file/restore helpers | Private behavior is owned by `src/KeyLoad.Storage.ZoneTree/BackupRestore/`; the public facade remains the shared entry point |
+| Archive and transfer | `src/KeyLoad.Artifacts/BackupRestore/Execution/BackupArtifact.cs`, `ArtifactTransfer.cs` and focused helpers | Same canonical slice; legacy declarations removed |
+| CLI | `src/KeyLoad.Cli/BackupRestore/Commands/CliBackupRestore.cs` behind the aggregate Program runner | Slice-local offline operations; exact dispatch/text/disposal parity under AC-CQ-010 and ADR-033 |
 | HTTP backup entry | `src/KeyLoad.Server/ApiEndpoints.cs` | Shared server boundary; no public restore route is defined |
-| Tests | `tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs`; `tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs` | Unit source is slice-local; remaining recovery layout debt targets matching `Features/BackupRestore/` |
+| Tests | `tests/KeyLoad.UnitTests/BackupRestore/Cases/Artifact/ArtifactTests.cs`; `tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/RecoveryTests.cs` | Unit source is slice-local; remaining recovery layout debt targets matching `Features/BackupRestore/` |
 | Documentation | This spec; detailed storage/cluster design in `../design/architecture-v0.3.uk.md` | One canonical feature acceptance source |
 | UI and public blob API | None | N/A: operators use CLI/admin boundaries; archive chunking is not a user-facing blob contract |
 | Official MCP | No backup tool surface verified | Required MCP work is tracked in ClientApi; no tool name or route is inferred here |
@@ -132,7 +132,7 @@ that focused development result does not qualify full recovery, RF3 or Linux.
 
 TASK-CQ-CLI-BACKUP-FLOW-001 maps REQ-BACKUP-001/002/003 to AC-BACKUP-001/002/003
 and AC-CQ-031. It adds genuine Release CLI child-process flows in
-tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs,
+tests/KeyLoad.UnitTests/BackupRestore/Cases/Cli/CliBackupRestoreFlowTests.cs,
 with feature-local Processes/ and Fixtures/ helpers. The actual Aspire-owned
 unit and unit-scalar runners own every child, original exit, bounded pipe drain,
 temporary file and cleanup. Native validated test execution options supply
@@ -475,107 +475,107 @@ The source implementation uses ADR-123 stages above and the following exact resp
 
 - `docs/ADR/ADR-123-native-rf3-cluster-restore.md`
 - `docs/Features/BackupRestore.md`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupOwnerCut.cs`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupOwnerReceipt.cs`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupOwnerRequest.cs`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupPartitionCut.cs`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupProtocol.cs`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterRestoreMarker.cs`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterRestoreOwnerMapping.cs`
-- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/INativeCatalogBackupStore.cs`
-- `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs`
-- `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/CatalogBackupArtifactOperations.cs`
-- `src/KeyLoad.Artifacts/Features/BackupRestore/Staging/BackupArtifactExtraction.cs`
-- `src/KeyLoad.Artifacts/Features/BackupRestore/Staging/BackupArtifactStaging.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/ClusterBackupOwnerCut.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/ClusterBackupOwnerReceipt.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/ClusterBackupOwnerRequest.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/ClusterBackupPartitionCut.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/ClusterBackupProtocol.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/ClusterRestoreMarker.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/ClusterRestoreOwnerMapping.cs`
+- `src/KeyLoad.Abstractions/BackupRestore/Contracts/INativeCatalogBackupStore.cs`
+- `src/KeyLoad.Artifacts/BackupRestore/Execution/BackupArtifact.cs`
+- `src/KeyLoad.Artifacts/BackupRestore/Execution/CatalogBackupArtifactOperations.cs`
+- `src/KeyLoad.Artifacts/BackupRestore/Staging/BackupArtifactExtraction.cs`
+- `src/KeyLoad.Artifacts/BackupRestore/Staging/BackupArtifactStaging.cs`
 - `src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj`
-- `src/KeyLoad.Cli/Features/BackupRestore/Commands/CliClusterRestore.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Commands/ClusterRestoreCoordinator.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/CliStorageConfiguration.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestoreConfigurationBinding.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestoreMappingConfiguration.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestoreOperatorConfiguration.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestorePhysicalOwnerConfiguration.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Contracts/ClusterRestoreExecutionReceipt.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Contracts/ClusterRestoreNodeTarget.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Execution/ClusterRestorePublication.cs`
-- `src/KeyLoad.Cli/Features/BackupRestore/Validation/ClusterRestorePathValidation.cs`
-- `src/KeyLoad.Cli/Features/ClientApi/CliClientMessages.resx`
-- `src/KeyLoad.Cli/Features/ClientApi/Hosting/KeyLoadCliApplication.cs`
+- `src/KeyLoad.Cli/BackupRestore/Commands/CliClusterRestore.cs`
+- `src/KeyLoad.Cli/BackupRestore/Commands/ClusterRestoreCoordinator.cs`
+- `src/KeyLoad.Cli/BackupRestore/Configuration/CliStorageConfiguration.cs`
+- `src/KeyLoad.Cli/BackupRestore/Configuration/ClusterRestoreConfigurationBinding.cs`
+- `src/KeyLoad.Cli/BackupRestore/Configuration/ClusterRestoreMappingConfiguration.cs`
+- `src/KeyLoad.Cli/BackupRestore/Configuration/ClusterRestoreOperatorConfiguration.cs`
+- `src/KeyLoad.Cli/BackupRestore/Configuration/ClusterRestorePhysicalOwnerConfiguration.cs`
+- `src/KeyLoad.Cli/BackupRestore/Contracts/ClusterRestoreExecutionReceipt.cs`
+- `src/KeyLoad.Cli/BackupRestore/Contracts/ClusterRestoreNodeTarget.cs`
+- `src/KeyLoad.Cli/BackupRestore/Execution/ClusterRestorePublication.cs`
+- `src/KeyLoad.Cli/BackupRestore/Validation/ClusterRestorePathValidation.cs`
+- `src/KeyLoad.Cli/ClientApi/CliClientMessages.resx`
+- `src/KeyLoad.Cli/ClientApi/Hosting/KeyLoadCliApplication.cs`
 - `src/KeyLoad.Cli/KeyLoad.Cli.csproj`
-- `src/KeyLoad.Client/Features/BackupRestore/Transport/BackupClient.cs`
-- `src/KeyLoad.Core/Features/Authorization/Execution/DatabaseAuthentication.cs`
-- `src/KeyLoad.Core/Features/Authorization/Identity/DatabaseCredentialWitness.cs`
-- `src/KeyLoad.Core/Features/Authorization/Validation/DatabaseCredentialValidation.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Contracts/ClusterBackupOwnerCapability.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Execution/ClusterBackupOwnerAuthorization.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Execution/ClusterRestoreCatalogReconciliation.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupCanonicalCensus.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupOwnerCapture.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupPlacementRead.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupRosterCapture.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupMetadataEquality.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupNativeCutVerification.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupOwnerClosureValidation.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupPartitionVectorValidation.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupRequestValidation.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterRestoreMappingValidation.cs`
-- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterRestoreOperatorValidation.cs`
-- `src/KeyLoad.Clustering/Features/BackupRestore/Queries/ClusterBackupOwnerReadExecution.cs`
-- `src/KeyLoad.Clustering/Features/ClusterRouting/Contracts/INodeAdministration.cs`
+- `src/KeyLoad.Client/BackupRestore/Transport/BackupClient.cs`
+- `src/KeyLoad.Core/Authorization/Execution/DatabaseAuthentication.cs`
+- `src/KeyLoad.Core/Authorization/Identity/DatabaseCredentialWitness.cs`
+- `src/KeyLoad.Core/Authorization/Validation/DatabaseCredentialValidation.cs`
+- `src/KeyLoad.Core/BackupRestore/Contracts/ClusterBackupOwnerCapability.cs`
+- `src/KeyLoad.Core/BackupRestore/Execution/ClusterBackupOwnerAuthorization.cs`
+- `src/KeyLoad.Core/BackupRestore/Execution/ClusterRestoreCatalogReconciliation.cs`
+- `src/KeyLoad.Core/BackupRestore/Queries/ClusterBackupCanonicalCensus.cs`
+- `src/KeyLoad.Core/BackupRestore/Queries/ClusterBackupOwnerCapture.cs`
+- `src/KeyLoad.Core/BackupRestore/Queries/ClusterBackupPlacementRead.cs`
+- `src/KeyLoad.Core/BackupRestore/Queries/ClusterBackupRosterCapture.cs`
+- `src/KeyLoad.Core/BackupRestore/Validation/ClusterBackupMetadataEquality.cs`
+- `src/KeyLoad.Core/BackupRestore/Validation/ClusterBackupNativeCutVerification.cs`
+- `src/KeyLoad.Core/BackupRestore/Validation/ClusterBackupOwnerClosureValidation.cs`
+- `src/KeyLoad.Core/BackupRestore/Validation/ClusterBackupPartitionVectorValidation.cs`
+- `src/KeyLoad.Core/BackupRestore/Validation/ClusterBackupRequestValidation.cs`
+- `src/KeyLoad.Core/BackupRestore/Validation/ClusterRestoreMappingValidation.cs`
+- `src/KeyLoad.Core/BackupRestore/Validation/ClusterRestoreOperatorValidation.cs`
+- `src/KeyLoad.Clustering/BackupRestore/Queries/ClusterBackupOwnerReadExecution.cs`
+- `src/KeyLoad.Clustering/ClusterRouting/Contracts/INodeAdministration.cs`
 - `src/KeyLoad.Orleans/Features/ClusterRouting/Grains/DatabaseReadGrain.cs`
-- `src/KeyLoad.Clustering/Features/ClusterRouting/Models/GrainReadKind.cs`
-- `src/KeyLoad.Server/Features/BackupRestore/Authentication/ClusterBackupCredentialCapability.cs`
-- `src/KeyLoad.Server/Features/BackupRestore/Execution/ClusterBackupOwnerArchive.cs`
-- `src/KeyLoad.Server/Features/BackupRestore/Transport/ClusterBackupApi.cs`
-- `src/KeyLoad.Server/Features/ClientApi/Contracts/McpReadCatalog.cs`
-- `src/KeyLoad.Server/Features/ClientApi/Contracts/McpToolDescriptions.cs`
-- `src/KeyLoad.Server/Features/ClientApi/Contracts/McpToolHints.cs`
-- `src/KeyLoad.Server/Features/ClientApi/Execution/CanonicalOperationGateway.cs`
-- `src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs`
-- `src/KeyLoad.Server/Features/ClusterRouting/Transport/NodeAdministration.cs`
-- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Contracts/ZoneTreeCatalogBackupMetadata.cs`
-- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeBackupRestore.cs`
-- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeBackupRestoreRestore.cs`
-- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeCatalogBackupPublication.cs`
-- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeCatalogRestoreEntry.cs`
-- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeCatalogRestoreVerification.cs`
-- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Serialization/ZoneTreeCatalogBackupMetadataFile.cs`
+- `src/KeyLoad.Clustering/ClusterRouting/Models/GrainReadKind.cs`
+- `src/KeyLoad.Server/BackupRestore/Authentication/ClusterBackupCredentialCapability.cs`
+- `src/KeyLoad.Server/BackupRestore/Execution/ClusterBackupOwnerArchive.cs`
+- `src/KeyLoad.Server/BackupRestore/Transport/ClusterBackupApi.cs`
+- `src/KeyLoad.Server/ClientApi/Contracts/McpReadCatalog.cs`
+- `src/KeyLoad.Server/ClientApi/Contracts/McpToolDescriptions.cs`
+- `src/KeyLoad.Server/ClientApi/Contracts/McpToolHints.cs`
+- `src/KeyLoad.Server/ClientApi/Execution/CanonicalOperationGateway.cs`
+- `src/KeyLoad.Server/ClientApi/Transport/ApiEndpoints.cs`
+- `src/KeyLoad.Server/ClusterRouting/Transport/NodeAdministration.cs`
+- `src/KeyLoad.Storage.ZoneTree/BackupRestore/Contracts/ZoneTreeCatalogBackupMetadata.cs`
+- `src/KeyLoad.Storage.ZoneTree/BackupRestore/Recovery/ZoneTreeBackupRestore.cs`
+- `src/KeyLoad.Storage.ZoneTree/BackupRestore/Recovery/ZoneTreeBackupRestoreRestore.cs`
+- `src/KeyLoad.Storage.ZoneTree/BackupRestore/Recovery/ZoneTreeCatalogBackupPublication.cs`
+- `src/KeyLoad.Storage.ZoneTree/BackupRestore/Recovery/ZoneTreeCatalogRestoreEntry.cs`
+- `src/KeyLoad.Storage.ZoneTree/BackupRestore/Recovery/ZoneTreeCatalogRestoreVerification.cs`
+- `src/KeyLoad.Storage.ZoneTree/BackupRestore/Serialization/ZoneTreeCatalogBackupMetadataFile.cs`
 - `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingReadOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingReceiptOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingReceiveOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingSourceOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3ModelOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3TargetAuthority.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Contracts/ClusterRestoreRf3EventingProtocol.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Contracts/ClusterRestoreRf3OperatorReceipt.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Contracts/ClusterRestoreRf3Protocol.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Fixtures/ClusterRestoreRf3Fixture.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3AuthorityTrial.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3AuthorityTrialVector.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3BuilderCleanup.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3CallerOwner.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Capture.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3CaptureAuthorityTrial.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3CredentialTrial.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingContinuation.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingFences.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingHealthy.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingSeed.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Graph.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3LogFraming.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3NativeArchive.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Operator.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3OperatorObservation.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3ResumeConflict.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3RpoOracle.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Scenario.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3SecondaryPartition.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3TargetRead.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Models/ClusterRestoreRf3EventingState.cs`
-- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Models/ClusterRestoreRf3SecondaryState.cs`
-- `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/PartitionMovementPublicParentRf3Seed.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Assertions/ClusterRestoreRf3EventingReadOracle.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Assertions/ClusterRestoreRf3EventingReceiptOracle.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Assertions/ClusterRestoreRf3EventingReceiveOracle.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Assertions/ClusterRestoreRf3EventingSourceOracle.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Assertions/ClusterRestoreRf3ModelOracle.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Assertions/ClusterRestoreRf3TargetAuthority.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Cases/ClusterRestoreRf3Tests.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Contracts/ClusterRestoreRf3EventingProtocol.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Contracts/ClusterRestoreRf3OperatorReceipt.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Contracts/ClusterRestoreRf3Protocol.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Fixtures/ClusterRestoreRf3Fixture.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3AuthorityTrial.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3AuthorityTrialVector.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3BuilderCleanup.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3CallerOwner.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3Capture.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3CaptureAuthorityTrial.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3CredentialTrial.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3EventingContinuation.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3EventingFences.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3EventingHealthy.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3EventingSeed.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3Graph.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3LogFraming.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3NativeArchive.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3Operator.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3OperatorObservation.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3ResumeConflict.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3RpoOracle.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3Scenario.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3SecondaryPartition.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Helpers/ClusterRestoreRf3TargetRead.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Models/ClusterRestoreRf3EventingState.cs`
+- `tests/KeyLoad.IntegrationTests/BackupRestore/Models/ClusterRestoreRf3SecondaryState.cs`
+- `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/PartitionMovementPublicParentRf3Seed.cs`
 - `tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj`
 
 The source-authored cases are `ClusterRestoreRf3Tests.ActualTwoRf3ArchiveRestoresAllRegisteredOwnersAndLinkedModelsWithFencedOriginalReceiptsAndColdContinuation`, `ActualSplitMovementVectorRefusesPublicationThenFreshCaptureRestoresMovedLinkedModelsAndColdContinuation`, and `ActualCapturedRevokedAndExpiredCredentialsRefuseOfflinePublicationAndRestoredRequestsThenValidCredentialContinuesCold`. These names are not native UIDs or observed case counts. All three use the original owned two-RF3 Aspire graph, existing parent/cleanup bounds, exact-source built CLI completion dependencies, native image/profile/membership admission and original resources. Fresh current-source native census, exact normal/scalar runtime evidence and mandatory process/RF3/global gates are pending.

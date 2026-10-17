@@ -33,7 +33,7 @@ flowchart LR
     View --> Rows[Independent expected result and cursor parity]
 ```
 
-Canonical map: parser/token constants under src/KeyLoad.Query/Features/
+Canonical map: parser/token constants under src/KeyLoad.Query/
 QueryExecution; existing QueryEngine capability entry; NEW tests/KeyLoad.UnitTests/
 Features/QueryExecution/SqlBetween-prefixed files and IntegrationTests matching
 slice SqlRf3BetweenTests/helper. Root owns shared contracts/docs/Git and RF3;

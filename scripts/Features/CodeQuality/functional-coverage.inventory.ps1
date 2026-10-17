@@ -22,7 +22,7 @@ function Get-FcContributorInventory([string] $Root, [object] $Contract) {
     $entries = [Collections.Generic.List[object]]::new()
     foreach ($relative in $Contract.contributors.sourceFiles) {
         $path = [string] $relative
-        if (-not $path.StartsWith('tests/KeyLoad.UnitTests/Features/QueryExecution/', [StringComparison]::Ordinal)) { throw $script:FunctionalCoverage.ErrorContract }
+        if (-not $path.StartsWith('tests/KeyLoad.UnitTests/QueryExecution/', [StringComparison]::Ordinal)) { throw $script:FunctionalCoverage.ErrorContract }
         $file = Resolve-FcPath $Root $path
         if (-not [IO.File]::Exists($file)) { throw $script:FunctionalCoverage.ErrorInventory }
         if ($path.Contains('/Cases/')) {

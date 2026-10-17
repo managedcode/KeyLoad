@@ -328,14 +328,14 @@ Status: in progress. Owner: lead benchmark integrator. Product scope and authori
 
 ## Slice map
 
-- Harness/adapters: benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/; existing flat files are migration debt tracked by ADR-032.
-- Embedded scenario library: benchmarks/KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/; existing KeyLoad.Benchmarks retains only its typed executable runner under ADR-047. New boundary implementation/qualification is pending; exact accepted contract is ../ADR/ADR-047-embedded-benchmark-host.md and its ordered working plan.
-- Aspire engine resources: src/KeyLoad.AppHost/Features/BenchmarkComparisons/; shared Program.cs composition has one integration owner.
-- Tests: `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/`, including the sole benchmark-contract owner `UnitContracts/`; only helpers with actual functional consumers remain shared.
+- Harness/adapters: benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/; existing flat files are migration debt tracked by ADR-032.
+- Embedded scenario library: benchmarks/KeyLoad.BenchmarkScenarios/BenchmarkComparisons/; existing KeyLoad.Benchmarks retains only its typed executable runner under ADR-047. New boundary implementation/qualification is pending; exact accepted contract is ../ADR/ADR-047-embedded-benchmark-host.md and its ordered working plan.
+- Aspire engine resources: src/KeyLoad.AppHost/BenchmarkComparisons/; shared Program.cs composition has one integration owner.
+- Tests: `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/`, including the sole benchmark-contract owner `UnitContracts/`; only helpers with actual functional consumers remain shared.
 - Evidence/chart tooling: scripts/Features/BenchmarkComparisons/.
 - Site: site/Features/BenchmarkComparisons/; existing root assets are migration debt and updated only under serialized integration ownership.
 - Docs: this spec, ADR-034, implementation/comparative-benchmarks.md and the README presentation.
-- Time-series profile: root-owned Aspire resource in `src/KeyLoad.AppHost/Features/BenchmarkComparisons/`; profile/targets under `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/`; real tests under `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
+- Time-series profile: root-owned Aspire resource in `src/KeyLoad.AppHost/BenchmarkComparisons/`; profile/targets under `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
 - Product persisted schema/public API changes: N/A; engines use isolated per-run benchmark databases/collections/streams. Core optimizations require their own business-slice contract and serialized ownership.
 
 ## Immutable harness collection and naming repair
@@ -526,7 +526,7 @@ flowchart LR
 
 Canonical surfaces: scripts/Features/BenchmarkComparisons/github-evidence-*.mjs
 and github-evidence.mjs; SiteGitHub-prefixed tests/input helpers under
-tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/; shared pages.yml; durable
+tests/KeyLoad.SiteTests/BenchmarkComparisons/; shared pages.yml; durable
 spec here. Backend/contracts/database persistence N/A: no runtime/data API changes.
 Actors, public receipt schema, positive/negative/edge/error flows, tests, exact
 worker ownership and terminal joins are frozen in acceptance/ADR/plan before
@@ -1252,7 +1252,7 @@ the observed interaction; it does not presume the cause of CI failure.
 
 Mapping: `REQ-BC-025` and `AC-BC-025` (real browser criteria), plus this focused
 admission acceptance. New TUnit source belongs to
-`tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/`; no site runtime,
+`tests/KeyLoad.SiteTests/BenchmarkComparisons/`; no site runtime,
 workflow, publication or measurement behavior changes.
 
 # Proposed r2 amendment — identify the original queued Chrome waiter
@@ -1297,7 +1297,7 @@ TUnit scheduling and does not serialize unrelated tests globally.
 
 1. Freeze this amendment against the immutable r1 source packet before source
    edits.
-2. Modify `tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Helpers/
+2. Modify `tests/KeyLoad.SiteTests/BenchmarkComparisons/Helpers/
    SiteHeavyChildAdmission.cs` only to add the bounded locked membership read
    over its original-token waiter nodes. No Node admission behavior changes.
 3. Modify `.../Helpers/SiteBrowserSessionAdmission.cs` only to expose that
@@ -1546,7 +1546,7 @@ and unexpected rejection reasons fail; no authored Git output or image evidence.
 
 [ADR-034](../ADR/ADR-034-cluster-comparisons.md) owns the implementation contract.
 Source: `scripts/Features/BenchmarkComparisons/prepare-images.mjs`. New test paths:
-`tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/SourceCheckoutIdentityTests.cs`
+`tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/Cases/SourceCheckout/SourceCheckoutIdentityTests.cs`
 and `UnitContracts/Fixtures/TemporaryGitCheckout.cs`. Root owns specification,
 review, native CI evidence and delivery; a Luna worker owns this narrowly guarded
 source/test packet. Execute the case only through the Aspire comparison entry in

@@ -21,7 +21,7 @@ export const fileName = Object.freeze({
   registryHeaders: 'registry-headers.jsonl',
   registryReadiness: 'registry-readiness.jsonl',
   serverDockerfile: 'Dockerfile',
-  runnerDockerfile: 'benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Dockerfile',
+  runnerDockerfile: 'benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/Dockerfile',
 });
 
 export const directoryName = Object.freeze({ evidence: 'keyload-images' });

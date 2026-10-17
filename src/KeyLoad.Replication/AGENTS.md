@@ -5,7 +5,7 @@
 - Main types: `ClusterCoordinator`, `DurableRaftLog`, `ReplicatedStateMachine`, `ClusterBootstrap`, and `PeerSecurity` in the correspondingly named files.
 
 ## Ownership and boundaries
-- Replication feature code belongs under `Features/<SliceName>/` with matching `docs/Features/<SliceName>.md`; this project does not own Orleans activation routing or node-local physical storage.
+- Replication feature code belongs under `<SliceName>/` with matching `docs/Features/<SliceName>.md`; this project does not own Orleans activation routing or node-local physical storage.
 - Orleans is the cluster foundation and routes commands. Atomic partition identity is distinct from physical placement; node-local `PartitionHost` owns storage, journals, file locks and apply gate.
 - Existing consensus implementation and root-level files are migration debt under current root policy. Do not add DotNext cluster packages, weaken replica acknowledgements, or present process-kill recovery as power-loss durability.
 
@@ -20,8 +20,8 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `ClusterReplication` and `StorageRecovery`; target paths: `Features/ClusterReplication/` and `Features/StorageRecovery/`.
-- `Features/ClusterReplication/Execution/ClusterCoordinator.cs`, `Features/ClusterReplication/Storage/DurableReplicaLog.cs`, `Features/ClusterReplication/Execution/ReplicaMaterializer.cs`, `Features/ClusterReplication/Execution/ClusterCoordinator.cs`, and `Features/ClusterReplication/Identity/PeerSecurity.cs` are current slice entry points.
+- Owned slices: `ClusterReplication` and `StorageRecovery`; target paths: `ClusterReplication/` and `StorageRecovery/`.
+- `ClusterReplication/Execution/ClusterCoordinator.cs`, `ClusterReplication/Storage/DurableReplicaLog.cs`, `ClusterReplication/Execution/ReplicaMaterializer.cs`, `ClusterReplication/Execution/ClusterCoordinator.cs`, and `ClusterReplication/Identity/PeerSecurity.cs` are current slice entry points.
 ## Feature-local responsibility folders
 
-- Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

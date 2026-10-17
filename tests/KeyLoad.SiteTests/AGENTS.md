@@ -1,7 +1,7 @@
 # KeyLoad.SiteTests
 
 ## Purpose and entry points
-- Owns the independently buildable static website qualification suite. Entry: KeyLoad.SiteTests.csproj; canonical slice: Features/BenchmarkComparisons/. Read root/site policy, BenchmarkComparisons design/acceptance/execution contracts and ADR-040 before implementation.
+- Owns the independently buildable static website qualification suite. Entry: KeyLoad.SiteTests.csproj; canonical slice: BenchmarkComparisons/. Read root/site policy, BenchmarkComparisons design/acceptance/execution contracts and ADR-040 before implementation.
 
 ## Boundaries and ownership
 - TUnit/Microsoft.Testing.Platform, net10.0, centrally pinned packages and all central analyzers are mandatory. No Core/AppHost dependency, alternate runner, mocks/fakes/stubs or browser automation package.
@@ -18,7 +18,7 @@
 
 ## Protected risks
 - Never omit a required test, replace unavailable reports with fabricated fixture measurements, weaken analyzers, leak process environment/credentials or mistake historical measured SHA for website source SHA. Keep process timeouts/cancellation/stderr/exit-code checks and isolate disposable output.
-- Worker ownership is only Features/BenchmarkComparisons test files. Root owns this policy, project, solution, workflow, shared contracts and governance inventory.
+- Worker ownership is only BenchmarkComparisons test files. Root owns this policy, project, solution, workflow, shared contracts and governance inventory.
 
 ## BC028 publication qualification inputs
 - Read BenchmarkComparisons and ADR-040/076 before publication work. Owner-directed immediate legacy removal retires the obsolete SiteGitHubEvidence/SiteGitHubArchive family with its removed producer; current SiteIsolatedGitHub tests retain all applicable stronger provenance/archive checks. Worker scopes are exact and disjoint; root alone owns workflow and source closure.
@@ -31,7 +31,7 @@
 - Root supplies KEYLOAD_SITE_ISOLATED_CAPTURE and KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT. No pre-extracted fallback, skipped unavailable cohort, forged CI executor environment or fabricated metrics may satisfy these gates.
 - All eleven site-isolated-github- modules retain native80/70 coverage and individual critical90. Preserve every remaining numerical, browser, archive, safety and provenance criterion; remove only retired executable sources and their obsolete entries under ADR-076. Root owns workflow and dependency closure joins.
 ## Feature slice responsibility folders
-- Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
+- Place every feature-owned source file under `<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
 - Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
 - Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.
 

@@ -22,7 +22,7 @@ QueryExecution [REQ-QUERY-004](../Features/QueryExecution.md#повний-query-
 
 1. Freeze grammar/version, supported scalar/NULL/order semantics, parameter typing, unsupported diagnostics, and capability negotiation.
 2. Add parser fixtures and real-store semantic tests for positive, negative, edge, and unsupported expressions; include differential SQL/JSON/C# cases under ADR-013.
-3. Target code: `src/KeyLoad.Query/Features/QueryExecution/Syntax/` and `Binding/`; public capability contracts, if approved, in `src/KeyLoad.Abstractions/Features/QueryExecution/`.
+3. Target code: `src/KeyLoad.Query/QueryExecution/Syntax/` and `Binding/`; public capability contracts, if approved, in `src/KeyLoad.Abstractions/QueryExecution/`.
 4. Additive grammar is versioned; a breaking semantic change requires new capability/dialect version. Rollback stops advertising the new version and never reinterprets persisted cursors silently.
 5. GitHub CI runs grammar/semantic TUnit and RF3 client queries, with exact unsupported outcomes; Query owner joins root on equivalence artifacts.
 

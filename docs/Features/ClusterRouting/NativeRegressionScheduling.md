@@ -28,7 +28,7 @@ flowchart LR
 
 ## Source map and evidence
 
-The implementation paths are `tests/KeyLoad.UnitTests/Features/ClusterRouting/{Cases,Fixtures,Helpers}/` and the existing `Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs`. Changes comprise the native shared-session key, guarded attribute changes and the genuine two-fixture whole operation case. Frontend, public SDK/MCP operations and server database execution are N/A: this work changes test scheduling and adds original-fixture evidence.
+The implementation paths are `tests/KeyLoad.UnitTests/ClusterRouting/{Cases,Fixtures,Helpers}/` and the existing `Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs`. Changes comprise the native shared-session key, guarded attribute changes and the genuine two-fixture whole operation case. Frontend, public SDK/MCP operations and server database execution are N/A: this work changes test scheduling and adds original-fixture evidence.
 
 SOURCE11 applies after the genuine connection cleanup SOURCE9. The ANN scheduling supplement applies after Parent R4 ACK SOURCE3 and original ACK uncertainty SOURCE5. Private patch validation verifies source composition only. It does not establish successful generated compilation, test execution, measured throughput, memory bounds, RF3 acceptance or production readiness.
 
