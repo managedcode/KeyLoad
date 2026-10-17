@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using KeyLoad.Comparisons;
-using OperationResult = KeyLoad.Comparisons.OperationResult;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -81,7 +80,7 @@ internal class SessionRegressionTarget : IDocumentComparisonTarget
     {
         public Guid ClientIdentity { get; } = Guid.NewGuid();
         public bool SingleOperationTiming => true;
-        public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
+        public async Task<global::KeyLoad.Comparisons.OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {
             if (!target.SynchronousOperations)
             {
