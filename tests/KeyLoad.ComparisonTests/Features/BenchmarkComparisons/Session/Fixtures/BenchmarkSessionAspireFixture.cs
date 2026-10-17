@@ -91,8 +91,16 @@ internal static class BenchmarkSessionAspireFixture
         }
         finally
         {
-            await IsolatedNativeTeardown.CompleteAsync(application, evidence, evidence, root,
+            var teardown = IsolatedNativeTeardown.CompleteAsync(application, evidence, evidence, root,
                 containers, work, primary);
+            try
+            {
+                await teardown;
+            }
+            finally
+            {
+                await IsolatedNativeTeardown.SettleOwnerDisposalAsync(teardown, work.DisposeAsync().AsTask());
+            }
         }
     }
 

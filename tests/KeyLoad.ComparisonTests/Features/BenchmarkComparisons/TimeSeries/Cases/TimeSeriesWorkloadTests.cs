@@ -53,7 +53,7 @@ internal sealed class TimeSeriesWorkloadTests
     }
 
     [Test]
-    public async Task ReportUsesTheLoadedPublishedLibraryPackageVersion()
+    public async Task PackageIdentityMatchesTheLoadedPublishedLibraryVersion()
     {
         var assembly = typeof(DoubleTimeSeriesSummer).Assembly;
         var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
@@ -65,14 +65,9 @@ internal sealed class TimeSeriesWorkloadTests
         var packageVersion = separator < 0 ? loadedVersion : loadedVersion[..separator];
         await Assert.That(packageVersion).IsEqualTo("10.1.2");
 
-        var workload = TimeSeriesComparisonWorkloadFactory.Create("package-version-run");
-        var recorder = new TimeSeriesComparisonRecorder(workload, TimeProvider.System);
-        recorder.AddLibraryTarget();
-        var library = recorder.CreateReport("0123456789abcdef0123456789abcdef01234567")
-            .Targets.Single(target => target.Name == "ManagedCode.TimeSeries");
-
-        await Assert.That(library.PackageVersion).IsEqualTo(packageVersion);
-        await Assert.That(library.PackageVersion).IsEqualTo("10.1.2");
+        var actual = TimeSeriesComparisonPackageVersion.Read();
+        await Assert.That(actual).IsEqualTo(packageVersion);
+        await Assert.That(actual).IsEqualTo("10.1.2");
     }
 
     private static ImmutableArray<TimeSeriesBucketValue> Oracle(

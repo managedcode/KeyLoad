@@ -26,11 +26,13 @@ internal static class IsolatedNativeTeardownNativeSupport
         throw new InvalidOperationException("The actual Aspire runner wait did not observe caller cancellation.");
     }
 
-    internal static Task CompleteAsync(ComparisonProgressNativeFixture fixture, string output,
+    internal static async Task CompleteAsync(ComparisonProgressNativeFixture fixture, string output,
         string evidence, string absentDataRoot, Exception? primary)
-        => IsolatedNativeTeardown.CompleteAsync(fixture.Application, fixture.Capture, output, evidence,
-            absentDataRoot, [fixture.Runner, fixture.Node],
-            new IsolatedNativeOwnedWork(NativeExecutionPolicyFixture.Harness()), primary);
+    {
+        await using var work = new IsolatedNativeOwnedWork(NativeExecutionPolicyFixture.Harness());
+        await IsolatedNativeTeardown.CompleteAsync(fixture.Application, fixture.Capture, output, evidence,
+            absentDataRoot, [fixture.Runner, fixture.Node], work, primary);
+    }
 
     internal static void CreateRawCopyConflict(string output, string evidence)
     {

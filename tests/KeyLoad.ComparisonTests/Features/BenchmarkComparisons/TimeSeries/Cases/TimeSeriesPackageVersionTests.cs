@@ -12,15 +12,12 @@ internal sealed class TimeSeriesPackageVersionTests
     private const string Package = "ManagedCode.TimeSeries";
 
     [Test]
-    public async Task AcIso006ReportedLibraryVersionMatchesTheActuallyLoadedCentrallyPinnedPackage()
+    public async Task AcIso006PackageIdentityMatchesTheActuallyLoadedCentrallyPinnedPackage()
     {
         var source = XDocument.Load(Path.Combine(ImageBundleRealProtocol.RepositoryRoot(), CentralPackages));
         var pin = source.Descendants(PackageVersion).Single(item => item.Attribute(Include)?.Value == Package)
             .Attribute(Version)!.Value;
-        var recorder = new TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkloadFactory.Create("version-proof"), TimeProvider.System);
-        recorder.AddLibraryTarget();
-        var report = recorder.CreateReport(new string('a', 40));
-
-        await Assert.That(report.Targets.Single().PackageVersion).IsEqualTo(pin);
+        var actual = TimeSeriesComparisonPackageVersion.Read();
+        await Assert.That(actual).IsEqualTo(pin);
     }
 }

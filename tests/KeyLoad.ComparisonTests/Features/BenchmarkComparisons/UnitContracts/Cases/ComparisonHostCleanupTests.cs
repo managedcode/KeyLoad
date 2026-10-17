@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
+using KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
+using KeyLoad.Comparisons;
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
@@ -47,5 +49,76 @@ internal sealed class ComparisonHostCleanupTests
             directory.RetainFailureEvidence();
             throw;
         }
+    }
+
+    [Test]
+    public async Task RetentionAndBothNativeDisposalFailuresKeepTheirOriginalObjectsInOrder()
+    {
+        using var directory = new ImageBundleTestDirectory();
+        var path = Path.Combine(directory.Root, "original-retention.json");
+        await File.WriteAllTextAsync(path, "original");
+        var retention = RetainExclusiveAsync(path);
+        await using var fixture = await SessionDisposalNativeFixture.CreateAsync(true, true);
+        var observed = await NativeComparisonFailure.ObserveAsync(fixture.CompleteAsync(retention).AsTask());
+        await Assert.That(observed is AggregateException).IsTrue();
+        var failures = ((AggregateException)observed!).InnerExceptions;
+        await Assert.That(failures.Count).IsEqualTo(3);
+        await Assert.That(ReferenceEquals(failures[0], retention.Exception!.InnerException)).IsTrue();
+        await Assert.That(ReferenceEquals(failures[1], fixture.OwnerFailure)).IsTrue();
+        await Assert.That(ReferenceEquals(failures[2], fixture.ConfigurationFailure)).IsTrue();
+        await Assert.That(fixture.OwnerDisposals).IsEqualTo(1);
+        await Assert.That(fixture.ConfigurationDisposals).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task SingleNativeDisposalFailureIsRethrownUnwrappedAndConfigurationStillCloses()
+    {
+        await using var fixture = await SessionDisposalNativeFixture.CreateAsync(true, false);
+        var observed = await NativeComparisonFailure.ObserveAsync(fixture.CompleteAsync(Task.CompletedTask).AsTask());
+        await Assert.That(ReferenceEquals(observed, fixture.OwnerFailure)).IsTrue();
+        await Assert.That(observed is AggregateException).IsFalse();
+        await Assert.That(fixture.OwnerDisposals).IsEqualTo(1);
+        await Assert.That(fixture.ConfigurationDisposals).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task FatalPrimaryKeepsPriorityWhileBothActualNativeLifetimesAreJoined()
+    {
+        var fatal = new InsufficientMemoryException("controlled-fatal-classification");
+        await using var fixture = await SessionDisposalNativeFixture.CreateAsync(false, true);
+        var observed = await NativeComparisonFailure.ObserveAsync(fixture.CompleteAsync(Task.FromException(fatal)).AsTask());
+        await Assert.That(observed is AggregateException).IsTrue();
+        var failures = ((AggregateException)observed!).InnerExceptions;
+        await Assert.That(failures.Count).IsEqualTo(2);
+        await Assert.That(ReferenceEquals(failures[0], fatal)).IsTrue();
+        await Assert.That(ReferenceEquals(failures[1], fixture.ConfigurationFailure)).IsTrue();
+        await Assert.That(fixture.OwnerDisposals).IsEqualTo(1);
+        await Assert.That(fixture.ConfigurationDisposals).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task FailedOperationAndFailedOriginalReportRetentionKeepBothNativeErrors()
+    {
+        using var directory = new ImageBundleTestDirectory();
+        var missing = Path.Combine(directory.Root, "missing-operation-input.json");
+        var operation = File.ReadAllBytesAsync(missing);
+        var original = await NativeComparisonFailure.ObserveAsync(operation);
+        var report = Path.Combine(directory.Root, "original-failed-report.json");
+        await File.WriteAllTextAsync(report, "original");
+        var retention = RetainExclusiveAsync(report);
+        var observed = await NativeComparisonFailure.ObserveAsync(
+            BenchmarkSessionFixtureDisposal.RetainFailureAsync(original!, retention));
+        await Assert.That(observed is AggregateException).IsTrue();
+        var failures = ((AggregateException)observed!).InnerExceptions;
+        await Assert.That(failures.Count).IsEqualTo(2);
+        await Assert.That(ReferenceEquals(failures[0], original)).IsTrue();
+        await Assert.That(ReferenceEquals(failures[1], retention.Exception!.InnerException)).IsTrue();
+        await Assert.That(await File.ReadAllTextAsync(report)).IsEqualTo("original");
+    }
+
+    private static async Task RetainExclusiveAsync(string path)
+    {
+        await using var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+        await output.WriteAsync(new byte[] { 1 });
     }
 }

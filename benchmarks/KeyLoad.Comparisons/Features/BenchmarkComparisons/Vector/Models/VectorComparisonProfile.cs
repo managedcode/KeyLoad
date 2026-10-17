@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 
 namespace KeyLoad.Comparisons;
@@ -141,36 +140,3 @@ public sealed record VectorComparisonProfile
          from mode in new[] { VectorProfileTokens.PlainMode, VectorProfileTokens.FilteredMode, VectorProfileTokens.MixedMode }
          select $"{VectorComparisonProfileValues.Vector}{scale}{VectorComparisonProfileValues.ProfileDelimiter}{method}{VectorComparisonProfileValues.ProfileDelimiter}{mode}{VectorComparisonProfileValues.C16}").ToArray();
 }
-
-/// <summary>Measured vector results, native index evidence and per-query accuracy.</summary>
-/// <param name="RecordCount">The requested corpus record count.</param>
-/// <param name="LoadedRecordCount">The actual native ingestion record count.</param>
-/// <param name="QueryAttempts">The number of attempted measured queries.</param>
-/// <param name="QuerySuccesses">The number of successfully completed measured queries.</param>
-/// <param name="UpdateAttempts">The number of attempted embedding updates.</param>
-/// <param name="UpdateSuccesses">The number of acknowledged and verified embedding updates.</param>
-/// <param name="ExactRecall">The mean recall against the independent exact oracle.</param>
-/// <param name="MinimumRecall">The lowest per-query recall.</param>
-/// <param name="RecallSamples">The number of per-query recall observations.</param>
-/// <param name="PerQueryRecall">Recall for each measured query.</param>
-/// <param name="LatencyP95Ms">The estimated p95 query latency in milliseconds.</param>
-/// <param name="LatencyP99Ms">The estimated p99 query latency in milliseconds.</param>
-/// <param name="IndexBuildMilliseconds">Observed native index creation duration.</param>
-/// <param name="IndexKind">The requested index kind label.</param>
-/// <param name="NativeIndexDefinition">The actual native index definition.</param>
-/// <param name="NativeQueryPlan">The actual native measured query plan.</param>
-/// <param name="IndexParameters">Native index and search parameters.</param>
-/// <param name="ServerMemoryBytes">Native server memory from the AppHost sidecar, when joined.</param>
-/// <param name="ServerMemorySamplingIntervalMs">Native server memory sampling interval, when joined.</param>
-/// <param name="QueryElapsedSeconds">The measured query phase duration.</param>
-/// <param name="QueryUsefulOperationsPerSecond">The measured useful query rate.</param>
-/// <param name="UpdateElapsedSeconds">The concurrent update phase duration.</param>
-/// <param name="UpdateUsefulOperationsPerSecond">The verified update rate.</param>
-public sealed record VectorMetrics(
-    int RecordCount, int LoadedRecordCount, int QueryAttempts, int QuerySuccesses,
-    int UpdateAttempts, int UpdateSuccesses, double ExactRecall, double MinimumRecall, int RecallSamples,
-    ImmutableArray<double> PerQueryRecall, double LatencyP95Ms, double LatencyP99Ms, double IndexBuildMilliseconds, string IndexKind,
-    string NativeIndexDefinition, string NativeQueryPlan, IReadOnlyDictionary<string, string> IndexParameters,
-    long? ServerMemoryBytes, int? ServerMemorySamplingIntervalMs,
-    double QueryElapsedSeconds, double QueryUsefulOperationsPerSecond,
-    double UpdateElapsedSeconds, double UpdateUsefulOperationsPerSecond);

@@ -1,5 +1,22 @@
 # BenchmarkComparisons: native vector qualification
 
+## Current execution contract
+
+[ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md) and
+[SessionExecution](SessionExecution.md) supersede the per-cell runner, warmup,
+repetition, planner and report-production instructions in the retained source
+stages below. Current measurement jobs share one live native database/topology
+across separate TUnit cases, measure the initial load, and perform no per-case
+reset or reseeding. Historical implementation snapshots and immutable originals
+retain their original identities; retired runners and fixtures are not current
+qualification evidence.
+
+The original dataset, operation-count, native capability, correctness, privacy,
+cancellation, resource, topology and provenance requirements remain mandatory.
+The current seven document cases do not complete the required vector, graph,
+queue, event, time-series or physical100k-corpus coverage. Family integration and
+exact-source native Linux qualification remain open.
+
 This contract implements the owner's 2026-10-05 request under
 [ADR-109](../../ADR/ADR-109-native-vector-comparisons.md). The Benchmarks producer
 and website consumer are in scope, including SurrealDB and HelixDB. Product SQL,

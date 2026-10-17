@@ -149,9 +149,9 @@ TASK-WEB-NAVIGATION-001 strengthens AC-BC-WEB-003's existing real Chrome flow un
 
 | Requirement | Measurable acceptance | Tests and evidence |
 |---|---|---|
-| REQ-BC-CURRENT-001: the complete current native cohort is the sole live producer | AC-BC-CURRENT-001: the current plan accounts for all 924 website workers across the 220-cell control, two 88-cell scaled profiles and 24 22-cell vector profiles, with a separately authenticated 418-cell document family, bound to the exact Benchmarks run/attempt/source and authenticated inputs. Each slot is an authenticated measurement, an explicit unsupported-topology disposition or a terminal workload failure with fixed safe reason, null report and visible original failure; measured workers pass correctness/fairness/provenance checks. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects | SiteIsolatedGitHub selection/proof/archive/input/authority tests; actual aggregate and original GitHub archives |
+| REQ-BC-CURRENT-001: the complete current native cohort is the sole live producer | AC-BC-CURRENT-001: session-v1 accounts for22 workers across11 databases x native node counts[1,3], each with seven original native TUnit case outcomes on one live topology. One preparation job builds the exact-source compiled runtime/images once; workers import those authenticated bundles. Initial1m loading is measured, each applicable operation lane has100k attempts, and no warmup/reset/reseeding occurs between cases. Retain actual failures/null metrics and genuine native-unavailable outcomes with the original source/run/attempt/job/TRX/report/DLL/PDB/image identity. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects; publication requires every applicable correctness/fairness/provenance/resource/functional gate. Seven document cases do not qualify remaining model families or physical100k-corpus coverage | SessionCohortContractTests, CompiledBenchmarkRuntimeBundleTests, current native session/aggregate/site gates and original authenticated GitHub archives |
 | REQ-BC-CURRENT-002: retire superseded collector, archives and current-profile assets together | AC-BC-CURRENT-002: no active comparison-smoke/comparison-suite collector, twelve-file precondition or three-profile current renderer remains; replacement retains all applicable safety, accessibility, vendor, arithmetic and browser criteria | scoped dependency inventory, workflow source tests and standalone isolated site/browser tests |
-| REQ-BC-CURRENT-003: preserve unchanged qualified authority around final build | AC-BC-CURRENT-003: bounded immutable receipt, original archives and every file in the current composite plan/proof inventory match before/after builder; emitted aggregate bytes match; every remaining native coverage/no-skip/source-closure gate passes | SiteIsolatedGitHub integrity/build/coverage tests, original TRX/Cobertura/Node/browser artifacts and schema-v2 publication receipt |
+| REQ-BC-CURRENT-003: preserve unchanged qualified authority around final build | AC-BC-CURRENT-003: bounded immutable receipt, original archives and every file in the current composite plan/proof inventory match before/after builder; emitted aggregate bytes match; every remaining native coverage/no-skip/source-closure gate passes | SiteIsolatedGitHub integrity/build/coverage tests, original TRX/Cobertura/Node/browser artifacts and the current source-bound publication receipt |
 | REQ-BC-CURRENT-004: deploy only fresh exact-source evidence | AC-BC-CURRENT-004: current main and exact original producer tuple match immediately before needs-gated least-privilege Pages delivery; altered source/attempt/artifact rejects and actual provider receipt records outcome | SiteIsolatedGitHubFreshnessTests, workflow source tests, genuine same-run qualification and Pages provider receipt |
 
 Canonical ownership remains BenchmarkComparisons under site/scripts/workflows and
@@ -1453,20 +1453,27 @@ from exact-source Linux and actual provider qualification.
 
 TASK-CURRENT-ARCHIVE-IMPLEMENTATION-070-CONSUMERS implements
 REQ/AC-BC-CURRENT-001..004 and REQ/AC-BC-WEB-002/004/006/007 alongside
-TASK-CURRENT-WEBSITE-EVENT-071. QualifySite/action.yml validates the exact current
-84-path dependency manifest. Regular-path, byte/hash, archive, source, coverage
-and freshness checks remain strict. Current readers admit only the
-924-worker/1,716-input website contract plus the separately admitted418-cell document family and its native schema; unsupported sources are
-classified before jobs/archive reads and cannot supply live metrics.
+TASK-CURRENT-WEBSITE-EVENT-071. The current QualifySite action validates the
+complete executed dependency manifest derived by session-source-closure.mjs;
+there is no inherited fixed path count. Regular-path, byte/hash, archive, source,
+coverage and freshness checks remain strict. Current readers admit only the
+session-v1 cohort:22 workers (11 databases x native1/3), seven source-bound native
+case outcomes per shared live topology, common compiled runtime/images built
+once, measured initial1m loading and no warmup/reset/reseeding. Every original
+report, native TRX, image/runtime identity and resource observation remains
+authenticated. Unsupported sources are classified before jobs/archive reads and
+cannot supply live metrics. Remaining model-family and physical100k qualification
+requirements stay open; these seven document cases do not complete them.
 
-SiteOptionalBenchmarkSelectionTests is the mandatory Aspire-owned native Website
-preparation gate for the seven current executor/argument flows defined above.
-Its Cases and Processes use the actual production context API. Current
-SiteTests retain authenticated capture, optional unavailability, newest-ready
-selection, strict selected-evidence rejection, unchanged inputs and healthy
-follow-up under AC-BC-WEB-002 and AC-BC-FAIL-019/020. SiteIsolatedInventory and all
-actual callers use current no-argument inventory functions; source authentication
-remains separately enforced.
+Current Website preparation invokes SiteQualificationStartupTests and
+SessionCohortContractTests through the native comparison entry. SiteTests retain
+authenticated capture, optional unavailability, newest-ready selection, strict
+selected-evidence rejection, unchanged inputs and healthy follow-up under
+AC-BC-WEB-002 and AC-BC-FAIL-019/020. Current session/browser/executor tests and
+SiteIsolatedInventory consume the canonical session inventory. Real Node/Chrome,
+all applicable native TUnit/coverage/no-skip gates, complete source/input hashes
+and final freshness remain mandatory; source authentication is separately
+enforced. No current source claim establishes genuine Linux/provider acceptance.
 
 Root owns shared source/coverage inventories, canonical build and formatter,
 Aspire unit/SiteTests, Linux/provider evidence and Git delivery. Run full ordinary

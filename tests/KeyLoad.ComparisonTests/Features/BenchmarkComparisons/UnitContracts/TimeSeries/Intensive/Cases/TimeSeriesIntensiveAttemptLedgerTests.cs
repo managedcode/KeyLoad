@@ -8,8 +8,10 @@ internal sealed class TimeSeriesIntensiveAttemptLedgerTests
     [Test]
     public async Task AcTsi004LedgerRejectsMissingDefaultDuplicateAndWrongIdentity()
     {
-        var storage = TimeSeriesIntensiveAttemptLedger.CreateMeasuredStorage();
-        var ledger = new TimeSeriesIntensiveAttemptLedger(storage, 10000, 10000, 1);
+        var before = TimeSeriesIntensiveAttemptValues.Success(0, 31);
+        var after = TimeSeriesIntensiveAttemptValues.Success(2, 47);
+        TimeSeriesIntensiveAttempt[] storage = [before, default, default, after];
+        var ledger = new TimeSeriesIntensiveAttemptLedger(storage, 1, 2, 1);
         Assert.ThrowsExactly<ComparisonFailureException>(ledger.ValidateComplete);
         Assert.ThrowsExactly<ComparisonFailureException>(() => ledger.Publish(default));
         var attempt = TimeSeriesIntensiveAttemptValues.Success(1, 0);
@@ -17,10 +19,12 @@ internal sealed class TimeSeriesIntensiveAttemptLedgerTests
         Assert.ThrowsExactly<ComparisonFailureException>(() => ledger.Publish(attempt with { Worker = 1 }));
         ledger.Publish(attempt);
         Assert.ThrowsExactly<ComparisonFailureException>(() => ledger.Publish(attempt));
+        Assert.ThrowsExactly<ComparisonFailureException>(ledger.ValidateComplete);
         await Assert.That(ledger.Attempts.Span[0]).IsEqualTo(attempt);
-        await Assert.That(storage[0].Outcome).IsEqualTo(TimeSeriesIntensiveOutcome.NotStarted);
-        await Assert.That(storage[49999].Index).IsEqualTo(9999);
-        await Assert.That(storage[49999].Repetition).IsEqualTo(4);
+        await Assert.That(ledger.Attempts.Length).IsEqualTo(2);
+        await Assert.That(storage[0]).IsEqualTo(before);
+        await Assert.That(storage[2].Outcome).IsEqualTo(TimeSeriesIntensiveOutcome.NotStarted);
+        await Assert.That(storage[3]).IsEqualTo(after);
     }
 
     [Test]

@@ -2,8 +2,6 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed class TimeSeriesIntensiveAttemptLedger
 {
-    private const int NoObservedItems = 0;
-
     private readonly TimeSeriesIntensiveAttempt[] storage;
     private readonly int[] states;
     private readonly int offset;
@@ -86,34 +84,4 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
             throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.MissingAttempt);
         }
     }
-
-    internal static TimeSeriesIntensiveAttempt[] CreateMeasuredStorage()
-        => CreateStorage(TimeSeriesIntensiveProfile.OperationCount);
-
-    internal static TimeSeriesIntensiveAttempt[] CreateWarmupStorage()
-        => CreateStorage(TimeSeriesIntensiveProfile.WarmupCount);
-
-    private static TimeSeriesIntensiveAttempt[] CreateStorage(int attemptsPerRepetition)
-    {
-        const int NoItems = 0;
-
-        if (attemptsPerRepetition != TimeSeriesIntensiveProfile.OperationCount
-            && attemptsPerRepetition != TimeSeriesIntensiveProfile.WarmupCount)
-        {
-            throw new ArgumentOutOfRangeException(nameof(attemptsPerRepetition));
-        }
-
-        var storage = new TimeSeriesIntensiveAttempt[checked(TimeSeriesIntensiveProfile.RepetitionCount * attemptsPerRepetition)];
-        for (var slot = NoItems; slot < storage.Length; slot++)
-        {
-            var index = slot % attemptsPerRepetition;
-            storage[slot] = CreateNotStarted(slot / attemptsPerRepetition, index);
-        }
-
-        return storage;
-    }
-
-    private static TimeSeriesIntensiveAttempt CreateNotStarted(int repetition, int index)
-        => new(repetition, index, index % TimeSeriesIntensiveProfile.Concurrency,
-            NoObservedItems, NoObservedItems, TimeSeriesIntensiveOutcome.NotStarted, null, default, NoObservedItems, default);
 }

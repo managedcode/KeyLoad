@@ -412,25 +412,19 @@ its documentation, braces and null guards. Public wrappers, 1,024-character boun
 RFC 6901 decoding, missing/scalar distinction and field-patch behavior stay exact;
 direct pointer/patch acceptance cases join existing real-document regressions.
 
-## Accepted progressive report output repair
+## Historical progressive report output repair
 
-TASK-MP-008C implements REQ-MP-004, REQ-BC-010 and AC-MP-010/012 under ADR-035/044.
-The current owned synchronous Cases/Samples converters retain full serialized
-payloads before SerializeAsync can flush. Private write-only views adapt both
-collections to native async enumeration over existing immutable arrays. Public
-ComparisonReport/ComparisonCase, strict read converters, targets, exact JSON
-schema/property order, every attempt and CSV/Markdown content stay unchanged.
-Default arrays still reject with the existing JsonException and safe detail.
+TASK-MP-008C under ADR-035/044 described streaming output for the former
+ComparisonReport schema. [ADR-142](../ADR/ADR-142-shared-live-benchmark-sessions.md)
+retires that standalone report, its write-only projections and exclusive schema
+fixtures. Historical original measurements keep their exact source identities.
 
-Tests-first source retains the real-file byte/schema/roundtrip oracle, populates
-optional provenance/image metadata, and cancels directly in the early-growth
-observer. The fixed 20,000-by-4,096 sample input stays bounded; partial output must
-remain below one quarter of its complete raw error-byte lower bound, with no
-Markdown/CSV. Source audit verifies no sample-array/list/string duplication. The
-worker owns new BenchmarkComparisons write views/helpers and ReportFileTests.cs;
-lead alone joins ReportWriter and shared docs. Enabled build/format/governance and
-complete exact-SHA GitHub tests qualify correctness; matched memory/speed evidence
-remains open. No public/data/report-version or package migration.
+Current shared sessions retain original per-case reports and samples through
+native asynchronous file serialization. They must preserve bounded output,
+cancellation, exact source/image/runtime provenance and meaningful native
+correctness assertions. Successful compilation and current Linux output/resource
+qualification remain separate gates; the old report tests do not qualify the
+replacement pipeline.
 
 ## Accepted exact-CI fixture corrections
 

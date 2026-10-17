@@ -46,17 +46,10 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         {
             InitializeCore();
         }
-        catch (Exception original) when (CqrsRuntimeFailures.FindFatal(original) is null)
+        catch (Exception original)
         {
             settings = null;
-            try
-            {
-                await ReleaseAsync();
-            }
-            catch (Exception cleanup) when (CqrsRuntimeFailures.FindFatal(cleanup) is null)
-            {
-                throw new AggregateException(original, cleanup);
-            }
+            await ReleaseAsync(Task.FromException(original));
             throw;
         }
     }
@@ -111,7 +104,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
         {
             report = new(id, Failed, error.GetType().Name, UnverifiedRecords, new BenchmarkSessionOptions().Records, UnverifiedRecords, [], NoElapsedMeasurement);
-            await RetainAsync(report);
+            await BenchmarkSessionFixtureDisposal.RetainFailureAsync(error, RetainAsync(report));
             throw;
         }
         await RetainAsync(report);
@@ -130,14 +123,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
 
     public async ValueTask DisposeAsync()
     {
-        try
-        {
-            await RetainStateAsync();
-        }
-        finally
-        {
-            await ReleaseAsync();
-        }
+        await ReleaseAsync(RetainStateAsync());
         GC.SuppressFinalize(this);
     }
 
@@ -169,23 +155,13 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
                 artifacts.ToImmutableArray(), outcome, reason), input.Native.HostExecution);
     }
 
-    private async ValueTask ReleaseAsync()
+    private ValueTask ReleaseAsync(Task original)
     {
         var owned = owner;
+        var lifetime = configuration;
         owner = null;
+        configuration = null;
         session = null;
-        try
-        {
-            if (owned is not null)
-            {
-                await owned.DisposeAsync();
-            }
-        }
-        finally
-        {
-            var lifetime = configuration;
-            configuration = null;
-            lifetime?.Dispose();
-        }
+        return BenchmarkSessionFixtureDisposal.CompleteAsync(original, owned, lifetime);
     }
 }

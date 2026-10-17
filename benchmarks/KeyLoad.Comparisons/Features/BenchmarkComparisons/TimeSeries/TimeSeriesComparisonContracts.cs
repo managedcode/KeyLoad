@@ -41,24 +41,3 @@ internal interface ITimeSeriesAggregationTarget
     Task<ImmutableArray<TimeSeriesBucketValue>> AggregateAsync(TimeSeriesComparisonWorkload workload,
         CancellationToken cancellationToken);
 }
-
-internal sealed record TimeSeriesComparisonAttempt(string Target, string Operation, int Attempt,
-    bool Measured, double? ElapsedMilliseconds, bool Succeeded, int? ResultCount, string? ErrorCode);
-
-internal sealed record TimeSeriesCorrectnessCheck(string Target, string Check, bool Passed,
-    int ExpectedCount, int ActualCount, string ExpectedHash, string? ActualHash, string? ErrorCode);
-
-internal sealed record TimeSeriesComparisonReport(int SchemaVersion, string SourceRevision, string RunId,
-    DateTimeOffset CreatedAtUtc, string WorkloadHash, int SampleCount, TimeSpan BucketWidth,
-    TimeSeriesTargetMetadata[] Targets, TimeSeriesComparisonAttempt[] Attempts,
-    TimeSeriesCorrectnessCheck[] CorrectnessChecks)
-{
-    public GitHubProvenance? Provenance
-    {
-        get; init;
-    }
-    public string? LoadGeneratorImage
-    {
-        get; init;
-    }
-}

@@ -45,16 +45,38 @@ internal sealed class IsolatedNativeTeardownSuccessTests
         await using var fixture = await IsolatedNativeTeardownNativeSupport.CreateFixtureAsync(
             Path.Combine(directory.Root, "fixture-progress.json"));
         var work = new IsolatedNativeOwnedWork(NativeExecutionPolicyFixture.Harness());
-        work.BeginCapture(fixture.Application, [fixture.Node.Name], Path.Combine(evidence, "progress.json"));
-        var capture = work.Capture!;
-        Assert.ThrowsExactly<InvalidOperationException>(() => work.BeginCapture(fixture.Application,
-            [fixture.Node.Name], Path.Combine(evidence, "replacement-progress.json")));
-        await Assert.That(ReferenceEquals(capture, work.Capture)).IsTrue();
-        await IsolatedNativeTeardown.CompleteAsync(fixture.Application, output, evidence, data,
-            [fixture.Runner, fixture.Node], work, null);
-        await Assert.That(capture.StopAsync().IsCompletedSuccessfully).IsTrue();
-        await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.RunnerLog))).IsTrue();
-        await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.NodeLog))).IsTrue();
-        await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.ReceiptFile))).IsTrue();
+        Task original = Task.CompletedTask;
+        Exception? bodyFailure = null;
+        try
+        {
+            work.BeginCapture(fixture.Application, [fixture.Node.Name], Path.Combine(evidence, "progress.json"));
+            var capture = work.Capture!;
+            Assert.ThrowsExactly<InvalidOperationException>(() => work.BeginCapture(fixture.Application,
+                [fixture.Node.Name], Path.Combine(evidence, "replacement-progress.json")));
+            await Assert.That(ReferenceEquals(capture, work.Capture)).IsTrue();
+            original = IsolatedNativeTeardown.CompleteAsync(fixture.Application, output, evidence, data,
+                [fixture.Runner, fixture.Node], work, null);
+            await original;
+            await Assert.That(capture.StopAsync().IsCompletedSuccessfully).IsTrue();
+            await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.RunnerLog))).IsTrue();
+            await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.NodeLog))).IsTrue();
+            await Assert.That(File.Exists(Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.ReceiptFile))).IsTrue();
+            var completion = work.DisposeAsync().AsTask();
+            await completion;
+            await Assert.That(ReferenceEquals(completion, work.DisposeAsync().AsTask())).IsTrue();
+            await Assert.That(capture.DisposeAsync().IsCompletedSuccessfully).IsTrue();
+            Assert.ThrowsExactly<InvalidOperationException>(() => work.BeginCapture(fixture.Application,
+                [fixture.Node.Name], Path.Combine(evidence, "after-close-progress.json")));
+        }
+        catch (Exception failure)
+        {
+            bodyFailure = failure;
+            throw;
+        }
+        finally
+        {
+            await IsolatedNativeTeardown.SettleOwnerDisposalAsync(
+                bodyFailure is null ? original : Task.FromException(bodyFailure), work.DisposeAsync().AsTask());
+        }
     }
 }

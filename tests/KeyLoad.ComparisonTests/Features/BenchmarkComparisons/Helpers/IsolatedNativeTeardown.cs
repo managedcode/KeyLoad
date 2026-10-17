@@ -1,5 +1,7 @@
+using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -62,6 +64,28 @@ internal static class IsolatedNativeTeardown
             () => WriteReceiptAsync(evidence, failures, options), "receipt", failures, options);
         failures.ThrowIfAny();
     }
+
+    internal static async Task SettleOwnerDisposalAsync(Task original, Task disposal)
+    {
+        var primary = await NativeComparisonFailure.ObserveAsync(original);
+        var cleanup = await NativeComparisonFailure.ObserveAsync(disposal);
+        if (cleanup is null || ContainsAllFailures(primary, cleanup))
+        {
+            // A repeated await of the same native completion must not replace its already retained teardown failure.
+            return;
+        }
+        var combined = NativeComparisonFailure.Combine(primary, [cleanup]);
+        ExceptionDispatchInfo.Capture(combined!).Throw();
+    }
+
+    private static bool ContainsAllFailures(Exception? original, Exception observed)
+        => observed is AggregateException aggregate && aggregate.InnerExceptions.Count > 0
+            ? aggregate.InnerExceptions.All(error => ContainsAllFailures(original, error))
+            : ContainsFailure(original, observed);
+
+    private static bool ContainsFailure(Exception? original, Exception observed)
+        => ReferenceEquals(original, observed)
+            || original is AggregateException aggregate && aggregate.InnerExceptions.Any(error => ContainsFailure(error, observed));
 
     private static async Task<bool> SettleCollectorAsync(IsolatedNativeOwnedWork work,
         IsolatedNativeTeardownFailures failures, IOptions<NativeComparisonHarnessOptions> options)

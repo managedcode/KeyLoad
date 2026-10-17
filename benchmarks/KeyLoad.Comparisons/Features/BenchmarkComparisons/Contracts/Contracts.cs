@@ -213,22 +213,7 @@ public sealed record Measurement(int Attempts, int Successes, int Failures, doub
 /// <param name="Measurement">The aggregate measurements, when the scenario ran.</param>
 /// <param name="Samples">The individual operation samples.</param>
 public sealed record ComparisonCase(string Target, Scenario Scenario, int Repetition, string Status,
-    string? Detail, Measurement? Measurement, [property: JsonRequired] ImmutableArray<OperationSample> Samples)
-{
-    /// <summary>Gets exact scaled-run request accounting, omitted for existing control cases.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ScaledOperationAccounting? Scaled
-    {
-        get; init;
-    }
-
-    /// <summary>Gets actual native vector qualification metrics for a vector profile case.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public VectorMetrics? VectorMetrics
-    {
-        get; init;
-    }
-}
+    string? Detail, Measurement? Measurement, [property: JsonRequired] ImmutableArray<OperationSample> Samples);
 
 /// <summary>Identifies the GitHub Actions workflow run and selected comparison profile.</summary>
 /// <param name="RunId">The GitHub Actions run identifier.</param>

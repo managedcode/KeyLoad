@@ -63,28 +63,47 @@ internal sealed class IsolatedNativeTeardownFailureTests
         await using var fixture = await IsolatedNativeTeardownNativeSupport.CreateFixtureAsync(
             Path.Combine(directory.Root, "fixture-progress.json"));
         var work = new IsolatedNativeOwnedWork(NativeExecutionPolicyFixture.Harness());
-        var captureFailure = new InvalidOperationException(CaptureMarker);
-        var observed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        work.BeginCapture(fixture.Application, [fixture.Node.Name], Path.Combine(evidence, "progress.json"), line =>
+        Task original = Task.CompletedTask;
+        Exception? bodyFailure = null;
+        try
         {
-            if (line.Contains(CaptureMarker, StringComparison.Ordinal))
-            {
-                observed.TrySetResult();
-                throw captureFailure;
-            }
-        });
-        await PublishCaptureFailureAsync(fixture, observed);
-        using var cancellation = new CancellationTokenSource();
-        var primary = await IsolatedNativeTeardownNativeSupport.CancelNativeRunnerWaitAsync(fixture, cancellation);
-        var failure = await CaptureAsync(() => IsolatedNativeTeardown.CompleteAsync(fixture.Application,
-            output, evidence, Path.Combine(directory.Root, "absent-data"), [fixture.Runner, fixture.Node], work, primary));
-        await Assert.That(ReferenceEquals(failure.InnerExceptions[0], primary)).IsTrue();
-        await Assert.That(failure.InnerExceptions.Count(error => ReferenceEquals(error, captureFailure))).IsEqualTo(1);
-        await Assert.That(work.Capture!.StopAsync().IsCompleted).IsTrue();
-        using var receipt = JsonDocument.Parse(await File.ReadAllTextAsync(
-            Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.ReceiptFile)));
-        await Assert.That(receipt.RootElement.GetProperty(FailedStagesField).EnumerateArray()
-            .Count(stage => stage.GetString() == CaptureDisposeStage)).IsEqualTo(1);
+            var captureFailure = new InvalidOperationException(CaptureMarker);
+            var observed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            work.BeginCapture(fixture.Application, [fixture.Node.Name], Path.Combine(evidence, "progress.json"),
+                line => ObserveNativeCaptureFailure(line, observed, captureFailure));
+            await PublishCaptureFailureAsync(fixture, observed);
+            using var cancellation = new CancellationTokenSource();
+            var primary = await IsolatedNativeTeardownNativeSupport.CancelNativeRunnerWaitAsync(fixture, cancellation);
+            original = IsolatedNativeTeardown.CompleteAsync(fixture.Application,
+                output, evidence, Path.Combine(directory.Root, "absent-data"), [fixture.Runner, fixture.Node], work, primary);
+            var failure = await CaptureAsync(() => original);
+            await Assert.That(ReferenceEquals(failure.InnerExceptions[0], primary)).IsTrue();
+            await Assert.That(failure.InnerExceptions.Count(error => ReferenceEquals(error, captureFailure))).IsEqualTo(1);
+            await Assert.That(work.Capture!.StopAsync().IsCompleted).IsTrue();
+            using var receipt = JsonDocument.Parse(await File.ReadAllTextAsync(
+                Path.Combine(evidence, IsolatedNativeTeardownNativeSupport.ReceiptFile)));
+            await Assert.That(receipt.RootElement.GetProperty(FailedStagesField).EnumerateArray()
+                .Count(stage => stage.GetString() == CaptureDisposeStage)).IsEqualTo(1);
+        }
+        catch (Exception failure)
+        {
+            bodyFailure = failure;
+            throw;
+        }
+        finally
+        {
+            await IsolatedNativeTeardown.SettleOwnerDisposalAsync(
+                bodyFailure is null ? original : Task.FromException(bodyFailure), work.DisposeAsync().AsTask());
+        }
+    }
+
+    private static void ObserveNativeCaptureFailure(string line, TaskCompletionSource observed, Exception failure)
+    {
+        if (line.Contains(CaptureMarker, StringComparison.Ordinal))
+        {
+            observed.TrySetResult();
+            throw failure;
+        }
     }
 
     private static async Task PublishCaptureFailureAsync(ComparisonProgressNativeFixture fixture, TaskCompletionSource observed)

@@ -862,13 +862,12 @@ fixed qualification-profile identity, defaults 30 seconds and pool margin/minimu
 4/16; configured lower values must reach these execution owners. Real replicated
 Mongo behavior requires the original exact-source comparison suite.
 
-`NativeComparisonReportPolicyTests` compares original and configured lower native
-CSV buffers against independent golden bytes. `VectorExecutionCadenceTests`
-compares configured cancellation/yield policy with unchanged corpus payload,
-vector digests and exact oracle results. `OpenLoopOriginalFailureTests` and
-`OpenLoopOriginalFailureWorkerTests` exercise the production settlement path with
-original native tasks and cancellation callbacks, retaining original failures
-and joined disposal. These checks await the rebuilt Aspire-owned suite.
+`VectorExecutionCadenceTests` retains configured cancellation/yield policy
+checks over unchanged corpus payload, vector digests and exact oracle results.
+ADR-142 retires the old CSV report policy and open-loop settlement tests together
+with their superseded producers. Shared-session originals, current runtime
+settings and joined native failure/disposal paths require their own actual Linux
+qualification; retired fixtures are not evidence for that pipeline.
 
 The final operational-sink audit includes configured grain reply initial buffers,
 administrator failure-ring retention, native seed batches and storage stream

@@ -1,5 +1,21 @@
 # Scaling qualification and fair deployment arms
 
+## Current execution contract
+
+[ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md) and
+[SessionExecution](SessionExecution.md) supersede the per-cell runner, warmup,
+repetition, planner and report-production instructions in the retained source
+stages below. Current measurement jobs share one live native database/topology
+across separate TUnit cases, measure the initial load, and perform no per-case
+reset or reseeding. Historical implementation snapshots and immutable originals
+retain their original identities; retired runners and fixtures are not current
+qualification evidence.
+
+The original dataset, operation-count, native capability, correctness, privacy,
+cancellation, resource, topology and provenance requirements remain mandatory.
+The current seven document cases do not complete the required vector, graph,
+queue, event, time-series or physical100k-corpus coverage. Family integration and
+exact-source native Linux qualification remain open.
 
 Owner correction 2026-10-05 supersedes the earlier three-scale inventory: only
 100k and 1m remain active for every database and workload. SurrealDB/HelixDB

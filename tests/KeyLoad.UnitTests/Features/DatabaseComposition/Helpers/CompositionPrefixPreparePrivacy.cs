@@ -17,7 +17,13 @@ internal static class CompositionPrefixPreparePrivacy
     internal static Task RunAsync() => ResourceRetirementPreparationValidationFixture.RunAsync(async (state, token) =>
     {
         var source = state.Nodes[R.SourceIndex];
-        var issued = await IssueThenRevokeAsync(source, state.Preparation.Control.Lifetime, token);
+        var sources = state.Nodes.Take(R.Voters).ToArray();
+        var issued = await IssueThenRevokeAsync(sources, state.Preparation.Control.Lifetime, token);
+        var expectedBeginPosition = source.Journal.Log.State.LastIndex + R.One;
+        foreach (var owner in sources)
+        {
+            await Assert.That(owner.Journal.Log.State.LastIndex + R.One).IsEqualTo(expectedBeginPosition);
+        }
         var statuses = ResourceRetirementPreparationValidationSeed.ReadStatuses(state.Nodes, state.Preparation.Control, token);
         await ResourceRetirementAttemptAdmissionFlow.ExecuteAsync(state with
         {
@@ -26,13 +32,15 @@ internal static class CompositionPrefixPreparePrivacy
         var current = source.Database.ReadResourceRetirementState(D.Root, state.Preparation.Control.Request,
             ResourceRetirementPreparationValidationFixture.Work(source, token));
         await Assert.That(current.Stage).IsEqualTo(ResourceRetirementStage.Retiring);
+        await Assert.That(current.Control.BeginReceipt.AppliedPosition).IsEqualTo(expectedBeginPosition);
         await Assert.That(current.Control.Lifetime).IsEqualTo(state.Preparation.Control.Lifetime);
         await RefusalAndReplayAsync(source, issued.Original, issued.Bytes, token);
     });
 
     private static async Task<(ReplicatedOperation Original, byte[] Bytes)> IssueThenRevokeAsync(
-        ControlledPartitionMovementNode source, ResourceLifetimeV1 documents, CancellationToken token)
+        ControlledPartitionMovementNode[] sources, ResourceLifetimeV1 documents, CancellationToken token)
     {
+        var source = sources[R.SourceIndex];
         var partition = ControlledPartitionMovementCorpus.Partition;
         var expectedLifetimes = new HashSet<ResourceLifetimeV1> { documents };
         foreach (var (name, kind) in new[] { (D.Graph, ResourceKind.Graph), (D.Queue, ResourceKind.WorkQueue) })
@@ -41,17 +49,27 @@ internal static class CompositionPrefixPreparePrivacy
             var operation = source.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), D.Root,
                 source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigureResourceRequest(
                     partition.TenantId, partition.DatabaseId, definition)));
-            expectedLifetimes.Add(ResourceLifetimeIdentity.Create(operation, partition.TenantId, partition.DatabaseId, definition));
-            await CompositionPrefixPrepareAssertions.EqualAsync(definition, source.Journal.Submit(operation, token).Get<ResourceDefinition>());
+            var lifetime = ResourceLifetimeIdentity.Create(operation, partition.TenantId, partition.DatabaseId, definition);
+            expectedLifetimes.Add(lifetime);
+            await CompositionPrefixPreparePrivacySeed.SubmitAsync(sources, operation, definition, token);
+            foreach (var owner in sources)
+            {
+                await CompositionPrefixPrepareAssertions.EqualAsync(lifetime, owner.Store.Read(view => ResourceLifetimeCatalog.Read(
+                    view, partition.TenantId, partition.DatabaseId, definition.Name, definition)));
+            }
         }
         var actor = Principal(partition, documents.ResourceName, allowed: true);
-        await ConfigureAsync(source, actor, token);
+        await ConfigureAsync(sources, actor, token);
         var vertex = new EntityRef(partition, documents.ResourceName, ControlledPartitionMovementCorpus.DocumentId);
         var payload = JsonSerializer.Serialize(new QueueGraphLink(vertex, vertex, D.Label), JsonDefaults.Options);
         var seed = new CommandRequest(Guid.NewGuid(), partition, [new EnqueueMessage(D.Queue, D.Message, payload)]);
         var enqueue = source.Database.CreateNativeOperation(OperationKind.Batch, seed.CommandId, D.Root,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(seed));
-        await Assert.That(source.Journal.Submit(enqueue, token).Error).IsNull();
+        var expectedReceipt = new CommitReceipt(seed.CommandId,
+            new(source.PhysicalOwner.Incarnation, partition.AtomicPartitionId,
+                source.Journal.Log.State.LastIndex + R.One, source.PhysicalOwner.PlacementEpoch),
+            [new(D.Enqueue, D.Queue, D.Message, D.FirstRevision)], DurabilityProfile.ProcessDurable);
+        await CompositionPrefixPreparePrivacySeed.SubmitAsync(sources, enqueue, expectedReceipt, token);
         var request = new CommandRequest(Guid.NewGuid(), partition,
             [CompositionPrefixPrepareCommands.Forward(typed: false)]);
         var original = source.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, actor.Id,
@@ -61,7 +79,7 @@ internal static class CompositionPrefixPreparePrivacy
         var admission = ResourceEffectAdmissionValidation.Read(original, source.Database.Limits);
         await Assert.That(admission.Error).IsNull();
         await Assert.That(expectedLifetimes.SetEquals(admission.Bindings)).IsTrue();
-        await ConfigureAsync(source, Principal(partition, documents.ResourceName, allowed: false), token);
+        await ConfigureAsync(sources, Principal(partition, documents.ResourceName, allowed: false), token);
         await Assert.That(NativeSerialization.Serialize(original).SequenceEqual(bytes)).IsTrue();
         return (original, bytes);
     }
@@ -83,13 +101,18 @@ internal static class CompositionPrefixPreparePrivacy
         };
     }
 
-    private static async Task ConfigureAsync(ControlledPartitionMovementNode source, PrincipalRecord actor, CancellationToken token)
+    private static async Task ConfigureAsync(ControlledPartitionMovementNode[] sources,
+        PrincipalRecord actor, CancellationToken token)
     {
+        var source = sources[R.SourceIndex];
         var original = source.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(actor)));
-        await CompositionPrefixPrepareAssertions.EqualAsync(actor, source.Journal.Submit(original, token).Get<PrincipalRecord>());
-        await CompositionPrefixPrepareAssertions.EqualAsync(actor,
-            source.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(actor.Id))));
+        await CompositionPrefixPreparePrivacySeed.SubmitAsync(sources, original, actor, token);
+        foreach (var owner in sources)
+        {
+            await CompositionPrefixPrepareAssertions.EqualAsync(actor,
+                owner.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(actor.Id))));
+        }
     }
 
     private static async Task RefusalAndReplayAsync(ControlledPartitionMovementNode source, ReplicatedOperation original,

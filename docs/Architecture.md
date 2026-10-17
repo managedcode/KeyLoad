@@ -296,21 +296,24 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | scripts/Features/BenchmarkComparisons | session-plan.mjs, session-github-collect.mjs, session-aggregate-cli.mjs | BenchmarkComparisons; ADR-040/BC028 authenticated-metadata and same-ZIP proof tooling, implementation pending. |
 | docs | design/, implementation/, Features/, ADR/ | Product specification, evidence and canonical slice/decision records. |
 
-[ADR-049](ADR/ADR-049-genuine-neo4j-harness.md) accepts genuine harness regressions
-inside the existing comparison Aspire lifecycle and confirmed Neo4j cleanup
-authority. Its exact acknowledgement/parser contract review, implementation and
-GitHub qualification are pending; the accepted schema3/nine-engine graph remains.
+[ADR-049](ADR/ADR-049-genuine-neo4j-harness.md) retains genuine Neo4j protocol,
+acknowledgement and ownership regressions inside the existing Aspire lifecycle.
+The current setup-failure regression calls `BenchmarkSession.LoadAsync` and the
+six later native session operations, requiring truthful failed prerequisites
+and preserving the owned fixture. It also checks the actual native parser and
+sanitized error code. Exact-source Linux qualification remains a separate gate;
+the former ComparisonRunner/schema3 route is retired by ADR-142.
 
 ```mermaid
 classDiagram
     class ComparisonTests
     class Neo4jHarnessRegression
-    class ComparisonRunner
+    class BenchmarkSession
     class Neo4jTarget
     class Neo4jQueryResponse
     ComparisonTests --> Neo4jHarnessRegression : existing Aspire endpoint
-    Neo4jHarnessRegression --> ComparisonRunner : genuine public flow
-    ComparisonRunner --> Neo4jTarget : target contract
+    Neo4jHarnessRegression --> BenchmarkSession : real load and failed prerequisites
+    BenchmarkSession --> Neo4jTarget : native target contract
     Neo4jTarget --> Neo4jQueryResponse : parsed acknowledgement
     Neo4jHarnessRegression --> Neo4jQueryResponse : real protocol input checks
 ```
@@ -620,88 +623,41 @@ flowchart LR
 
 ## Isolated Linux comparison execution
 
-[ADR-056](ADR/ADR-056-isolated-linux-comparison-cells.md) and the canonical
-[BenchmarkComparisons](Features/BenchmarkComparisons.md) contract add one native
-engine/node-count/scenario per independent GitHub Linux runner. The closed plan,
-common corpus/options, strict worker envelope and complete aggregate are owned
-by the same slice across library, host, AppHost, scripts, tests and site.
-Production starts RF3; explicit benchmark startup alone enables fixed RF1/RF2.
-The first intensive cohort has270 planned cells; this is a plan count, not evidence
-that any measurement passed. TimeSeries keeps a distinct workload and needs the
-same isolation before it joins publication.
+[ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) and the canonical
+[shared session contract](Features/BenchmarkComparisons/SessionExecution.md)
+replace per-scenario workers with exactly two measurement jobs per database:
+one native node and three native nodes. The current eleven-database inventory
+has 22 measurement workers. Each worker owns one live Aspire topology and runs
+separate real native TUnit cases against it. Production retains its RF3 contract.
+
+The initial million-record load is measured. The current seven-case source
+includes indexing, sequential and deterministic random reads, search, concurrent
+create/delete/update/read/search streams of 100,000 operations each, and final
+record verification. There is no warmup, per-case reset, reseeding or restart.
+One preparation job builds the common source-bound runner and images; workers
+import those artifacts. Original per-case outcomes, native TRX, runtime/image
+identities and resource observations feed one authenticated complete-cohort
+aggregation. Failed or incomplete cohorts cannot refresh published metrics.
 
 ```mermaid
 flowchart LR
-    Contract[Canonical isolated contract] --> Selection[ComparisonWorkerSelection]
-    Selection --> Aspire[Selected native resources only]
-    Aspire --> Target[One native adapter]
-    Target --> Runner[One selected scenario and common oracle]
-    Runner --> Envelope[Current raw worker schema5]
-    Envelope --> Aggregate[Complete authenticated cohort]
-    Aggregate --> Site[Independent site generation]
+    Plan[Canonical session inventory] --> Prepare[Common compiled runner and images]
+    Prepare --> Worker[One database and native node count per job]
+    Worker --> Aspire[One owned live Aspire topology]
+    Aspire --> Tests[Separate native TUnit workload cases]
+    Tests --> Originals[Original reports, TRX and runtime evidence]
+    Originals --> Aggregate[Complete authenticated cohort]
+    Aggregate --> Site[Qualified website metrics]
 ```
 
-```mermaid
-classDiagram
-    ComparisonWorkerSelection --> ComparisonOptions
-    ComparisonRunner --> BenchmarkDataset
-    ComparisonRunner --> IComparisonTarget
-    ComparisonRunner --> ComparisonFailureDiagnostics
-    ComparisonFailureDiagnostics --> IComparisonFailureDiagnostics
-    KeyLoadTarget ..|> IComparisonFailureDiagnostics
-    KeyLoadTarget --> KeyLoadOutboxDiagnosticLine
-    IComparisonTarget --> IComparisonSession
-    IsolatedComparisonReport --> IsolatedComparisonWorker
-    IsolatedComparisonReport --> ComparisonReport
-```
-
-[ADR-068 stageE](ADR/ADR-068-native-benchmark-gate-repair.md) adds a private
-failure-only diagnostic boundary after case/session settlement and outside the
-measurement clock. The KeyLoad adapter performs one bounded authorized outbox
-status read; only numeric context is logged and the original case is preserved.
-It changes no limits, retention, operations or public transport, and remains
-runtime-unqualified until authentic failed native originals join.
-
-Source stages remain unqualified until exact-SHA real native correctness/fault,
-intensive cohort, aggregate, site and publication gates pass.
-
-The additive TimeSeries selection and physical-resource model below preserves
-the separate270 route and productionRF3. These classes are source-present;
-native dispatch, membership/ACK/copy verification and the6/30 evidence join
-remain open under ADR059.
-
-```mermaid
-classDiagram
-    TimeSeriesIntensiveSelection --> IsolatedTimeSeriesResourceContext
-    TimeSeriesIntensiveFamilyContract --> TimeSeriesIntensiveFamilyPlan
-    TimeSeriesIntensiveFamilyPlan --> TimeSeriesIntensiveSelection
-    TimeSeriesIntensiveRunResult --> TimeSeriesIntensiveRunJson
-    TimeSeriesIntensiveRunJson --> TimeSeriesIntensiveRunJsonValidation
-    TimeSeriesIntensiveRunJson --> Utf8JsonWriter : borrows caller writer
-    IsolatedTimeSeriesResourceContext --> IsolatedTimeSeriesKeyLoadResources
-    IsolatedTimeSeriesResourceContext --> IsolatedTimeSeriesTimescaleResources
-    IsolatedTimeSeriesKeyLoadResources --> ClusterResources
-    IsolatedTimeSeriesTimescaleResources --> IsolatedPostgresBootstrap
-```
-
-[ADR-059](ADR/ADR-059-isolated-intensive-timeseries.md) specifies a separate
-30-cell intensive TimeSeries family using the same canonical BenchmarkComparisons
-slice. KeyLoad and TimescaleDB each have native1/2/3-node preflights and five
-operation scenarios, with common4096 samples, actual persisted sequence order,
-bounded output lifetime and separate latency/validation-inclusive wall throughput.
-Exact target/SQL/provider packets and native pinned-image feasibility precede
-their staged implementation. The historical TimeSeries and270-cell protocols
-remain independent; source, measured results and publication gates stay explicit.
-
-```mermaid
-classDiagram
-    TimeSeriesIntensiveSelection --> TimeSeriesIntensiveWorkload
-    TimeSeriesIntensiveRunner --> ITimeSeriesIntensiveTarget
-    TimeSeriesIntensiveRunner --> TimeSeriesIntensiveOracle
-    ITimeSeriesIntensiveTarget <|.. KeyLoadTimeSeriesIntensiveTarget
-    ITimeSeriesIntensiveTarget <|.. TimescaleTimeSeriesIntensiveTarget
-    TimeSeriesIntensiveRunner --> TimeSeriesIntensiveReport
-```
+Superseded per-cell dispatch, repetition runners and report readers are removed
+without a compatibility reader. Historical ADRs and immutable result artifacts
+retain their original identities; they do not qualify this implementation.
+Native adapters, deterministic corpora, correctness oracles, bounded cancellation
+and joined ownership checks remain reusable prerequisites. The current seven
+document cases do not qualify vector, graph, queue, event or time-series family
+performance. Complete family integration and exact-source Linux build, native
+correctness, recovery, RF3, resource and publication gates remain open.
 
 ## Atomic WAL binary serialization
 
@@ -913,30 +869,16 @@ flowchart LR
 ```
 
 Numeric quota/configuration logs retain actual pool evidence; they cannot alone
-prove successful control execution under pressure. Native Linux1/2/3 and genuine
+prove successful control execution under pressure. Native Linux one-node/three-node and genuine
 Docker/Aspire RF3/fault gates remain required before performance/publication.
 
 
-TimeSeries intensive runner remains a distinct internal BenchmarkComparisons
-surface under ADR059 TASK-ISO-TS007B. Its16 bounded loops release each decoded
-response after synchronous verification and retain only50000 compact value
-records; wall throughput includes validation. Real target adapters own transport
-drain, the host owns namespace/resources and the original cell lifetime. The
-source stage does not establish the separate6/30 native family or site evidence.
-
-
-```mermaid
-classDiagram
-    class ITimeSeriesIntensiveTarget
-    class TimeSeriesIntensiveRunner
-    class TimeSeriesIntensivePhaseExecutor
-    class TimeSeriesIntensiveAttemptLedger
-    class TimeSeriesIntensiveRunResult
-    TimeSeriesIntensiveRunner --> ITimeSeriesIntensiveTarget : borrows
-    TimeSeriesIntensiveRunner --> TimeSeriesIntensivePhaseExecutor : five repetitions
-    TimeSeriesIntensivePhaseExecutor --> TimeSeriesIntensiveAttemptLedger : sixteen loops
-    TimeSeriesIntensiveAttemptLedger --> TimeSeriesIntensiveRunResult : compact attempts
-```
+Native time-series target adapters, deterministic phase/attempt primitives,
+clock contracts and correctness oracles remain under BenchmarkComparisons.
+The superseded standalone Run/report orchestration and its warmup/five-repetition
+accounting are retired by ADR-142. Meaningful ACK, ordering and failure-fact
+assertions remain required. Time-series integration into the shared session and
+its actual native Linux performance evidence remain pending.
 
 ## Database term-read hot path
 
