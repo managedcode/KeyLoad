@@ -155,7 +155,7 @@ REQ-PEER-DISCOVERY-LIFETIME-001: The original recovery discovery fixture owns it
 
 AC-PEER-DISCOVERY-LIFETIME-001: Preserve every original discovery security/ownership/replay operation and declaration. The lexical fixture RunAsync captures operation errors before implicit disposal and records acquisition/disposal errors afterward; no exception is lost. Direct materializer/journal/TestCluster disposal stays in the same original ordered shutdown. Required canonical recovery execution and native analyzer recognition remain OPEN until the source is compiled/executed; source review does not qualify process/power-loss or Linux gates.
 
-Source map: RecoveryTests/Features/ClusterReplication/Fixtures/PeerDiscoveryFixture.cs, PeerDiscoveryNativeCluster.cs, PeerDiscoveryNativeNode.cs. Original actual cohort, signed caller authentication, real silo registration and original startup/shutdown limits remain unchanged.
+Source map: RecoveryTests/ClusterReplication/Fixtures/Discovery/PeerDiscoveryFixture.cs, PeerDiscoveryNativeCluster.cs, PeerDiscoveryNativeNode.cs. Original actual cohort, signed caller authentication, real silo registration and original startup/shutdown limits remain unchanged.
 
 
 ## TASK-CQRS-COHORT-LIFETIME-001 — native detached-owner join (2026-10-12)

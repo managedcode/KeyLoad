@@ -174,7 +174,7 @@ join-specific setting, or add a server test hook.
 The root integration owner owns shared changes to
 `tests/KeyLoad.IntegrationTests/ClusterFixture.cs`,
 `Features/ClusterReplication/Contracts/ClusterFixtureProtocol.cs` and
-`Features/ClusterReplication/Helpers/ClusterFixtureComposition.cs` under that
+`ClusterReplication/Scenarios/Resources/ClusterFixtureComposition.cs` under that
 project. A cohesive `ClusterFixtureDatabaseLimits` helper in the same Helpers
 folder may own the complete typed mapping if needed for the existing type
 limits. Luna owns a guarded private implementation packet and separate
@@ -239,7 +239,7 @@ owning normal/scalar cohort and recovery, then retains original Linux/RF3 and
 schema evidence. No failed assertion, safety bound, check or criterion is waived.
 
 The root review additionally permits one cohesive
-`UnitTests/Features/QueryExecution/Assertions/SqlInnerJoinPageAssertions.cs`
+`UnitTests/QueryExecution/Assertions/Relational/SqlInnerJoinPageAssertions.cs`
 extraction of the existing complete pair-row oracle. Preserve every source,
 revision, JSON and redaction assertion exactly. Keep vocabulary declarations on
 separate readable lines; combining declarations cannot serve as a code-size

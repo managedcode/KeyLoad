@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
-using KeyLoad.Comparisons;
 using KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;

@@ -35,4 +35,4 @@ runs:
       run: dotnet restore KeyLoad.slnx
     - name: Build functional RF3 tests
       shell: bash
-      run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release
+      run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release -warnaserror

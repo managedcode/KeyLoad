@@ -105,7 +105,7 @@ jobs:
         run: |
           node scripts/Features/RepositoryGovernance/verify.mjs
           dotnet restore KeyLoad.slnx
-          dotnet build KeyLoad.slnx --no-restore --configuration Release -p:Version="$RELEASE_VERSION" -p:PackageVersion="$RELEASE_PACKAGE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION"
+          dotnet build KeyLoad.slnx --no-restore --configuration Release -p:Version="$RELEASE_VERSION" -p:PackageVersion="$RELEASE_PACKAGE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION" -warnaserror
           dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Build NuGet packages and Linux database distribution
         if: env.RELEASE_ASSETS_EXISTS == '0'

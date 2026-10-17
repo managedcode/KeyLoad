@@ -41,8 +41,8 @@ jobs:
         run: dotnet restore KeyLoad.slnx
       - name: Build analyzer tests
         run: |
-          dotnet build build/KeyLoad.AppHost --no-restore --configuration Release
-          dotnet build tests/KeyLoad.Analyzers.Tests --no-restore --configuration Release
+          dotnet build build/KeyLoad.AppHost --no-restore --configuration Release -warnaserror
+          dotnet build tests/KeyLoad.Analyzers.Tests --no-restore --configuration Release -warnaserror
       - name: Prepare source-bound analyzer coverage
         shell: pwsh
         run: |
@@ -123,7 +123,7 @@ jobs:
         run: dotnet restore KeyLoad.slnx
       - name: Build KeyLoad
         id: build
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
       - name: Prepare native source and test-image identity receipts
         id: native-source-identity
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
@@ -155,7 +155,7 @@ jobs:
           if (verification.error || verification.status !== 0) throw verification.error ?? new Error('Native FTS package signature verification failed.');
           JS
       - name: Build current Debug analyzer for native formatting
-        run: dotnet build analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug
+        run: dotnet build analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug -warnaserror
       - name: Check code formatting
         run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Check repository rules
@@ -249,7 +249,7 @@ jobs:
         run: dotnet restore KeyLoad.slnx
       - name: Build the complete current solution
         id: build
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
       - name: Prepare original task source and test-image receipts
         id: source-identity
         shell: pwsh
@@ -327,7 +327,7 @@ jobs:
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
       - name: Build the complete native coverage cohort
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
       - name: Prepare original source and test-image receipts
         id: coverage-source
         shell: pwsh

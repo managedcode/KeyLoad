@@ -1,6 +1,6 @@
 # ADR-005: Canonical namespaces and ordered key codec
 
-Status: Accepted; KL-007 v1 codec and captured-envelope criteria implemented and Linux-qualified. Resource-family and full StorageRecovery qualification remain open. Related current source: `src/KeyLoad.Abstractions/Storage/KeyCodec.cs` and `src/KeyLoad.Core/KeySpace.cs`; product source [sections 4, 7–9, 18, and 36](../design/architecture-v0.3.uk.md).
+Status: Accepted; KL-007 v1 codec and captured-envelope criteria implemented and Linux-qualified. Resource-family and full StorageRecovery qualification remain open. Related current source: `src/KeyLoad.Abstractions/Storage/Serialization/KeyCodec.cs` and `src/KeyLoad.Core/KeySpace.cs`; product source [sections 4, 7–9, 18, and 36](../design/architecture-v0.3.uk.md).
 
 ## Context and decision
 

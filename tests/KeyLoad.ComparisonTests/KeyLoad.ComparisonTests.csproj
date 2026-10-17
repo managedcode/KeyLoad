@@ -6,11 +6,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../KeyLoad.UnitTests/ResourceExecution/Helpers/UnitExecutionOptions.cs" Link="ResourceExecution/Helpers/UnitExecutionOptions.cs" />
-    <Compile Include="../KeyLoad.UnitTests/ClientApi/Helpers/UnitClientOptions.cs" Link="ClientApi/Helpers/UnitClientOptions.cs" />
-    <Compile Include="../KeyLoad.UnitTests/ClusterReplication/Helpers/ReplicaExecutionTestOptions.cs" Link="ClusterReplication/Helpers/ReplicaExecutionTestOptions.cs" />
-    <Compile Include="../KeyLoad.UnitTests/InternalSerialization/Helpers/ReplicaNativeFixtureEncoder.cs" Link="InternalSerialization/Helpers/ReplicaNativeFixtureEncoder.cs" />
-    <Compile Include="../KeyLoad.UnitTests/TestInfrastructure/Helpers/TestElapsedClock.cs" Link="TestInfrastructure/Helpers/TestElapsedClock.cs" />
+    <Compile Include="../KeyLoad.UnitTests/ResourceExecution/Configuration/UnitExecutionOptions.cs" Link="ResourceExecution/Configuration/UnitExecutionOptions.cs" />
+    <Compile Include="../KeyLoad.UnitTests/ClientApi/Configuration/Sdk/UnitClientOptions.cs" Link="ClientApi/Configuration/Sdk/UnitClientOptions.cs" />
+    <Compile Include="../KeyLoad.UnitTests/ClusterReplication/Configuration/Submission/ReplicaExecutionTestOptions.cs" Link="ClusterReplication/Configuration/Submission/ReplicaExecutionTestOptions.cs" />
+    <Compile Include="../KeyLoad.UnitTests/InternalSerialization/Serialization/ReplicaNativeFixtureEncoder.cs" Link="InternalSerialization/Serialization/ReplicaNativeFixtureEncoder.cs" />
+    <Compile Include="../KeyLoad.UnitTests/TestInfrastructure/Fixtures/TestElapsedClock.cs" Link="TestInfrastructure/Fixtures/TestElapsedClock.cs" />
     <ProjectReference Include="../../benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Benchmarks/KeyLoad.Benchmarks.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="../../benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj" />

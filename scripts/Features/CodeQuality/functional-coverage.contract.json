@@ -211,7 +211,7 @@
     ],
     "testNamePrefix": "PartitionQuery",
     "sourceFiles": [
-      "tests/KeyLoad.UnitTests/QueryExecution/Assertions/PartitionQueryReferenceSizing.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/Assertions/Distribution/PartitionQueryReferenceSizing.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryAuthorizationTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryCancellationTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryContractTests.cs",
@@ -225,12 +225,12 @@
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Assertions/PartitionQueryMcpNativeAssertions.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Cases/PartitionQueryMcpContractTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Contracts/PartitionQueryMcpProtocol.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Helpers/PartitionQueryMcpTestData.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/Helpers/PartitionQueryCancellationFailures.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/Helpers/PartitionQueryCancellationObserver.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/Helpers/PartitionQueryCancellationRun.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/Helpers/PartitionQueryPublicTestSupport.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/Helpers/PartitionQueryTestSupport.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Fixtures/Distribution/PartitionQueryMcpTestData.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/Scenarios/Distribution/PartitionQueryCancellationFailures.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/Observations/Distribution/PartitionQueryCancellationObserver.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/Scenarios/Distribution/PartitionQueryCancellationRun.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/Fixtures/Distribution/PartitionQueryPublicTestSupport.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/Fixtures/Distribution/PartitionQueryTestSupport.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Models/PartitionQueryPublicSeed.cs"
     ],
     "testClasses": [

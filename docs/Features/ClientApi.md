@@ -287,7 +287,7 @@ schemas, excess bounds and failed
 writes fail; no credentials, caller data or private inventory is recorded.
 
 ADR-039 freezes the test-only helper
-`tests/KeyLoad.IntegrationTests/ClientApi/Helpers/NativeMcpSchemaEvidence.cs`
+`tests/KeyLoad.IntegrationTests/ClientApi/Scenarios/Mcp/NativeMcpSchemaEvidence.cs`
 and the three existing case call sites. Use the existing repository-root helper
 and uploaded `artifacts/qualification/mcp-schema-evidence/` ownership. Root owns
 contract, review, native RF3 evidence and delivery; a Luna worker prepares the
@@ -421,7 +421,7 @@ Capture the source `backup.json` SHA-256 before restore and require the same
 digest after restore; the complete native verifier must again validate every
 manifest file and the original position. This retains the unchanged-archive
 requirement without changing identity equality, serialization or restore behavior.
-`Restore/Archives/Serialization/AdminBackupArchiveIntegrity` owns the bounded manifest
+`Restore/Serialization/Archives/AdminBackupArchiveIntegrity` owns the bounded manifest
 digest; the existing verifier owns the full native identity/file checks.
 Hash the fixture-owned manifest through a streaming file reader, with cancellation
 and joined disposal; never emit identity payloads, signing keys or archive data.
@@ -1271,7 +1271,7 @@ REQ-CRS-OPERATION-EVIDENCE-001: An actual failed ConnectionNativeScenario body o
 
 AC-CRS-OPERATION-EVIDENCE-001: Extend the existing OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy declaration with a genuinely deployed signed cancelled command, no persisted document effect, exact initiating exception identity, joined native operation evidence, and a fresh signed literal write/read/same-command replay/close. The successful continuation creates no failure archive. Original startup evidence stays byte-shape compatible; operation evidence has the distinct NativeTestClusterOperationFailure kind and -operation path, unchanged bounded sanitizer, file ownership, CreateNew and output/error/close ledger. Caller/deadline facts are not fabricated for an operation archive.
 
-Source map: ClusterRouting/Fixtures/ConnectionNativeScenario.cs, RequestCqrsFixture.cs; Diagnostics/NativeClusterStartupEvidence.cs and NativeClusterStartupProtocol.cs; Cases/NativeClusterStartupEvidenceTests.cs. Canonical Aspire-owned ordinary Unit entry, native50 and SIMD remain mandatory. Original nine Linux cancellation causes remain unproven; source delivery is not runtime qualification or a causal repair.
+Source map: ClusterRouting/Fixtures/Connections/ConnectionNativeScenario.cs, RequestCqrsFixture.cs; Diagnostics/NativeClusterStartupEvidence.cs and NativeClusterStartupProtocol.cs; Cases/NativeClusterStartupEvidenceTests.cs. Canonical Aspire-owned ordinary Unit entry, native50 and SIMD remain mandatory. Original nine Linux cancellation causes remain unproven; source delivery is not runtime qualification or a causal repair.
 
 
 ### TASK-CLIENT-CONNECTION-CLOSE-FAILURE-RETENTION-001
@@ -1328,7 +1328,7 @@ The private integration successor retains all actual concurrent task faults/canc
 
 REQ/AC-CLIENT-005/006 and REQ/AC-AUTH-ASPNET-001/003 retain the original McpDiscoveryTests.AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall declaration, UID, keyed Aspire fixture, deadline, pre-cancelled official capabilities read and following capabilities assertion. Seed a uniquely owned real persisted document through the existing SDK scenario, independently require its complete literal revision1 DocumentResult and capture every OutboxStatus field on Node3 before cancellation. After the actual original OperationCanceledException, the complete image must remain unchanged. The genuine SDK and SAME original official MCP client must then each return the independently literal full document, with complete image equality after each read. No reduced cut/counter oracle, fake task, dispatcher, provider, identity/role authority, new limits, transport schema or format change.
 
-This covers caller cancellation before official invocation only. It does not establish server callback cancellation, handler lookup count, disconnect settlement, cold durability or a fresh runtime/Linux PASS. Those criteria keep their original separate operation mappings. Source ownership is the unchanged existing ClientApi case and feature-local Authorization/Assertions/CanceledCredentialAuthorityAssertions, with the child contract docs/Features/Authorization/StandardPipelineCancellation.md. Original HTTP/client/token owners remain lexical and joined; native50/default SIMD and fresh-image discovery/compiler/runtime remain required.
+This covers caller cancellation before official invocation only. It does not establish server callback cancellation, handler lookup count, disconnect settlement, cold durability or a fresh runtime/Linux PASS. Those criteria keep their original separate operation mappings. Source ownership is the unchanged existing ClientApi case and feature-local Authorization/Assertions/Credentials/Verification/CanceledCredentialAuthorityAssertions, with the child contract docs/Features/Authorization/StandardPipelineCancellation.md. Original HTTP/client/token owners remain lexical and joined; native50/default SIMD and fresh-image discovery/compiler/runtime remain required.
 
 AC-MCP-001/006 independent public catalog continuation: the frozen test inventory contains exactly 92 public operations, including independently authored remote Graph upsert/delete/deliver/incoming routes and exclusive operation kinds. McpRemoteGraphCatalogExpectations checks full literal request/result property inventories and read-only/idempotent/destructive hints plus retry descriptions for those four native SDK/official MCP flows. The existing AcMcp001EveryFrozenOperationHasItsExactRouteAndOneCapability and AcBlob006TenExactToolsRetainTheirContractsInThePublicCatalog remain the mapped complete inventory/blob controls. Internal parent/leaf operations remain excluded and initial gateway discovery stays bounded to three tools. No production catalog or authority changes; repaired oracle source does not establish passing runtime qualification.
 

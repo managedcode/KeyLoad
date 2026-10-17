@@ -34,7 +34,7 @@ flowchart LR
 ## Ownership and evidence boundary
 
 Only the existing ClientApi case and the new feature-local
-Authorization/Assertions/CanceledCredentialAuthorityAssertions own this source
+Authorization/Assertions/Credentials/Verification/CanceledCredentialAuthorityAssertions own this source
 proposal. Existing capability assertions remain. The helper uses real SDK and
 official MCP calls and compares original complete typed images through the
 existing canonical serializer assertions; it does not remove cuts, derive

@@ -94,7 +94,7 @@ flowchart LR
    root integrates code, fixes actionable findings and owns shared docs/config,
    Git and gates. No worker may run local tests or alter diagnostics/limits.
    Root alone owns the semantic documentation of the existing shared
-   `src/KeyLoad.Abstractions/Storage/StorageContracts.cs` provider fields/read gate;
+   `src/KeyLoad.Abstractions/Storage/Contracts/StorageContracts.cs` provider fields/read gate;
    the worker documents the accepted store preconditions in its already owned
    DurableReplicaLog constructor parameter without new signatures or interfaces.
 5. Root runs enabled full development build, formatter/governance/static checks,

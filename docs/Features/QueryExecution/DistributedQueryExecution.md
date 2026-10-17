@@ -377,7 +377,7 @@ then return the complete persisted row after explicit consent; correcting fixtur
 input does not weaken production validation or change its error contract.
 
 Ownership: existing ClientApi/Cases/PartitionQueryMcpContractTests.cs and
-ClientApi/Helpers/PartitionQueryMcpTestData.cs in the QueryExecution test slice;
+ClientApi/Fixtures/Distribution/PartitionQueryMcpTestData.cs in the QueryExecution test slice;
 production contracts, aliases, field IDs and execution paths are unchanged.
 ADR: the existing ADR-100 public-query contract is sufficient; no new boundary,
 data format or transport is introduced. First complete source review and the

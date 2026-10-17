@@ -162,7 +162,7 @@ contracts/config/docs/Git. No suitable cheaper route is established for the
 shared lexical/outcome boundary; workers must escalate contract drift.
 
 TASK-SQLC-R13 / AC006/007/008 source planning confirms that
-[IAtomicStore](../../src/KeyLoad.Abstractions/Storage/StorageContracts.cs) exposes
+[IAtomicStore](../../src/KeyLoad.Abstractions/Storage/Contracts/StorageContracts.cs) exposes
 callback-scoped reads/commits and
 [the gateway](../../src/KeyLoad.Server/ClientApi/Execution/CanonicalOperationGateway.cs)
 dispatches one signed operation through an HTTP principal. A native session must

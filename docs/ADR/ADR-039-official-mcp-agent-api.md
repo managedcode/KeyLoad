@@ -211,7 +211,7 @@ unfinished blob tool or resource may be advertised. The current canonical
 inventory contains 68 operation names, including the ten BlobStorage operations
 frozen by ADR-038 and the read-only [AdminDashboard](ADR-051-admin-dashboard.md)
 operations. The complete independent schema/effect oracle is
-[McpCatalogExpectations](../../tests/KeyLoad.IntegrationTests/ClientApi/Helpers/McpCatalogExpectations.cs).
+[McpCatalogExpectations](../../tests/KeyLoad.IntegrationTests/ClientApi/Assertions/Mcp/McpCatalogExpectations.cs).
 All operations are reached through authorized on-demand gateway discovery and
 invocation; the initial public list contains three gateway tools. A catalog count
 cannot qualify operation semantics or replace runtime and delivery gates.
@@ -303,7 +303,7 @@ cluster does not qualify the EventStreams capability.
 
 TASK-MCP-NATIVE-SCHEMA-EVIDENCE supports existing REQ/AC-CLIENT-006 and AC-MCP-001.
 Root freezes the bounded diagnostics contract in ClientApi. A Luna worker owns
-only new `IntegrationTests/Features/ClientApi/Helpers/NativeMcpSchemaEvidence.cs`
+only new `IntegrationTests/ClientApi/Scenarios/Mcp/NativeMcpSchemaEvidence.cs`
 and additive capture calls in existing `McpDiscoveryTests`,
 `GraphIncomingMcpSchemaTests` and `PartitionQueryMcpSchemaTests`. Root reviews,
 joins, builds and executes those unchanged assertion flows through actual Aspire

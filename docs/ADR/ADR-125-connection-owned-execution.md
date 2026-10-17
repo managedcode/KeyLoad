@@ -479,7 +479,7 @@ REQ-CRS-OPERATION-EVIDENCE-001: An actual failed ConnectionNativeScenario body o
 
 AC-CRS-OPERATION-EVIDENCE-001: Extend the existing OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy declaration with a genuinely deployed signed cancelled command, no persisted document effect, exact initiating exception identity, joined native operation evidence, and a fresh signed literal write/read/same-command replay/close. The successful continuation creates no failure archive. Original startup evidence stays byte-shape compatible; operation evidence has the distinct NativeTestClusterOperationFailure kind and -operation path, unchanged bounded sanitizer, file ownership, CreateNew and output/error/close ledger. Caller/deadline facts are not fabricated for an operation archive.
 
-Source map: ClusterRouting/Fixtures/ConnectionNativeScenario.cs, RequestCqrsFixture.cs; Diagnostics/NativeClusterStartupEvidence.cs and NativeClusterStartupProtocol.cs; Cases/NativeClusterStartupEvidenceTests.cs. Canonical Aspire-owned ordinary Unit entry, native50 and SIMD remain mandatory. Original nine Linux cancellation causes remain unproven; source delivery is not runtime qualification or a causal repair.
+Source map: ClusterRouting/Fixtures/Connections/ConnectionNativeScenario.cs, RequestCqrsFixture.cs; Diagnostics/NativeClusterStartupEvidence.cs and NativeClusterStartupProtocol.cs; Cases/NativeClusterStartupEvidenceTests.cs. Canonical Aspire-owned ordinary Unit entry, native50 and SIMD remain mandatory. Original nine Linux cancellation causes remain unproven; source delivery is not runtime qualification or a causal repair.
 
 
 ### TASK-CLIENT-CONNECTION-CLOSE-FAILURE-RETENTION-001

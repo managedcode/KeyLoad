@@ -122,11 +122,11 @@ runs:
         dotnet --info > "$EVIDENCE_DIR/dotnet-info.txt"
         pwsh --version > "$EVIDENCE_DIR/powershell-version.txt"
         dotnet restore KeyLoad.slnx
-        dotnet build build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release
-        dotnet build tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-restore --configuration Release
+        dotnet build build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release -warnaserror
+        dotnet build tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-restore --configuration Release -warnaserror
         node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
         node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SessionCohortContractTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
-        dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release
+        dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release -warnaserror
         mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
         pwsh -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Prepare -Repository "$KEYLOAD_SITE_REPOSITORY" -Contract "$KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$EVIDENCE_DIR/analyzer-coverage"
@@ -141,7 +141,7 @@ runs:
       shell: bash
       run: |
         dotnet restore tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj
-        dotnet build tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --no-restore --configuration Release
+        dotnet build tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --no-restore --configuration Release -warnaserror
     - name: Check website test formatting and repository rules
       working-directory: website
       shell: bash

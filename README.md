@@ -214,7 +214,7 @@ dotnet restore KeyLoad.slnx
 ```
 
 ```bash
-dotnet build KeyLoad.slnx --no-restore --configuration Release
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
 ```
 
 **2. Build the server image**

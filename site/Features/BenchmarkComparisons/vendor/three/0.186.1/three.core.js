@@ -11996,7 +11996,7 @@ class Object3D extends EventDispatcher {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization.
+		 * in context of serialization/deserialization....
 		 *
 		 * @type {string}
 		 * @readonly
@@ -14541,7 +14541,7 @@ class Color {
 	 * Copies the given color into this color, and then converts this color from
 	 * `SRGBColorSpace` to `LinearSRGBColorSpace`.
 	 *
-	 * @param {Color} color - The color to copy/convert.
+	 * @param {Color} color - The color to copy/convert..
 	 * @return {Color} A reference to this color.
 	 */
 	copySRGBToLinear( color ) {
@@ -14558,7 +14558,7 @@ class Color {
 	 * Copies the given color into this color, and then converts this color from
 	 * `LinearSRGBColorSpace` to `SRGBColorSpace`.
 	 *
-	 * @param {Color} color - The color to copy/convert.
+	 * @param {Color} color - The color to copy/convert..
 	 * @return {Color} A reference to this color.
 	 */
 	copyLinearToSRGB( color ) {
@@ -21118,7 +21118,7 @@ class Material extends EventDispatcher {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization.
+		 * in context of serialization/deserialization....
 		 *
 		 * @type {string}
 		 * @readonly
@@ -31392,7 +31392,7 @@ class Curve {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization.
+		 * in context of serialization/deserialization....
 		 *
 		 * @type {string}
 		 * @readonly
@@ -46096,7 +46096,7 @@ class Light extends Object3D {
 	 * Constructs a new light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 * @param {number} [intensity=1] - The light's strength/intensity......
 	 */
 	constructor( color, intensity = 1 ) {
 
@@ -46174,7 +46174,7 @@ class HemisphereLight extends Light {
 	 *
 	 * @param {(number|Color|string)} [skyColor=0xffffff] - The light's sky color.
 	 * @param {(number|Color|string)} [groundColor=0xffffff] - The light's ground color.
-	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 * @param {number} [intensity=1] - The light's strength/intensity......
 	 */
 	constructor( skyColor, groundColor, intensity ) {
 
@@ -47270,7 +47270,7 @@ class SpotLight extends Light {
 	 * Constructs a new spot light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity measured in candela (cd).
+	 * @param {number} [intensity=1] - The light's strength/intensity..... measured in candela (cd).
 	 * @param {number} [distance=0] - Maximum range of the light. `0` means no limit.
 	 * @param {number} [angle=Math.PI/3] - Maximum angle of light dispersion from its direction whose upper bound is `Math.PI/2`.
 	 * @param {number} [penumbra=0] - Percent of the spotlight cone that is attenuated due to penumbra. Value range is `[0,1]`.
@@ -47479,7 +47479,7 @@ class PointLight extends Light {
 	 * Constructs a new point light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity measured in candela (cd).
+	 * @param {number} [intensity=1] - The light's strength/intensity..... measured in candela (cd).
 	 * @param {number} [distance=0] - Maximum range of the light. `0` means no limit.
 	 * @param {number} [decay=2] - The amount the light dims along the distance of the light.
 	 */
@@ -47887,7 +47887,7 @@ class DirectionalLight extends Light {
 	 * Constructs a new directional light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 * @param {number} [intensity=1] - The light's strength/intensity......
 	 */
 	constructor( color, intensity ) {
 
@@ -47980,7 +47980,7 @@ class AmbientLight extends Light {
 	 * Constructs a new ambient light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 * @param {number} [intensity=1] - The light's strength/intensity......
 	 */
 	constructor( color, intensity ) {
 
@@ -48032,7 +48032,7 @@ class RectAreaLight extends Light {
 	 * Constructs a new area light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 * @param {number} [intensity=1] - The light's strength/intensity......
 	 * @param {number} [width=10] - The width of the light.
 	 * @param {number} [height=10] - The height of the light.
 	 */
@@ -48476,7 +48476,7 @@ class LightProbe extends Light {
 	 * Constructs a new light probe.
 	 *
 	 * @param {SphericalHarmonics3} sh - The spherical harmonics which represents encoded lighting information.
-	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 * @param {number} [intensity=1] - The light's strength/intensity......
 	 */
 	constructor( sh = new SphericalHarmonics3(), intensity = 1 ) {
 
@@ -50676,7 +50676,7 @@ class StereoCamera {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization.
+		 * in context of serialization/deserialization....
 		 *
 		 * @type {string}
 		 * @readonly

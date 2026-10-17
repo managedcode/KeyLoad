@@ -1300,7 +1300,7 @@ TUnit scheduling and does not serialize unrelated tests globally.
 2. Modify `tests/KeyLoad.SiteTests/BenchmarkComparisons/Helpers/
    SiteHeavyChildAdmission.cs` only to add the bounded locked membership read
    over its original-token waiter nodes. No Node admission behavior changes.
-3. Modify `.../Helpers/SiteBrowserSessionAdmission.cs` only to expose that
+3. Modify `tests/KeyLoad.SiteTests/BenchmarkComparisons/Fixtures/WebsiteBrowser/SiteBrowserSessionAdmission.cs` only to expose that
    observation from its browser-only pool.
 4. Modify `.../Cases/SiteBrowserSessionAdmissionTests.cs` only to assert exact
    token presence before cancellation and exact absence after awaiting the

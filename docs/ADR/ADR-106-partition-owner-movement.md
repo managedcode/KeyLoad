@@ -237,7 +237,7 @@ existing test oracle: the unprefixed digest remains exact, and a pinned image
 requires null Tag. The prior retained-tag correction was wrong and original922
 RF3 rejected the valid model before startup.
 Root freezes this contract before the worker changes
-`tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/TwoRf3MembershipImageAssertions.cs`
+`tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/Membership/TwoRf3MembershipImageAssertions.cs`
 and new `Cases/TwoRf3MembershipImageModelTests.cs` in that same slice;
 root reviews and joins strict build/format and the unchanged actual six-container
 startup, signed membership, closed-client and teardown flow. Require exact
@@ -1342,7 +1342,7 @@ The original failure collector restores the saved row, joins and cold reopens
 the native owner before complete original outcome replay and healthy installation.
 
 Ordered implementation: feature contract; existing
-`tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ControlledPartitionMovementNoneControlFlow.cs`
+`tests/KeyLoad.UnitTests/ClusterRouting/Scenarios/PartitionMovement/Controls/ControlledPartitionMovementNoneControlFlow.cs`
 producer order and original-state assertions; full source-bound build/formatter;
 fresh Linux normal/scalar whole-flow and mandatory RF3 qualification. Root owns
 integration/compiler/Git; movement owner reviews native ordering. All production

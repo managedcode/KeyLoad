@@ -89,7 +89,7 @@ and healthy exact search assertions. No new synthetic argument-only test replace
 these actual operation flows.
 
 Root owns the one-index repair in
-`tests/KeyLoad.CrashHost/Search/Helpers/NativeTextCrashScenario.cs`,
+`tests/KeyLoad.CrashHost/Search/Execution/FullText/NativeTextCrashScenario.cs`,
 source review, current Release build and the Aspire recovery gate. ADR-078 freezes
 this helper protocol; product data/wire formats and dependencies do not change.
 Local native results remain development evidence. Complete exact-source Linux
@@ -126,7 +126,7 @@ REQ-FTS-AUDIT-001 / AC-FTS-AUDIT-001 and REQ/AC-FTS-005: extend the existing AcF
 
 Before and after replay and after all original nodes rejoin, SDK and official MCP search must equal independent complete ordered literal document/rank oracles: replaced English text, removed Ukrainian/original English postings, surviving vector ranking and deleted document absence. Canonical document revision remains2 and deleted document remains absent. Current redaction policy and original caller identity are retained. There is no cross-node cut equality claim; replay retains the historical token exactly. Original resource restart/diagnostics/primary and cleanup ownership, deadlines and closed coverage inventory are unchanged. No LocalImage selector expansion.
 
-Ownership: existing Search/Cases/NativeTextRf3LeaderLossTests.cs plus feature-local Search/Assertions/NativeTextRf3ReplayAssertions.cs. Root joins and executes native RF3 filter /*/*/NativeTextRf3LeaderLossTests/AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart. Actual original Linux AcFts005 PASS is historical; these added assertions require a new exact-source native execution. No KL028 closure, full-provider/BM25/resource/performance qualification claimed.
+Ownership: existing Search/Cases/NativeTextRf3LeaderLossTests.cs plus feature-local Search/Assertions/FullText/NativeTextRf3ReplayAssertions.cs. Root joins and executes native RF3 filter /*/*/NativeTextRf3LeaderLossTests/AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart. Actual original Linux AcFts005 PASS is historical; these added assertions require a new exact-source native execution. No KL028 closure, full-provider/BM25/resource/performance qualification claimed.
 
 ## c028 AC-FTS-005 fixed-corpus result mismatch evidence
 
@@ -523,7 +523,7 @@ changes; rollback removes only additive reconciliation and shared-ledger wiring.
 
 REQ/AC-FTS-AUDIT-001 and REQ/AC-FTS-004 require a complete real selected-provider format failure→exact fixture repair→cold healthy operation. Existing `NativeTextProjectionRestartTests.CorruptManifestIsRejectedAndPreservedForDiagnosis` retains its genuine corruption, preserved damaged bytes and generation checks. It additionally captures the original manifest and full canonical logical bytes/cut before damage; after rejected native owner construction unwinds, the feature-owned assertion component restores only that exact fixture-owned disposable manifest. Two separately disposed/reopened actual native projection owners must return the independent complete literal needle document (reference/revision1/JSON/redaction/score1/61/null explanation), with canonical bytes/cut unchanged before repair and after each search. This is fixture repair of recognized derived metadata, never automatic production repair or canonical recovery.
 
-Ownership: Search/Cases/NativeTextProjectionRestartTests.cs and Search/Assertions/NativeTextProviderManifestRecovery.cs in UnitTests. Ordered stages are original native generation→captured original/canonical cut→actual corruption/rejection/preservation→exact closed-owner fixture restoration→native search→dispose→native reopen/search→complete canonical no-effect. Same original cancellation and options, no retry/limit/token renewal/new public API. Existing provider, bilingual/delete/replay, privacy, resource, process and public RF3 gates remain mandatory. Fresh native case UID/location/outcome and delivered-source normal/scalar/Linux qualification are pending; historical passing original corruption case did not exercise this continuation. Rollback removes only this additional fixture oracle and audit docs; canonical bytes, package versions, provider formats and runtime behavior are unchanged.
+Ownership: Search/Cases/NativeTextProjectionRestartTests.cs and Search/Assertions/FullText/NativeTextProviderManifestRecovery.cs in UnitTests. Ordered stages are original native generation→captured original/canonical cut→actual corruption/rejection/preservation→exact closed-owner fixture restoration→native search→dispose→native reopen/search→complete canonical no-effect. Same original cancellation and options, no retry/limit/token renewal/new public API. Existing provider, bilingual/delete/replay, privacy, resource, process and public RF3 gates remain mandatory. Fresh native case UID/location/outcome and delivered-source normal/scalar/Linux qualification are pending; historical passing original corruption case did not exercise this continuation. Rollback removes only this additional fixture oracle and audit docs; canonical bytes, package versions, provider formats and runtime behavior are unchanged.
 
 
 ## Same-owner search parent children, 2026-10-10

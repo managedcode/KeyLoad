@@ -274,3 +274,20 @@ controlled shutdown; causality for the long suite is unproven. Readiness fixture
 regressions also passed 10/10 through AppHost, for 47/47 targeted cases. The website
 session hook requires authentic source/archive preparation missing from this local
 reference. Complete Linux runtime/RF3/fault/endurance gates remain pending.
+
+
+## Project support source placement, 2026-10-17
+
+The whole-project role review removes catch-all `Helpers/` folders. Test cases stay
+in their existing thematic `Cases/` folders; executable flows use `Scenarios/`,
+owned test setup uses `Fixtures/`, independent outcome checks use `Assertions/`,
+and protocols, serialization, observation and lifecycle code use their concrete
+roles. Related subjects group beneath each role; runtime source and shared
+composition retain their existing ownership boundaries. The live architecture map,
+linked compile items and source/coverage inventories follow the moves.
+
+The physical placement check retained all13,913 original C# sources in their
+original projects, with unchanged content before the separately authorized
+formatter pass. Full formatting and warnings-as-errors solution compilation are
+tracked in `SOURCE-LAYOUT-20261017` in the implementation status. Original TUnit,
+process-recovery, RF3 and exact-source Linux gates remain separate and open.

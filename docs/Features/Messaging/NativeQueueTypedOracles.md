@@ -9,7 +9,7 @@ The original four invalid enum/jitter and eight ready-row expiry cases remain th
 
 ## Canonical source map
 
-The assertion changes are owned by `tests/KeyLoad.UnitTests/Messaging/Helpers/QueueInvalidDeliveryActionTrial.cs` and `tests/KeyLoad.UnitTests/Messaging/Helpers/QueueReadyAuthorityHealthy.cs`. Their callers remain `Cases/QueueInvalidDeliveryActionTests.cs` and `Cases/QueueReadyAuthorityTests.cs` in the same canonical Messaging test slice. This note changes test oracle types only; production behavior and its qualification gates remain unchanged.
+The assertion changes are owned by `tests/KeyLoad.UnitTests/Messaging/Scenarios/QueueLifecycle/States/QueueInvalidDeliveryActionTrial.cs` and `tests/KeyLoad.UnitTests/Messaging/Assertions/QueueReadyAuthorityHealthy.cs`. Their callers remain `Cases/QueueInvalidDeliveryActionTests.cs` and `Cases/QueueReadyAuthorityTests.cs` in the same canonical Messaging test slice. This note changes test oracle types only; production behavior and its qualification gates remain unchanged.
 
 ```mermaid
 flowchart LR

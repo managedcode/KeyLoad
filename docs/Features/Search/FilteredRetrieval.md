@@ -179,7 +179,7 @@ querying and compare after refusal and healthy continuation. No query effect
 or incomplete exact result is accepted.
 
 Move only this complete existing method body into the feature-local
-Search/Helpers/AdaptiveFallbackWholeFlow so its caller remains the same native
+Search/Scenarios/Ann/Search/AdaptiveFallbackWholeFlow so its caller remains the same native
 case and the existing test type is within the 200-line bound. Each helper method
 stays within64 lines. Reuse the independent AdaptiveFilteredPlannerOracle,
 actual persisted native root and current WithVectors loader; no dispatcher,

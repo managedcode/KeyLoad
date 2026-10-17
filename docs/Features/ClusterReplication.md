@@ -814,7 +814,7 @@ REQ-PEER-DISCOVERY-LIFETIME-001: The original recovery discovery fixture owns it
 
 AC-PEER-DISCOVERY-LIFETIME-001: Preserve every original discovery security/ownership/replay operation and declaration. The lexical fixture RunAsync captures operation errors before implicit disposal and records acquisition/disposal errors afterward; no exception is lost. Direct materializer/journal/TestCluster disposal stays in the same original ordered shutdown. Required canonical recovery execution and native analyzer recognition remain OPEN until the source is compiled/executed; source review does not qualify process/power-loss or Linux gates.
 
-Source map: RecoveryTests/Features/ClusterReplication/Fixtures/PeerDiscoveryFixture.cs, PeerDiscoveryNativeCluster.cs, PeerDiscoveryNativeNode.cs. Original actual cohort, signed caller authentication, real silo registration and original startup/shutdown limits remain unchanged.
+Source map: RecoveryTests/ClusterReplication/Fixtures/Discovery/PeerDiscoveryFixture.cs, PeerDiscoveryNativeCluster.cs, PeerDiscoveryNativeNode.cs. Original actual cohort, signed caller authentication, real silo registration and original startup/shutdown limits remain unchanged.
 
 
 ## TASK-CQRS-COHORT-LIFETIME-001 — native detached-owner join (2026-10-12)
@@ -872,7 +872,7 @@ REQ-KL021-DISCOVERY-002: Existing owning cleanup joins the actual Aspire applica
 
 AC-KL021-DISCOVERY-002: Original namespace resources/image rules and every initiating/cleanup failure remain preserved. Successful cleanup removes the actual owned probe tree after app stop; a failed join retains it. Compiler, Linux whole-flow and original cold/replay gates remain OPEN until Main executes them.
 
-Canonical slice map: IntegrationTests Features/ClusterReplication/Helpers/ClusterFixtureComposition.cs selects the explicit profile; Helpers/ClusterFixtureSnapshotReadiness.cs creates/applies the existing owner; ClusterFixture.cs owns unchanged startup/JoinAfterStop; ClusterRouting/Helpers/RequestCqrsRf3SignedDiscovery.cs verifies original signed observations; Server ClusterReplication/Diagnostics/NativeSiloDiscoveryDiagnosticEndpoints.cs retains unchanged fixture-only mapping and fresh persisted administrator/current native generation admission.
+Canonical slice map: IntegrationTests ClusterReplication/Scenarios/Resources/ClusterFixtureComposition.cs selects the explicit profile; Helpers/ClusterFixtureSnapshotReadiness.cs creates/applies the existing owner; ClusterFixture.cs owns unchanged startup/JoinAfterStop; ClusterRouting/Scenarios/RequestExecution/Identity/RequestCqrsRf3SignedDiscovery.cs verifies original signed observations; Server ClusterReplication/Diagnostics/NativeSiloDiscoveryDiagnosticEndpoints.cs retains unchanged fixture-only mapping and fresh persisted administrator/current native generation admission.
 
 ```mermaid
 flowchart TD

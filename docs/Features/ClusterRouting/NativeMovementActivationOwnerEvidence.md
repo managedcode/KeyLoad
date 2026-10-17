@@ -24,7 +24,7 @@ sequenceDiagram
     Cleanup->>Observer: Write first/latest records with original failure
 ```
 
-Canonical slice map: UnitTests Features/ClusterRouting/Helpers/NativeMovementParentStateEvidence.cs is the sole executable owner; existing Search and ClusterRouting trial helpers borrow it unchanged. Backend, SDK, MCP, frontend and infrastructure changes are N/A because this is a bounded test observer. Native compiler, original runtime and Linux/RF3/endurance qualification of this extension remain OPEN.
+Canonical slice map: UnitTests ClusterRouting/Observations/PartitionMovement/ParentOperations/NativeMovementParentStateEvidence.cs is the sole executable owner; existing Search and ClusterRouting trial helpers borrow it unchanged. Backend, SDK, MCP, frontend and infrastructure changes are N/A because this is a bounded test observer. Native compiler, original runtime and Linux/RF3/endurance qualification of this extension remain OPEN.
 
 ## R34 actual silo-service witness correction
 

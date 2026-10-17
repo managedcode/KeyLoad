@@ -64,7 +64,7 @@ Stages and ownership:
    Features/ClusterRouting/Resources/TwoRf3ClusterResources.cs; IntegrationTests
    Features/ClusterReplication/Fixtures/LocalRf3ImageTestSession.cs and cohesive
    feature-local helpers as needed, Helpers/LocalRf3ImageSelection.cs and
-   LocalRf3ImageIdentity.cs; ClusterRouting/Helpers/TwoRf3MembershipWave.cs,
+   LocalRf3ImageIdentity.cs; ClusterRouting/Fixtures/Membership/TwoRf3MembershipWave.cs,
    Cases/TwoRf3MembershipProfileTests.cs and applicable model negatives; and the
    native selection script plus UnitTests/TestInfrastructure native selection
    whole-process regressions. Root owns shared composition and final joins.

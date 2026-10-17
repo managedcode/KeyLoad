@@ -8,7 +8,7 @@ REQ-FTS-WITNESS-VALIDATION-002 / AC-FTS-WITNESS-VALIDATION-002: malformed requir
 
 REQ-FTS-WITNESS-VALIDATION-003 / AC-FTS-WITNESS-VALIDATION-003: require the same arm/request/session/voter/silo and both original RequestStarted Observed/Released markers plus one typed wait marker. Reject orphan/foreign/duplicate/wrong-owner pairs, foreign principal/readkind/target and attempts to arm the captured adjunct phase. Tests: OrphanForeignSessionDuplicateAndWrongOwnerMarkersRefuse; DifferentArmContractAndCapturedPhaseCannotQualifyAWait.
 
-Slice map: Unit Features/ClusterRouting/Helpers/RequestCqrsWaitForIndexValidationInput.cs; Cases/RequestCqrsWaitForIndexValidationTests.cs. Product code remains the coherent FTS41 Search capture and ClusterRouting probe. UI N/A: private test-only validator. No resources are acquired. Compiler, analyzer, native TUnit, Linux, callback lifecycle and public SDK/MCP RF3 gates remain OPEN.
+Slice map: Unit ClusterRouting/Scenarios/RequestExecution/RequestCqrsWaitForIndexValidationInput.cs; Cases/RequestCqrsWaitForIndexValidationTests.cs. Product code remains the coherent FTS41 Search capture and ClusterRouting probe. UI N/A: private test-only validator. No resources are acquired. Compiler, analyzer, native TUnit, Linux, callback lifecycle and public SDK/MCP RF3 gates remain OPEN.
 
 ```mermaid
 flowchart LR

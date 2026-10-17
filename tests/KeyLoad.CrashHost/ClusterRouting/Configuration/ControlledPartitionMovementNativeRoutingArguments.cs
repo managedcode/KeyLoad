@@ -1,5 +1,5 @@
-using System.Globalization;
 using System.Collections.Immutable;
+using System.Globalization;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 

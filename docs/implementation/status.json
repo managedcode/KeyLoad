@@ -1,4 +1,16 @@
 {
+  "SOURCE-LAYOUT-20261017": {
+    "status": "in_progress",
+    "implementation": "Reviewed project source placement across runtime, tests, benchmarks, AppHost and analyzers. Moved 5536 C# sources into concrete responsibility and subject folders; removed generic Helpers folders, retained existing thematic Cases folders, original projects, namespaces and public/persisted identities. Updated linked sources and live source/coverage/documentation maps. Physical moves preserved all 13913 original C# sources before the separately authorized formatter pass.",
+    "verification": {
+      "sourceInventory": "Original per-project source content census passed before formatting; no source loss or duplication.",
+      "governance": "Passed local repository inventory validation.",
+      "format": "Applying full-solution dotnet format; final verification pending.",
+      "build": "Full Release solution build with explicit -warnaserror pending.",
+      "tests": "TUnit, process recovery and Docker/Aspire RF3 were not run for this layout checkpoint. Exact-source Linux and all existing acceptance gates remain open."
+    },
+    "policy": "Every dotnet build uses -warnaserror. Existing central compiler/analyzer warning enforcement remains enabled; workflow and composite-action build commands make the requirement explicit."
+  },
   "NATIVE-FOUNDATION-REPAIR-20261017": {
     "status": "in_progress",
     "implementation": "The20-file foundation repair and permanent six-file closed-cause follow-up remain integrated. R756 passed56/57 related Unit rows and6/6 diagnostic/privacy rows; its remaining composition fixture incorrectly appended five logical operations to only one of three independent source journals. The two-file fixture repair preserves every original operation, signature boundary, full receipt/control equality and denial/replay oracle; R761 passed its complete12-row class. R763 passed21/21 related process-recovery rows. R760 still failed native bootstrap before business execution; private local bounded evidence identifies the native graph transition check, with product-versus-owned-library cause still under investigation. All four temporary capture source changes were removed before this checkpoint. Current final-source, fullsolution, Linux and public ONE/RF3/cold/file gates remain OPEN; original105 states remain20 done/85 in_progress.",

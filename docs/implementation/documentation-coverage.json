@@ -8542,7 +8542,7 @@
         "modelTier": "strong_planning_integration_review",
         "permissions": "exact_test_files_only_no_product_contract_changes",
         "files": [
-          "tests/KeyLoad.UnitTests/StorageRecovery/Fixtures/ZoneTreeExistingStoreFixture.cs",
+          "tests/KeyLoad.UnitTests/StorageRecovery/Fixtures/GuardedOpen/ZoneTreeExistingStoreFixture.cs",
           "tests/KeyLoad.UnitTests/StorageRecovery/Fixtures/EpochStorageFixture.cs",
           "tests/KeyLoad.UnitTests/StorageRecovery/Cases/EpochStoragePreservationTests.cs",
           "tests/KeyLoad.UnitTests/StorageRecovery/Assertions/EpochStorageSnapshot.cs"
@@ -9412,8 +9412,8 @@
         "owner": "query_wave_gpt_6_luna_high",
         "modelTier": "cost_efficient_bounded_coding",
         "permissions": [
-          "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
-          "src/KeyLoad.Abstractions/Storage/KeyCodecDecimal.cs",
+          "src/KeyLoad.Abstractions/Storage/Serialization/KeyCodec.cs",
+          "src/KeyLoad.Abstractions/Storage/Serialization/KeyCodecDecimal.cs",
           "src/KeyLoad.Abstractions/StorageRecovery/Serialization/KeyCodecReadPrimitives.cs",
           "new_src/KeyLoad.Abstractions/StorageRecovery/KeyCodec_validation_helpers_only"
         ],
@@ -10086,7 +10086,7 @@
         ],
         "fileOwnership": [
           "tests/KeyLoad.IntegrationTests/TimeSeries/Cases/Sample/SampleRetentionRf3Tests.cs",
-          "tests/KeyLoad.IntegrationTests/TimeSeries/Helpers/SampleRetentionRf3RestartWorkflow.cs"
+          "tests/KeyLoad.IntegrationTests/TimeSeries/Scenarios/Retention/SampleRetentionRf3RestartWorkflow.cs"
         ],
         "dependencies": [],
         "startCondition": "root_reviewed_original_37163610260_RF3_report_and_two_read_only_diagnoses",
@@ -10169,7 +10169,7 @@
         "fileOwnership": [
           "tests/KeyLoad.IntegrationTests/DocumentStorage/Cases/McpDocument/McpDocumentCrudParityTests.cs",
           "tests/KeyLoad.IntegrationTests/DocumentStorage/Assertions/McpDocumentCrudParityAssertions.cs",
-          "tests/KeyLoad.IntegrationTests/DocumentStorage/Helpers/McpDocumentCrudParityScenario.cs"
+          "tests/KeyLoad.IntegrationTests/DocumentStorage/Models/Remote/McpDocumentCrudParityScenario.cs"
         ],
         "dependencies": [],
         "startCondition": "root_approved_exact_mirrored_success_and_stale_replacement_oracles_after_6e09f03_checkpoint",
@@ -10196,7 +10196,7 @@
               "sha256": "3765e29f6aa9f78ceeca98d3fc69a947301a54f8de8d2cdd4dcbee7cbd6a58d2"
             },
             {
-              "path": "tests/KeyLoad.IntegrationTests/DocumentStorage/Helpers/McpDocumentCrudParityScenario.cs",
+              "path": "tests/KeyLoad.IntegrationTests/DocumentStorage/Models/Remote/McpDocumentCrudParityScenario.cs",
               "bytes": 2107,
               "sha256": "79ce374e7d5efe4e7db19302d0645466cbdc5183a722b3a1fb5038f46bac9890"
             },
@@ -10352,14 +10352,14 @@
         "permissions": "bounded_build1_repairs_only_no_execution_contract_config_or_assertion_weakening",
         "fileOwnership": [
           "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3Wave.cs",
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3Callers.cs",
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3Inventory.cs",
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3Profile.cs",
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3StatusOracle.cs",
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3CurrentWorkload.cs",
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Fixtures/Identity/NodeEpochRf3Callers.cs",
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Scenarios/Identity/NodeEpochRf3Inventory.cs",
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Scenarios/Identity/NodeEpochRf3Profile.cs",
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Assertions/Identity/NodeEpochRf3StatusOracle.cs",
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Scenarios/Identity/NodeEpochRf3CurrentWorkload.cs",
           "tests/KeyLoad.IntegrationTests/StorageRecovery/Assertions/NodeEpochRf3MigrationAssertions.cs",
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3ReadOracle.cs",
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3AuthorizationOracle.cs"
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Assertions/ReadCuts/NodeEpochRf3ReadOracle.cs",
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Assertions/Identity/NodeEpochRf3AuthorizationOracle.cs"
         ],
         "dependencies": [
           "TASK-NODE-EPOCH-COLD-SHARED",
@@ -10408,8 +10408,8 @@
         "fileOwnership": [
           "scripts/Features/BenchmarkComparisons/image-engine.mjs",
           "scripts/Features/BenchmarkComparisons/cleanup-images.mjs",
-          "tests/KeyLoad.IntegrationTests/ClientApi/Helpers/McpCallerHttp.cs",
-          "tests/KeyLoad.IntegrationTests/ClientApi/Helpers/McpOfficialClient.cs",
+          "tests/KeyLoad.IntegrationTests/ClientApi/Scenarios/Mcp/McpCallerHttp.cs",
+          "tests/KeyLoad.IntegrationTests/ClientApi/Fixtures/Mcp/McpOfficialClient.cs",
           "tests/KeyLoad.IntegrationTests/StorageRecovery/NodeEpochRf3ImageProof*",
           "tests/KeyLoad.IntegrationTests/StorageRecovery/NodeEpochRf3Offline*",
           "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3ReceiptReader.cs",
@@ -11447,7 +11447,7 @@
         ],
         "permissions": "exact_existing_cold_fixture_SDK_and_official_MCP_sample_conflict_expected_codes_only_no_production_input_tolerance_retry_or_other_assertion_changes",
         "fileOwnership": [
-          "tests/KeyLoad.IntegrationTests/StorageRecovery/Helpers/NodeEpochRf3CurrentWorkload.cs"
+          "tests/KeyLoad.IntegrationTests/StorageRecovery/Scenarios/Identity/NodeEpochRf3CurrentWorkload.cs"
         ],
         "dependencies": [
           "TASK-NODE-EPOCH-COLD-FIXTURE"

@@ -4,7 +4,7 @@ REQ-BLOB-SECOND-COLD-001: Both actual cold reopens preserve complete canonical a
 
 REQ-BLOB-SECOND-COLD-002: Exactly two original cold restarts occur, without additional effects, rewritten command identities or a third reopen. AC-BLOB-SECOND-COLD-002: The final capture leaves the original wave stopped; NativeBlobWholeParentOwner.DisposeCoreAsync joins that same wave and releases borrowed keys only after application disposal and all node locks are proven released. Every failure uses the original retained failure ledger.
 
-Canonical source map: Integration Features/ClusterRouting/Helpers/NativeBlobWholeParentFlow.cs, selected original WholeParentOwner and WholeCold readers/assertions; real TUnit entry Features/BlobStorage/Cases/NativeBlobWholeParentQualificationCases.cs. This narrow successor supplements AC-BLOB-WHOLE-PARENT-004 and AC-BLOB-WHOLE-005; it does not edit a UID, selector, status count or qualification result. Source52r2, whole cold8 plus actual-owner1r2, Parent5, READY115 and Source90 remain dependencies.
+Canonical source map: Integration ClusterRouting/Scenarios/BlobTransfers/NativeBlobWholeParentFlow.cs, selected original WholeParentOwner and WholeCold readers/assertions; real TUnit entry Features/BlobStorage/Cases/NativeBlobWholeParentQualificationCases.cs. This narrow successor supplements AC-BLOB-WHOLE-PARENT-004 and AC-BLOB-WHOLE-005; it does not edit a UID, selector, status count or qualification result. Source52r2, whole cold8 plus actual-owner1r2, Parent5, READY115 and Source90 remain dependencies.
 
 ```mermaid
 flowchart LR

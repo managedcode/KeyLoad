@@ -394,16 +394,16 @@ Frontend: N/A, internal native execution. No public database protocol, storage f
 | `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeMigrationJson.cs` |
 | `src/KeyLoad.Server/ClusterRouting/Serialization/RequestCqrsProbeMigrationJsonContext.cs` |
 | `src/KeyLoad.Server/ClusterRouting/Validation/RequestCqrsProbeMigrationValidation.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/NativeActivationMigrationRf3Ownership.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/NativeActivationRf3ColdOutcome.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/Activation/NativeActivationMigrationRf3Ownership.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Assertions/Activation/NativeActivationRf3ColdOutcome.cs` |
 | `tests/KeyLoad.IntegrationTests/ClusterRouting/Cases/NativeDatabase/NativeDatabaseMigrationRf3Tests.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Contracts/NativeActivationMigrationRf3Protocol.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationDuplicateRf3Operation.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Attempt.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Control.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Operation.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/NativeActivationMigrationRf3Scenario.cs` |
-| `tests/KeyLoad.IntegrationTests/ClusterRouting/Helpers/RequestCqrsProbeFileValidation.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Contracts/Activation/NativeActivationMigrationRf3Protocol.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Scenarios/Activation/NativeActivationDuplicateRf3Operation.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Scenarios/Activation/NativeActivationMigrationRf3Attempt.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Scenarios/Activation/NativeActivationMigrationRf3Control.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Scenarios/Activation/NativeActivationMigrationRf3Operation.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Scenarios/Activation/NativeActivationMigrationRf3Scenario.cs` |
+| `tests/KeyLoad.IntegrationTests/ClusterRouting/Fixtures/RequestExecution/Diagnostics/RequestCqrsProbeFileValidation.cs` |
 | `tests/KeyLoad.UnitTests/ClusterRouting/Cases/ReplicaMembershipNativeStoreTests.cs` |
 
 
@@ -782,7 +782,7 @@ AC-CMD-UNC-001 maps to `ConnectionPostSubmitFailureTests.ReturnedSubmitObserverF
 
 REQ-CMD-UNC-002: when post-submit observation succeeds, an actual persisted refusal `OperationResult.Error` retains its exact code/detail; pre-submit authorization refusal must not become blanket uncertainty. AC-CMD-UNC-002 maps to the same two cases' genuine subsequent revision-conflict command and exact persisted error/detail comparison, plus existing `ConnectionNativeFailureTests.AcCrs052FailureAndRevocationLeaveNoEffectsAndFollowingCallSucceeds` for revoked authorization, absent outcome/document effects and a healthy following call.
 
-Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Clustering/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Clustering/ClusterRouting/Serialization/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/ClusterRouting/Helpers/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
+Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Clustering/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Clustering/ClusterRouting/Serialization/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/ClusterRouting/Observations/Connections/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/Connection/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
 
 ```mermaid
 flowchart LR

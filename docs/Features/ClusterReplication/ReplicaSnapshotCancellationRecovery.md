@@ -26,7 +26,7 @@ asked to fabricate operation6.
 
 All three acceptance criteria map to
 [ReplicaSnapshotCancellationRecoveryTests.CancelledNativeBeginAndFullInstallRetainExactTransferThenSameOwnerTailTwoColdAndHealthyReplay](../../../tests/KeyLoad.RecoveryTests/ClusterReplication/Cases/Replica/ReplicaSnapshotCancellationRecoveryTests.cs)
-and its [whole-operation owner](../../../tests/KeyLoad.RecoveryTests/ClusterReplication/Helpers/ReplicaSnapshotCancellationRecoveryFlow.cs).
+and its [whole-operation owner](../../../tests/KeyLoad.RecoveryTests/ClusterReplication/Scenarios/Snapshots/ReplicaSnapshotCancellationRecoveryFlow.cs).
 This closes a source regression gap beyond the existing complete-image canceled
 install and synchronous transfer-fencing cases. It does not allege a product
 defect or change snapshot formats, admission, providers, clocks or bounds.

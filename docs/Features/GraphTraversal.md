@@ -74,7 +74,7 @@ Count outgoing candidates before label/visibility filtering. Preserve the
 existing cancellation/deadline and healthy-follow-up cases.
 
 TASK-KL023-ORACLE owns only
-`tests/KeyLoad.UnitTests/GraphTraversal/Assertions/GraphTraversalReferenceBfsOracle.cs`
+`tests/KeyLoad.UnitTests/GraphTraversal/Assertions/References/GraphTraversalReferenceBfsOracle.cs`
 and `Cases/GraphTraversalReferenceOracleTests.cs`. Root freezes this contract,
 reviews and joins the private packet, and runs Aspire normal/scalar followed by
 exact-source Linux and real SDK/official MCP RF3 qualification. Existing

@@ -1201,7 +1201,7 @@ REQ-DUE-UNIT-001: fixed-tail/count algorithm regressions use an explicitly owned
 
 AC-DUE-UNIT-001: preserve both original AlternatesPrefixesAndBoundsRealZoneTreePages and FixedTailDefersHigherKeysUntilTheFollowingSweep UIDs and complete literal count/order/fixed-tail oracles against real canonical ZoneTree. AC-DUE-UNIT-002: extend the original cancellation whole operation with an elapsed deadline refusal armed only after actual native range bytes were examined, exact BudgetExceeded/owning detail, unchanged complete canonical rows/store position/identity/seed receipt, then a fresh healthy read and same-root reopen with exact original receipt replay and complete row/hint equality. The observed original clock advance remains retained; disarm clears only observation and never rewinds time. Scope is Unit behavior, not RF3 or timing qualification; the unchanged system-clock/Linux production deadline gate stays open.
 
-Source ownership: tests/KeyLoad.UnitTests/Messaging/Helpers/RecurringSagaDatabase.cs supplies the optional borrowed clock to both initial/reopened genuine engine; the two original positive methods opt in. Feature-local DueDiscoveryClock and DueDiscoveryDeadlineFlow own elapsed observation and full refusal/healthy/cold assertions. No product API, policy, persisted format, quota, retry or scheduling changes.
+Source ownership: tests/KeyLoad.UnitTests/Messaging/Fixtures/Sagas/RecurringSagaDatabase.cs supplies the optional borrowed clock to both initial/reopened genuine engine; the two original positive methods opt in. Feature-local DueDiscoveryClock and DueDiscoveryDeadlineFlow own elapsed observation and full refusal/healthy/cold assertions. No product API, policy, persisted format, quota, retry or scheduling changes.
 
 ### TASK-DUE-BYTE-UNIT-CLOCK-001
 
@@ -1215,7 +1215,7 @@ AC-DUE-BYTE-UNIT-002: retain AC-DUE-UNIT-002's original cancellation whole opera
 |---|---|
 | REQ-DUE-BYTE-UNIT-001 / AC-DUE-BYTE-UNIT-001 | tests/KeyLoad.UnitTests/Messaging/Cases/Due/DueWorkPageBudgetTests.cs: both original methods |
 | AC-DUE-BYTE-UNIT-002 | tests/KeyLoad.UnitTests/Messaging/Cases/Due/DueWorkDiscoveryTests.cs: CancellationRejectsTheWholeDiscoveryPage; Assertions/DueDiscoveryDeadlineFlow.cs |
-| Clock ownership | tests/KeyLoad.UnitTests/Messaging/Helpers/DueDiscoveryClock.cs; Helpers/RecurringSagaDatabase.cs |
+| Clock ownership | tests/KeyLoad.UnitTests/Messaging/Fixtures/QueueScheduling/DueWork/DueDiscoveryClock.cs; Helpers/RecurringSagaDatabase.cs |
 
 ### TASK-QUEUE-DEADLINE-UNIT-CLOCK-001
 
@@ -1227,9 +1227,9 @@ AC-QUEUE-DEADLINE-UNIT-002: inside the original bounded discovery loop, wait for
 
 | Requirement / acceptance | Original automated source |
 |---|---|
-| REQ-QUEUE-DEADLINE-UNIT-001 / AC-QUEUE-DEADLINE-UNIT-002 | tests/KeyLoad.UnitTests/Messaging/Helpers/QueueDeadlineNativeDiscovery.cs |
+| REQ-QUEUE-DEADLINE-UNIT-001 / AC-QUEUE-DEADLINE-UNIT-002 | tests/KeyLoad.UnitTests/Messaging/Scenarios/QueueScheduling/Deadlines/QueueDeadlineNativeDiscovery.cs |
 | AC-QUEUE-DEADLINE-UNIT-001 | tests/KeyLoad.UnitTests/Messaging/Cases/Queue/QueueDeadlineNativeWholeFlowTests.cs; Helpers/QueueDeadlineNativeTrial.cs and original continuation helpers |
-| Clock ownership | tests/KeyLoad.UnitTests/Messaging/Helpers/DueDiscoveryClock.cs |
+| Clock ownership | tests/KeyLoad.UnitTests/Messaging/Fixtures/QueueScheduling/DueWork/DueDiscoveryClock.cs |
 
 +### TASK-REMOTE-TRANSFER-UNIT-CLOCK-001
 

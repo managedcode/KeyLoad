@@ -16,6 +16,12 @@ The intermediate project `Features/` directory is removed. This supersedes prior
 project-layout examples below; namespaces and persisted identities stay stable.
 Script, site and documentation module paths retain their existing layout.
 
+Test support uses explicit `Scenarios/`, `Fixtures/`, `Assertions/`, `Contracts/`,
+`Lifecycle/`, `Observations/`, `Serialization/` and other concrete roles. Related
+subjects are grouped beneath the role, for example `Search/Scenarios/FullText/`
+and `Search/Assertions/FullText/`. Generic `Helpers/` folders are removed.
+Executable entry points and shared project composition keep their own locations.
+
 The owner-selected [foundation-first delivery contract](Features/RepositoryGovernance/FoundationDelivery.md)
 and [all-105 dependency graph](implementation/foundation-dependencies.json) control
 execution order. Native Orleans, node-local ZoneTree/RF3, current persisted identity,
@@ -282,7 +288,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 
 | Project/module | Purpose and entry points | Canonical slices / protected boundary |
 |---|---|---|
-| src/KeyLoad.Abstractions | Contracts.cs, Features/<SliceName>/Contracts/, Storage/StorageContracts.cs; Features/BackupRestore/Contracts/AtomicPartitionCatalogEntry.cs | Shared public/storage contracts; DocumentStorage, EventStreams, Messaging, Authorization, Search, GraphTraversal and the generated BackupRestore roster entry. |
+| src/KeyLoad.Abstractions | Contracts.cs, Features/<SliceName>/Contracts/, Storage/Contracts/StorageContracts.cs; Features/BackupRestore/Contracts/AtomicPartitionCatalogEntry.cs | Shared public/storage contracts; DocumentStorage, EventStreams, Messaging, Authorization, Search, GraphTraversal and the generated BackupRestore roster entry. |
 | src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/; Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs | Node-local engine and atomic transactions; model effects and first-write logical partition registration share the ordered native commit. Complete current roster capture and cluster backup qualification remain required. |
 | src/KeyLoad.Diagnostics | Features/ResourceExecution/Models/DatabasePhaseKind.cs, Features/ResourceExecution/Models/DatabasePhaseSnapshot.cs and fixed bank | ResourceExecution; ADR-063 BCL-only callback-free scalar phase observations. No database state, public control endpoint or framework dependency; source integration and genuine native profiling pending. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs; Features/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs and Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and BackupRestore; file/WAL/checkpoint ownership stays node-local. |
@@ -299,7 +305,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | build/KeyLoad.AppHost | Program.cs, Features/BenchmarkComparisons/Resources/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality test-only collector preparation; Aspire owns resource lifecycle. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and focused test files | Matching product slices; pure contract/engine regression evidence. |
 | tests/KeyLoad.RecoveryTests | Features/StorageRecovery/Cases/RecoveryTests.cs, Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs, Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs, Features/ClusterRouting/ | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery and current outcome-v2 scoped-locator integrity; current source qualification pending. |
-| tests/KeyLoad.CrashHost | Program.cs, Features/ClusterReplication/Helpers/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
+| tests/KeyLoad.CrashHost | Program.cs, ClusterReplication/Execution/Faults/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
 | tests/KeyLoad.IntegrationTests | ClusterFixture.cs, Features/ClusterReplication/Cases/ClusterTests.cs, Features/ResourceExecution/Cases/AdmissionClusterTests.cs | ClusterReplication and ClientApi shared fixtures; CodeQuality scopes actual server collector export; business cases mirror their owning canonical slices with real RF3/.NET and required MCP flows. |
 | tests/KeyLoad.ComparisonTests | Features/BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements, including the separate TimeSeries profile under ADR-050. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public CI claim without CI evidence. |

@@ -1,5 +1,5 @@
-using KeyLoad.Storage;
 using KeyLoad.Replication;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 

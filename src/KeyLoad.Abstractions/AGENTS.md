@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns public, implementation-independent contracts shared by KeyLoad clients and services.
-- Main contract sources: `Contracts.cs`, `<SliceName>/Contracts/` (individual request/result records), `QueryExecution/Contracts/QueryAst.cs`, `ChangeFeeds/Contracts/ChangeFeeds.cs`, `EventStreams/Contracts/Subscriptions.cs`, `ResourceExecution/Contracts/Admission.cs`, `ResourceExecution/Contracts/HttpAdmission.cs`; storage contracts and key encoding are under `Storage/StorageContracts.cs` and `Storage/KeyCodec.cs`.
+- Main contract sources: `Contracts.cs`, `<SliceName>/Contracts/` (individual request/result records), `QueryExecution/Contracts/QueryAst.cs`, `ChangeFeeds/Contracts/ChangeFeeds.cs`, `EventStreams/Contracts/Subscriptions.cs`, `ResourceExecution/Contracts/Admission.cs`, `ResourceExecution/Contracts/HttpAdmission.cs`; storage contracts and key encoding are under `Storage/Contracts/StorageContracts.cs` and `Storage/Serialization/KeyCodec.cs`.
 
 ## Ownership and boundaries
 - Place feature-owned public contracts under `<SliceName>/` using the canonical name in `docs/Features/<SliceName>.md`; keep truly shared primitives here only when multiple slices require them.

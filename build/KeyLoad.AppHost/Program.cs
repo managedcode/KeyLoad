@@ -1,6 +1,6 @@
 using KeyLoad;
-using KeyLoad.AppHost.Hosting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.Hosting;
 
 const string MessageText = "An explicitly selected test suite must not be empty.";
 const int EmptyResult = 0;

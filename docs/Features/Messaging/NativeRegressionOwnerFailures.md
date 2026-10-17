@@ -12,7 +12,7 @@ REQ-PEER-NATIVE-CLEANUP-003: actual Event test body, original-row restore and fi
 
 ## Canonical source map
 
-The owning helpers are `tests/KeyLoad.UnitTests/Messaging/Helpers/QueueInvalidDeliveryActionTrial.cs`, `tests/KeyLoad.UnitTests/Messaging/Helpers/QueueReadyAuthorityTrial.cs`, and `tests/KeyLoad.UnitTests/EventStreams/Helpers/EventAppendCorruptHeadFlow.cs`. Each remains in its original feature slice and runs the original fixture and native operation assertions. This note owns failure preservation only, without a new runtime or storage authority.
+The owning helpers are `tests/KeyLoad.UnitTests/Messaging/Scenarios/QueueLifecycle/States/QueueInvalidDeliveryActionTrial.cs`, `tests/KeyLoad.UnitTests/Messaging/Scenarios/QueueReadyAuthorityTrial.cs`, and `tests/KeyLoad.UnitTests/EventStreams/Scenarios/Appending/EventAppendCorruptHeadFlow.cs`. Each remains in its original feature slice and runs the original fixture and native operation assertions. This note owns failure preservation only, without a new runtime or storage authority.
 
 ```mermaid
 flowchart TD
