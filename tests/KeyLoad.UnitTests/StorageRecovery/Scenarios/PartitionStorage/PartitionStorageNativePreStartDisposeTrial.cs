@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,10 +7,8 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageNativePreStartDisposeTrial
 {
-    private const int FirstOwner = 0;
-
-    internal static async Task RunAsync(ControlledPartitionMovementNativeHostSettings settings,
-        NativeLocalhostClusteringOptions localhost, CancellationToken token)
+    internal static async Task RunAsync(string[] arguments, NativeLocalhostClusteringOptions localhost,
+        RequestCqrsHostedProfile profile, string root, string directory, CancellationToken token)
     {
         var failures = new List<Exception>();
         using var startupObservation = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -21,13 +18,12 @@ internal static class PartitionStorageNativePreStartDisposeTrial
         Task? originalStartupWait = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            application = await ServerConfiguration.BuildAsync(settings.Arguments(FirstOwner),
-                localhostClustering: localhost, startupCancellation: token).ConfigureAwait(false);
+            application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+                configureServices: profile.Register, startupCancellation: token).ConfigureAwait(false);
             captured = new(application.Services.GetRequiredService<PartitionHostApplicationOwner>(),
                 application.Services.GetRequiredService<OrleansNode>(),
-                application.Services.GetRequiredService<ServerConnectionRegistry>(),
-                application.Services.GetRequiredService<ReplicaTransportLifecycle>());
-            await PartitionStorageNativePreStartDisposeAssertions.BeforeAsync(application, captured, settings)
+                application.Services.GetRequiredService<ServerConnectionRegistry>());
+            await PartitionStorageNativePreStartDisposeAssertions.BeforeAsync(application, captured, root, directory)
                 .ConfigureAwait(false);
             originalStartupWait = captured.Native.WaitForNativeStartupAsync(startupObservation.Token);
             await PartitionStorageNativeStartupWaitAssertions.PendingAsync(captured.Native, originalStartupWait, token)
@@ -58,7 +54,7 @@ internal static class PartitionStorageNativePreStartDisposeTrial
         if (captured is not null && originalDisposal is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => PartitionStorageNativePreStartDisposeAssertions.AfterAsync(
-                originalDisposal, captured, settings), failures).ConfigureAwait(false);
+                originalDisposal, captured, root, directory), failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -10,11 +10,11 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class AuthenticationExecutionHttpRefusal
 {
-    internal static async Task RunAsync(ControlledPartitionMovementNativeHost host,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture host,
         AuthenticationExecutionState state, AuthenticationExecutionCollector collector, CancellationToken token)
     {
-        using var rootHttp = new HttpClient { BaseAddress = new(host.Runtime.Node.Value.PublicEndpoint), Timeout = Timeout.InfiniteTimeSpan };
-        var root = new KeyLoadClient(rootHttp, host.Runtime.Node.Value.AdminKey, IntegrationClientOptions.Execution());
+        using var rootHttp = new HttpClient { BaseAddress = host.PublicEndpoint, Timeout = Timeout.InfiniteTimeSpan };
+        var root = new KeyLoadClient(rootHttp, host.AdminKey, IntegrationClientOptions.Execution());
         var before = await AuthenticationExecutionValues.ImageAsync(root, state, token);
         foreach (var (header, entered) in new (string? Header, bool Entered)[]
         {

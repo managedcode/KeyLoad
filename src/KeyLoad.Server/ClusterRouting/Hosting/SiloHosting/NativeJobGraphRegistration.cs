@@ -37,20 +37,12 @@ internal static class NativeJobGraphRegistration
     {
         Add<IConnectionGrain, IDatabaseCommitGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
             nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
-        Add<IConnectionGrain, IRequestWorkerGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
-            nameof(IRequestWorkerGrain.ExecuteStreamAsync));
         Add<ICommandPartitionGrain, IDatabaseCommitGrain>(graph, nameof(ICommandPartitionGrain.ExecuteAsync),
             nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
-        Add<ICommandPartitionGrain, IRequestWorkerGrain>(graph, nameof(ICommandPartitionGrain.ExecuteAsync),
-            nameof(IRequestWorkerGrain.ExecuteCommandAsync));
         Add<IRequestWorkerGrain, ICommandPartitionGrain>(graph, nameof(IRequestWorkerGrain.ExecuteStreamAsync),
             nameof(ICommandPartitionGrain.ExecuteAsync));
         Add<IRequestWorkerGrain, IDatabaseCommitGrain>(graph, EverySourceMethod,
             nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync));
-        Add<IRequestWorkerGrain, IConnectionGrain>(graph, EverySourceMethod,
-            nameof(IConnectionGrain.ExecuteStreamAsync));
-        Add<IConnectionGrain, IConnectionGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
-            nameof(IConnectionGrain.ExecuteStreamAsync));
     }
 
     private static void AddBackgroundWorkers(DirectedGraph graph)

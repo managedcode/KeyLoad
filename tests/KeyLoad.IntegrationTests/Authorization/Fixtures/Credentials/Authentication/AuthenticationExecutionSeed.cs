@@ -10,10 +10,10 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class AuthenticationExecutionSeed
 {
     internal static async Task<AuthenticationExecutionState> CreateAsync(
-        ControlledPartitionMovementNativeHost host, CancellationToken token)
+        RequestCqrsHostedRuntimeFixture host, CancellationToken token)
     {
-        using var http = new HttpClient { BaseAddress = new(host.Runtime.Node.Value.PublicEndpoint), Timeout = Timeout.InfiniteTimeSpan };
-        var root = new KeyLoadClient(http, host.Runtime.Node.Value.AdminKey, IntegrationClientOptions.Execution());
+        using var http = new HttpClient { BaseAddress = host.PublicEndpoint, Timeout = Timeout.InfiniteTimeSpan };
+        var root = new KeyLoadClient(http, host.AdminKey, IntegrationClientOptions.Execution());
         var partition = new PartitionRef(McpDocumentProtocol.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             McpDocumentProtocol.Database, McpDocumentProtocol.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var document = new McpDocumentScenario(partition);

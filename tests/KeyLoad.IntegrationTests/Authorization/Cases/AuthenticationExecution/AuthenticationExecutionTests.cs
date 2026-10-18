@@ -12,17 +12,16 @@ internal sealed class AuthenticationExecutionTests
         var token = TestContext.Current!.Execution.CancellationToken;
         var collector = new AuthenticationExecutionCollector();
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        await ServerFailureObserver.ObserveAsync(() => RequestCqrsHostedCluster.RunAsync(async hosts =>
         {
-            await using var hosts = await ControlledPartitionMovementNativeHosts.CreateWithAuthenticationObserverAsync(
-                collector.ForOwner, token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 try
                 {
-                    var state = await AuthenticationExecutionSeed.CreateAsync(hosts.Source, token);
-                    await AuthenticationExecutionHttpRefusal.RunAsync(hosts.Source, state, collector, token);
-                    await AuthenticationExecutionChanges.WarmAsync(hosts.Source, state, collector, token);
+                    var source = hosts.Nodes[AuthenticationExecutionProtocol.NoEvents];
+                    var state = await AuthenticationExecutionSeed.CreateAsync(source, token);
+                    await AuthenticationExecutionHttpRefusal.RunAsync(source, state, collector, token);
+                    await AuthenticationExecutionChanges.WarmAsync(source, state, collector, token);
                     await AuthenticationExecutionCold.RunAsync(hosts, state, collector, token);
                 }
                 catch (Exception original) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(original))
@@ -36,7 +35,7 @@ internal sealed class AuthenticationExecutionTests
                     throw;
                 }
             }, failures);
-        }, failures);
+        }, token, authenticationObservers: collector.ForOwner), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -7,11 +7,11 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class AuthenticationExecutionChanges
 {
-    internal static async Task WarmAsync(ControlledPartitionMovementNativeHost host,
+    internal static async Task WarmAsync(RequestCqrsHostedRuntimeFixture host,
         AuthenticationExecutionState state, AuthenticationExecutionCollector collector, CancellationToken token)
     {
-        using var rootHttp = new HttpClient { BaseAddress = new(host.Runtime.Node.Value.PublicEndpoint), Timeout = Timeout.InfiniteTimeSpan };
-        var root = new KeyLoadClient(rootHttp, host.Runtime.Node.Value.AdminKey, IntegrationClientOptions.Execution());
+        using var rootHttp = new HttpClient { BaseAddress = host.PublicEndpoint, Timeout = Timeout.InfiniteTimeSpan };
+        var root = new KeyLoadClient(rootHttp, host.AdminKey, IntegrationClientOptions.Execution());
         await AuthenticationExecutionClients.RunAsync(host, state, collector, async (reader, mcp, http) =>
         {
             await AuthenticationExecutionValues.HealthyAsync(reader, mcp, http, collector, state, state.Expected, token);

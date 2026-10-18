@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class AuthenticationExecutionClients
 {
-    internal static async Task RunAsync(ControlledPartitionMovementNativeHost host, AuthenticationExecutionState state,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture host, AuthenticationExecutionState state,
         AuthenticationExecutionCollector collector,
         Func<KeyLoadClient, McpClient, AuthenticationExecutionHttpHandler, Task> operation, CancellationToken token)
     {
@@ -20,7 +20,7 @@ internal static class AuthenticationExecutionClients
             using var handler = new AuthenticationExecutionHttpHandler(inner);
             using var http = new HttpClient(handler, disposeHandler: false)
             {
-                BaseAddress = new(host.Runtime.Node.Value.PublicEndpoint),
+                BaseAddress = host.PublicEndpoint,
                 Timeout = Timeout.InfiniteTimeSpan
             };
             StandardAspNetAuthorityTrial.AddHeaders(http);

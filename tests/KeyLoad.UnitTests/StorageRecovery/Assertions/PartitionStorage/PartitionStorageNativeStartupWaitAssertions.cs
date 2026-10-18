@@ -1,7 +1,5 @@
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.ClusterRouting;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -47,7 +45,7 @@ internal static class PartitionStorageNativeStartupWaitAssertions
         await ServerFailureObserver.ObserveAsync(() => original, observed);
         var error = observed.FirstOrDefault() as KeyLoadException;
         var matches = observed.Count == SingleFailure && original.IsFaulted && error is not null
-            && error.Code == ErrorCode.OwnershipLost && error.Message == PhysicalOwnerProbeProtocol.Unavailable;
+            && error.Code == ErrorCode.OwnershipLost && error.Message == OrleansNodeProtocol.RoutingUnavailable;
         if (!matches)
         {
             ServerFailureObserver.ThrowIfAny(observed);
@@ -55,36 +53,23 @@ internal static class PartitionStorageNativeStartupWaitAssertions
         await Assert.That(matches).IsTrue();
     }
 
-    internal static async Task StartAsync(ControlledPartitionMovementNativeHosts owners, CancellationToken token)
+    internal static async Task StartAsync(WebApplication application, OrleansNode node, CancellationToken token)
     {
         using var callerWaits = CancellationTokenSource.CreateLinkedTokenSource(token);
-        var originals = new List<Task>();
+        var original = node.WaitForNativeStartupAsync(callerWaits.Token);
         var failures = new List<Exception>();
-        foreach (var node in owners.Nodes)
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(original.IsCompleted).IsFalse(), failures);
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            ServerFailureObserver.Observe(() => originals.Add(node.Application.Services.GetRequiredService<OrleansNode>()
-                .WaitForNativeStartupAsync(callerWaits.Token)), failures);
-        }
-        foreach (var original in originals)
-        {
-            await ServerFailureObserver.ObserveAsync(async () => await Assert.That(original.IsCompleted).IsFalse(), failures);
-        }
-        var starts = new List<Task>();
-        foreach (var node in owners.Nodes)
-        {
-            ServerFailureObserver.Observe(() => starts.Add(node.StartAsync(token)), failures);
-        }
-        var starting = Task.WhenAll(starts);
-        await ServerFailureObserver.ObserveAsync(() => starting, failures);
+            await application.StartAsync(token).ConfigureAwait(false);
+            await node.StartAsync(token).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
         if (failures.Count != NoFailures)
         {
             await ServerFailureObserver.ObserveAsync(callerWaits.CancelAsync, failures);
         }
-        foreach (var original in originals)
-        {
-            await ServerFailureObserver.ObserveAsync(() => original, failures);
-        }
+        await ServerFailureObserver.ObserveAsync(() => original, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        await Assert.That(originals.All(original => original.IsCompletedSuccessfully)).IsTrue();
+        await Assert.That(original.IsCompletedSuccessfully).IsTrue();
     }
 }

@@ -113,7 +113,6 @@ internal sealed class ImmutableComparisonContractTests
             ImmutableCollectionsMarshal.AsArray(dataset.ExactNeighbors(dataset.Documents[0])))).IsTrue();
         await Assert.That(ReferenceEquals(ImmutableCollectionsMarshal.AsArray(dataset.Reachable(dataset.Documents[0], 2)),
             ImmutableCollectionsMarshal.AsArray(dataset.Reachable(dataset.Documents[0], 2)))).IsTrue();
-        // No pre-migration corpus SHA fixture is retained in this checkout; do not invent one.
     }
 
     [Test]

@@ -4,6 +4,6 @@ internal sealed class PartitionStorageNativePreStartDisposeTests
 {
     [Test]
     [NotInParallel]
-    public Task ProductionApplicationDisposedBeforeStartNeverOpensPhysicalStorageThenSameRootsSupportSignedReplayAndTwoCold()
+    public Task ProductionApplicationDisposedBeforeStartNeverOpensPhysicalStorageThenSameRootsSupportCanonicalReplayAndTwoCold()
         => PartitionStorageNativePreStartDisposeFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }
