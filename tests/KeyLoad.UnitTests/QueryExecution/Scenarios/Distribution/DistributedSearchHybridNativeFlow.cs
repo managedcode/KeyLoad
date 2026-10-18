@@ -16,7 +16,7 @@ internal static class DistributedSearchHybridNativeFlow
 
     internal static RankedDocument[] Execute(QueryNativeFixture fixture, CancellationToken token)
     {
-        var sourceRequest = DistributedSearchHybridNativeSeed.Request(QueryNativePartitionFlow.Local);
+        var sourceRequest = DistributedSearchHybridNativeSeed.Request(QueryNativeDataset.Local);
         var destinationRequest = DistributedSearchHybridNativeSeed.Request(QueryNativeFixture.Partition);
         var source = Capture(fixture.Source, sourceRequest, fixture.SourceOwner, token);
         var destination = Capture(fixture.Destination, destinationRequest, fixture.DestinationOwner, token);

@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.CrashHost.Features.EventStreams;

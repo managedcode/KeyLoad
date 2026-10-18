@@ -1,13 +1,15 @@
-using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Server;
+using ManagedCode.Communication.Commands;
 using P = KeyLoad.CrashHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
 
 namespace KeyLoad.CrashHost.Features.AnalyticsStore;
 
 internal static class UserAnalyticsProcessMutations
 {
+    private const int BufferedPersistedCopies = 0;
+    private const int LocalPersistedCopies = 1;
     internal static void Bootstrap(PartitionHost host, CancellationToken token)
     {
         var definition = new ResourceDefinition(P.Store, ResourceKind.AnalyticsStore, P.Domain)
@@ -29,7 +31,8 @@ internal static class UserAnalyticsProcessMutations
         var command = new CommandRequest(Guid.NewGuid(), P.Partition, [mutation]);
         var original = Issue(host, OperationKind.Batch, command, command.CommandId, token);
         var expected = new CommitReceipt(command.CommandId, new(host.Database.Store.Identity.Incarnation,
-            P.Partition.AtomicPartitionId, checked(host.Database.LastApplied + P.Created)), [new(AnalyticsStoreProtocol.UpsertKind, P.Store, update ? P.First : P.Second, update ? P.Updated : P.Created)], host.Database.Durability, (host.Database.Durability == DurabilityProfile.Buffered ? 0 : 1));
+            P.Partition.AtomicPartitionId, checked(host.Database.LastApplied + P.Created)), [new(AnalyticsStoreProtocol.UpsertKind, P.Store, update ? P.First : P.Second, update ? P.Updated : P.Created)], host.Database.Durability,
+            host.Database.Durability == DurabilityProfile.Buffered ? BufferedPersistedCopies : LocalPersistedCopies);
         token.ThrowIfCancellationRequested();
         var actual = host.Database.Apply(original).Get<CommitReceipt>();
         UserAnalyticsProcessState.Equal(expected, actual);

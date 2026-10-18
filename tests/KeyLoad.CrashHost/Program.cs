@@ -3,9 +3,7 @@ using KeyLoad;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.AnalyticsStore;
 using KeyLoad.CrashHost.Features.BlobStorage;
-using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.CrashHost.Features.Messaging;
-using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.CrashHost.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 
@@ -36,7 +34,6 @@ if (await BlobCommitCutScenario.TryRunAsync(args)
     || await NativeTextIncrementalCrashScenario.TryRunAsync(args)
     || await NativeTextCrashScenario.TryRunAsync(args)
     || await ExistingStoreInspector.TryRunAsync(args)
-    || await SnapshotManifestEntryProbe.TryRunAsync(args)
     || await ExternalQueueWorkerCrashScenario.TryRunAsync(args))
 {
     return;

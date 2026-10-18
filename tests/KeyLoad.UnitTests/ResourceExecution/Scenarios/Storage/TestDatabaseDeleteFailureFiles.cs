@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class TestDatabaseDeleteFailureFiles
 {
-    internal static async Task<PartitionPairedIdentityInventoryCut> CaptureAsync(TestDatabase fixture, CancellationToken token)
+    internal static async Task<PartitionIdentityInventoryCut> CaptureAsync(TestDatabase fixture, CancellationToken token)
     {
         if (OperatingSystem.IsWindows())
         {

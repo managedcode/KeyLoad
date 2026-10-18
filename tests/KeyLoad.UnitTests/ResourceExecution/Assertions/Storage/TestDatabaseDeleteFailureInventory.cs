@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class TestDatabaseDeleteFailureInventory
 {
-    internal static async Task RequireAsync(TestDatabase fixture, PartitionPairedIdentityInventoryCut expected,
+    internal static async Task RequireAsync(TestDatabase fixture, PartitionIdentityInventoryCut expected,
         CancellationToken token)
     {
         var actual = await TestDatabaseDeleteFailureFiles.CaptureAsync(fixture, token);

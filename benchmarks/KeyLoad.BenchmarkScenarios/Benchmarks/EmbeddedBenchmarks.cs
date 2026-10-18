@@ -192,11 +192,12 @@ public class EmbeddedBenchmarks : IDisposable
         private void Submit<T>(OperationKind kind, T payload)
         {
             var commandId = payload is CommandRequest command ? command.CommandId : Guid.NewGuid();
-            var result = Database.Apply(new(commandId, kind, PrincipalId, timeProvider.GetUtcNow(),
-                System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)));
-            if (result.Error is { } error)
+            var operation = Database.CreateCommand(kind, commandId, PrincipalId, timeProvider.GetUtcNow(),
+                System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
+            var result = Database.Apply(operation);
+            if (result.IsFailed)
             {
-                throw Errors.Fail(error, result.SafeDetail!);
+                throw Errors.Fail(Errors.Code(result.Problem!), result.Problem!.Detail!);
             }
         }
     }

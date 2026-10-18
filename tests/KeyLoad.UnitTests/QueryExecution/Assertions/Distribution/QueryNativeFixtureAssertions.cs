@@ -38,21 +38,4 @@ internal static class QueryNativeFixtureAssertions
         await Assert.That(fixture.Destination.Store.Position).IsEqualTo(destinationPosition);
     }
 
-    internal static async Task PageAsync(PartitionQueryPageV1 page, QueryNativeFixture fixture)
-    {
-        var expected = new PartitionQueryPageV1(QueryNativeFixture.Version,
-        [
-            new(fixture.ExpectedDestinationReference, new(QueryNativeFixture.DocumentId, QueryNativeFixture.First,
-                QueryNativeFixture.ProjectedJson, false, [])),
-            new(fixture.ExpectedSourceReference, new(QueryNativeFixture.DocumentId, QueryNativeFixture.First,
-                QueryNativePartitionFlow.SourceProjected, false, []))
-        ],
-        [
-            new(QueryNativeFixture.Partition, fixture.Destination.Store.Position, QueryNativePartitionFlow.DestinationEpoch,
-                QueryNativeFixture.First, "bounded-full-scan"),
-            new(QueryNativePartitionFlow.Local, fixture.Source.Store.Position, QueryNativePartitionFlow.SourceEpoch,
-                QueryNativeFixture.First, "bounded-full-scan")
-        ], true);
-        await Assert.That(NativeSerialization.Serialize(page).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
-    }
 }

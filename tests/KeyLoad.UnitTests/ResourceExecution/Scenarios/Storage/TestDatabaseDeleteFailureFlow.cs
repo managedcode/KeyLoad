@@ -11,7 +11,7 @@ internal static class TestDatabaseDeleteFailureFlow
         var failures = new List<Exception>();
         TestDatabase? fixture = null;
         TestDatabaseConcurrentCloseSeed? state = null;
-        PartitionPairedIdentityInventoryCut? inventory = null;
+        PartitionIdentityInventoryCut? inventory = null;
         TestDatabaseDeleteFailurePermission? permission = null;
         UnauthorizedAccessException? first = null;
         var joinAttempted = false;
@@ -52,7 +52,7 @@ internal static class TestDatabaseDeleteFailureFlow
         await TestDatabaseDeleteFailureHealthy.RunAsync(token);
     }
 
-    private static async Task RequireMemoizedAsync(TestDatabase fixture, PartitionPairedIdentityInventoryCut inventory,
+    private static async Task RequireMemoizedAsync(TestDatabase fixture, PartitionIdentityInventoryCut inventory,
         UnauthorizedAccessException first, CancellationToken token)
     {
         await Assert.That(Directory.Exists(fixture.Directory)).IsTrue();

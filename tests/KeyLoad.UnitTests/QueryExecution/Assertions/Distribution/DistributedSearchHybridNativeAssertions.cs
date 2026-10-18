@@ -16,7 +16,7 @@ internal static class DistributedSearchHybridNativeAssertions
                 QueryNativeFixture.ProjectedJson, true, [QueryNativeFixture.Secret]),
                 IndependentTextWeight / FirstDenominator + IndependentVectorWeight / SecondDenominator),
             new(new(fixture.ExpectedSourceReference, QueryNativeFixture.First,
-                QueryNativePartitionFlow.SourceProjected, true, [QueryNativeFixture.Secret]),
+                QueryNativeDataset.SourceProjected, true, [QueryNativeFixture.Secret]),
                 IndependentTextWeight / SecondDenominator + IndependentVectorWeight / FirstDenominator)
         ];
         var actual = DistributedSearchHybridNativeFlow.Execute(fixture, token);

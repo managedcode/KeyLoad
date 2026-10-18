@@ -9,7 +9,7 @@ internal sealed class AnalyticsSharedIntegrationTests
         => AnalyticsSharedFlow.MixedAsync(TestContext.Current!.Execution.CancellationToken);
 
     [Test]
-    public Task NativeAnalyticsOnlyWriteRegistersRosterInventoryAndExportsBothCanonicalFamilies()
+    public Task NativeAnalyticsOnlyWriteRegistersPartitionAndExportsBothCanonicalFamilies()
         => AnalyticsSharedFamilies.RunAsync(TestContext.Current!.Execution.CancellationToken);
     [Test]
     public async Task PolicyOnlySchemaCasCannotChangeAnalyticsStoreShape()

@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal static class PartitionPairedIdentityProtocol
+internal static class PartitionIdentityProtocol
 {
     internal const string JournalFile = "commands.wal";
     internal const long NextFrame = 1;

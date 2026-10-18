@@ -1,9 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -102,8 +103,30 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures);
-        await ServerFailureObserver.ObserveAsync(() => services.DisposeAsync().AsTask(), failures);
+        try
+        {
+            await owner.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        try
+        {
+            await services.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         ServerFailureObserver.Observe(Store.Dispose, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

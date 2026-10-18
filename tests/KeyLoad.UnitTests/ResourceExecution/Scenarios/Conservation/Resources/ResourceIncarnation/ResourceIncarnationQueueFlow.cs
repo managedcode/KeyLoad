@@ -16,7 +16,7 @@ internal static class ResourceIncarnationQueueFlow
     {
         token.ThrowIfCancellationRequested();
         var definition = new ResourceDefinition(Queue, ResourceKind.WorkQueue, fixture.Partition.TransactionDomainId);
-        var create = ResourceIncarnationLiteral.Configure(fixture.Partition, definition);
+        var create = ResourceIncarnationLiteral.Configure(fixture.Database, fixture.Partition, definition);
         var created = fixture.Database.Apply(create);
         await ResourceIncarnationAssertions.EqualAsync(definition, created.Get<ResourceDefinition>());
         var lifetime = ResourceIncarnationAssertions.Bytes(fixture.Store, ResourceIncarnationLiteral.LifetimeKey(fixture.Partition, Queue));
@@ -52,7 +52,7 @@ internal static class ResourceIncarnationQueueFlow
     }
 
     private static Command<DatabaseCommand> Control(DatabaseEngine database, QueueLaneRef lane, long version, bool paused)
-        => new(Guid.NewGuid(), OperationKind.SetQueueDispatch, "root", database.EvaluationClock.GetUtcNow(),
+        => database.CreateCommand(OperationKind.SetQueueDispatch, Guid.NewGuid(), "root", database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new QueueDispatchControlRequest(lane.Partition.TenantId, lane.Partition.DatabaseId,
                 lane.Queue, version, paused), JsonDefaults.Options));
 
@@ -128,6 +128,7 @@ internal static class ResourceIncarnationQueueFlow
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(lane.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(1);
         await ResourceIncarnationAssertions.EqualAsync<System.Collections.Immutable.ImmutableArray<MutationReceipt>>([expected], receipt.Mutations);
     }
 }

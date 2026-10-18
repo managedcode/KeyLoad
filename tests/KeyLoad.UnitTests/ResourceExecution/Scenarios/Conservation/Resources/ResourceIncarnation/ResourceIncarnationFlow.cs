@@ -9,8 +9,8 @@ internal static class ResourceIncarnationFlow
     {
         token.ThrowIfCancellationRequested();
         var original = ResourceIncarnationLiteral.Creation(fixture, sql, token);
-        var payload = original.PayloadJson;
-        var native = original.NativePayload.ToArray();
+        var fingerprint = original.Value!.Fingerprint;
+        var native = original.Value.Input.ToArray();
         var created = fixture.Database.Apply(original);
         var definition = ResourceIncarnationLiteral.Definition(sql);
         await ResourceIncarnationAssertions.EqualAsync(definition, created.Get<ResourceDefinition>());
@@ -20,13 +20,13 @@ internal static class ResourceIncarnationFlow
         await ResourceIncarnationAssertions.WriteAsync(fixture.Database, fixture.Partition, 1);
         var lifetime = ResourceIncarnationAssertions.Lifetime(fixture.Store, fixture.Partition);
         var bytes = ResourceIncarnationAssertions.Bytes(fixture.Store, ResourceIncarnationLiteral.LifetimeKey(fixture.Partition));
-        var creationOutcome = ResourceIncarnationAssertions.Bytes(fixture.Store, KeySpace.GlobalOutcome(original.PrincipalId, original.Id));
+        var creationOutcome = ResourceIncarnationAssertions.Bytes(fixture.Store, KeySpace.GlobalOutcome(original.UserId!, original.CommandId));
         var replacement = definition with
         {
             SchemaVersion = 2,
             FieldPolicies = [new("/secret", "confidential")]
         };
-        var updated = ResourceIncarnationLiteral.Configure(fixture.Partition, replacement, 1);
+        var updated = ResourceIncarnationLiteral.Configure(fixture.Database, fixture.Partition, replacement, 1);
         var outcome = fixture.Database.Apply(updated);
         await ResourceIncarnationAssertions.EqualAsync(replacement, outcome.Get<ResourceDefinition>());
         var state = new ResourceIncarnationState(original, created, replacement, lifetime, bytes, creationOutcome, updated, outcome,
@@ -35,8 +35,8 @@ internal static class ResourceIncarnationFlow
         await ResourceIncarnationAssertions.WriteAsync(fixture.Database, fixture.Partition, 2);
         await ResourceIncarnationRefusals.RunAsync(fixture, state, token);
         await ResourceIncarnationAssertions.ReplayAsync(fixture.Database, fixture.Store, state);
-        await Assert.That(original.PayloadJson).IsEqualTo(payload);
-        await Assert.That(original.NativePayload.ToArray()).IsEquivalentTo(native,
+        await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
+        await Assert.That(original.Value.Input.ToArray()).IsEquivalentTo(native,
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await ResourceIncarnationCold.RunAsync(fixture, state, token);
     }
@@ -52,7 +52,8 @@ internal static class ResourceIncarnationFlow
                 ClusterAdministrator = true
             };
             second.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
-            var independent = second.Database.CreateCommand(original.Value!.Kind, original.CommandId, principal.Id, second.Database.EvaluationClock.GetUtcNow(), original.PayloadJson);
+            var independent = second.Database.CreateCommand(original.Value!.Kind, original.CommandId, principal.Id,
+                second.Database.EvaluationClock.GetUtcNow(), ResourceIncarnationLiteral.CreationJson(original));
             await ResourceIncarnationAssertions.EqualAsync(definition, second.Database.ApplyEmbedded(independent, token).Get<ResourceDefinition>());
             var left = ResourceIncarnationAssertions.Lifetime(first.Store, first.Partition);
             var right = ResourceIncarnationAssertions.Lifetime(second.Store, second.Partition);
@@ -67,8 +68,8 @@ internal static class ResourceIncarnationFlow
         {
             token.ThrowIfCancellationRequested();
             await Assert.That(replica.Store.Identity.NodeId).IsNotEqualTo(originalOwner.Store.Identity.NodeId);
-            // Native authority is issued locally from the same original public envelope, not borrowed from another owner.
-            var local = replica.Database.CreateCommand(original.Value!.Kind, original.CommandId, original.UserId!, replica.Database.EvaluationClock.GetUtcNow(), original.PayloadJson);
+            var local = replica.Database.CreateCommand(original.Value!.Kind, original.CommandId, original.UserId!,
+                replica.Database.EvaluationClock.GetUtcNow(), ResourceIncarnationLiteral.CreationJson(original));
             await ResourceIncarnationAssertions.EqualAsync(definition, replica.Database.ApplyEmbedded(local, token).Get<ResourceDefinition>());
             await Assert.That(ResourceIncarnationAssertions.Bytes(replica.Store, ResourceIncarnationLiteral.LifetimeKey(replica.Partition)))
                 .IsEquivalentTo(ResourceIncarnationAssertions.Bytes(originalOwner.Store, ResourceIncarnationLiteral.LifetimeKey(originalOwner.Partition)),

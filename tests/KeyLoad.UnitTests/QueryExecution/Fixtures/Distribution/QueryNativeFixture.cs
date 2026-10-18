@@ -37,7 +37,7 @@ internal sealed class QueryNativeFixture(DocumentPatchAtomicityOwner source, Doc
     internal CommitReceipt Receipt { get; private set; } = null!;
     internal long WriteSequence { get; private set; }
     internal EntityRef ExpectedDestinationReference => Reference with { Lifetime = new(DestinationCreation.Incarnation.Value) };
-    internal EntityRef ExpectedSourceReference => new(QueryNativePartitionFlow.Local, Collection, DocumentId)
+    internal EntityRef ExpectedSourceReference => new(QueryNativeDataset.Local, Collection, DocumentId)
     {
         Lifetime = new(SourceCreation.Incarnation.Value)
     };
@@ -48,8 +48,8 @@ internal sealed class QueryNativeFixture(DocumentPatchAtomicityOwner source, Doc
 
     internal void Seed()
     {
-        SourceCreation = Configure(source);
-        DestinationCreation = Configure(destination);
+        SourceCreation = Configure();
+        DestinationCreation = SourceCreation;
         RequireOriginalResourceBindings();
         Principal(source, new(Reader, Tenant, [new(Partition.DatabaseId, Collection, Capability.DocumentsRead)], [Title]));
         Principal(destination, new(Reader, Tenant, [], [Title]));
@@ -68,17 +68,19 @@ internal sealed class QueryNativeFixture(DocumentPatchAtomicityOwner source, Doc
         => _ = owner.Submit(Operation(owner, OperationKind.ConfigurePrincipal, Guid.NewGuid(),
             new ConfigurePrincipalRequest(principal))).Get<PrincipalRecord>();
 
-    private static ResourceLifetimeV1 Configure(DocumentPatchAtomicityOwner owner)
+    private ResourceLifetimeV1 Configure()
     {
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, Partition.TransactionDomainId)
         {
             FieldPolicies = [new(Secret, Classification)]
         };
-        var creation = Operation(owner, OperationKind.ConfigureResource, Guid.NewGuid(),
+        var creation = Operation(source, OperationKind.ConfigureResource, Guid.NewGuid(),
             new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, definition));
         var expected = ResourceLifetimeIdentity.Create(creation, Partition.TenantId, Partition.DatabaseId, definition);
-        _ = owner.Submit(creation).Get<ResourceDefinition>();
-        RequireCreation(owner, expected);
+        _ = source.Submit(creation).Get<ResourceDefinition>();
+        _ = destination.Submit(destination.Database.OwnCommand(creation)).Get<ResourceDefinition>();
+        RequireCreation(source, expected);
+        RequireCreation(destination, expected);
         return expected;
     }
 

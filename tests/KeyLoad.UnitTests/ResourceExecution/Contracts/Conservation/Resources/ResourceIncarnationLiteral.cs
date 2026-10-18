@@ -1,5 +1,6 @@
 using ManagedCode.Communication.Commands;
 using System.Text.Json;
+using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
@@ -33,7 +34,7 @@ internal static class ResourceIncarnationLiteral
         var issued = fixture.Database.EvaluationClock.GetUtcNow();
         if (!sql)
         {
-            return new(OriginalId, OperationKind.ConfigureResource, "root", issued, RawCreate);
+            return fixture.Database.CreateCommand(OperationKind.ConfigureResource, OriginalId, "root", issued, RawCreate);
         }
         var limits = UnitExecutionOptions.DatabaseLimits();
         var decoded = SqlOperationCompiler.Compile(new(fixture.Partition, Sql, CommandId: OriginalId), limits,
@@ -41,12 +42,16 @@ internal static class ResourceIncarnationLiteral
         return fixture.Database.CreateCommand(OperationKind.CreateTable, decoded.CommandId, "root", issued, decoded.Payload);
     }
 
-    internal static Command<DatabaseCommand> Configure(PartitionRef partition, ResourceDefinition definition, long? expected = null)
-        => new(Guid.NewGuid(), OperationKind.ConfigureResource, "root", TimeProvider.System.GetUtcNow(),
+    internal static Command<DatabaseCommand> Configure(DatabaseEngine database, PartitionRef partition, ResourceDefinition definition, long? expected = null)
+        => database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), "root", database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition)
             {
                 ExpectedSchemaVersion = expected
             }, JsonDefaults.Options));
+
+    internal static string CreationJson(Command<DatabaseCommand> original)
+        => original.Value!.Kind == OperationKind.ConfigureResource ? RawCreate
+            : JsonSerializer.Serialize(NativeSerialization.Deserialize<CreateTableRequest>(original.Value.Input.Span), JsonDefaults.Options);
 
     internal static byte[] LifetimeKey(PartitionRef partition, string name = Table)
         => KeyCodec.Encode("resource-lifetime-v1", partition.TenantId, partition.DatabaseId, name);

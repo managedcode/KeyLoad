@@ -4,6 +4,6 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class DistributedSearchDeadlineNativeControlTests
 {
     [Test]
-    public Task ActualTwoOwnerCancellationAndPersistedDenialKeepOriginalMixedCauseThenFreshColdMergeIsHealthy()
+    public Task NativeLeafCancellationAndPersistedDenialKeepOriginalMixedCauseThenFreshColdOwnersAreHealthy()
         => QueryNativeFixtureAssertions.RunAsync(DistributedSearchDeadlineNativeControls.RequireAsync);
 }

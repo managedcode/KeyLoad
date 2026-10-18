@@ -50,7 +50,7 @@ internal static class RemoteTransferRepairCrashSetup
             : new CompleteQueueTransfer(source, hint.TransferId, receipt!);
         var original = new CommandRequest(originalId, stage == QueueTransferRepairStage.Accept ? target.Partition : source.Partition, [mutation]);
         var failed = CrashDatabase.Submit(database, OperationKind.Batch, original, originalId);
-        if (Errors.Code(failed.Problem) != ErrorCode.PermissionDenied || failed.Json is not null || failed.Value is not null)
+        if (Errors.Code(failed.Problem) != ErrorCode.PermissionDenied || failed.Value is not null)
         {
             throw new InvalidOperationException(RemoteTransferRepairCrashProtocol.Missing);
         }

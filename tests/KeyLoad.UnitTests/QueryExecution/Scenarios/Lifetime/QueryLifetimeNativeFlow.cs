@@ -8,7 +8,7 @@ using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-/// <summary>Uses two original real ZoneTree owners; this is target-execution evidence, not an CLUSTER transport.</summary>
+/// <summary>Exercises authorized native leaf execution against two original real ZoneTree owners.</summary>
 internal sealed class QueryLifetimeNativeFlow(QueryNativeFixture fixture, bool sourceNarrower)
 {
     internal QueryNativeFixture Fixture => fixture;
@@ -79,8 +79,10 @@ internal sealed class QueryLifetimeNativeFlow(QueryNativeFixture fixture, bool s
     }
 
     internal PartitionQueryLeafResultV1 Query(string path = QueryLifetimeNativeProtocol.Star,
-        PartitionQueryLifetimeMetadata? captured = null, Predicate? filter = null, bool nativeRoundTrip = true)
+        PartitionQueryLifetimeMetadata? captured = null, Predicate? filter = null, bool nativeRoundTrip = true,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var metadata = captured ?? Capture();
         var database = fixture.Destination.Database;
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
@@ -97,7 +99,7 @@ internal sealed class QueryLifetimeNativeFlow(QueryNativeFixture fixture, bool s
             ? NativeSerialization.Deserialize<PartitionQueryOwnedLeafRequestV2>(NativeSerialization.Serialize(input)) : input;
         return PartitionQueryLifetimeLeafExecution.Execute(engine, QueryNativeFixture.Reader, roundTrip,
             fixture.DestinationOwner, database.EvaluationClock,
-            database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), CancellationToken.None);
+            database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), cancellationToken);
     }
 
     internal DistributedSearchLeafResultV1 Statistics(PartitionQueryLifetimeMetadata? captured = null,

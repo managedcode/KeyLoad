@@ -19,8 +19,8 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         await A.UnchangedAsync(fixture, async () =>
         {
             await A.RowsAsync(fixture, original, 1, token);
-            var retained = original;
-            await Assert.That(retained.NativePayload.Span.SequenceEqual(original.NativePayload.Span)).IsTrue();
+            var retained = fixture.Owner.ReadOutcome(original).PreparedCommand;
+            await Assert.That(retained.Value!.Input.Span.SequenceEqual(original.Value!.Input.Span)).IsTrue();
             var payload = retained.Value!;
             var input = NativeSerialization.Deserialize<CommandRequest>(payload.Input.Span);
             await A.EqualAsync(fixture.Plain, ((UpsertAnalyticsEvents)input.Mutations.Single()).Events.Single().Links.Single());
@@ -67,7 +67,7 @@ internal static class AnalyticsEntityLinkLifetimeFlow
     private static async Task<Command<DatabaseCommand>> CommitAsync(F fixture, EntityRef link, long revision, CancellationToken token)
     {
         var original = Issue(fixture, link, revision, token);
-        var expected = new CommitReceipt(original.Id, fixture.Owner.NextToken(), [new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.First, revision + 1)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(original.CommandId, fixture.Owner.NextToken(), [new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.First, revision + 1)], DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(expected, fixture.Owner.Submit(original).Get<CommitReceipt>());
         return original;
     }
@@ -77,18 +77,17 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         var owner = fixture.Owner;
         var business = A.BusinessImage(fixture);
         var original = Issue(fixture, fixture.Foreign, 2, token);
-        var index = owner.ReadCanonicalCut().LastIndex + 1;
+        var index = owner.ReadCanonicalCut().AppliedPosition + 1;
         var position = owner.Store.Position;
         var result = owner.Submit(original);
         await A.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.OwnershipLost, ChangedLifetime)), result);
         await Assert.That(result.Value).IsNull();
         await Assert.That(A.BusinessImage(fixture).SequenceEqual(business, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(owner.ReadCanonicalCut().LastIndex).IsEqualTo(index);
-        await Assert.That(owner.ReadCanonicalCut().CommittedIndex).IsEqualTo(index);
+        await Assert.That(owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(index);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(index);
         await Assert.That(owner.Store.Position).IsEqualTo(position + 1);
         // Failed command metadata is a legitimate native commit, not a business mutation.
-        var key = OutcomeStoreOracle.PartitionKey(owner.Source.Partition, D.Root, original.Id);
+        var key = OutcomeStoreOracle.PartitionKey(owner.Source.Partition, D.Root, original.CommandId);
         var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))!;
         await A.EqualAsync(result, stored.Result);
         await A.UnchangedAsync(fixture, () => A.EqualAsync(result, owner.Submit(original)));

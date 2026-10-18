@@ -14,7 +14,7 @@ internal static class DistributedSearchStatisticsNativeAssertions
     internal static async Task HealthyAsync(QueryNativeFixture fixture, CancellationToken token)
     {
         var source = DistributedSearchStatisticsNativeFlow.Capture(fixture.Source,
-            QueryNativePartitionFlow.Local, fixture.SourceOwner, token);
+            QueryNativeDataset.Local, fixture.SourceOwner, token);
         var destination = DistributedSearchStatisticsNativeFlow.Capture(fixture.Destination,
             QueryNativeFixture.Partition, fixture.DestinationOwner, token);
         var statistics = DistributedSearchStatisticsNativeFlow.Combine(fixture.Source, source, destination, token);
@@ -30,7 +30,7 @@ internal static class DistributedSearchStatisticsNativeAssertions
             new(new(fixture.ExpectedDestinationReference, QueryNativeFixture.First,
                 QueryNativeFixture.ProjectedJson, true, [QueryNativeFixture.Secret]), Math.Log(CorpusDocuments) * UnitFrequencyScale / (TermDocuments + UnitLengthScale)),
             new(new(fixture.ExpectedSourceReference, QueryNativeFixture.First,
-                QueryNativePartitionFlow.SourceProjected, true, [QueryNativeFixture.Secret]), Math.Log(CorpusDocuments) * UnitFrequencyScale / (TermDocuments + UnitLengthScale))
+                QueryNativeDataset.SourceProjected, true, [QueryNativeFixture.Secret]), Math.Log(CorpusDocuments) * UnitFrequencyScale / (TermDocuments + UnitLengthScale))
         ];
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));

@@ -13,16 +13,16 @@ internal static class ImplementationTestOwnership
     {
         var owners = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
         var pending = new Queue<INamedTypeSymbol>();
-        foreach (var tree in compilation.SyntaxTrees.Where(tree =>
-            ImplementationTermSymbols.PathContains(tree.FilePath, ImplementationTermCatalog.TestPath)))
+        AddProcessEntry(compilation, pending, token);
+        foreach (var tree in compilation.SyntaxTrees.Where(tree => ExecutionPath(tree.FilePath)))
         {
             var model = compilation.GetSemanticModel(tree);
             foreach (var declaration in tree.GetRoot(token).DescendantNodes().OfType<TypeDeclarationSyntax>())
             {
                 token.ThrowIfCancellationRequested();
                 if (model.GetDeclaredSymbol(declaration, token) is INamedTypeSymbol type &&
-                    (ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestOwnerPath) ||
-                     type.GetMembers().Any(NativeTest)))
+                    (ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestPath) &&
+                     ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestOwnerPath) || NativeExecution(type)))
                 {
                     pending.Enqueue(type);
                 }
@@ -40,26 +40,68 @@ internal static class ImplementationTestOwnership
         return owners;
     }
 
-    private static bool NativeTest(ISymbol member) => member.GetAttributes().Any(static attribute =>
-        attribute.AttributeClass is { Name: "TestAttribute" } type &&
-        ImplementationTermSymbols.Native(type) &&
-        type.ContainingNamespace.ToDisplayString().StartsWith("TUnit.", StringComparison.Ordinal));
+    private static bool ExecutionPath(string path) =>
+        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.TestPath) ||
+        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.BenchmarkPath);
+
+    private static bool NativeExecution(INamedTypeSymbol type) => type.GetMembers().Any(member =>
+        member.GetAttributes().Any(static attribute => NativeExecutionAttribute(attribute.AttributeClass))) ||
+        type.GetAttributes().Any(static attribute => attribute.AttributeClass is { Name: "ClassDataSourceAttribute", Arity: 1 } source &&
+            ImplementationTermSymbols.Native(source) && source.ContainingNamespace.ToDisplayString() == "TUnit.Core") ||
+        type.AllInterfaces.Any(static contract => ImplementationTermSymbols.Native(contract) &&
+            contract.ToDisplayString() == "TUnit.Core.Interfaces.IAsyncInitializer");
+
+    private static bool NativeExecutionAttribute(INamedTypeSymbol? type) =>
+        type is not null && ImplementationTermSymbols.Native(type) &&
+        (type.Name == "TestAttribute" && type.ContainingNamespace.ToDisplayString().StartsWith("TUnit.", StringComparison.Ordinal) ||
+         type.Name is "BenchmarkAttribute" or "GlobalSetupAttribute" or "GlobalCleanupAttribute" &&
+         type.ContainingNamespace.ToDisplayString() == "BenchmarkDotNet.Attributes");
+
+    private static void AddProcessEntry(Compilation compilation, Queue<INamedTypeSymbol> pending, CancellationToken token)
+    {
+        if (compilation.AssemblyName != "KeyLoad.CrashHost" || compilation.GetEntryPoint(token) is not { } entry)
+        {
+            return;
+        }
+        foreach (var reference in entry.DeclaringSyntaxReferences.Where(reference =>
+            ImplementationTermSymbols.PathContains(reference.SyntaxTree.FilePath, ImplementationTermCatalog.TestPath)))
+        {
+            AddReferences(compilation, reference.GetSyntax(token), pending, token);
+        }
+        foreach (var tree in compilation.SyntaxTrees.Where(tree =>
+            ImplementationTermSymbols.PathContains(tree.FilePath, ImplementationTermCatalog.TestPath)))
+        {
+            if (tree.GetRoot(token) is CompilationUnitSyntax root)
+            {
+                foreach (var statement in root.Members.OfType<GlobalStatementSyntax>())
+                {
+                    AddReferences(compilation, statement, pending, token);
+                }
+            }
+        }
+    }
 
     private static void AddReferences(Compilation compilation, INamedTypeSymbol owner,
         Queue<INamedTypeSymbol> pending, CancellationToken token)
     {
         foreach (var declaration in owner.DeclaringSyntaxReferences)
         {
-            var model = compilation.GetSemanticModel(declaration.SyntaxTree);
-            foreach (var name in declaration.GetSyntax(token).DescendantNodes().OfType<SimpleNameSyntax>())
+            AddReferences(compilation, declaration.GetSyntax(token), pending, token);
+        }
+    }
+
+    private static void AddReferences(Compilation compilation, SyntaxNode source,
+        Queue<INamedTypeSymbol> pending, CancellationToken token)
+    {
+        var model = compilation.GetSemanticModel(source.SyntaxTree);
+        foreach (var name in source.DescendantNodesAndSelf().OfType<SimpleNameSyntax>())
+        {
+            token.ThrowIfCancellationRequested();
+            var symbol = model.GetSymbolInfo(name, token).Symbol;
+            var type = symbol as INamedTypeSymbol ?? symbol?.ContainingType;
+            if (type is not null && type.DeclaringSyntaxReferences.Any(reference => ExecutionPath(reference.SyntaxTree.FilePath)))
             {
-                token.ThrowIfCancellationRequested();
-                var symbol = model.GetSymbolInfo(name, token).Symbol;
-                var type = symbol as INamedTypeSymbol ?? symbol?.ContainingType;
-                if (type is not null && ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestPath))
-                {
-                    pending.Enqueue(type.OriginalDefinition);
-                }
+                pending.Enqueue(type.OriginalDefinition);
             }
         }
     }

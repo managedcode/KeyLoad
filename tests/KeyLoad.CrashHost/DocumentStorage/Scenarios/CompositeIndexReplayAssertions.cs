@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
+using ManagedCode.Communication;
 
 namespace KeyLoad.CrashHost.Features.DocumentStorage;
 
@@ -32,7 +32,7 @@ internal static class CompositeIndexReplayAssertions
         File.WriteAllBytes(Path.Combine(directory, OriginalFile), NativeSerialization.Serialize(original.Get<CommitReceipt>()));
         var before = CompositeIndexCrashOperations.Capture(database);
         var failure = ApplyConflict(database);
-        if (failure.Error != ErrorCode.Conflict)
+        if (Errors.Code(failure.Problem) != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(Invalid);
         }

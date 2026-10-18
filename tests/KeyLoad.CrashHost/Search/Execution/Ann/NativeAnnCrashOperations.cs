@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
+using ManagedCode.Communication;
 
 namespace KeyLoad.CrashHost.Features.Search;
 

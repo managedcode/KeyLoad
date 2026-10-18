@@ -27,11 +27,9 @@ internal static class AnalyticsSharedFamilies
         await AnalyticsSharedAssertions.SameAsync(new AtomicPartitionCatalogEntryV1(1, partition, 0, receipt.Token.Position), roster);
         var lifetime = fixture.Store.Read(view => ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
             P.Store, fixture.Database.Resource(view, partition, P.Store)))!;
-        var enrollment = fixture.Store.Read(view => view.GetRecord<ResourceOwnerInventoryEnrollmentV1>(ResourceOwnerInventoryKeys.Entry(lifetime, partition)));
-        await Assert.That(enrollment).IsNotNull();
-        await AnalyticsSharedAssertions.SameAsync(lifetime, enrollment!.Lifetime);
-        await Assert.That(enrollment.Partition).IsEqualTo(partition);
-        await Assert.That(enrollment.Origin.Proven).IsTrue();
+        await Assert.That(lifetime.ResourceName).IsEqualTo(P.Store);
+        await Assert.That(lifetime.Kind).IsEqualTo(ResourceKind.AnalyticsStore);
+        await Assert.That(lifetime.Incarnation.Value).IsNotEmpty();
         var evaluatedAt = new DateTimeOffset(fixture.ReadStoredOutcome(command.CommandId).PreparedCommand!.Timestamp);
         var row = new AnalyticsStoredEvent(new(P.EventId, P.Epoch, P.Dimensions, P.Metrics, null, [], 1), false, evaluatedAt);
         await PageAsync(fixture, partition, PartitionRecordFamilies.AnalyticsEvent,

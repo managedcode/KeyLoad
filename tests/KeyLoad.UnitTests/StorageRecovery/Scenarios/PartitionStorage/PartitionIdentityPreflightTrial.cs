@@ -1,24 +1,24 @@
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal static class PartitionPairedIdentityPreflightTrial
+internal static class PartitionIdentityPreflightTrial
 {
-    internal static async Task RunAsync(bool canonical, int capability, CancellationToken token)
+    internal static async Task RunAsync(int capability, CancellationToken token)
     {
         await PartitionHostRecoveryFixture.RunAsync(async fixture =>
         {
-            var original = await PartitionPairedIdentityPreparation.SeedAsync(fixture).ConfigureAwait(false);
+            var original = await PartitionIdentityPreparation.SeedAsync(fixture).ConfigureAwait(false);
             var path = Path.Combine(fixture.Options.DataDirectory,
-                canonical ? PartitionHostRecoveryFixture.CanonicalDirectory : ReplicaProtocol.ReplicaDirectory);
+                PartitionHostRecoveryFixture.CanonicalDirectory);
             var identityPath = RuntimeJournalReaderFixture.IdentityPath(path);
             var identityBytes = await File.ReadAllBytesAsync(identityPath, token).ConfigureAwait(false);
-            await PartitionPairedIdentityPreparation.AppendTornTailAsync(fixture, original.CanonicalPosition, token)
+            await PartitionIdentityPreparation.AppendTornTailAsync(fixture, original.Position, token)
                 .ConfigureAwait(false);
             await RuntimeJournalReaderFixture.RewriteCapabilityAsync(path, capability).ConfigureAwait(false);
-            var before = await PartitionPairedIdentityInventory.CaptureAsync(fixture.Options.DataDirectory).ConfigureAwait(false);
+            var before = await PartitionIdentityInventory.CaptureAsync(fixture.Options.DataDirectory).ConfigureAwait(false);
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
             await Assert.That(failure!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-            await PartitionPairedIdentityInventory.RequireUnchangedAsync(fixture.Options.DataDirectory, before)
+            await PartitionIdentityInventory.RequireUnchangedAsync(fixture.Options.DataDirectory, before)
                 .ConfigureAwait(false);
             using (var released = fixture.AcquireHostOwnership())
             {
@@ -27,7 +27,7 @@ internal static class PartitionPairedIdentityPreflightTrial
             await File.WriteAllBytesAsync(identityPath, identityBytes, token).ConfigureAwait(false);
             await Assert.That(await File.ReadAllBytesAsync(identityPath, token).ConfigureAwait(false))
                 .IsEquivalentTo(identityBytes);
-            await PartitionPairedIdentityContinuation.RequireAsync(fixture, original).ConfigureAwait(false);
+            await PartitionIdentityContinuation.RequireAsync(fixture, original).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 }

@@ -17,11 +17,11 @@ internal static class DistributedSearchHybridNativeSeed
 
     internal static void Seed(QueryNativeFixture fixture)
     {
-        var flow = new QueryNativePartitionFlow(fixture);
+        var flow = new QueryNativeDataset(fixture);
         flow.Seed();
         Configure(fixture.Source);
         Configure(fixture.Destination);
-        WriteVector(fixture.Source, QueryNativePartitionFlow.Local, [1f, 0f]);
+        WriteVector(fixture.Source, QueryNativeDataset.Local, [1f, 0f]);
         WriteVector(fixture.Destination, QueryNativeFixture.Partition, [0f, 1f]);
     }
 

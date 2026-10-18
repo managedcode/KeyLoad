@@ -11,7 +11,7 @@ internal sealed class DistributedSearchStatisticsNativeTests
     public async Task IndependentCanonicalCorporaProduceGlobalBm25AndCompleteRedactedLiteralDocuments()
         => await QueryNativeFixtureAssertions.RunAsync(async fixture =>
         {
-            var flow = new QueryNativePartitionFlow(fixture);
+            var flow = new QueryNativeDataset(fixture);
             flow.Seed();
             flow.GrantDestination();
             var source = QueryNativeFixtureAssertions.Image(fixture.Source);
@@ -27,11 +27,11 @@ internal sealed class DistributedSearchStatisticsNativeTests
         => await QueryNativeFixtureAssertions.RunAsync(async fixture =>
         {
             var token = TestContext.Current!.Execution.CancellationToken;
-            var flow = new QueryNativePartitionFlow(fixture);
+            var flow = new QueryNativeDataset(fixture);
             flow.Seed();
             flow.GrantDestination();
             var old = DistributedSearchStatisticsNativeFlow.Capture(fixture.Source,
-                QueryNativePartitionFlow.Local, fixture.SourceOwner, token);
+                QueryNativeDataset.Local, fixture.SourceOwner, token);
             var remote = DistributedSearchStatisticsNativeFlow.Capture(fixture.Destination,
                 QueryNativeFixture.Partition, fixture.DestinationOwner, token);
             var statistics = DistributedSearchStatisticsNativeFlow.Combine(fixture.Source, old, remote, token);

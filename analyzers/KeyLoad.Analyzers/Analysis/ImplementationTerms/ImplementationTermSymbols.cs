@@ -69,7 +69,9 @@ internal static class ImplementationTermSymbols
 
     internal static bool TimeSeries(ISymbol? symbol, Compilation compilation)
     {
-        if (symbol is IFieldSymbol { Name: "SeriesRead" or "SeriesAppend", ContainingType: { } capability } &&
+        if (symbol is IFieldSymbol or IPropertySymbol && symbol.ContainingAssembly.Name == "KeyLoad.BenchmarkScenarios" &&
+            Array.Exists(ImplementationTermCatalog.DataControlMembers, member => member == symbol.ToDisplayString()) ||
+            symbol is IFieldSymbol { Name: "SeriesRead" or "SeriesAppend", ContainingType: { } capability } &&
             capability.ToDisplayString() == "KeyLoad.Capability" &&
             capability.ContainingAssembly.Name == ImplementationTermCatalog.DataAssembly ||
             symbol is IFieldSymbol { IsConst: true, Type.SpecialType: SpecialType.System_String, ContainingType: { } family } &&
@@ -125,7 +127,9 @@ internal static class ImplementationTermSymbols
          Array.Exists(ImplementationTermCatalog.DataContractTypes, name => name == type.Name) ||
          type.ContainingAssembly?.Name == ImplementationTermCatalog.DataRuntimeAssembly &&
          type.ContainingNamespace?.ToDisplayString() == ImplementationTermCatalog.DataRuntimeNamespace &&
-         Array.Exists(ImplementationTermCatalog.DataRuntimeTypes, name => name == type.Name);
+         Array.Exists(ImplementationTermCatalog.DataRuntimeTypes, name => name == type.Name) ||
+         type.ContainingAssembly?.Name == "KeyLoad.BenchmarkScenarios" &&
+         Array.Exists(ImplementationTermCatalog.DataControlTypes, name => name == type.ToDisplayString());
 
     private static bool TypeMeans(ITypeSymbol? type, Func<ITypeSymbol, bool> accepts, HashSet<ITypeSymbol> visited)
     {

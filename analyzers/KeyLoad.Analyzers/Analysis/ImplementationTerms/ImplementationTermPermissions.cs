@@ -19,7 +19,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
         {
             return true;
         }
-        if (ImplementationSourceIdentity.Allows(term, node, model, cancellationToken))
+        if (ImplementationSourceIdentity.Allows(term, node, model, testOwners, cancellationToken))
         {
             return true;
         }
@@ -52,7 +52,8 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
              nameof(ImplementationTermCatalog.DataRecordFamilyFields) or nameof(ImplementationTermCatalog.DataReadKinds) or
              nameof(ImplementationTermCatalog.DataRequestPhases) or nameof(ImplementationTermCatalog.DataToolDescriptionFields) or
              nameof(ImplementationTermCatalog.DataRuntimeTypes) or nameof(ImplementationTermCatalog.MeasurementTypes) or
-             nameof(ImplementationTermCatalog.MeasurementMembers)
+             nameof(ImplementationTermCatalog.MeasurementMembers) or nameof(ImplementationTermCatalog.DataControlTypes) or
+             nameof(ImplementationTermCatalog.DataControlMembers)
          } ||
          symbol is IMethodSymbol { Name: nameof(ImplementationTermCatalog.Read) or "Classify" or "Compound" });
 

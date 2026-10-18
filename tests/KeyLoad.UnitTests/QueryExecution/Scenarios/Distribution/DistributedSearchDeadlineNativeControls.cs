@@ -12,25 +12,27 @@ internal static class DistributedSearchDeadlineNativeControls
     internal static async Task RequireAsync(QueryNativeFixture fixture)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var flow = new QueryNativePartitionFlow(fixture);
+        var flow = new QueryNativeDataset(fixture);
         flow.Seed();
         var source = QueryNativeFixtureAssertions.Image(fixture.Source);
         var destination = QueryNativeFixtureAssertions.Image(fixture.Destination);
         var sourcePosition = fixture.Source.Store.Position;
         var destinationPosition = fixture.Destination.Store.Position;
-        PartitionQueryPageV1? page = null;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
-            page = await flow.ExecuteAsync(token).ConfigureAwait(false), failures).ConfigureAwait(false);
-        var denied = failures.Single();
-        IReadOnlyList<Exception> deniedLeaves = denied is AggregateException aggregate ? aggregate.Flatten().InnerExceptions : [denied];
-        await Assert.That(deniedLeaves.Any(failure => failure is KeyLoadException { Code: ErrorCode.PermissionDenied })).IsTrue();
-        await Assert.That(deniedLeaves.All(failure => failure is KeyLoadException { Code: ErrorCode.PermissionDenied }
-            or OperationCanceledException)).IsTrue();
+        PartitionQueryLeafResultV1? page = null;
+        var leaf = new QueryLifetimeNativeFlow(fixture, sourceNarrower: false);
+        var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
+        {
+            page = leaf.Query(QueryNativeFixture.Title, cancellationToken: token);
+            return Task.CompletedTask;
+        }) ?? throw new InvalidOperationException(Missing);
+        await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         await caller.CancelAsync().ConfigureAwait(false);
-        var original = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
-            page = await flow.ExecuteAsync(caller.Token)) ?? throw new InvalidOperationException(Missing);
+        var original = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() =>
+        {
+            page = leaf.Query(QueryNativeFixture.Title, cancellationToken: caller.Token);
+            return Task.CompletedTask;
+        }) ?? throw new InvalidOperationException(Missing);
         await Assert.That(original.CancellationToken).IsEqualTo(caller.Token);
         await Assert.That(page).IsNull();
         var cancelled = OrleansRpcFailure.Translate(original, command: false, Guid.NewGuid(),
@@ -43,12 +45,11 @@ internal static class DistributedSearchDeadlineNativeControls
         destination = QueryNativeFixtureAssertions.Image(fixture.Destination);
         sourcePosition = fixture.Source.Store.Position;
         destinationPosition = fixture.Destination.Store.Position;
-        await QueryNativeFixtureAssertions.PageAsync(await flow.ExecuteAsync(token), fixture);
+        await DistributedSearchStatisticsNativeAssertions.HealthyAsync(fixture, token);
         await QueryNativeFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
         await fixture.Source.ReopenAsync();
         await fixture.Destination.ReopenAsync();
-        var cold = new QueryNativePartitionFlow(fixture);
-        await QueryNativeFixtureAssertions.PageAsync(await cold.ExecuteAsync(token), fixture);
+        await DistributedSearchStatisticsNativeAssertions.HealthyAsync(fixture, token);
         await QueryNativeFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
     }
 

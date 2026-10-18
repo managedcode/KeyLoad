@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -8,7 +9,8 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 
 internal static class ImplementationSourceIdentity
 {
-    internal static bool Allows(string term, SyntaxNode node, SemanticModel model, CancellationToken token)
+    internal static bool Allows(string term, SyntaxNode node, SemanticModel model,
+        Lazy<HashSet<INamedTypeSymbol>> testOwners, CancellationToken token)
     {
         var attribute = node.AncestorsAndSelf().OfType<AttributeSyntax>().FirstOrDefault();
         if (attribute?.ArgumentList is not { Arguments.Count: 2 } arguments ||
@@ -34,9 +36,18 @@ internal static class ImplementationSourceIdentity
         {
             return false;
         }
-        return term == ImplementationTermCatalog.DataWord &&
+        return term == ImplementationTermCatalog.ResourceWord && HasExecutionOwner(source, model.Compilation, testOwners, token) ||
+            term == ImplementationTermCatalog.DataWord &&
             (ImplementationTermSymbols.PathContains(source.FilePath, ImplementationTermCatalog.TimeSeriesPath) ||
              HasDomainRecords(source, model.Compilation, token));
+    }
+
+    private static bool HasExecutionOwner(SyntaxTree source, Compilation compilation,
+        Lazy<HashSet<INamedTypeSymbol>> owners, CancellationToken token)
+    {
+        var model = compilation.GetSemanticModel(source);
+        return source.GetRoot(token).DescendantNodes().OfType<TypeDeclarationSyntax>().Any(declaration =>
+            model.GetDeclaredSymbol(declaration, token) is INamedTypeSymbol type && owners.Value.Contains(type.OriginalDefinition));
     }
 
     private static bool HasDomainRecords(SyntaxTree source, Compilation compilation, CancellationToken token)

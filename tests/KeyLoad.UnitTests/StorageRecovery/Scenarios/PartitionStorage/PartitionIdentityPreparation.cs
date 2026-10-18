@@ -2,26 +2,25 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal static class PartitionPairedIdentityPreparation
+internal static class PartitionIdentityPreparation
 {
-    internal static async Task<PartitionPairedIdentityCut> SeedAsync(PartitionHostRecoveryFixture fixture)
+    internal static async Task<PartitionIdentityCut> SeedAsync(PartitionHostRecoveryFixture fixture)
     {
         await fixture.RunHostAsync(host =>
         {
             host.Database.Store.Commit((transaction, _) =>
             {
-                transaction.Put(PartitionPairedIdentityProtocol.OriginalKey, PartitionPairedIdentityProtocol.OriginalValue);
+                transaction.Put(PartitionIdentityProtocol.OriginalKey, PartitionIdentityProtocol.OriginalValue);
                 return true;
             });
             return Task.CompletedTask;
         }).ConfigureAwait(false);
-        PartitionPairedIdentityCut cut = null!;
+        PartitionIdentityCut cut = null!;
         await fixture.RunStoresAsync(stores =>
         {
             var journalLength = new FileInfo(Path.Combine(fixture.Options.DataDirectory,
-                PartitionHostRecoveryFixture.CanonicalDirectory, PartitionPairedIdentityProtocol.JournalFile)).Length;
-            cut = new(stores.Canonical.Identity, stores.Replica.Identity,
-                stores.Canonical.Position, stores.Replica.Position, journalLength);
+                PartitionHostRecoveryFixture.CanonicalDirectory, PartitionIdentityProtocol.JournalFile)).Length;
+            cut = new(stores.Canonical.Identity, stores.Canonical.Position, journalLength);
             return Task.CompletedTask;
         }).ConfigureAwait(false);
         return cut;
@@ -33,15 +32,15 @@ internal static class PartitionPairedIdentityPreparation
         using var serializer = new WalSerializerFixture();
         var payload = serializer.Serialize([new ZoneTreeJournalMutation
         {
-            Key = PartitionPairedIdentityProtocol.TornKey,
-            Value = new ReadOnlyMemory<byte>(PartitionPairedIdentityProtocol.TornValue),
+            Key = PartitionIdentityProtocol.TornKey,
+            Value = new ReadOnlyMemory<byte>(PartitionIdentityProtocol.TornValue),
             Kind = ZoneTreeJournalMutation.PutKind
         }]);
-        var frame = WalFileFixture.CreateFrame(payload, originalPosition + PartitionPairedIdentityProtocol.NextFrame);
+        var frame = WalFileFixture.CreateFrame(payload, originalPosition + PartitionIdentityProtocol.NextFrame);
         var path = Path.Combine(fixture.Options.DataDirectory,
-            PartitionHostRecoveryFixture.CanonicalDirectory, PartitionPairedIdentityProtocol.JournalFile);
+            PartitionHostRecoveryFixture.CanonicalDirectory, PartitionIdentityProtocol.JournalFile);
         await using var journal = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.None);
-        await journal.WriteAsync(frame.AsMemory(0, frame.Length - PartitionPairedIdentityProtocol.MissingFinalByte), token)
+        await journal.WriteAsync(frame.AsMemory(0, frame.Length - PartitionIdentityProtocol.MissingFinalByte), token)
             .ConfigureAwait(false);
     }
 }

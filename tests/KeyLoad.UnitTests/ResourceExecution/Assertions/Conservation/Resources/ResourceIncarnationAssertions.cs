@@ -24,7 +24,6 @@ internal static class ResourceIncarnationAssertions
     {
         await EqualAsync(Errors.Code(expected.Problem), Errors.Code(actual.Problem));
         await EqualAsync(expected.Problem?.Detail, actual.Problem?.Detail);
-        await EqualAsync(expected.Json, actual.Json);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());
         await EqualAsync(expected.Value, actual.Value);
     }
@@ -41,11 +40,12 @@ internal static class ResourceIncarnationAssertions
     {
         var fingerprint = JsonData.Fingerprint(new
         {
-            original.CommandId,
-            original.Value!.Kind,
-            original.UserId!,
-            original.PayloadJson
+            Id = original.CommandId,
+            Kind = original.Value!.Kind,
+            PrincipalId = original.UserId!,
+            PayloadJson = ResourceIncarnationLiteral.CreationJson(original)
         });
+        await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
         var incarnation = Convert.ToHexStringLower(SHA256.HashData(KeyCodec.Encode(
             "keyload:resource-incarnation:v1", partition.TenantId, partition.DatabaseId, definition.Name, fingerprint)));
         if (!sql)
@@ -62,7 +62,7 @@ internal static class ResourceIncarnationAssertions
     {
         await Assert.That(Bytes(store, ResourceIncarnationLiteral.LifetimeKey(partition))).IsEquivalentTo(state.LifetimeBytes,
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(Bytes(store, KeySpace.GlobalOutcome(state.Original.PrincipalId, state.Original.Id)))
+        await Assert.That(Bytes(store, KeySpace.GlobalOutcome(state.Original.UserId!, state.Original.CommandId)))
             .IsEquivalentTo(state.CreationOutcomeBytes, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await EqualAsync(state.Definition, store.Read(view => view.GetRecord<ResourceDefinition>(
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, ResourceIncarnationLiteral.Table)))!);
@@ -79,6 +79,7 @@ internal static class ResourceIncarnationAssertions
         await EqualAsync<System.Collections.Immutable.ImmutableArray<MutationReceipt>>(
             [new("putDocument", ResourceIncarnationLiteral.Table, ResourceIncarnationLiteral.RowId, revision)], receipt.Mutations);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(1);
         await RowAsync(database, partition, revision);
         return receipt;
     }

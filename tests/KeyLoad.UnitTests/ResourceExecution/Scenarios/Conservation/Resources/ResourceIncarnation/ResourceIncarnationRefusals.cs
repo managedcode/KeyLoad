@@ -6,7 +6,7 @@ internal static class ResourceIncarnationRefusals
 {
     internal static async Task RunAsync(TestDatabase fixture, ResourceIncarnationState state, CancellationToken token)
     {
-        var stale = ResourceIncarnationLiteral.Configure(fixture.Partition, state.Definition with
+        var stale = ResourceIncarnationLiteral.Configure(fixture.Database, fixture.Partition, state.Definition with
         {
             SchemaVersion = 3
         }, 1);
@@ -15,23 +15,18 @@ internal static class ResourceIncarnationRefusals
         state.Outcomes.Add((stale, failure));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);
         await ResourceIncarnationAssertions.RowAsync(fixture.Database, fixture.Partition, 2);
-        var collision = state.Original with
-        {
-            PayloadJson = state.Original.PayloadJson.Replace(
-            ResourceIncarnationLiteral.Table, "identity-collision", StringComparison.Ordinal),
-            NativePayload = default
-        };
+        var collision = fixture.Database.CreateCommand(state.Original.Value!.Kind, state.Original.CommandId,
+            state.Original.UserId!, fixture.Database.EvaluationClock.GetUtcNow(),
+            ResourceIncarnationLiteral.CreationJson(state.Original).Replace(
+                ResourceIncarnationLiteral.Table, "identity-collision", StringComparison.Ordinal));
         var conflict = fixture.Database.Apply(collision);
         await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(ResourceIncarnationLiteral.LifetimeKey(
             fixture.Partition, "identity-collision")))).IsNull();
-        var duplicate = state.Original with
-        {
-            Id = Guid.NewGuid(),
-            NativePayload = default
-        };
+        var duplicate = fixture.Database.CreateCommand(state.Original.Value.Kind, Guid.NewGuid(), state.Original.UserId!,
+            fixture.Database.EvaluationClock.GetUtcNow(), ResourceIncarnationLiteral.CreationJson(state.Original));
         var duplicateResult = fixture.Database.ApplyEmbedded(duplicate, token);
-        await Assert.That(Errors.Code(duplicateResult.Problem)).IsEqualTo(state.Original.Kind == OperationKind.CreateTable
+        await Assert.That(Errors.Code(duplicateResult.Problem)).IsEqualTo(state.Original.Value.Kind == OperationKind.CreateTable
             ? ErrorCode.Conflict : ErrorCode.UnsupportedCapability);
         state.Outcomes.Add((duplicate, duplicateResult));
         await PrincipalAsync(fixture, state, token);
@@ -43,7 +38,7 @@ internal static class ResourceIncarnationRefusals
         }));
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         await caller.CancelAsync();
-        var cancelled = ResourceIncarnationLiteral.Configure(fixture.Partition, state.Definition);
+        var cancelled = ResourceIncarnationLiteral.Configure(fixture.Database, fixture.Partition, state.Definition);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => fixture.Database.ApplyEmbedded(cancelled, caller.Token));
@@ -63,13 +58,10 @@ internal static class ResourceIncarnationRefusals
             ClusterAdministrator = true
         };
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
-        var original = state.Original with
-        {
-            PrincipalId = principal.Id,
-            NativePayload = default
-        };
+        var original = fixture.Database.CreateCommand(state.Original.Value!.Kind, state.Original.CommandId, principal.Id,
+            fixture.Database.EvaluationClock.GetUtcNow(), ResourceIncarnationLiteral.CreationJson(state.Original));
         var result = fixture.Database.ApplyEmbedded(original, token);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(state.Original.Kind == OperationKind.CreateTable
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(state.Original.Value.Kind == OperationKind.CreateTable
             ? ErrorCode.Conflict : ErrorCode.UnsupportedCapability);
         state.Outcomes.Add((original, result));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);
@@ -81,7 +73,7 @@ internal static class ResourceIncarnationRefusals
         fixture.Store.Commit((tx, _) => { if (corrupted is null) { tx.Delete(key); } else { tx.Put(key, corrupted); } return true; });
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var operation = ResourceIncarnationLiteral.Configure(fixture.Partition, state.Definition);
+        var operation = ResourceIncarnationLiteral.Configure(fixture.Database, fixture.Partition, state.Definition);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Apply(operation));
         await Assert.That(error!.Code).IsEqualTo(ErrorCode.Corruption);
         await ResourceIncarnationAssertions.UnchangedAsync(fixture.Store, image, position);

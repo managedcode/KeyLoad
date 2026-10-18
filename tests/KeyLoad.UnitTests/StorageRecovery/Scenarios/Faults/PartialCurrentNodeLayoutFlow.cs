@@ -12,20 +12,20 @@ internal static class PartialCurrentNodeLayoutFlow
     private static readonly byte[] Value = "native-current-prefix-write"u8.ToArray();
     private const string Separator = ":";
 
-    internal static async Task RunAsync(bool replicaPrefix)
+    internal static async Task RunAsync()
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var fixture = new PartitionHostRecoveryFixture();
-            await ServerFailureObserver.ObserveAsync(() => CompleteAsync(fixture, replicaPrefix), failures);
+            await ServerFailureObserver.ObserveAsync(() => CompleteAsync(fixture), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task CompleteAsync(PartitionHostRecoveryFixture fixture, bool replicaPrefix)
+    private static async Task CompleteAsync(PartitionHostRecoveryFixture fixture)
     {
-        var originalPrefix = await PartialCurrentNodeLayoutPrefix.CreateAsync(fixture, replicaPrefix);
+        var originalPrefix = await PartialCurrentNodeLayoutPrefix.CreateAsync(fixture);
         var failures = new List<Exception>();
         string[]? expected = null;
         string? identity = null;
@@ -61,7 +61,7 @@ internal static class PartialCurrentNodeLayoutFlow
                 }, failures);
             }), failures);
             ServerFailureObserver.ThrowIfAny(failures);
-            await PartialCurrentNodeLayoutPrefix.RequireAsync(fixture, replicaPrefix, originalPrefix);
+            await PartialCurrentNodeLayoutPrefix.RequireAsync(fixture, originalPrefix);
         }
     }
 }

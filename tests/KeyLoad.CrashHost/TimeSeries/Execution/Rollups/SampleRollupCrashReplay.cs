@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.CrashHost;
 
@@ -49,7 +49,7 @@ internal static class SampleRollupCrashReplay
             SampleRollupCrashContract.Set, SampleRollupCrashContract.Series, SampleRollupCrashContract.Start, SampleRollupCrashContract.End));
         Mutation changed = drop ? SampleRollupCrashContract.Drop(ChangedRevision) : SampleRollupCrashContract.Refresh(ChangedRevision);
         var failure = SampleRollupCrashOperations.Commit(database, SampleRollupCrashContract.InflightId, changed);
-        if (failure.Error != ErrorCode.Conflict || failure.SafeDetail != ContentConflict || failure.Json is not null)
+        if (Errors.Code(failure.Problem) != ErrorCode.Conflict || failure.Problem?.Detail != ContentConflict || failure.Value is not null)
         {
             throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
         }

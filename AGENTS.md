@@ -145,8 +145,11 @@ text and comments as `KLD0038` errors. Restricted terms include fallback,
 migration/migrate, regression, mock, fixture, sample/simple and compatibility,
 including their grammatical forms and compound identifiers. Meanings approved by
 the current design stay explicit: native Orleans activation migration, real
-TUnit fixtures owned under `tests/.../Fixtures/` and their source-resolved test
-contracts, metadata and support reachable from real native TUnit cases,
+TUnit fixtures owned under `tests/.../Fixtures/` and source-resolved test contracts,
+metadata and support reachable from real native TUnit cases or lifecycle interfaces;
+real process-recovery fixtures reached from the compiled `KeyLoad.CrashHost` entry point;
+BenchmarkDotNet fixtures rooted in its native benchmark, setup and cleanup attributes
+and their source-resolved measurement support under `benchmarks/`;
 time-series sample data, original operation/resource measurement samples and their
 authentic report fields, and resolved native framework API names. These are term-specific semantic contexts,
 not permission to add a fallback or mock inside an approved feature. The

@@ -7,10 +7,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartialCurrentNodeLayoutPrefix
 {
-    private const string CanonicalDirectory = "database";
-    private const string ReplicaDirectory = "replica";
-
-    internal static async Task<string> CreateAsync(PartitionHostRecoveryFixture fixture, bool replicaPrefix)
+    internal static async Task<string> CreateAsync(PartitionHostRecoveryFixture fixture)
     {
         Directory.CreateDirectory(fixture.Options.DataDirectory);
         var key = Convert.FromBase64String(fixture.Options.SigningKey);
@@ -20,7 +17,7 @@ internal static class PartialCurrentNodeLayoutPrefix
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var store = new ZoneTreeStore(new(Path(fixture, replicaPrefix))
+                using var store = new ZoneTreeStore(new(Path(fixture))
                 {
                     Incarnation = fixture.Options.Incarnation,
                     SigningKey = key
@@ -41,7 +38,7 @@ internal static class PartialCurrentNodeLayoutPrefix
         return identity ?? throw new InvalidOperationException(MissingIdentity);
     }
 
-    internal static async Task RequireAsync(PartitionHostRecoveryFixture fixture, bool replicaPrefix, string identity)
+    internal static async Task RequireAsync(PartitionHostRecoveryFixture fixture, string identity)
     {
         var key = Convert.FromBase64String(fixture.Options.SigningKey);
         var failures = new List<Exception>();
@@ -49,7 +46,7 @@ internal static class PartialCurrentNodeLayoutPrefix
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var store = new ZoneTreeStore(new(Path(fixture, replicaPrefix))
+                using var store = new ZoneTreeStore(new(Path(fixture))
                 {
                     Incarnation = fixture.Options.Incarnation,
                     SigningKey = key
@@ -63,7 +60,7 @@ internal static class PartialCurrentNodeLayoutPrefix
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static string Path(PartitionHostRecoveryFixture fixture, bool replicaPrefix)
-        => System.IO.Path.Combine(fixture.Options.DataDirectory, replicaPrefix ? ReplicaDirectory : CanonicalDirectory);
+    private static string Path(PartitionHostRecoveryFixture fixture)
+        => System.IO.Path.Combine(fixture.Options.DataDirectory, PartitionHostRecoveryFixture.CanonicalDirectory);
     private const string MissingIdentity = "The genuine empty native prefix identity is required.";
 }

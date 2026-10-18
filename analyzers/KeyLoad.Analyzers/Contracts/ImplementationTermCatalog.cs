@@ -14,6 +14,7 @@ internal static class ImplementationTermCatalog
     internal const string RuleVocabularyType = "KeyLoad.Analyzers.Features.CodeQuality.ImplementationTermCatalog";
     internal const string TimeSeriesPath = "/TimeSeries/";
     internal const string TestPath = "/tests/";
+    internal const string BenchmarkPath = "/benchmarks/";
     internal const string TestOwnerPath = "/Fixtures/";
     internal const string OrleansWord = "Orleans";
     internal const string ActivationWord = "activation";
@@ -79,6 +80,18 @@ internal static class ImplementationTermCatalog
     internal static readonly string[] DataRuntimeTypes =
     [
         "ISampleChunkWorkerGrain", "SampleChunkWorkerGrain", "ISampleChunkCoordinatorGrain", "SampleChunkCoordinatorGrain"
+    ];
+    internal static readonly string[] DataControlTypes =
+    [
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkCorpus",
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkManifest",
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkState",
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkSerializationBenchmarks"
+    ];
+    internal static readonly string[] DataControlMembers =
+    [
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.BenchmarkArtifactOptions.SampleChunkDirectory",
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.BenchmarkArtifactOptions.InvalidSource"
     ];
     internal static readonly string[] NativeModelContracts =
     [

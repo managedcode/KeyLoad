@@ -2,9 +2,9 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal static class PartitionPairedIdentityInventory
+internal static class PartitionIdentityInventory
 {
-    internal static async Task<PartitionPairedIdentityInventoryCut> CaptureAsync(string root)
+    internal static async Task<PartitionIdentityInventoryCut> CaptureAsync(string root)
     {
         var bytes = await RuntimeJournalReaderFixture.ReadInventoryAsync(root).ConfigureAwait(false);
         var modes = new Dictionary<string, UnixFileMode>(StringComparer.Ordinal);
@@ -19,7 +19,7 @@ internal static class PartitionPairedIdentityInventory
         return new(bytes, modes);
     }
 
-    internal static async Task RequireUnchangedAsync(string root, PartitionPairedIdentityInventoryCut expected)
+    internal static async Task RequireUnchangedAsync(string root, PartitionIdentityInventoryCut expected)
     {
         var actual = await CaptureAsync(root).ConfigureAwait(false);
         await Assert.That(actual.Bytes.Keys.Order(StringComparer.Ordinal))
