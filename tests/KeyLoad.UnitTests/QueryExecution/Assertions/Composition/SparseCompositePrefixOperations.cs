@@ -15,9 +15,9 @@ internal static class SparseCompositePrefixOperations
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
-            foreach (var fallback in new[] { false, true })
+            foreach (var includeStatusIndex in new[] { false, true })
             {
-                await CollectionAsync(engine, store, partition, includeNull, includeMissing, fallback);
+                await CollectionAsync(engine, store, partition, includeNull, includeMissing, includeStatusIndex);
             }
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => ReplayAsync(owner, store, originals), failures);
@@ -41,20 +41,20 @@ internal static class SparseCompositePrefixOperations
         }
     }
     private static async Task CollectionAsync(QueryEngine engine, ZoneTreeStore store, PartitionRef partition,
-        bool includeNull, bool includeMissing, bool fallback)
+        bool includeNull, bool includeMissing, bool includeStatusIndex)
     {
-        var collection = fallback ? SparseCompositePrefixData.Fallback : SparseCompositePrefixData.Only;
+        var collection = includeStatusIndex ? SparseCompositePrefixData.WithStatusIndex : SparseCompositePrefixData.Only;
         foreach (var shape in new[] { 0, 1, 2 })
         {
             foreach (var reference in new[] { false, true })
             {
                 var path = reference ? SparseCompositePrefixData.Scan
-                    : SparseCompositePrefixData.Path(includeNull, includeMissing, fallback, shape);
+                    : SparseCompositePrefixData.Path(includeNull, includeMissing, includeStatusIndex, shape);
                 await PagesAsync(engine, store, partition, collection, shape, reference, path);
             }
         }
-        await ConsentAsync(engine, store, partition, collection, includeNull && includeMissing || fallback,
-            SparseCompositePrefixData.Path(includeNull, includeMissing, fallback, 0));
+        await ConsentAsync(engine, store, partition, collection, includeNull && includeMissing || includeStatusIndex,
+            SparseCompositePrefixData.Path(includeNull, includeMissing, includeStatusIndex, 0));
     }
     private static async Task PagesAsync(QueryEngine engine, ZoneTreeStore store, PartitionRef partition,
         string collection, int shape, bool reference, string path)

@@ -2,8 +2,8 @@ using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.DocumentStorage;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
@@ -34,7 +34,7 @@ internal static class EventAppendRecoveryOracle
         await EventAppendStateAssertions.VerifyAsync(database, new DateTimeOffset(original.Timestamp), seedTail, committed, healthy: false);
         if (recovered is not null)
         {
-            await EventAppendReceiptAssertions.VerifyAsync(store, recovered.Get<CommitReceipt>(), seedPosition + PositionStep);
+            await EventAppendReceiptAssertions.VerifyAsync(store, recovered.Value.Get<CommitReceipt>(), seedPosition + PositionStep);
         }
         await EventAppendReceiptAssertions.AssertOutboxPresenceAsync(store, seedTail, committed);
         var applied = database.Apply(original);

@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 

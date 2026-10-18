@@ -2,7 +2,7 @@ using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -30,7 +30,7 @@ internal static class BlobCompleteCommitCutAssertions
         var oldHash = BlobCompleteCommitCutOracle.Chain(proof.Incarnation, blob, BlobCommitCutProtocol.OriginalUpload, oldBytes);
         var newHash = BlobCompleteCommitCutOracle.Chain(proof.Incarnation, blob, BlobCommitCutProtocol.NewUpload, newBytes);
         var prior = new BlobMetadata(blob, 1, BlobCommitCutProtocol.OriginalUpload, OriginalLength, 1,
-            oldHash, new RowAccess(), BlobCompleteCommitCutOracle.PriorComplete(proof).EvaluatedAt);
+            oldHash, new RowAccess(), new DateTimeOffset(BlobCompleteCommitCutOracle.PriorComplete(proof).Timestamp));
         var current = new BlobMetadata(blob, 2, BlobCommitCutProtocol.NewUpload, newBytes.Length, 2,
             newHash, new RowAccess(), new DateTimeOffset(selected.Timestamp));
         var expected = committed ? current : prior;
@@ -55,8 +55,8 @@ internal static class BlobCompleteCommitCutAssertions
         var begin = BlobCompleteCommitCutOracle.Begin(proof, upload);
         var revision = upload == BlobCommitCutProtocol.OriginalUpload ? 0 : 1;
         var parts = upload == BlobCommitCutProtocol.OriginalUpload ? 1 : 2;
-        var expiry = begin.EvaluatedAt.AddSeconds(BlobCompleteCommitCutOracle.UploadLifetimeSeconds);
-        var state = new BlobState(Format, proof.Incarnation, proof.Incarnation, begin.Id,
+        var expiry = new DateTimeOffset(begin.Timestamp).AddSeconds(BlobCompleteCommitCutOracle.UploadLifetimeSeconds);
+        var state = new BlobState(Format, proof.Incarnation, proof.Incarnation, begin.CommandId,
             BlobCommitCutProtocol.Principal, blob, upload, new RowAccess(), bytes.Length, revision, expiry,
             parts, bytes.Length, hash, status, 0, 0, retired);
         await BlobCompleteCommitCutOracle.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobState>(

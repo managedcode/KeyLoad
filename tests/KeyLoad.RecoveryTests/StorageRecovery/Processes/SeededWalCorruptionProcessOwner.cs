@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.Server;
 
@@ -54,7 +54,7 @@ internal sealed class SeededWalCorruptionProcessOwner(SeededWalCorruptionTrial t
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location,
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location,
             NativeChecksumProfileProtocol.Mode, trial.Root, phase })
         {
             info.ArgumentList.Add(argument);

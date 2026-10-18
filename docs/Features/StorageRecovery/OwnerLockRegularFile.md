@@ -6,7 +6,7 @@ REQ-OWNER-ENTRY-001: Existing node-local owner.lock must be a retained, identity
 
 REQ-OWNER-ENTRY-002: Preserve the absolute file Name required by the existing empty-store identity validation. Thread the original path through existing internal transfer methods; no native ABI, storage format, alias, authority or disposal-order change. New private creation retains ordinary BCL ownership. Existing native flock and same disposal task remain unchanged.
 
-AC-OWNER-ENTRY-001: Genuine seeded stores with a symlink owner entry and a directory owner entry refuse normal provider open and the actual existing-store CrashHost child with fixed FormatUnsupported. Actual child exit and both readers settle. Repair the original owner entry, compare every original store entry byte, then require two genuine child cold opens and normal reopen with full identity/signing-key/value/position.
+AC-OWNER-ENTRY-001: Genuine seeded stores with a symlink owner entry and a directory owner entry refuse normal provider open and the actual existing-store RecoveryHost child with fixed FormatUnsupported. Actual child exit and both readers settle. Repair the original owner entry, compare every original store entry byte, then require two genuine child cold opens and normal reopen with full identity/signing-key/value/position.
 
 AC-OWNER-ENTRY-002: Missing existing-only owner file produces FileNotFound without creation; repair preserves complete files and the same healthy continuation. Fresh creation and a preexisting empty regular owner file both permit native identity creation, real commit, exclusive second-open refusal and identity-preserving reopen. The preexisting-empty case specifically exercises the native stream Name override.
 

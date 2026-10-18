@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.DocumentStorage;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 
@@ -66,7 +66,7 @@ internal static class CommandIdempotencyProcess
         };
         foreach (var argument in new[]
         {
-            typeof(CrashHostMarker).Assembly.Location,
+            typeof(RecoveryHostMarker).Assembly.Location,
             root,
             CommitStage.ApplyCompleted.ToString(),
             MutationIndex.ToString(CultureInfo.InvariantCulture),

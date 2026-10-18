@@ -1,4 +1,4 @@
-using KeyLoad.CrashHost.Features.ClusterRouting;
+using KeyLoad.RecoveryHost.Features.ClusterRouting;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;

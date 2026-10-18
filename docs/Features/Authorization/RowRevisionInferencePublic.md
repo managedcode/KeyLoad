@@ -4,7 +4,7 @@ REQ/AC-AUTH-005, REQ/AC-AUTH-009, REQ/AC-DSTORE-003 and the row-inference threat
 
 The three whole Case arguments Put/Patch/Delete own actual Aspire ClusterFixture cluster resources, discovered endpoints, real .NET SDK and official MCP C# SDK clients. At each guessed revision0/1/2, independent SDK-first and official-MCP-first new command IDs must return PermissionDenied; the other adapter then repeats that exact GUID/payload. SDK requires the entire native row-denied Problem; official MCP requires the entire closed safe Problem/envelope and dispatched nonempty GUID. Neither errors nor summaries may expose private payload canary or credential. Own-row stale CAS retains RevisionConflict, including same-ID replay.
 
-Each actual mutation refusal/replay is immediately bracketed by administrator SDK+official MCP full independent literal two-document results and complete frozen outbox. Domain data, revision and outbox remain exact; public observations do not claim every physical key/watermark unchanged, because genuine failed outcomes can be durable. Root then really changes hidden row ownership at revision2 without changing the member principal/key/epoch1. A fresh member command succeeds at revision3 (Patch preserves the exact original secret property; Put replaces the complete JSON; Delete returns a tombstone/null point result) with complete independently validated quorum receipt, then identical SDK/MCP receipt replays. Original failed IDs still return their canonical original failure under the unchanged policy epoch; no old failure becomes a fresh write. All original root seed and repair receipts replay without reverting current rows. Reader full current documents and original failed/successful results survive two actual joined all-three cluster cold cycles on original volumes.
+Each actual mutation refusal/replay is immediately bracketed by administrator SDK+official MCP full independent literal two-document results and complete frozen outbox. Domain data, revision and outbox remain exact; public observations do not claim every physical key/watermark unchanged, because genuine failed outcomes can be durable. Root then really changes hidden row ownership at revision2 without changing the member principal/key/epoch1. A fresh member command succeeds at revision3 (Patch preserves the exact original secret property; Put replaces the complete JSON; Delete returns a tombstone/null point result) with complete independently validated persisted-copy receipt, then identical SDK/MCP receipt replays. Original failed IDs still return their canonical original failure under the unchanged policy epoch; no old failure becomes a fresh write. All original root seed and repair receipts replay without reverting current rows. Reader full current documents and original failed/successful results survive two actual joined all-three cluster cold cycles on original volumes.
 
 ```mermaid
 flowchart LR
@@ -12,8 +12,8 @@ flowchart LR
  FreshSdkAndOfficialMcp --> UniformDeniedBeforeCas
  UniformDeniedBeforeCas --> RootFullModelOutbox
  RootFullModelOutbox --> ActualRowOwnerRepair
- ActualRowOwnerRepair --> FreshQuorumWrite
- FreshQuorumWrite --> OriginalFailedAndSuccessfulReplays
+ ActualRowOwnerRepair --> FreshPersistedWrite
+ FreshPersistedWrite --> OriginalFailedAndSuccessfulReplays
  OriginalFailedAndSuccessfulReplays --> TwoJoinedClusterColdCuts
 ```
 

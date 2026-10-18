@@ -2,7 +2,7 @@ using ManagedCode.Communication.Commands;
 using System.Diagnostics;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 
@@ -44,12 +44,12 @@ internal sealed class AggregateReplayProcessRecoveryTests
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
                      index.ToString(System.Globalization.CultureInfo.InvariantCulture), AggregateReplayCrashScenario.Mode })
         {
             start.ArgumentList.Add(argument);
         }
-        return Process.Start(start) ?? throw new InvalidOperationException("Could not start aggregate replay crash host.");
+        return Process.Start(start) ?? throw new InvalidOperationException("Could not start aggregate replay recovery process.");
     }
 
     private static async Task KillAtBoundaryAsync(Process process, string root, CancellationToken cancellationToken)

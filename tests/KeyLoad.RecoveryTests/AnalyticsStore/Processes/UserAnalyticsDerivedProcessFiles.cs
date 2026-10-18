@@ -1,6 +1,6 @@
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
-using P = KeyLoad.CrashHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
+using P = KeyLoad.RecoveryHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
 
@@ -10,7 +10,6 @@ internal static class UserAnalyticsDerivedProcessFiles
     {
         var physical = Path.Combine(root, P.PhysicalDirectory);
         await KilledProcessFileReadiness.WaitAsync(Path.Combine(physical, PartitionStoreProtocol.CanonicalDirectory), token);
-        await KilledProcessFileReadiness.WaitAsync(Path.Combine(physical, ReplicaProtocol.ReplicaDirectory), token);
         token.ThrowIfCancellationRequested();
         using var ownership = new FileStream(Path.Combine(physical, PartitionStoreProtocol.OwnershipFile),
             FileMode.Open, FileAccess.ReadWrite, FileShare.None);

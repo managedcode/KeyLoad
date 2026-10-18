@@ -4,8 +4,8 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;

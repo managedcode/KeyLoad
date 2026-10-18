@@ -32,7 +32,7 @@ Two cold opens reuse the original native canonical and distinct replica director
 
 Unit case: QueueViewLeaseIsolationTests.ActiveLeaseViewsArePureMaskedCurrentAuthorityAndOriginalHistorySurvivesRenewAckHealthyAndTwoNativeCold. Public case: QueueViewLeaseIsolationTests.ActiveLeaseViewsPreserveClaimsDuringSqlAstCurrentPolicyRepairThenOriginalTokenRenewAckAndTwoColdCuts. Both are under QueryExecution with feature-local role folders. Frontend is N/A because this adds database acceptance only. New product contracts are N/A; existing official SDK/MCP contracts and actual ScriptDom syntax are used unchanged.
 
-Native ownership reuses DocumentPatchAtomicityOwner as its existing operation-generic canonical/native-replica fixture. This is real ZoneTree, retained DurableReplicaLog and ReplicaMaterializer admission, not native cluster/quorum evidence. The public fixture owns actual cluster and complete joined disposal. Independent source review and syntax/numeric preflight are not compilation, runtime, process-kill, power-loss, SQL-wire, full-SQL, performance or production qualification.
+Native ownership uses the actual silo-local ZoneTree owner and native command outcomes. Ordered apply, current persisted policy, held read views and original receipt replay are operation evidence. Distributed acknowledgement and fault behavior require the actual Orleans cluster. The public fixture owns actual cluster and complete joined disposal. Independent source review and syntax/numeric preflight are not compilation, runtime, process-kill, power-loss, SQL-wire, full-SQL, performance or production qualification.
 
 ```mermaid
 flowchart LR

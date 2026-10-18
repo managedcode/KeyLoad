@@ -197,7 +197,7 @@ public class EmbeddedBenchmarks : IDisposable
             var result = Database.Apply(operation);
             if (result.IsFailed)
             {
-                throw Errors.Fail(Errors.Code(result.Problem!), result.Problem!.Detail!);
+                throw Errors.Fail(Errors.Code(result.Problem!)!.Value, result.Problem!.Detail!);
             }
         }
     }

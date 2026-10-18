@@ -38,7 +38,8 @@ internal static class QueueDeadlineSignedRetry
             QueueDeadlineNativeProtocol.LeaseSpace, lane.Partition, lane.Queue, delivery.LeaseUntil, delivery.Id), CollectionOrdering.Matching);
         await Assert.That(choice.DelayMilliseconds).IsGreaterThanOrEqualTo((int)QueueDeadlineNativeProtocol.First);
         await Assert.That(choice.DelayMilliseconds).IsLessThanOrEqualTo(QueueDeadlineNativeProtocol.RetryCapMilliseconds);
-        await Assert.That(choice.RetryAt).IsEqualTo(operation.EvaluatedAt.AddMilliseconds(choice.DelayMilliseconds));
+        await Assert.That(choice.RetryAt).IsEqualTo(new DateTimeOffset(operation.Timestamp).AddMilliseconds(choice.DelayMilliseconds));
+        await QueueDeadlineNativeAssertions.AlteredRetryDrawAsync(fixture.Database, fixture.Store, lane, operation);
         var result = fixture.Database.Apply(operation);
         result.Get<CommitReceipt>();
         var expected = new MessageMetadata(delivery.Id, MessageState.Scheduled, delivery.Attempt,

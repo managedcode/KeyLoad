@@ -1,7 +1,8 @@
 using System.Security.Cryptography;
-using KeyLoad.CrashHost.Features.EventStreams;
+using KeyLoad.Core;
+using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -27,13 +28,18 @@ internal static class SharedDomainRecoveryImage
     {
         var scope = SharedDomainCorpus.Create(Tenant, Database)[FirstIndex];
         var original = scope.Partition;
-        var expected = WithoutScope(await SharedDomainRecoveryInventoryImage.ExpectedAsync(input, scope, committed), original);
+        var expectedApplied = SharedDomainRecoverySeed.AppliedPosition(input) + (committed ? FirstRevision : NoRevision);
+        var appliedKey = Convert.ToHexString(KeySpace.AppliedBytes) + RowSeparator;
+        var expected = WithoutScope(input.SeedImage, original).Select(row =>
+            row.StartsWith(appliedKey, StringComparison.Ordinal)
+                ? appliedKey + Convert.ToHexString(NativeSerialization.Serialize(expectedApplied)) : row);
+        await Assert.That(store.Read(view => view.GetRecord<long>(KeySpace.AppliedBytes))).IsEqualTo(expectedApplied);
         await Assert.That(WithoutScope(SharedDomainStoredImage.Capture(store), original))
             .IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     private static IEnumerable<string> WithoutScope(IEnumerable<string> rows, PartitionRef partition)
-        => rows.Where(row => SharedDomainRecoveryInventoryImage.Retain(Convert.FromHexString(row[..row.IndexOf(RowSeparator, StringComparison.Ordinal)]), partition));
+        => rows.Where(row => !SharedDomainStoredImage.Owns(Convert.FromHexString(row[..row.IndexOf(RowSeparator, StringComparison.Ordinal)]), partition));
 
     internal static async Task SameAsync(IAtomicStore store, string[] rows, long position)
     {

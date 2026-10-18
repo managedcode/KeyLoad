@@ -1,4 +1,4 @@
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 
 namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 

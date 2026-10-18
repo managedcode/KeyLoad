@@ -9,8 +9,8 @@ internal static class PartitionStorageNativeProtocol
     internal const string Json = "{\"text\":\"native storage\"}";
     internal const string PutKind = "putDocument";
     internal const long InitialRevision = 1;
-    internal const long OwnershipEpoch = 1;
-    internal const int FirstOwner = 0;
+    internal const long CanonicalStep = 1;
+    internal const int PersistedCopies = 1;
     internal static readonly PartitionRef Partition = new("system", "native-storage", "knowledge", PartitionKey);
     internal static readonly Guid Configure = Guid.Parse("f955a135-81fb-4b15-acf7-ab7f32732c07");
     internal static readonly Guid Command = Guid.Parse("b4cb2998-d3bb-413c-924d-21c67cb1fe4f");

@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
@@ -16,6 +16,7 @@ internal static class TopicPurgeReceiptAssertions
     {
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(pinned ? ErrorCode.ResourceExhausted : (ErrorCode?)null);
+        var stored = OutcomeStoreOracle.ReadStored(store, operation)!;
         if (pinned)
         {
             await Assert.That(outcome.Problem?.Detail).IsEqualTo(PinnedDetail);
@@ -25,23 +26,24 @@ internal static class TopicPurgeReceiptAssertions
         {
             var receipt = outcome.Get<CommitReceipt>();
             await Assert.That(receipt.CommandId).IsEqualTo(TopicPurgeCrashContract.PurgeId);
-            await Assert.That(receipt.Token.Position).IsEqualTo(position);
+            await Assert.That(receipt.Token.Position).IsEqualTo(stored.CanonicalSequence);
             await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
             await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(TopicPurgeCrashContract.Partition.AtomicPartitionId);
 
             await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
             await Assert.That(receipt.Mutations).IsEquivalentTo(new[] { new MutationReceipt("purgeTopic", TopicPurgeCrashContract.Topic, "2", 2) }, CollectionOrdering.Matching);
         }
-        var stored = OutcomeStoreOracle.ReadStored(store, operation)!;
         await Assert.That(stored.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(stored.Partition).IsEqualTo(TopicPurgeCrashContract.Partition);
         var canonical = "{\"id\":" + JsonSerializer.Serialize(operation.CommandId, JsonDefaults.Options) + ",\"kind\":" +
             JsonSerializer.Serialize(OperationKind.Batch, JsonDefaults.Options) + ",\"payloadJson\":" +
-            JsonSerializer.Serialize(operation.PayloadJson, JsonDefaults.Options) + ",\"principalId\":\"root\"}";
+            JsonSerializer.Serialize(JsonSerializer.Serialize(NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span),
+                JsonDefaults.Options), JsonDefaults.Options) + ",\"principalId\":\"root\"}";
         await Assert.That(stored.Fingerprint).IsEqualTo(Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(canonical))));
         await EventAppendReceiptAssertions.SameResultAsync(outcome, stored.Result);
         await Assert.That(store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(operation.Timestamp));
-        await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.Applied.ToArray()))).IsNull();
+        await Assert.That(stored.CanonicalSequence).IsGreaterThan(0L);
+        await Assert.That(store.Read(view => view.GetRecord<long>(KeySpace.AppliedBytes))).IsEqualTo(stored.CanonicalSequence);
     }
     internal static async Task StableReplayAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> expected)
     {

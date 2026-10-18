@@ -1,9 +1,9 @@
 using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.CrashHost.Features.EventStreams;
+using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -23,14 +23,14 @@ internal static class SharedDomainRecoverySeed
         for (var index = FirstIndex; index < SeedOperations; index++)
         {
             var operation = input.SeedOperations[index];
-            await Assert.That(operation.EvaluatedAt).IsEqualTo(input.Original.EvaluatedAt);
-            await Assert.That(operation.PrincipalId).IsEqualTo(Writer);
-            var position = input.SeedPosition - (SeedOperations - index - FirstRevision);
+            await Assert.That(operation.Timestamp).IsEqualTo(input.Original.Timestamp);
+            await Assert.That(operation.UserId).IsEqualTo(Writer);
+            var position = AppliedPosition(input) - (SeedOperations - index - FirstRevision);
             var scope = index < SeedProducers ? scopes[index + SecondIndex] : scopes[SecondIndex];
             if (index < SeedProducers)
             {
-                await Assert.That(operation.Kind).IsEqualTo(OperationKind.Batch);
-                await Assert.That(operation.Id).IsEqualTo(CommandId);
+                await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
+                await Assert.That(operation.CommandId).IsEqualTo(CommandId);
                 await SharedDomainRecoveryValues.ProducerAsync(input.SeedResults[index], scope, CommandId, Item, store.Identity.Incarnation, position);
             }
             else if (index == ReceiveIndex)
@@ -91,4 +91,7 @@ internal static class SharedDomainRecoverySeed
 
     internal static byte[] Required(IAtomicStore store, byte[] key)
         => store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingNative);
+
+    internal static long AppliedPosition(SharedDomainRecoveryInput input)
+        => input.SeedResults[SeedOperations - SecondIndex].Get<CommitReceipt>().Token.Position;
 }

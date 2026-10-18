@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 
@@ -58,13 +58,13 @@ internal sealed class ProjectionProcessRecoveryTests
     private static Process StartCrashProcess(string root, CommitStage stage, int index)
     {
         var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
                      index.ToString(System.Globalization.CultureInfo.InvariantCulture), "projection-processing" })
         {
             start.ArgumentList.Add(argument);
         }
 
-        return Process.Start(start) ?? throw new InvalidOperationException("Could not start the projection crash host.");
+        return Process.Start(start) ?? throw new InvalidOperationException("Could not start the projection recovery process.");
     }
 
     private static async Task AssertRecoveredProcessCutAsync(DatabaseEngine database, CommitStage stage)

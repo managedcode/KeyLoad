@@ -20,4 +20,4 @@ flowchart TD
  New --> Journal
 ```
 
-Acceptance requires genuine same-OS original BCL/native F_GETFL O_SYNC observations, unchanged native defaults and invalid-entry refusal, full canonical Commit/replay/two native cold cuts, actual bounded CrashHost FIFO/symlink/missing refusal/repair, compiler/style and Linux recovery/cluster/fault evidence. No source review, process-kill or fsync promise claims power-loss durability.
+Acceptance requires genuine same-OS original BCL/native F_GETFL O_SYNC observations, unchanged native defaults and invalid-entry refusal, full canonical Commit/replay/two native cold cuts, actual bounded RecoveryHost FIFO/symlink/missing refusal/repair, compiler/style and Linux recovery/cluster/fault evidence. No source review, process-kill or fsync promise claims power-loss durability.

@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.CrashHost.Features.EventStreams;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using KeyLoad.RecoveryHost.Features.EventStreams;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -21,8 +21,8 @@ internal static class SharedDomainRecoveryModels
             }
             if (scope.Streams is { } streams)
             {
-                await StreamAsync(database, scope, streams, Item, present, FirstRevision, input.Original.EvaluatedAt, token);
-                await StreamAsync(database, scope, streams, Healthy, continued, SecondRevision, input.Original.EvaluatedAt, token);
+                await StreamAsync(database, scope, streams, Item, present, FirstRevision, new DateTimeOffset(input.Original.Timestamp), token);
+                await StreamAsync(database, scope, streams, Healthy, continued, SecondRevision, new DateTimeOffset(input.Original.Timestamp), token);
             }
             if (scope.Queue is not null)
             {
@@ -56,8 +56,8 @@ internal static class SharedDomainRecoveryModels
         var actual = database.ReadStream(Root, stream, cancellationToken: token);
         await Assert.That(actual.Stream).IsEqualTo(stream);
         await Assert.That(actual.Head).IsEqualTo(new StreamHead(present ? FirstRevision : NoRevision, FirstRevision, Generation));
-        await Assert.That(actual.CutPosition).IsEqualTo(database.Store.Position);
-        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(database.Store.Position);
+        await Assert.That(actual.CutPosition).IsEqualTo(database.LastApplied);
+        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(database.LastApplied);
         await Assert.That(actual.HasMore).IsFalse();
         await Assert.That(actual.Cursor).IsNull();
         EventRecord[] expected = present ? [new(stream, FirstRevision, sequence, new(id, EventType, scope.Payload, Headers), time)] : [];

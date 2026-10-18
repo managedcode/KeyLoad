@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 using System.Text.Json;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 
 namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
@@ -72,7 +72,7 @@ internal static class TopicPurgeCrashTrial
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
             index.ToString(CultureInfo.InvariantCulture), pinned ? TopicPurgeCrashContract.Mode + "-pinned" : TopicPurgeCrashContract.Mode })
         {
             start.ArgumentList.Add(argument);

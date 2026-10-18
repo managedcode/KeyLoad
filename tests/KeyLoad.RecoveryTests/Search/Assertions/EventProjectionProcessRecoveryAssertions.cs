@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.CrashHost.Features.Search;
+using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.Search;

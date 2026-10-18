@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.EventStreams;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
@@ -80,7 +80,7 @@ internal static class SharedDomainProcessTrial
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
             index.ToString(CultureInfo.InvariantCulture), SharedDomainCrashProtocol.Mode })
         {
             start.ArgumentList.Add(argument);

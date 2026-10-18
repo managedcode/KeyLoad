@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -59,12 +59,12 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
                      index.ToString(CultureInfo.InvariantCulture), DatabaseCompositionCrashScenario.Mode })
         {
             start.ArgumentList.Add(argument);
         }
-        return Process.Start(start) ?? throw new InvalidOperationException("Could not start the composition crash host.");
+        return Process.Start(start) ?? throw new InvalidOperationException("Could not start the composition recovery process.");
     }
 
     private static async Task AssertRecoveredAndRetriedAsync(string root, CommitStage stage, CancellationToken cancellationToken)

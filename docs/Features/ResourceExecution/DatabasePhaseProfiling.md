@@ -90,7 +90,7 @@ build/formatter/analyzers/governance, normal/scalar/recovery/cluster must pass
 without skips. Development checks, authored fixtures and fixed budgets are
 source evidence only. Numeric coverage collection remains unconfigured.
 Periodic node snapshots and resources bracket client windows; phases overlap
-and can end after the initiating quorum. No summing/subtracting phases into
+and can end after the configured copies acknowledge. No summing/subtracting phases into
 exclusive request latency or attributing whole-process CPU to one operation.
 Repeated exact-source disabled/enabled workloads measure overhead; their numeric
 budget requires actual baseline. Complete cohort/site, multi-host scale, fault/

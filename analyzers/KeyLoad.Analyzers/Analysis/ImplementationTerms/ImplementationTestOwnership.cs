@@ -42,7 +42,8 @@ internal static class ImplementationTestOwnership
 
     private static bool ExecutionPath(string path) =>
         ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.TestPath) ||
-        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.BenchmarkPath);
+        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.BenchmarkPath) ||
+        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.AspireHostPath);
 
     private static bool NativeExecution(INamedTypeSymbol type) => type.GetMembers().Any(member =>
         member.GetAttributes().Any(static attribute => NativeExecutionAttribute(attribute.AttributeClass))) ||
@@ -59,17 +60,23 @@ internal static class ImplementationTestOwnership
 
     private static void AddProcessEntry(Compilation compilation, Queue<INamedTypeSymbol> pending, CancellationToken token)
     {
-        if (compilation.AssemblyName != "KeyLoad.CrashHost" || compilation.GetEntryPoint(token) is not { } entry)
+        var path = compilation.AssemblyName switch
+        {
+            "KeyLoad.RecoveryHost" => ImplementationTermCatalog.TestPath,
+            "KeyLoad.AppHost" when NativeAspireEntry(compilation, token) => ImplementationTermCatalog.AspireHostPath,
+            _ => null
+        };
+        if (path is null || compilation.GetEntryPoint(token) is not { } entry)
         {
             return;
         }
         foreach (var reference in entry.DeclaringSyntaxReferences.Where(reference =>
-            ImplementationTermSymbols.PathContains(reference.SyntaxTree.FilePath, ImplementationTermCatalog.TestPath)))
+            ImplementationTermSymbols.PathContains(reference.SyntaxTree.FilePath, path)))
         {
             AddReferences(compilation, reference.GetSyntax(token), pending, token);
         }
         foreach (var tree in compilation.SyntaxTrees.Where(tree =>
-            ImplementationTermSymbols.PathContains(tree.FilePath, ImplementationTermCatalog.TestPath)))
+            ImplementationTermSymbols.PathContains(tree.FilePath, path)))
         {
             if (tree.GetRoot(token) is CompilationUnitSyntax root)
             {
@@ -79,6 +86,28 @@ internal static class ImplementationTestOwnership
                 }
             }
         }
+    }
+
+    private static bool NativeAspireEntry(Compilation compilation, CancellationToken token)
+    {
+        foreach (var tree in compilation.SyntaxTrees.Where(tree =>
+            ImplementationTermSymbols.PathContains(tree.FilePath, ImplementationTermCatalog.AspireHostPath)))
+        {
+            var model = compilation.GetSemanticModel(tree);
+            var calls = tree.GetRoot(token).ChildNodes().OfType<GlobalStatementSyntax>()
+                .SelectMany(static statement => statement.DescendantNodes().OfType<InvocationExpressionSyntax>());
+            foreach (var call in calls)
+            {
+                token.ThrowIfCancellationRequested();
+                if (model.GetSymbolInfo(call, token).Symbol is IMethodSymbol { Name: "CreateBuilder" } method &&
+                    method.ContainingType.ToDisplayString() == "Aspire.Hosting.DistributedApplication" &&
+                    ImplementationTermSymbols.Native(method))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static void AddReferences(Compilation compilation, INamedTypeSymbol owner,

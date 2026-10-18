@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -37,7 +37,7 @@ internal sealed class StorageRecoveryProcessTests
         var stage = (CommitStage)random.Next(5);
         var mutationIndex = random.Next(3);
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
-        using var process = Process.Start(CreateCrashHostStart(root, stage, mutationIndex))!;
+        using var process = Process.Start(CreateRecoveryHostStart(root, stage, mutationIndex))!;
         using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15), TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         Exception? originalFailure = null;
@@ -72,10 +72,10 @@ internal sealed class StorageRecoveryProcessTests
         }
     }
 
-    private static ProcessStartInfo CreateCrashHostStart(string root, CommitStage stage, int mutationIndex)
+    private static ProcessStartInfo CreateRecoveryHostStart(string root, CommitStage stage, int mutationIndex)
     {
         var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        start.ArgumentList.Add(typeof(CrashHostMarker).Assembly.Location);
+        start.ArgumentList.Add(typeof(RecoveryHostMarker).Assembly.Location);
         start.ArgumentList.Add(root);
         start.ArgumentList.Add(stage.ToString());
         start.ArgumentList.Add(mutationIndex.ToString(System.Globalization.CultureInfo.InvariantCulture));

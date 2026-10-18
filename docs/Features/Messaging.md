@@ -105,7 +105,7 @@ sequenceDiagram
     loop Each lane, sequentially
         C->>P: Original stable leaf ID, fresh signed identity
         P->>Z: Reload authorization, canonical receive (Orleans call)
-        Z-->>P: Majority-acknowledged result or exact rejection/uncertainty
+        Z-->>P: All configured copies acknowledge, or exact rejection/uncertainty
         P-->>C: Terminal outcome for the lane
     end
     C-->>Caller: Ordered independent lane outcomes

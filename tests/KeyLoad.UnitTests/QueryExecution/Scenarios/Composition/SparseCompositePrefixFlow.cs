@@ -29,7 +29,7 @@ internal static class SparseCompositePrefixFlow
     private static async Task DeniedAsync(TestDatabase fixture)
     {
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
-        foreach (var collection in new[] { SparseCompositePrefixData.Only, SparseCompositePrefixData.Fallback })
+        foreach (var collection in new[] { SparseCompositePrefixData.Only, SparseCompositePrefixData.WithStatusIndex })
         {
             foreach (var execute in new Func<QueryPage>[]
             {

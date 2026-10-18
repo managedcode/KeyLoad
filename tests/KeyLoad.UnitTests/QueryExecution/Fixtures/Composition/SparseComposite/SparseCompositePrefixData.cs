@@ -7,7 +7,7 @@ internal static class SparseCompositePrefixData
     internal const string Composite = "status_rank";
     internal const string StatusIndex = "status_only";
     internal const string Only = "sparse_only";
-    internal const string Fallback = "sparse_fallback";
+    internal const string WithStatusIndex = "sparse_with_status_index";
     internal const string Reader = "sparse-prefix-reader";
     internal const string ReadGrant = "status.read";
     internal const string UseGrant = "status.use";
@@ -22,14 +22,14 @@ internal static class SparseCompositePrefixData
         ("f", """{"status":null,"rank":7}"""),
         ("g", """{"rank":7}""")
     ];
-    internal static ImmutableArray<IndexDefinition> Indexes(bool includeNull, bool includeMissing, bool fallback)
+    internal static ImmutableArray<IndexDefinition> Indexes(bool includeNull, bool includeMissing, bool includeStatusIndex)
     {
         var index = new IndexDefinition(Composite, ["/status", "/rank"], IncludeNull: includeNull, IncludeMissing: includeMissing);
-        return fallback ? [index, new(StatusIndex, ["/status"])] : [index];
+        return includeStatusIndex ? [index, new(StatusIndex, ["/status"])] : [index];
     }
-    internal static string Path(bool includeNull, bool includeMissing, bool fallback, int shape)
+    internal static string Path(bool includeNull, bool includeMissing, bool includeStatusIndex, int shape)
         => shape != 0 || includeNull && includeMissing ? "index:" + Composite
-            : fallback ? "index:" + StatusIndex : Scan;
+            : includeStatusIndex ? "index:" + StatusIndex : Scan;
     internal static QueryRow[] Expected(int shape)
         => Rows.Take(4).Where(row => shape == 0 || shape == 1 && row.Id == "c")
             .Select(row => new QueryRow(row.Id, 1L, row.Json, false, [])).ToArray();

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
@@ -31,7 +31,7 @@ internal static class SeededWalCorruptionEvidence
             + "-" + Guid.NewGuid().ToString("N") + ".json");
         var assemblies = new List<object>();
         foreach (var assembly in new[] { typeof(SeededWalCorruptionEvidence).Assembly,
-            typeof(CrashHostMarker).Assembly, typeof(DatabaseEngine).Assembly, typeof(ZoneTreeStore).Assembly })
+            typeof(RecoveryHostMarker).Assembly, typeof(DatabaseEngine).Assembly, typeof(ZoneTreeStore).Assembly })
         {
             await using var image = File.OpenRead(assembly.Location);
             assemblies.Add(new

@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;

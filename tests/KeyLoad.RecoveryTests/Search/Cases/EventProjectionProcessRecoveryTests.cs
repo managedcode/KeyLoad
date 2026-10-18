@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.Search;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 
@@ -62,7 +62,7 @@ internal sealed class EventProjectionProcessRecoveryTests
         };
         foreach (var argument in new[]
         {
-            typeof(CrashHostMarker).Assembly.Location,
+            typeof(RecoveryHostMarker).Assembly.Location,
             root,
             stage.ToString(),
             mutationIndex.ToString(System.Globalization.CultureInfo.InvariantCulture),
@@ -71,7 +71,7 @@ internal sealed class EventProjectionProcessRecoveryTests
         {
             start.ArgumentList.Add(argument);
         }
-        return Process.Start(start) ?? throw new InvalidOperationException("Could not start event projection CrashHost.");
+        return Process.Start(start) ?? throw new InvalidOperationException("Could not start event projection RecoveryHost.");
     }
 
     private static async Task AwaitCrashBoundaryAsync(Process process, CancellationToken cancellationToken)
@@ -99,7 +99,7 @@ internal sealed class EventProjectionProcessRecoveryTests
             total += read;
             if (total > MarkerOutputLimit)
             {
-                throw new InvalidOperationException("The event projection CrashHost output exceeded its bound.");
+                throw new InvalidOperationException("The event projection RecoveryHost output exceeded its bound.");
             }
         }
     }

@@ -1,6 +1,6 @@
 using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 

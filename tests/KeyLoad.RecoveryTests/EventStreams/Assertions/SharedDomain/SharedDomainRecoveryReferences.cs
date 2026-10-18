@@ -1,7 +1,6 @@
-using System.Text.Json;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.CrashHost.Features.EventStreams;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using KeyLoad.RecoveryHost.Features.EventStreams;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -16,12 +15,11 @@ internal static class SharedDomainRecoveryReferences
         var commandIds = new HashSet<Guid>();
         foreach (var original in input.ResourceCreations)
         {
-            await Assert.That(original.Id).IsNotEqualTo(Guid.Empty);
-            await Assert.That(commandIds.Add(original.Id)).IsTrue();
-            await Assert.That(original.Kind).IsEqualTo(OperationKind.ConfigureResource);
-            await Assert.That(original.PrincipalId).IsEqualTo(Root);
-            var request = JsonSerializer.Deserialize<ConfigureResourceRequest>(original.PayloadJson, JsonDefaults.Options)
-                ?? throw new InvalidOperationException(MissingNative);
+            await Assert.That(original.CommandId).IsNotEqualTo(Guid.Empty);
+            await Assert.That(commandIds.Add(original.CommandId)).IsTrue();
+            await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
+            await Assert.That(original.UserId).IsEqualTo(Root);
+            var request = NativeSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span);
             var definition = definitions.Single(value => value.Name == request.Definition.Name);
             await SharedDomainRecoveryValues.EqualAsync(request, new ConfigureResourceRequest(Tenant, Database, definition));
             lifetimes.Add(definition.Name, ResourceLifetimeIdentity.Create(original, Tenant, Database, definition));

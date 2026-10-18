@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.Search;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
@@ -40,7 +40,7 @@ internal static class NativeTextIncrementalProcessTrial
                 active.Start(CreateStart(root, stage, mode));
                 active.ThrowStartupFailure();
                 await CompleteChildAsync(active, killed, linked.Token);
-                await ReplicaProcessFiles.WaitForOwnershipAsync(root, linked.Token);
+                await KilledProcessFileReadiness.WaitAsync(Path.Combine(root, PartitionStoreProtocol.CanonicalDirectory), linked.Token);
                 RecoveryFileInventory.AssertNativeHandlesReleased(root);
                 active.CloseNativeProcessAfterJoin();
                 active = null;
@@ -86,7 +86,7 @@ internal static class NativeTextIncrementalProcessTrial
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root,
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root,
             Incarnation.ToString("D"), stage.ToString(), mode })
         {
             start.ArgumentList.Add(argument);
@@ -110,10 +110,15 @@ internal static class NativeTextIncrementalProcessTrial
         if (primary is null && failures.Count == SuccessExit)
         {
             await ServerFailureObserver.ObserveAsync(
-                () => ReplicaProcessFiles.WaitForOwnershipAsync(root, cleanup.Token), failures);
+                () => KilledProcessFileReadiness.WaitAsync(Path.Combine(root, PartitionStoreProtocol.CanonicalDirectory), cleanup.Token), failures);
             if (failures.Count == SuccessExit)
             {
-                await ServerFailureObserver.ObserveAsync(() => ReplicaProcessFiles.DeleteAsync(root, cleanup.Token), failures);
+                ServerFailureObserver.Observe(() =>
+                {
+                    cleanup.Token.ThrowIfCancellationRequested();
+                    RecoveryFileInventory.AssertNativeHandlesReleased(root);
+                    Directory.Delete(root, recursive: true);
+                }, failures);
             }
         }
         primary?.Data[RetainedRoot] = root;

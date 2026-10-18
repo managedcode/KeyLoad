@@ -1,4 +1,6 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -21,8 +23,38 @@ internal static class QueueDeadlineNativeAssertions
     {
         var original = QueueRetryColdAssertions.LaneBytes(store, lane);
         var result = QueueDeadlineNativeOperations.Batch(database, command, time);
-        await Assert.That(result.Error).IsEqualTo(error);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(error);
         await Assert.That(QueueRetryColdAssertions.LaneBytes(store, lane))
             .IsEquivalentTo(original, CollectionOrdering.Matching);
+    }
+
+    internal static async Task AlteredRetryDrawAsync(DatabaseEngine database, ZoneTreeStore store,
+        QueueLaneRef lane, Command<DatabaseCommand> operation)
+    {
+        var altered = database.OwnCommand(operation);
+        var payload = altered.Value!;
+        var choices = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
+        var original = choices.Items.Single();
+        var delay = original.DelayMilliseconds == QueueDeadlineNativeProtocol.RetryCapMilliseconds
+            ? (int)QueueDeadlineNativeProtocol.First
+            : original.DelayMilliseconds + (int)QueueDeadlineNativeProtocol.First;
+        altered.Value = payload with
+        {
+            RetryDecisions = NativeSerialization.Serialize(choices with
+            {
+                Items = [original with { DelayMilliseconds = delay, RetryAt = altered.Timestamp.AddMilliseconds(delay) }]
+            })
+        };
+        var position = store.Position;
+        var applied = database.LastApplied;
+        var bytes = QueueRetryColdAssertions.LaneBytes(store, lane);
+        await Assert.That(database.ReadStoredCommand(operation, CancellationToken.None)).IsNull();
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(altered));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(store.Position).IsEqualTo(position);
+        await Assert.That(database.LastApplied).IsEqualTo(applied);
+        await Assert.That(QueueRetryColdAssertions.LaneBytes(store, lane))
+            .IsEquivalentTo(bytes, CollectionOrdering.Matching);
+        await Assert.That(database.ReadStoredCommand(operation, CancellationToken.None)).IsNull();
     }
 }

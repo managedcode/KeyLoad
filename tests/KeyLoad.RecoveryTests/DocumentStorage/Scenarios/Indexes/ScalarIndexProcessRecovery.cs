@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.DocumentStorage;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 
@@ -11,7 +11,7 @@ internal static class ScalarIndexProcessRecovery
 {
     private const int CutMutationIndex = 0;
     private const string DotnetHost = "dotnet";
-    private const string UnsuccessfulExitMessage = "The scalar-index recovery CrashHost exited unsuccessfully.";
+    private const string UnsuccessfulExitMessage = "The scalar-index recovery RecoveryHost exited unsuccessfully.";
 
     internal static async Task RunAsync(string root, CancellationToken callerToken)
     {
@@ -87,7 +87,7 @@ internal static class ScalarIndexProcessRecovery
         };
         foreach (var argument in new[]
         {
-            typeof(CrashHostMarker).Assembly.Location, root, CommitStage.JournalFlushed.ToString(),
+            typeof(RecoveryHostMarker).Assembly.Location, root, CommitStage.JournalFlushed.ToString(),
             CutMutationIndex.ToString(CultureInfo.InvariantCulture), mode
         })
         {

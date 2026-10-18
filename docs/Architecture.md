@@ -182,7 +182,7 @@ NuGet publication follow root policy.
 | build/KeyLoad.AppHost | Program.cs, BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality; Aspire owns cluster resources, readiness, test dependencies and shutdown. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
 | tests/KeyLoad.RecoveryTests | StorageRecovery/, ClusterReplication/Cases/Replica/ReplicaProcessRecoveryTests.cs | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery. |
-| tests/KeyLoad.CrashHost | Program.cs, ClusterReplication/Execution/Faults/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
+| tests/KeyLoad.RecoveryHost | Program.cs, ClusterReplication/Execution/Faults/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
 | tests/KeyLoad.IntegrationTests | ClusterFixture.cs, ClusterReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/AdmissionClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
 | tests/KeyLoad.ComparisonTests | BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |

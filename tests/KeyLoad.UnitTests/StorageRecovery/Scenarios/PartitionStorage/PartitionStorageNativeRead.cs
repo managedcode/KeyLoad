@@ -1,35 +1,31 @@
 using KeyLoad.Clustering;
-using KeyLoad.CrashHost.Features.ClusterRouting;
-using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.ClusterRouting;
+using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.DependencyInjection;
+using Orleans.Serialization;
 using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageNativeProtocol;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageNativeRead
 {
-    internal static async Task RequireAsync(ControlledPartitionMovementNativeHost source,
+    internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture source,
         CommitToken minimum, CancellationToken token)
     {
-        var principal = source.Store.Read(view => source.Database.Principal(view, P.Root, source.Clock.GetUtcNow()));
+        var principal = source.Database.Store.Read(view => source.Database.Database.Principal(view, P.Root, source.Clock.GetUtcNow()));
         var requestId = Guid.NewGuid();
-        var signed = source.Silo.CatalogRequestCodec().CreateRead(requestId, principal.Id, GrainReadKind.Document,
+        var signed = source.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
             NativeSerialization.Serialize(new GetDocumentRequest(P.Reference(), minimum)));
-        GrainOperationReply? reply = null;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            using var scope = source.Silo.OpenRequestContext(principal, requestId, Guid.Empty, token);
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                reply = await source.Silo.ExecuteAsync(requestId, signed, command: false, token)
-                    .ConfigureAwait(false);
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
-        await Assert.That(reply is not null).IsTrue();
-        await Assert.That(reply!.Error).IsNull();
+        using var scope = new GrainRequestIdentityScope(source.Services, principal, requestId, Guid.Empty,
+            token, connectionId: source.ConnectionId);
+        var connection = source.Grains.GetGrain<IConnectionGrain>(source.ConnectionId);
+        var reply = await GrainRequestStreamConsumer.DrainAsync(
+            execution => connection.ExecuteStreamAsync(signed, execution),
+            source.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            requestId, source.Clock, source.RoutingOptions, token).ConfigureAwait(false);
+        await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
-        var actual = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as DocumentResult;
+        var actual = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentResult;
         var expected = new DocumentResult(P.Reference(), P.InitialRevision, P.Json, false, []);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
             .IsTrue();

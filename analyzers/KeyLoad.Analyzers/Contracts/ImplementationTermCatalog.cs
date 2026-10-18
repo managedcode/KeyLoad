@@ -15,6 +15,7 @@ internal static class ImplementationTermCatalog
     internal const string TimeSeriesPath = "/TimeSeries/";
     internal const string TestPath = "/tests/";
     internal const string BenchmarkPath = "/benchmarks/";
+    internal const string AspireHostPath = "/build/KeyLoad.AppHost/";
     internal const string TestOwnerPath = "/Fixtures/";
     internal const string OrleansWord = "Orleans";
     internal const string ActivationWord = "activation";
@@ -106,7 +107,12 @@ internal static class ImplementationTermCatalog
         "KeyLoad.Comparisons.ClientResourceSampler",
         "KeyLoad.AdminNodeSnapshot", "KeyLoad.OperationalAnalyticsCounters",
         "KeyLoad.OperationalAnalyticsReport", "KeyLoad.OperationalAnalyticsRow",
-        "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFixture"
+        "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFixture",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerContainer",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerObservationPolicy",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampleBudget",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampler",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceEvidenceCollector"
     ];
     internal static readonly string[] MeasurementMembers =
     [
@@ -115,7 +121,13 @@ internal static class ImplementationTermCatalog
         "KeyLoad.Comparisons.NativeComparisonOperationalPolicy.MaximumResourceSampleIntervalMilliseconds",
         "KeyLoad.Comparisons.VectorComparisonProfile.LatencySampleCount",
         "KeyLoad.Comparisons.VectorComparisonProfileValues.LatencySampleCount",
-        "KeyLoad.Comparisons.VectorProfileJsonFields.LatencySampleCount"
+        "KeyLoad.Comparisons.VectorProfileJsonFields.LatencySampleCount",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSampleMetadataBytes",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSamples",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSampleMetadataBytes",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSamples",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.MinimumSamples",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing"
     ];
 
     private static readonly Regex Words = new("[A-Z]?[a-z]+|[A-Z]+(?![a-z])", RegexOptions.CultureInvariant);

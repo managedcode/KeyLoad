@@ -2,7 +2,7 @@ using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryHost.Features.BlobStorage;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -65,7 +65,7 @@ internal static class BlobCompleteCommitCutSeedAssertions
         var info = result.Get<BlobCommitResult<BlobUploadInfo>>();
         await BlobCompleteCommitCutOracle.ExactAsync(info.Value, new BlobUploadInfo(BlobCommitCutProtocol.Blob, upload,
             bytes.Length, upload == BlobCommitCutProtocol.OriginalUpload ? 0 : 1, ordinal + 1, length,
-            begin.EvaluatedAt.AddSeconds(BlobCompleteCommitCutOracle.UploadLifetimeSeconds), BlobUploadStatus.Active, hash));
+            new DateTimeOffset(begin.Timestamp).AddSeconds(BlobCompleteCommitCutOracle.UploadLifetimeSeconds), BlobUploadStatus.Active, hash));
         return info.Receipt;
     }
 }

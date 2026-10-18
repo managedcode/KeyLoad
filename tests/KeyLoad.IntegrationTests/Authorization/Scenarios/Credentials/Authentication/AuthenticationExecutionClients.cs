@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.CrashHost.Features.ClusterRouting;
+using KeyLoad.RecoveryHost.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Server;
 using ModelContextProtocol.Client;

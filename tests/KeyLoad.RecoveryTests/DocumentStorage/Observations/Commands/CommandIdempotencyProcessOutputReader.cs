@@ -1,5 +1,5 @@
 using System.Text;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 
 namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
@@ -8,7 +8,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
     private const int BufferCharacters = 512;
     private const string AcknowledgementFailure = "The original command process did not finish its pre-restart retries.";
     private const string ChildSignalFailure = "The original document recovery child did not emit its required boundary signal.";
-    private const string OutputLimitFailure = "The document command CrashHost output exceeded its fixed bound.";
+    private const string OutputLimitFailure = "The document command RecoveryHost output exceeded its fixed bound.";
     private const int WitnessUnreported = 0;
     private const int WitnessReported = 1;
     private int witnessReported;

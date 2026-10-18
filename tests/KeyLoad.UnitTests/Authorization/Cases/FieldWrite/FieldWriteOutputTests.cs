@@ -1,4 +1,4 @@
-using KeyLoad.UnitTests.Features.ClusterReplication;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 

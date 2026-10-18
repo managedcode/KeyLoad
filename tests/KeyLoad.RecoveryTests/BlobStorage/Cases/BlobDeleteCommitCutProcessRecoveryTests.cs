@@ -1,4 +1,4 @@
-using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryHost.Features.BlobStorage;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 

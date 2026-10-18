@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.CrashHost.Features.EventStreams;
+using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 

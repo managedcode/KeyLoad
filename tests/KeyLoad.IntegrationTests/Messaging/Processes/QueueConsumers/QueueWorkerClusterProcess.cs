@@ -1,5 +1,5 @@
 using KeyLoad.Client;
-using KeyLoad.CrashHost.Features.Messaging;
+using KeyLoad.RecoveryHost.Features.Messaging;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Server;
 

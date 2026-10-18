@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
-using KeyLoad.CrashHost;
-using KeyLoad.CrashHost.Features.Messaging;
+using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryHost.Features.Messaging;
 using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
 using KeyLoad.Server;
 
@@ -40,7 +40,7 @@ internal sealed class QueueWorkerClusterChild : IAsyncDisposable
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        start.ArgumentList.Add(typeof(CrashHostMarker).Assembly.Location);
+        start.ArgumentList.Add(typeof(RecoveryHostMarker).Assembly.Location);
         start.ArgumentList.Add(ExternalQueueWorkerCrashProtocol.Mode);
         var child = new QueueWorkerClusterChild(new Process { StartInfo = start });
         try

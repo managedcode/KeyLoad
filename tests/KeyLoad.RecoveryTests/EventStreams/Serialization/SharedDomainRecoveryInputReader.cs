@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
-using KeyLoad.CrashHost.Features.DocumentStorage;
-using KeyLoad.CrashHost.Features.EventStreams;
+using KeyLoad.RecoveryHost.Features.DocumentStorage;
+using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;

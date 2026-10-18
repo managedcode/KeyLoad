@@ -47,7 +47,7 @@ Native ApplyCommittedCommand uses the original admitted operation business time 
 
 1. This contract plus TimeSeries/ADR124 appendices precede implementation.
 2. Abstractions TimeSeries typed roles; Core TimeSeries contracts/storage/commands/queries/serialization/config; additive shared Mutation discriminators/authorizer/dispatcher; Orleans TimeSeries StatelessWorker maintenance grains and native read branch; Server/Client existing typed transport; independent literal catalog tuple addition.
-3. Unit full native lifecycle/mixed rollback/privacy/corruption/cancel controls; Recovery real CrashHost cuts; Integration genuine Aspire SDK/official MCP/Q1/cold/worker revoke→healthy, all original readers/processes/resources joined.
+3. Unit full native lifecycle/mixed rollback/privacy/corruption/cancel controls; Recovery real RecoveryHost cuts; Integration genuine Aspire SDK/official MCP/Q1/cold/worker revoke→healthy, all original readers/processes/resources joined.
 4. Join, compiler, census and Linux evidence are produced once for the integrated source. New source methods/arguments are not native UID/count/PASS. Normal/scalar and every mandatory global suite/performance/fault gate remain open until authenticated exact-source originals.
 5. Rollback unpublished source as a coherent stage only; after publishing records no format downgrade, metadata deletion, automatic raw fallback or fabricated current authority.
 

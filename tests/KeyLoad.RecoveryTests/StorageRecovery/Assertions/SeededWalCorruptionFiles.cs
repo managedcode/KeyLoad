@@ -1,4 +1,4 @@
-using KeyLoad.CrashHost.Features.DocumentStorage;
+using KeyLoad.RecoveryHost.Features.DocumentStorage;
 using KeyLoad.Server;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
@@ -49,12 +49,12 @@ internal static class SeededWalCorruptionFiles
     }
     internal static async Task RequireHistoryAsync(SeededWalCorruptionProcessOwner owner)
     {
-        string[] phases = [global::KeyLoad.CrashHost.NativeChecksumProfileProtocol.Seed,
-            global::KeyLoad.CrashHost.NativeChecksumProfileProtocol.CorruptionRefusal,
-            global::KeyLoad.CrashHost.NativeChecksumProfileProtocol.CorruptionRefusal,
-            global::KeyLoad.CrashHost.NativeChecksumProfileProtocol.FirstAppend,
-            global::KeyLoad.CrashHost.NativeChecksumProfileProtocol.SecondAppend,
-            global::KeyLoad.CrashHost.NativeChecksumProfileProtocol.Cold];
+        string[] phases = [global::KeyLoad.RecoveryHost.NativeChecksumProfileProtocol.Seed,
+            global::KeyLoad.RecoveryHost.NativeChecksumProfileProtocol.CorruptionRefusal,
+            global::KeyLoad.RecoveryHost.NativeChecksumProfileProtocol.CorruptionRefusal,
+            global::KeyLoad.RecoveryHost.NativeChecksumProfileProtocol.FirstAppend,
+            global::KeyLoad.RecoveryHost.NativeChecksumProfileProtocol.SecondAppend,
+            global::KeyLoad.RecoveryHost.NativeChecksumProfileProtocol.Cold];
         await Assert.That(owner.History.Count).IsEqualTo(phases.Length);
         for (var index = 0; index < phases.Length; index++)
         {

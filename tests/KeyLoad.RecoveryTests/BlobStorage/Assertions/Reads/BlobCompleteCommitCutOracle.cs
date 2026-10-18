@@ -2,7 +2,7 @@ using ManagedCode.Communication.Commands;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
@@ -48,12 +48,12 @@ internal static class BlobCompleteCommitCutOracle
 
     internal static Command<DatabaseCommand> Begin(BlobCommitCutSeedProof proof, Guid upload)
         => proof.Operations.Select(static bytes => NativeSerialization.Deserialize<Command<DatabaseCommand>>(bytes))
-            .Single(operation => operation.Kind == OperationKind.BeginBlobUpload
+            .Single(operation => operation.Value!.Kind == OperationKind.BeginBlobUpload
                 && NativeSerialization.Deserialize<BeginBlobUploadRequest>((operation).Value!.Input.Span).UploadId == upload);
 
     internal static Command<DatabaseCommand> PriorComplete(BlobCommitCutSeedProof proof)
         => proof.Operations.Select(static bytes => NativeSerialization.Deserialize<Command<DatabaseCommand>>(bytes))
-            .Single(operation => operation.Kind == OperationKind.CompleteBlobUpload);
+            .Single(operation => operation.Value!.Kind == OperationKind.CompleteBlobUpload);
 
     internal static BlobMetadata Metadata(BlobCommitCutSeedProof proof, Command<DatabaseCommand> complete, Guid upload,
         byte[] bytes, long revision)

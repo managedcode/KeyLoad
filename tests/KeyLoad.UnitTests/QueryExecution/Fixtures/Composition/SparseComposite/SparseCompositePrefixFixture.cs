@@ -8,18 +8,18 @@ internal static class SparseCompositePrefixFixture
     internal static async Task<List<(Command<DatabaseCommand> Operation, byte[] Result)>> SeedAsync(
         TestDatabase fixture, bool includeNull, bool includeMissing)
     {
-        foreach (var fallback in new[] { false, true })
+        foreach (var includeStatusIndex in new[] { false, true })
         {
-            fixture.Configure(fallback ? SparseCompositePrefixData.Fallback : SparseCompositePrefixData.Only,
-                ResourceKind.Collection, indexes: SparseCompositePrefixData.Indexes(includeNull, includeMissing, fallback).ToArray(),
+            fixture.Configure(includeStatusIndex ? SparseCompositePrefixData.WithStatusIndex : SparseCompositePrefixData.Only,
+                ResourceKind.Collection, indexes: SparseCompositePrefixData.Indexes(includeNull, includeMissing, includeStatusIndex).ToArray(),
                 fields: [new("/status", "restricted", SparseCompositePrefixData.ReadGrant, SparseCompositePrefixData.UseGrant)]);
         }
-        var mutations = new[] { SparseCompositePrefixData.Only, SparseCompositePrefixData.Fallback }
+        var mutations = new[] { SparseCompositePrefixData.Only, SparseCompositePrefixData.WithStatusIndex }
             .SelectMany(collection => SparseCompositePrefixData.Rows.Select(row =>
                 (Mutation)new PutDocument(collection, row.Id, SparseCompositePrefixRequests.SeedJson(row.Id, row.Json)))).ToArray();
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, [.. mutations]);
         var originals = new List<(Command<DatabaseCommand> Operation, byte[] Result)>();
-        var before = fixture.Store.Position;
+        var before = fixture.ReadCanonicalCut().AppliedPosition;
         var identity = fixture.Store.Identity;
         var receipt = QueryAdapterNullParityReplay.Apply(fixture.Database, OperationKind.Batch,
             command.CommandId, command, originals).Get<CommitReceipt>();
@@ -41,7 +41,7 @@ internal static class SparseCompositePrefixFixture
     {
         var principal = new PrincipalRecord(SparseCompositePrefixData.Reader, partition.TenantId,
             [new(partition.DatabaseId, SparseCompositePrefixData.Only, Capability.Query | Capability.DocumentsRead),
-             new(partition.DatabaseId, SparseCompositePrefixData.Fallback, Capability.Query | Capability.DocumentsRead)],
+             new(partition.DatabaseId, SparseCompositePrefixData.WithStatusIndex, Capability.Query | Capability.DocumentsRead)],
             use ? [SparseCompositePrefixData.ReadGrant, SparseCompositePrefixData.UseGrant] : [SparseCompositePrefixData.ReadGrant])
         {
             PolicyEpoch = epoch

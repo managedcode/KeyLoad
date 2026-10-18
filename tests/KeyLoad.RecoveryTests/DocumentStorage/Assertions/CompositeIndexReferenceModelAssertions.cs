@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.CrashHost.Features.DocumentStorage;
+using KeyLoad.RecoveryHost.Features.DocumentStorage;
 
 namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 

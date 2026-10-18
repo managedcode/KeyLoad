@@ -1,6 +1,6 @@
 using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.Messaging;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;

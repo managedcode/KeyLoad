@@ -1,5 +1,5 @@
 using KeyLoad.Clustering;
-using KeyLoad.CrashHost.Features.ClusterRouting;
+using KeyLoad.RecoveryHost.Features.ClusterRouting;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;

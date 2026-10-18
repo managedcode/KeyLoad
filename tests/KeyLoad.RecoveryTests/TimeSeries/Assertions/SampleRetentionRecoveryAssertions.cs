@@ -2,7 +2,7 @@ using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -43,7 +43,7 @@ internal static class SampleRetentionRecoveryAssertions
         await Assert.That(first.Mutations).HasSingleItem();
         if (oldOutcome is not null)
         {
-            var recovered = oldOutcome.Get<CommitReceipt>();
+            var recovered = oldOutcome.Value.Get<CommitReceipt>();
             await Assert.That(recovered.Token).IsEqualTo(first.Token);
             await Assert.That(JsonDefaults.Serialize(recovered).AsSpan()
                 .SequenceEqual(JsonDefaults.Serialize(first))).IsTrue();

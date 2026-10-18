@@ -55,6 +55,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Conflict, QueueRetryProtocol.StaleDecision);
         }
         if (choice.DelayMilliseconds < QueueRetryProtocol.Positive || choice.DelayMilliseconds > QueueRetryCap(input.Policy, metadata.Attempts)
+            || choice.DelayMilliseconds != ChooseQueueRetryDelay(operation, input.Lane, input.Policy, metadata)
             || choice.RetryAt != operation.Timestamp.AddMilliseconds(choice.DelayMilliseconds))
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.InvalidDecision);

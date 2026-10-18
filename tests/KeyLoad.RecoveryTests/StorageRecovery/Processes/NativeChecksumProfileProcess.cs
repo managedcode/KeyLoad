@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
@@ -47,7 +47,7 @@ internal static class NativeChecksumProfileProcess
     private static ProcessStartInfo Start(string root, string phase)
     {
         var start = new ProcessStartInfo(Dotnet) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        foreach (var value in new[] { typeof(CrashHostMarker).Assembly.Location, NativeChecksumProfileProtocol.Mode, root, phase })
+        foreach (var value in new[] { typeof(RecoveryHostMarker).Assembly.Location, NativeChecksumProfileProtocol.Mode, root, phase })
         {
             start.ArgumentList.Add(value);
         }

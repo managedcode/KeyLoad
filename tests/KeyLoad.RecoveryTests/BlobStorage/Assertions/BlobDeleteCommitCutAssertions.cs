@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -26,7 +26,7 @@ internal static class BlobDeleteCommitCutAssertions
         var hash = BlobDeleteCommitCutOracle.Chain(proof.Incarnation, blob, upload, bytes);
         var metadata = deleted
             ? new BlobMetadata(blob, 2, null, 0, 0, null, new RowAccess(), new DateTimeOffset(selected.Timestamp), true)
-            : new BlobMetadata(blob, 1, upload, 4, 1, hash, new RowAccess(), BlobDeleteCommitCutOracle.PriorComplete(proof).EvaluatedAt);
+            : new BlobMetadata(blob, 1, upload, 4, 1, hash, new RowAccess(), new DateTimeOffset(BlobDeleteCommitCutOracle.PriorComplete(proof).Timestamp));
         var operations = new BlobStorageOperations(owner);
         await BlobDeleteCommitCutOracle.ExactAsync(operations.Metadata(BlobCommitCutProtocol.Principal, new(blob)), metadata);
         await BlobDeleteCommitCutOracle.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobHead>(Key(HeadSpace))),
@@ -49,7 +49,7 @@ internal static class BlobDeleteCommitCutAssertions
     {
         var blob = BlobCommitCutProtocol.Blob;
         var begin = BlobDeleteCommitCutOracle.Begin(proof, BlobCommitCutProtocol.OriginalUpload);
-        var expiry = begin.EvaluatedAt.AddSeconds(3_600);
+        var expiry = new DateTimeOffset(begin.Timestamp).AddSeconds(3_600);
         var stateKey = Key(StateSpace, version: true);
         var rawKey = Key(PartSpace, version: true, part: true);
         var manifestKey = Key(PartMetaSpace, version: true, part: true);
@@ -60,7 +60,7 @@ internal static class BlobDeleteCommitCutAssertions
             await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(manifestKey))).IsNull();
             return;
         }
-        var expected = new BlobState(1, proof.Incarnation, proof.Incarnation, begin.Id, BlobCommitCutProtocol.Principal,
+        var expected = new BlobState(1, proof.Incarnation, proof.Incarnation, begin.CommandId, BlobCommitCutProtocol.Principal,
             blob, BlobCommitCutProtocol.OriginalUpload, new RowAccess(), 4, 0, expiry, 1, 4, hash, BlobUploadStatus.Complete, 0, 0, retired);
         await BlobDeleteCommitCutOracle.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobState>(stateKey)), expected);
         await BlobDeleteCommitCutOracle.ExactAsync(new BlobStorageOperations(owner).UploadInfo(BlobCommitCutProtocol.Principal,

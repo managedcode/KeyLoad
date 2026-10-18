@@ -22,4 +22,4 @@ flowchart LR
   Replay --> Cold[Two actual joined same-root cold owners]
 ```
 
-This native test owns one real node-local ZoneTree store, existing System clock/options and actual ordered embedded commit/apply semantics. It does not start Orleans transport, cluster quorum, public SDK or official MCP, and does not qualify public cold restart, query expression lineage, cache/index authority, process-kill durability, power loss or performance. Field-output read/use grants, catalog registration and native50 policies remain unchanged. Frontend is N/A for this programmable authorization operation.
+This native test owns one real node-local ZoneTree store, existing System clock/options and actual ordered embedded commit/apply semantics. It does not start Orleans transport, multi-copy acknowledgement, public SDK or official MCP, and does not qualify public cold restart, query expression lineage, cache/index authority, process-kill durability, power loss or performance. Field-output read/use grants, catalog registration and native50 policies remain unchanged. Frontend is N/A for this programmable authorization operation.

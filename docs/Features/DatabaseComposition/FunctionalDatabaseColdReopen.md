@@ -18,7 +18,7 @@ REQ-DBCOLD-002 requires the same original Aspire application, physical roots,
 container names and verified source/image selection. ContainerRuntimeControl owns
 native fault-command kill receipts, exited identities, native Start acceptance,
 changed process generation and health settlement. All nodes exit before any starts;
-all native starts are accepted before quorum-health waits. Existing joined shutdown,
+all native starts are accepted before Orleans cluster-readiness waits. Existing joined shutdown,
 retained failure evidence and released-storage checks remain mandatory. One replica is
 its actual development acknowledgement topology; three replicas are the default replicated cluster.
 The native ContainerRuntimeOwnedReceipt scenario namespace is reused unchanged;

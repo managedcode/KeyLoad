@@ -24,4 +24,4 @@ flowchart LR
  Healthy --> Cold[Two native cold opens with full image and outcome proof]
 ```
 
-The CLI process is an offline closed-store operation; it does not qualify quorum acknowledgements, full replicated-cluster restore, power loss, performance or production readiness. The existing full content, restore and corruption suites remain required. UI, new provider/package and public API are N/A.
+The CLI process is an offline closed-store operation; it does not qualify configured-copy acknowledgements, full replicated-cluster restore, power loss, performance or production readiness. The existing full content, restore and corruption suites remain required. UI, new provider/package and public API are N/A.

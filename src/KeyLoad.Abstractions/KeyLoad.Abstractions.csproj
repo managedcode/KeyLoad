@@ -20,6 +20,6 @@
     <InternalsVisibleTo Include="KeyLoad.Core" />
     <InternalsVisibleTo Include="KeyLoad.Clustering" />
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
-    <InternalsVisibleTo Include="KeyLoad.CrashHost" />
+    <InternalsVisibleTo Include="KeyLoad.RecoveryHost" />
   </ItemGroup>
 </Project>

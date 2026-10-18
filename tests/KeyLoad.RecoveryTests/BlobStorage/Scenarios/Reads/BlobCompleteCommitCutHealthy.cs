@@ -2,7 +2,7 @@ using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;

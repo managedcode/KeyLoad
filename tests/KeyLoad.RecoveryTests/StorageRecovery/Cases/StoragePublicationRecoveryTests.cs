@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -42,7 +42,7 @@ internal sealed class StoragePublicationRecoveryTests
             RedirectStandardError = true,
             UseShellExecute = false,
         };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(), "0", mode })
+        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(), "0", mode })
         {
             start.ArgumentList.Add(argument);
         }

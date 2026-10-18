@@ -2,7 +2,7 @@ using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 

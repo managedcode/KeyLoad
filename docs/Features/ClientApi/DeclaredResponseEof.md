@@ -23,4 +23,4 @@ flowchart LR
 
 The same Abort primitive is already used by chunked coverage; this stage is specifically its declared-length framing law and read-failure mapping, not another whole-task completion. A successful flush is native server-side evidence only: source authoring does not prove which private HttpClient/JSON exception arrives, TCP delivery of each prefix, actual pending-state timing or deadline fit. The SDK deliberately exposes safe public classifications rather than private exception text.
 
-A one-silo native TestCluster is not a genuine Docker/Aspire cluster quorum, standard ASP.NET gateway authentication, process restart, two cold owners, power-loss or performance proof. Those product gates remain separate. Main alone may adopt tracked source and run SDK/build/tests/Git.
+A one-silo native TestCluster is not a genuine Docker/Aspire persisted-copy acknowledgement, standard ASP.NET gateway authentication, process restart, two cold owners, power-loss or performance proof. Those product gates remain separate. Main alone may adopt tracked source and run SDK/build/tests/Git.

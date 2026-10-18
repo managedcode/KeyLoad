@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
@@ -53,7 +53,7 @@ internal static class MessagingCrashTrial
         };
         foreach (var argument in new[]
         {
-            typeof(CrashHostMarker).Assembly.Location,
+            typeof(RecoveryHostMarker).Assembly.Location,
             root,
             stage.ToString(),
             mutationIndex.ToString(CultureInfo.InvariantCulture),

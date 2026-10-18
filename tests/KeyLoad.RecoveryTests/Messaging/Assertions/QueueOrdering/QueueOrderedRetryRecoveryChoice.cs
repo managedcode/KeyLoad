@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Core;
-using KeyLoad.CrashHost;
+using KeyLoad.RecoveryHost;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 namespace KeyLoad.RecoveryTests.Features.EventStreams;

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
-using KeyLoad.CrashHost.Features.ClusterRouting;
+using KeyLoad.RecoveryHost.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 

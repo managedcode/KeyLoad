@@ -150,7 +150,7 @@ the shared [BenchmarkComparisons](BenchmarkComparisons.md) feature in
 `benchmarks/KeyLoad.BenchmarkScenarios/` and uses
 the existing KeyLoad.Benchmarks executable. Frontend, SDK/MCP/HTTP and
 Orleans request surfaces are N/A for this transient private codec: their public
-contracts are unchanged. StorageRecovery, CrashHost, RecoveryTests and cluster chunk
+contracts are unchanged. StorageRecovery, RecoveryHost, RecoveryTests and cluster chunk
 integration are N/A for this transient codec candidate because no canonical chunk
 is written; ordinary current-format integration and recovery remain mandatory
 work, not waived acceptance criteria. No legacy-record conversion is
@@ -190,7 +190,7 @@ REQ-SERIES-022 / AC-SERIES-022 and new REQ-STORAGE-GATE-001 / AC-STORAGE-GATE-00
 
 ### Original process cuts
 
-REQ-SERIES-022 / AC-SERIES-022 under ADR-120: distinguish graceful reopen from actual process termination. The existing CrashHost, original CanonicalCrashBoundary and bounded joined child owner must exercise both RefreshSampleRollup and DropSampleRollup. Each case kills one child after its acknowledged revision-one refresh and a second child at the next canonical JournalFlushed before apply. Original samples/IDs/sequence/exclusive retention floor remain byte-identical. Independent literal parent assertions require all four original samples, exact half-open bucket count3/sum12/min2/max6/average4, sourceSequence4 and retention floor at From; inflight refresh recovers revision2 statistics and inflight drop revision2 tombstone. Exact original acknowledged receipt and recovered stable-ID receipt replay without new bytes/position; changed payload is Conflict with no bucket/raw effects, its original failed replay has no effects. Healthy refresh/drop/recreate reaches revision5 and a fourth distinct child reopens that complete state. Preserve native current format, aliases/field IDs, original child/output/timeout bounds and primary plus cleanup failures. No production hook, migration, power-loss or qualification claim.
+REQ-SERIES-022 / AC-SERIES-022 under ADR-120: distinguish graceful reopen from actual process termination. The existing RecoveryHost, original CanonicalCrashBoundary and bounded joined child owner must exercise both RefreshSampleRollup and DropSampleRollup. Each case kills one child after its acknowledged revision-one refresh and a second child at the next canonical JournalFlushed before apply. Original samples/IDs/sequence/exclusive retention floor remain byte-identical. Independent literal parent assertions require all four original samples, exact half-open bucket count3/sum12/min2/max6/average4, sourceSequence4 and retention floor at From; inflight refresh recovers revision2 statistics and inflight drop revision2 tombstone. Exact original acknowledged receipt and recovered stable-ID receipt replay without new bytes/position; changed payload is Conflict with no bucket/raw effects, its original failed replay has no effects. Healthy refresh/drop/recreate reaches revision5 and a fourth distinct child reopens that complete state. Preserve native current format, aliases/field IDs, original child/output/timeout bounds and primary plus cleanup failures. No production hook, migration, power-loss or qualification claim.
 
 ### Rollup process receipt oracle
 
@@ -289,7 +289,7 @@ REQ/AC-SERIES-CHUNK-008/010/011/012 and AC-CHUNK-001/002 require partial retenti
 
 ## Two-block original process publication
 
-AC-SERIES-CHUNK-011/012 retains every original Open/Append/Correction/Seal/Merge recovery declaration and its exact small-corpus oracles. The existing five real cases use two/three rows, so they do not establish the independently authored 257-record generation across two encoded blocks. A distinct same-partition CrashHost flow uses the original producer/linked parent token/run deadline/output bounds/kill and joined pipe cleanup/file-lock readiness. Its closed child modes are routed within the owning TimeSeries helper; Program, storage format, clocks, limits and production ownership are unchanged.
+AC-SERIES-CHUNK-011/012 retains every original Open/Append/Correction/Seal/Merge recovery declaration and its exact small-corpus oracles. The existing five real cases use two/three rows, so they do not establish the independently authored 257-record generation across two encoded blocks. A distinct same-partition RecoveryHost flow uses the original producer/linked parent token/run deadline/output bounds/kill and joined pipe cleanup/file-lock readiness. Its closed child modes are routed within the owning TimeSeries helper; Program, storage format, clocks, limits and production ownership are unchanged.
 
 ## Two-block paged partial retention
 

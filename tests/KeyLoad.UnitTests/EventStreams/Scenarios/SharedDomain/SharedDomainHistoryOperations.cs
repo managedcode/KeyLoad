@@ -4,7 +4,7 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 

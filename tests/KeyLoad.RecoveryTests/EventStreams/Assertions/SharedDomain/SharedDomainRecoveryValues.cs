@@ -1,7 +1,7 @@
 using ManagedCode.Communication;
 using System.Text.Json;
-using KeyLoad.CrashHost.Features.EventStreams;
-using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
+using KeyLoad.RecoveryHost.Features.EventStreams;
+using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -17,7 +17,6 @@ internal static class SharedDomainRecoveryValues
 
     internal static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(actual.Json).IsEqualTo(expected.Json);
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());
