@@ -145,8 +145,10 @@ text and comments as `KLD0038` errors. Restricted terms include fallback,
 migration/migrate, regression, mock, fixture, sample/simple and compatibility,
 including their grammatical forms and compound identifiers. Meanings approved by
 the current design stay explicit: native Orleans activation migration, real
-TUnit fixtures owned under `tests/.../Fixtures/`, time-series sample data and
-resolved native framework API names. These are term-specific semantic contexts,
+TUnit fixtures owned under `tests/.../Fixtures/` and their source-resolved test
+contracts, metadata and support reachable from real native TUnit cases,
+time-series sample data, original operation/resource measurement samples and their
+authentic report fields, and resolved native framework API names. These are term-specific semantic contexts,
 not permission to add a fallback or mock inside an approved feature. The
 analyzer's exact vocabulary declarations describe this rule and grant no runtime
 implementation permission. No blanket file, test, generated-code or keyword

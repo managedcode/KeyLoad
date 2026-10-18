@@ -31,16 +31,19 @@ public sealed class UnauthorizedImplementationTermAnalyzer : DiagnosticAnalyzer
         {
             if (start.Compilation.AssemblyName?.StartsWith(ImplementationTermCatalog.NamespacePrefix, StringComparison.Ordinal) == true)
             {
-                start.RegisterSyntaxTreeAction(tree => AnalyzeTree(tree, start.Compilation));
+                var testOwners = new Lazy<System.Collections.Generic.HashSet<INamedTypeSymbol>>(
+                    () => ImplementationTestOwnership.Read(start.Compilation, start.CancellationToken));
+                start.RegisterSyntaxTreeAction(tree => AnalyzeTree(tree, start.Compilation, testOwners));
             }
         });
     }
 
-    private static void AnalyzeTree(SyntaxTreeAnalysisContext context, Compilation compilation)
+    private static void AnalyzeTree(SyntaxTreeAnalysisContext context, Compilation compilation,
+        Lazy<System.Collections.Generic.HashSet<INamedTypeSymbol>> testOwners)
     {
         var root = context.Tree.GetRoot(context.CancellationToken);
         var model = compilation.GetSemanticModel(context.Tree);
-        var permissions = new ImplementationTermPermissions(model);
+        var permissions = new ImplementationTermPermissions(model, testOwners);
         foreach (var token in root.DescendantTokens())
         {
             context.CancellationToken.ThrowIfCancellationRequested();

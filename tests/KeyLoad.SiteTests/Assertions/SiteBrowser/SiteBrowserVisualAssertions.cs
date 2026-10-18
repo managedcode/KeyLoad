@@ -70,7 +70,7 @@ internal static class SiteBrowserVisualAssertions
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollAwayScript, false, cancellationToken);
         var paused = await cdp.WaitForExpressionAsync(SiteBrowserUiTokens.ScenePausedScript, cancellationToken);
         await Assert.That(paused).IsTrue();
-        await SiteBrowserVectorAssetAssertions.AssertPosterFallbackAsync(cdp, cancellationToken);
+        await SiteBrowserVectorAssetAssertions.AssertPosterVisibleAsync(cdp, cancellationToken);
 
         await chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, cancellationToken);
         await chrome.NavigateAsync(baseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, cancellationToken);
@@ -96,7 +96,7 @@ internal static class SiteBrowserVisualAssertions
         await Assert.That(state.GetProperty(SiteBrowserUiTokens.SceneStateField).GetString()).IsEqualTo(
             SiteBrowserUiTokens.ScenePoster);
         await Assert.That(state.GetProperty(SiteBrowserUiTokens.CanvasCountField).GetInt32()).IsEqualTo(SiteTokens.Zero);
-        await SiteBrowserVectorAssetAssertions.AssertPosterFallbackAsync(cdp, cancellationToken);
+        await SiteBrowserVectorAssetAssertions.AssertPosterVisibleAsync(cdp, cancellationToken);
     }
 
     private static async Task AssertRendererState(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)

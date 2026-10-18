@@ -50,7 +50,7 @@ internal static class SiteBrowserVectorAssetAssertions
         await Assert.That(description.Contains(SiteVectorAssetTokens.ConceptualDescription, StringComparison.OrdinalIgnoreCase)).IsTrue();
     }
 
-    public static async Task AssertPosterFallbackAsync(SiteBrowserCdpClient cdp,
+    public static async Task AssertPosterVisibleAsync(SiteBrowserCdpClient cdp,
         CancellationToken cancellationToken)
     {
         var state = await cdp.EvaluateAsync(SiteVectorAssetTokens.PosterStateScript, false, cancellationToken);

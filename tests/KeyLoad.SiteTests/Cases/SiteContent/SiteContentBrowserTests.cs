@@ -148,7 +148,7 @@ internal sealed class SiteContentBrowserTests
         {
             await Assert.That(snapshot.GetProperty(SiteBrowserUiTokens.CanvasCountField).GetInt32())
                 .IsEqualTo(SiteTokens.Zero);
-            await SiteBrowserVectorAssetAssertions.AssertPosterFallbackAsync(cdp, token);
+            await SiteBrowserVectorAssetAssertions.AssertPosterVisibleAsync(cdp, token);
         }
     }
 }

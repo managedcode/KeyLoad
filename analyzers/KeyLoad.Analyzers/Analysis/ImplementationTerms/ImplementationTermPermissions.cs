@@ -7,7 +7,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace KeyLoad.Analyzers.Features.CodeQuality;
 
-internal sealed class ImplementationTermPermissions(SemanticModel model)
+internal sealed class ImplementationTermPermissions(SemanticModel model,
+    Lazy<HashSet<INamedTypeSymbol>> testOwners)
 {
     private readonly Dictionary<(MemberDeclarationSyntax Owner, string Term), bool> references = new();
 
@@ -29,10 +30,11 @@ internal sealed class ImplementationTermPermissions(SemanticModel model)
             ImplementationTermCatalog.MovementWord => NativeMovement(text),
             ImplementationTermCatalog.DataWord => ImplementationTermSymbols.TimeSeries(symbol, model.Compilation) ||
                 ImplementationTermSymbols.TimeSeries(ownerSymbol, model.Compilation) ||
-                References(owner, term, static (candidate, compilation) => ImplementationTermSymbols.TimeSeries(candidate, compilation), cancellationToken),
-            ImplementationTermCatalog.ResourceWord => ImplementationTermSymbols.TestOwner(symbol) ||
-                ImplementationTermSymbols.TestOwner(ownerSymbol) ||
-                References(owner, term, static (candidate, _) => ImplementationTermSymbols.TestOwner(candidate), cancellationToken),
+                ImplementationTermSymbols.Measurement(symbol) || ImplementationTermSymbols.Measurement(ownerSymbol) ||
+                References(owner, term, static (candidate, compilation) => ImplementationTermSymbols.TimeSeries(candidate, compilation) ||
+                    ImplementationTermSymbols.Measurement(candidate), cancellationToken),
+            ImplementationTermCatalog.ResourceWord => AllowsTestOwner(symbol) || AllowsTestOwner(ownerSymbol) ||
+                References(owner, term, (candidate, _) => AllowsTestOwner(candidate), cancellationToken),
             _ => false
         };
     }
@@ -40,12 +42,16 @@ internal sealed class ImplementationTermPermissions(SemanticModel model)
     private static bool IsVocabulary(ISymbol? symbol) =>
         symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.RuleVocabularyType &&
         (symbol is IFieldSymbol { IsConst: true } ||
-         symbol is IFieldSymbol { IsStatic: true, Name: nameof(ImplementationTermCatalog.DataContractTypes) } ||
+         symbol is IFieldSymbol { IsStatic: true, Name: nameof(ImplementationTermCatalog.DataContractTypes) or nameof(ImplementationTermCatalog.MeasurementTypes) } ||
          symbol is IMethodSymbol { Name: nameof(ImplementationTermCatalog.Read) or "Classify" or "Compound" });
 
     private static bool NativeMovement(string text) =>
         text.Contains(ImplementationTermCatalog.OrleansWord, StringComparison.Ordinal) &&
         text.Contains(ImplementationTermCatalog.ActivationWord, StringComparison.OrdinalIgnoreCase);
+
+    private bool AllowsTestOwner(ISymbol? symbol) => ImplementationTermSymbols.TestOwner(symbol) ||
+        (symbol as INamedTypeSymbol ?? symbol?.ContainingType) is { } type && testOwners.Value.Contains(type.OriginalDefinition) ||
+        ImplementationTermSymbols.ValueType(symbol) is INamedTypeSymbol value && testOwners.Value.Contains(value.OriginalDefinition);
 
     private bool References(MemberDeclarationSyntax? owner, string term,
         Func<ISymbol?, Compilation, bool> accepts, CancellationToken cancellationToken)

@@ -70,10 +70,6 @@
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyCodeTokens.cs",
-      "classification": "declaration-only"
-    },
-    {
       "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
       "classification": "executable"
     },
@@ -227,6 +223,74 @@
     },
     {
       "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/PolicyArgumentSources.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeMeasurement.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermPermissions.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermSymbols.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyMethodNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyParameterNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyTypeNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/ZoneTreeDispatchAnalysis.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/SynchronousZoneTreeAccessAnalyzer.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/UnauthorizedImplementationTermAnalyzer.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityDiagnosticCategories.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityLifecycleMethodNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualitySourceLimits.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualitySourceNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/ImplementationTermCatalog.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/ZoneTreeAccessPolicy.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Models/MachineKeyAttributeArgumentNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTestOwnership.cs",
       "classification": "executable"
     }
   ],
@@ -387,6 +451,24 @@
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OptionsSnapshotOverrides.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/OwnedDiagnosticsPolicy.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/PolicyArgumentSources.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0038",
+      "sources": [
+        "analyzers/KeyLoad.Analyzers/Analyzers/UnauthorizedImplementationTermAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermPermissions.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermSymbols.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/ImplementationTermCatalog.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTestOwnership.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0039",
+      "sources": [
+        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/SynchronousZoneTreeAccessAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/ZoneTreeDispatchAnalysis.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/ZoneTreeAccessPolicy.cs"
       ]
     }
   ],

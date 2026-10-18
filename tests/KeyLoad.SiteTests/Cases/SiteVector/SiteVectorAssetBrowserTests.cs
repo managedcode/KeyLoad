@@ -29,7 +29,7 @@ internal sealed class SiteVectorAssetBrowserTests
         await browser.Chrome.NavigateAsync(browser.BaseUrl + SiteAssetTokens.IndexHtml, token);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, token);
         await Assert.That(await cdp.WaitForExpressionAsync(SiteVectorAssetTokens.SceneErrorPredicate, token)).IsTrue();
-        await SiteBrowserVectorAssetAssertions.AssertPosterFallbackAsync(cdp, token);
+        await SiteBrowserVectorAssetAssertions.AssertPosterVisibleAsync(cdp, token);
         var scene = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneIdleSnapshotScript, false, token);
         await Assert.That(scene.GetProperty(SiteBrowserUiTokens.CanvasCountField).GetInt32()).IsEqualTo(SiteTokens.Zero);
         await Assert.That((await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionDisabledScript, false, token)).GetBoolean()).IsTrue();

@@ -32,7 +32,7 @@ internal sealed class SiteBrowserStaticHostTests
     }
 
     /// <summary>
-    /// AC-BC-025 regression for website run 37074632196. On the managed (non-Windows) listener, Close() after Stop()
+    /// AC-BC-025 test for website run 37074632196. On the managed (non-Windows) listener, Close() after Stop()
     /// re-binds the port Stop() already released, so a concurrent owner of that port turns teardown into
     /// "Address already in use". The static host releases its listener once and leaves the port free.
     /// </summary>

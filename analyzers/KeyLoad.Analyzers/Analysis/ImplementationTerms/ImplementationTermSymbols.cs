@@ -82,6 +82,16 @@ internal static class ImplementationTermSymbols
             DataType(compilation.GetTypeByMetadataName(prefix + "." + symbol.Name)));
     }
 
+    internal static bool Measurement(ISymbol? symbol) =>
+        symbol is IFieldSymbol { Name: "Samples", ContainingType: { } owner } &&
+        owner.ToDisplayString() == "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFields" ||
+        TypeMeans(ValueType(symbol), MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
+        TypeMeans(symbol?.ContainingType, MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
+
+    private static bool MeasurementType(ITypeSymbol type) =>
+        type.ContainingAssembly?.Name.StartsWith(ImplementationTermCatalog.NamespacePrefix, StringComparison.Ordinal) == true &&
+        Array.Exists(ImplementationTermCatalog.MeasurementTypes, name => name == type.ToDisplayString());
+
     private static bool DataType(ITypeSymbol? type) => TypeMeans(type, static candidate =>
         HasPath(candidate, ImplementationTermCatalog.TimeSeriesPath) ||
         DataIdentity(candidate), new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));

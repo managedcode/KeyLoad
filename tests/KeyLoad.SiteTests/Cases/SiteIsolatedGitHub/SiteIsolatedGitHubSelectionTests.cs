@@ -19,7 +19,7 @@ internal sealed class SiteIsolatedGitHubSelectionTests
     }
 
     [Test]
-    public async Task AC_ISO_009_SuccessfulAggregateWithMissingMandatoryStepFailsWithoutFallback()
+    public async Task AC_ISO_009_SuccessfulAggregateRejectsMissingMandatoryStep()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);

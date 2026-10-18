@@ -33,7 +33,7 @@ internal static class ImplementationTermCatalog
     internal const string DataFeatureNamespaceSuffix = ".Features.TimeSeries";
     internal static readonly string[] NativeNamespaces =
     [
-        "System", "Microsoft", "Orleans", "ManagedCode", "Tenray.ZoneTree", "ZoneTree", "TUnit", "Aspire"
+        "System", "Microsoft", "Orleans", "ManagedCode", "Tenray.ZoneTree", "ZoneTree", "TUnit", "Aspire", "BenchmarkDotNet"
     ];
     internal static readonly string[] DataNamespaces =
     [
@@ -54,6 +54,14 @@ internal static class ImplementationTermCatalog
     [
         "Orleans.Serialization.Codecs.IFieldCodec`1", "Orleans.Serialization.Cloning.IDeepCopier`1",
         "Orleans.Serialization.Serializers.IBaseCodec`1", "Orleans.Serialization.Activators.IActivator`1"
+    ];
+    internal static readonly string[] MeasurementTypes =
+    [
+        "KeyLoad.Comparisons.OperationSample", "KeyLoad.Comparisons.BenchmarkSessionOperationSample",
+        "KeyLoad.Comparisons.Measurement", "KeyLoad.Comparisons.ClientResources",
+        "KeyLoad.Comparisons.ComparisonCase", "KeyLoad.Comparisons.BenchmarkSessionLaneReport",
+        "KeyLoad.Comparisons.ClientResourceSampler",
+        "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFixture"
     ];
 
     private static readonly Regex Words = new("[A-Z]?[a-z]+|[A-Z]+(?![a-z])", RegexOptions.CultureInvariant);

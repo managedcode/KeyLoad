@@ -54,7 +54,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 | Requirement | Acceptance (pass condition) | Verified by |
 |---|---|---|
 | REQ-CQ-001: the Prostir EditorConfig is the source of truth and every project builds with strict SDK/style analysis | AC-CQ-001: `TreatWarningsAsErrors`, `CodeAnalysisTreatWarningsAsErrors`, `EnableNETAnalyzers`, `EnforceCodeStyleInBuild`, all `RunAnalyzers*` switches, `AnalysisLevel=latest-all` and XML documentation are on; the `EnforceKeyLoadCodeQuality` target fails the build before compilation when any is off; the analyzer is attached to every project except itself and its tests | Release solution build with `-warnaserror` (CI `Build and test KeyLoad`); a build with `-p:RunAnalyzers=false` must fail |
-| REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: every rule has compiler-valid passing and violating fixtures asserting diagnostic ID, severity and exact span. AC-CQ-004: sixteen rules have unique enabled IDs and expected severities; generated and external code is excluded | `DiagnosticContractTests` (`AllSixteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and every case folder |
+| REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: compiler cases assert diagnostic ID, severity and exact span for the rules they exercise. AC-CQ-004: eighteen rules have unique enabled IDs and expected severities. Each rule selects its generated-code contract; KLD0038 and KLD0039 analyze generated code. | `DiagnosticContractTests` (`AllEighteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and the existing compiler case folders; focused compiler execution evidence for KLD0038/KLD0039 remains open. |
 | REQ-CQ-003: compiler SARIF is retained, including for failed builds | AC-CQ-003: each project writes `artifacts/code-quality/<project>/<configuration>/<framework>/diagnostics.sarif`; CI uploads `code-quality-<os>` even when the build fails, and an upload never turns a failed build green | Workflow review of `Directory.Build.targets` and the `Save build diagnostics` step (explicit review exception) |
 | REQ-CQ-004: quality gates are enforced and qualification is stated honestly | AC-CQ-005: no required gate is skipped, disabled or downgraded to pass. AC-CQ-006: documentation and status record source configuration, local checks and exact-source Linux evidence separately. AC-CQ-022: the complete solution passes the strict Release build and `dotnet format --verify-no-changes`; repairs preserve public signatures, persisted bytes, signed identities, cancellation and lifetime rules. AC-CQ-023: every source-bound method with cyclomatic complexity above 20 is reviewed and, where it helps, split along a real responsibility | Governance check `node scripts/Features/RepositoryGovernance/verify.mjs`; review of `docs/implementation/status.json`; Release build and formatter gates (AC-CQ-022) |
 | REQ-CQ-006: maintainability limits are executable | AC-CQ-008: KLD0030..KLD0033 accept the boundary and reject one past it (file 400, type 200, executable unit 64 including the 63/64/65 edge, nesting 3). AC-CQ-009: the analyzer module reaches the coverage thresholds below from the native analyzer suite | `FileCodeLineCountAnalyzerTests`, `AggregateTypeCodeLineCountAnalyzerTests`, `ExecutableUnitCodeLineCountAnalyzerTests`, `ExecutableUnitSpanAndTriviaAnalyzerTests`, `ControlFlowNestingAnalyzerTests`, `ControlFlowNestingExtendedConstructTests`, `NumericAnalyzerSelfInventoryTests`, `SiteAnalyzerCoverage*Tests` |
@@ -94,8 +94,8 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 ## Analyzer rules
 
 `KeyLoad.Analyzers` is attached centrally and compiles against the Roslyn that
-ships with the pinned SDK. Generated code is excluded through the Roslyn
-generated-code API, analysis is concurrent and cancellable, and diagnostic IDs are
+ships with the pinned SDK. Each rule declares its generated-code contract through
+the Roslyn API. Analysis is concurrent and cancellable, and diagnostic IDs are
 unique and never reused.
 
 | ID | Meaning | Severity |
@@ -116,6 +116,8 @@ unique and never reused.
 | KLD0035 | Runtime numeric literals, including zero and one, use named constants or typed options | Error |
 | KLD0036 | Runtime strings, characters, interpolation text and format tokens use named identities or `nameof` | Error |
 | KLD0037 | Operational policy comes from centrally bound, validated `IOptions<T>`, not from raw configuration reads or constants | Error |
+| KLD0038 | Implementation terminology requires explicit owner approval; only narrowly approved native runtime, domain and testing meanings are allowed | Error |
+| KLD0039 | ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics use public synchronous APIs without thread-pool dispatch | Error |
 
 Rule fixtures (all under `Cases/`): KLD0001 `LiteralMachineKey/`, KLD0013
 `Program/ProgramEndpointMappingTests`, KLD0014 `Grain/GrainInterfaceVersionTests`,
@@ -126,6 +128,8 @@ KLD0022 `SystemClock/`, KLD0024 `UntypedCatch/`, KLD0030..KLD0033 `FileCode/`,
 `NativeSynchronization/`, KLD0035/KLD0036 `MagicRuntime/` and `GeneralRuntime/`,
 KLD0037 `TypedConfiguration/`, `TypedOptions/`, `OptionsSnapshot/`,
 `SerializedOptions/` and `ConditionalPolicy/`.
+The existing diagnostic inventory includes KLD0038 and KLD0039. Focused compiler
+execution evidence for their rejected and permitted cases remains open.
 
 Rule behaviour follows these constraints:
 
