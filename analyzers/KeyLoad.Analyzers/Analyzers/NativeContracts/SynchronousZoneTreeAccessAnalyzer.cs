@@ -35,7 +35,8 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
     {
         var invocation = (IInvocationOperation)context.Operation;
         var method = invocation.TargetMethod;
-        if (ZoneTreeAccessPolicy.Native(method) && ZoneTreeAccessPolicy.Asynchronous(method) ||
+        if ((ZoneTreeAccessPolicy.Native(method) || invocation.Instance is not null &&
+            ZoneTreeDispatchAnalysis.NativeResource(invocation.Instance)) && ZoneTreeAccessPolicy.Asynchronous(method) ||
             ZoneTreeAccessPolicy.Dispatch(method) && ZoneTreeDispatchAnalysis.ContainsNativeAccess(invocation, context,
                 new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default)))
         {
