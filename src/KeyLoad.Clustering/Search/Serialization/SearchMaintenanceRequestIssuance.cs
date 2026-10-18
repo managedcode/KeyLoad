@@ -16,11 +16,11 @@ internal static class SearchMaintenanceRequestIssuance
             Purpose = AnnMaintenanceChildScope.Purpose,
             RequestId = requestId,
             PrincipalId = principalId,
-            Incarnation = context.Database.Store.Identity.Incarnation,
+            Incarnation = context.Scope.Incarnation,
             ReadKind = readKind,
             CommandKind = commandKind,
             CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Database.Limits.MaxBatchBytes),
+            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
         _ = AnnMaintenanceChildScope.Validate(envelope);
@@ -39,11 +39,11 @@ internal static class SearchMaintenanceRequestIssuance
             Purpose = AnnProjectionJobChildScope.Purpose,
             RequestId = requestId,
             PrincipalId = principalId,
-            Incarnation = context.Database.Store.Identity.Incarnation,
+            Incarnation = context.Scope.Incarnation,
             ReadKind = null,
             CommandKind = OperationKind.MaintainAnnIndex,
             CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Database.Limits.MaxBatchBytes),
+            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry < context.Now + context.Lifetime ? expiry : context.Now + context.Lifetime
         };
         _ = AnnProjectionJobChildScope.Validate(envelope);
@@ -62,11 +62,11 @@ internal static class SearchMaintenanceRequestIssuance
             Purpose = TextMaintenanceChildScope.Purpose,
             RequestId = requestId,
             PrincipalId = principalId,
-            Incarnation = context.Database.Store.Identity.Incarnation,
+            Incarnation = context.Scope.Incarnation,
             ReadKind = readKind,
             CommandKind = commandKind,
             CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Database.Limits.MaxBatchBytes),
+            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
         _ = TextMaintenanceChildScope.Validate(envelope);

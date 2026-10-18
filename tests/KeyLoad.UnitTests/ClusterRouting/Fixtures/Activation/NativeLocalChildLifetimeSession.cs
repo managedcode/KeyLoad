@@ -39,7 +39,8 @@ internal sealed class NativeLocalChildLifetimeSession
         Linked = CancellationTokenSource.CreateLinkedTokenSource(token, Parent.Cancellation);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, Linked.Token);
         budget.AttachResourceLifetimeBinding(Parent);
-        var codec = new GrainRequestCodec(database, database.EvaluationClock, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(database.Store.Identity.Incarnation, database.Store.Identity.SigningKey,
+            database.OperationLimitsOptions, database.EvaluationClock, UnitRoutingOptions.Routing());
         var lifetime = codec.ExecutionOptions.Value.RequestLifetime;
         var queryLifetime = TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds);
         var expiry = database.EvaluationClock.GetUtcNow() + (lifetime < queryLifetime ? lifetime : queryLifetime);

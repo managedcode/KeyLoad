@@ -35,9 +35,8 @@ internal static class NativeRuntimeJournalRegistration
     private static RuntimeJournalClient CreateClient(IServiceProvider provider)
     {
         var codec = new Lazy<GrainRequestCodec>(provider.GetRequiredService<GrainRequestCodec>);
-        var database = new Lazy<DatabaseEngine>(provider.GetRequiredService<DatabaseEngine>);
         return new RuntimeJournalClient(provider.GetRequiredService<IGrainFactory>(),
-            () => codec.Value, () => database.Value, provider,
+            () => codec.Value, provider.GetRequiredService<IOptions<DatabaseLimits>>(), provider,
             provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),

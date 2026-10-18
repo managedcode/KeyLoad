@@ -1,12 +1,11 @@
 using System.Security.Cryptography;
-using KeyLoad.Core;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Issues bounded native authentication authority and clears the original secret bytes.</summary>
 internal static class NativeAdministratorAuthenticationRequestIssuance
 {
-    internal static string Create(GrainRequestCodec codec, DatabaseEngine database,
+    internal static string Create(GrainRequestCodec codec,
         TimeProvider clock, GrainRoutingOptions settings, Guid requestId,
         NativeAdministratorAuthenticationRequestV1 request)
     {
@@ -22,10 +21,10 @@ internal static class NativeAdministratorAuthenticationRequestIssuance
             {
                 Purpose = NativeAdministratorAuthenticationProtocol.Purpose,
                 RequestId = requestId,
-                Incarnation = database.Store.Identity.Incarnation,
+                Incarnation = codec.Incarnation,
                 PrincipalId = null,
                 ReadKind = GrainReadKind.Authenticate,
-                Payload = GrainNativePayload.Copy(bytes, database.Limits.MaxBatchBytes),
+                Payload = GrainNativePayload.Copy(bytes, codec.Limits.MaxBatchBytes),
                 ExpiresAt = request.ExpiresAt
             });
         }

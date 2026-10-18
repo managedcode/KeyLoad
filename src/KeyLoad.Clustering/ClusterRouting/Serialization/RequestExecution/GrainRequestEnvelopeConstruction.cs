@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.Clustering;
 
 /// <summary>Constructs owned request envelopes; the existing codec still validates and signs each result.</summary>
@@ -41,23 +39,4 @@ internal static class GrainRequestEnvelopeConstruction
         };
     }
 
-    internal static GrainRequestEnvelope MovementRead(DatabaseEngine database, DateTimeOffset now,
-        TimeSpan requestLifetime, Guid requestId, string principalId, GrainReadKind kind,
-        string purpose, byte[] payload, DateTimeOffset expiry)
-    {
-        if (expiry <= now || expiry > now + requestLifetime)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-        return new GrainRequestEnvelope
-        {
-            Purpose = purpose,
-            RequestId = requestId,
-            Incarnation = database.Store.Identity.Incarnation,
-            PrincipalId = principalId,
-            ReadKind = kind,
-            Payload = GrainNativePayload.Copy(payload, database.Limits.MaxBatchBytes),
-            ExpiresAt = expiry
-        };
-    }
 }

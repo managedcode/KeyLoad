@@ -13,17 +13,21 @@ public sealed partial class DatabaseEngine
     /// <param name="operation">Native command whose subject was bound by the server boundary.</param>
     /// <returns>An independently owned command and generated native input.</returns>
     public Command<DatabaseCommand> OwnCommand(Command<DatabaseCommand> operation)
+        => SnapshotCommand(operation, Limits);
+
+    internal static Command<DatabaseCommand> SnapshotCommand(Command<DatabaseCommand> operation, DatabaseLimits limits)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        ValidateDatabaseCommand(operation);
-        using var buffer = new CommandSnapshotBuffer(Limits.MaxBatchBytes);
+        ArgumentNullException.ThrowIfNull(limits);
+        ValidateDatabaseCommand(operation, limits);
+        using var buffer = new CommandSnapshotBuffer(limits.MaxBatchBytes);
         NativeSerialization.Serialize(operation, buffer);
         var owned = NativeSerialization.Deserialize<Command<DatabaseCommand>>(buffer.GetBuffer().AsSpan(SnapshotStart, checked((int)buffer.Length)));
-        ValidateDatabaseCommand(owned);
+        ValidateDatabaseCommand(owned, limits);
         return owned;
     }
 
-    private void ValidateDatabaseCommand(Command<DatabaseCommand> operation)
+    private static void ValidateDatabaseCommand(Command<DatabaseCommand> operation, DatabaseLimits limits)
     {
         var input = operation.Value;
         if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId)
@@ -34,7 +38,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommand);
         }
-        RequireNativeBudget(checked((long)input.Input.Length + input.RetryDecisions.Length + input.ResourceAdmission.Length));
+        RequireNativeBudget(checked((long)input.Input.Length + input.RetryDecisions.Length + input.ResourceAdmission.Length), limits.MaxBatchBytes);
         NativeSerialization.Validate(input.Input.Span, NativeOperationPayloadType(input.Kind)
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand));
     }
@@ -63,8 +67,11 @@ public sealed partial class DatabaseEngine
     }
 
     private void RequireNativeBudget(long byteCount)
+        => RequireNativeBudget(byteCount, Limits.MaxBatchBytes);
+
+    private static void RequireNativeBudget(long byteCount, int maximumBytes)
     {
-        if (byteCount > Limits.MaxBatchBytes)
+        if (byteCount > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage);
         }

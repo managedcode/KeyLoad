@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.Clustering;
 
 internal static class GrainRequestPayloadVerification
@@ -22,7 +20,7 @@ internal static class GrainRequestPayloadVerification
         return request;
     }
 
-    internal static DecodedGrainRequest Verify(GrainRequestCodec originalCodec, DatabaseEngine database,
+    internal static DecodedGrainRequest Verify(GrainRequestCodec originalCodec,
         int maximumTokenCharacters, string signedRequest)
     {
         if (string.IsNullOrEmpty(signedRequest) || signedRequest.Length > maximumTokenCharacters)
@@ -30,9 +28,9 @@ internal static class GrainRequestPayloadVerification
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
 
-        var request = database.Verify<GrainRequestEnvelope>(signedRequest, maximumTokenCharacters);
+        var request = originalCodec.VerifySigned<GrainRequestEnvelope>(signedRequest, maximumTokenCharacters);
         originalCodec.ValidateVerifiedScope(request);
-        if (request.Payload.Length > database.Limits.MaxBatchBytes)
+        if (request.Payload.Length > originalCodec.Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
         }

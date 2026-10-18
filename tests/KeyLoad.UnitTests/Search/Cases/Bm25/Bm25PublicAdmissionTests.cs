@@ -18,7 +18,8 @@ internal sealed class Bm25PublicAdmissionTests
             var native = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateCommand(
                 OperationKind.Bm25CorpusPublicationPhase, original.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), payload));
             await Assert.That(native.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-            var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+            var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database.Store.Identity.Incarnation, flow.Database.Database.Store.Identity.SigningKey,
+            flow.Database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
             var generic = Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(),
                 original.UserId!, OperationKind.Bm25CorpusPublicationPhase, original.CommandId, payload));
             await Assert.That(generic.Code).IsEqualTo(ErrorCode.TokenInvalidated);

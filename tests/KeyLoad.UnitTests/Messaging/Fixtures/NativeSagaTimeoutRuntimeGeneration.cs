@@ -44,7 +44,8 @@ internal sealed class NativeSagaTimeoutRuntimeGeneration(NativeSagaTimeoutFixtur
         var builder = CreateBuilder();
         cluster = builder.Build();
         fixture.SetRuntimeDependencies(
-            new GrainRequestCodec(fixture.Database.Database, TimeProvider.System, fixture.Routing), coordinator);
+            new GrainRequestCodec(fixture.Database.Database.Store.Identity.Incarnation, fixture.Database.Database.Store.Identity.SigningKey,
+            fixture.Database.Database.OperationLimitsOptions, TimeProvider.System, fixture.Routing), coordinator);
         await DeployAndOpenAsync(deadline.Token);
     }
 

@@ -11,7 +11,7 @@ namespace KeyLoad.Clustering;
 internal sealed class RuntimeJournalClient(
     IGrainFactory grains,
     Func<GrainRequestCodec> codecFactory,
-    Func<DatabaseEngine> databaseFactory,
+    IOptions<DatabaseLimits> databaseLimits,
     IServiceProvider services,
     TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
@@ -122,8 +122,7 @@ internal sealed class RuntimeJournalClient(
     {
         await admission.WaitAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        var database = databaseFactory();
-        ValidateDatabaseLimits(database, payload);
+        ValidateDatabaseLimits(databaseLimits.Value, payload);
         return codecFactory();
     }
 
@@ -143,10 +142,10 @@ internal sealed class RuntimeJournalClient(
         return value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
     }
 
-    private static void ValidateDatabaseLimits(DatabaseEngine database, ReadOnlyMemory<byte> payload)
+    private static void ValidateDatabaseLimits(DatabaseLimits limits, ReadOnlyMemory<byte> payload)
     {
         // The signed-token wrapper has its own additive envelope allowance. Bound the complete native DTO here.
-        if (payload.Length > database.Limits.MaxBatchBytes)
+        if (payload.Length > limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
         }

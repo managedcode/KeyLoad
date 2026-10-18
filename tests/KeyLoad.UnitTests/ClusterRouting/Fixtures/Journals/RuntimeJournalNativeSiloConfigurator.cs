@@ -47,7 +47,7 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
             .Validate(options => options.IsValid(), "The native runtime test timing profile is invalid.")
             .ValidateOnStart();
         siloBuilder.Services.AddSingleton(services => new RuntimeJournalClient(
-            services.GetRequiredService<IGrainFactory>(), () => fixture.Codec, () => fixture.Database.Database,
+            services.GetRequiredService<IGrainFactory>(), () => fixture.Codec, fixture.Database.Database.OperationLimitsOptions,
             services,
             services.GetRequiredService<TimeProvider>(),
             services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),

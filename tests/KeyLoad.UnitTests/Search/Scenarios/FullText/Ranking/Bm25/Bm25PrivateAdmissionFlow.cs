@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
@@ -97,7 +97,8 @@ internal static class Bm25PrivateAdmissionFlow
         CancellationToken token)
     {
         var routing = UnitRoutingOptions.Routing();
-        var codec = new KeyLoad.Clustering.GrainRequestCodec(database.Database, database.Database.EvaluationClock, routing);
+        var codec = new KeyLoad.Clustering.GrainRequestCodec(database.Database.Store.Identity.Incarnation, database.Database.Store.Identity.SigningKey,
+            database.Database.OperationLimitsOptions, database.Database.EvaluationClock, routing);
         var expiry = database.Database.EvaluationClock.GetUtcNow().Add(routing.Value.RequestLifetime);
         var signed = codec.CreateBm25CorpusPublication(Guid.NewGuid(), operation, expiry);
         var decoded = codec.Verify(signed);

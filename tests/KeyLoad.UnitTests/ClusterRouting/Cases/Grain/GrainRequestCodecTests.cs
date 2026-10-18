@@ -24,7 +24,8 @@ internal sealed class GrainRequestCodecTests
     public async Task ExactUnicodePayloadAndDistinctReadActorKeysArePreserved()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var bytes = NativeSerialization.Serialize(Payload);
         var firstId = Guid.NewGuid();
         var secondId = Guid.NewGuid();
@@ -42,7 +43,8 @@ internal sealed class GrainRequestCodecTests
     {
         var bytes = NativeSerialization.Serialize(new string(Padding, RepresentativeCharacters));
         using var fixture = new TestDatabase(new DatabaseLimits { MaxBatchBytes = bytes.Length });
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var id = Guid.NewGuid();
         var signed = codec.CreateRead(id, null, GrainReadKind.Authenticate, bytes);
         await Assert.That(codec.VerifyRead(signed, id).Payload.Span.SequenceEqual(bytes)).IsTrue();
@@ -57,7 +59,8 @@ internal sealed class GrainRequestCodecTests
     public async Task SignedPayloadNeverRetainsCallersMutableBuffer()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var bytes = NativeSerialization.Serialize(Payload);
         var expected = bytes.ToArray();
         var id = Guid.NewGuid();
@@ -81,7 +84,8 @@ internal sealed class GrainRequestCodecTests
     public async Task InvalidSignedScopeIsDenied(GrainRequestMutation mutation)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var id = Guid.NewGuid();
         var envelope = codec.VerifyRead(codec.CreateRead(id, Principal, GrainReadKind.QueryCapabilities,
             NativeSerialization.Serialize(NoDtoMarker)), id).Envelope;
@@ -109,7 +113,8 @@ internal sealed class GrainRequestCodecTests
     public async Task WrongActorKeyAndTamperedSignatureAreDenied()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var id = Guid.NewGuid();
         var signed = codec.CreateRead(id, Principal, GrainReadKind.Document, NativeSerialization.Serialize(Payload));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(signed, Guid.NewGuid())).Code).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -123,7 +128,8 @@ internal sealed class GrainRequestCodecTests
     public async Task ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(), Principal,
             (OperationKind)8, Guid.NewGuid(), NativeSerialization.Serialize(NoDtoMarker))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(Guid.NewGuid(), Principal,
@@ -139,7 +145,8 @@ internal sealed class GrainRequestCodecTests
     public async Task SignedMalformedOrTrailingPayloadIsDenied(bool trailing)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var id = Guid.NewGuid();
         var marker = NativeSerialization.Serialize(NoDtoMarker);
         var request = codec.VerifyRead(codec.CreateRead(id, Principal, GrainReadKind.QueryCapabilities, marker), id).Envelope;
@@ -156,7 +163,8 @@ internal sealed class GrainRequestCodecTests
     public async Task LegacyJsonAndMalformedNativeAreDeniedBeforeIssuance()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var invalid = new byte[][] { Encoding.UTF8.GetBytes(InvalidJson), [InvalidUtf8] };
         foreach (var bytes in invalid)
         {

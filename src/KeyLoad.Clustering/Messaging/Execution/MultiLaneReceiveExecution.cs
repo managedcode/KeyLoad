@@ -20,7 +20,7 @@ internal static class MultiLaneReceiveExecution
         var request = GrainNativePayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
         ArgumentNullException.ThrowIfNull(binding);
         var limits = services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
-        var incarnation = codec.LifetimeReadContext.Database.Store.Identity.Incarnation;
+        var incarnation = codec.Incarnation;
         MultiLaneReceiveAdmission.Validate(request, parent.Envelope.CommandId,
             services.GetRequiredService<IOptions<MessagingExecutionOptions>>().Value, limits, token);
         var outcomes = ImmutableArray.CreateBuilder<QueueLaneReceiveOutcome>(request.Requests.Length);

@@ -10,7 +10,7 @@ internal static class RuntimeJournalStartup
     private const int BootstrapIdentityCount = 2;
     private const string BootstrapCommandDomain = "keyload-runtime-journal-bootstrap-v1\0";
     private static readonly byte[] BootstrapDomain = Encoding.ASCII.GetBytes(BootstrapCommandDomain);
-    internal static async Task InitializeAsync(IServiceProvider services, PartitionHost partition,
+    internal static async Task InitializeAsync(IServiceProvider services,
         Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, ServerRuntimeOptions runtime,
         CancellationToken cancellationToken)
     {
@@ -20,7 +20,8 @@ internal static class RuntimeJournalStartup
         var token = pending.Token;
         var requests = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(),
             services.GetRequiredService<GrainRequestCodec>(), services, clock, runtime.GrainRouting);
-        var commandId = BootstrapCommandId(partition.Database.Store.Identity.Incarnation, partition.Database.Store.Identity.Incarnation);
+        var incarnation = runtime.Node.Value.Incarnation;
+        var commandId = BootstrapCommandId(incarnation, incarnation);
         await InitializeAuthorityAsync(requests, authenticateAdministrator, commandId, runtime, clock, token)
             .ConfigureAwait(false);
         services.GetRequiredService<RuntimeJournalAdmission>().Open(token);

@@ -18,7 +18,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     private Task? shutdown;
     private bool localReady;
     private IGrainFactory? grains;
-    private PartitionHost Partition => applicationServices.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
     internal NativeRequestWorkOwner RequestWork => requestLifetime.Work;
     internal NativeConnectionOwnerIdentity ConnectionOwner => connectionOwner;
     internal Task? Closing => Volatile.Read(ref shutdown);
@@ -76,7 +75,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     private async Task BootstrapAsync(CancellationToken cancellationToken)
     {
         var settings = nodeOptions.Value;
-        await RuntimeJournalStartup.InitializeAsync(applicationServices, Partition,
+        await RuntimeJournalStartup.InitializeAsync(applicationServices,
             token => NativeAdministratorAuthenticationRequests.StartupAsync(this, settings.AdminKey,
                 runtimeOptions.McpExecution, token), runtimeOptions, cancellationToken).ConfigureAwait(false);
         var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);

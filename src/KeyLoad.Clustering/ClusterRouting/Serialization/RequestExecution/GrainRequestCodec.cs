@@ -1,4 +1,4 @@
-using KeyLoad.Core;
+using KeyLoad.Core.Features.InternalSerialization;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
@@ -6,7 +6,8 @@ namespace KeyLoad.Clustering;
 /// <summary>Issues and verifies database-signed authority while preserving bounded exact native payload bytes.</summary>
 public sealed partial class GrainRequestCodec
 {
-    private readonly DatabaseEngine database;
+    private const int SigningKeyBytes = 32;
+    private readonly byte[] signingKey;
     private readonly TimeProvider clock;
     private readonly int maximumTokenCharacters;
     private readonly GrainRoutingOptions settings;
@@ -14,8 +15,13 @@ public sealed partial class GrainRequestCodec
 
     internal IOptions<GrainRoutingOptions> ExecutionOptions => executionOptions;
 
-    internal (DatabaseEngine Database, DateTimeOffset Now, TimeSpan Lifetime) LifetimeReadContext
-        => (database, clock.GetUtcNow(), settings.RequestLifetime);
+    internal Guid Incarnation { get; }
+    internal IOptions<DatabaseLimits> OperationLimits { get; }
+    internal DatabaseLimits Limits { get; }
+    internal TimeProvider RuntimeClock => clock;
+
+    internal (GrainRequestCodec Scope, DateTimeOffset Now, TimeSpan Lifetime) LifetimeReadContext
+        => (this, clock.GetUtcNow(), settings.RequestLifetime);
 
     internal IGrainRequestPhaseObserver? PhaseObserver
     {
@@ -30,19 +36,30 @@ public sealed partial class GrainRequestCodec
     }
 
     /// <summary>Uses the shared durable signing key and incarnation, with the runtime system clock.</summary>
-    /// <param name="database">Borrowed canonical database with immutable cluster signing scope.</param>
+    /// <param name="incarnation">Configured immutable database incarnation.</param>
+    /// <param name="signingKey">Trusted database signing credential, copied into this issuer.</param>
+    /// <param name="limits">Centrally validated native payload and operation limits.</param>
     /// <param name="clock">System clock for issuance and expiry checks.</param>
     /// <param name="options">The centrally validated signed request and execution lifetimes.</param>
-    public GrainRequestCodec(DatabaseEngine database, TimeProvider clock, IOptions<GrainRoutingOptions> options)
+    public GrainRequestCodec(Guid incarnation, ReadOnlyMemory<byte> signingKey, IOptions<DatabaseLimits> limits,
+        TimeProvider clock, IOptions<GrainRoutingOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(database);
+        if (incarnation == Guid.Empty || signingKey.Length != SigningKeyBytes)
+        {
+            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+        }
+        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(clock);
-        this.database = database;
+        Incarnation = incarnation;
+        this.signingKey = signingKey.ToArray();
+        OperationLimits = limits;
+        Limits = limits.Value;
+        Limits.Validate();
         this.clock = clock;
         ArgumentNullException.ThrowIfNull(options);
         settings = options.Value;
         executionOptions = options;
-        maximumTokenCharacters = GrainRequestTokenBounds.MaximumCharacters(database);
+        maximumTokenCharacters = GrainRequestTokenBounds.MaximumCharacters(Limits.MaxBatchBytes);
     }
 
     /// <summary>Signs one GUID read request; API-key authentication alone has no principal identifier.</summary>
@@ -52,7 +69,7 @@ public sealed partial class GrainRequestCodec
     /// <param name="payload">Exact native typed bytes, including the native zero marker for no-DTO capabilities.</param>
     /// <returns>A bounded database-signed envelope with the current incarnation and expiry.</returns>
     public string CreateRead(Guid requestId, string? principalId, GrainReadKind kind, ReadOnlyMemory<byte> payload)
-        => Issue(GrainRequestEnvelopeConstruction.Read(requestId, database.Store.Identity.Incarnation,
+        => Issue(GrainRequestEnvelopeConstruction.Read(requestId, Incarnation,
             principalId, kind, Encode(payload), clock.GetUtcNow() + settings.RequestLifetime));
 
     /// <summary>Signs one independently keyed request without changing the write's durable deduplication ID.</summary>
@@ -63,11 +80,16 @@ public sealed partial class GrainRequestCodec
     /// <param name="payload">Exact bounded native bytes for the typed operation contract.</param>
     /// <returns>A bounded signed request for canonical partition routing.</returns>
     public string CreateCommand(Guid requestId, string principalId, OperationKind kind, Guid commandId, ReadOnlyMemory<byte> payload)
-        => Issue(GrainRequestEnvelopeConstruction.Command(requestId, database.Store.Identity.Incarnation,
+        => Issue(GrainRequestEnvelopeConstruction.Command(requestId, Incarnation,
             principalId, kind, commandId, Encode(payload), clock.GetUtcNow() + settings.RequestLifetime));
 
     internal DecodedGrainRequest Verify(string signedRequest)
-        => GrainRequestPayloadVerification.Verify(this, database, maximumTokenCharacters, signedRequest);
+        => GrainRequestPayloadVerification.Verify(this, maximumTokenCharacters, signedRequest);
+
+    internal string Sign<T>(T claims) => CoreNativeClaims.Sign(signingKey, claims);
+
+    internal T VerifySigned<T>(string token, int maximumCharacters)
+        => CoreNativeClaims.Verify<T>(signingKey, token, maximumCharacters);
 
     internal DecodedGrainRequest VerifyRead(string signedRequest, Guid actorId)
         => GrainRequestPayloadVerification.VerifyRead(this, signedRequest, actorId);
@@ -90,10 +112,13 @@ public sealed partial class GrainRequestCodec
         => GrainRequestPhaseObservation.ProducerDisposed(PhaseObserver, identity, context);
 
     private ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
-        => GrainNativePayload.Copy(payload, database.Limits.MaxBatchBytes);
+        => GrainNativePayload.Copy(payload, Limits.MaxBatchBytes);
 
     internal string Issue(GrainRequestEnvelope request)
-        => GrainRequestIssuance.Issue(this, database, PurposeObserver, request);
+    {
+        ValidateScope(request);
+        return Sign(GrainRequestPurposeObservation.BeforeSign(PurposeObserver, request));
+    }
 
     internal void ValidateScope(GrainRequestEnvelope request)
         => ValidateScope(request, null);
@@ -102,5 +127,6 @@ public sealed partial class GrainRequestCodec
         => ValidateScope(request, PurposeObserver);
 
     private void ValidateScope(GrainRequestEnvelope request, IGrainRequestPurposeObserver? observer)
-        => GrainRequestCurrentScopeValidation.Validate(request, database, clock, settings, observer);
+        => GrainRequestPurposeObservation.Validate(request,
+            new GrainRequestScopeCut(Incarnation, clock.GetUtcNow(), settings.MaximumFuture), observer);
 }

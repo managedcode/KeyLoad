@@ -16,10 +16,10 @@ internal static class MultiLaneReceiveRequestIssuance
             Purpose = MultiLaneReceiveChildScope.Purpose,
             RequestId = requestId,
             PrincipalId = principalId,
-            Incarnation = context.Database.Store.Identity.Incarnation,
+            Incarnation = context.Scope.Incarnation,
             CommandKind = OperationKind.Receive,
             CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Database.Limits.MaxBatchBytes),
+            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
         _ = MultiLaneReceiveChildScope.Validate(envelope);

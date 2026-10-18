@@ -26,7 +26,8 @@ internal static class SampleChunkSignedMinimumCold
                 var reopened = stores.Canonical;
                 await SampleRawIntegrityAssertions.UnchangedAsync(reopened, expected);
                 var database = owner.CreateDatabase(reopened);
-                var codec = new GrainRequestCodec(database, owner.Clock, owner.RoutingOptions);
+                var codec = new GrainRequestCodec(database.Store.Identity.Incarnation, database.Store.Identity.SigningKey,
+            database.OperationLimitsOptions, owner.Clock, owner.RoutingOptions);
                 await SampleChunkSignedMinimumAssertions.ObserveAsync(reopened, () =>
                 {
                     var id = Guid.NewGuid();

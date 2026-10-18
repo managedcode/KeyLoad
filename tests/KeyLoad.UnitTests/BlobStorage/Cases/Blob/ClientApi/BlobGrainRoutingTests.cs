@@ -15,7 +15,8 @@ internal sealed class BlobGrainRoutingTests
     public async Task AcBlob006FreshSignedActorsPreserveEachStableCommandAndAtomicPartition()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         foreach (var item in BlobAgentCases.All().Where(item => item.CommandKind.HasValue))
         {
             var first = codec.Verify(Sign(codec, item, Guid.NewGuid()));
@@ -33,7 +34,8 @@ internal sealed class BlobGrainRoutingTests
     public async Task AcBlob006SignedReadActorsRequireTheirFreshRequestIdentity()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         foreach (var item in BlobAgentCases.All().Where(item => item.ReadKind.HasValue))
         {
             var id = Guid.NewGuid();
@@ -51,7 +53,8 @@ internal sealed class BlobGrainRoutingTests
     public async Task AcBlob003WrongCommandIdentityOrAtomicActorCannotExecuteAnyBlobCommand()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System, UnitRoutingOptions.Routing());
         var keys = new[]
         {

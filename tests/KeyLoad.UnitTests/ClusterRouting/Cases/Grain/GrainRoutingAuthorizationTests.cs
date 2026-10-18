@@ -58,7 +58,8 @@ internal sealed class GrainRoutingAuthorizationTests
     {
         using var fixture = new TestDatabase();
         fixture.Configure(Collection, ResourceKind.Collection);
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System, UnitRoutingOptions.Routing());
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, fixture.Partition, [new PutDocument(Collection, DocumentId, DocumentJson)]);
@@ -85,7 +86,8 @@ internal sealed class GrainRoutingAuthorizationTests
     {
         using var fixture = new TestDatabase();
         fixture.Configure(Collection, ResourceKind.Collection);
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, fixture.Partition, [new PutDocument(Collection, DocumentId, DocumentJson)]);
         var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, NativeSerialization.Serialize(command)));
@@ -108,7 +110,8 @@ internal sealed class GrainRoutingAuthorizationTests
     public async Task EmbeddedWriteIdentityAndCancellationAreCheckedBeforeEffects()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, []);
         var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, Guid.NewGuid(), NativeSerialization.Serialize(command)));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainPartitionResolver.Resolve(request)).Code).IsEqualTo(ErrorCode.TokenInvalidated);

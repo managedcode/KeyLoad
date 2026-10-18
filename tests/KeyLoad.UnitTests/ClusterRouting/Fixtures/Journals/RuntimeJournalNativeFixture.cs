@@ -35,7 +35,8 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
             builder.AddSiloBuilderConfigurator<RuntimeJournalNativeSiloConfigurator>();
             builder.AddClientBuilderConfigurator<RuntimeJournalNativeClientConfigurator>();
             Cluster = builder.Build();
-            Codec = new(Database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+            Codec = new(Database.Database.Store.Identity.Incarnation, Database.Database.Store.Identity.SigningKey,
+                Database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         }
         catch (Exception failure)
         {

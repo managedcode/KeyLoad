@@ -7,7 +7,7 @@ internal static class GrainLifetimeReadCodec
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
     {
         var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Database, context.Now,
+        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Scope, context.Now,
             context.Lifetime, requestId, principalId, GrainReadKind.PartitionQueryLeafV2, payload, expiresAt)
             with
         {
@@ -19,7 +19,7 @@ internal static class GrainLifetimeReadCodec
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
     {
         var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Database, context.Now,
+        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Scope, context.Now,
             context.Lifetime, requestId, principalId, GrainReadKind.DistributedSearchLeafV2, payload, expiresAt)
             with
         {
@@ -31,7 +31,7 @@ internal static class GrainLifetimeReadCodec
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
     {
         var context = codec.LifetimeReadContext;
-        var envelope = GrainRequestCapabilityEnvelopes.RemoteRead(context.Database, context.Now,
+        var envelope = GrainRequestCapabilityEnvelopes.RemoteRead(context.Scope, context.Now,
             context.Lifetime, requestId, principalId, GrainReadKind.AnnProjectionObservationV2, payload, expiresAt);
         return codec.Issue(envelope with
         {
