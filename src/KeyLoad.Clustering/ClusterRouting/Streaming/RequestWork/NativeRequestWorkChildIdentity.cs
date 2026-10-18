@@ -8,10 +8,9 @@ internal sealed record NativeRequestWorkChildIdentity(Guid RequestId, ImmutableA
 {
     internal static bool IsSelectedPurpose(string? purpose)
         => purpose is QueryLifetimeReadProtocol.Purpose or DocumentLifetimeReadScope.Purpose
-            or AnnProjectionLifetimeObservationScope.Purpose or RemoteGraphRequestScope.ReadPurpose
+            or AnnProjectionLifetimeObservationScope.Purpose
             or AnnMaintenanceChildScope.Purpose or AnnProjectionJobChildScope.Purpose
-            or TextMaintenanceChildScope.Purpose or OnlineTextRequestScope.Purpose or MultiLaneReceiveChildScope.Purpose
-            or EventVectorRequestScope.ControlPurpose or EventVectorRequestScope.SourcePurpose;
+            or TextMaintenanceChildScope.Purpose or OnlineTextRequestScope.Purpose or MultiLaneReceiveChildScope.Purpose;
 
     internal static bool IsSelected(DecodedGrainRequest request)
         => request.Envelope.Purpose switch
@@ -21,17 +20,11 @@ internal sealed record NativeRequestWorkChildIdentity(Guid RequestId, ImmutableA
             DocumentLifetimeReadScope.Purpose => request.Envelope.ReadKind is GrainReadKind.OwnedDocumentV2,
             AnnProjectionLifetimeObservationScope.Purpose =>
                 request.Envelope.ReadKind == GrainReadKind.AnnProjectionObservationV2,
-            RemoteGraphRequestScope.ReadPurpose => RemoteGraphRequestScope.HandlesRead(request.Envelope.ReadKind),
             AnnMaintenanceChildScope.Purpose => AnnMaintenanceChildScope.IsSelected(request.Envelope),
             AnnProjectionJobChildScope.Purpose => AnnProjectionJobChildScope.IsSelected(request.Envelope),
             TextMaintenanceChildScope.Purpose => TextMaintenanceChildScope.IsSelected(request.Envelope),
             OnlineTextRequestScope.Purpose => OnlineTextRequestScope.IsSelected(request.Envelope),
             MultiLaneReceiveChildScope.Purpose => MultiLaneReceiveChildScope.IsSelected(request.Envelope),
-            EventVectorRequestScope.ControlPurpose => request.Envelope.CommandKind == OperationKind.EventFeedControl
-                && EventVectorRequestScope.Validate(request.Envelope),
-            EventVectorRequestScope.SourcePurpose => (request.Envelope.CommandKind == OperationKind.EventFeedSourcePhase
-                || EventVectorRequestScope.HandlesRead(request.Envelope.ReadKind))
-                && EventVectorRequestScope.Validate(request.Envelope),
             _ => false
         };
 

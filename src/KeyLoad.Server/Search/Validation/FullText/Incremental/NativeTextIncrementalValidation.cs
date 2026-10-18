@@ -21,8 +21,6 @@ internal static class NativeTextIncrementalValidation
             || manifest.Scope != scope || manifest.Consumer != consumer || manifest.Generation != generation
             || manifest.Placement is null || manifest.Placement.PhysicalShardId != placement.PhysicalShardId
             || manifest.Placement.Incarnation != placement.Incarnation
-            || manifest.Placement.PlacementEpoch != placement.PlacementEpoch
-            || !manifest.Placement.VoterIds.SequenceEqual(placement.VoterIds, StringComparer.Ordinal)
             || consumer.Partition != scope.Partition || generation < NativeTextIncrementalProtocol.InitialGeneration
             || manifest.ThroughSequence < NativeTextIncrementalProtocol.InitialSequence
             || manifest.AppliedPosition < NativeTextIncrementalProtocol.InitialSequence

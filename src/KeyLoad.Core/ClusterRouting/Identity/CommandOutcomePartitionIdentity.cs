@@ -26,11 +26,6 @@ internal static class CommandOutcomePartitionIdentity
     private static CommandOutcomePartitionScope ResolveKind(OperationKind kind, ReadOnlyMemory<byte> payload)
         => kind switch
         {
-            OperationKind.RemoteGraphSource => ForPayload<global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphSourceMutationV1>(payload, static request => request.Original?.SourcePartition),
-            OperationKind.RemoteGraphReceive => ForPayload<global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphReceiverMutationV1>(payload, static request => request.SourceProof?.Intent?.Content?.Destination?.Partition),
-            OperationKind.RemoteGraphComplete => ForPayload<global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphCompletionMutationV1>(payload, static request => request.Receipt?.Intent?.Content?.SourcePartition),
-            OperationKind.EventFeedControl => ForPayload<EventVectorControlPhase>(payload, static phase => phase.OriginalRequest?.ControlPartition),
-            OperationKind.EventFeedSourcePhase => ForPayload<global::KeyLoad.Core.EventVectorSourceMutation>(payload, static request => request.Source?.Partition),
             OperationKind.Bm25CorpusPublicationPhase => ForPayload<global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand>(payload, static phase => phase.Current?.Partition),
             OperationKind.OnlineTextPublicationPhase => ForPayload<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload, static request => request.Request.Consumer.Partition),
             OperationKind.Batch => ForPayload<CommandRequest>(payload, static request => request.Partition),
@@ -47,9 +42,8 @@ internal static class CommandOutcomePartitionIdentity
             OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.CompleteBlobUpload
                 or OperationKind.AbortBlobUpload or OperationKind.DeleteBlob or OperationKind.ReclaimBlob
                 => ResolveBlob(kind, payload),
-            OperationKind.ResourceRetirementPhase or OperationKind.CreateTable or OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey
-                or OperationKind.SetQueueDispatch or OperationKind.SetDispatch or OperationKind.BootstrapPhysicalShardCatalog
-                or OperationKind.RegisterPhysicalOwner => CommandOutcomePartitionScope.Global,
+            OperationKind.DropTable or OperationKind.CreateTable or OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey
+                or OperationKind.SetQueueDispatch or OperationKind.SetDispatch => CommandOutcomePartitionScope.Global,
             _ => CommandOutcomePartitionScope.Unknown
         };
 

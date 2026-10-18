@@ -58,10 +58,4 @@ public sealed record GrainRequestEnvelope
     {
         get; init;
     }
-    /// <summary>Private retirement command metadata bounds, absent for every other purpose.</summary>
-    [Orleans.Id(GrainNativeContracts.MetadataField)]
-    internal NativeCommandMetadataAdmissionV1? Metadata
-    {
-        get; init;
-    }
 }

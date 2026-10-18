@@ -27,7 +27,7 @@ public sealed partial class DatabaseEngine
             }
             foreach (var lifetime in lifetimes)
             {
-                ResourceOwnerInventoryValidation.Lifetime(lifetime);
+                ResourceLifetimeIdentity.Validate(lifetime);
             }
             work.ObserveAuthenticatedResourceLifetimes(lifetimes);
             return true;

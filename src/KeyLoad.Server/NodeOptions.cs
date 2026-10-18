@@ -34,8 +34,6 @@ internal sealed record NodeOptions
     public HttpAdmissionLimits HttpAdmission { get; init; } = new();
     /// <summary>Bounded MCP request, serialization and retained output pools.</summary>
     public McpMemoryLimits McpMemory { get; init; } = new();
-    /// <summary>Persisted technical subject for authorized queue transfer, when configured.</summary>
-    public string? RemoteTransferPrincipalId { get; init; }
 
     /// <summary>Rejects invalid startup settings before opening files.</summary>
     public void Validate()
@@ -55,10 +53,6 @@ internal sealed record NodeOptions
             || AdminKey is null || AdminKey.Length < 32 || !AdminKey.StartsWith("root.", StringComparison.Ordinal))
         {
             throw new InvalidOperationException("The native silo identity or database credentials are invalid.");
-        }
-        if (RemoteTransferPrincipalId is not null)
-        {
-            KeyLoad.Core.JsonData.Identifier(RemoteTransferPrincipalId);
         }
     }
 }

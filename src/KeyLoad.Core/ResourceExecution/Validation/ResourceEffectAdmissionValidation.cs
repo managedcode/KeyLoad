@@ -29,7 +29,7 @@ internal static class ResourceEffectAdmissionValidation
         long retainedBytes = ResourceEffectAdmissionProtocol.Zero;
         foreach (var lifetime in value.Bindings)
         {
-            ResourceOwnerInventoryValidation.Lifetime(lifetime);
+            ResourceLifetimeIdentity.Validate(lifetime);
             var bytes = NativeSerialization.Measure(lifetime);
             if (bytes <= ResourceEffectAdmissionProtocol.Zero || bytes > limits.MaxBatchBytes - retainedBytes)
             {

@@ -10,7 +10,6 @@ public sealed partial class DatabaseEngine
     private void ObserveAdditionalResourceEffects(IKeyValueView view, PrincipalRecord principal,
         ReplicatedOperation operation)
     {
-        RequireRetirementTopologyOpen(view, operation);
         if (BlobStorageOperations.Handles(operation.Kind))
         {
             return;
@@ -18,17 +17,6 @@ public sealed partial class DatabaseEngine
         switch (operation.Kind)
         {
             case OperationKind.Batch:
-                if (ReadRemoteTransferNativeProof(operation) is { } transfer)
-                {
-                    ObserveAuthenticatedLifetime(view, transfer.Call.SourceLifetime);
-                }
-                return;
-            case OperationKind.RemoteGraphReceive:
-                RemoteGraphLifetimeAdmission.RequireReceiver(view,
-                    Payload<KeyLoad.Core.Features.GraphTraversal.RemoteGraphReceiverMutationV1>(operation).SourceProof.Intent, Limits);
-                return;
-            case OperationKind.RemoteGraphSource:
-                ObserveRemoteGraphPreparations(view, Payload<KeyLoad.Core.Features.GraphTraversal.RemoteGraphSourceMutationV1>(operation));
                 return;
             case OperationKind.Receive:
             case OperationKind.Processing:
@@ -39,9 +27,7 @@ public sealed partial class DatabaseEngine
             case OperationKind.ReceiveSubscription:
             case OperationKind.SubscriptionDelivery:
             case OperationKind.SubscriptionProcessing:
-            case OperationKind.RemoteGraphComplete:
             case OperationKind.Bm25CorpusPublicationPhase:
-            case OperationKind.EventFeedSourcePhase:
                 return; // The original authorizer resolves every modeled resource through BindResourceDefinition.
             case OperationKind.Delivery:
                 var delivery = Payload<DeliveryCommand>(operation);
@@ -49,9 +35,6 @@ public sealed partial class DatabaseEngine
                 return;
             case OperationKind.OnlineTextPublicationPhase:
                 ValidateOnlineTextCanonicalSource(view, principal, Payload<OnlineTextPublicationPhaseCommand>(operation));
-                return;
-            case OperationKind.EventFeedControl:
-                ObserveEventControlLifetime(view, Payload<EventVectorControlPhase>(operation));
                 return;
             default:
                 if (ObserveCatalogResourceEffect(view, operation) || ObserveProjectionResourceEffects(view, principal, operation)

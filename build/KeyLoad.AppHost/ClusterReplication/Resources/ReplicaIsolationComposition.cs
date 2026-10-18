@@ -1,6 +1,6 @@
 namespace KeyLoad.AppHost.Features.ClusterReplication;
 
-/// <summary>Admits only the unchanged original fixed-three fault topology.</summary>
+/// <summary>Selects the explicitly qualified three-silo network fault topology.</summary>
 internal static class ReplicaIsolationComposition
 {
     internal const string Stage = "fault-runtime";

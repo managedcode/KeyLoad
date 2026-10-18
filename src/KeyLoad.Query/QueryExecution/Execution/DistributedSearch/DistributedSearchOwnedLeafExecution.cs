@@ -77,8 +77,6 @@ internal static partial class DistributedSearchOwnedLeafExecution
     private static void RequireOwner(DatabaseEngine database, PhysicalShardRecord expected, PhysicalShardRecord actual)
     {
         if (expected.PhysicalShardId != actual.PhysicalShardId || expected.Incarnation != actual.Incarnation
-            || expected.PlacementEpoch != actual.PlacementEpoch
-            || !expected.VoterIds.SequenceEqual(actual.VoterIds, StringComparer.Ordinal)
             || database.Store.Identity.Incarnation != actual.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChanged);

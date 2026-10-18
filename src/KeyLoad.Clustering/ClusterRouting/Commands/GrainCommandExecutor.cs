@@ -97,9 +97,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
 
     private Task<OperationResult> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken token)
-        => request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose
-            ? GrainRemoteTransferCommand.SubmitAsync(database, coordinator, request, principal, token)
-            : coordinator.SubmitNativeAsync(OperationKind.Batch, request.Envelope.CommandId,
+        => coordinator.SubmitNativeAsync(OperationKind.Batch, request.Envelope.CommandId,
                 principal.Id, request.Payload, cancellationToken: token);
 
     private Task<OperationResult> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,

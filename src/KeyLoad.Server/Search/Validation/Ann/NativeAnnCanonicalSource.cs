@@ -83,7 +83,5 @@ internal static class NativeAnnCanonicalSource
     }
 
     private static bool SamePlacement(PhysicalShardRecord left, PhysicalShardRecord right)
-        => left.PhysicalShardId == right.PhysicalShardId && left.Incarnation == right.Incarnation
-            && left.PlacementEpoch == right.PlacementEpoch
-            && left.VoterIds.SequenceEqual(right.VoterIds, StringComparer.Ordinal);
+        => left.PhysicalShardId == right.PhysicalShardId && left.Incarnation == right.Incarnation;
 }

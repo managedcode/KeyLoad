@@ -9,11 +9,4 @@ internal sealed record RemoteTransferTargetReceiptRecord(
     [property: global::Orleans.Id(RemoteTransferFields.PrincipalId)] string PrincipalId,
     [property: global::Orleans.Id(RemoteTransferFields.Fingerprint)] string Fingerprint,
     [property: global::Orleans.Id(RemoteTransferFields.ReceiptToken)] string ReceiptToken,
-    [property: global::Orleans.Id(RemoteTransferFields.TargetCommit)] CommitToken TargetCommit)
-{
-    [global::Orleans.Id(RemoteTransferFields.RemoteOrigin)]
-    public RemoteTransferRemoteOrigin? RemoteOrigin
-    {
-        get; init;
-    }
-}
+    [property: global::Orleans.Id(RemoteTransferFields.TargetCommit)] CommitToken TargetCommit);

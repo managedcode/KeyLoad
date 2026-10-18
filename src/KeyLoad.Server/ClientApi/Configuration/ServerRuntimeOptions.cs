@@ -19,7 +19,6 @@ internal sealed record ServerRuntimeOptions(
     IOptions<McpExecutionOptions> McpExecution,
     IOptions<ZoneTreeStorageExecutionOptions> StorageExecution,
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
-    IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
     IOptions<AdminObservationOptions> AdminObservation,
     IOptions<NativeTextExecutionOptions> NativeText,
@@ -40,7 +39,6 @@ internal sealed record ServerRuntimeOptions(
         _ = McpExecution.Value;
         _ = StorageExecution.Value;
         _ = PointCache.Value;
-        _ = Membership.Value;
         _ = GrainRouting.Value;
         _ = AdminObservation.Value;
         _ = NativeText.Value;

@@ -39,7 +39,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
             if (!localReady)
             {
                 RequestWork.BindPhysicalOwner(applicationServices.GetRequiredService<PhysicalShardRecord>());
-                RequestWork.AttachResourceLifetimeWorkFence(Partition.Database, Partition.Database.Store.Position);
                 localReady = true;
             }
         }

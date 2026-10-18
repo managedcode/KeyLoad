@@ -17,15 +17,9 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
     internal void AdmissionFailed(Exception original) => admissionFailure = original;
     internal void RequireAdmission() => NativeRequestWorkSettlement.Rethrow(admissionFailure);
 
-    internal NativeCommandMetadataAdmissionV1? MetadataAdmission
-    {
-        get; private set;
-    }
-
     private bool bound;
     private bool textCandidate;
     private bool annCandidate;
-    private bool tailCandidate;
     private bool onlineCandidate;
     private DecodedGrainRequest? original;
     internal bool IsTextMaintenance
@@ -36,16 +30,11 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
     {
         get; private set;
     }
-    internal EventFeedControlRequest? TailRequest
-    {
-        get; private set;
-    }
-    internal bool IsEventFeedTail => TailRequest is not null;
     internal bool IsOnlineTextMaintenance
     {
         get; private set;
     }
-    internal bool HasLongProfile => IsTextMaintenance || IsAnnMaintenance || IsEventFeedTail
+    internal bool HasLongProfile => IsTextMaintenance || IsAnnMaintenance
         || IsOnlineTextMaintenance;
 
     internal void Bind(DecodedGrainRequest request)
@@ -54,17 +43,10 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
-        if (request.Envelope.Purpose == ResourceRetirementCommandScope.Purpose
-            && ResourceRetirementCommandScope.Validate(request.Envelope))
-        {
-            MetadataAdmission = request.Envelope.Metadata;
-        }
         textCandidate = request.Envelope.CommandKind == OperationKind.MaintainTextIndex;
         annCandidate = request.Envelope.CommandKind == OperationKind.MaintainAnnIndex;
-        tailCandidate = request.Envelope.CommandKind == OperationKind.EventFeedControl
-            && request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose;
         onlineCandidate = request.Envelope.CommandKind == OperationKind.MaintainOnlineTextIndex;
-        if (((textCandidate || annCandidate) && resolve is not null) || tailCandidate || onlineCandidate)
+        if (((textCandidate || annCandidate) && resolve is not null) || onlineCandidate)
         {
             original = request;
         }
@@ -100,15 +82,6 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
         {
             _ = GrainNativePayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(request.Payload);
             IsOnlineTextMaintenance = true;
-            return;
-        }
-        if (tailCandidate)
-        {
-            var tail = GrainNativePayload.ReadCommand<EventFeedControlRequest>(request.Payload);
-            if (tail.Action == EventFeedControlAction.Tail)
-            {
-                TailRequest = tail;
-            }
             return;
         }
         if (annCandidate)

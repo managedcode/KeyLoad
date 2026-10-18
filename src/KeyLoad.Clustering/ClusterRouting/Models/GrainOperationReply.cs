@@ -28,10 +28,4 @@ public sealed record GrainOperationReply
     {
         get; init;
     }
-    /// <summary>Actual private retirement receiver metadata work, excluded from public JSON.</summary>
-    [Orleans.Id(NativeCommandMetadataProtocol.ReplyMetadataField), System.Text.Json.Serialization.JsonIgnore]
-    internal NativeCommandMetadataStatisticsV1? Metadata
-    {
-        get; init;
-    }
 }

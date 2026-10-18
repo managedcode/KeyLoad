@@ -12,7 +12,7 @@ internal static class McpReplyProtocol
     private const string ForeignDocumentIncarnation = "The document session token belongs to another incarnation.";
     private const string DocumentOutOfScope = "The document session token belongs to another atomic partition or placement.";
     private const string DocumentInvalidPosition = "The document session token position must be positive.";
-    private const string DocumentFuturePosition = "The document session token is beyond the current quorum-applied cut.";
+    private const string DocumentFuturePosition = "The document session token is beyond the current persisted cut.";
     private const string SelectedTextMismatch = "The native text projection does not match the authorized source cut.";
     private const string ConfiguredVectorMismatch = "The declared vector profile does not match the configured field.";
     private const string OwnedScopeDenied = "The principal cannot perform this operation in this scope.";
@@ -36,16 +36,6 @@ internal static class McpReplyProtocol
         (ErrorCode.TokenInvalidated, DocumentInvalidPosition) => DocumentInvalidPosition,
         (ErrorCode.TokenInvalidated, DocumentFuturePosition) => DocumentFuturePosition,
         (ErrorCode.HistoryUnavailable, SelectedTextMismatch) => SelectedTextMismatch,
-        (ErrorCode.HistoryUnavailable, KeyLoad.Core.DatabaseEngine.FollowerReadLagExceeded)
-            => KeyLoad.Core.DatabaseEngine.FollowerReadLagExceeded,
-        (ErrorCode.HistoryUnavailable, KeyLoad.Core.DatabaseEngine.FollowerReadMinimumUnavailable)
-            => KeyLoad.Core.DatabaseEngine.FollowerReadMinimumUnavailable,
-        (ErrorCode.OwnershipLost, KeyLoad.Core.DatabaseEngine.FollowerReadOwnerChanged)
-            => KeyLoad.Core.DatabaseEngine.FollowerReadOwnerChanged,
-        (ErrorCode.OwnershipLost, KeyLoad.Core.DatabaseEngine.FollowerReadReplicaUnavailable)
-            => KeyLoad.Core.DatabaseEngine.FollowerReadReplicaUnavailable,
-        (ErrorCode.Validation, KeyLoad.Core.DatabaseEngine.FollowerReadInvalid)
-            => KeyLoad.Core.DatabaseEngine.FollowerReadInvalid,
         (ErrorCode.Validation, ConfiguredVectorMismatch) => ConfiguredVectorMismatch,
         (ErrorCode.PermissionDenied, OwnedScopeDenied) => OwnedScopeDenied,
         (ErrorCode.Conflict, CommandContentConflict) => CommandContentConflict,

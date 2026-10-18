@@ -28,6 +28,16 @@ internal static class ResourceLifetimeIdentity
             definition.Kind, new(incarnation), fingerprint);
     }
 
+    internal static void Validate(ResourceLifetimeV1 lifetime)
+    {
+        if (lifetime is null)
+        {
+            throw Invalid();
+        }
+        Validate(lifetime, lifetime.TenantId, lifetime.DatabaseId,
+            new(lifetime.ResourceName, lifetime.Kind, lifetime.TransactionDomainId));
+    }
+
     internal static void Validate(ResourceLifetimeV1 lifetime, string tenantId,
         string databaseId, ResourceDefinition definition)
     {

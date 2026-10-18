@@ -11,7 +11,7 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
     private ResourceLifetimeWorkResultRetention? resultRetention;
     private readonly CancellationTokenSource cancellation = new();
     private readonly TaskCompletionSource<NativeRequestWorkOriginalSettlement> settlement = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private NativeRequestWorkLeasePublication publication = new([]);
+    private NativeRequestWorkLeasePublication publication = new();
     private bool contextFrozen;
     private Exception? originalFailure;
     private Exception? cleanupFailure;
@@ -22,7 +22,6 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
     public NativeRequestWorkLease OriginalProducer => this;
     internal bool OwnsResultRetention => ChildReservation is null;
     internal ImmutableArray<Exception> ChildCleanupFailures { get; set; } = [];
-    internal bool HasRetirementHolds => publication.HasRetirementHolds;
     internal bool Completing => publication.Completing;
     internal Task? CompletionDriver
     {
@@ -86,15 +85,6 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
 
     internal void AdmitPublication() => owner.AdmitPublication(this);
     internal Task<Exception?> CancelAsync() => NativeRequestWorkSettlement.CancelAsync(cancellation);
-
-    internal void MarkRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-        => publication.MarkRetirement(fence, fingerprint, this);
-
-    internal NativeResourceWorkSnapshot RetirementSnapshot(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-        => publication.RetirementSnapshot(fence, fingerprint);
-
-    internal void ConsumeRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-        => publication.ConsumeRetirement(fence, fingerprint);
 
     internal bool ClosePublication(bool retainCancellation) => publication.ClosePublication(retainCancellation);
     internal void RetainCompletionObserver() => publication.RetainCompletionObserver();
@@ -169,8 +159,6 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
         }
     }
 
-    internal NativeResourceWorkSnapshot Snapshot()
-        => new(RequestId, Kind, AdmissionGeneration, LastPublicationGeneration);
     internal void PrepareDisposal(Exception? original, Exception? cleanup)
         => owner.PrepareDisposal(this, original, cleanup);
 

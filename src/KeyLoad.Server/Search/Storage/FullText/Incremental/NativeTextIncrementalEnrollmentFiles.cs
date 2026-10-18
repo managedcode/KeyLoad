@@ -24,16 +24,9 @@ internal static class NativeTextIncrementalEnrollmentFiles
             || value.Consumer.Partition != value.Scope.Partition
             || value.Generation < NativeTextIncrementalProtocol.InitialGeneration
             || value.Placement is null || value.Placement.PhysicalShardId == Guid.Empty
-            || value.Placement.Incarnation != value.Scope.Incarnation
-            || value.Placement.PlacementEpoch < NativeTextIncrementalProtocol.InitialGeneration
-            || value.Placement.VoterIds.IsDefaultOrEmpty
-            || value.Placement.VoterIds.Distinct(StringComparer.Ordinal).Count() != value.Placement.VoterIds.Length)
+            || value.Placement.Incarnation != value.Scope.Incarnation)
         {
             throw NativeTextErrors.Corrupt();
-        }
-        foreach (var voter in value.Placement.VoterIds)
-        {
-            JsonData.Identifier(voter);
         }
         NativeTextValidation.ValidateScope(value.Scope, sourceNode);
         budget?.Check();
@@ -56,9 +49,7 @@ internal static class NativeTextIncrementalEnrollmentFiles
             if (selected is not null || enrolled.Scope.Collection != request.Collection
                 || enrolled.Scope.Field != request.Field
                 || enrolled.Placement.PhysicalShardId != request.Placement.PhysicalShardId
-                || enrolled.Placement.Incarnation != request.Placement.Incarnation
-                || enrolled.Placement.PlacementEpoch != request.Placement.PlacementEpoch
-                || !enrolled.Placement.VoterIds.SequenceEqual(request.Placement.VoterIds, StringComparer.Ordinal))
+                || enrolled.Placement.Incarnation != request.Placement.Incarnation)
             {
                 throw NativeTextErrors.Corrupt();
             }

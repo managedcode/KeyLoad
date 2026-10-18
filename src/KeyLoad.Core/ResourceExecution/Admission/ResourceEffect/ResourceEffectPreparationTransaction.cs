@@ -6,7 +6,7 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Observes a real provider-owned discard-only transaction with one original read ledger.</summary>
 internal sealed class ResourceEffectPreparationTransaction : ResourceEffectObservationView, IAtomicTransaction,
-    IResourceLifetimeReadBindingView, IResourceOwnerInventoryContext
+    IResourceLifetimeReadBindingView
 {
     private readonly IAtomicTransaction inner;
     private readonly ResourceEffectBindingScope scope;
@@ -37,20 +37,4 @@ internal sealed class ResourceEffectPreparationTransaction : ResourceEffectObser
         ResourceDefinition definition, ResourceLifetimeV1 lifetime)
         => Work.ObserveResourceLifetime(partition, definition, lifetime);
 
-    void IResourceOwnerInventoryContext.UseVerifiedImage(PartitionRef partition)
-    {
-        if (inner is IResourceOwnerInventoryContext context)
-        {
-            context.UseVerifiedImage(partition);
-        }
-    }
-
-    void IResourceOwnerInventoryContext.UseControlledResources(PartitionRef partition,
-        ImmutableArray<ResourceDefinition> definitions, ResourceLifetimeCoverageV1 coverage)
-    {
-        if (inner is IResourceOwnerInventoryContext context)
-        {
-            context.UseControlledResources(partition, definitions, coverage);
-        }
-    }
 }

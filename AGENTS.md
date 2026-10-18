@@ -123,6 +123,27 @@ and what remains. Repository documents, comments in documentation and website
 copy are English. Do not claim a whole-repository review from a search count or
 claim product readiness from documentation, configuration or a focused test run.
 
+## MCAF-ARCH-002: Explicit implementation approval
+
+Adding a fallback, backward compatibility path, migration mechanism, mock or
+demonstration implementation requires the owner's explicit approval for that
+specific implementation. Refactoring and general delivery authorization grant no
+such permission. Remove unauthorized mechanisms rather than hiding them behind
+different names. Do not introduce compatibility shims for deleted runtime code.
+
+The compiler reports unauthorized implementation terminology in C# identifiers,
+text and comments as `KLD0038` errors. Restricted terms include fallback,
+migration/migrate, regression, mock, fixture, sample/simple and compatibility,
+including their grammatical forms and compound identifiers. Meanings approved by
+the current design stay explicit: native Orleans activation migration, real
+TUnit fixtures owned under `tests/.../Fixtures/`, time-series sample data and
+resolved native framework API names. These are term-specific semantic contexts,
+not permission to add a fallback or mock inside an approved feature. The
+analyzer's exact vocabulary declarations describe this rule and grant no runtime
+implementation permission. No blanket file, test, generated-code or keyword
+suppression grants approval; any new exception needs explicit owner approval and
+a narrowly defined canonical context.
+
 ## MCAF-REQ-001: Correctness and qualification
 
 Use stable feature requirements and observable acceptance criteria. Tests exercise

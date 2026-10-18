@@ -2,44 +2,18 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Holds the lease's retirement and publication-observer state under its original owner gate.</summary>
-internal struct NativeRequestWorkLeasePublication(Dictionary<ResourceLifetimeV1, NativeResourceWorkFenceAdmission> retirements)
+/// <summary>Holds publication and completion-observer state under the original request owner gate.</summary>
+internal struct NativeRequestWorkLeasePublication
 {
-    private const int NoRetirements = 0;
     private const int NoObservers = 0;
     private const int SingleObserver = 1;
     private TaskCompletionSource? cancelObservers;
     private int observerCount;
     private bool publicationClosed;
 
-    internal readonly bool HasRetirementHolds => retirements.Count != NoRetirements;
     internal bool Completing
     {
         get; private set;
-    }
-
-    internal void MarkRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint, NativeRequestWorkLease lease)
-    {
-        if (retirements.TryGetValue(fence.Control.Lifetime, out var original))
-        {
-            NativeResourceWorkRetentions.RequireFingerprint(original.Fingerprint, fingerprint);
-            return;
-        }
-        publicationClosed = true;
-        retirements.Add(fence.Control.Lifetime, new(fingerprint, lease.Snapshot()));
-    }
-
-    internal readonly NativeResourceWorkSnapshot RetirementSnapshot(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-    {
-        var original = retirements[fence.Control.Lifetime];
-        NativeResourceWorkRetentions.RequireFingerprint(original.Fingerprint, fingerprint);
-        return original.Snapshot;
-    }
-
-    internal readonly void ConsumeRetirement(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-    {
-        _ = RetirementSnapshot(fence, fingerprint);
-        retirements.Remove(fence.Control.Lifetime);
     }
 
     internal bool ClosePublication(bool retainCancellation)

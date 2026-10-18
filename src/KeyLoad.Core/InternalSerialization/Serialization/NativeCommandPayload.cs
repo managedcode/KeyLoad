@@ -27,12 +27,6 @@ internal sealed record NativeCommandPayload(
         get; init;
     }
 
-    [Orleans.Id(NativeCommandContract.TransferProofId)]
-    public ReadOnlyMemory<byte> TransferProof
-    {
-        get; init;
-    }
-
     [Orleans.Id(NativeCommandContract.ResourceAdmissionId)]
     public ReadOnlyMemory<byte> ResourceAdmission
     {

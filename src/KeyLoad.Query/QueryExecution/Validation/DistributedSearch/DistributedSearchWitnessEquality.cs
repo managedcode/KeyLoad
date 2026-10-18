@@ -14,9 +14,7 @@ internal static class DistributedSearchWitnessEquality
             && SameStatistics(expected.Statistics, actual.Statistics);
 
     internal static bool SameOwner(PhysicalShardRecord expected, PhysicalShardRecord actual)
-        => expected.PhysicalShardId == actual.PhysicalShardId && expected.Incarnation == actual.Incarnation
-            && expected.PlacementEpoch == actual.PlacementEpoch
-            && expected.VoterIds.SequenceEqual(actual.VoterIds, StringComparer.Ordinal);
+        => expected.PhysicalShardId == actual.PhysicalShardId && expected.Incarnation == actual.Incarnation;
 
     private static bool SameStatistics(DistributedTextStatisticsV1 expected, DistributedTextStatisticsV1 actual)
         => !expected.Terms.IsDefault && !actual.Terms.IsDefault

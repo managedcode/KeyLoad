@@ -13,10 +13,6 @@ internal enum GrainRequestPhase
     NativeTextOriginalPostingRead,
     DistributedSearchStatisticsCaptured,
     OnlineTextCaptured,
-    EventVectorFirstDispatchReserved,
-    EventVectorFirstCapturesReady,
-    EventVectorFirstAdmitPrepared,
-    ResourceOwnerInventoryOwnerValidation = 25,
     OriginalClaimReturned = 26,
     OriginalBusinessReplyReturned = 27
 }

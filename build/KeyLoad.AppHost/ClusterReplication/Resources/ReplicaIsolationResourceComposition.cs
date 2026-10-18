@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication;
 
-/// <summary>Composes only an explicitly owned three-voter namespace fault cohort.</summary>
+/// <summary>Composes the owned three-silo native Orleans network fault topology.</summary>
 internal static class ReplicaIsolationResourceComposition
 {
     internal const string Stage = "fault-runtime";
@@ -26,7 +26,7 @@ internal static class ReplicaIsolationResourceComposition
     private const char LowerHexDigitLast = 'f';
     private const string ImmutableBaseRequired = "The namespace fault image requires an authenticated immutable base.";
     private const string OriginalBaseMismatch = "The configured original server reference differs from its authenticated source receipt.";
-    private const string ExactVotersRequired = "The namespace fault cohort must own exactly the named diagnostic voters.";
+    private const string ExactSilosRequired = "The network fault topology must own exactly the named diagnostic silos.";
     private const string MissingContext = "The fault Dockerfile context is absent.";
     private const string ContextFilePattern = "*";
     private const string ExactContextRequired = "The immutable fault build context must contain only its owned Dockerfile.";
@@ -51,7 +51,7 @@ internal static class ReplicaIsolationResourceComposition
         var nodes = builder.Resources.OfType<ContainerResource>().ToArray();
         if (nodes.Length != expectedNames.Count || !nodes.Select(node => node.Name).Order(StringComparer.Ordinal).SequenceEqual(expectedNames.Order(StringComparer.Ordinal)))
         {
-            throw new InvalidOperationException(ExactVotersRequired);
+            throw new InvalidOperationException(ExactSilosRequired);
         }
         var dockerfile = Path.Combine(repository, Dockerfile);
         var context = Path.GetDirectoryName(dockerfile) ?? throw new InvalidOperationException(MissingContext);

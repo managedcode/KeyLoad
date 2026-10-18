@@ -49,7 +49,7 @@ internal static class TextIndexWaitExecution
                 database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget,
                     document => NativeTextIndexPublication.Publish(lease, path, budget, document, execution));
                 lease.VerifyCandidates([], [], budget);
-                result = new WaitForIndexResult(DatabaseEngine.Token(authority, request.Partition, applied), resource.SchemaVersion, principal.PolicyEpoch);
+                result = new WaitForIndexResult(database.Token(authority, request.Partition, applied), resource.SchemaVersion, principal.PolicyEpoch);
                 budget.CheckResult(result);
             }
             catch (Exception error)

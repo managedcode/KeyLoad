@@ -31,9 +31,6 @@ internal sealed partial record RuntimeContainerImage(string Image, string Tag, s
         {
             ContainerImageOptions.ServerKey => images.Server,
             ContainerImageOptions.RunnerKey => images.Runner,
-            ContainerImageOptions.VoterOneKey => images.VoterOne,
-            ContainerImageOptions.VoterTwoKey => images.VoterTwo,
-            ContainerImageOptions.VoterThreeKey => images.VoterThree,
             _ => throw new ArgumentOutOfRangeException(nameof(configurationKey))
         } ?? throw new InvalidOperationException(MissingPrefix + configurationKey);
         if (value.Length > policy.MaximumImageCharacters)

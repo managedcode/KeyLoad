@@ -8,7 +8,6 @@ internal sealed class AdminStorageScan
     private readonly AdminObservationOptions settings;
     private readonly CancellationToken cancellationToken;
     private const string Canonical = "canonical";
-    private const string Replica = "replica";
     private const string Backup = "backup";
     private const string Other = "other";
     private const string BackupDirectory = "backups";
@@ -18,7 +17,6 @@ internal sealed class AdminStorageScan
     private readonly List<AdminFileInfo> files = [];
     private readonly Stack<DirectoryInfo> directories = [];
     private long canonicalBytes;
-    private long replicaBytes;
     private long backupBytes;
     private long totalBytes;
     private int observedFiles;
@@ -125,9 +123,6 @@ internal sealed class AdminStorageScan
             case Canonical:
                 canonicalBytes = checked(canonicalBytes + length);
                 break;
-            case Replica:
-                replicaBytes = checked(replicaBytes + length);
-                break;
             case Backup:
                 backupBytes = checked(backupBytes + length);
                 break;
@@ -153,6 +148,6 @@ internal sealed class AdminStorageScan
         };
     }
 
-    internal AdminStorageSnapshot Snapshot() => new(canonicalBytes, replicaBytes, backupBytes, totalBytes,
+    internal AdminStorageSnapshot Snapshot() => new(canonicalBytes, backupBytes, totalBytes,
         observedFiles, complete, [.. files], complete ? null : Incomplete);
 }

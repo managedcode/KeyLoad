@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Clustering;
 
 /// <summary>Owns bounded active native request producers and verified capability frames for one silo.</summary>
-public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetimeWorkFence
+public sealed class NativeRequestWorkOwner : IAsyncDisposable
 {
     private const int GetIsJoinedEmptyRead = 0;
     private const int Joined = 1;
@@ -16,7 +16,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
     private readonly CancellationTokenSource shutdown = new();
     private readonly CancellationToken shutdownToken;
     private readonly NativeRequestWorkAdmissions admissions;
-    private readonly NativeResourceWorkRetentions retentions;
     private readonly NativeRequestWorkChildren children;
     private Task? drainTask;
     private Task? disposeTask;
@@ -29,8 +28,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
     {
         ArgumentNullException.ThrowIfNull(options);
         admissions = new(options);
-        retentions = new(options);
-        children = new(gate, this, physical, admissions, retentions, () => admissionClosed);
+        children = new(gate, this, physical, admissions, () => admissionClosed);
         shutdownToken = shutdown.Token;
     }
 
@@ -56,7 +54,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.AdmissionClosedMessage);
             }
-            retentions.RequireAdmissionSlot(admissions.Count);
             return admissions.Acquire(this, requestId, kind);
         }
     }
@@ -81,7 +78,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
     /// <summary>Closes admission, cancels work, and returns the shared original drain task.</summary>
     /// <returns>The same task to every caller.</returns>
     internal Task DrainAsync()
-        => NativeRequestWorkDrain.Start(gate, ref drainTask, ref admissionClosed, shutdown, admissions, retentions, this);
+        => NativeRequestWorkDrain.Start(gate, ref drainTask, ref admissionClosed, shutdown, admissions, this);
 
     internal void MarkJoined() => Volatile.Write(ref isJoined, Joined);
 
@@ -170,46 +167,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
         lock (gate)
         {
             physical.Bind(actualOwner);
-        }
-    }
-
-    internal void AttachResourceLifetimeWorkFence(DatabaseEngine sameDatabase, long originalDurableLogLastIndex)
-    {
-        var startup = NativeResourceWorkPhysicalBinding.CaptureStartup(sameDatabase, originalDurableLogLastIndex);
-        lock (gate)
-        {
-            physical.Attach(sameDatabase, this, startup.Applied, startup.NodeId, startup.Generation);
-        }
-    }
-
-    IResourceLifetimeWorkSettlement IResourceLifetimeWorkFence.CloseMatching(ResourceRetirementOwnerFenceV1 fence)
-        => CloseMatching(fence);
-
-    internal IResourceLifetimeWorkSettlement CloseMatching(ResourceRetirementOwnerFenceV1 fence)
-    {
-        var fingerprint = NativeResourceWorkRetentions.Fingerprint(fence);
-        lock (gate)
-        {
-            var actual = physical.Require(fence);
-            return retentions.CloseMatching(this, fence, fingerprint, actual, admissions, physical.CanQualify(fence), retainCancellation: !admissionClosed);
-        }
-    }
-
-    internal NativeResourceWorkClosure? FindRetainedSettlement(ResourceRetirementOwnerFenceV1 fence)
-    {
-        lock (gate)
-        {
-            _ = physical.Require(fence);
-            return physical.CanQualify(fence) ? retentions.Find(fence) : null;
-        }
-    }
-
-    internal void ConsumeSettlement(ResourceRetirementOwnerFenceV1 fence, NativeResourceWorkClosure originalHandle)
-    {
-        var fingerprint = NativeResourceWorkRetentions.Fingerprint(fence);
-        lock (gate)
-        {
-            retentions.Consume(fence, fingerprint, originalHandle, admissions);
         }
     }
 

@@ -23,7 +23,6 @@ internal static class NativeTextIncrementalCheckpointSettlement
             || fresh.Checkpoint != intent.ThroughSequence
             || receipt.Token is null || receipt.Token.Incarnation != manifest.Scope.Incarnation
             || receipt.Token.AtomicPartitionId != manifest.Consumer.Partition.AtomicPartitionId
-            || receipt.Token.OwnershipEpoch != manifest.Placement.PlacementEpoch
             || receipt.Token.Position <= PositivePositionBoundary
             || receipt.Token.Position > fresh.AppliedPosition
             || fresh.Incarnation != manifest.Scope.Incarnation

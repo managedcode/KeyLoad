@@ -11,7 +11,7 @@ internal static class ApiGrainDispatch
         ExecuteAsync(context, kind, null, Guid.Empty,
             kind is GrainReadKind.AstQuery or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead
                 or GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges
-                or GrainReadKind.RemoteGraphIncomingParent or GrainReadKind.SqlGraphPath
+                or GrainReadKind.SqlGraphPath
                 or GrainReadKind.PartitionQuery
                 ? NativeSerialization.Serialize(payload, NativeValidationProfile.PublicInputElements)
                 : NativeSerialization.Serialize(payload));

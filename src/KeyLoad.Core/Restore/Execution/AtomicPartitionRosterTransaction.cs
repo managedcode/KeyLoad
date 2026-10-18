@@ -8,11 +8,10 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.BackupRestore.Execution;
 
-internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IResourceOwnerInventoryContext, IAtomicCommitCandidateValidation, IResourceEffectObservation, IResourceEffectCompletion
+internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IResourceEffectObservation, IResourceEffectCompletion
 {
     private const int NoCandidates = 0;
     private readonly IAtomicTransaction inner;
-    private readonly ResourceOwnerInventoryStaging inventory;
     internal ResourceEffectBindingScope EffectAdmission
     {
         get;
@@ -30,7 +29,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     {
         this.inner = inner ?? throw new ArgumentNullException(nameof(inner));
         this.limits = limits ?? throw new ArgumentNullException(nameof(limits));
-        inventory = new(inner, limits);
         EffectAdmission = new(limits);
         this.storePosition = storePosition;
         this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
@@ -55,7 +53,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     public void Put(byte[] key, byte[] value)
     {
-        cleanupScope?.RequireMutation(key, hasValue: true);
         var candidate = PrepareCandidate(key);
         inner.Put(key, value);
         RetainCandidate(candidate);
@@ -63,7 +60,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     public void Delete(byte[] key)
     {
-        cleanupScope?.RequireMutation(key, hasValue: false);
         var candidate = PrepareCandidate(key);
         inner.Delete(key);
         RetainCandidate(candidate);
@@ -72,8 +68,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     public void Reset()
     {
         candidates.Clear();
-        cleanupScope = null;
-        inventory.Reset();
         retainedKeyBytes = NoRetainedKeyBytes;
         inner.Reset();
     }
@@ -81,7 +75,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     void IResourceEffectCompletion.RequireCompleteResourceEffects() => EffectAdmission.RequireComplete();
 
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
-        => AtomicPartitionRosterPreparation.Prepare(inner, limits, storePosition, appliedIndex, cleanupScope is not null, prepare);
+        => AtomicPartitionRosterPreparation.Prepare(inner, limits, storePosition, appliedIndex, prepare);
 
     public void ValidateCommit() => inner.ValidateCommit();
 
@@ -91,26 +85,8 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime)
         => EffectAdmission.Observe(partition, lifetime);
 
-    void IResourceOwnerInventoryContext.UseVerifiedImage(PartitionRef partition)
-        => inventory.UseVerifiedImage(partition);
-
-    void IResourceOwnerInventoryContext.UseControlledResources(PartitionRef partition,
-        ImmutableArray<ResourceDefinition> definitions,
-        ResourceLifetimeCoverageV1 coverage)
-        => inventory.UseControlled(partition, definitions, coverage);
-
     internal void PersistCandidates(Guid currentIncarnation)
     {
-        if (cleanupScope is not null)
-        {
-            if (candidates.Count != NoCandidates)
-            {
-                throw ResourceOwnerInventoryValidation.Invalid();
-            }
-
-            return;
-        }
-        inventory.Persist(currentIncarnation);
         if (candidates.Count == NoCandidates)
         {
             return;
@@ -161,10 +137,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
             return null;
         }
 
-        if (cleanupScope is not null)
-        {
-            return null;
-        }
         var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
         var retained = candidates.ContainsKey(partition);
         if (!retained && (candidates.Count >= limits.Value.MaxBatchMutations || rosterKey.Length > limits.Value.MaxBatchBytes
@@ -172,7 +144,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, AtomicPartitionRosterProtocol.CandidateBudgetExhausted);
         }
-        inventory.Observe(key, partition);
         return retained ? null : new(partition, rosterKey);
     }
 

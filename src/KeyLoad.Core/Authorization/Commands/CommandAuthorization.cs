@@ -43,10 +43,7 @@ public sealed partial class DatabaseEngine
                 AuthorizeBm25CorpusPublication(view, principal, operation);
                 return null;
             case OperationKind.Batch:
-                var transferProof = ReadRemoteTransferNativeProof(operation);
-                return transferProof is null
-                    ? AuthorizeBatch(view, principal, Payload<CommandRequest>(operation))
-                    : AuthorizeRemoteTransferNativeProof(view, principal, operation, transferProof);
+                return AuthorizeBatch(view, principal, Payload<CommandRequest>(operation));
             case OperationKind.Receive:
                 AuthorizeQueueReceiveOperation(view, principal, Payload<ReceiveRequest>(operation));
                 break;

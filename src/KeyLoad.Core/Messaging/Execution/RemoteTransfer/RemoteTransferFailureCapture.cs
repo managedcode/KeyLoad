@@ -12,10 +12,6 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        if (ReadRemoteTransferNativeProof(operation) is not null)
-        {
-            return null;
-        }
         var batch = Payload<CommandRequest>(operation);
         if (batch.Mutations.Length != RemoteTransferAttemptProtocol.SingleMutation
             || batch.Mutations[RemoteTransferAttemptProtocol.FirstIndex] is not AcceptQueueTransfer accept)

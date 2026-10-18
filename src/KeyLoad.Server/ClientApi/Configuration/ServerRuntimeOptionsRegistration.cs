@@ -33,9 +33,6 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<ReplicaCopyOptions>().Bind(configuration.GetSection(ReplicaCopyOptions.SectionName))
             .Validate(options => options.SiloCount > 0 && options.ReplicaCount > 0
                 && options.ReplicaCount <= options.SiloCount, "Invalid silo or data-copy count.").ValidateOnStart();
-        services.AddOptions<OrleansMembershipOptions>()
-            .Bind(configuration.GetSection(OrleansMembershipOptions.SectionName))
-            .Validate(options => options.IsValid(), OrleansMembershipOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<GrainRoutingOptions>()
             .Bind(configuration.GetSection(GrainRoutingOptions.SectionName))
             .Validate(options => options.IsValid(), GrainRoutingOptions.ValidationMessage).ValidateOnStart();

@@ -4,8 +4,7 @@ namespace KeyLoad.Server;
 internal static class McpToolDescriptions
 {
     internal const string StableRetry = " Retry a command only with the same stable ID and canonical payload; timeout or disconnect does not prove rollback.";
-    private const string DocumentsReadFollower = "Read an explicitly selected follower committed document snapshot with a declared position-lag bound. Data and fresh authorization cuts are returned separately; current persisted credential, grants, field policy and row visibility are revalidated after a quorum barrier. A minimum cannot silently fall back to a newer or strong read.";
-    private const string DocumentsGet = "Read one authorized document revision; result is null when absent. Optional minimumToken requires the acknowledged position in the same physical incarnation and placement after a fresh quorum barrier. Invalid tokens fail; redaction follows current persisted grants.";
+    private const string DocumentsGet = "Read one authorized document revision; result is null when absent. Optional minimumToken requires the acknowledged position in the same physical incarnation and placement after a fresh storage read barrier. Invalid tokens fail; redaction follows current persisted grants.";
     private const string StreamsRead = "Read a bounded event stream page after a revision; continue using the returned revision and hasMore indicator.";
     private const string StreamsReplay = "Read one exact-versioned aggregate snapshot and its complete bounded event tail under one committed cut. Requires persisted worker capabilities and every raw payload/header grant; incompatible versions or unavailable history fail. Replay invokes no subscription or external effect.";
     private const string EventsRead = "Read a bounded topic or stream page; preserve the returned cursor when continuing.";
@@ -29,7 +28,7 @@ internal static class McpToolDescriptions
     private const string SeriesSampleChunkWindow = "Read one authorized sample-chunk window with an optional tag filter under one committed cut; result includes generation, revision, source sequence and retention floor. Exceeding the record limit rejects the whole result.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
-    private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions. Default admission requires one physical owner; explicitly configured two-owner deployments may route separately authorized leaves. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
+    private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions. Native Orleans request workers execute the authorized leaves at the addressed storage owner. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
     private const string QueryCapabilities = "Discover supported query versions, predicates, read profiles and bounded execution limits.";
     private const string ChangesRead = "Read a bounded document change-feed page and preserve the returned signed cursor.";
     private const string QueryLiveStart = "Start a bounded live query snapshot and retain its cursor for subsequent reads.";
@@ -48,7 +47,7 @@ internal static class McpToolDescriptions
     private const string MessagesComplete = "Acknowledge, reject or renew a queue delivery using its signed token.";
     private const string InboxCommit = "Commit authorized target inbox effects once for a declared input; source ACK is separate.";
     private const string MessagesProcess = "Atomically complete an idempotent queue handler and its declared mutation effects.";
-    private const string TablesDrop = "Drop one table after native owner retirement, joined work and canonical cleanup. Supply the same outer commandId when retrying an uncertain result.";
+    private const string TablesDrop = "Drop one table through the authorized database command owner and canonical cleanup. Supply the same outer commandId when retrying an uncertain result.";
     private const string ResourcesConfigure = "Configure a resource as an administrator. Supply a stable outer commandId together with the canonical request.";
     private const string PrincipalsConfigure = "Configure a persisted principal as an administrator. Supply a stable outer commandId; this request never establishes caller authority.";
     private const string CredentialsConfigure = "Configure a persisted API-key verifier as an administrator. Supply a stable outer commandId; do not send a plaintext key.";
@@ -67,7 +66,6 @@ internal static class McpToolDescriptions
     internal static string For(string name) => ModelDescription(name) ?? name switch
     {
         McpToolNames.DocumentsGet => DocumentsGet,
-        McpToolNames.DocumentsReadFollower => DocumentsReadFollower,
         McpToolNames.StreamsRead => StreamsRead,
         McpToolNames.StreamsReplay => StreamsReplay,
         McpToolNames.EventsRead => EventsRead,
@@ -129,8 +127,7 @@ internal static class McpToolDescriptions
     };
 
     private static string? ModelDescription(string name)
-        => AnalyticsStoreMcpDescriptions.Find(name) ?? McpEventFeedDescriptions.Find(name)
-            ?? global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphMcpDescriptions.Find(name);
+        => AnalyticsStoreMcpDescriptions.Find(name);
 
     private static string AdminDescription(string name) => name switch
     {

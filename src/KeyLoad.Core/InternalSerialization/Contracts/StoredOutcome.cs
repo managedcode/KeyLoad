@@ -53,10 +53,4 @@ internal sealed record StoredOutcome(
         get; init;
     }
 
-    [JsonIgnore]
-    [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.RemoteTransferAuthority)]
-    public global::KeyLoad.Core.Features.Messaging.RemoteTransferOutcomeAuthority? RemoteTransferAuthority
-    {
-        get; init;
-    }
 }

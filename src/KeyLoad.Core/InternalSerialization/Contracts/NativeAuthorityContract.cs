@@ -15,6 +15,5 @@ internal static class NativeAuthorityContract
     internal const int ErrorId = 7;
     internal const int SafeDetailId = 8;
     internal const uint RetryDecisionHashId = 9;
-    internal const uint TransferProofHashId = 10;
     internal const uint ResourceAdmissionHashId = 11;
 }

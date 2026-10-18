@@ -36,10 +36,6 @@ internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> 
     internal void Release(NativeRequestWorkLease lease)
     {
         RequireActive(lease);
-        if (lease.HasRetirementHolds)
-        {
-            return;
-        }
         Remove(lease);
     }
 
@@ -79,26 +75,6 @@ internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> 
         RequireActive(lease);
         lease.RequirePublicationOpen();
         lease.LastPublicationGeneration = checked(++publicationGeneration);
-    }
-
-    internal ImmutableArray<NativeRequestWorkLease> CloseMatching(ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-    {
-        var matching = active.Values.Where(lease => lease.Dependencies.Contains(fence.Control.Lifetime)).ToImmutableArray();
-        foreach (var lease in matching)
-        {
-            lease.MarkRetirement(fence, fingerprint);
-        }
-        return matching;
-    }
-
-    internal void ConsumeRetirement(NativeRequestWorkLease lease, ResourceRetirementOwnerFenceV1 fence, ImmutableArray<byte> fingerprint)
-    {
-        RequireActive(lease);
-        lease.ConsumeRetirement(fence, fingerprint);
-        if (!lease.HasRetirementHolds && lease.Settlement.IsCompleted)
-        {
-            Remove(lease);
-        }
     }
 
     internal NativeRequestWorkChildReservation ReserveChild(NativeRequestWorkOwner owner,

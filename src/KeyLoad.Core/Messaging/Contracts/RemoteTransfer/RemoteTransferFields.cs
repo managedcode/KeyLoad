@@ -19,6 +19,4 @@ internal static class RemoteTransferFields
     internal const int StoredRecords = 14;
     internal const int AcceptAttempts = 15;
     internal const int Repairs = 16;
-    internal const int RemoteTarget = 17;
-    internal const int RemoteOrigin = 17;
 }

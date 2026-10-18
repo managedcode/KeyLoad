@@ -47,22 +47,14 @@ public sealed partial class DatabaseEngine
         var claims = new RemoteTransferIntentClaims(RemoteTransferProtocol.IntentPurpose, Store.Identity.Incarnation,
             request.SourceQueue, request.TransferId, request.Destination, principal.Id, request.Message, fingerprint);
         var intentToken = Sign(claims);
-        var remoteTarget = CaptureRemoteTransferTarget(tx, request.Destination);
-        var reservationBytes = remoteTarget is null
-            ? ReceiptReservationBytes(tx, request.SourceQueue, request.TransferId, request.Destination, principal.Id, fingerprint)
-            : RemoteTransferReceiptReservation(tx, remoteTarget, request.SourceQueue, request.TransferId, request.Destination, principal.Id, fingerprint);
-        remoteTarget = remoteTarget is null ? null : remoteTarget with
-        {
-            MaximumReservedReceiptBytes = reservationBytes,
-            OriginalSourceCommit = Token(tx, request.SourceQueue.Partition, position)
-        };
+        var reservationBytes = ReceiptReservationBytes(tx, request.SourceQueue, request.TransferId,
+            request.Destination, principal.Id, fingerprint);
         RequireTokenBound(intentToken);
         var record = new RemoteTransferIntentRecord(request.SourceQueue, request.TransferId, request.Destination, principal.Id,
             request.Message, fingerprint, QueueTransferState.OutputPending, intentToken, null, reservationBytes)
         {
             Attempts = RemoteTransferAttemptStateValidation.Initial(Limits.MaxQueueTransferAcceptAttempts),
-            Repairs = RemoteTransferRepairStateValidation.Initial(Limits.MaxQueueTransferRepairAttempts),
-            RemoteTarget = remoteTarget
+            Repairs = RemoteTransferRepairStateValidation.Initial(Limits.MaxQueueTransferRepairAttempts)
         };
         var recordBytes = RemoteTransferStorage.SourceAccountedBytes(record);
         var capacity = RemoteTransferStorage.SourceCapacity(tx, request.SourceQueue);
@@ -136,10 +128,6 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
         }
 
-        if (existing.RemoteTarget is not null)
-        {
-            return ApplyCompleteRemoteQueueTransfer(tx, principal, request, existing);
-        }
         var receipt = Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, Limits.MaxBatchBytes);
         if (receipt is null || receipt.Source is null || receipt.Destination is null || receipt.TargetCommit is null)
         {
@@ -327,10 +315,6 @@ public sealed partial class DatabaseEngine
         ValidateStoredIntentClaims(claims, record);
         RequireRemoteTransferAttemptHistory(record, claims);
         RequireRemoteTransferRepairHistory(view, record, claims);
-        if (record.RemoteTarget is not null)
-        {
-            ValidateRemoteTransferOriginalSourceCommit(view, record);
-        }
         ValidateIntentRecordState(record);
         RemoteTransferAttemptStateValidation.Require(record.Attempts);
         ValidateReceiptToken(view, record);
@@ -354,14 +338,6 @@ public sealed partial class DatabaseEngine
 
     private void ValidateReceiptToken(IKeyValueView view, RemoteTransferIntentRecord record)
     {
-        if (record.RemoteTarget is not null)
-        {
-            if (record.ReceiptToken is { } remoteToken)
-            {
-                ValidateRemoteTransferIntentReceipt(view, record, remoteToken);
-            }
-            return;
-        }
         if (record.ReceiptToken is { } receiptToken)
         {
             var receipt = Verify<RemoteTransferReceiptClaims>(receiptToken, Limits.MaxBatchBytes);

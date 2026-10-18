@@ -22,9 +22,7 @@ internal static class NativeTextIncrementalSourceValidation
             || manifest.ThroughSequence > current.UpperSequence
             || manifest.ResourceSha256 != current.ResourceSha256
             || manifest.Placement.PhysicalShardId != request.Placement.PhysicalShardId
-            || manifest.Placement.Incarnation != request.Placement.Incarnation
-            || manifest.Placement.PlacementEpoch != request.Placement.PlacementEpoch
-            || !manifest.Placement.VoterIds.SequenceEqual(request.Placement.VoterIds, StringComparer.Ordinal))
+            || manifest.Placement.Incarnation != request.Placement.Incarnation)
         {
             throw NativeTextErrors.Mismatch();
         }

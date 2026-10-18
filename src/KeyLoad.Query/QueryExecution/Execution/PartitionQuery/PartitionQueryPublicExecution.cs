@@ -5,8 +5,6 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class PartitionQueryPublicExecution
 {
-    private const int MinimumPositiveCount = 1;
-
     private const string InvalidOwner = "The server physical owner identity is invalid.";
 
     internal static PartitionQueryPageV1 Execute(QueryEngine engine, string principalId,
@@ -32,8 +30,7 @@ internal static class PartitionQueryPublicExecution
 
     private static void ValidateOwner(PhysicalShardRecord? owner)
     {
-        if (owner is null || owner.PhysicalShardId == Guid.Empty || owner.Incarnation == Guid.Empty
-            || owner.VoterIds.IsDefaultOrEmpty || owner.PlacementEpoch < MinimumPositiveCount)
+        if (owner is null || owner.PhysicalShardId == Guid.Empty || owner.Incarnation == Guid.Empty)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, InvalidOwner);
         }

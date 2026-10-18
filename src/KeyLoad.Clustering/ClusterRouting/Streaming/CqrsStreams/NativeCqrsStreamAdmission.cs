@@ -13,7 +13,6 @@ internal sealed class NativeCqrsStreamAdmission(
     private long aggregateBytes;
     private int count;
     private bool terminal;
-    private EventFeedTailStreamShape? tail;
     private readonly TextMaintenanceStreamShape text = new(requestId);
     private AnnMaintenanceStreamShape? ann;
     private OnlineTextMaintenanceStreamShape? online;
@@ -40,7 +39,6 @@ internal sealed class NativeCqrsStreamAdmission(
 
         var maximumBytes = chunk.Kind switch
         {
-            CqrsStreamChunkKind.Progress when purpose?.IsEventFeedTail == true => options.Value.MaximumCompletedBytes,
             CqrsStreamChunkKind.Started or CqrsStreamChunkKind.Progress => options.Value.MaximumStartedBytes,
             CqrsStreamChunkKind.Completed => options.Value.MaximumCompletedBytes,
             CqrsStreamChunkKind.Failed => options.Value.MaximumFailedBytes,
@@ -94,11 +92,6 @@ internal sealed class NativeCqrsStreamAdmission(
             (ann ??= new AnnMaintenanceStreamShape(requestId)).Admit(chunk, nextCount);
             return;
         }
-        if (chunk.Kind == CqrsStreamChunkKind.Progress && purpose?.TailRequest is { } request && count > EmptyCount)
-        {
-            (tail ??= new EventFeedTailStreamShape(requestId, request)).Admit(chunk, nextCount);
-            return;
-        }
         if (chunk.Kind == CqrsStreamChunkKind.Progress && purpose?.IsOnlineTextMaintenance == true && count > EmptyCount)
         {
             (online ??= new OnlineTextMaintenanceStreamShape(requestId)).Admit(chunk, nextCount);
@@ -116,7 +109,7 @@ internal sealed class NativeCqrsStreamAdmission(
         if (nextCount != EmptyNextCount || chunk.Sequence != EmptySequence || chunk.ProgressResult is not { IsSuccess: true, Value: not null }
             || chunk.ProgressResult.Value.Problem is not null
             || chunk.ProgressResult.Value.Value.RequestId != requestId
-            || chunk.ProgressResult.Value.Value is { AnnPhase: not null } or { TextPhase: not null } or { OnlineTextPhase: not null } or { EventFeedTail: not null }
+            || chunk.ProgressResult.Value.Value is { AnnPhase: not null } or { TextPhase: not null } or { OnlineTextPhase: not null }
             || chunk.Final is not null
             || chunk.Message is not null || chunk.EventId is not null
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))
@@ -138,7 +131,6 @@ internal sealed class NativeCqrsStreamAdmission(
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind)
             || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsTextMaintenance == true && !text.Completed)
             || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsAnnMaintenance == true && ann?.Completed != true)
-            || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsEventFeedTail == true && tail?.HasDelivery != true)
             || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsOnlineTextMaintenance == true && online?.Completed == false))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
@@ -151,16 +143,6 @@ internal sealed class NativeCqrsStreamAdmission(
     {
         if (final.IsSuccess)
         {
-            if (final.Value is { Metadata: not null } counted)
-            {
-                if (kind != CqrsStreamChunkKind.Completed || final.Problem is not null
-                    || purpose?.MetadataAdmission is not { } admission)
-                {
-                    throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
-                }
-                NativeCommandMetadataReplies.Require(counted, admission, options);
-                return;
-            }
             if (kind != CqrsStreamChunkKind.Completed || final.Problem is not null
                 || final.Value is not { } reply || reply.Payload.IsEmpty || reply.Payload.Length > options.Value.MaximumReplyBytes
                 || reply.Error is not null || reply.SafeDetail is not null)

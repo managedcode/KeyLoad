@@ -7,11 +7,10 @@ import { latest, pick, times } from './metrics.js';
 import { failureClass, failureCode } from './errors.js';
 
 const storageParts = storage => {
-    const known = (storage.canonicalBytes ?? Config.zero) + (storage.replicaBytes ?? Config.zero) + (storage.backupBytes ?? Config.zero);
+    const known = (storage.canonicalBytes ?? Config.zero) + (storage.backupBytes ?? Config.zero);
     const other = storage.totalBytes === null || storage.totalBytes === undefined ? null : Math.max(Config.zero, storage.totalBytes - known);
     return [
         { value: storage.canonicalBytes ?? Config.zero, cls: Css.c1 },
-        { value: storage.replicaBytes ?? Config.zero, cls: Css.c2 },
         { value: storage.backupBytes ?? Config.zero, cls: Css.c3 },
         { value: other ?? Config.zero, cls: Css.c4, raw: other }
     ];
@@ -56,7 +55,6 @@ function storage(snapshot) {
     donut(Id.storageDonut, parts);
     write(Id.storageTotal, bytes(value.totalBytes));
     write(Id.storageCanonical, bytes(value.canonicalBytes));
-    write(Id.storageReplica, bytes(value.replicaBytes));
     write(Id.storageBackup, bytes(value.backupBytes));
     write(Id.storageOther, bytes(parts[parts.length - Config.one].raw));
     const state = el(Id.storageState);
@@ -100,7 +98,7 @@ export function renderOverview(snapshot) {
 }
 
 export function clearOverview() {
-    [Id.throughput, Id.latency, Id.errorRate, Id.canonical, Id.admission, Id.storageCanonical, Id.storageReplica,
+    [Id.throughput, Id.latency, Id.errorRate, Id.canonical, Id.admission, Id.storageCanonical,
         Id.storageBackup, Id.storageOther, Id.storageTotal].forEach(id => write(id, Text.dash));
     write(Id.errorRateNote, Text.twoSamples);
     write(Id.canonicalNote, Text.storageWaiting);

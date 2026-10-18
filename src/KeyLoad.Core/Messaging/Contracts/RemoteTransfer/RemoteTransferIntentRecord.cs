@@ -26,9 +26,4 @@ internal sealed record RemoteTransferIntentRecord(
         get; init;
     }
 
-    [global::Orleans.Id(RemoteTransferFields.RemoteTarget)]
-    public RemoteTransferRemoteTarget? RemoteTarget
-    {
-        get; init;
-    }
 }

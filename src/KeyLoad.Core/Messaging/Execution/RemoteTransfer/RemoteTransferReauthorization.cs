@@ -113,15 +113,8 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
         }
-        if (record.RemoteTarget is not null)
-        {
-            ValidateRemoteTransferIntentReceipt(view, record, request.ReceiptToken);
-        }
-        else
-        {
-            var claims = Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, Limits.MaxBatchBytes);
-            ValidateReceipt(view, claims, record);
-        }
+        var claims = Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, Limits.MaxBatchBytes);
+        ValidateReceipt(view, claims, record);
         if (record.State != QueueTransferState.Delivered || record.ReceiptToken != request.ReceiptToken)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, TransferOutcomeMissingMessage);
@@ -157,17 +150,6 @@ public sealed partial class DatabaseEngine
         if (request.ReceiptToken is null)
         {
             throw Errors.Fail(ErrorCode.Validation, TransferInvalidMessage);
-        }
-        var record = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(request.SourceQueue, request.TransferId));
-        if (record?.RemoteTarget is not null)
-        {
-            ValidateIntentRecord(view, record, request.SourceQueue, request.TransferId);
-            if (record.PrincipalId != principal.Id)
-            {
-                throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
-            }
-            ValidateRemoteTransferIntentReceipt(view, record, request.ReceiptToken);
-            return;
         }
         var claims = Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, Limits.MaxBatchBytes);
         ValidateReceiptRequestScope(view, claims, request.SourceQueue, request.TransferId, principal.Id);

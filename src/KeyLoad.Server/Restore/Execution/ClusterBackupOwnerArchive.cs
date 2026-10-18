@@ -55,7 +55,7 @@ internal static class ClusterBackupOwnerArchive
         if (cut is null || cut.Version != ClusterBackupOwnerCut.CurrentVersion
             || cut.CaptureId != request.CaptureId || cut.SourceNodeId != request.ExpectedNodeId
             || cut.StorePosition != captured.Position
-            || !PhysicalOwnerEntryValidation.SameOwner(cut.Owner, request.ExpectedOwner))
+            || cut.Owner != request.ExpectedOwner)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidArchive);
         }

@@ -43,7 +43,6 @@ internal static class OrleansSiloConfiguration
 #pragma warning restore ORLEANSEXP001
         ConnectionGrainGraphRegistration.Register(silo);
         NativeRuntimeJournalRegistration.Register(silo);
-        EventFeedNativeProviderRegistration.Register(silo);
     }
 
     private static void ConfigureMessaging(IServiceCollection services)

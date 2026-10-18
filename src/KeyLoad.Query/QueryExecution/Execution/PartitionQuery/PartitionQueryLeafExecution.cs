@@ -12,9 +12,7 @@ internal static class PartitionQueryLeafExecution
         var database = engine.PartitionQueryOwner;
         PartitionQueryOwnedLeafValidation.Validate(request, database.Limits, engine.Execution);
         var plan = request.Plan;
-        if (request.Owner.PhysicalShardId != owner.PhysicalShardId || request.Owner.Incarnation != owner.Incarnation
-            || request.Owner.PlacementEpoch != owner.PlacementEpoch
-            || !request.Owner.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal))
+        if (request.Owner.PhysicalShardId != owner.PhysicalShardId || request.Owner.Incarnation != owner.Incarnation))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChangedDetail);
         }

@@ -35,9 +35,7 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
                 return null;
             }
             if (reserved.NodeId != work.NodeId || reserved.Placement.PhysicalShardId != work.Placement.PhysicalShardId
-                || reserved.Placement.Incarnation != work.Placement.Incarnation
-                || reserved.Placement.PlacementEpoch != work.Placement.PlacementEpoch
-                || !reserved.Placement.VoterIds.SequenceEqual(work.Placement.VoterIds, StringComparer.Ordinal))
+                || reserved.Placement.Incarnation != work.Placement.Incarnation))
             {
                 var ownInitial = Initial(work);
                 return new(authority, ownInitial, ownInitial, null, null, null, work.ThroughSequence, null);
@@ -68,9 +66,7 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
             throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionJobProtocol.Invalid);
         }
         if (request.NodeId != work.NodeId || request.Placement.PhysicalShardId != work.Placement.PhysicalShardId
-            || request.Placement.Incarnation != work.Placement.Incarnation
-            || request.Placement.PlacementEpoch != work.Placement.PlacementEpoch
-            || !request.Placement.VoterIds.SequenceEqual(work.Placement.VoterIds, StringComparer.Ordinal))
+            || request.Placement.Incarnation != work.Placement.Incarnation))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
         }

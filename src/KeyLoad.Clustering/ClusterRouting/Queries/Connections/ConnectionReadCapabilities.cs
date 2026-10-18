@@ -30,20 +30,11 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
                 : GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock);
         }
 
-        var retirementWork = ResourceRetirementReadScope.Handles(kind)
-            ? ResourceRetirementReadExecution.CreateWork(localDatabase, runtimeClock, request, binding, cancellationToken)
-            : null;
-        retirementWork?.RequireResourceLifetimeBinding(binding);
-        var principal = await ReloadPrincipalAsync(request, requestId, retirementWork, cancellationToken).ConfigureAwait(true);
+        var principal = await ReloadPrincipalAsync(request, requestId, null, cancellationToken).ConfigureAwait(true);
         if (UserAnalyticsReadExecution.Handles(kind))
         {
             return await UserAnalyticsReadExecution.ExecuteAsync(localDatabase, services, principal, kind, request,
                 binding, cancellationToken).ConfigureAwait(true);
-        }
-        if (ResourceLifecycleReadExecution.Handles(kind))
-        {
-            return await ResourceLifecycleReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,
-                principal, request, codec, context, retirementWork, cancellationToken).ConfigureAwait(true);
         }
         if (GrainLifetimeReadCapabilities.Handles(kind))
         {
@@ -112,14 +103,6 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await AnnProjectionObservationRead.ExecuteAsync(localDatabase, services, runtimeClock,
                 principal, request, binding, cancellationToken).ConfigureAwait(true);
         }
-        if (RemoteGraphRequestScope.HandlesRead(kind))
-        {
-            return GrainRemoteGraphReadCapabilities.Execute(localDatabase, services, runtimeClock, principal, request, binding, cancellationToken);
-        }
-        if (EventVectorRequestScope.HandlesRead(kind))
-        {
-            return EventVectorReadCapabilities.Execute(localDatabase, services, principal, request, binding, cancellationToken);
-        }
         if (kind == GrainReadKind.DistributedSearch)
         {
             return await DistributedSearchReadCapability.ExecuteAsync(services, principal, request, requestId,
@@ -137,20 +120,6 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (GrainBlobReadCapabilities.Handles(kind))
         {
             return blobs.Execute(kind, principal, request, binding, cancellationToken);
-        }
-        if (ConnectionRemoteTransferReadCapabilities.HandlesPeer(kind, request.Envelope))
-        {
-            return ConnectionRemoteTransferReadCapabilities.ExecutePeer(localDatabase,
-                runtimeClock, principal, request, binding, cancellationToken);
-        }
-        if (kind == GrainReadKind.QueueTransferReceipt)
-        {
-            var result = await ConnectionRemoteTransferReadCapabilities.TryReceiptAsync(services,
-                principal, request, binding, cancellationToken).ConfigureAwait(true);
-            if (result.Routed)
-            {
-                return result.Receipt;
-            }
         }
         if (GrainCoreReadCapabilities.Handles(kind))
         {

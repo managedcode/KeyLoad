@@ -6,10 +6,9 @@ import { bytes, count } from './format.js';
 const categoryOf = name => Category[name] ?? Category.other;
 
 function totals(storage) {
-    const known = (storage.canonicalBytes ?? Config.zero) + (storage.replicaBytes ?? Config.zero) + (storage.backupBytes ?? Config.zero);
+    const known = (storage.canonicalBytes ?? Config.zero) + (storage.backupBytes ?? Config.zero);
     return [
         [Category.canonical, storage.canonicalBytes],
-        [Category.replica, storage.replicaBytes],
         [Category.backup, storage.backupBytes],
         [Category.other, storage.totalBytes === null || storage.totalBytes === undefined ? null : Math.max(Config.zero, storage.totalBytes - known)]
     ];

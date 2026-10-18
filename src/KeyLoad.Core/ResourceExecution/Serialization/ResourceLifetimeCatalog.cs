@@ -45,9 +45,7 @@ internal static class ResourceLifetimeCatalog
             throw Errors.Fail(ErrorCode.Conflict, AlreadyCreated);
         }
         var created = ResourceLifetimeIdentity.Create(original, tenantId, databaseId, definition);
-        ResourceRetirementFinalizationStorage.RequireCreation(transaction, created, limits);
         transaction.PutRecord(Key(tenantId, databaseId, definition.Name), created);
-        ResourceOwnerInventoryCreation.Record(transaction, created);
         return created;
     }
 }

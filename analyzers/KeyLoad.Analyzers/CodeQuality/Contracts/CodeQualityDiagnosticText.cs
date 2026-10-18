@@ -21,7 +21,7 @@ internal static class CodeQualityDiagnosticText
 
     public const string GrainVersionTitle = "Grain interfaces require explicit versions";
     public const string GrainVersionMessage = "Grain interface '{0}' must declare a positive Orleans VersionAttribute";
-    public const string GrainVersionDescription = "Explicit grain interface versions prevent new invokable contracts from being routed to incompatible silos during rolling deployments. Increment the version whenever a public method is added and never change an existing method signature.";
+    public const string GrainVersionDescription = "Grain interfaces declare a positive Orleans version. Any version change requires the owner's explicit permission for that specific increase; refactoring and contract changes do not grant permission.";
 
     public const string CompositionRootTitle = "Program files show process composition";
     public const string CompositionRootMessage = "Program.cs must show process initialization and lifecycle instead of forwarding the entire entry point to '{0}'";

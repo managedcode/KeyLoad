@@ -129,7 +129,7 @@ public sealed partial class DatabaseEngine
                 && result.Json is null && result.NativeValue is null
                 && outcome.BlobAuthority is null && outcome.CompositionAuthority is null
                 && outcome.OnlineTextAuthority is null && outcome.RemoteTransferFailureAuthority is null
-                && outcome.RemoteTransferAuthority is null;
+                ;
         }
         catch (KeyLoadException error) when (CanDeclineDocumentAdmission(error, bounded)) { return false; }
     }
@@ -140,7 +140,7 @@ public sealed partial class DatabaseEngine
 
     private CommandRequest? ReadOrdinaryDocumentSubmission(ReplicatedOperation operation)
     {
-        if (operation.Kind != OperationKind.Batch || ReadRemoteTransferNativeProof(operation) is not null)
+        if (operation.Kind != OperationKind.Batch)
         {
             return null;
         }

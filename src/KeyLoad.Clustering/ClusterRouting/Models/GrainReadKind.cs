@@ -107,8 +107,6 @@ public enum GrainReadKind
     PartitionQueryLeaf,
     /// <summary>Reads one provisioned vector-only native ANN generation under current policy.</summary>
     ApproximateSearch,
-    /// <summary>Read one explicitly bounded follower snapshot under fresh persisted authority.</summary>
-    FollowerDocument = 56,
     /// <summary>Captures or verifies one stable actual native owner archive under current persisted credentials.</summary>
     ClusterBackupOwner = 62,
     /// <summary>Requires an actual provisioned native ANN generation to cover an acknowledged minimum prefix.</summary>
@@ -121,30 +119,10 @@ public enum GrainReadKind
     DistributedSearch,
     /// <summary>Execute one privately signed bounded phase under its original owner, statistics witness and expiry.</summary>
     DistributedSearchLeaf,
-    /// <summary>Private authenticated complete native event-vector coverage capture.</summary>
-    EventVectorCoverage = 69,
-    /// <summary>Private authenticated immutable original event-vector outcome observation.</summary>
-    EventVectorOriginalOutcome = 70,
-    /// <summary>Private authenticated complete bounded source-page read.</summary>
-    EventVectorSources = 71,
     /// <summary>Privately observes source attempt state or an authenticated actual target capacity failure.</summary>
     QueueTransferCoordination = 72,
     /// <summary>Privately observes one authenticated native ANN root or its exact publication.</summary>
     AnnProjectionObservation = 73,
-    /// <summary>Privately prepares one freshly authorized remote graph endpoint.</summary>
-    RemoteGraphTargetPreparation = 74,
-    /// <summary>Privately reads an actual committed remote graph source intent.</summary>
-    RemoteGraphSourceIntent = 75,
-    /// <summary>Privately reads an actual committed remote graph receiver receipt.</summary>
-    RemoteGraphReceiverReceipt = 76,
-    /// <summary>Privately proves current source graph visibility for a remote incoming projection.</summary>
-    RemoteGraphIncoming = 77,
-    /// <summary>Privately captures bounded remote graph receiver candidates at a target cut.</summary>
-    RemoteGraphReceiverCandidates = 78,
-    /// <summary>Privately finalizes a target projection against exact fresh source proofs.</summary>
-    RemoteGraphIncomingFinalize = 79,
-    /// <summary>Composes explicit remote incoming graph reads over distinct authorized owner cuts.</summary>
-    RemoteGraphIncomingParent = 80,
     /// <summary>Privately reads an owned document under exact authenticated D1 coverage.</summary>
     OwnedDocumentV2 = 85,
     /// <summary>Privately executes a partition query leaf under mandatory exact metadata and principal proof.</summary>
@@ -153,10 +131,6 @@ public enum GrainReadKind
     DistributedSearchLeafV2 = 89,
     /// <summary>Privately observes native ANN publication and data under mandatory lifetime coverage.</summary>
     AnnProjectionObservationV2 = 90,
-    /// <summary>Privately reads bounded canonical resource-owner inventory under current administrator authority.</summary>
-    ResourceOwnerInventory = 92,
-    /// <summary>Privately reads exact durable resource retirement state under current authority.</summary>
-    ResourceRetirement = 93,
     /// <summary>Reads bounded canonical user analytics events under current persisted authority.</summary>
     AnalyticsEvents = 94,
     /// <summary>Aggregates a bounded authorized user analytics source cut through the native derived engine.</summary>

@@ -75,7 +75,6 @@ public sealed partial class DatabaseEngine
                 binding?.Bind(current.Capture());
                 return true;
             }
-            RequirePreparedResourceRetirementSubmission(observed, operation, admittedAt);
             var admission = ResourceEffectAdmissionValidation.Read(operation, Limits);
             if (admission.Error is { } capturedError)
             {

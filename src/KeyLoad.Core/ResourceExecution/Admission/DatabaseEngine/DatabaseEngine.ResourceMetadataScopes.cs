@@ -7,8 +7,7 @@ public sealed partial class DatabaseEngine
 {
     private static bool IsResourceFreeNativeOperation(OperationKind kind)
         => kind is OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey or OperationKind.SetDispatch
-            or OperationKind.RuntimeJournal or OperationKind.BootstrapPhysicalShardCatalog
-            or OperationKind.RegisterPhysicalOwner or OperationKind.ResourceRetirementPhase;
+            or OperationKind.RuntimeJournal;
 
     private static bool ObserveCatalogResourceEffect(IKeyValueView view, ReplicatedOperation operation)
     {
@@ -54,15 +53,4 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private void ObserveEventControlLifetime(IKeyValueView view, EventVectorControlPhase phase)
-    {
-        var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
-        var witness = EventVectorCoverageWitnessEncoding.Read(phase.OriginalCoverageWitness,
-            phase.OriginalRequest, admission);
-        var lifetime = EventVectorCoverageLifetimeValidation.Require(witness, admission);
-        if (view is IResourceEffectObservation observation)
-        {
-            observation.ObserveLifetime(lifetime);
-        }
-    }
 }

@@ -33,10 +33,10 @@ public sealed partial class DatabaseEngine
     // Commands decode only metadata/authority; no expanded identity string is retained.
     internal void VerifyNativeAuthority(Guid id, OperationKind kind, string principalId, ReadOnlySpan<byte> payloadJsonUtf8,
         ReadOnlyMemory<byte> value, ErrorCode? error, string? safeDetail,
-        ReadOnlyMemory<byte> authority, ReadOnlyMemory<byte> signature, ReadOnlyMemory<byte> retryDecisions = default, ReadOnlyMemory<byte> transferProof = default,
+        ReadOnlyMemory<byte> authority, ReadOnlyMemory<byte> signature, ReadOnlyMemory<byte> retryDecisions = default,
         ReadOnlyMemory<byte> resourceAdmission = default)
     {
-        var payload = new NativeCommandPayload(value, error, safeDetail) { Authority = authority, Signature = signature, RetryDecisions = retryDecisions, TransferProof = transferProof, ResourceAdmission = resourceAdmission };
+        var payload = new NativeCommandPayload(value, error, safeDetail) { Authority = authority, Signature = signature, RetryDecisions = retryDecisions, ResourceAdmission = resourceAdmission };
         var identity = Store.Identity;
         var claims = ReadNativeAuthority(identity, payload);
         VerifyNativeAuthority(identity, claims, id, kind, principalId,
@@ -53,7 +53,6 @@ public sealed partial class DatabaseEngine
             || claims.Fingerprint != fingerprint || claims.Error != payload.Error || claims.SafeDetail != payload.SafeDetail
             || claims.ValueHash.Length != valueHash.Length || !CryptographicOperations.FixedTimeEquals(claims.ValueHash.Span, valueHash)
             || !MatchesQueueRetryHash(payload.RetryDecisions.Span, claims.RetryDecisionHash.Span)
-            || !MatchesRemoteTransferProofHash(payload.TransferProof.Span, claims.TransferProofHash.Span)
             || !MatchesResourceAdmissionHash(payload.ResourceAdmission.Span, claims.ResourceAdmissionHash.Span)
             || !ValidNativeMarker(payload))
         {
@@ -115,7 +114,6 @@ public sealed partial class DatabaseEngine
             operation.Id, operation.Kind, operation.PrincipalId, NativeOperationFingerprint.Compute(operation),
             SHA256.HashData(payload.Value.Span), payload.Error, payload.SafeDetail,
             payload.RetryDecisions.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.RetryDecisions.Span),
-            payload.TransferProof.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.TransferProof.Span),
             payload.ResourceAdmission.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.ResourceAdmission.Span));
         var authority = NativeSerialization.Serialize(claims);
         var signed = payload with

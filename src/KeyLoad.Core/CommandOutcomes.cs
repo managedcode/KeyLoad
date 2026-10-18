@@ -73,7 +73,7 @@ public sealed partial class DatabaseEngine
             || outcome.Result.Json is not null || outcome.Result.NativeValue is not null
             || outcome.BlobAuthority is not null || outcome.CompositionAuthority is not null
             || outcome.OnlineTextAuthority is not null || outcome.RemoteTransferFailureAuthority is not null
-            || outcome.RemoteTransferAuthority is not null))
+            ))
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw();
         }
@@ -111,10 +111,7 @@ public sealed partial class DatabaseEngine
         ValidateBm25CachedOutcome(view, principal, operation, previous);
         ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         ValidateCompositionOutcome(view, principal, operation, previous);
-        if (!ValidateRemoteTransferCachedOutcome(view, principal, operation, previous))
-        {
-            ReauthorizeExtendedOutcome(view, principal, operation, previous);
-        }
+        ReauthorizeExtendedOutcome(view, principal, operation, previous);
 
         if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
         {

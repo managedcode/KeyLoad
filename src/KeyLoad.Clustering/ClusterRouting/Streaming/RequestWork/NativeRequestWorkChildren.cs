@@ -5,7 +5,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Handles verified child admission within the existing owner's gate and bounded frame table.</summary>
 internal sealed class NativeRequestWorkChildren(Lock gate, NativeRequestWorkOwner owner,
     NativeResourceWorkPhysicalBinding physical, NativeRequestWorkAdmissions admissions,
-    NativeResourceWorkRetentions retentions, Func<bool> isAdmissionClosed)
+    Func<bool> isAdmissionClosed)
 {
     internal NativeRequestWorkChildReservation Reserve(NativeRequestWorkLease parent,
         DecodedGrainRequest verified, PhysicalShardRecord expectedOwner, SiloStorageIdentity expectedRuntime)
@@ -14,7 +14,6 @@ internal sealed class NativeRequestWorkChildren(Lock gate, NativeRequestWorkOwne
         lock (gate)
         {
             RequireChildOwner(expectedOwner, expectedRuntime);
-            retentions.RequireAdmissionSlot(admissions.Count);
             return admissions.ReserveChild(owner, parent, identity);
         }
     }
@@ -35,7 +34,6 @@ internal sealed class NativeRequestWorkChildren(Lock gate, NativeRequestWorkOwne
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.LeaseIdentityMessage);
             }
-            retentions.RequireAdmissionSlot(admissions.Count);
             return admissions.Acquire(owner, verified.Envelope.RequestId, NativeRequestWorkKind.RequestProducer);
         }
     }

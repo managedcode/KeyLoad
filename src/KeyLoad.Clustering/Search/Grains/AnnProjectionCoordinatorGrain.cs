@@ -151,8 +151,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     private void RequireHost(PhysicalShardRecord placement)
     {
         if (physicalOwner.PhysicalShardId != placement.PhysicalShardId
-            || physicalOwner.Incarnation != placement.Incarnation
-            || !physicalOwner.VoterIds.SequenceEqual(placement.VoterIds, StringComparer.Ordinal))
+            || physicalOwner.Incarnation != placement.Incarnation))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
         }

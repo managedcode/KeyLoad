@@ -12,5 +12,4 @@ internal static class StoredOutcomeFields
     internal const uint Partition = 7;
     internal const uint OnlineTextAuthority = 8;
     internal const uint RemoteTransferFailureAuthority = 9;
-    internal const uint RemoteTransferAuthority = 10;
 }

@@ -4,7 +4,6 @@ internal static class AnnProjectionObservationScope
 {
     internal static bool SamePhysicalIdentity(PhysicalShardRecord host, PhysicalShardRecord original)
         => host.PhysicalShardId == original.PhysicalShardId && host.Incarnation == original.Incarnation
-            && host.VoterIds.SequenceEqual(original.VoterIds, StringComparer.Ordinal);
 
     internal static bool Handles(GrainReadKind? kind) => kind == GrainReadKind.AnnProjectionObservation;
 

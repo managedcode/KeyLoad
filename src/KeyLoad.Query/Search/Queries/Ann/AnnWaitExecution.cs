@@ -99,7 +99,7 @@ internal static class AnnWaitExecution
                 {
                     throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
                 }
-                result = new(DatabaseEngine.Token(authority, request.Partition, indexed), lease.IndexGeneration,
+                result = new(database.Token(authority, request.Partition, indexed), lease.IndexGeneration,
                     resource.SchemaVersion, principal.PolicyEpoch);
                 budget.CheckResult(result);
             }

@@ -22,7 +22,6 @@ internal static class DatabaseReadinessEndpoints
         try
         {
             await owner.Borrow().Coordinator.ReadBarrierAsync(deadline.Token).ConfigureAwait(false);
-            var partition = owner.Borrow();
             return Results.Ok(new ReadyReply(ServerProtocol.ReadyStatus, nodeOptions.Value.ReplicaCount));
         }
         catch (Exception error) when (error is KeyLoadException or OperationCanceledException)

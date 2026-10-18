@@ -112,7 +112,6 @@ export const KindInfo = Object.freeze({
 
 export const Category = Object.freeze({
     canonical: { label: 'Canonical', cls: 'c1' },
-    replica: { label: 'Replica journals', cls: 'c2' },
     backup: { label: 'Backups', cls: 'c3' },
     other: { label: 'Other files', cls: 'c4' }
 });
@@ -206,7 +205,6 @@ export const Id = Object.freeze({
     storageState: 'storage-state',
     storageDonut: 'storage-donut',
     storageCanonical: 'storage-canonical',
-    storageReplica: 'storage-replica',
     storageBackup: 'storage-backup',
     storageOther: 'storage-other',
     storageTotal: 'storage-total',
@@ -258,8 +256,8 @@ export const Headers = Object.freeze({
     catalog: ['Name', 'Category', 'Transaction domain', 'Schema', 'Indexes', 'State', 'Browse']
 });
 
-export const ClusterLabels = Object.freeze(['Node ID', 'Leader', 'Configured voters', 'Routing ready',
-    'Durability profile', 'Applied position', 'Read generation', 'Process ID', 'Incarnation',
+export const ClusterLabels = Object.freeze(['Node ID', 'Active silos', 'Required data copies', 'Routing ready',
+    'Durability profile', 'Store position', 'Read generation', 'Process ID', 'Incarnation',
     'HTTP process instance', 'Capture time', 'Command retained bytes']);
 
 export const Css = Object.freeze({
@@ -323,8 +321,6 @@ export const Css = Object.freeze({
     sizeBar: 'size-bar',
     node: 'node',
     self: 'self',
-    leader: 'leader',
-    crown: 'crown',
     sub: 'sub',
     glyph: 'glyph',
     accent: 'accent',

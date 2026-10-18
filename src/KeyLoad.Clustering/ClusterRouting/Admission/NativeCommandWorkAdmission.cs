@@ -42,9 +42,5 @@ internal static class NativeCommandWorkAdmission
     }
 
     private static bool CarriesVerifiedOperation(DecodedGrainRequest request, OperationKind kind)
-        => kind == OperationKind.Batch && request.Envelope.Purpose == global::KeyLoad.Core.Features.Messaging.RemoteTransferPeerProtocol.GrainPurpose
-            && RemoteTransferRequestScope.Validate(request.Envelope)
-            || kind is OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
-            or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase or OperationKind.OnlineTextPublicationPhase
-            or OperationKind.Bm25CorpusPublicationPhase or OperationKind.ResourceRetirementPhase;
+        => kind is OperationKind.OnlineTextPublicationPhase or OperationKind.Bm25CorpusPublicationPhase;
 }

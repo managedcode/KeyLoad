@@ -82,8 +82,6 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
             || request.Placement is not { } placement
             || placement.PhysicalShardId != initial.Placement.PhysicalShardId
             || placement.Incarnation != initial.Placement.Incarnation
-            || placement.PlacementEpoch != initial.Placement.PlacementEpoch
-            || !placement.VoterIds.SequenceEqual(initial.Placement.VoterIds, StringComparer.Ordinal)
             || request.MaintenanceProfile != initial.MaintenanceProfile
             || request.Mode is not (AnnMaintenanceMode.Build or AnnMaintenanceMode.Restore))
         {

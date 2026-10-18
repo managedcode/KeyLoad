@@ -128,7 +128,6 @@ public sealed partial class DatabaseEngine
         BlobOutcomeAuthority? blobAuthority = null;
         var onlineTextAuthority = CaptureOnlineTextOutcomeAuthority(operation);
         global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
-        global::KeyLoad.Core.Features.Messaging.RemoteTransferOutcomeAuthority? remoteTransferAuthority = null;
         OperationResult result;
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
         try
@@ -148,7 +147,6 @@ public sealed partial class DatabaseEngine
             ValidateQueueRetryDecisions(transaction, principal, operation);
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             transferFailure = CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
-            remoteTransferAuthority = CaptureRemoteTransferOutcomeAuthority(transaction, principal, operation);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
                 placement);
             compositionAuthority = CaptureCompositionOutcome(transaction, principal, operation, result);
@@ -168,7 +166,7 @@ public sealed partial class DatabaseEngine
         }
         persistOutcome = selection.Outcome is null;
         var actualOutcome = BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority,
-            partitionScope, onlineTextAuthority, transferFailure, remoteTransferAuthority);
+            partitionScope, onlineTextAuthority, transferFailure);
         return actualOutcome;
     }
 
@@ -183,7 +181,6 @@ public sealed partial class DatabaseEngine
         CommandOutcomePartitionScope partitionScope,
         global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? onlineTextAuthority,
         global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure,
-        global::KeyLoad.Core.Features.Messaging.RemoteTransferOutcomeAuthority? remoteTransferAuthority)
         => new(fingerprint, Store.Identity.Incarnation, policyEpoch, result)
         {
             BlobAuthority = result.Error is null ? blobAuthority : null,
@@ -191,8 +188,7 @@ public sealed partial class DatabaseEngine
             ScopeKind = partitionScope.Kind,
             Partition = partitionScope.Partition,
             OnlineTextAuthority = onlineTextAuthority,
-            RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null,
-            RemoteTransferAuthority = result.Error is null ? remoteTransferAuthority : null
+            RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null
         };
 
     private OperationResult ReplayCommand(IAtomicTransaction transaction, PrincipalRecord principal,
@@ -277,8 +273,7 @@ public sealed partial class DatabaseEngine
                 Result = failure,
                 BlobAuthority = null,
                 CompositionAuthority = null,
-                RemoteTransferFailureAuthority = null,
-                RemoteTransferAuthority = null
+                RemoteTransferFailureAuthority = null
             };
             PersistCommandOutcome(transaction, operation, resultKey, actualFailure, replicationIndex, persistOutcome);
             transaction.PersistCandidates(currentIncarnation);

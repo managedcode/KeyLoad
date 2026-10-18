@@ -149,7 +149,7 @@ public sealed partial class DatabaseEngine
             StoreAggregateSnapshot snapshot => SaveAggregateSnapshot(tx, principal, partition, snapshot),
             PutVector vector => Upsert(tx, principal, partition, vector),
             CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now, position),
-            AcceptQueueTransfer transfer => ApplyAcceptRemoteTransferOrLocal(tx, principal, partition, transfer, now, position, operation),
+            AcceptQueueTransfer transfer => ApplyAcceptQueueTransfer(tx, principal, partition, transfer, now, position),
             CompleteQueueTransfer transfer => ApplyCompleteQueueTransfer(tx, principal, partition, transfer),
             AdvanceQueueTransferAttempt transfer => ApplyAdvanceQueueTransferAttempt(tx, principal, partition, transfer),
             AdvanceQueueTransferRepair transfer => ApplyAdvanceQueueTransferRepair(tx, principal, partition, transfer),
