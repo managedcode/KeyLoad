@@ -1,3 +1,4 @@
+using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -32,4 +33,14 @@ public sealed partial class KeyLoadClient
         return Send<AdminQueuePage>(AdminDashboardProtocol.QueuePath, request, false, null, cancellationToken);
     }
 
+    /// <summary>Reads public node readiness and status information.</summary>
+    /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
+    /// <returns>The node status.</returns>
+    public Task<Result<NodeStatus>> StatusAsync(CancellationToken cancellationToken = default)
+        => Send<NodeStatus>(ClientApiRoutes.Status, null, false, null, cancellationToken);
+    /// <summary>Reads operator-visible node admission status.</summary>
+    /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
+    /// <returns>The node admission status.</returns>
+    public Task<Result<NodeAdmissionStatus>> AdmissionStatusAsync(CancellationToken cancellationToken = default)
+        => Send<NodeAdmissionStatus>(ClientApiRoutes.AdmissionStatus, null, false, null, cancellationToken);
 }

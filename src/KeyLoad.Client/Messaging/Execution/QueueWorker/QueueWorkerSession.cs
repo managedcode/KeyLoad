@@ -155,11 +155,11 @@ internal sealed class QueueWorkerSession : IDisposable
         }
     }
 
-    internal QueueWorkerResult Result(QueueWorkerStopReason fallback)
+    internal QueueWorkerResult Result(QueueWorkerStopReason loopExitReason)
     {
         lock (gate)
         {
-            return new(reason ?? fallback, received, acknowledged, peakHandlers, peakBytes,
+            return new(reason ?? loopExitReason, received, acknowledged, peakHandlers, peakBytes,
                 operations.ToImmutableArray(), unacknowledged.ToImmutableArray(), failures.ToImmutableArray());
         }
     }

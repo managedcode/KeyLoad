@@ -3,10 +3,10 @@
 ## Purpose, entry points and ownership
 
 - Owns the .NET SDK client surface used by applications connecting to KeyLoad.
-- Main entry points: `KeyLoadClient.cs` and `QueryExecution/Queries/KeyLoadQuery.cs`.
+- Main entry points: `ClientApi/Transport/KeyLoadClient.cs` and `QueryExecution/Queries/KeyLoadQuery.cs`.
 - Client capabilities belong under `<SliceName>/` and the same-name `docs/Features/<SliceName>.md`; keep shared client composition separate from feature behavior.
 - The SDK owns request construction and response mapping, not trusted authorization, database persistence, replication, or server-side validation. Credentials and authorization policy are database-owned; callers cannot assert roles.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Use the installed formatting and semantic C# tools for SDK changes; apply Orleans guidance when reviewing its server boundary.
 - Preserve cancellation, disposal, transport errors and typed contracts. Keep secrets out of source and diagnostics; maintain central package pins and the no-lock-file policy.
 
 ## Boundaries and protected risks

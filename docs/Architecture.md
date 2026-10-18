@@ -178,7 +178,7 @@ NuGet publication follow root policy.
 | src/KeyLoad.Replication | ClusterReplication/ | ClusterReplication; sends each write through Orleans calls to the ZoneTree owners of `ReplicaCount` silos and acknowledges after majority durable local apply. |
 | src/KeyLoad.Clustering | ClusterRouting/Grains/ConnectionGrain.cs, ClusterRouting/Grains/CommandPartitionGrain.cs, ClusterRouting/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | ClusterRouting; connection and partition grains route through Orleans to the silo-local ZoneTree owners. |
 | src/KeyLoad.Server | Program.cs, NodeOptions.cs, ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
-| src/KeyLoad.Client | KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
+| src/KeyLoad.Client | ClientApi/Transport/KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
 | src/KeyLoad.Cli | Program.cs, ClientApi/Transport/CliClientApi.cs, Restore/Commands/CliBackupRestore.cs | Administrative entry point with typed ClientApi and backup/restore owners. |
 | build/KeyLoad.AppHost | Program.cs, BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality; Aspire owns cluster resources, readiness, test dependencies and shutdown. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
@@ -187,15 +187,15 @@ NuGet publication follow root policy.
 | tests/KeyLoad.IntegrationTests | ClusterFixture.cs, ClusterReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/AdmissionClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
 | tests/KeyLoad.ComparisonTests | BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |
-| benchmarks/KeyLoad.BenchmarkScenarios | BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
-| benchmarks/KeyLoad.Comparisons | BenchmarkComparisons/Session/, Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
-| benchmarks/KeyLoad.ComparisonHost | BenchmarkComparisons/Session/ | BenchmarkComparisons; native TUnit C# client workload container under [ADR-117](ADR/ADR-117-native-tunit-ci-entry.md). |
+| benchmarks/KeyLoad.BenchmarkScenarios | Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
+| benchmarks/KeyLoad.Comparisons | Session/, Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
+| benchmarks/KeyLoad.ComparisonHost | Session/ | BenchmarkComparisons; native TUnit C# client workload container under [ADR-117](ADR/ADR-117-native-tunit-ci-entry.md). |
 | site | Features/BenchmarkComparisons/index.html, bootstrap.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction and public views of qualified GitHub JSON. |
-| tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, BenchmarkComparisons/ | BenchmarkComparisons; TUnit suite over the actual Node modules and authentic GitHub report files. |
+| tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Cases/, Fixtures/ | BenchmarkComparisons; TUnit suite over the actual Node modules and authentic GitHub report files. |
 | .github/workflows | build-and-tests.yml, benchmarks.yml, website.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, website and release workflows. |
 | scripts | Features/RepositoryGovernance/verify.mjs, Features/BenchmarkComparisons/session-plan.mjs | RepositoryGovernance and BenchmarkComparisons; static repository verification and benchmark session tooling with Node built-ins. |
-| analyzers/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, CodeQuality/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage or routing. |
-| tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, CodeQuality/ | CodeQuality; real Roslyn/Orleans metadata regressions. |
+| analyzers/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, Analyzers/, Analysis/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage or routing. |
+| tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, Cases/, Fixtures/ | CodeQuality; real Roslyn/Orleans metadata checks. |
 | docs | design/, Features/, ADR/, implementation/ | Product specification and canonical slice/decision records. |
 
 ```mermaid
@@ -726,11 +726,11 @@ consumer for local development and never qualify the required scales.
 
 ```mermaid
 classDiagram
-    class BenchmarkComparisonRunner
+    class BenchmarkProgram
     class EmbeddedBenchmarks
     class GeneratedBenchmarkRunner
     class ZoneTreeStore
-    BenchmarkComparisonRunner --> EmbeddedBenchmarks : selects fixture assembly
+    BenchmarkProgram --> EmbeddedBenchmarks : native BenchmarkSwitcher selects assembly
     GeneratedBenchmarkRunner --|> EmbeddedBenchmarks : upstream generated inheritance
     EmbeddedBenchmarks --> ZoneTreeStore : owns actual embedded fixture storage
 ```

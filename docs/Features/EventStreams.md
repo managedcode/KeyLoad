@@ -24,7 +24,7 @@ flowchart LR
 
 ## Event Store contract
 
-Actors: producer append, authorized reader/replay consumer and subscription worker. Entry points: `AppendEvents` in the public contracts, `CommitAsync`/`ReadStreamAsync` in the [SDK](../../src/KeyLoad.Client/KeyLoadClient.cs), HTTP operations. Source: Events.cs; the source exists, but the new shared changes are not yet GitHub-qualified.
+Actors: producer append, authorized reader/replay consumer and subscription worker. Entry points: `AppendEvents` in the public contracts, [atomic SDK writes](../../src/KeyLoad.Client/DatabaseComposition/Commands/KeyLoadClient.cs), [SDK stream reads](../../src/KeyLoad.Client/EventStreams/Transport/KeyLoadClient.cs) and HTTP operations. Source: Events.cs; the source exists, but the new shared changes are not yet GitHub-qualified.
 
 | Requirement | Observable acceptance / flows | Test mapping |
 |---|---|---|

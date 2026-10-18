@@ -42,7 +42,7 @@ distinct from GitHub unit/recovery/cluster SDK qualification and measured perfor
 
 ## Time series contract
 
-Actors: sample producers, an authorized range reader and a future retention/rollup worker. Current API: `AppendSamples`/`SampleData` in the contracts, `ReadSamplesAsync` in the [SDK](../../src/KeyLoad.Client/KeyLoadClient.cs); source GraphAndSeries. Canonical identity: partition + resource/set + series; timestamps are normalized to UTC and the sequence orders equal timestamps.
+Actors: sample producers, an authorized range reader and retention/rollup workers. Current API: `AppendSamples`/`SampleData` in the contracts, `ReadSamplesAsync` in the [SDK](../../src/KeyLoad.Client/TimeSeries/Transport/KeyLoadClient.cs); source GraphAndSeries. Canonical identity: partition + resource/set + series; timestamps are normalized to UTC and the sequence orders equal timestamps.
 
 | Requirement | Acceptance / positive, negative, edge, error | Test mapping |
 |---|---|---|

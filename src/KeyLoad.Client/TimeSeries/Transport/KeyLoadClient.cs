@@ -1,3 +1,4 @@
+using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -35,4 +36,11 @@ public sealed partial class KeyLoadClient
     public Task<Result<SampleAggregateWindowsResult>> AggregateSampleWindowsAsync(AggregateSampleWindowsRequest request,
         CancellationToken cancellationToken = default)
         => Send<SampleAggregateWindowsResult>(TimeSeriesReadProtocol.WindowsRoute, request, false, null, cancellationToken);
+
+    /// <summary>Reads a bounded page of time-series samples.</summary>
+    /// <param name="request">Series identity, time range and page controls.</param>
+    /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
+    /// <returns>The typed sample page.</returns>
+    public Task<Result<SampleRecord[]>> ReadSamplesAsync(ReadSamplesRequest request, CancellationToken cancellationToken = default)
+        => Send<SampleRecord[]>(ClientApiRoutes.SeriesRead, request, false, null, cancellationToken);
 }

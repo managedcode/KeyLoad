@@ -17,10 +17,10 @@ internal static class QueueWorkerExecution
         Func<QueueWorkerDeliveryContext, CancellationToken, Task> handler, QueueWorkerSession session, TimeProvider clock)
     {
         var renewal = QueueWorkerRenewal.RunAsync(client, session, clock);
-        var fallback = QueueWorkerStopReason.Cancelled;
+        var loopExitReason = QueueWorkerStopReason.Cancelled;
         try
         {
-            fallback = await LoopAsync(client, lane, firstReceive, handler, session, clock).ConfigureAwait(false);
+            loopExitReason = await LoopAsync(client, lane, firstReceive, handler, session, clock).ConfigureAwait(false);
         }
         catch (OperationCanceledException original) when (session.Lifetime.IsCancellationRequested)
         {
@@ -42,7 +42,7 @@ internal static class QueueWorkerExecution
             await QueueWorkerSettlement.CancelAndJoinAsync(session, renewal).ConfigureAwait(false);
         }
         session.ThrowIfFatal();
-        return session.Result(fallback);
+        return session.Result(loopExitReason);
     }
 
     private static async Task<QueueWorkerStopReason> LoopAsync(KeyLoadClient client, QueueLaneRef lane, Guid firstReceive,
