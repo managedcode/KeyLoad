@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Core;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Server.Features.Search;

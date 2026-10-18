@@ -8,14 +8,15 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextIncrementalBegin
 {
+    private const int OriginalFailureOnlyCount = 1;
     internal static TextMaintenanceCapabilityResult Run(DatabaseEngine database, string root, PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock,
-        CancellationToken shutdown, NativeTextIncrementalSessions sessions, Action<NativeTextFaultStage>? faultObserver,
+        CancellationTokenSource shutdown, NativeTextIncrementalSessions sessions, Action<NativeTextFaultStage>? faultObserver,
         NativeTextResourceOwnership? resources, Action<string, NativeTextResourceReservation> retainGeneration,
         DateTimeOffset? expiry, IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
         var work = new NativeMaintenanceSessionWork(configured.Core.DatabaseLimits, clock,
-            expiry ?? clock.GetUtcNow().AddSeconds(configured.Core.DatabaseLimits.Value.QueryDeadlineSeconds), shutdown);
+            expiry ?? clock.GetUtcNow().AddSeconds(configured.Core.DatabaseLimits.Value.QueryDeadlineSeconds), shutdown.Token);
         var captureStarted = false;
         var captured = false;
         try
@@ -95,7 +96,7 @@ internal static class NativeTextIncrementalBegin
             {
                 ServerFailureObserver.Observe(reservation.CompleteAfterJoinedCleanup, failures);
             }
-            if (captured is null && failures.Count == 1)
+            if (captured is null && failures.Count == OriginalFailureOnlyCount)
             {
                 ServerFailureObserver.Observe(work.DisposeAfterStage, failures);
             }

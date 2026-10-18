@@ -31,6 +31,7 @@ internal static class ClusterResources
     private const string ServerUrlsEnvironment = "ASPNETCORE_URLS";
     private const string LoopbackAddress = "127.0.0.1";
     private const int FirstNodeIndex = 0;
+    private const int LastNodeOffset = 1;
 
     /// <summary>Adds real native project silos; each process retains its own canonical storage directory.</summary>
     internal static IResourceBuilder<ProjectResource>[] Add(IDistributedApplicationBuilder builder,
@@ -42,7 +43,7 @@ internal static class ClusterResources
         var nodeNames = ClusterTopologyNodeNames.Read(benchmarkNodeCount, functionalNodeCount, ephemeral,
             options.Cluster.Value.SiloCount);
         var replicas = benchmarkNodeCount ?? options.Cluster.Value.ReplicaCount;
-        if (!ephemeral && (long)options.Cluster.Value.FirstPublicPort + nodeNames.Length - 1 > IPEndPoint.MaxPort)
+        if (!ephemeral && (long)options.Cluster.Value.FirstPublicPort + nodeNames.Length - LastNodeOffset > IPEndPoint.MaxPort)
         {
             throw new OptionsValidationException(Options.DefaultName, typeof(ClusterDeploymentOptions),
                 [ClusterDeploymentOptions.ValidationMessage]);
@@ -84,7 +85,6 @@ internal static class ClusterResources
         ClusterProfileStore.PrepareDirectory(directory);
         var port = ephemeral ? (int?)null : AppHostOptionsRegistration.Get(builder).Cluster.Value.FirstPublicPort + index;
         var resource = builder.AddProject<Projects.KeyLoad_Server>(resourceName, launchProfileName: null)
-            .WithAnnotation(new ForceProcessExecutionAnnotation())
             .WithHttpEndpoint(port: port, name: HttpEndpoint, isProxied: false)
             .WithEndpoint(name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false);
         resource.WithEnvironment(ClusterEnvironment, ClusterPrefix + profile.Incarnation.ToString(ClusterGuidFormat))

@@ -39,7 +39,9 @@ internal static class ProcessKillCommand
 
     private static InteractionInput Input(string name) => new()
     {
-        Name = name, InputType = InputType.Text, Required = true,
+        Name = name,
+        InputType = InputType.Text,
+        Required = true,
         MaxLength = ProcessFaultCommandProtocol.MaximumIdentityCharacters
     };
 

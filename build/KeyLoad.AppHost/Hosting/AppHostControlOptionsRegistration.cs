@@ -17,6 +17,7 @@ internal static class AppHostControlOptionsRegistration
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string BenchmarksEnabledSetting = "Benchmarks:Enabled";
     private const string BenchmarkTargetSetting = "Benchmarks:Target";
+    private const string KeyLoadTarget = "KeyLoad";
     private const string BenchmarkSessionSetting = "Benchmarks:Session";
     private const string BenchmarkDataRootSetting = "Benchmarks:DataRoot";
     private const string DataRootSetting = "KeyLoad:DataRoot";
@@ -71,7 +72,7 @@ internal static class AppHostControlOptionsRegistration
     private static bool ReadProcessFaults(IConfiguration configuration, AppHostControlOptions options)
     {
         var enabled = configuration.GetValue<bool>(ProcessFaultCommandProtocol.EnabledSetting);
-        var selectedLoad = options.BenchmarksEnabled && configuration[BenchmarkTargetSetting] == "KeyLoad"
+        var selectedLoad = options.BenchmarksEnabled && configuration[BenchmarkTargetSetting] == KeyLoadTarget
             && configuration.GetValue<bool>(BenchmarkSessionSetting)
             && configuration[BenchmarkDataRootSetting] is { } root && Path.IsPathFullyQualified(root);
         if (enabled && (!options.Ephemeral || !selectedLoad && (options.BenchmarksEnabled || options.TargetSelected

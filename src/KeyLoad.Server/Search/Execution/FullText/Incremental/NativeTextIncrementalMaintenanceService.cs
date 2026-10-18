@@ -101,7 +101,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         if (request.Kind == TextMaintenanceCapabilityKind.Begin)
         {
             return NativeTextIncrementalBegin.Run(database, root, principal, request, configured, clock,
-                shutdown.Token, sessions, faultObserver, resources, generations.RetainGeneration, originalExpiry, binding, token);
+                shutdown, sessions, faultObserver, resources, generations.RetainGeneration, originalExpiry, binding, token);
         }
         var retained = sessions.Require(request.SessionId);
         retained.Work.RequireExpiry(originalExpiry);
@@ -161,7 +161,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(shutdown.CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => NativeTextIncrementalOwnerShutdown.RunAsync(
-            sessions, selectedAdmission, worker, selectedGate, selectedSlots), failures).ConfigureAwait(false);
+            sessions, selectedAdmission, worker.DisposeAsync().AsTask(), selectedGate, selectedSlots), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         shutdown.Dispose();
     }

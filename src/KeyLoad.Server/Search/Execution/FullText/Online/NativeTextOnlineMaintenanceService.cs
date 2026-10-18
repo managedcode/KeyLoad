@@ -68,13 +68,15 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
             throw NativeTextErrors.Ownership();
         }
         var session = request.Kind == OnlineTextCapabilityKind.ResolveOriginal ? null : sessions.Require(request.SessionId);
-        var work = session?.Work ?? new NativeMaintenanceSessionWork(options.Core.DatabaseLimits, clock, expiry, shutdown.Token);
-        var retained = session is not null;
+        NativeMaintenanceSessionWork? created = null;
         try
         {
-            if (!retained)
+            var work = session?.Work;
+            if (work is null)
             {
-                sessions.BeginWork(request.SessionId, work);
+                created = new NativeMaintenanceSessionWork(options.Core.DatabaseLimits, clock, expiry, shutdown.Token);
+                work = created;
+                sessions.BeginWork(request.SessionId, created);
             }
             using var stage = work.EnterStage(binding, token);
             work.RequireExpiry(expiry);
@@ -87,17 +89,17 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
                 }
                 session = await sessions.AddOwnedAsync(new(request.SessionId, request.Request, principal.Id, expiry, work))
                     .ConfigureAwait(false);
-                retained = true;
+                created = null;
             }
             return await ExecuteStageAsync(session ?? throw NativeTextErrors.Ownership(), principal, request, expiry)
                 .ConfigureAwait(false);
         }
         finally
         {
-            if (!retained)
+            if (created is not null)
             {
-                work.DisposeAfterStage();
-                sessions.RemoveWorkWithoutSession(request.SessionId, work);
+                created.Dispose();
+                sessions.RemoveWorkWithoutSession(request.SessionId, created);
             }
         }
     }

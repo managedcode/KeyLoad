@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 
 namespace KeyLoad.Server.Features.Search;
 
