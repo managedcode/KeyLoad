@@ -52,7 +52,6 @@ internal sealed class RecurringSagaDatabase : IDisposable
         {
             ClusterAdministrator = true
         }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
-        PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         ConfigureQueueDefinition(Queue, fields, headers, queuePolicy, null);
         ConfigureQueueDefinition(TimeoutQueue, null, null, timeoutQueuePolicy, null);
     }
@@ -101,7 +100,6 @@ internal sealed class RecurringSagaDatabase : IDisposable
         store.Dispose();
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider: timeProvider);
-        PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 
     public void Dispose()

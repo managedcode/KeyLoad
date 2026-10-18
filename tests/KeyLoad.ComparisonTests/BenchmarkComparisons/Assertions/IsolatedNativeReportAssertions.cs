@@ -12,6 +12,7 @@ internal static class IsolatedNativeReportAssertions
     private const string Mongo = "MongoDB";
     private const string Membership = "orleans-storage";
     private const string ServerProject = "KeyLoad.Server.csproj";
+    private const string ExternalImageDigest = "@sha256:";
 
     internal static async Task VerifyModelAsync(IResourceCollection resources, BenchmarkSessionSelection selection,
         CancellationToken cancellationToken)
@@ -40,7 +41,7 @@ internal static class IsolatedNativeReportAssertions
         foreach (var node in native.Concat(bootstrap))
         {
             await Assert.That(node.TryGetContainerImageName(out var image)).IsTrue();
-            await Assert.That(image).Contains(ComparisonImageProtocol.ImageDigestPrefix);
+            await Assert.That(image).Contains(ExternalImageDigest);
         }
     }
 }

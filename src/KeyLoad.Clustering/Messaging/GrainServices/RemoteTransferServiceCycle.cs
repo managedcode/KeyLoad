@@ -6,20 +6,18 @@ namespace KeyLoad.Clustering;
 
 internal static class RemoteTransferServiceCycle
 {
-    internal static async Task<RemoteTransferPendingCursor?> RunAsync(DatabaseEngine database, ICommitCoordinator coordinator,
+    internal static async Task<RemoteTransferPendingCursor?> RunAsync(BackgroundStorageClient storage,
         IGrainFactory grains, TimeProvider clock, Microsoft.Extensions.Logging.ILogger diagnostics,
         IOptions<DueCoordinationOptions> options, RemoteTransferPendingCursor? cursor, CancellationToken token)
     {
         var next = cursor;
         try
         {
-            await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-            var subject = options.Value.TransferCoordinatorPrincipalId;
-            if (subject is null)
+            var page = await storage.Operations.ReadQueueTransferPendingAsync(cursor, token).ConfigureAwait(true);
+            if (page is null)
             {
                 return cursor;
             }
-            var page = RemoteTransferPendingDiscovery.Read(database, subject, cursor, token);
             next = page.Cursor;
             if (page.Hint is { } hint)
             {

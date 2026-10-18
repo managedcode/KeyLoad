@@ -18,7 +18,7 @@ internal static class EventQueueStateEnvelopeCommands
     }
 
     internal static async Task<EventQueueStateEnvelopeHistory> SubmitAsync<TRequest, TResult>(
-        EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample, OperationKind kind,
+        EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state, OperationKind kind,
         Guid id, TRequest request, DateTimeOffset time, TResult expected)
         where TResult : class
     {
@@ -35,18 +35,18 @@ internal static class EventQueueStateEnvelopeCommands
         var locator = Required(fixture, KeySpace.OutcomeLocatorV2(fixture.Partition, Root, id));
         await Assert.That(locator.AsSpan().SequenceEqual(KeySpace.PartitionOutcome(fixture.Partition, Root, id))).IsTrue();
         var retained = new EventQueueStateEnvelopeHistory(operation, result, outcome, locator);
-        sample.History.Add(retained);
+        state.History.Add(retained);
         return retained;
     }
 
     internal static Task<EventQueueStateEnvelopeHistory> CommitAsync(EventQueueStateEnvelopeFixture fixture,
-        EventQueueStateEnvelopeSample sample, ImmutableArray<Mutation> effects,
+        EventQueueStateEnvelopeState state, ImmutableArray<Mutation> effects,
         ImmutableArray<MutationReceipt> expectedEffects, DateTimeOffset time)
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, fixture.Partition, effects);
         var expected = new CommitReceipt(id, NextToken(fixture), expectedEffects, DurabilityProfile.ProcessDurable, 1);
-        return SubmitAsync(fixture, sample, OperationKind.Batch, id, command, time, expected);
+        return SubmitAsync(fixture, state, OperationKind.Batch, id, command, time, expected);
     }
 
     internal static byte[] Required(EventQueueStateEnvelopeFixture fixture, byte[] key)

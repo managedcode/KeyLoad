@@ -11,7 +11,7 @@ namespace KeyLoad.Server;
 internal static class ServerRuntimeOptionsRegistration
 {
     private const int NoCount = 0;
-    private const string InvalidCopies = "Invalid silo or data-copy count.";
+    private const string InvalidCopies = "Invalid storage mode or silo/data-copy count; SharedVolume requires ReplicaCount 1.";
     internal static IServiceCollection AddRuntimeOptions(this IServiceCollection services, IConfiguration configuration)
     {
         CoreRuntimeOptionsRegistration.AddCoreRuntimeOptions(services, configuration);
@@ -32,8 +32,7 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<NativeDurableJobOptions>().Bind(configuration.GetSection(NativeDurableJobOptions.SectionName))
             .Validate(options => options.IsValid(), NativeDurableJobOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaCopyOptions>().Bind(configuration.GetSection(ReplicaCopyOptions.SectionName))
-            .Validate(options => options.SiloCount > NoCount && options.ReplicaCount > NoCount
-                && options.ReplicaCount <= options.SiloCount, InvalidCopies).ValidateOnStart();
+            .Validate(options => options.IsValid(), InvalidCopies).ValidateOnStart();
         services.AddOptions<GrainRoutingOptions>()
             .Bind(configuration.GetSection(GrainRoutingOptions.SectionName))
             .Validate(options => options.IsValid(), GrainRoutingOptions.ValidationMessage).ValidateOnStart();

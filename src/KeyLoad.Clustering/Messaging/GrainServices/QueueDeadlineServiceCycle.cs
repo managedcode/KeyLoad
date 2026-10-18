@@ -9,15 +9,20 @@ internal static class QueueDeadlineServiceCycle
 {
     private const int NoRejectedRecords = 0;
 
-    internal static async Task<QueueDeadlineCursor?> RunAsync(DatabaseEngine database, ICommitCoordinator coordinator,
+    internal static async Task<QueueDeadlineCursor?> RunAsync(BackgroundStorageClient storage,
         IGrainFactory factory, TimeProvider clock, ILogger<RecurringDueWorkerGrain> diagnostics,
         IOptions<DueCoordinationOptions> options, QueueDeadlineCursor? cursor, CancellationToken cancellationToken)
     {
         try
         {
-            await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
-            var page = QueueDeadlineDiscovery.ReadPage(database, cursor, clock.GetUtcNow(), cancellationToken);
-            cursor = page.Cursor;
+            var discovery = await storage.Operations.ReadQueueDeadlinePageAsync(cursor, cancellationToken).ConfigureAwait(true);
+            cursor = discovery.Cursor;
+            if (discovery.PrefixError is { } prefixError)
+            {
+                RecurringDueDiagnostics.PrefixRejected(diagnostics, prefixError);
+                return cursor;
+            }
+            var page = discovery.Page ?? throw Errors.Fail(ErrorCode.Corruption, DueCoordinatorFields.InvalidHint);
             if (page.Rejected.Length > NoRejectedRecords)
             {
                 RecurringDueDiagnostics.PageRejected(diagnostics, page.Rejected.Length);
@@ -31,12 +36,6 @@ internal static class QueueDeadlineServiceCycle
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
-        }
-        catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
-            && failure.Message == DueWorkProtocol.KeyExceedsBound)
-        {
-            cursor = QueueDeadlineCursor.DeferNext(database.Store.Identity, cursor);
-            RecurringDueDiagnostics.PrefixRejected(diagnostics, failure.Code);
         }
         catch (KeyLoadException failure)
         {

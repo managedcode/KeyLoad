@@ -6,14 +6,23 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { FUNCTIONAL, validateDocumentFunctionalProof, selectDocumentFunctionalGate, parseDocumentFunctionalTrx,
   verifyDocumentFunctionalGate } from '../../../../../scripts/Features/BenchmarkComparisons/document-functional-gate.mjs';
-import { baseImage, registry } from '../../../../../scripts/Features/BenchmarkComparisons/image-contracts.mjs';
-import { makeTaggedReference, makeImageTag } from '../../../../../scripts/Features/BenchmarkComparisons/image-engine.mjs';
-import { runBounded } from '../../../../../scripts/Features/BenchmarkComparisons/image-process.mjs';
+import { runBounded } from '../../../../../scripts/Features/BenchmarkComparisons/native-process.mjs';
 import { hashRegularFile } from '../../../../../scripts/Features/BenchmarkComparisons/isolated-github-files.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const entries = ['TestResults/cluster-heavy-load/original.trx', 'keyload-images/image-receipt.json',
-  'keyload-images/server-manifest.json', 'keyload-images/comparisons-manifest.json'];
+const originalsRoot = 'TestResults/cluster-heavy-load/qualification/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/';
+const entries = ['TestResults/cluster-heavy-load/original.trx', ...FUNCTIONAL.files.slice(1).map(file => originalsRoot + path.basename(file))];
+const binary = { executablePath: '/usr/share/dotnet/dotnet', executableSha256: '1'.repeat(64),
+  assemblyPath: '/workspace/src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.dll', assemblySha256: '2'.repeat(64),
+  pdbPath: '/workspace/src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.pdb', pdbSha256: '3'.repeat(64),
+  sourceCount: 12, sourceCompositionSha256: '4'.repeat(64) };
+const processes = Array.from({length: 3}, (_, index) => ({ name: 'node' + (index + 1), processId: 100 + index,
+  startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z', binary }));
+const runtimeIdentity = { descriptor: { workspace: '/workspace', assemblies: [{role: 'server',
+  path: 'src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.dll', sha256: binary.assemblySha256,
+  pdbPath: 'src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.pdb', pdbSha256: binary.pdbSha256}] } };
+const pascal = value => Object.fromEntries(Object.entries(value).map(([key, item]) =>
+  [key[0].toUpperCase() + key.slice(1), key === 'binary' ? pascal(item) : item]));
 export function controlledFunctionalProof(cohort) {
   return { job: { id: 9000, name: FUNCTIONAL.job,
     url: `https://github.com/${cohort.repository}/actions/runs/${cohort.runId}/job/9000`, conclusion: 'success',
@@ -22,7 +31,7 @@ export function controlledFunctionalProof(cohort) {
     archive: { path: FUNCTIONAL.archive, bytes: 1, sha256: 'a'.repeat(64) },
     files: FUNCTIONAL.files.map((file, index) => ({ path: file, entry: entries[index], bytes: 1, sha256: 'b'.repeat(64) })),
     test: { className: FUNCTIONAL.className, methodName: FUNCTIONAL.methodName, instanceName: FUNCTIONAL.methodName, count: 1 },
-    server: 'controlled@sha256:' + 'c'.repeat(64) };
+    processes: structuredClone(processes) };
 }
 function originalTrx(outcome = 'Passed', extra = false) {
   const definition = id => `<UnitTest id="${id}" name="${FUNCTIONAL.methodName}"><TestMethod className="${FUNCTIONAL.className}" name="${FUNCTIONAL.methodName}" /></UnitTest>`;
@@ -65,20 +74,14 @@ async function probe() {
     for (const change of captureMutations) { const value = structuredClone(capture); change(value); captureRejected.push(await rejected(() => selectDocumentFunctionalGate(value, cohort))); }
     const input = path.join(directory, 'intake'); const source = path.join(directory, 'source');
     await mkdir(path.join(input, 'archives'), { recursive: true });
-    await mkdir(path.join(input, 'functional/images'), { recursive: true });
-    const native = { sourceSha: cohort.sourceRevision, runId: String(cohort.runId), runAttempt: String(cohort.attempt) };
-    const receipt = { schemaVersion: 1, sourceRevision: cohort.sourceRevision,
-      github: { runId: native.runId, attempt: native.runAttempt, repository: cohort.repository, ref: cohort.ref },
-      bases: { sdk: baseImage.sdk, runtime: baseImage.aspnet, registry: registry.image }, images: {} };
-    const manifests = [];
-    for (const name of ['server', 'comparisons']) {
-      const configId = 'sha256:' + (name === 'server' ? 'b' : 'c').repeat(64);
-      const bytes = Buffer.from(JSON.stringify({ schemaVersion: 2, mediaType: 'application/vnd.oci.image.manifest.v1+json', config: { digest: configId } }));
-      const manifestDigest = 'sha256:' + digest(bytes); manifests.push(bytes);
-      receipt.images[name] = { reference: makeTaggedReference(name, makeImageTag(native)) + '@' + manifestDigest,
-        manifestDigest, registryDigest: manifestDigest, manifestFile: name + '-manifest.json', revisionLabel: cohort.sourceRevision, configId };
-    }
-    const originals = [Buffer.from(originalTrx()), Buffer.from(JSON.stringify(receipt)), ...manifests];
+    await mkdir(path.join(input, 'github/functional'), { recursive: true });
+    const started = processes.map(pascal);
+    const closed = { JoinedAtUtc: '2026-10-09T10:59:01Z', Processes: started, Resources: started.map(value => ({
+      Name: value.Name, ProcessId: value.ProcessId, StartedAtUtc: value.StartedAtUtc,
+      AspireStartedAtUtc: value.AspireStartedAtUtc, ExitCode: 0, StartTimeStamp: value.AspireStartedAtUtc,
+      StopTimeStamp: '2026-10-09T10:59:00Z', State: 'Exited' })) };
+    const originals = [Buffer.from(originalTrx()), Buffer.from(JSON.stringify(started)),
+      Buffer.from(JSON.stringify(started)), Buffer.from(JSON.stringify(closed))];
     for (const [index, bytes] of originals.entries()) {
       await mkdir(path.dirname(path.join(source, entries[index])), { recursive: true });
       await writeFile(path.join(source, entries[index]), bytes); await writeFile(path.join(input, FUNCTIONAL.files[index]), bytes);
@@ -90,17 +93,16 @@ async function probe() {
     const raw = await hashRegularFile(archive, 33554432);
     proof.archive.bytes = raw.bytes; proof.archive.sha256 = raw.sha256;
     proof.artifact.sizeInBytes = raw.bytes; proof.artifact.digest = 'sha256:' + raw.sha256;
-    proof.server = receipt.images.server.reference;
     const originalCapture = captureOf(proof);
-    await verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, proof.server, directory);
+    await verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, runtimeIdentity, directory);
     const changedProof = structuredClone(proof); changedProof.files[0].sha256 = 'd'.repeat(64);
-    const changedProofDigest = await rejected(() => verifyDocumentFunctionalGate(input, changedProof, originalCapture, cohort, proof.server, directory));
-    const wrongServer = await rejected(() => verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, 'foreign@sha256:' + 'd'.repeat(64), directory));
+    const changedProofDigest = await rejected(() => verifyDocumentFunctionalGate(input, changedProof, originalCapture, cohort, runtimeIdentity, directory));
+    const wrongServer = await rejected(() => verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, {descriptor: {...runtimeIdentity.descriptor, assemblies: [{...runtimeIdentity.descriptor.assemblies[0], sha256: 'd'.repeat(64)}]}}, directory));
     await writeFile(path.join(input, FUNCTIONAL.files[0]), originalTrx('Failed'));
-    const changedOriginal = await rejected(() => verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, proof.server, directory));
+    const changedOriginal = await rejected(() => verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, runtimeIdentity, directory));
     await writeFile(path.join(input, FUNCTIONAL.files[0]), originals[0]);
     await appendFile(archive, 'changed original ZIP bytes');
-    const changedDigest = changedProofDigest && await rejected(() => verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, proof.server, directory));
+    const changedDigest = changedProofDigest && await rejected(() => verifyDocumentFunctionalGate(input, proof, originalCapture, cohort, runtimeIdentity, directory));
     return { passed: positive.count, xmlRejected, captureRejected, completeOriginalPassed: true, changedDigest, wrongServer, changedOriginal };
   } finally { await rm(directory, { recursive: true, force: true }); }
 }

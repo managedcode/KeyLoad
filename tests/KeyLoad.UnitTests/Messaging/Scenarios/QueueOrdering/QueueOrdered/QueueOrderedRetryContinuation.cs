@@ -12,7 +12,7 @@ internal static class QueueOrderedRetryContinuation
         await QueueOrderedRetryAssertions.RedrivenAsync(database, state);
         var before = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var stale = QueueOrderedRetryOperations.Complete(database, state, state.FirstLease!, DeliveryAction.Ack);
-        await Assert.That(stale.Error).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, before);
         if (state.ParkedHead == QueueParkedHeadPolicy.Continue)
         {

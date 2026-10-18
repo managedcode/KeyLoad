@@ -42,18 +42,18 @@ internal static class RequestCqrsProtocolCases
     internal static async Task AcCrs004ActualClientSerializerCounterIsInclusiveAndCancellationAware(RequestCqrsHostedRuntimeFixture fixture)
     {
         var serializer = fixture.Services.GetRequiredService<Serializer<string>>();
-        var sample = new string('n', 8_192);
-        var native = serializer.SerializeToArray(sample);
-        await Assert.That(GrainNativeByteCounter.Measure(serializer, sample, native.Length, fixture.RoutingOptions, CancellationToken.None))
+        var payload = new string('n', 8_192);
+        var native = serializer.SerializeToArray(payload);
+        await Assert.That(GrainNativeByteCounter.Measure(serializer, payload, native.Length, fixture.RoutingOptions, CancellationToken.None))
             .IsEqualTo((long)native.Length);
         var oneUnder = Assert.ThrowsExactly<KeyLoadException>(() =>
-            GrainNativeByteCounter.Measure(serializer, sample, native.Length - ExtraReplyByte, fixture.RoutingOptions, CancellationToken.None));
+            GrainNativeByteCounter.Measure(serializer, payload, native.Length - ExtraReplyByte, fixture.RoutingOptions, CancellationToken.None));
         await Assert.That(oneUnder.Code).IsEqualTo(ErrorCode.BudgetExceeded);
 
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
-            GrainNativeByteCounter.Measure(serializer, sample, native.Length, fixture.RoutingOptions, cancelled.Token)).CancellationToken)
+            GrainNativeByteCounter.Measure(serializer, payload, native.Length, fixture.RoutingOptions, cancelled.Token)).CancellationToken)
             .IsEqualTo(cancelled.Token);
     }
 

@@ -91,6 +91,11 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await DistributedSearchReadCapability.ExecuteAsync(localDatabase, services, principal, request,
                 requestId, codec, context, runtimeClock, binding, cancellationToken).ConfigureAwait(true);
         }
+        if (kind == GrainReadKind.PartitionQuery)
+        {
+            return await PartitionQueryReadCapability.ExecuteAsync(localDatabase, services, principal, request,
+                codec, runtimeClock, binding, cancellationToken).ConfigureAwait(true);
+        }
         if (RuntimeJournalRequestScope.Handles(kind))
         {
             return RuntimeJournalReadCapabilities.Execute(localDatabase, principal.Id, kind, request.Payload, cancellationToken);

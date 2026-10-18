@@ -45,7 +45,7 @@ internal sealed class QueueReadyAuthorityTests
     [Arguments(QueueReadyAuthorityFault.MetadataIdentity, true)]
     [Arguments(QueueReadyAuthorityFault.BodyIdentity, false)]
     [Arguments(QueueReadyAuthorityFault.BodyIdentity, true)]
-    public Task NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(
+    public Task NativeReadyAuthorityFaultPreservesOriginalInputThenRepairsClaimOrExpiryAndHealthyProcessing(
         QueueReadyAuthorityFault fault, bool expired)
         => QueueReadyAuthorityTrial.RunAsync(fault, expired, TestContext.Current!.Execution.CancellationToken);
 }

@@ -31,7 +31,7 @@ internal static class CurrentJournalSignatureRepairFlow
     {
         await Assert.That(fixture.Position).IsEqualTo(CapturedPosition);
         var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
-        await CurrentJournalSignatureConservation.RequireOriginalSourceAsync(fixture, source);
+        await NativeBackupJournalRepairAssertions.OriginalSourceAsync(fixture, source);
         var original = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
         var originalSignature = BinaryPrimitives.ReadUInt64LittleEndian(original[MetadataTestContract.JournalFileName]);
         await Assert.That(originalSignature).IsEqualTo(checkpoint ? ZoneTreePersistenceFormat.CheckpointMagic : ZoneTreePersistenceFormat.JournalMagic);
@@ -46,14 +46,14 @@ internal static class CurrentJournalSignatureRepairFlow
             faulted = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
             await CurrentJournalSignatureRefusal.RunAsync(fixture, authority, cliTarget, token);
         }, failures);
-        await ServerFailureObserver.ObserveAsync(() => CurrentJournalSignatureConservation.RunAsync(fixture,
+        await ServerFailureObserver.ObserveAsync(() => NativeBackupJournalRepairAssertions.OriginalSourceAndArchiveAsync(fixture,
             source, faulted ?? original, CancellationToken.None), failures);
-        await ServerFailureObserver.ObserveAsync(() => CurrentJournalSignatureConservation.RepairAsync(fixture.Backup, original), failures);
-        await ServerFailureObserver.ObserveAsync(() => CurrentJournalSignatureConservation.RunAsync(fixture,
+        await ServerFailureObserver.ObserveAsync(() => NativeBackupJournalRepairAssertions.RepairArchiveAsync(fixture.Backup, original), failures);
+        await ServerFailureObserver.ObserveAsync(() => NativeBackupJournalRepairAssertions.OriginalSourceAndArchiveAsync(fixture,
             source, original, CancellationToken.None), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await ServerFailureObserver.ObserveAsync(() => CurrentJournalSignatureHealthy.RunAsync(fixture, authority, cliTarget, token), failures);
-        await ServerFailureObserver.ObserveAsync(() => CurrentJournalSignatureConservation.RunAsync(fixture,
+        await ServerFailureObserver.ObserveAsync(() => NativeBackupJournalRepairAssertions.OriginalSourceAndArchiveAsync(fixture,
             source, original, CancellationToken.None), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

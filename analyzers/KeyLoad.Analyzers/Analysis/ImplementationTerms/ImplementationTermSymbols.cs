@@ -17,7 +17,13 @@ internal static class ImplementationTermSymbols
         }
         if (node is SimpleNameSyntax or MemberAccessExpressionSyntax)
         {
-            return model.GetSymbolInfo(node, cancellationToken).Symbol;
+            var info = model.GetSymbolInfo(node, cancellationToken);
+            if (info.Symbol is null && info.CandidateReason == CandidateReason.MemberGroup &&
+                info.CandidateSymbols is [IMethodSymbol method])
+            {
+                return method;
+            }
+            return info.Symbol;
         }
         if (node is FieldDeclarationSyntax field && field.Declaration.Variables.Count == 1)
         {
@@ -34,7 +40,8 @@ internal static class ImplementationTermSymbols
     internal static bool NativeLoggingProcessor(ISymbol? symbol) => symbol is not null &&
         symbol.Locations.All(static location => !location.IsInSource) &&
         symbol.ContainingAssembly?.Name == ImplementationTermCatalog.NativeLoggingProcessorAssembly &&
-        (symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.NativeLoggingProcessorType;
+        ((symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.NativeLoggingProcessorType ||
+         (symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.NativeActivityProcessorType);
 
     internal static bool HasPath(ISymbol? symbol, string segment) => symbol is not null &&
         (symbol is INamedTypeSymbol { DeclaringSyntaxReferences.Length: > 0 } type
@@ -75,7 +82,7 @@ internal static class ImplementationTermSymbols
     internal static bool TimeSeries(ISymbol? symbol, Compilation compilation)
     {
         if (symbol is IFieldSymbol or IPropertySymbol &&
-            (symbol.ContainingAssembly.Name is "KeyLoad.BenchmarkScenarios" or "KeyLoad.IntegrationTests") &&
+            (symbol.ContainingAssembly.Name is "KeyLoad.BenchmarkScenarios" or "KeyLoad.IntegrationTests" or "KeyLoad.UnitTests") &&
             Array.Exists(ImplementationTermCatalog.DataControlMembers, member => member == symbol.ToDisplayString()) ||
             symbol is IFieldSymbol { Name: "SeriesRead" or "SeriesAppend", ContainingType: { } capability } &&
             capability.ToDisplayString() == "KeyLoad.Capability" &&

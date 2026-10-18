@@ -38,12 +38,6 @@ internal static class ProductionSourceManifestContributorAssertions
         OperationProperty, RequirementsProperty, SuiteProperty
     ];
     private static readonly string[] Suites = [UnitSuite, RecoverySuite, ClusterSuite];
-    private static readonly string[] ProductionModules =
-    [
-        "KeyLoad.Abstractions", "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core",
-        "KeyLoad.Diagnostics", "KeyLoad.Clustering", "KeyLoad.Query", "KeyLoad.Replication", "KeyLoad.Server", "KeyLoad.Storage.ZoneTree"
-    ];
-    private static readonly HashSet<string> ProductionModuleSet = new(ProductionModules, StringComparer.Ordinal);
     private static readonly Dictionary<string, string> StrengthenedQueryOperations = new(StringComparer.Ordinal)
     {
         [MismatchedLeafMethod] = "The invalid leaf/request partition is rejected as Validation before native reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position.",
@@ -69,7 +63,7 @@ internal static class ProductionSourceManifestContributorAssertions
         var expectedRows = registry.RootElement.GetProperty(ContributorsProperty);
         await Assert.That(actualRows.GetArrayLength()).IsEqualTo(expectedRows.GetArrayLength());
         await AssertRegistryRowsMatchAsync(actualRows, expectedRows);
-        await AssertRowsAsync(actualRows);
+        await AssertRowsAsync(actualRows, ProductionSourceManifestAssertions.ProductionModules(repositoryRoot));
         await AssertQueryExpansionAsync(actualRows, queryContract.RootElement);
         await AssertAdditionalCandidatesAsync(actualRows, queryContract.RootElement);
     }
@@ -96,7 +90,7 @@ internal static class ProductionSourceManifestContributorAssertions
         }
     }
 
-    private static async Task AssertRowsAsync(JsonElement contributors)
+    private static async Task AssertRowsAsync(JsonElement contributors, HashSet<string> productionModules)
     {
         var suiteCounts = new Dictionary<string, int>(StringComparer.Ordinal);
         var identities = new HashSet<string>(StringComparer.Ordinal);
@@ -120,7 +114,7 @@ internal static class ProductionSourceManifestContributorAssertions
             await Assert.That(operation!.Length).IsLessThanOrEqualTo(MaximumOperationCharacters);
             await AssertUniqueStringsAsync(contributor.GetProperty(RequirementsProperty), null);
             await AssertUniqueStringsAsync(contributor.GetProperty(AcceptanceProperty), null);
-            await AssertUniqueStringsAsync(contributor.GetProperty(ExecutedModulesProperty), ProductionModuleSet);
+            await AssertUniqueStringsAsync(contributor.GetProperty(ExecutedModulesProperty), productionModules);
         }
         await Assert.That(suiteCounts.Keys.Order(StringComparer.Ordinal)).IsEquivalentTo(
             Suites.Order(StringComparer.Ordinal), TUnit.Assertions.Enums.CollectionOrdering.Matching);

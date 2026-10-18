@@ -6,18 +6,13 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 /// <summary>Compares published preparation evidence with each original same-run artifact ZIP.</summary>
 internal static class SiteSessionPreparationArchives
 {
-    private const long ImageArchiveBytes = 9_663_676_416;
     private const long SmallArchiveBytes = 134_217_728;
     private const long IdentityFileBytes = 67_108_864;
-    private const string Images = "github/images/";
     private const string Runtime = "github/runtime/";
 
     internal static async Task VerifyAsync(string capture, JsonObject metadata,
         SiteIsolatedGitHubArchiveEntry[] provider, CancellationToken token)
     {
-        var image = provider.Where(item => item.File.Path.StartsWith(Images, StringComparison.Ordinal))
-            .ToDictionary(item => item.File.Path[Images.Length..], item => item.File.Sha256, StringComparer.Ordinal);
-        await VerifyArchiveAsync(capture, metadata[SiteIsolatedFields.Image]!.AsObject(), image, ImageArchiveBytes, token);
         var runtime = provider.Where(item => item.File.Path.StartsWith(Runtime, StringComparison.Ordinal))
             .ToDictionary(item => item.File.Path[Runtime.Length..], item => item.File.Sha256, StringComparer.Ordinal);
         await VerifyArchiveAsync(capture, metadata[SiteIsolatedFields.RuntimeIdentity]!.AsObject(), runtime, SmallArchiveBytes, token);
@@ -63,7 +58,7 @@ internal static class SiteSessionPreparationArchives
             SiteIsolatedGitHubArchivePreflight.ValidateType(entry, directory);
             total = checked(total + entry.Length);
             if (seen.Count > SiteIsolatedGitHubTokens.MaximumEntries || entry.Length < 0
-                || total > ImageArchiveBytes || directory && entry.Length != 0)
+                || total > SmallArchiveBytes || directory && entry.Length != 0)
             {
                 throw new InvalidDataException(SiteIsolatedGitHubTokens.Bounds);
             }

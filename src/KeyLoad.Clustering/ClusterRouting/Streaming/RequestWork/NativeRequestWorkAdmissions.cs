@@ -36,11 +36,6 @@ internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> 
     internal void Release(NativeRequestWorkLease lease)
     {
         RequireActive(lease);
-        Remove(lease);
-    }
-
-    private void Remove(NativeRequestWorkLease lease)
-    {
         active.Remove((lease.RequestId, lease.Kind));
         if (lease.Kind == NativeRequestWorkKind.RequestProducer)
         {
@@ -58,16 +53,7 @@ internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> 
         }
         // The authenticated same-cut caller validated this set; the original lease reserved its metadata.
         // An authorized resource-free command has an empty set, not a missing or inferred dependency.
-        var parent = lease.ChildReservation?.Parent;
-        if (parent is not null)
-        {
-            RequireActive(parent);
-            parent.RequirePublicationOpen();
-        }
-        var completeSet = lease.Dependencies.Union(lifetimes);
-        var parentSet = parent?.Dependencies.Union(lifetimes);
-        lease.Dependencies = completeSet;
-        parent?.Dependencies = parentSet!;
+        lease.Dependencies = lease.Dependencies.Union(lifetimes);
     }
 
     internal void AdmitPublication(NativeRequestWorkLease lease)
@@ -75,66 +61,6 @@ internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> 
         RequireActive(lease);
         lease.RequirePublicationOpen();
         lease.LastPublicationGeneration = checked(++publicationGeneration);
-    }
-
-    internal NativeRequestWorkChildReservation ReserveChild(NativeRequestWorkOwner owner,
-        NativeRequestWorkLease parent, NativeRequestWorkChildIdentity identity)
-    {
-        RequireActive(parent);
-        parent.RequirePublicationOpen();
-        _ = parent.ResultRetention;
-        var child = Acquire(owner, identity.RequestId, NativeRequestWorkKind.RequestProducer);
-        child.AttachResultRetention(parent.ResultRetention);
-        child.Dependencies = parent.Dependencies;
-        parent.RetainCompletionObserver();
-        var reservation = new NativeRequestWorkChildReservation(owner, parent, child, identity);
-        child.ChildReservation = reservation;
-        return reservation;
-    }
-
-    internal NativeRequestWorkLease RequireOriginalParentBinding(NativeRequestWorkLease child)
-    {
-        RequireActive(child);
-        child.RequirePublicationOpen();
-        var reservation = child.ChildReservation
-            ?? throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.LeaseIdentityMessage);
-        reservation.RequireExecuting();
-        var parent = reservation.Parent;
-        RequireActive(parent);
-        parent.RequirePublicationOpen();
-        if (!ReferenceEquals(reservation.Child, child) || !ReferenceEquals(child.ResultRetention, parent.ResultRetention))
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.LeaseIdentityMessage);
-        }
-        return parent;
-    }
-
-    internal bool HasReservedChild(Guid requestId)
-        => active.TryGetValue((requestId, NativeRequestWorkKind.RequestProducer), out var frame)
-            && frame.ChildReservation is not null;
-
-    internal NativeRequestWorkLease ConsumeChild(NativeRequestWorkChildIdentity identity)
-    {
-        if (!active.TryGetValue((identity.RequestId, NativeRequestWorkKind.RequestProducer), out var child)
-            || child.ChildReservation is not { } reservation)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.LeaseIdentityMessage);
-        }
-        RequireActive(reservation.Parent);
-        reservation.Parent.RequirePublicationOpen();
-        child.RequirePublicationOpen();
-        reservation.Consume(identity);
-        return child;
-    }
-
-    internal void RecordChildCleanup(NativeRequestWorkLease parent, ImmutableArray<Exception> failures)
-    {
-        RequireActive(parent);
-        if (!failures.IsEmpty)
-        {
-            parent.ClosePublication(retainCancellation: false);
-            parent.ChildCleanupFailures = parent.ChildCleanupFailures.AddRange(failures);
-        }
     }
 
     internal void RequireActive(NativeRequestWorkLease lease)

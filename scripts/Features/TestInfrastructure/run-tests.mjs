@@ -71,7 +71,7 @@ export function nativeSelection(input, inherited = process.env) {
     }
   }
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__HeavyLoad__Enabled']) delete environment[key];
-  const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore', '--configuration', 'Release',
+  const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore',
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
   args.push('--timeout', `${values.get('TimeoutMinutes') ?? (['cluster', 'comparison'].includes(suite) ? 60 : 30)}m`);

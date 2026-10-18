@@ -25,7 +25,7 @@ internal static class QueueOrderedRetryPolicyRefusal
             {
                 ExpectedSchemaVersion = original.SchemaVersion
             }, Guid.NewGuid());
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))).IsEqualTo(original);
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, before);
     }

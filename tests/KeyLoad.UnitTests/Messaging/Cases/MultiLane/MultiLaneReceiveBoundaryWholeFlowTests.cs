@@ -38,8 +38,10 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
             "root", request.Requests[1].RequestId)).IsNull();
         await Assert.That(NativeSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!)
             .SequenceEqual(untouched)).IsTrue();
-        var persisted = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
-            "root", request.Requests[0].RequestId)!.Get<ReceiveResult>();
+        var persistedOutcome = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
+            "root", request.Requests[0].RequestId)
+            ?? throw new InvalidOperationException("The committed first-lane outcome is absent.");
+        var persisted = persistedOutcome.Get<ReceiveResult>();
         await Assert.That(NativeSerialization.Serialize(persisted).SequenceEqual(NativeSerialization.Serialize(result.Outcomes[0].Result!))).IsTrue();
         var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
@@ -57,8 +59,10 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         await Assert.That(expired.Outcomes[0].Error).IsEqualTo(ErrorCode.LeaseExpired);
         await Assert.That(expired.Outcomes[0].SafeDetail).IsEqualTo("The delivery lease has expired.");
         await Assert.That(expired.Outcomes[0].Result).IsNull();
-        await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.ReadPartition(fixture.Database.Store,
-            fixture.Database.Partition, "root", request.Requests[0].RequestId)!.Get<ReceiveResult>())
+        var retained = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
+            "root", request.Requests[0].RequestId)
+            ?? throw new InvalidOperationException("The original first-lane outcome is absent after replay.");
+        await Assert.That(NativeSerialization.Serialize(retained.Get<ReceiveResult>())
             .SequenceEqual(NativeSerialization.Serialize(persisted))).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
@@ -101,8 +105,10 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         await Assert.That(result.Outcomes[1].Result).IsNull();
         await Assert.That(result.Outcomes[1].Error).IsNull();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut + 1);
-        var original = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
-            "root", request.Requests[0].RequestId)!.Get<ReceiveResult>();
+        var outcome = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
+            "root", request.Requests[0].RequestId)
+            ?? throw new InvalidOperationException("The submitted first-lane outcome is absent.");
+        var original = outcome.Get<ReceiveResult>();
         var delivery = await Assert.That(original.Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo("large");
         await Assert.That(delivery.PayloadJson).IsEqualTo(payload);

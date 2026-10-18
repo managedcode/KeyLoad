@@ -106,7 +106,18 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         {
             ServerFailureObserver.Observe(attempt.RequireReleased, failures);
         }
-        ServerFailureObserver.Observe(logging.Dispose, failures);
+        try
+        {
+            logging.Dispose();
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         if (!retainRoot && failures.Count == NoFailures && Directory.Exists(directory))
         {
             ServerFailureObserver.Observe(() => Directory.Delete(directory, true), failures);

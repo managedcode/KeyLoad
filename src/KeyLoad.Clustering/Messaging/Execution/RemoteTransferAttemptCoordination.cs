@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.Clustering;
@@ -27,7 +26,7 @@ internal static class RemoteTransferAttemptCoordination
         return current;
     }
 
-    internal static async Task AdvanceAsync(RemoteTransferSignedExecution execution, DatabaseEngine database, RemoteTransferCoordinationHint hint,
+    internal static async Task AdvanceAsync(RemoteTransferSignedExecution execution, GrainRequestCodec codec, RemoteTransferCoordinationHint hint,
         string intentToken, CancellationToken token)
     {
         if (hint.AcceptAttemptCeiling is not { } ceiling || hint.AcceptGeneration >= ceiling
@@ -42,7 +41,7 @@ internal static class RemoteTransferAttemptCoordination
             return;
         }
         var witness = value.FailureWitness ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
-        var claims = database.Verify<RemoteTransferAcceptFailureClaims>(witness, database.Limits.MaxBatchBytes);
+        var claims = codec.VerifySigned<RemoteTransferAcceptFailureClaims>(witness, codec.Limits.MaxBatchBytes);
         var digest = claims.OutcomeDigest;
         var id = RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, digest);
         var reply = await execution.ApplyAsync(hint.PrincipalId, new(id, hint.Source.Partition,

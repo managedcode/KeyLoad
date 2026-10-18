@@ -14,7 +14,7 @@ internal static class QueueDeadLetterSelectedContinuation
         var history = new List<QueueDeadLetterSelectedSaved>();
         var result = QueueDeadLetterSelectedSetup.Execute(database, history, state.Original);
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(state.Original.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(state.Original.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo([new MutationReceipt(
             state.Kind == QueueDeadLetterSelectedOperation.Redrive ? QueueDeadLetterSelectedProtocol.RedriveKind
                 : QueueDeadLetterSelectedProtocol.CancelKind, state.Lane.Queue, state.Target, QueueDeadLetterSelectedProtocol.Four)],
@@ -28,7 +28,7 @@ internal static class QueueDeadLetterSelectedContinuation
         await QueueDeadLetterSelectedImage.RequireAsync(database, store, state, settled: true);
         var command = new CommandRequest(Guid.NewGuid(), state.Lane.Partition,
             [QueueDeadLetterSelectedSetup.Message(QueueDeadLetterSelectedProtocol.Healthy)]);
-        QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(
+        QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(database,
             OperationKind.Batch, command, command.CommandId, state.Time)).Get<CommitReceipt>();
         await ProcessAsync(database, store, state, QueueDeadLetterSelectedProtocol.Healthy,
             QueueDeadLetterSelectedImage.HealthySequence(state), QueueDeadLetterSelectedProtocol.One,
@@ -42,7 +42,7 @@ internal static class QueueDeadLetterSelectedContinuation
         List<QueueDeadLetterSelectedSaved> history)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, LeaseSeconds: QueueDeadLetterSelectedProtocol.LeaseSeconds);
-        var result = QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(
+        var result = QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(database,
             OperationKind.Receive, request, request.RequestId, state.Time));
         var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery).IsEqualTo(new Delivery(id, QueueDeadLetterSelectedProtocol.Payload,
@@ -56,7 +56,7 @@ internal static class QueueDeadLetterSelectedContinuation
         var processing = new ProcessingRequest(Guid.NewGuid(), state.Lane, delivery.Token,
             QueueDeadLetterSelectedProtocol.Handler, QueueDeadLetterSelectedProtocol.One,
             [new PutDocument(QueueDeadLetterSelectedProtocol.Collection, id, QueueDeadLetterSelectedProtocol.Payload)]);
-        var completed = QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(
+        var completed = QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(database,
             OperationKind.Processing, processing, processing.CommandId, state.Time));
         var receipt = completed.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(processing.CommandId);

@@ -23,7 +23,7 @@ internal static class QueueDeadlineCapacityContinuation
         ReceiveResult? claimed = null;
         if (state.Sweep)
         {
-            claimed = QueueDeadlineCapacityClaims.Expected(database, state.Lane, expected, operation.Id, commit, state.Due);
+            claimed = QueueDeadlineCapacityClaims.Expected(database, state.Lane, expected, operation.CommandId, commit, state.Due);
             if (expected.State == MessageState.Ready)
             {
                 expected = QueueDeadlineCapacityClaims.Leased(expected, state.Due);
@@ -32,7 +32,7 @@ internal static class QueueDeadlineCapacityContinuation
         var actual = database.Apply(operation);
         if (claimed is null)
         {
-            await QueueDeadlineCapacityOperations.ReceiptAsync(actual, new(operation.Id, commit, [new(AdvanceReceipt, Queue, Message, expected.StateVersion)], DurabilityProfile.ProcessDurable, 1));
+            await QueueDeadlineCapacityOperations.ReceiptAsync(actual, new(operation.CommandId, commit, [new(AdvanceReceipt, Queue, Message, expected.StateVersion)], DurabilityProfile.ProcessDurable, 1));
         }
         else
         {
@@ -68,7 +68,7 @@ internal static class QueueDeadlineCapacityContinuation
             ReadySequence = sequence + ReadySequenceStep
         };
         var result = database.Apply(operation);
-        await QueueDeadlineCapacityOperations.ReceiptAsync(result, new(operation.Id, commit, [new(AdvanceReceipt, Queue, Message, expected.StateVersion)], DurabilityProfile.ProcessDurable, 1));
+        await QueueDeadlineCapacityOperations.ReceiptAsync(result, new(operation.CommandId, commit, [new(AdvanceReceipt, Queue, Message, expected.StateVersion)], DurabilityProfile.ProcessDurable, 1));
         state.Outcomes.Add((operation, result));
         return expected;
     }

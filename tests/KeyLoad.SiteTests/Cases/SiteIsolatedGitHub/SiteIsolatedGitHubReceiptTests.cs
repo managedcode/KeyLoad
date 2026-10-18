@@ -65,18 +65,18 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
         var copy = FailedWorkerReceipt(inputs.Metadata);
         await Assert.That(await ProbeAsync(copy, token)).IsTrue();
-        await Assert.That(JsonNode.DeepEquals(copy[SiteIsolatedGitHubFields.Image],
-            inputs.Metadata[SiteIsolatedGitHubFields.Image])).IsTrue();
+        await Assert.That(JsonNode.DeepEquals(copy[SiteIsolatedGitHubFields.Preparation],
+            inputs.Metadata[SiteIsolatedGitHubFields.Preparation])).IsTrue();
         await Assert.That(copy[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
             .IsEqualTo(SiteIsolatedInventory.Workers());
     }
 
-    /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or image checks remain rejected.</summary>
+    /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or native runtime preparation checks remain rejected.</summary>
     [Test]
     [Arguments("successConclusion")]
     [Arguments("successWorkload")]
     [Arguments("failedUpload")]
-    [Arguments("failedImage")]
+    [Arguments("failedPreparation")]
     public async Task AC_BC_FAIL_003_ReceiptRejectsFailureOutcomeMismatches(string corruption)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -94,8 +94,8 @@ internal sealed class SiteIsolatedGitHubReceiptTests
                 var step = job[SiteIsolatedFields.Steps]!.AsArray().Single(item => item![SiteIsolatedFields.Name]!.GetValue<string>() == name)!;
                 step[SiteIsolatedFields.Conclusion] = corruption == "successWorkload" ? "success" : "failure";
                 break;
-            case "failedImage":
-                copy[SiteIsolatedGitHubFields.Image]![SiteIsolatedGitHubFields.Job]![SiteIsolatedFields.Conclusion] = "failure";
+            case "failedPreparation":
+                copy[SiteIsolatedGitHubFields.Preparation]![SiteIsolatedGitHubFields.Job]![SiteIsolatedFields.Conclusion] = "failure";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(corruption));

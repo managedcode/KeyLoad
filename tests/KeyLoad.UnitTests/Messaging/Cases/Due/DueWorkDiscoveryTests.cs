@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
@@ -123,8 +124,9 @@ internal sealed class DueWorkDiscoveryTests
         var upper = KeyCodec.Encode(DueWorkProtocol.ScheduleSpace, RecurringSagaDatabase.TenantId,
             RecurringSagaDatabase.DatabaseId, RecurringSagaDatabase.Domain, "partition", "jobs",
             DueWorkTestData.OrderedId(1).ToString(DueWorkFields.GuidFormat));
+        var owned = ImmutableArray.CreateRange(upper);
         var cursor = new DueSweepCursor(identity.Incarnation, identity.ReadGeneration, DueWorkKind.Saga,
-            new(true, upper, upper), DuePrefixCursor.Empty);
+            new(true, owned, owned), DuePrefixCursor.Empty);
         var matched = DueWorkCursor.Match(identity, cursor);
         await Assert.That(matched.NextPrefix).IsEqualTo(DueWorkKind.Saga);
         await Assert.That(matched.Schedules.LastKey).IsNotNull();

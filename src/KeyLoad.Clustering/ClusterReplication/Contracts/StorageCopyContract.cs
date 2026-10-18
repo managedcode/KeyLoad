@@ -7,7 +7,7 @@ internal static class StorageCopyContract
     internal const int FirstOwner = 0;
     internal const long NextSequence = 1;
     internal const string InvalidIncarnation = "A database incarnation is required.";
-    internal const string InvalidCounts = "SiloCount and ReplicaCount must be positive; ReplicaCount cannot exceed SiloCount.";
+    internal const string InvalidCounts = "StorageMode must be supported; silo and copy counts must be positive, copies cannot exceed silos, and SharedVolume requires ReplicaCount 1.";
     internal const string DifferentOutcomes = "The persisted data-copy outcomes differ.";
     internal const string WriteUncertain = "The write did not receive every required persistence acknowledgement.";
     internal const string OwnersUnavailable = "The required Orleans storage services are unavailable.";

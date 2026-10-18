@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class CliBackupRestoreProcessOutput
 {
-    private const string OutputLimitMessage = "The Release KeyLoad CLI output exceeded the validated retention limit.";
+    private const string OutputLimitMessage = "The native KeyLoad CLI output exceeded the validated retention limit.";
     private readonly int maximumCharacters;
     private readonly StringBuilder retained;
     private bool exceeded;

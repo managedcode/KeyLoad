@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -9,7 +10,7 @@ internal static class DatabaseReadinessEndpoints
         app.MapGet(ServerProtocol.ReadyPath, ReadyAsync);
     }
 
-    private static async Task<IResult> ReadyAsync(PartitionHostApplicationOwner owner, OrleansNode node,
+    private static async Task<IResult> ReadyAsync(OrleansNode node,
         IOptions<ServerExecutionOptions> options, IOptions<NodeOptions> nodeOptions, TimeProvider clock, CancellationToken cancellationToken)
     {
         if (!node.DatabaseReady)
@@ -21,7 +22,14 @@ internal static class DatabaseReadinessEndpoints
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
-            await owner.Borrow().Coordinator.ReadBarrierAsync(deadline.Token).ConfigureAwait(false);
+            var factory = node.Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+            var incarnation = nodeOptions.Value.Incarnation;
+            var cut = await factory.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(incarnation))
+                .ReadCutAsync(deadline.Token).ConfigureAwait(false);
+            if (cut.Incarnation != incarnation)
+            {
+                return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+            }
             return Results.Ok(new ReadyReply(ServerProtocol.ReadyStatus, nodeOptions.Value.ReplicaCount));
         }
         catch (Exception error) when (error is KeyLoadException or OperationCanceledException)

@@ -36,7 +36,7 @@ internal sealed class IsolatedNativeTeardownSuccessTests
     [Test]
     public async Task OwnedCaptureCannotBeReplacedAndSettlesItsOriginalWritersBeforeReturn()
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         var evidence = Path.Combine(directory.Root, "evidence");
         var output = Path.Combine(directory.Root, "output");
         var data = Path.Combine(directory.Root, "absent-data");

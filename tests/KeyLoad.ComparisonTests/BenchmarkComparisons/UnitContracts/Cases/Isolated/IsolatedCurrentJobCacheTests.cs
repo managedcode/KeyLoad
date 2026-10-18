@@ -84,7 +84,7 @@ internal sealed class IsolatedCurrentJobCacheTests
         {
             await Assert.That(document.RootElement.GetProperty(Result).GetProperty(Rejected).GetBoolean()).IsTrue();
         }
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         await VerifyChildStopsAsync(directory.Root, "cancel", 1024, token);
         await VerifyChildStopsAsync(directory.Root, "overflow", 32, token);
     }

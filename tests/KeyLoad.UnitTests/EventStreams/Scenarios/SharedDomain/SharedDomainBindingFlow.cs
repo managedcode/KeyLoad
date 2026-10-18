@@ -22,7 +22,7 @@ internal static class SharedDomainBindingFlow
                 {
                     ExpectedSchemaVersion = FirstRevision
                 };
-                var operation = SharedDomainOperations.Operation(OperationKind.ConfigureResource, Guid.NewGuid(), request, Root);
+                var operation = SharedDomainOperations.Operation(database, OperationKind.ConfigureResource, Guid.NewGuid(), request, Root);
                 var result = SharedDomainOperations.Apply(database, operation, token);
                 await SharedDomainValueAssertions.FailureAsync(result, ErrorCode.UnsupportedCapability, BindingDetail);
                 await SharedDomainNativeImage.BytesAsync(database.Store, key, original);

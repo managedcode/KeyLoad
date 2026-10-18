@@ -12,8 +12,7 @@ internal sealed partial class OrleansNode
         var startupFailures = new List<Exception>();
         applicationServices.GetRequiredService<RuntimeJournalAdmission>().CloseScheduling();
         await requestLifetime.CancelAndJoinStartupAsync(null, startup, startupFailures, failures).ConfigureAwait(false);
-        await OrleansNodeHostShutdown.JoinAsync(RequestWork,
-            applicationServices.GetService<INodeAdministration>() as IAsyncDisposable, failures).ConfigureAwait(false);
+        await OrleansNodeHostShutdown.JoinAsync(RequestWork, null, failures).ConfigureAwait(false);
         await requestLifetime.JoinAsync(failures).ConfigureAwait(false);
         closure.Complete(failures);
         Volatile.Write(ref grains, null);

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { readdir } from 'node:fs/promises';
-import { createDirectory } from './image-bundle-files.mjs';
+import { createDirectory } from './native-files.mjs';
 import { captureApi, downloadArtifact } from './isolated-github-api.mjs';
 import { initializeTransport } from './isolated-github-transport.mjs';
 import { inspectNativeZip, extractNativeEntry } from './isolated-github-zip.mjs';
@@ -95,8 +95,7 @@ export async function captureSessionSite({ environment = process.env, args, down
     const fresh = { schemaVersion: SESSION.schema, state: 'selection_verified', source: { ...context.source, measured: selected.cohort.sourceRevision },
       cohort: selected.cohort, aggregateJobId: selected.job.id, suiteArtifactId: selected.suite.id,
       providerArtifactId: selected.provider.id,
-      preparation: {jobId:selected.native.image.job.id,imageArtifactId:selected.native.image.artifact.id,
-        imageDigest:selected.native.image.artifact.digest,runtimeArtifactId:selected.native.runtimeArtifact.id,
+      preparation: {jobId:selected.native.preparation.id,runtimeArtifactId:selected.native.runtimeArtifact.id,
         runtimeDigest:selected.native.runtimeArtifact.digest,compiledArtifactId:selected.native.compiledArtifact.id,
         compiledDigest:selected.native.compiledArtifact.digest,functionalArtifactId:selected.functional.artifact.id,
         functionalDigest:selected.functional.artifact.digest},
@@ -113,7 +112,6 @@ export async function captureSessionSite({ environment = process.env, args, down
     'keyload-functional-heavy-load.zip', GH.workerZipBytes, context);
   const runtimeArchive = await downloadOriginal(selected.native.runtimeArtifact, input,
     'comparison-compiled-runtime-identity.zip', 134_217_728, context);
-  const imageArchive = await downloadOriginal(selected.native.image.artifact, input, 'comparison-image-bundle.zip', GH.imageZipBytes, context);
   await inspectNativeZip(path.join(input, suite.path), ['aggregate.json'], path.join(metadata, 'suite-inventory.txt'), context);
   const aggregateRaw = await extractNativeEntry(path.join(input, suite.path), 'aggregate.json',
     path.join(metadata, 'aggregate-original.json'), SESSION.aggregateBytes, context);
@@ -138,8 +136,8 @@ export async function captureSessionSite({ environment = process.env, args, down
       url: `https://github.com/${SESSION.repository}/actions/runs/${selected.run.id}` }, cohort: selected.cohort,
     aggregateJob: projectJob(selected.job, selected.cohort, SESSION_SITE.aggregateSteps),
     artifacts: { suite: projectArtifact(selected.suite), provider: projectArtifact(selected.provider) }, workers,
-    image: { job: projectJob(selected.native.image.job, selected.cohort, GH.imageSteps),
-      artifact: projectArtifact(selected.native.image.artifact), compiledArtifact: projectArtifact(selected.native.compiledArtifact), archive: imageArchive },
+    preparation: { job: projectJob(selected.native.preparation, selected.cohort, SESSION.prepareSteps),
+      compiledArtifact: projectArtifact(selected.native.compiledArtifact) },
     functional: { artifact: projectArtifact(functionalSelection.artifact), archive: functionalArchive },
     runtimeIdentity: { artifact: projectArtifact(selected.native.runtimeArtifact), archive: runtimeArchive },
     suiteFiles: sessionSuiteFiles(aggregate, aggregateRaw.sha256), workerArchives,

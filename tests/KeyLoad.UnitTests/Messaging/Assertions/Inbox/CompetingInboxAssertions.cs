@@ -9,7 +9,7 @@ internal static class CompetingInboxAssertions
 {
     internal static async Task ResultsAsync(DatabaseEngine database, ZoneTreeStore store, CompetingInboxState state)
     {
-        await SubscriptionOldCutAssertions.ReceiptAsync(state.Receipt, state.Competitors[state.Winner].Id,
+        await SubscriptionOldCutAssertions.ReceiptAsync(state.Receipt, state.Competitors[state.Winner].CommandId,
             store, state.Partition, state.EffectPosition,
             new("putDocument", CompetingInboxState.Documents, "effect", 1),
             new("appendEvents", CompetingInboxState.Streams, "effect", 1),
@@ -27,9 +27,8 @@ internal static class CompetingInboxAssertions
             }
             else
             {
-                await Assert.That(actual.Error).IsEqualTo(ErrorCode.Conflict);
-                await Assert.That(actual.SafeDetail).IsEqualTo("The inbox input was already completed with different effects.");
-                await Assert.That(actual.Json).IsNull();
+                await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.Conflict);
+                await Assert.That(actual.Problem?.Detail).IsEqualTo("The inbox input was already completed with different effects.");
                 await Assert.That(actual.Value).IsNull();
             }
         }
@@ -65,20 +64,22 @@ internal static class CompetingInboxAssertions
         {
             var operation = state.Competitors[index];
             var original = state.Results[index];
-            var raw = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, "root", operation.Id)))!;
+            var raw = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, "root", operation.CommandId)))
+                ?? throw new InvalidOperationException("The competing inbox outcome is absent.");
             var replay = database.Apply(operation);
-            if (original.Error is null)
+            if (Errors.Code(original.Problem) is null)
             {
                 await NativeReplayResultAssertions.Same<CommitReceipt>(replay, original);
             }
             else
             {
-                await SubscriptionOldCutAssertions.SameAsync(replay, original);
+                await Assert.That(NativeSerialization.Serialize(replay).AsSpan()
+                    .SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
                 await Assert.That(replay.Value).IsNull();
                 await Assert.That(original.Value).IsNull();
             }
             await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition,
-                "root", operation.Id)))!.AsSpan().SequenceEqual(raw)).IsTrue();
+                "root", operation.CommandId)))!.AsSpan().SequenceEqual(raw)).IsTrue();
             await SubscriptionOldCutAssertions.ConservedAsync(store, bytes, position, identity);
         }
         await ModelAsync(database, state);

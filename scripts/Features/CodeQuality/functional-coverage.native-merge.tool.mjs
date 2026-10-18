@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
-import { getToolClosure } from './functional-coverage.server-image-tool.mjs';
+import { getToolClosure } from './functional-coverage.native-tool.closure.mjs';
 
-const failure = 'The pinned native coverage tool closure does not match the retained node context.';
+const failure = 'The pinned native coverage tool closure does not match the admitted native tool inventory.';
 
 function canonicalInventory(entries) {
   return entries.map(({ path: itemPath, mode, length, sha256 }) => ({ path: itemPath, mode, length, sha256 }))
@@ -15,20 +15,20 @@ function digestInventory(entries) {
 
 function validateArguments(args) {
   if (args.length !== 4) { throw new Error(failure); }
-  const [root, version, boundsJson, contextJson] = args;
+  const [root, version, boundsJson, expectedJson] = args;
   const bounds = JSON.parse(boundsJson);
-  const contextEntries = JSON.parse(contextJson);
+  const expectedEntries = JSON.parse(expectedJson);
   const positive = [bounds.maximumFiles, bounds.maximumTotalBytes, bounds.maximumFileBytes,
     bounds.maximumPathCharacters, bounds.maximumManifestBytes, bounds.readBufferBytes];
-  if (!path.isAbsolute(root) || path.basename(root) !== version || version !== '18.11.2' ||
+  if (!path.isAbsolute(root) || path.basename(root) !== version || version !== '18.12.0' ||
       positive.some((value) => !Number.isSafeInteger(value) || value <= 0) ||
-      contextEntries !== null && (!Array.isArray(contextEntries) || contextEntries.length > bounds.maximumFiles)) {
+      expectedEntries !== null && (!Array.isArray(expectedEntries) || expectedEntries.length > bounds.maximumFiles)) {
     throw new Error(failure);
   }
-  return { root, version, bounds, contextEntries };
+  return { root, version, bounds, expectedEntries };
 }
 
-function verifyClosure({ root, version, bounds, contextEntries }) {
+function verifyClosure({ root, version, bounds, expectedEntries }) {
   const closure = getToolClosure(root, version, bounds);
   const packageEntries = closure.packageFiles;
   const licenseEntries = closure.licenseFiles;
@@ -41,14 +41,14 @@ function verifyClosure({ root, version, bounds, contextEntries }) {
   const expectedLicense = licenseEntries.map(({ relativePath, mode, length, sha256 }) => ({
     path: relativePath, mode, length, sha256,
   }));
-  if (contextEntries !== null) {
-    for (const entry of contextEntries) {
+  if (expectedEntries !== null) {
+    for (const entry of expectedEntries) {
       if (entry === null || Object.keys(entry).sort().join('\n') !== 'length\nmode\npath\nsha256' ||
           !Number.isSafeInteger(entry.length) || entry.length <= 0 || !Number.isInteger(entry.mode) ||
           typeof entry.path !== 'string' || !/^[0-9a-f]{64}$/.test(entry.sha256)) { throw new Error(failure); }
     }
-    const actualTool = contextEntries.filter((entry) => entry.path.startsWith('tool/'));
-    const actualLicense = contextEntries.filter((entry) => entry.path.startsWith('license/'));
+    const actualTool = expectedEntries.filter((entry) => entry.path.startsWith('tool/'));
+    const actualLicense = expectedEntries.filter((entry) => entry.path.startsWith('license/'));
     if (digestInventory(actualTool) !== digestInventory(expectedTool) ||
         digestInventory(actualLicense) !== digestInventory(expectedLicense) ||
         actualTool.length !== expectedTool.length || actualLicense.length !== expectedLicense.length) {

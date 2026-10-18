@@ -61,6 +61,6 @@ internal static class NativeArchiveEntryFlow
     }
 
     internal static Command<DatabaseCommand> Operation(DatabaseEngine database, CommandRequest command)
-        => new(command.CommandId, OperationKind.Batch, P.Root, database.EvaluationClock.GetUtcNow(),
+        => database.CreateCommand(OperationKind.Batch, command.CommandId, P.Root, database.EvaluationClock.GetUtcNow(),
             System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(command)));
 }

@@ -20,7 +20,7 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
         var appended = entry.PreparedCommand ?? throw new InvalidOperationException("The native receive entry is absent.");
         await Assert.That(appended.Value!.Kind).IsEqualTo(operation.Value!.Kind);
         await Assert.That(appended.UserId!).IsEqualTo(operation.UserId!);
-        await Assert.That(appended.PayloadJson).IsEqualTo(operation.PayloadJson);
+        await Assert.That(appended.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
         await Assert.That(delivery.HeadersJson).IsEqualTo(P.CanonicalHeaders);
         var expected = new ReceiveResult(operation.CommandId,
             [new(messageId, P.Payload, P.CanonicalHeaders, delivery.Token, P.Initial,
@@ -57,6 +57,6 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
 
     private static byte[] OutcomeBytes(BudgetedQueueReceiveOutcomeFixture fixture)
         => fixture.Database.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(
-            fixture.Database.Partition, P.Worker, fixture.OriginalIntent.Id)))
+            fixture.Database.Partition, P.Worker, fixture.OriginalIntent.CommandId)))
             ?? throw new InvalidOperationException("The genuine original receive outcome is absent.");
 }

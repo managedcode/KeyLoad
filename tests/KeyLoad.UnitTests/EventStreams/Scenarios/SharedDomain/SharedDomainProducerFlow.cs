@@ -15,7 +15,7 @@ internal static class SharedDomainProducerFlow
                 candidate => SharedDomainNativeImage.Capture(database.Store, candidate.Partition));
             var command = SharedDomainCorpus.Producer(scope, id, healthy ? Healthy : Item);
             var position = database.Store.Position + FirstRevision;
-            var operation = SharedDomainOperations.Operation(OperationKind.Batch, command.CommandId, command);
+            var operation = SharedDomainOperations.Operation(database, OperationKind.Batch, command.CommandId, command);
             var result = SharedDomainOperations.Apply(database, operation, token);
             await SharedDomainValueAssertions.ReceiptAsync(result, command, database.Store.Identity, position);
             state.Recorded.Add(scope.Partition.AtomicPartitionId + IdentitySeparator + (healthy ? Healthy : Item),

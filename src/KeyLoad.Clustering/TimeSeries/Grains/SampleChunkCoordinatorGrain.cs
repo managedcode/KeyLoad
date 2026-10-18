@@ -14,16 +14,15 @@ namespace KeyLoad.Clustering;
 [Immovable(ImmovableKind.Any)]
 [GrainType(SampleChunkJobProtocol.GrainAlias), PreferLocalPlacement]
 internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
-    ILocalDurableJobManager jobs, DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
+    ILocalDurableJobManager jobs, BackgroundStorageClient storage, IOptions<TimeSeriesExecutionOptions> timeSeries,
     RuntimeJournalAdmission runtime, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, IOptions<DueCoordinationOptions> execution)
     : Grain, ISampleChunkCoordinatorGrain, IDurableJobHandler
 {
-    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly IDurableDictionary<Guid, SampleChunkJobAdmission> admissions =
         state.GetOrAddDictionary<Guid, SampleChunkJobAdmission>(SampleChunkJobProtocol.Admissions);
-    private readonly SampleChunkJobDispatch dispatch = new(database, codec, services, clock, serializer, routing);
+    private readonly SampleChunkJobDispatch dispatch = new(storage, codec, services, clock, serializer, routing);
     private bool open = true;
 
     public Task ScheduleAsync(SampleChunkWorkHint hint, CancellationToken cancellationToken)
@@ -68,8 +67,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         using var timeout = new CancellationTokenSource(execution.Value.DispatchDeadline, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-        var current = SampleChunkWorkRead.Current(database, hint, token);
+        var current = await storage.Operations.ReadSampleChunkCurrentAsync(hint, token).ConfigureAwait(true);
         if (current is null || !SampleChunkWorkEligibility.SameOriginal(current, hint))
         {
             return;
@@ -79,7 +77,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
             return;
         }
         await RetireSettledAsync(token).ConfigureAwait(true);
-        if (admissions.Count >= database.TimeSeriesOptions.Value.MaximumPendingChunkWindows)
+        if (admissions.Count >= timeSeries.Value.MaximumPendingChunkWindows)
         {
             if (observation is { } observed)
             {
@@ -93,12 +91,12 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkAdmissionPersisted, token)
             .ConfigureAwait(true);
         var nativeRequest = SampleChunkJobMetadata.Create(this.GetGrainId(), clock.GetUtcNow(), hint,
-            database.Limits.MaxBatchBytes);
+            codec.Limits.MaxBatchBytes);
         var job = await jobs.ScheduleJobAsync(nativeRequest, token).ConfigureAwait(true);
         if (observation is not null)
         {
             SampleChunkNativeJobObservation.Returned(services, hint.CommandId, job.Id,
-            nativeRequest.Metadata![SampleChunkJobProtocol.HintKey], database.Limits.MaxBatchBytes);
+            nativeRequest.Metadata![SampleChunkJobProtocol.HintKey], codec.Limits.MaxBatchBytes);
         }
         await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkNativeJobReturned, token)
             .ConfigureAwait(true);
@@ -135,7 +133,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
 
     private async Task ExecuteOriginalAsync(IJobRunContext context, CancellationToken cancellationToken)
     {
-        var hint = SampleChunkJobMetadata.Read(context, this.GetGrainId(), database.Limits.MaxBatchBytes);
+        var hint = SampleChunkJobMetadata.Read(context, this.GetGrainId(), codec.Limits.MaxBatchBytes);
         RequireOpen(hint);
         if (!admissions.TryGetValue(hint.CommandId, out var original))
         {
@@ -149,17 +147,16 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         if (codec.PhaseObserver is not null)
         {
             SampleChunkNativeJobObservation.Executing(services, hint.CommandId, context.Job.Id,
-            context.Job.Metadata![SampleChunkJobProtocol.HintKey], database.Limits.MaxBatchBytes);
+            context.Job.Metadata![SampleChunkJobProtocol.HintKey], codec.Limits.MaxBatchBytes);
         }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, runtime.SchedulingToken);
         using var timeout = new CancellationTokenSource(execution.Value.DispatchDeadline, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         SampleChunkWorkHint? current;
         try
         {
-            current = SampleChunkWorkRead.Current(database, hint, token);
+            current = await storage.Operations.ReadSampleChunkCurrentAsync(hint, token).ConfigureAwait(true);
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated)
         {
@@ -177,8 +174,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
             await BlockAsync(original, context.Job.Id, result.Error.Value, token).ConfigureAwait(true);
             return;
         }
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-        var after = SampleChunkWorkRead.Current(database, hint, token);
+        var after = await storage.Operations.ReadSampleChunkCurrentAsync(hint, token).ConfigureAwait(true);
         if (after is null || !SampleChunkWorkEligibility.SameOriginal(after, hint))
         {
             await RemoveAsync(hint.CommandId, token).ConfigureAwait(true);
@@ -188,7 +184,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
     }
 
     private Task RetireSettledAsync(CancellationToken token)
-        => SampleChunkAdmissionTransitions.RetireSettledAsync(database, () => admissions.ToDictionary(),
+        => SampleChunkAdmissionTransitions.RetireSettledAsync(storage, () => admissions.ToDictionary(),
             RemoveAsync, token);
 
     private Task BlockAsync(SampleChunkJobAdmission original, string jobId, ErrorCode code, CancellationToken token)

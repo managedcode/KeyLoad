@@ -17,7 +17,7 @@ internal static class NativeCoverageCliCollector
 
     internal static async Task<NativeCoverageMergeProcess.ChildResult> CollectCliAsync(
         NativeCoverageMergeProcess.ToolingOptions options,
-        string ownedRoot, NativeCoverageImageSourceSnapshot originalSource, string imageName,
+        string ownedRoot, NativeCoverageDeploymentSnapshot originalSource, string imageName,
         IReadOnlyList<string> cliArguments, string reportPath, CancellationToken cancellationToken)
     {
         var limits = options.Coverage;
@@ -33,7 +33,7 @@ internal static class NativeCoverageCliCollector
 
     private static async Task<NativeCoverageMergeChildProcess.Result?> RunCollectionAsync(
         NativeCoverageMergeProcess.ToolingOptions options, string ownedRoot,
-        NativeCoverageImageSourceSnapshot originalSource, string imageName, IReadOnlyList<string> cliArguments,
+        NativeCoverageDeploymentSnapshot originalSource, string imageName, IReadOnlyList<string> cliArguments,
         string reportPath, List<Exception> failures, CancellationToken cancellationToken)
     {
         var limits = options.Coverage;
@@ -75,7 +75,7 @@ internal static class NativeCoverageCliCollector
     }
 
     private static string? PrepareCopy(string ownedRoot, string imageName,
-        NativeCoverageImageSourceSnapshot originalSource, string source, NativeCoverageExecutionOptions limits,
+        NativeCoverageDeploymentSnapshot originalSource, string source, NativeCoverageExecutionOptions limits,
         List<Exception> failures)
     {
         ServerFailureObserver.Observe(() => originalSource.VerifyUnchanged(source, limits.MaximumFiles,

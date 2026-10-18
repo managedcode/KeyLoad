@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -28,7 +29,8 @@ internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
         {
             return;
         }
-        var database = context.ActivationServices.GetRequiredService<DatabaseEngine>();
+        var services = context.ActivationServices.GetRequiredService<PartitionHostApplicationOwner>().Session.Services;
+        var database = services.GetRequiredService<DatabaseEngine>();
         if (!ReferenceEquals(database.Store, read.Store))
         {
             throw new InvalidOperationException(ChangedOwner);

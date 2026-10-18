@@ -1,11 +1,10 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 
 namespace KeyLoad.Clustering;
 
 internal static class SampleChunkAdmissionTransitions
 {
-    internal static async Task RetireSettledAsync(DatabaseEngine database,
+    internal static async Task RetireSettledAsync(BackgroundStorageClient storage,
         Func<IEnumerable<KeyValuePair<Guid, SampleChunkJobAdmission>>> snapshot,
         Func<Guid, CancellationToken, Task> remove, CancellationToken token)
     {
@@ -14,7 +13,7 @@ internal static class SampleChunkAdmissionTransitions
             SampleChunkWorkHint? current;
             try
             {
-                current = SampleChunkWorkRead.Current(database, entry.Value.Hint, token);
+                current = await storage.Operations.ReadSampleChunkCurrentAsync(entry.Value.Hint, token).ConfigureAwait(true);
             }
             catch (KeyLoadException failure) when (failure.Code is ErrorCode.Unauthenticated or ErrorCode.PermissionDenied)
             {

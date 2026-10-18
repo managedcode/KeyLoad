@@ -4,7 +4,9 @@
 
 - Owns only the shared physical-storage publication contract for ADR-136.
 - The implementation is the same silo-local `PartitionHostApplicationOwner` in KeyLoad.Server; this contract never creates a store or another owner.
-- Native storage Grain Service initialization initiates the original opening. Other native services observe `Opening` or await `WaitForOpenAsync` without initiating acquisition.
+- Isolated storage opens during native Grain Service initialization. Shared storage opens only for the actual ordinary database activation through `ILocalDatabaseRuntime`; other silos forward through Orleans without opening the files.
+- Shared activation failure and deactivation join the exact acquired physical session before its handles close. Scoped services borrow that session; they never resolve an unrelated current host or carry a handle across RPC.
+- Other native services observe `Opening` or await `WaitForOpenAsync` without initiating acquisition.
 - Caller cancellation cancels its wait, not the original physical opening. A null `Opening` means initialization never started.
 - Keep file handles, storage recovery, locks and joined close in the node-local owner; Orleans activation placement does not move them.
 - Follow root and Clustering policy. Main owns coherent solution integration/build/TUnit/Aspire cluster/Linux evidence; source preparation does not qualify execution.
@@ -18,7 +20,7 @@ Follow the [root policy](../../../AGENTS.md) and the owning feature specificatio
 From the repository root:
 
 ```sh
-dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
 Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.

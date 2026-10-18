@@ -169,18 +169,12 @@ internal static class ServerConfiguration
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();
-        services.AddSingleton<UserAnalyticsRuntime>();
-        services.AddSingleton<INativeUserAnalytics>(provider => provider.GetRequiredService<UserAnalyticsRuntime>());
-        services.AddSingleton(provider => ActivatorUtilities.CreateInstance<AdminNodeObserver>(provider,
-            provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
         services.AddSingleton(provider => new CommandAdmissionGovernor(
             provider.GetRequiredService<IOptions<CommandAdmissionLimits>>()));
         services.AddSingleton(provider => new HttpAdmissionGovernor(
             provider.GetRequiredService<IOptions<HttpAdmissionLimits>>()));
         services.AddSingleton<PartitionHostApplicationOwner>();
-        services.AddSingleton<INodeAdministration>(provider => ActivatorUtilities.CreateInstance<NodeAdministration>(provider,
-            provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         services.AddSingleton(provider => ActivatorUtilities.CreateInstance<OrleansNode>(provider));
     }
 

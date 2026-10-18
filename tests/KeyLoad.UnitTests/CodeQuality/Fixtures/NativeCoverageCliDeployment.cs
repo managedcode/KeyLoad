@@ -3,14 +3,14 @@ namespace KeyLoad.UnitTests.Features.CodeQuality;
 internal static class NativeCoverageCliDeployment
 {
     private const string SolutionFile = "KeyLoad.slnx";
-    internal const string CliOutputRelativePath = "src/KeyLoad.Cli/bin/Release/net10.0";
+    internal const string CliOutputRelativePath = "src/KeyLoad.Cli/bin/Debug/net10.0";
 
     internal static string CliOutput => Path.Combine(RepositoryRoot, CliOutputRelativePath);
     internal static string RepositoryRoot { get; } = FindRepositoryRoot();
 
     internal static string CopyCliClosure(string destinationRoot, string name,
         NativeCoverageExecutionOptions options)
-        => NativeCoverageImageClosure.CopyToRoot(CliOutput, destinationRoot, name, options);
+        => NativeCoverageDeploymentClosure.CopyToRoot(CliOutput, destinationRoot, name, options);
 
     private static string FindRepositoryRoot()
     {

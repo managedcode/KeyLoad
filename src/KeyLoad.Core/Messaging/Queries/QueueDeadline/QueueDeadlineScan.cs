@@ -13,14 +13,16 @@ internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView v
     private const int LookaheadRecordCost = 1;
     private readonly PriorityQueue<QueueDeadlineHint, DateTimeOffset> hints = new();
     private readonly ImmutableArray<ErrorCode>.Builder rejected = ImmutableArray.CreateBuilder<ErrorCode>();
-    private byte[]? last = bounds.LastKey;
+    private byte[]? last = bounds.LastKey?.ToArray();
+    private readonly ImmutableArray<byte> upper = bounds.UpperKey
+        ?? throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidCursor);
     private bool atUpper;
     private long admittedBytes;
 
     internal bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
         page.Check();
-        if (key.SequenceCompareTo(bounds.UpperKey) > EqualOrder)
+        if (key.SequenceCompareTo(upper.AsSpan()) > EqualOrder)
         {
             page.ExamineRecord();
             atUpper = true;
@@ -54,7 +56,7 @@ internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView v
         {
             rejected.Add(DueWorkRecordDecoder.SafeError(failure.Code));
         }
-        atUpper = key.SequenceEqual(bounds.UpperKey);
+        atUpper = key.SequenceEqual(upper.AsSpan());
         return !atUpper && page.ExaminedRecords < page.MaximumRecordsPerPage;
     }
 
@@ -68,7 +70,7 @@ internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView v
         var next = cursor.Advance(atUpper || exhausted ? DuePrefixCursor.Empty
             : bounds with
             {
-                LastKey = last?.ToArray()
+                LastKey = last is null ? null : ImmutableArray.CreateRange(last)
             });
         return new(jobs.MoveToImmutable(), rejected.ToImmutable(), next, page.ExaminedRecords, page.ExaminedBytes);
     }

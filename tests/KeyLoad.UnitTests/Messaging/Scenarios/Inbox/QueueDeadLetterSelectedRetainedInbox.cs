@@ -13,10 +13,10 @@ internal static class QueueDeadLetterSelectedRetainedInbox
         var message = new EnqueueMessage(lane.Queue, QueueDeadLetterSelectedProtocol.HistoryMessage,
             QueueDeadLetterSelectedProtocol.Payload, QueueDeadLetterSelectedProtocol.Headers);
         var producer = new CommandRequest(Guid.NewGuid(), lane.Partition, [message]);
-        QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(
+        QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(database,
             OperationKind.Batch, producer, producer.CommandId, time)).Get<CommitReceipt>();
         var claim = new ReceiveRequest(Guid.NewGuid(), lane, LeaseSeconds: QueueDeadLetterSelectedProtocol.LeaseSeconds);
-        var claimed = QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(
+        var claimed = QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(database,
             OperationKind.Receive, claim, claim.RequestId, time));
         var delivery = await Assert.That(claimed.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery).IsEqualTo(new Delivery(message.MessageId, QueueDeadLetterSelectedProtocol.Payload,
@@ -26,7 +26,7 @@ internal static class QueueDeadLetterSelectedRetainedInbox
         var processing = new ProcessingRequest(Guid.NewGuid(), lane, delivery.Token,
             QueueDeadLetterSelectedProtocol.Handler, QueueDeadLetterSelectedProtocol.One,
             [new PutDocument(QueueDeadLetterSelectedProtocol.Collection, message.MessageId, QueueDeadLetterSelectedProtocol.Payload)]);
-        QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(
+        QueueDeadLetterSelectedSetup.Execute(database, history, QueueDeadLetterSelectedSetup.Create(database,
             OperationKind.Processing, processing, processing.CommandId, time)).Get<CommitReceipt>();
     }
 

@@ -14,6 +14,9 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'functional-coverage.compiled-identity.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.compile-identity.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.test-identity.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.image-manifests.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.process-lifecycle.ps1') -Repository $Repository `
+    -ResultsDirectory $ResultsRoot -SourceManifestPath $SourceManifestPath
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.inputs.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.files.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.process.ps1')
@@ -23,10 +26,8 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.unit-selectors.ps1')
 
 $script:FcNativeProductDescriptor = [ordered]@{
-    Invalid = 'The original functional coverage cohort is incomplete or mismatched.'
+    Invalid = 'The original functional coverage inputs are incomplete or mismatched.'
     SourceName = 'functional-coverage.production-source-manifest.json'
-    RunName = 'functional-coverage.cluster-run.v1.json'
-    FixtureName = 'functional-coverage.cluster-fixture.v1.json'
     DescriptorName = 'functional-coverage.native-product-descriptor.v1.json'
     BoundsName = 'functional-coverage.native-options.v1.json'
     OutputDirectory = 'native-merge'
@@ -95,44 +96,37 @@ function Assert-DescriptorInputs {
     $SourceManifestPath = $script:FcNativeProductDescriptor.SourceManifestPath
     $UnitRunStatusPath = $script:FcNativeProductDescriptor.UnitRunStatusPath
 }
-function Get-PolicyBounds([string] $RunManifestPath) {
-    $file = Read-BoundedJson $RunManifestPath $script:FcNativeProductDescriptor.MaximumRunManifestBytes
-    $run = $file.value
-    if ($run.schemaVersion -ne 1 -or $run.suite -cne 'cluster' -or $run.filter -cne $script:FcNativeProductDescriptor.ClusterFilter -or
-        $run.runId -cnotmatch $script:FcNativeProductDescriptor.GuidPattern -or
-        $run.sourceRevision -cnotmatch $script:FcNativeProductDescriptor.RevisionPattern -or
-        $run.executionPolicy -isnot [Collections.IDictionary] -or
-        $run.executionPolicy.coverage -isnot [Collections.IDictionary]) { throw $script:FcNativeProductDescriptor.Invalid }
-    $coverage = $run.executionPolicy.coverage
-    $expected = @('maximumDescriptorBytes','maximumFiles','readBufferBytes','maximumTotalBytes','maximumFileBytes',
-        'maximumPathCharacters','maximumManifestBytes','maximumReportBytes','shutdownTimeout','settlementTimeout',
-        'containerStopTimeout','applicationCleanupTimeout')
-    Assert-ExactKeys $coverage $expected
-    $bounds = [ordered]@{}
-    foreach ($name in $expected[0..7]) {
-        $value = $coverage[$name]
-        if (($value -isnot [int] -and $value -isnot [long]) -or $value -le 0) {
-            throw $script:FcNativeProductDescriptor.Invalid
-        }
-        $bounds[$name] = $value
+function Get-PolicyBounds([string] $Root) {
+    # This is an admission/tooling default snapshot, never observed host or workload configuration.
+    $snapshot = Get-FcTestIdentitySnapshot $Root
+    $assemblyPath = Resolve-FcPath $Root $snapshot.compiledIdentity.dll
+    $assembly = [Reflection.Assembly]::LoadFrom($assemblyPath)
+    $type = $assembly.GetType('KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageExecutionOptions', $true)
+    $options = [Activator]::CreateInstance($type, $true)
+    $validation = $type.GetMethod('IsValid', [Reflection.BindingFlags] 'Instance,NonPublic')
+    if ($null -eq $validation -or -not $validation.Invoke($options, @())) {
+        throw $script:FcNativeProductDescriptor.Invalid
     }
-    foreach ($name in @('shutdownTimeout','settlementTimeout','containerStopTimeout','applicationCleanupTimeout')) {
-        $duration = [TimeSpan]::ParseExact([string]$coverage[$name], $script:FcNativeProductDescriptor.TimeSpanFormat,
-            [Globalization.CultureInfo]::InvariantCulture)
+    $bounds = [ordered]@{}
+    foreach ($name in @('MaximumDescriptorBytes','MaximumFiles','ReadBufferBytes','MaximumTotalBytes',
+        'MaximumFileBytes','MaximumPathCharacters','MaximumManifestBytes','MaximumReportBytes')) {
+        $value = $type.GetProperty($name).GetValue($options)
+        if ($value -le 0) { throw $script:FcNativeProductDescriptor.Invalid }
+        $bounds[$name.Substring(0,1).ToLowerInvariant() + $name.Substring(1)] = $value
+    }
+    foreach ($name in @('ShutdownTimeout','SettlementTimeout','ProcessStopTimeout','ApplicationCleanupTimeout')) {
+        $duration = [TimeSpan] $type.GetProperty($name).GetValue($options)
         if ($duration.Ticks -le 0 -or $duration.Ticks % [TimeSpan]::TicksPerSecond -ne 0) {
             throw $script:FcNativeProductDescriptor.Invalid
         }
-        $bounds[$name + 'Seconds'] = [long]$duration.TotalSeconds
+        $key = $name.Substring(0,1).ToLowerInvariant() + $name.Substring(1) + 'Seconds'
+        $bounds[$key] = [long] $duration.TotalSeconds
     }
-    $script:FcNativeMergeInput.ReadBufferBytes = [int]$bounds.readBufferBytes
-    $script:FcNativeMergeInput.MaximumFiles = [int]$bounds.maximumFiles
-    $script:FcNativeMergeInput.MaximumTotalBytes = [long]$bounds.maximumTotalBytes
-    $script:FcNativeMergeInput.MaximumFileBytes = [long]$bounds.maximumFileBytes
-    $script:FcNativeMergeInput.MaximumManifestBytes = [long]$bounds.maximumManifestBytes
-    $script:FcNativeMergeInput.MaximumReportBytes = [long]$bounds.maximumReportBytes
-    $script:FcNativeMergeInput.MaximumPathCharacters = [int]$bounds.maximumPathCharacters
-    $run.file = $file
-    [ordered]@{ run = $run; bounds = $bounds }
+    foreach ($name in @('ReadBufferBytes','MaximumFiles','MaximumTotalBytes','MaximumFileBytes',
+        'MaximumManifestBytes','MaximumReportBytes','MaximumPathCharacters','SettlementTimeoutSeconds')) {
+        $script:FcNativeMergeInput[$name] = $bounds[$name.Substring(0,1).ToLowerInvariant() + $name.Substring(1)]
+    }
+    [ordered]@{ bounds = $bounds; testIdentity = $snapshot.compiledIdentity }
 }
 
 function Assert-ExactKeys([Collections.IDictionary] $Value, [string[]] $Names) {
@@ -182,7 +176,7 @@ function Assert-CompleteContributorModules([object[]] $Rows, [object] $Manifest)
     foreach ($product in $Manifest.compiledProducts) {
         if ($product.role -ceq 'production') { [void]$required.Add([string]$product.module) }
     }
-    if ($required.Count -ne 14) { throw $script:FcNativeProductDescriptor.Invalid }
+    if ($required.Count -eq 0) { throw $script:FcNativeProductDescriptor.Invalid }
     $observed = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($row in $Rows) { foreach ($module in $row.executedModules) { [void]$observed.Add([string]$module) } }
     if (-not $observed.SetEquals($required)) {
@@ -227,7 +221,7 @@ function Get-ToolMetadata([string] $Root, [object] $Bounds) {
 }
 
 function Get-SuiteRun([string] $Suite, [int] $ExitCode, [object] $Source, [object] $ImageBySuite,
-    [object] $Bounds, [string] $ResultsRoot, [string] $ClusterRunId, [string] $Filter = '', [object] $Status = $null) {
+    [object] $Bounds, [string] $ResultsRoot, [string] $Filter = '', [object] $Status = $null) {
     if ($ExitCode -ne $script:FcNativeProductDescriptor.ExitSuccess) {
         throw "The native $Suite coverage child did not complete successfully; raw outputs are retained."
     }
@@ -236,7 +230,8 @@ function Get-SuiteRun([string] $Suite, [int] $ExitCode, [object] $Source, [objec
     $report = Get-UniqueReport $directory $script:FcNativeProductDescriptor.ReportPattern
     $trx = Get-UniqueReport $directory $script:FcNativeProductDescriptor.TrxPattern
     $coverage = Join-Path $directory $script:FcNativeProductDescriptor.CoverageName
-    $runId = if ($Suite -ceq 'cluster') { $ClusterRunId } else { [Guid]::NewGuid().ToString('D').ToLowerInvariant() }
+    $native = Read-BoundedJson $report $Bounds.maximumReportBytes
+    $runId = [Guid]::ParseExact([string] $native.value.publicationGeneration, 'N').ToString('D').ToLowerInvariant()
     $baseSuite = Get-FcNativeBaseSuite $Suite
     $run = [ordered]@{ suite = $Suite; runId = $runId; sourceRevision = $Source.value.sourceRevision
         sourceManifestSha256 = $Source.file.sha256; testImageManifestSha256 = $ImageBySuite[$baseSuite].sha256
@@ -286,30 +281,20 @@ function Get-UnitGroupSuites {
     $suites.ToArray()
 }
 
-function Get-ClusterFixture([string] $ResultsRoot, [object] $Run, [object] $Source, [object] $Bounds) {
-    $fixtureRead = Read-BoundedJson (Join-Path $ResultsRoot $script:FcNativeProductDescriptor.FixtureName) `
-        $Bounds.maximumManifestBytes
-    $fixture = $fixtureRead.value
-    if ($fixture.schemaVersion -ne 1 -or $fixture.functionalRunId -cne $Run.runId -or
-        $fixture.sourceRevision -cne $Source.value.sourceRevision -or
-        $fixture.sourceManifestSha256 -cne $Source.file.sha256 -or $fixture.suite -cne 'cluster' -or
-        $fixture.nodes -isnot [array] -or $fixture.nodes.Count -ne 3 -or $fixture.caseIdentities -isnot [array]) {
-        throw $script:FcNativeProductDescriptor.Invalid
+function Get-ClusterLifecycles([string] $Root, [string] $Results, [object] $Bounds) {
+    $observed = Get-FcNativeProcessLifecycleEvidence $Root $Results $SourceManifestPath
+    $rows = [Collections.Generic.List[object]]::new()
+    foreach ($original in $observed.originals) {
+        if ([IO.Path]::GetFileName($original.path) -cne 'native-process-startup.json') { continue }
+        $directory = [IO.Path]::GetDirectoryName((Resolve-FcPath $Root $original.path))
+        $rows.Add([ordered]@{
+            startup = New-EvidenceReference (Join-Path $directory 'native-process-startup.json') $Bounds.maximumManifestBytes
+            beforeShutdown = New-EvidenceReference (Join-Path $directory 'native-process-before-shutdown.json') $Bounds.maximumManifestBytes
+            shutdown = New-EvidenceReference (Join-Path $directory 'native-process-shutdown.json') $Bounds.maximumManifestBytes
+        })
     }
-    $nodes = [Collections.Generic.List[object]]::new()
-    foreach ($node in $fixture.nodes) {
-        Assert-ExactKeys $node @('node','containerId','imageId','session','serverPid','serverStartTicks','terminal','coverage','contextManifest')
-        $nodes.Add([ordered]@{ node = $node.node; session = $node.session; coverage = $node.coverage
-            terminal = $node.terminal; contextManifest = $node.contextManifest })
-    }
-    $caseStrings = [Collections.Generic.List[string]]::new()
-    foreach ($case in $fixture.caseIdentities) {
-        Assert-ExactKeys $case @('className','methodName','instanceName')
-        $caseStrings.Add(([string]$case.className) + '|' + ([string]$case.methodName) + '|' + ([string]$case.instanceName))
-    }
-    [ordered]@{ fixtureId = $fixture.fixtureId; sourceRevision = $Source.value.sourceRevision
-        sourceManifestSha256 = $Source.file.sha256; functionalRunId = $Run.runId; caseIdentities = @($caseStrings.ToArray())
-        nodes = @($nodes.ToArray()); fixtureReceipt = New-EvidenceReference $fixtureRead.path $Bounds.maximumManifestBytes }
+    if ($rows.Count -eq 0 -or $rows.Count -gt $Bounds.maximumFiles) { throw $script:FcNativeProductDescriptor.Invalid }
+    $rows.ToArray()
 }
 
 function Write-CreateOnly([string] $Path, [byte[]] $Bytes) {
@@ -319,7 +304,7 @@ function Write-CreateOnly([string] $Path, [byte[]] $Bytes) {
     finally { $stream.Dispose() }
 }
 
-function New-ProductRunEvidence([string] $Root, [string] $Results, [object] $Bounds, [object] $Policy, [object] $Source,
+function New-ProductRunEvidence([string] $Root, [string] $Results, [object] $Bounds, [object] $Source,
     [object] $ImageBySuite, [string] $StatusPath, [object] $StatusRead, [object] $StatusRuns,
     [int] $RecoveryExitCode, [int] $ClusterExitCode) {
     $groupSuites = [string[]] @(Get-UnitGroupSuites)
@@ -331,18 +316,16 @@ function New-ProductRunEvidence([string] $Root, [string] $Results, [object] $Bou
     foreach ($suite in $groupSuites + @('recovery','cluster')) {
         $statusRow = if ($statusRuns.ContainsKey($suite)) { $statusRuns[$suite] } else { $null }
         $exitCode = if ($null -ne $statusRow) { [int] $statusRow.exitCode } else { $codes[$suite] }
-        $runId = if ($suite -ceq 'cluster') { [string]$policy.run.runId } else { $null }
         $filter = if ($null -ne $statusRow) { [string] $statusRow.filter } else { '' }
-        $runs.Add((Get-SuiteRun $suite $exitCode $source $imageBySuite $bounds $results $runId $filter $statusRow))
+        $runs.Add((Get-SuiteRun $suite $exitCode $source $imageBySuite $bounds $results $filter $statusRow))
     }
-    $clusterRun = @($runs.ToArray() | Where-Object suite -CEQ 'cluster')[0]
-    $fixture = Get-ClusterFixture $results $clusterRun $source $bounds
+    $lifecycles = @(Get-ClusterLifecycles $root $results $bounds)
     $tool = Get-ToolMetadata $root $bounds
     $statusReference = New-EvidenceReference $statusPath $script:FcNativeContributors.UnitRunStatusMaximumBytes
     if ($statusReference.length -ne $statusRead.length -or $statusReference.sha256 -cne $statusRead.sha256) {
         throw $script:FcNativeProductDescriptor.Invalid
     }
-    [ordered]@{ census = $census; runs = @($runs.ToArray()); fixture = $fixture; tool = $tool
+    [ordered]@{ census = $census; runs = @($runs.ToArray()); lifecycles = $lifecycles; tool = $tool
         statusReference = $statusReference }
 }
 
@@ -350,8 +333,7 @@ function Invoke-DescriptorProducer {
     Assert-DescriptorInputs
     $root = $script:FcNativeProductDescriptor.RepositoryRoot
     $results = $script:FcNativeProductDescriptor.ResultsRoot
-    $runPath = Join-Path $results $script:FcNativeProductDescriptor.RunName
-    $policy = Get-PolicyBounds $runPath
+    $policy = Get-PolicyBounds $root
     $bounds = $policy.bounds
     $statusPath = $script:FcNativeProductDescriptor.UnitRunStatusPath
     $statusRead = Read-BoundedJson $statusPath $script:FcNativeContributors.UnitRunStatusMaximumBytes
@@ -369,19 +351,18 @@ function Invoke-DescriptorProducer {
     $imageBySuite = Read-FcNativeTestImageManifests $results $root $source.value $bounds
     if ($imageBySuite.Count -ne 3) { throw $script:FcNativeProductDescriptor.Invalid }
     $inventory = Read-FcNativeUnitInventory $root $source.value $bounds $imageBySuite $contributors
-    $statusRuns = Assert-FcNativeUnitRunStatus $statusRead.value $inventory.value $policy.run.sourceRevision `
-        $policy.run.sourceManifestSha256
-    if ($policy.run.sourceRevision -cne $source.value.sourceRevision -or
-        $policy.run.sourceManifestSha256 -cne $source.file.sha256 -or
-        $policy.run.testImageManifestSha256 -cne $imageBySuite['cluster'].sha256) {
+    $statusRuns = Assert-FcNativeUnitRunStatus $statusRead.value $inventory.value $source.value.sourceRevision `
+        $source.file.sha256
+    if ($policy.testIdentity.dllSha256 -cne $imageBySuite['unit'].identity.compiledIdentity.dllSha256 -or
+        $policy.testIdentity.pdbSha256 -cne $imageBySuite['unit'].identity.compiledIdentity.pdbSha256) {
         throw $script:FcNativeProductDescriptor.Invalid
     }
-    $runEvidence = New-ProductRunEvidence $root $results $bounds $policy $source $imageBySuite `
+    $runEvidence = New-ProductRunEvidence $root $results $bounds $source $imageBySuite `
         $statusPath $statusRead $statusRuns $RecoveryExitCode $ClusterExitCode
     $descriptor = [ordered]@{ schemaVersion = 3; invocationId = [Guid]::NewGuid().ToString('D').ToLowerInvariant()
         evidenceRoot = $results; sourceManifest = $sourceRef; unitRunStatus = $runEvidence.statusReference
         tool = $runEvidence.tool; bounds = $bounds; unitCensus = $runEvidence.census
-        suiteRuns = $runEvidence.runs; clusterFixtures = @($runEvidence.fixture)
+        suiteRuns = $runEvidence.runs; clusterLifecycles = @($runEvidence.lifecycles)
         outputDirectory = $script:FcNativeProductDescriptor.OutputDirectory }
     $descriptorPath = Join-Path $results 'functional-coverage.native-product-descriptor.v1.json'
     $nativeOptionsPath = Join-Path $results 'functional-coverage.native-options.v1.json'

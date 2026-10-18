@@ -14,7 +14,7 @@ internal sealed class DocumentFunctionalGateTests
     private const string ChangedOriginal = "changedOriginal";
 
     [Test]
-    public async Task AcMeth004FunctionalGateRequiresOnePassingOriginalTestAndSameSourceJobArtifactImages()
+    public async Task AcMeth004FunctionalGateRequiresOnePassingOriginalTestAndSameSourceJobArtifactProcesses()
     {
         var script = Path.Combine(
             SessionNodeProcess.RepositoryRoot(),

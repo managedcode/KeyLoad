@@ -7,10 +7,32 @@ namespace KeyLoad.Server;
 
 internal static class NativeJobGraphRegistration
 {
-    private const string ExistingPolicyRequired = "The native jobs graph requires the existing default-deny policy instance.";
+    private const string ExistingPolicyRequired = "The native execution graph requires the existing default-deny policy instance.";
     private const string EverySourceMethod = ManagedCode.Orleans.Graph.Interfaces.Constants.AnyMethod;
 
     internal static void Extend(IServiceCollection services)
+    {
+        ExtendPolicy(services, graph =>
+        {
+            AddRequests(graph);
+            AddBackgroundWorkers(graph);
+            AddJobs(graph);
+            AddJournalStorage(graph);
+            AddNativeJournalScheduler(graph, services);
+            BackgroundStorageGraphRegistration.Add(graph);
+        });
+    }
+
+    internal static void ExtendJournalStorage(IServiceCollection services)
+    {
+        ExtendPolicy(services, graph =>
+        {
+            AddRequests(graph);
+            AddJournalStorage(graph);
+        });
+    }
+
+    private static void ExtendPolicy(IServiceCollection services, Action<DirectedGraph> configure)
     {
         var descriptor = services.Single(static value => !value.IsKeyedService
             && value.ServiceType == typeof(GrainTransitionManager));
@@ -26,9 +48,7 @@ internal static class NativeJobGraphRegistration
                 graph.AddTransition(edge.Source, edge.Target, transition);
             }
         }
-        AddRequests(graph);
-        AddBackgroundWorkers(graph);
-        AddJobs(graph);
+        configure(graph);
         services.Remove(descriptor);
         services.AddSingleton(new GrainTransitionManager(graph, allowAllByDefault: false));
     }
@@ -63,12 +83,6 @@ internal static class NativeJobGraphRegistration
             nameof(IAnnProjectionCoordinatorGrain.ScheduleAsync));
         Add<IAnnProjectionWorkerGrain, IAnnProjectionCoordinatorGrain>(graph, EverySourceMethod,
             nameof(IAnnProjectionCoordinatorGrain.ScheduleAsync));
-        Add<RecurringDueWorkerGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<SampleChunkWorkerGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<AnnProjectionWorkerGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<IRecurringDueWorkerGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<ISampleChunkWorkerGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<IAnnProjectionWorkerGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
     }
 
     private static void AddJobs(DirectedGraph graph)
@@ -79,18 +93,24 @@ internal static class NativeJobGraphRegistration
         Add<AnnProjectionCoordinatorGrain, IConnectionGrain>(graph, nameof(IDurableJobHandler.ExecuteJobAsync),
             nameof(IConnectionGrain.ExecuteStreamAsync));
         Add<IRecurringDueCoordinatorGrain, IConnectionGrain>(graph, EverySourceMethod, nameof(IConnectionGrain.ExecuteStreamAsync));
-        Add<IRecurringDueCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod,
-            nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync));
-        Add<RecurringDueCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod,
-            nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync));
-        Add<SampleChunkCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<AnnProjectionCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<ISampleChunkCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
-        Add<IAnnProjectionCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
+    }
+
+    private static void AddJournalStorage(DirectedGraph graph)
+    {
         graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IConnectionGrain).FullName!,
             new GrainTransition(RuntimeJournalClient.ReadCoreCallerMethod, nameof(IConnectionGrain.ExecuteStreamAsync)));
         graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IConnectionGrain).FullName!,
             new GrainTransition(RuntimeJournalClient.SendCommandCallerMethod, nameof(IConnectionGrain.ExecuteStreamAsync)));
+    }
+
+    private static void AddNativeJournalScheduler(DirectedGraph graph, IServiceCollection services)
+    {
+        var contract = typeof(ILocalDurableJobManager);
+        var source = services.Where(static service => !service.IsKeyedService)
+            .Select(static service => service.ImplementationType).OfType<Type>()
+            .Single(type => type.Assembly == contract.Assembly && contract.IsAssignableFrom(type));
+        graph.AddTransition(source.FullName!, typeof(IConnectionGrain).FullName!,
+            new GrainTransition(EverySourceMethod, nameof(IConnectionGrain.ExecuteStreamAsync)));
     }
 
     private static void Add<TSource, TTarget>(DirectedGraph graph, string sourceMethod, params string[] targetMethods)

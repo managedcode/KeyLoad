@@ -8,11 +8,11 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal static class EventQueueStateEnvelopeBodyOwnershipAssertions
 {
     internal static async Task CallerBuffersCannotChangeNativeProducerBodiesAsync(EventQueueStateEnvelopeFixture fixture,
-        EventQueueStateEnvelopeSample sample)
+        EventQueueStateEnvelopeState state)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        foreach (var pair in sample.Bodies)
+        foreach (var pair in state.Bodies)
         {
             var key = Convert.FromHexString(pair.Key);
             var owned = Required(fixture, key);
@@ -22,6 +22,6 @@ internal static class EventQueueStateEnvelopeBodyOwnershipAssertions
         }
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await EventQueueStateEnvelopeSourceAssertions.CurrentAsync(fixture, sample);
+        await EventQueueStateEnvelopeSourceAssertions.CurrentAsync(fixture, state);
     }
 }

@@ -35,11 +35,11 @@ internal sealed class SubscriptionOldCutState(PartitionRef partition)
     internal CommitReceipt Producer { get; set; } = null!;
     internal CommitReceipt FreshProducer { get; set; } = null!;
     internal CommitReceipt FreshProcessing { get; set; } = null!;
-    internal Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, string principal = "root")
-        => new(id, kind, principal, Clock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    internal Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, string principal = "root")
+        => database.CreateCommand(kind, id, principal, Clock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
     internal Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, string principal = "root")
     {
-        var operation = Create(kind, payload, id, principal);
+        var operation = Create(database, kind, payload, id, principal);
         var result = database.Apply(operation);
         if (Errors.Code(result.Problem) is { } code)
         {

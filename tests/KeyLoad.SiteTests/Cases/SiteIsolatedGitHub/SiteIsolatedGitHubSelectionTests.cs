@@ -36,7 +36,7 @@ internal sealed class SiteIsolatedGitHubSelectionTests
     }
 
     [Test]
-    public async Task AC_ISO_007_CurrentCompositeJobAndImageProofRejectsExpiredSuiteArtifact()
+    public async Task AC_ISO_007_CurrentCompositeJobAndRuntimeProofRejectsExpiredSuiteArtifact()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);

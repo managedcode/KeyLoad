@@ -2,7 +2,7 @@ import { SESSION, exactSession as exact, requireSession as require, sessionHash,
   sessionRows, sessionPositive, sessionCount, validateSessionCohort } from './session-contract.mjs';
 
 const common = ['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'producer', 'metadataFiles'];
-const selected = ['repository', 'workflow', 'run', 'cohort', 'aggregateJob', 'artifacts', 'workers', 'image', 'runtimeIdentity', 'functional',
+const selected = ['repository', 'workflow', 'run', 'cohort', 'aggregateJob', 'artifacts', 'workers', 'preparation', 'runtimeIdentity', 'functional',
   'suiteFiles', 'workerArchives', 'archives', 'inputFiles'];
 export function validateSessionSiteReceipt(value) {
   require(value?.schemaVersion === SESSION.schema && ['publish', 'validate'].includes(value.mode)
@@ -24,8 +24,10 @@ export function validateSessionSiteReceipt(value) {
     && Array.isArray(value.workerArchives) && value.workerArchives.length === SESSION.workers);
   for (const artifact of Object.values(value.artifacts)) validateArtifactIdentity(artifact);
   validateJobProof(value.aggregateJob, value.cohort, ['Check complete session accounting', 'Save combined benchmark results', 'Save GitHub result verification'], false);
-  for (const artifact of [value.image.artifact, value.image.compiledArtifact, value.runtimeIdentity.artifact, value.functional.artifact]) validateArtifactIdentity(artifact);
-  validateJobProof(value.image.job, value.cohort, ['Check Docker image export and import', 'Save Docker images'], false);
+  require(exact(value.preparation, ['job', 'compiledArtifact']) && value.preparation.job?.name === SESSION.prepareJob
+    && value.preparation.compiledArtifact?.name === 'comparison-compiled-test-bundle');
+  for (const artifact of [value.preparation.compiledArtifact, value.runtimeIdentity.artifact, value.functional.artifact]) validateArtifactIdentity(artifact);
+  validateJobProof(value.preparation.job, value.cohort, SESSION.prepareSteps, false);
   const seenJobs = new Set(), seenArtifacts = new Set();
   for (const [index, row] of sessionRows().entries()) {
     const worker = value.workers[index];
@@ -48,10 +50,7 @@ export function validateSessionSiteReceipt(value) {
     require(exact(file, ['path', 'sha256']) && sessionPath(file.path) && sessionHash(file.sha256) && !paths.has(file.path));
     paths.add(file.path);
   }
-  require(paths.has('aggregate.json') && exact(value.image.archive, ['path', 'bytes', 'sha256'])
-    && value.image.archive.path === 'archives/comparison-image-bundle.zip' && sessionPositive(value.image.archive.bytes)
-    && `sha256:${value.image.archive.sha256}` === value.image.artifact.digest
-    && value.image.archive.bytes === value.image.artifact.sizeInBytes);
+  require(paths.has('aggregate.json'));
   require(exact(value.runtimeIdentity, ['artifact', 'archive'])
     && value.runtimeIdentity.artifact.name === 'comparison-compiled-runtime-identity'
     && exact(value.runtimeIdentity.archive, ['path', 'bytes', 'sha256'])

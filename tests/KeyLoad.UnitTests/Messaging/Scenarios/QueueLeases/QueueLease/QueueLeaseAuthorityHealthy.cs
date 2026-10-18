@@ -12,13 +12,13 @@ internal static class QueueLeaseAuthorityHealthy
         ZoneTreeStore store, QueueLeaseAuthorityState state)
     {
         var before = QueueLeaseAuthoritySetup.Counters(store, state.Lane);
-        var time = state.Original.EvaluatedAt;
+        var time = new DateTimeOffset(state.Original.Timestamp);
         var producer = new CommandRequest(Guid.NewGuid(), state.Lane.Partition,
             [new EnqueueMessage(state.Lane.Queue, QueueLeaseAuthorityProtocol.Healthy, QueueLeaseAuthorityProtocol.HealthyPayload)]);
         var produced = QueueWholeFlowStorage.Apply(database, OperationKind.Batch, producer, producer.CommandId, time);
         produced.Get<CommitReceipt>();
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, LeaseSeconds: QueueLeaseAuthorityProtocol.LeaseSeconds);
-        var claim = QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, time);
+        var claim = QueueLeaseAuthoritySetup.Create(database, OperationKind.Receive, request, request.RequestId, time);
         var claimed = database.Apply(claim);
         var delivered = await Assert.That(claimed.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivered).IsEqualTo(new Delivery(QueueLeaseAuthorityProtocol.Healthy,
@@ -26,7 +26,7 @@ internal static class QueueLeaseAuthorityHealthy
             QueueLeaseAuthorityProtocol.One, time.AddSeconds(QueueLeaseAuthorityProtocol.LeaseSeconds),
             QueueLeaseAuthorityProtocol.One, QueueLeaseAuthorityProtocol.One));
         var command = new DeliveryCommand(Guid.NewGuid(), state.Lane, delivered.Token, DeliveryAction.Ack);
-        var ack = QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command, command.CommandId, time);
+        var ack = QueueLeaseAuthoritySetup.Create(database, OperationKind.Delivery, command, command.CommandId, time);
         var acked = database.Apply(ack);
         var receipt = acked.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
@@ -48,14 +48,14 @@ internal static class QueueLeaseAuthorityHealthy
         QueueLeaseAuthorityState state, QueueLeaseAuthorityHealthyState healthy)
     {
         await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
-            healthy.Producer, healthy.Producer.CommandId, state.Original.EvaluatedAt), healthy.Produced);
+            healthy.Producer, healthy.Producer.CommandId, new DateTimeOffset(state.Original.Timestamp)), healthy.Produced);
         await NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(healthy.Ack), healthy.Acked);
         var stale = database.Apply(healthy.Claim);
         await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
 
         await Assert.That(stale.Value).IsNull();
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, healthy.Claim.Id)))!;
+            state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, healthy.Claim.CommandId)))!;
         await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, healthy.Claimed);
         await RequireAsync(database, store, state, healthy);
     }

@@ -37,10 +37,9 @@ param(
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.files.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.process.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.counts.ps1')
-. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.context.ps1')
-. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.server-closure.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.sources.ps1')
-. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.fixture-receipt.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.process-lifecycle.ps1') -Repository $Repository `
+    -ResultsDirectory $EvidenceRoot -SourceManifestPath $DescriptorPath
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.admission.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.execution.ps1')
@@ -63,10 +62,7 @@ try {
     $expectedBounds = ConvertFrom-Json -InputObject $NativeOptionsJson -AsHashtable -Depth 4
     $plan = Read-FcNativeProductPlan $EvidenceRoot $Repository $DescriptorPath $expectedBounds
     if ($Mode -ceq 'ProductAdmission') {
-        [ordered]@{ admitted = $true; invocationId = $plan.descriptor.invocationId
-            sourceRevision = $plan.manifest.sourceRevision; inputCount = $plan.inputs.Count
-            suiteRunCount = $plan.descriptor.suiteRuns.Count } | ConvertTo-Json -Compress -Depth 4 | Write-Output
-        exit 0
+        throw $script:FcNativeMergeInput.ProcessAttributionOpen
     }
     Invoke-FcNativeMergePlan $plan | ConvertTo-Json -Compress -Depth 8 | Write-Output
 }

@@ -19,7 +19,7 @@ Follow the [root policy](../../AGENTS.md) and the owning feature specification. 
 From the repository root:
 
 ```sh
-dotnet test --project tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-build --no-restore --configuration Release --output Detailed
+dotnet test --project tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-build --no-restore --output Detailed
 ```
 
 Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.

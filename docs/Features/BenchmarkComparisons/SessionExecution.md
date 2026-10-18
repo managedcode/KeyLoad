@@ -115,11 +115,12 @@ matrix, restarts or separate benchmark scenario.
 
 ## Shared preparation and measurement
 
-- The exact-source test runner, AppHost and required images are built once. The
-  immutable bundle contains a manifest with SHA, DLL/PDB and image digests. Workers
-  verify it before use; there is no repeated solution restore/build in every
-  measurement job. The required metadata and Aspire paths are verified by a genuine
-  launch, not by assuming that copying bin is enough.
+- The exact-source native test runner, both AppHosts, server and workload client
+  are built once. The immutable runtime bundle retains source, DLL/PDB, package
+  assets and Aspire tool identities; workers validate and import it without a
+  repeated solution restore/build. KeyLoad is a native project process; external
+  databases use pinned images. Ordinary build/start/load never publishes a
+  KeyLoad or workload-client container.
 - Contract tests, the actual matrix-to-C# selection and native startup verification
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
@@ -129,6 +130,20 @@ matrix, restarts or separate benchmark scenario.
 - Unavailable native capabilities/topologies have explicit unavailable results with a
   verified reason. A native failure makes the scenario result failed/null; missing or
   corrupt evidence cannot be replaced by unavailable.
+
+The primary `KeyLoad.AppHost` serves development and functional tests with native
+server project processes and Azurite. `KeyLoad.LoadTests.AppHost` owns only the
+selected load infrastructure. It awaits readiness, exposes discovered endpoints to
+`KeyLoad.ComparisonHost`, and joins cleanup after the client-owned workload. The
+client remains outside the resource graph. Only run-owned Docker resources are
+removed; native image user defaults and anonymous session volumes own external DB
+files. SDK `PublishContainer` is explicit release/publication work.
+
+Local execution retains actual native binary/source/process identities with no
+invented GitHub provenance. It cannot authorize public figures. Matched resource
+qualification for native KeyLoad processes and external advertised-endpoint
+reachability remain open until actual execution proves them; measured workload
+reports do not close these independent gates.
 
 ## Runs and results
 
@@ -162,7 +177,7 @@ follow the real results.
 | REQ-BSESSION-002: several TUnit tests share one infrastructure. | AC-BSESSION-002: the original native discovery/TRX shows separate load/read/search/mixed cases; resource identities stay the same between cases; Aspire starts the topology once. |
 | REQ-BSESSION-003: the initial million is measured. | AC-BSESSION-003: the report contains actual attempted/ACKed/verified record counts, elapsed/throughput and the original load case outcome; setup does not hide inserts. |
 | REQ-BSESSION-004: separate operation tests and a genuine mixed workload. | AC-BSESSION-004: at least 100k measured operations per applicable case; mixed create/delete of 100k each genuinely overlap in time; a deterministic final oracle verifies the records and results. |
-| REQ-BSESSION-005: one build, an immutable exact-source bundle. | AC-BSESSION-005: workers verify hashes/source/image identity and run the compiled tests without rebuilding; Docker lifecycle belongs to Aspire. |
+| REQ-BSESSION-005: one build, an immutable exact-source bundle. | AC-BSESSION-005: workers verify source/DLL/PDB/process identities and run the compiled tests without rebuilding; Docker lifecycle belongs to Aspire. |
 | REQ-BSESSION-006: no warmup and no per-case data reset. | AC-BSESSION-006: actual operation accounting starts from the first call; the same dataset and topology are kept between native cases. |
 | REQ-BSESSION-007: complete genuine results and honest publication. | AC-BSESSION-007: the aggregator accounts for the whole planned case inventory, validates source/run/attempt and original artifacts, rejects corrupt/missing/mixed data, preserves failed/null and native unavailable; Website derives metrics only from validated successful measurements. |
 | REQ-BSESSION-008: completed verification. | AC-BSESSION-008: exact-source Linux build/format/governance, focused native regressions and genuine 1-node/3-node SDK/MCP benchmark sessions with retained reports; no local/source-only result closes the Linux gate. |

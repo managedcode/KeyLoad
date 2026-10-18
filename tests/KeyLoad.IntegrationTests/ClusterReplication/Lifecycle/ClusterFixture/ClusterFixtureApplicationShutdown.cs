@@ -1,8 +1,7 @@
-using KeyLoad.Server;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
@@ -50,8 +49,13 @@ internal static class ClusterFixtureApplicationShutdown
             }
             return new
             {
-                original.Name, original.ProcessId, original.StartedAtUtc, original.AspireStartedAtUtc,
-                actual.Snapshot.ExitCode, actual.Snapshot.StartTimeStamp, actual.Snapshot.StopTimeStamp,
+                original.Name,
+                original.ProcessId,
+                original.StartedAtUtc,
+                original.AspireStartedAtUtc,
+                actual.Snapshot.ExitCode,
+                actual.Snapshot.StartTimeStamp,
+                actual.Snapshot.StopTimeStamp,
                 State = actual.Snapshot.State?.Text
             };
         }).ToArray();

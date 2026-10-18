@@ -10,11 +10,9 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
     private const int Joined = 1;
 
     private readonly Lock gate = new();
-    private readonly NativeResourceWorkPhysicalBinding physical = new();
     private readonly CancellationTokenSource shutdown = new();
     private readonly CancellationToken shutdownToken;
     private readonly NativeRequestWorkAdmissions admissions;
-    private readonly NativeRequestWorkChildren children;
     private Task? drainTask;
     private Task? disposeTask;
     private bool admissionClosed;
@@ -26,7 +24,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(options);
         admissions = new(options);
-        children = new(gate, this, physical, admissions, () => admissionClosed);
         shutdownToken = shutdown.Token;
     }
 
@@ -55,23 +52,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
             return admissions.Acquire(this, requestId, kind);
         }
     }
-
-    internal NativeRequestWorkLease RequireOriginalParentBinding(NativeRequestWorkLease child)
-        => children.RequireOriginalParentBinding(child);
-
-    internal NativeRequestWorkChildReservation ReserveLocalChild(NativeRequestWorkLease parent,
-        DecodedGrainRequest verified, PhysicalShardRecord expectedOwner, SiloStorageIdentity expectedRuntime)
-        => children.Reserve(parent, verified, expectedOwner, expectedRuntime);
-
-    internal NativeRequestWorkLease AcquireVerifiedProducer(DecodedGrainRequest verified,
-        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime)
-        => children.AcquireVerifiedProducer(verified, actualOwner, actualRuntime);
-
-    internal bool BeginChildDispatchCompletion(NativeRequestWorkChildReservation reservation)
-        => children.BeginCompletion(reservation);
-
-    internal void RecordChildCleanup(NativeRequestWorkLease parent, ImmutableArray<Exception> failures)
-        => children.RecordCleanup(parent, failures);
 
     /// <summary>Closes admission, cancels work, and returns the shared original drain task.</summary>
     /// <returns>The same task to every caller.</returns>
@@ -159,16 +139,5 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
             admissions.AdmitPublication(lease);
         }
     }
-
-    internal void BindPhysicalOwner(PhysicalShardRecord actualOwner)
-    {
-        lock (gate)
-        {
-            physical.Bind(actualOwner);
-        }
-    }
-
-    internal void ReleaseCloseObserver(NativeRequestWorkLease lease)
-        => NativeRequestWorkCompletion.ReleaseCloseObserver(gate, lease);
 
 }

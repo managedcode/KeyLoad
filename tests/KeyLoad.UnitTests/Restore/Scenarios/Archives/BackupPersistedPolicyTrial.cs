@@ -103,7 +103,7 @@ internal static class BackupPersistedPolicyTrial
         var authority = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
         await Assert.That(authority.Code).IsEqualTo(ErrorCode.Corruption);
         var originalToken = result.Get<CommitReceipt>().Token;
-        var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, fixture.Partition));
+        var owner = database.Store.Read(view => database.ReadPlacementWitness(view, fixture.Partition));
         await Assert.That(owner.Incarnation).IsEqualTo(originalToken.Incarnation);
 
         await Assert.That(originalToken.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);

@@ -11,7 +11,8 @@ internal static partial class DistributedSearchCoordinator
 
     internal static async Task<DistributedSearchPageV1> ExecuteAsync(DatabaseEngine database,
         DistributedSearchRequestV1 request, IOptions<QueryExecutionOptions> options,
-        Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, DistributedSearchPreparedLeaf> prepare,
+        Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
+            Task<DistributedSearchPreparedLeaf>> prepare,
         Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,
         CancellationToken original, Func<CancellationToken, Task>? statisticsCaptured = null,
         IResourceLifetimeWorkBinding? binding = null)
@@ -38,7 +39,7 @@ internal static partial class DistributedSearchCoordinator
             var partitions = DistributedSearchValidation.Require(request, database.Limits, options, budget);
             var grants = DistributedSearchGrants.Reserve(partitions.Length, budget);
             return await new DistributedSearchOperation(database, request, partitions, options, budget, grants,
-                prepare, sourceBarrier, execution, statisticsCaptured).RunAsync().ConfigureAwait(false);
+                prepare, sourceBarrier, execution, statisticsCaptured).RunAsync().ConfigureAwait(true);
         }
         catch (OperationCanceledException) when (original.IsCancellationRequested)
         {

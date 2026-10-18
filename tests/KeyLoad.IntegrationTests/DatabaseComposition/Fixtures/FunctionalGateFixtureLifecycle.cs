@@ -1,7 +1,7 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.Server;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 

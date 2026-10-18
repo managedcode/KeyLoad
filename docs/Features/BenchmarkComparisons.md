@@ -33,7 +33,7 @@ ZoneTree.FullTextSearch as the canonical engines.
 | Requirement | Acceptance | Mapping |
 |---|---|---|
 | REQ-ZT-001: active storage experiments use the selected canonical engine | AC-ZT-001: real ZoneTree raw/scaled correctness, full loaded-record counts, bounds and cleanup still hold; removed labels fail explicitly | existing RawStorage and ScaledRawStorage TUnit cases, dependency/source inspection |
-| REQ-ZT-002: delete discarded plans and unused pipeline paths immediately | AC-ZT-002: active docs have no dead candidate-plan links; Benchmarks has no raw/internal-codec job or diagnostic-only bypass, and preserves every native comparison/image/aggregate/site gate | workflow contract TUnit cases, governance and root diff review |
+| REQ-ZT-002: delete discarded plans and unused pipeline paths immediately | AC-ZT-002: active docs have no dead candidate-plan links; Benchmarks has no raw/internal-codec job or diagnostic-only bypass, and preserves every native comparison/source/aggregate/site gate | workflow contract TUnit cases, governance and root diff review |
 
 Result files are immutable evidence of their own source. This decision establishes
 no performance, durability or production-readiness claim. UI is N/A:
@@ -53,7 +53,7 @@ evidence contracts.
 | Requirement | Type / priority | Behavior and rationale | Acceptance |
 |---|---|---|---|
 | REQ-BC-001 | Correctness / P0 | Use one deterministic dataset and exact caller-visible correctness oracle for every supported equivalent workload. | AC-BC-001; stable hash and verified documents/vectors/graph/events. |
-| REQ-BC-002 | Topology / P0 | Run all servers and the load generator in Docker under Aspire, preserving real KeyLoad cluster and SDK calls. | AC-BC-002; container model and runtime evidence. |
+| REQ-BC-002 | Topology / P0 | Use native KeyLoad project processes and a client-owned workload outside the selected LoadTests AppHost infrastructure; external databases use pinned native containers. Preserve real cluster and SDK calls. | AC-BC-002; actual project/container graph, process identities, endpoints and joined runtime evidence. |
 | REQ-BC-003 | Replication / P0 | Add native replicated engine groups with observed membership/copy/acknowledgement state. | AC-BC-003; real connected cluster proof before timing. |
 | REQ-BC-004 | Engine coverage / P0 | Compare the canonical 11-target inventory: KeyLoad, PostgreSQL + pgvector, Qdrant, RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB. Preserve actual native topology support and explicit unsupported profiles. | AC-BC-004; complete current plan and honest native support matrix. |
 | REQ-BC-005 | Event streams / P0 | Add expected-no-stream single-event append and bounded single-event read with identity/revision/cardinality/payload validation. | AC-BC-005; four supported engine implementations and readback. |
@@ -78,46 +78,42 @@ evidence contracts.
 - Time-series profile: Aspire resource in `build/KeyLoad.LoadTests.AppHost/`; profile/targets under `benchmarks/KeyLoad.Comparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
 - Product persisted schema/public API changes: N/A; engines use isolated per-run benchmark databases/collections/streams.
 
-## Digest-backed Docker execution
+## Native host execution and source evidence
 
-AC-KLEVENT-001..003 (with REQ/AC-BC-005 and AC-PERF-004): KeyLoad's public session
-event readback delegates to the existing SDK reads, returns null for absence and
-preserves strict cardinality. A fresh actual replicated KeyLoad target proves the
-seeded, new, conflicting, cancelled and following-read flows.
+The primary `build/KeyLoad.AppHost` owns development and functional-test KeyLoad
+server projects plus Azurite for Orleans membership. The separate
+`build/KeyLoad.LoadTests.AppHost` owns the selected native database infrastructure,
+readiness, discovered endpoints and cleanup. `KeyLoad.ComparisonHost` runs the
+client-owned workload outside that resource graph. Ordinary build/start/test/load
+has no KeyLoad or workload-client image publication prerequisite; native SDK
+`PublishContainer` is reserved for explicit release/publication.
 
-REQ-BC-001/003/005/009/019/021 and AC-PERF-006/009 map to AC-IMAGE-002/006 under the
-[ADR-034 image stage](../ADR/ADR-034-cluster-comparisons.md). The sole normal/TimeSeries
-runner and all KeyLoad cluster hosts consume real digest-backed images prepared once per
-GitHub runtime job, with actual manifest-byte/source label proof, owned output
-mount/user and native terminal exit 0. Required internal AppHost config is
-`KeyLoad:ContainerImages:Server` and `Benchmarks:ContainerImages:LoadGenerator`;
-missing or invalid refs fail safely and cannot select a host-process fallback. TUnit
-resource/metadata assertions and actual registry/Aspire execution prove the criteria
-in GitHub only. No public engine API/schema/ACK change, external registry publication,
-local runtime, tool installation, secret logging or test/bound weakening. Current
-publication uses the 11-target plan, the native 1/3 topology matrix and the 100K/1M
-profiles.
+REQ-BC-001/002/003/005/009/019/021 and AC-PERF-006/009 require real source/DLL/PDB
+and process start identities, original native outcomes and bounded joined cleanup.
+External databases retain their pinned native images, native entry points/users,
+readonly bootstrap files and anonymous writable session volumes. Only resources
+owned by that selected execution may be removed.
 
-AC-IMAGE-LIFE-001..004 under [ADR-056](../ADR/ADR-056-isolated-linux-comparison-cells.md)
-preserve REQ-BC-001/003/009/050/055/056 and AC-IMAGE-006 for the native image
-importer's HTTP lifetime:
+AC-KLEVENT-001..003 retains existing public SDK event readback, strict cardinality,
+seeded/new/conflicting/cancelled operations and healthy follow-up. Copy counts
+come from actual acknowledged writes and original data/restart oracles.
+AppHost-owned abrupt faults validate actual PID plus Aspire and OS start times,
+kill the owned process tree and await its real exit. Graceful stop cannot replace
+that evidence.
 
-| Criterion | Pass/fail and evidence |
-|---|---|
-| AC-IMAGE-LIFE-001 | One real referenced AbortController deadline owns and awaits the original operation through terminal body work, clears in finally, and rejects invalid bounds before submission; no detached race or global keepalive. |
-| AC-IMAGE-LIFE-002 | Readiness attempt and poll fit the remaining overall30s; manifest fetch/headers/bounded body/cancel share the existing30s owner. Every existing image/source/digest/status/output oracle remains. Source review plus actual native import is required. |
-| AC-IMAGE-LIFE-003 | New ImageHttpDeadlineTests real Node child/native controller tests assert abort settlement/exit0, prompt success/fault exit, original error identity, no late abort, and invalid-bound rejection. No HTTP double; lifecycle evidence stays distinct from HTTP proof. |
-| AC-IMAGE-LIFE-004 | Exact-SHA existing ImageBundleRealTests and native import/preflight retain original image bytes/config/source/manifests/outputs/owned cleanup. Failed/skipped/missing or unaccounted cells fail current complete-profile publication. |
-
-Public API, data, SQL, SDK and cache topology changes are N/A: this is internal
-tooling lifetime behavior.
+Local sessions preserve actual workload/corpus/result evidence without invented
+GitHub provenance. Public figures additionally require authenticated original
+source/run/attempt/job artifacts and equivalent measured resources. Native
+KeyLoad process resource qualification and external advertised-endpoint reachability
+remain open until actual execution proves them. A model or source review closes
+neither runtime nor publication qualification.
 
 ```mermaid
 flowchart LR
-    GitHub[Exact source runtime job] --> Images[Verified final OCI manifests]
-    Images --> Host[Aspire cluster and runner containers]
-    Host --> Native[Real native terminal gate]
-    Native --> Artifact[Raw reports source run and image identities]
+    GitHub[Exact source compiled runtime] --> Host[LoadTests AppHost selected infrastructure]
+    Host --> Client[Discovered endpoints to native workload client]
+    Client --> Artifact[Original reports DLL PDB process and resource evidence]
+    Artifact --> Gate[Authenticated complete qualification]
 ```
 
 ## Harness collection and PostgreSQL lifecycle
@@ -141,10 +137,10 @@ only transient benchmark lifecycle metadata changes.
 
 ```mermaid
 flowchart LR
-    CI[GitHub Actions measured SHA] --> Aspire[Aspire private Docker network]
+    CI[GitHub Actions measured SHA] --> Aspire[LoadTests AppHost infrastructure]
     Aspire --> KeyLoad[KeyLoad replicated cluster]
     Aspire --> Engines[Engine profiles]
-    Aspire --> Runner[Docker load generator]
+    Aspire --> Runner[Endpoints to native client outside resource graph]
     Runner --> Oracle[Shared corpus and correctness oracle]
     Oracle --> JSON[Raw JSON and CSV]
     JSON --> Gate[Successful source and completeness gate]
@@ -166,7 +162,7 @@ ownership and PostgreSQL public event readback.
 | AC-PERF-002/003 | ComparisonHost settings/constants/owner and host-only validation; UnitTests real-child startup/bindings/cleanup cases | Exactly three distinct HTTP(S) node origins with index 0 matching primary; safe early invalid config; actual Basic-auth management client; all existing precedence/cleanup/secret checks retained. |
 | AC-PERF-002/003 | AppHost BenchmarkComparisons/BenchmarkCallerBindings and the existing composition call | Actual node endpoints and broker management/user/password references; native three-copy and queue-member proofs remain mandatory. |
 | AC-PERF-001/009 | Full relevant main baseline | Original GitHub results retain byte hashes, counts and failing cases; source-only builds cannot qualify tests. |
-| AC-PERF-005..007 | Native resource graph/registration, Docker load generator, bounded CI | Coverage follows the 11-target source plan and the current scaled/vector profile inventory. |
+| AC-PERF-005..007 | Native resource graph/registration, native workload client, bounded CI | Coverage follows the 11-target source plan and the current scaled/vector profile inventory. |
 | AC-PERF-008 | Search, ResourceExecution and StorageRecovery contracts | SIMD/.NET intrinsics first, Rust only after profiling; correct native ZoneTree APIs and bounded Orleans parallelism preserve atomic apply, read cuts and faults. |
 
 Constraints: real regressions are authored first and located bindings and the public
@@ -193,8 +189,8 @@ flowchart LR
 
 REQ-BC-019 maps to AC-HOST-001..007 in [ADR-043](../ADR/ADR-043-comparison-library-host.md).
 The existing KeyLoad.Comparisons assembly/public API becomes a library; the new host
-owns sole CLI composition and lifecycle. Aspire retains its comparisons resource and
-existing configuration/topology. Public collections/enum/report/workload changes are
+owns sole CLI composition and lifecycle. The LoadTests AppHost owns infrastructure and discovered endpoints; the native
+client stays outside its resource graph and preserves configuration/topology. Public collections/enum/report/workload changes are
 outside this contract. Host tests use actual child processes; success, cleanup and
 cancellation qualification uses the real GitHub comparison suite. Private construction
 ownership requires explicit source review plus runtime evidence as stated in
@@ -205,9 +201,9 @@ only build/CLI ownership.
 
 REQ-PIPE-005/006 and AC-UB-001..006 under
 [ADR-064](../ADR/ADR-064-workflow-release-delivery.md) repair orchestration:
-common image preparation includes pinned TimeSeries checks; independent build,
-plan and images start in parallel; preflight, CRUD and specialized matrices share
-only required plan/image inputs and run in parallel without an arbitrary cap.
+one preparation builds and source-binds the native runtime and runs shared
+contracts. The current22 native topology sessions import its authenticated bundle
+without rebuilding; independent database groups run without an arbitrary cap.
 Every authored job/step has a concrete readable name. Exact-source display-name
 validators and independent test oracles change together, preserving internal job
 IDs, artifact/schema/permission contracts and report bytes.
@@ -217,9 +213,9 @@ flowchart LR
     Plan[Plan benchmark runs] --> Preflight[Database checks]
     Plan --> Crud[Document benchmarks]
     Plan --> Models[Vector queue graph stream benchmarks]
-    Images[Docker images and shared workload checks] --> Preflight
-    Images --> Crud
-    Images --> Models
+    Runtime[Compiled runtime and shared workload checks] --> Preflight
+    Runtime --> Crud
+    Runtime --> Models
     Build[Build and checks] --> Aggregate[Combine all results]
     Preflight --> Aggregate
     Crud --> Aggregate
@@ -230,7 +226,7 @@ flowchart LR
 
 Scaled and vector applicable workloads retain at least 100,000 measured operations at
 the 100,000 and 1,000,000 record scales. The separate intensive TimeSeries family
-retains its own cell contract under ADR-059. Image and model checks are not TimeSeries
+retains its own cell contract under ADR-059. Source and model checks are not TimeSeries
 performance measurements. Source graph regressions and real exact-SHA GitHub
 jobs/artifacts qualify the pipeline; local source checks do not.
 
@@ -317,7 +313,7 @@ selection and independent Website publication.
 
 | Requirement | Measurable acceptance | Tests and evidence |
 |---|---|---|
-| REQ-BC-CURRENT-001: the complete current native cohort is the sole live producer | AC-BC-CURRENT-001: session-v1 accounts for22 workers across11 databases x native node counts[1,3], each with seven original native TUnit case outcomes on one live topology. One preparation job builds the exact-source compiled runtime/images once; workers import those authenticated bundles. Initial1m loading is measured, each applicable operation lane has100k attempts, and no warmup/reset/reseeding occurs between cases. Retain actual failures/null metrics and genuine native-unavailable outcomes with the original source/run/attempt/job/TRX/report/DLL/PDB/image identity. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects; publication requires every applicable correctness/fairness/provenance/resource/functional gate. Seven document cases do not qualify remaining model families or physical100k-corpus coverage | SessionCohortContractTests, CompiledBenchmarkRuntimeBundleTests, current native session/aggregate/site gates and original authenticated GitHub archives |
+| REQ-BC-CURRENT-001: the complete current native cohort is the sole live producer | AC-BC-CURRENT-001: session-v1 accounts for22 workers across11 databases x native node counts[1,3], each with seven original native TUnit case outcomes on one live topology. One preparation job builds the exact-source compiled native runtime once; workers import those authenticated bundles. Initial1m loading is measured, each applicable operation lane has100k attempts, and no warmup/reset/reseeding occurs between cases. Retain actual failures/null metrics and genuine native-unavailable outcomes with the original source/run/attempt/job/TRX/report/DLL/PDB/process identity. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects; publication requires every applicable correctness/fairness/provenance/resource/functional gate. Seven document cases do not qualify remaining model families or physical100k-corpus coverage | SessionCohortContractTests, CompiledBenchmarkRuntimeBundleTests, current native session/aggregate/site gates and original authenticated GitHub archives |
 | REQ-BC-CURRENT-002: one collector, one archive set and one current-profile asset set | AC-BC-CURRENT-002: no active comparison-smoke/comparison-suite collector, twelve-file precondition or three-profile current renderer remains; replacement retains all applicable safety, accessibility, vendor, arithmetic and browser criteria | scoped dependency inventory, workflow source tests and standalone isolated site/browser tests |
 | REQ-BC-CURRENT-003: preserve unchanged qualified authority around final build | AC-BC-CURRENT-003: bounded immutable receipt, original archives and every file in the current composite plan/proof inventory match before/after builder; emitted aggregate bytes match; every remaining native coverage/no-skip/source-closure gate passes | SiteIsolatedGitHub integrity/build/coverage tests, original TRX/Cobertura/Node/browser artifacts and the current source-bound publication receipt |
 | REQ-BC-CURRENT-004: deploy only fresh exact-source evidence | AC-BC-CURRENT-004: current main and exact original producer tuple match immediately before needs-gated least-privilege Pages delivery; altered source/attempt/artifact rejects and actual provider receipt records outcome | SiteIsolatedGitHubFreshnessTests, workflow source tests, genuine same-run qualification and Pages provider receipt |
@@ -417,7 +413,6 @@ ready, and has no `workflow_run` executor.
 | REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 failed job accepted only with failed workload, successful result upload and matching failed envelope; missing/malformed/expired/mixed evidence rejected | producer/aggregate/site negative and positive TUnit regressions |
 | REQ-BC-FAIL-004 honest site | AC-BC-FAIL-004 successful competitors retain values; failed cells have no numeric values and expose actual job link | independent numeric oracle, projection validation and real Chrome |
 | REQ-BC-FAIL-005 repair shared preparation | AC-BC-FAIL-005 diagnose exact failed logs, repair benchmark setup/build invocation, retain native isolated topology and Aspire ownership; bounded transient GET retries cover HTTP 503 as well as 403/429, and a failed shared setup finalizes a null-report envelope | exact failed-source log, focused regression, delivered-source GitHub rerun |
-| REQ-BC-FAIL-006 bounded registry readiness | AC-BC-FAIL-006 each native HTTP probe has at most2s within the unchanged30s total; only settled non-aborted HTTP200 succeeds; private no-follow diagnostics remain at most121 records/64KiB and evidence-write failures propagate. Actual fixture listeners use kernel-assigned loopback ports; optional numeric port accepts only integers1..65535 before HTTP/evidence, while both production callers keep the default5000 | `ImageRegistryReadinessTests`:10 actual loopback HTTP/error/bounds cases, including rejected port inputs before I/O, plus genuine pinned Docker image export/import in GitHub |
 | REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all native1/3-member views before constructing the SDK writer; retain native DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/3 nodes |
 | REQ-BC-FAIL-008 explicit cancellation stops owned work | AC-BC-FAIL-008 workload, finalization and result upload use `!cancelled()` so ordinary failure still finalizes while cancellation stops execution/publication; `always()` cleanup retains bounded diagnostics and safely removes owned registries whose setup was cancelled | canceled-job/producer rejection operation regressions and actual GitHub lifecycle; no source-text substitute |
 | REQ-BC-FAIL-009 align native Redis transport | AC-BC-FAIL-009 each isolated Redis resource uses the documented native certificate opt-out for its existing authenticated RESP/TCP bootstrap; after actual Aspire startup, primary/replica endpoints retain scheme `redis` and native target port6379 with TLS disabled. Discovered mapped host ports remain dynamic; native client settings retain a password without `ssl=true`. Preserve health checks, wait dependencies, AOF `always`, native membership, direct-copy/cancellation checks and WAIT/WAITAOF acknowledgements | actual pinned resource-model regressions plus genuine Aspire-owned native Redis 1/3-node preflights; complete matrix and site qualification remain mandatory |
@@ -456,7 +451,7 @@ flowchart LR
 REQ-BC-GROUP-001 maps to AC-BC-GROUP-001: Benchmarks exposes eleven separately named
 database job matrices matching the current target inventory. Each matrix contains its
 target's preflight checks and canonical node/scenario workloads. Every cell retains its
-own Linux runner. Database groups run concurrently with only plan/image dependencies;
+own Linux runner. Database groups run concurrently with only native runtime/plan dependencies;
 steps inside each cell run in order. No shared cross-database matrix or arbitrary
 parallelism cap. Aggregate waits for every group and retains failed/null results.
 
@@ -473,7 +468,7 @@ outside this contract.
 
 ## Process identity observation
 
-REQ-BC-PROCESS-IDENTITY-001 / AC-BC-PROCESS-IDENTITY-001 refine AC-IMAGE-LIFE-003: the
+REQ-BC-PROCESS-IDENTITY-001 / AC-BC-PROCESS-IDENTITY-001 require that the
 original PID and captured UTC start identity stay mandatory. CaptureIdentity remains
 strict. A later identity observation may treat a Win32 failure (for example while
 reading StartTime after HasExited in
@@ -502,32 +497,22 @@ CaptureIdentity, the kill/reaper identity checks, original process/cancellation
 ownership and 5s cleanup are unchanged, with no synthetic process or broader
 Win32-to-success handling.
 
-## Exact clean source checkout before image preparation
+## Exact clean source checkout before delivered-source packaging
 
-REQ-BC-SOURCE-001 / AC-BC-SOURCE-001 strengthen the existing REQ-BC-001/009/055 and
-AC-IMAGE-006 source contract: a producer's real Git HEAD must equal its declared source
-revision and its checkout must contain no tracked changes or unignored untracked
-inputs. Native Git continues honoring the actual repository ignore rules for generated
-build/test output. Check this before Dockerfile validation, Docker/registry startup,
-image construction, receipts or GitHub outputs. Preserve all existing
-manifest/config/source, run/attempt and owned-cleanup checks; a Git-only regression
-does not qualify a Docker image.
+REQ-BC-SOURCE-001 / AC-BC-SOURCE-001 retain the existing REQ-BC-001/009/055 source
+contract. Actual Git HEAD equals the declared source and no tracked changes or
+unignored untracked inputs exist. Native Git honors repository ignore rules for
+build/test output. Check before runtime packaging, receipts and GitHub outputs.
+This proves source admission only, independently of native runtime execution.
 
-Automated mapping: `SourceCheckoutIdentityTests.CleanSourceIdentityRejectsUntrackedInputAndRecoversWithoutChangingHead`
-creates an actual committed temporary Git checkout, admits its real HEAD through
-production `verifySourceCheckout`/`runBounded`, adds an unignored
-`src/KeyLoad.Server/UntrackedProbe.cs`, asserts the exact existing dirty-source
-diagnostic, removes only that owned file, and successfully admits the same HEAD
-again. It also proves an ignored generated file preserves admission and that
-tracked sentinel bytes and HEAD remain unchanged. Missing Git/Node, child errors
-and unexpected rejection reasons fail; no authored Git output or image evidence.
-
-[ADR-034](../ADR/ADR-034-cluster-comparisons.md) owns the implementation contract.
-Source: `scripts/Features/BenchmarkComparisons/prepare-images.mjs`. Test paths:
-`tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/Cases/SourceCheckout/SourceCheckoutIdentityTests.cs`
-and `UnitContracts/Fixtures/TemporaryGitCheckout.cs`. Execute the case only through the
-Aspire comparison entry in Benchmarks, alongside the genuine image roundtrip/preflight
-gates. Product API/persistence/schema changes and new packages are N/A.
+`SourceCheckoutIdentityTests.CleanSourceIdentityRejectsUntrackedInputAndRecoversWithoutChangingHead`
+uses its real committed checkout, native `verifySourceCheckout`/`runBounded`, an
+unignored source file and an ignored generated file. It rejects the owned new
+source for the exact dirty diagnostic, admits the same HEAD after its removal and
+preserves tracked bytes throughout. Missing Git/Node, unexpected child errors or
+incorrect rejection reasons fail. The production owner is
+`scripts/Features/BenchmarkComparisons/source-checkout.mjs`; bounded native process
+and source-context owners are shared by actual compiled-runtime/GitHub tooling.
 
 ## Native image annotation model admission
 
@@ -536,20 +521,20 @@ image annotation representation in the complete isolated resource-model suite.
 `AddContainer` retains a registry-qualified image in `Image`; without an explicit
 `WithImageRegistry`, `Registry` is exactly null, not an empty string. The HelixDB and
 SurrealDB complete model flows assert that exact absence alongside the unchanged image,
-SHA256, null tag, private writable mount, native target port, runner endpoint/image
-binding and wait owner. Their two/three-node rejection flows must still leave only the
-runner, without native storage or a fabricated cluster.
+SHA256, null tag, anonymous writable session volume, native target port, actual
+client endpoint binding and readiness owner. Their unsupported two/three-node
+models allocate no database resource and never fabricate a cluster.
 
 ADR-056 owns this model admission contract. Verification is the native comparison
 selection `/*/*/Isolated*Resource*/*` at the original native concurrency 20, followed
-by exact-source Linux image preparation and the complete comparison matrices. A model
+by exact-source native startup and the complete comparison sessions. A model
 pass does not prove native startup, membership, corpus correctness or performance, and
 it does not alter images or production resource composition, configuration, providers,
 topology, execution or evidence gates.
 
 ## Native TUnit result for host child processes
 
-REQ-BC-NATIVE-CONTRACT-RESULT-001 / AC-BC-NATIVE-CONTRACT-RESULT-001 refine the image
+REQ-BC-NATIVE-CONTRACT-RESULT-001 / AC-BC-NATIVE-CONTRACT-RESULT-001 retain native
 safe-failure and AC-ISO-006/007 process gates under ADR-117. The comparison host is the
 native TUnit executable, not a CLI. A real child must fail with a nonzero
 native exit and report the original NativeClientWorkloadProducesSuccessfulOriginalReports
@@ -869,8 +854,8 @@ session-source-closure.mjs; there is no inherited fixed path count. Regular-path
 byte/hash, archive, source, coverage and freshness checks remain strict. Current readers
 admit only the session-v1 cohort: 22 workers (11 databases x native 1/3), seven
 source-bound native case outcomes per shared live topology, common compiled
-runtime/images built once, measured initial 1m loading and no warmup/reset/reseeding.
-Every original report, native TRX, image/runtime identity and resource observation
+native runtime built once, measured initial 1m loading and no warmup/reset/reseeding.
+Every original report, native TRX, process/runtime identity and resource observation
 remains authenticated. Unsupported sources are classified before jobs/archive reads and
 cannot supply live metrics. Remaining model-family and physical 100k qualification
 requirements stay open; these seven document cases do not complete them.

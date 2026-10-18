@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
 using OpenTelemetry;
 
@@ -11,65 +10,66 @@ namespace KeyLoad.Server;
 /// <param name="loggerFactory">The borrowed native logger factory.</param>
 /// <param name="owner">The same silo-local owner retained through opening and eventual joined physical close.</param>
 /// <param name="services"></param>
-internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, ILoggerFactory loggerFactory,
+internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo silo, ILoggerFactory loggerFactory,
     PartitionHostApplicationOwner owner, IServiceProvider services) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
 {
     private readonly PartitionHostApplicationOwner owner = owner;
-    private PartitionStorageRequestExecution? requests;
-    private PartitionStorageRequestExecution Requests => requests
-        ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+    private bool UsesSharedVolume => services.GetRequiredService<Microsoft.Extensions.Options.IOptions<ReplicaCopyOptions>>()
+        .Value.StorageMode == StorageAccessMode.SharedVolume;
+    private IDatabaseCommitGrain Shared => services.GetRequiredService<IGrainFactory>()
+        .GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(services.GetRequiredService<GrainRequestCodec>().Incarnation));
+    private IBackgroundStorageOperations BackgroundTarget => UsesSharedVolume ? Shared : owner.Session.Background;
+    private PartitionStorageSession Isolated => !UsesSharedVolume ? owner.Session
+        : throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
 
     public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        var database = owner.Borrow().Database;
-        return Task.FromResult(database.Store.Read(view => new SiloStorageCut(database.Store.Identity.Incarnation,
-            view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? NativeSerialization.Deserialize<long>(bytes) : default(long))));
+        return UsesSharedVolume ? Shared.ReadCutAsync(cancellationToken) : Task.FromResult(Isolated.ReadCut(cancellationToken));
     }
 
     public Task<Command<DatabaseCommand>> PrepareAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => Task.FromResult(owner.Borrow().Database.PrepareStorageOperation(operation, cancellationToken));
+        => Task.FromResult(Isolated.Host.Database.PrepareStorageOperation(operation, cancellationToken));
 
     public Task<StoredCommand?> ReadStoredCommandAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => Task.FromResult(owner.Borrow().Database.ReadStoredCommand(operation, cancellationToken));
+        => Task.FromResult(Isolated.Host.Database.ReadStoredCommand(operation, cancellationToken));
 
     public Task<StorageOperationResult> ApplyAsync(Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken)
-        => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, sequence, cancellationToken));
+        => Task.FromResult(Isolated.Host.Database.ApplyStorageOperation(operation, sequence, cancellationToken));
 
     public Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken)
-        => Requests.ExecuteAsync(signedRequest, null, cancellationToken);
+        => UsesSharedVolume ? Shared.ExecuteSharedAsync(signedRequest, null, cancellationToken)
+            : Isolated.ExecuteAsync(signedRequest, null, (IGrainContext)this, cancellationToken);
 
-    public Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId) => Requests.AbortAsync(kind, sessionId);
+    public Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId)
+        => UsesSharedVolume ? Shared.AbortSharedMaintenanceAsync(kind, sessionId) : Isolated.AbortMaintenanceAsync(kind, sessionId);
 
     public Task<GrainOperationReply> ExecuteCommandAsync(string signedRequest, string actorKey,
         CancellationToken cancellationToken)
-        => Requests.ExecuteAsync(signedRequest, actorKey, cancellationToken);
+        => UsesSharedVolume ? Shared.ExecuteSharedAsync(signedRequest, actorKey, cancellationToken)
+            : Isolated.ExecuteAsync(signedRequest, actorKey, (IGrainContext)this, cancellationToken);
 
     public Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken)
-        => services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken);
+        => UsesSharedVolume ? Shared.ReadSharedStatusAsync(cancellationToken) : Isolated.ReadStatusAsync(cancellationToken);
 
     public Task<NodeAdmissionStatus> ReadAdmissionAsync(CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(services.GetRequiredService<INodeAdministration>().Admission());
+        return UsesSharedVolume ? Shared.ReadSharedAdmissionAsync(cancellationToken) : Isolated.ReadAdmissionAsync(cancellationToken);
     }
 
     public Task<AdminNodeSnapshot> ReadDashboardAsync(CancellationToken cancellationToken)
-        => services.GetRequiredService<INodeAdministration>().DashboardAsync(cancellationToken);
+        => UsesSharedVolume ? Shared.ReadSharedDashboardAsync(cancellationToken) : Isolated.ReadDashboardAsync(cancellationToken);
 
     public Task<BackupReceipt> CreateBackupAsync(CancellationToken cancellationToken)
-        => services.GetRequiredService<INodeAdministration>().BackupAsync(cancellationToken);
+        => UsesSharedVolume ? Shared.CreateSharedBackupAsync(cancellationToken) : Isolated.CreateBackupAsync(cancellationToken);
 
     /// <inheritdoc />
     public override async Task Init(IServiceProvider serviceProvider)
     {
         serviceProvider.GetRequiredService<ITelemetryHostInitializer>().Initialize();
-        await owner.OpenAsync().ConfigureAwait(true);
+        if (!UsesSharedVolume)
+        {
+            await owner.OpenAsync().ConfigureAwait(true);
+        }
         await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(CancellationToken.None).ConfigureAwait(true);
-        requests = new(owner.Borrow().Database, services.GetRequiredService<Func<NativeRequestWorkOwner>>()(),
-            services.GetRequiredService<GrainRequestCodec>(), services, services.GetRequiredService<TimeProvider>(),
-            services.GetRequiredService<Microsoft.Extensions.Options.IOptions<GrainRoutingOptions>>(),
-            services.GetRequiredService<ILogger<PartitionStorageGrainService>>(), (IGrainContext)this);
     }
 }

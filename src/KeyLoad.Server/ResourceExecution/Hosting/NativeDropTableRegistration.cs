@@ -5,5 +5,7 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 internal static class NativeDropTableRegistration
 {
     internal static void Register(IServiceCollection services)
-        => services.AddSingleton<INativeDropTableExecution, NativeDropTableExecution>();
+        => services.AddScoped<INativeDropTableExecution>(provider =>
+            ActivatorUtilities.CreateInstance<NativeDropTableExecution>(provider,
+                provider.GetRequiredService<PartitionStorageScope>().Host));
 }

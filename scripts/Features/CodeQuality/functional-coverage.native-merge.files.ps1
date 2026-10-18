@@ -71,7 +71,7 @@ function Assert-FcNativeSourceScripts([string] $Repository, [object] $Scripts) {
     foreach ($entry in $Scripts) {
         Assert-FcNativeExactKeys $entry @('name','sha256')
         if ([string]::IsNullOrWhiteSpace($entry.name) -or
-            ($entry.name -cne '.dockerignore' -and $entry.name -cnotmatch '\Afunctional-coverage[A-Za-z0-9._-]{0,160}\z') -or
+            ($entry.name -cnotmatch '\Afunctional-coverage[A-Za-z0-9._-]{0,160}\z') -or
             $entry.sha256 -cnotmatch '\A[0-9a-f]{64}\z' -or -not $seen.Add([string] $entry.name)) {
             throw $script:FcNativeMergeInput.InvalidSource
         }
@@ -90,7 +90,7 @@ function Assert-FcNativeSourceScripts([string] $Repository, [object] $Scripts) {
         }
     }
     $actualNames = @((Get-ChildItem -LiteralPath $directory -File -Force | Where-Object {
-        $_.Name.StartsWith('functional-coverage', [StringComparison]::Ordinal) -or $_.Name -ceq '.dockerignore'
+        $_.Name.StartsWith('functional-coverage', [StringComparison]::Ordinal)
     } | ForEach-Object Name | Sort-Object))
     $recordedNames = @($seen | Sort-Object)
     if ($actualNames.Count -ne $recordedNames.Count -or ($actualNames -join "`n") -cne ($recordedNames -join "`n")) {

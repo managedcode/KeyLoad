@@ -3,12 +3,15 @@ using System.Net;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 internal static class ClusterResources
 {
     private const string SiloCountEnvironment = "KeyLoad__SiloCount";
     private const string ReplicaCountEnvironment = "KeyLoad__ReplicaCount";
+    private const string StorageModeEnvironment = "KeyLoad__StorageMode";
+    private const string SharedDirectory = "shared";
     private const string SiloNameEnvironment = "KeyLoad__SiloName";
     private const string HttpEndpoint = "http";
     private const string SiloEndpoint = "silo";
@@ -32,8 +35,9 @@ internal static class ClusterResources
     private const string LoopbackAddress = "127.0.0.1";
     private const int FirstNodeIndex = 0;
     private const int LastNodeOffset = 1;
+    private const int SharedVolumeCopies = 1;
 
-    /// <summary>Adds real native project silos; each process retains its own canonical storage directory.</summary>
+    /// <summary>Adds native project silos with the configured isolated or shared physical storage path.</summary>
     internal static IResourceBuilder<ProjectResource>[] Add(IDistributedApplicationBuilder builder,
         LocalProfile profile, string dataRoot, bool ephemeral, int? benchmarkNodeCount = null, int? functionalNodeCount = null)
     {
@@ -48,7 +52,8 @@ internal static class ClusterResources
             throw new OptionsValidationException(Options.DefaultName, typeof(ClusterDeploymentOptions),
                 [ClusterDeploymentOptions.ValidationMessage]);
         }
-        if (replicas > nodeNames.Length)
+        if (replicas > nodeNames.Length
+            || (options.Cluster.Value.StorageMode == StorageAccessMode.SharedVolume && replicas != SharedVolumeCopies))
         {
             throw new InvalidOperationException(ClusterDeploymentOptions.ValidationMessage);
         }
@@ -81,9 +86,10 @@ internal static class ClusterResources
         string ownerName, int index, string? resourceName = null)
     {
         resourceName ??= ownerName;
-        var directory = Path.Combine(root, ownerName);
+        var options = AppHostOptionsRegistration.Get(builder).Cluster.Value;
+        var directory = Path.Combine(root, options.StorageMode == StorageAccessMode.SharedVolume ? SharedDirectory : ownerName);
         ClusterProfileStore.PrepareDirectory(directory);
-        var port = ephemeral ? (int?)null : AppHostOptionsRegistration.Get(builder).Cluster.Value.FirstPublicPort + index;
+        var port = ephemeral ? (int?)null : options.FirstPublicPort + index;
         var resource = builder.AddProject<Projects.KeyLoad_Server>(resourceName, launchProfileName: null)
             .WithHttpEndpoint(port: port, name: HttpEndpoint, isProxied: false)
             .WithEndpoint(name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false);
@@ -93,6 +99,7 @@ internal static class ClusterResources
             .WithEnvironment(SiloNameEnvironment, resourceName)
             .WithEnvironment(SiloCountEnvironment, siloCount.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(ReplicaCountEnvironment, replicaCount.ToString(CultureInfo.InvariantCulture))
+            .WithEnvironment(StorageModeEnvironment, options.StorageMode.ToString())
             .WithEnvironment(SiloAddressEnvironment, LoopbackAddress)
             .WithEnvironment(SiloPortEnvironment, resource.GetEndpoint(SiloEndpoint).Property(EndpointProperty.TargetPort))
             .WithEnvironment(DataEnvironment, directory)

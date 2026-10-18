@@ -6,8 +6,6 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueReadyAuthorityRefusalAssertions
 {
-    private const int RetainedReplayFailureIndex = 1;
-
     internal static ErrorCode ExpectedError(QueueReadyAuthorityFault fault) => fault switch
     {
         QueueReadyAuthorityFault.BodyIdentity or QueueReadyAuthorityFault.MetadataIdentity => ErrorCode.Corruption,
@@ -41,7 +39,7 @@ internal static class QueueReadyAuthorityRefusalAssertions
         var identity = NativeSerialization.Serialize(fixture.Store.Identity);
         var position = fixture.Store.Position;
         var cut = fixture.ReadCanonicalCut();
-        var replay = fixture.SubmitIssued(original).Get<ReceiveResult>();
+        var replay = fixture.Database.Apply(original).Get<ReceiveResult>();
         await Assert.That(NativeSerialization.Serialize(replay)).IsEquivalentTo(resultBytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -51,15 +49,14 @@ internal static class QueueReadyAuthorityRefusalAssertions
 
     internal static async Task RequireOriginalFailuresAsync(List<Exception> failures, ErrorCode expectedError)
     {
-        await Assert.That(failures.Count >= 3).IsTrue();
+        await Assert.That(failures.Count).IsEqualTo(2);
         for (var index = 0; index < failures.Count; index++)
         {
             var failure = failures[index];
-            var actualExpectedError = index <= RetainedReplayFailureIndex ? ErrorCode.RecoveryRequired : expectedError;
             var errors = failure is AggregateException aggregate ? aggregate.Flatten().InnerExceptions.ToArray() : [failure];
             foreach (var error in errors)
             {
-                await Assert.That(error is KeyLoadException typed && typed.Code == actualExpectedError).IsTrue();
+                await Assert.That(error is KeyLoadException typed && typed.Code == expectedError).IsTrue();
             }
         }
     }

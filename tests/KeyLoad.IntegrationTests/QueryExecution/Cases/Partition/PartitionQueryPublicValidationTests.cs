@@ -2,12 +2,13 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 /// <summary>AC-PQUERY-001 and AC-PQUERY-005 reject bounded-shape, byte-limit and caller-cancellation cases.</summary>
-[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
+[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = PublicQueryStorageSelection.Key)]
 [NotInParallel]
 internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture)
 {

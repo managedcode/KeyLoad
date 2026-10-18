@@ -1,8 +1,8 @@
-using Aspire.Hosting;
 using System.Text.Json;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using Aspire.Hosting;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
@@ -35,7 +35,9 @@ internal static class ClusterFixtureApplicationStartup
     {
         await using var stream = new FileStream(Path.Combine(output, fileName), new FileStreamOptions
         {
-            Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None,
+            Mode = FileMode.CreateNew,
+            Access = FileAccess.Write,
+            Share = FileShare.None,
             Options = FileOptions.Asynchronous
         });
         await JsonSerializer.SerializeAsync(stream, original, cancellationToken: token).ConfigureAwait(false);

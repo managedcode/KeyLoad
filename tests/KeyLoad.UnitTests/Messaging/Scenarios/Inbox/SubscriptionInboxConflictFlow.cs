@@ -22,32 +22,32 @@ internal static class SubscriptionInboxConflictFlow
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event1", "Created", "{\"n\":1}"),
                 new("event2", "Created", "{\"n\":2}"), new("event3", "Created", "{\"n\":3}")])]);
-        var producer = Create(OperationKind.Batch, publish, publish.CommandId, producedAt);
+        var producer = Create(fixture.Database, OperationKind.Batch, publish, publish.CommandId, producedAt);
         var producerResult = fixture.Database.Apply(producer);
         producerResult.Get<CommitReceipt>();
         await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(producer), producerResult);
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var time = producedAt.AddSeconds(1);
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
-        var claim = Create(OperationKind.ReceiveSubscription, receive, receive.RequestId, time);
+        var claim = Create(fixture.Database, OperationKind.ReceiveSubscription, receive, receive.RequestId, time);
         var originalClaim = fixture.Database.Apply(claim);
         var deliveries = originalClaim.Get<ReceiveSubscriptionResult>().Deliveries;
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), originalClaim);
         await SubscriptionInboxConflictAssertions.InitialClaimsAsync(fixture.Database, group, deliveries, producedAt);
         var request = new SubscriptionProcessingRequest(Guid.NewGuid(), group, deliveries[0].Token, "worker", 1,
             [new PutDocument("orders", "first", "{\"n\":1}", 0), new PutDocument("orders", "second", "{\"n\":2}", 0)]);
-        var operation = Create(OperationKind.SubscriptionProcessing, request, request.CommandId, time.AddSeconds(1));
+        var operation = Create(fixture.Database, OperationKind.SubscriptionProcessing, request, request.CommandId, time.AddSeconds(1));
         var result = fixture.Database.Apply(operation);
         await SubscriptionProcessingAtomicAssertions.SuccessAsync(fixture.Database, group, request, result);
         var history = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
-        { (operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, operation.Id)) };
+        { (operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, operation.CommandId)) };
         var claims = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
-        { (claim, originalClaim, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, claim.Id)) };
+        { (claim, originalClaim, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, claim.CommandId)) };
         var inbox = SubscriptionInboxConflictAssertions.InboxBytes(fixture.Store, group);
         await SubscriptionInboxConflictAssertions.ReplayAsync(fixture.Database, fixture.Store, group, history[0]);
         await SeekAndResumeAsync(fixture.Database, fixture.Store, group, time, history);
         var current = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
-        var currentOperation = Create(OperationKind.ReceiveSubscription, current, current.RequestId, time.AddSeconds(3));
+        var currentOperation = Create(fixture.Database, OperationKind.ReceiveSubscription, current, current.RequestId, time.AddSeconds(3));
         var currentResult = fixture.Database.Apply(currentOperation);
         var currentDeliveries = currentResult.Get<ReceiveSubscriptionResult>().Deliveries;
         await SubscriptionInboxConflictAssertions.ClaimsAsync(currentDeliveries, deliveries, time.AddSeconds(33));
@@ -59,7 +59,7 @@ internal static class SubscriptionInboxConflictFlow
             Token = currentDeliveries[0].Token,
             Effects = [new PutDocument("orders", "first", "{\"n\":99}", 1), new PutDocument("orders", "second", "{\"n\":2}", 0)]
         };
-        var failed = Create(OperationKind.SubscriptionProcessing, conflict, conflict.CommandId, time.AddSeconds(4));
+        var failed = Create(fixture.Database, OperationKind.SubscriptionProcessing, conflict, conflict.CommandId, time.AddSeconds(4));
         await SubscriptionInboxConflictAssertions.RefusalAsync(fixture.Database, fixture.Store, group, failed, inbox, source, history);
         await ColdAsync(fixture, group, request, claims, history, inbox, source, token);
     }
@@ -91,19 +91,19 @@ internal static class SubscriptionInboxConflictFlow
             CommandId = Guid.NewGuid(),
             Token = deliveries[0].Token
         };
-        var repairedOperation = Create(OperationKind.SubscriptionProcessing, repair, repair.CommandId,
+        var repairedOperation = Create(db, OperationKind.SubscriptionProcessing, repair, repair.CommandId,
             QueueWholeFlowStorage.Clock(cold).AddSeconds(1));
         var repaired = db.Apply(repairedOperation);
         await SubscriptionInboxConflictAssertions.RepairedAsync(db, cold, group, repair, repaired, history[0].Result, inbox, source);
-        history.Add((repairedOperation, repaired, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, repairedOperation.Id)));
+        history.Add((repairedOperation, repaired, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, repairedOperation.CommandId)));
         await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, history[3]);
         foreach (var index in new[] { 2, 1 })
         {
             var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, deliveries[index].Token, DeliveryAction.Ack);
-            var operation = Create(OperationKind.SubscriptionDelivery, ack, ack.CommandId, QueueWholeFlowStorage.Clock(cold).AddSeconds(1));
+            var operation = Create(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, QueueWholeFlowStorage.Clock(cold).AddSeconds(1));
             var result = db.Apply(operation);
             await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(result, ack, deliveries[index].Event.Position);
-            history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, operation.Id)));
+            history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, operation.CommandId)));
             await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
             {
                 MaxWindow = 3
@@ -152,9 +152,9 @@ internal static class SubscriptionInboxConflictFlow
         var time = QueueWholeFlowStorage.Clock(store).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event4", "Created", "{\"n\":4}")])]);
-        db.Apply(Create(OperationKind.Batch, publish, publish.CommandId, time)).Get<CommitReceipt>();
+        db.Apply(Create(db, OperationKind.Batch, publish, publish.CommandId, time)).Get<CommitReceipt>();
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 1);
-        var operation = Create(OperationKind.ReceiveSubscription, request, request.RequestId, time);
+        var operation = Create(db, OperationKind.ReceiveSubscription, request, request.RequestId, time);
         var original = db.Apply(operation);
         var delivery = await Assert.That(original.Get<ReceiveSubscriptionResult>().Deliveries).HasSingleItem();
         var expected = new SubscriptionDelivery(new SourceEventRecord(group.Source, 4L, 4L,
@@ -163,7 +163,7 @@ internal static class SubscriptionInboxConflictFlow
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
-        var ackOperation = Create(OperationKind.SubscriptionDelivery, ack, ack.CommandId, time.AddSeconds(1));
+        var ackOperation = Create(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, time.AddSeconds(1));
         var receipt = db.Apply(ackOperation);
         await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(receipt, ack, 4);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
@@ -183,21 +183,21 @@ internal static class SubscriptionInboxConflictFlow
         history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)));
     }
 
-    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
-        => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    private static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, DateTimeOffset time)
+        => database.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 
     private static async Task SeekAndResumeAsync(DatabaseEngine database, ZoneTreeStore store,
         SubscriptionRef group, DateTimeOffset time,
         List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
         var seek = new SeekSubscriptionRequest(Guid.NewGuid(), group, 1, SubscriptionStart.FromBeginning);
-        Add(database, store, group, Create(OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(2)), history);
+        Add(database, store, group, Create(database, OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(2)), history);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(database, group, new()
         {
             MaxWindow = 3
         }, 2, 0, 0, 3, true, null);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 2, false);
-        Add(database, store, group, Create(OperationKind.SetSubscriptionPaused, resume, resume.CommandId, time.AddSeconds(2)), history);
+        Add(database, store, group, Create(database, OperationKind.SetSubscriptionPaused, resume, resume.CommandId, time.AddSeconds(2)), history);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(database, group, new()
         {
             MaxWindow = 3

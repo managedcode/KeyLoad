@@ -169,7 +169,15 @@ flowchart LR
 
 Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests native deactivation.
 
-Orleans does all of the clustering: membership, discovery, placement, activation migration, communication between silos and scaling. Every silo has its own ZoneTree that owns its files; database grains reach it on their own node or on other nodes through Orleans calls, and a write is copied to the configured number of replicas and acknowledged only after every configured copy persists it. Receipts report the actual persisted copy count separately from durability. Storage files never move with grain activations. Background work (queues, ANN, time series) runs in Orleans stateless workers that buffer events and flush them on a timer. See [ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md) and the [architecture map](docs/Architecture.md).
+Orleans owns membership, discovery, placement, activation migration, communication
+between silos and scaling. `IsolatedVolumes` keeps separate files on each silo;
+writes require every configured copy to persist them. `SharedVolume` uses one
+configured path and one open physical owner, reached through Orleans, without
+copying data. It requires `ReplicaCount=1`. Receipts report persisted copies
+separately from durability. Open handles stay with their actual local owner.
+Background queues, ANN and time-series work use Orleans stateless workers with
+bounded buffers and native timers. See [ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md)
+for ownership, distributed queries and open qualification gates.
 
 ## Why .NET, Orleans and ZoneTree
 
@@ -179,7 +187,7 @@ Orleans does all of the clustering: membership, discovery, placement, activation
 | [Orleans](https://github.com/dotnet/orleans) | The whole cluster: membership, routing, placement, migration, communication, data copies through grain calls and generated binary serialization |
 | [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Embedded ordered storage and a write-ahead log for every model; data stays on its node |
 | [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | Native full-text indexing on the same storage foundation |
-| [Aspire](https://github.com/dotnet/aspire) | Owns Docker cluster startup, readiness and cleanup |
+| [Aspire](https://github.com/dotnet/aspire) | Owns native server startup, required infrastructure, readiness and cleanup |
 
 **Orleans runs the cluster; ZoneTree keeps each node's data in place.**
 
@@ -194,7 +202,7 @@ dotnet restore KeyLoad.slnx
 ```
 
 ```bash
-dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
 **2. Start KeyLoad through Aspire**
@@ -203,11 +211,11 @@ dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
 aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build --non-interactive
 ```
 
-For ordinary local development Aspire runs `dotnet publish /t:PublishContainer` and owns
-all server containers and the native Orleans membership emulator. No manually
-started registry or server containers are required. An explicitly configured
-`KeyLoad__ContainerImages__Server` still selects the pinned image; qualification
-and benchmark profiles retain their separate image/provenance requirements.
+Aspire starts native `KeyLoad.Server` .NET project processes and Azurite for
+Orleans membership. Ordinary build, development and tests do not publish or run
+KeyLoad Docker images. Native SDK `PublishContainer` belongs to explicit releases.
+The separate `build/KeyLoad.LoadTests.AppHost` owns selected comparison database
+infrastructure; its workload client runs outside the Aspire resource graph.
 
 **3. Choose the number of silos and copies**
 
@@ -229,13 +237,23 @@ Node data and private development credentials remain in `data/cluster/`.
 HTTP ports start at `5101`; keep the data directory between restarts.
 Stop owned resources with `aspire stop --non-interactive`.
 
+For one shared volume, configure the same storage path on all silos. The native
+AppHost supplies `DataRoot/shared` to each server:
+
+```bash
+KeyLoad__StorageMode=SharedVolume KeyLoad__SiloCount=3 KeyLoad__ReplicaCount=1 aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build --non-interactive
+```
+
+Only one owner opens the mutable files. Other silos reach it through Orleans;
+shared filesystem locking and flush behavior still need deployment qualification.
+
 **4. Look around**
 
 - Open the [admin console](http://localhost:5101/admin).
 - Or check the cluster from the CLI:
 
 ```bash
-dotnet run --project src/KeyLoad.Cli --configuration Release --no-build -- status http://localhost:5101 data/cluster/local-profile.json
+dotnet run --project src/KeyLoad.Cli --no-build -- status http://localhost:5101 data/cluster/local-profile.json
 ```
 
 Your local admin API key is the `AdminKey` value in `data/cluster/local-profile.json`. Export it as `KEYLOAD_API_KEY` for the examples below.
@@ -348,9 +366,10 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 | [`src/KeyLoad.Server`](src/KeyLoad.Server) | The database server: HTTP API, MCP server and admin console |
 | [`src/KeyLoad.Client`](src/KeyLoad.Client) | The .NET SDK |
 | [`src/KeyLoad.Cli`](src/KeyLoad.Cli) | Command-line tool for operators and workers |
-| [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | Aspire host for the local cluster and every test suite |
+| [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | Native KeyLoad development and functional-test host, with Azurite membership |
+| [`build/KeyLoad.LoadTests.AppHost`](build/KeyLoad.LoadTests.AppHost) | Selected load-test database infrastructure and owned cleanup |
 | [`src/KeyLoad.Abstractions`](src/KeyLoad.Abstractions) | Shared public contracts |
-| `src/KeyLoad.Core`, `Query`, `Clustering`, `Replication`, `Storage.ZoneTree`, `Diagnostics` | Database engine, SQL, Orleans grains, replica calls, storage and phase telemetry |
+| `src/KeyLoad.Core`, `Query`, `Clustering`, `Storage.ZoneTree`, `Diagnostics` | Database engine, SQL, Orleans grains, replica calls, storage and phase telemetry |
 | [`tests/`](tests) | Unit, crash-recovery, three-node and website tests ([TUnit](https://github.com/thomhurst/TUnit)) |
 | [`benchmarks/`](benchmarks) | Comparisons with other databases, plus microbenchmarks |
 | [`site/`](site) | Source for [keyload.cloud](https://www.keyload.cloud/) |

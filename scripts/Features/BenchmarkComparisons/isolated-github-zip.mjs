@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { runBounded } from './image-process.mjs';
+import { runBounded } from './native-process.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { writeCapture } from './isolated-github-files.mjs';
 import { streamToFile } from './isolated-github-stream.mjs';

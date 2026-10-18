@@ -17,14 +17,14 @@ internal static class SharedDomainRefusals
             new EnqueueMessage(second.Queue!, Refused, first.Payload, Headers)]
         };
         await SharedDomainRefusalImage.RequireAsync(database, state, first.Partition,
-            SharedDomainOperations.Operation(OperationKind.Batch, request.CommandId, request), token);
+            SharedDomainOperations.Operation(database, OperationKind.Batch, request.CommandId, request), token);
         var document = state.Scopes[DocumentScopeIndex];
         var events = state.Scopes[EventScopeIndex];
         var isolated = new CommandRequest(Guid.NewGuid(), document.Partition,
             [new PutDocument(document.Documents!, Refused, document.Payload, NoRevision),
              new AppendEvents(events.Streams!, Refused, [new(Refused, EventType, events.Payload, Headers)], ExpectedStreamRevision.NoStream)]);
         await SharedDomainRefusalImage.RequireAsync(database, state, document.Partition,
-            SharedDomainOperations.Operation(OperationKind.Batch, isolated.CommandId, isolated), token);
+            SharedDomainOperations.Operation(database, OperationKind.Batch, isolated.CommandId, isolated), token);
         await SharedDomainModelAssertions.AllAsync(database, state, token);
     }
 
@@ -41,6 +41,6 @@ internal static class SharedDomainRefusals
              new EnqueueMessage(second.Queue!, Refused, second.Payload, Headers)]
         };
         await SharedDomainRefusalImage.RequireAsync(database, state, first.Partition,
-            SharedDomainOperations.Operation(OperationKind.Processing, refused.CommandId, refused), token);
+            SharedDomainOperations.Operation(database, OperationKind.Processing, refused.CommandId, refused), token);
     }
 }

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
@@ -6,20 +5,16 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class SampleChunkJobDispatch(DatabaseEngine database, GrainRequestCodec codec,
+internal sealed class SampleChunkJobDispatch(BackgroundStorageClient storage, GrainRequestCodec codec,
     IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing)
 {
-    internal Task<GrainOperationReply> ExecuteAsync(IGrainFactory grains, SampleChunkWorkHint hint,
+    internal async Task<GrainOperationReply> ExecuteAsync(IGrainFactory grains, SampleChunkWorkHint hint,
         CancellationToken cancellationToken)
     {
-        var principal = database.Store.Read(view => database.Principal(view, hint.Creator, clock.GetUtcNow()));
-        if (principal.PolicyEpoch != hint.CreatorPolicyEpoch)
-        {
-            throw Errors.Fail(ErrorCode.RevisionConflict, SampleChunkJobProtocol.Invalid);
-        }
-        return DispatchAsync(grains, hint, principal, cancellationToken);
+        var principal = await storage.Operations.ReadSampleChunkCreatorAsync(hint, cancellationToken).ConfigureAwait(true);
+        return await DispatchAsync(grains, hint, principal, cancellationToken).ConfigureAwait(true);
     }
 
     private async Task<GrainOperationReply> DispatchAsync(IGrainFactory grains, SampleChunkWorkHint hint,

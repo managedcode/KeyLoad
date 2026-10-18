@@ -1,7 +1,8 @@
 namespace KeyLoad.Core.Features.Messaging;
 
+/// <summary>Carries the actual retained transfer identity and its bounded coordination decisions.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RemoteTransferCoordinationProtocol.HintAlias)]
-internal sealed record RemoteTransferCoordinationHint(
+public sealed record RemoteTransferCoordinationHint(
     [property: global::Orleans.Id(RemoteTransferCoordinationFields.Source)] QueueLaneRef Source,
     [property: global::Orleans.Id(RemoteTransferCoordinationFields.Destination)] QueueLaneRef Destination,
     [property: global::Orleans.Id(RemoteTransferCoordinationFields.TransferId)] Guid TransferId,

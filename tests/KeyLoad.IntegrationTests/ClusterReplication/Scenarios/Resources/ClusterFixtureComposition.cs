@@ -13,9 +13,10 @@ internal static class ClusterFixtureComposition
 {
     private const string InvalidProjectModel = "The Aspire model must expose exactly the three named Orleans project resources.";
 
-    internal static string[] PrepareArguments(string root)
+    internal static string[] PrepareArguments(string root, PublicQueryStorageSelection storage)
         => [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
-            ClusterFixtureProtocol.SiloCountArgument, ClusterFixtureProtocol.ReplicaCountArgument,
+            ClusterFixtureProtocol.SiloCountArgument, ClusterFixtureProtocol.StorageModeArgument + storage.Mode,
+            ClusterFixtureProtocol.ReplicaCountArgument + storage.ReplicaCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
             KeyLoad.AppHost.Features.ClusterReplication.ProcessFaultCommandProtocol.EnabledArgument];
 
     internal static async Task<IDistributedApplicationTestingBuilder> CreateBuilderAsync(

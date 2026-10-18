@@ -6,7 +6,7 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Native Orleans scheduling for commands sharing one database's atomic metadata.</summary>
 [Version(BackgroundWorkerIdentity.InterfaceVersion)]
-public interface IDatabaseCommitGrain : IGrainWithGuidKey
+public partial interface IDatabaseCommitGrain : IGrainWithGuidKey
 {
     /// <summary>Returns only after every configured data copy has persisted the same operation.</summary>
     Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);

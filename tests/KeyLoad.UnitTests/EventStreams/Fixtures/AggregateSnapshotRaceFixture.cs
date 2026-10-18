@@ -30,7 +30,7 @@ internal sealed class AggregateSnapshotRaceFixture : IDisposable
     internal StreamRef Stream => new(Harness.Partition, StreamSet, StreamId);
     internal List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Raw)> Outcomes { get; } = [];
     internal Command<DatabaseCommand> SeedOperation { get; private set; } = null!;
-    internal Result<object> SeedResult { get; private set; } = null!;
+    internal Result<object> SeedResult { get; private set; }
     internal byte[] SeedRaw { get; private set; } = [];
     internal long SeedPosition
     {
@@ -66,8 +66,8 @@ internal sealed class AggregateSnapshotRaceFixture : IDisposable
         Policy(1, true);
         var seed = new CommandRequest(Guid.NewGuid(), Harness.Partition, [new AppendEvents(StreamSet, StreamId,
             [Data("first", 1), Data("second", 2), Data("third", 3)], ExpectedStreamRevision.NoStream)]);
-        SeedOperation = new(seed.CommandId, OperationKind.Batch, "root", Epoch, JsonSerializer.Serialize(seed, JsonDefaults.Options));
-        SeedPosition = Store.Position + 1;
+        SeedOperation = Database.CreateCommand(OperationKind.Batch, seed.CommandId, "root", Epoch, JsonSerializer.Serialize(seed, JsonDefaults.Options));
+        SeedPosition = Database.LastApplied + 1;
         SeedResult = Database.Apply(SeedOperation);
         SeedRaw = Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", seed.CommandId)))
             ?? throw new InvalidOperationException("The literal seed outcome is absent.");
@@ -84,8 +84,8 @@ internal sealed class AggregateSnapshotRaceFixture : IDisposable
     internal CommandRequest Snapshot(long source, string state, long version)
         => new(Guid.NewGuid(), Harness.Partition, [new StoreAggregateSnapshot(StreamSet, StreamId,
             source, Reducer, 1, state, version)]);
-    internal static Command<DatabaseCommand> Operation(CommandRequest command)
-        => new(command.CommandId, OperationKind.Batch, Worker, Epoch, JsonSerializer.Serialize(command, JsonDefaults.Options));
+    internal Command<DatabaseCommand> Operation(CommandRequest command)
+        => Database.CreateCommand(OperationKind.Batch, command.CommandId, Worker, Epoch, JsonSerializer.Serialize(command, JsonDefaults.Options));
     internal string[] EventImage() => Store.Read(view =>
         view.Scan(KeySpace.Partition("event", Harness.Partition, StreamSet, StreamId, 1L), 4).Records
             .Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray());

@@ -1,6 +1,6 @@
 function Assert-FcNativeCurrentSourceGeneration([object] $Plan) {
     if ((Get-FcRevision $Repository) -cne $Plan.manifest.sourceRevision -or
-        (Get-FcHash (Resolve-FcPath $Repository 'docs/Features/CodeQuality.md')) -cne $Plan.manifest.contractSha256) {
+        (Get-FcHash (Resolve-FcPath $Repository 'scripts/Features/CodeQuality/functional-coverage.contract.json')) -cne $Plan.manifest.contractSha256) {
         throw $script:FcNativeMergeInput.InvalidSource
     }
     Assert-FcNativeSourceManifest $Repository $Plan.manifest

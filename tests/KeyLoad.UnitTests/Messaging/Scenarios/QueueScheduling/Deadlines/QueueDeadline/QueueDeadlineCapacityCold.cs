@@ -37,7 +37,9 @@ internal static class QueueDeadlineCapacityCold
         foreach (var (operation, result) in state.Outcomes)
         {
             token.ThrowIfCancellationRequested();
-            await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.Read(store, operation)))
+            var stored = OutcomeStoreOracle.Read(store, operation)
+                ?? throw new InvalidOperationException("The deadline command outcome is absent before replay.");
+            await Assert.That(NativeSerialization.Serialize(stored))
                 .IsEquivalentTo(NativeSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
             if (result.Value is CommitReceipt receipt)
             {
@@ -61,10 +63,12 @@ internal static class QueueDeadlineCapacityCold
                     await Assert.That(database.ResolveOutcome(operation)).IsEqualTo(Result<object>.Fail(Errors.Problem(ErrorCode.StaleLease, StaleClaimDetail)));
                 }
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
-                await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.Read(store, operation)))
+                var retained = OutcomeStoreOracle.Read(store, operation)
+                    ?? throw new InvalidOperationException("The deadline receive outcome is absent after replay.");
+                await Assert.That(NativeSerialization.Serialize(retained))
                     .IsEquivalentTo(NativeSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
             }
-            if (result.Error is not null)
+            if (Errors.Code(result.Problem) is not null)
             {
                 await Assert.That(database.Apply(operation)).IsEqualTo(result);
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);

@@ -54,7 +54,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
     {
         var ambientActivity = Activity.Current;
         var parent = telemetry.StartParentActivity()
-            ?? throw new InvalidOperationException("The telemetry provider did not sample the operation parent.");
+            ?? throw new InvalidOperationException("The telemetry provider did not create the operation parent activity.");
         OrleansRuntimeTelemetrySentinelObservation observation;
         using (parent)
         {
@@ -86,7 +86,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         await AssertDocumentRevisionAsync(fixture, documentId, 1);
         var ambientActivity = Activity.Current;
         var parent = telemetry.StartParentActivity()
-            ?? throw new InvalidOperationException("The telemetry provider did not sample the read parent.");
+            ?? throw new InvalidOperationException("The telemetry provider did not create the read parent activity.");
         OrleansTelemetryOperationParent readParent;
         using (parent)
         {
@@ -114,7 +114,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
     {
         var ambientActivity = Activity.Current;
         var parent = telemetry.StartParentActivity()
-            ?? throw new InvalidOperationException("The telemetry provider did not sample the concurrent parent.");
+            ?? throw new InvalidOperationException("The telemetry provider did not create the concurrent parent activity.");
         GrainOperationReply reply;
         OrleansTelemetryOperationParent operationParent;
         using (parent)

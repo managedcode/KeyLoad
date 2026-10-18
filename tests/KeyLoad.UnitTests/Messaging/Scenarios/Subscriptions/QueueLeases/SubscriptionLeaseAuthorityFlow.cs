@@ -22,13 +22,13 @@ internal static class SubscriptionLeaseAuthorityFlow
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 30);
-        var operation = Create(OperationKind.ReceiveSubscription, request, request.RequestId, time);
+        var operation = Create(fixture.Database, OperationKind.ReceiveSubscription, request, request.RequestId, time);
         var original = fixture.Database.Apply(operation);
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(new long[] { 1, 2, 3 }, CollectionOrdering.Matching);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(operation), original);
         var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, deliveries[1].Token, action, LeaseSeconds: 20);
-        var attempt = Create(OperationKind.SubscriptionDelivery, command, command.CommandId, time.AddSeconds(1));
+        var attempt = Create(fixture.Database, OperationKind.SubscriptionDelivery, command, command.CommandId, time.AddSeconds(1));
         var key = SubscriptionCheckpointAuthorityFlow.WindowKey(group, 2);
         var saved = fixture.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The genuine leased subscription slot is absent.");
@@ -93,13 +93,14 @@ internal static class SubscriptionLeaseAuthorityFlow
         if (action == DeliveryAction.Nack)
         {
             var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 30);
-            reclaimed = Create(OperationKind.ReceiveSubscription, request, request.RequestId, time.AddSeconds(3));
-            reclaimResult = db.Apply(reclaimed);
-            second = await Assert.That(reclaimResult.Get<ReceiveSubscriptionResult>().Deliveries).HasSingleItem();
+            reclaimed = Create(db, OperationKind.ReceiveSubscription, request, request.RequestId, time.AddSeconds(3));
+            var reclaimedOutcome = db.Apply(reclaimed);
+            reclaimResult = reclaimedOutcome;
+            second = await Assert.That(reclaimedOutcome.Get<ReceiveSubscriptionResult>().Deliveries).HasSingleItem();
             await Assert.That(second).IsEqualTo(new SubscriptionDelivery(original.Get<ReceiveSubscriptionResult>().Deliveries[1].Event,
                 second.Token, 2L, time.AddSeconds(33), 2));
             await Assert.That(second.Token).IsNotEqualTo(command.Token);
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(reclaimed), reclaimResult);
+            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(reclaimed), reclaimedOutcome);
         }
         else if (action == DeliveryAction.Renew)
         {
@@ -139,12 +140,12 @@ internal static class SubscriptionLeaseAuthorityFlow
         long position, long leaseVersion, List<(Command<DatabaseCommand> Operation, Result<object> Result)> receipts)
     {
         var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, leaseToken, DeliveryAction.Ack);
-        var operation = Create(OperationKind.SubscriptionDelivery, command, command.CommandId, time);
+        var operation = Create(db, OperationKind.SubscriptionDelivery, command, command.CommandId, time);
         var result = db.Apply(operation);
         await SubscriptionLeaseAuthorityAssertions.ReceiptAsync(result, command, position, leaseVersion);
         receipts.Add((operation, result));
     }
 
-    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
-        => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    private static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, DateTimeOffset time)
+        => database.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }

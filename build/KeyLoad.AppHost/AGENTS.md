@@ -7,6 +7,7 @@
 - Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
 - Aspire owns resource orchestration, not database storage state. Each silo's ZoneTree owner (node-local `PartitionHost`) owns its storage, journals, file locks and the apply gate; Microsoft Orleans does all clustering and Orleans grains route commands (ADR-136).
 - ClusterResources composes real native project services. Each silo retains its own ZoneTree storage lifetime under the current storage-mode contract; copy count is independent of silo count. Native Orleans owns membership and communication. Do not retain a second peer protocol or coordination-only database nodes.
+- `KeyLoad:StorageMode` selects `IsolatedVolumes` (default, `DataRoot/<silo-name>`) or `SharedVolume` (all nodes receive `DataRoot/shared`). SharedVolume requires an explicit copy count of one; reject conflicting counts. Configuration and common paths do not prove single-owner opening, joined ownership transfer or the deployed volume's lock/flush behavior.
 - Ordinary build, development, tests and load execution never publish or start a KeyLoad server image. Keep native SDK PublishContainer at explicit release/publication only. AppHost-owned abrupt faults validate real PID plus Aspire/OS starts, kill the selected owned process tree and join its actual exit.
 - Use session lifetime for required Azurite and dispose only resources owned by the run. Capture actual native source/DLL/PDB/process identities; do not substitute Docker image/PID fields. Runtime, process recovery, matched-resource qualification and public measurements remain separate gates.
 - Apply the installed Orleans and Aspire skills within their actual ownership boundaries.
@@ -21,7 +22,7 @@ Follow the [root policy](../../AGENTS.md) and the owning feature specification. 
 From the repository root:
 
 ```sh
-dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
 Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.

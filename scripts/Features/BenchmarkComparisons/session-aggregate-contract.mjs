@@ -3,11 +3,11 @@ import { validateSessionPlan } from './session-plan-contract.mjs';
 import { validateSessionCase, validateSessionEnvelope, validateSessionQualification, validateSessionProfileAccounting } from './session-report-validation.mjs';
 
 export function validateSessionAggregate(value) {
-  require(exact(value, ['schemaVersion', 'cohort', 'plan', 'images', 'preparation', 'workers'])
+  require(exact(value, ['schemaVersion', 'cohort', 'plan', 'preparation', 'workers'])
     && value.schemaVersion === SESSION.schema);
   validateSessionCohort(value.cohort);
   validateSessionPlan(value.plan);
-  require(exact(value.images, ['server', 'loadGenerator']) && exact(value.preparation, ['job', 'artifact', 'compiledArtifact', 'runtimeIdentity', 'functional'])
+  require(exact(value.preparation, ['job', 'compiledArtifact', 'runtimeIdentity', 'functional'])
     && Array.isArray(value.workers) && value.workers.length === SESSION.workers);
   const jobs = new Set(), artifacts = new Set(), sessions = new Set();
   for (const [index, worker] of value.workers.entries()) {
@@ -17,13 +17,11 @@ export function validateSessionAggregate(value) {
       && ['success', 'failure'].includes(worker.job?.conclusion) && worker.artifact?.expired === false
       && /^sha256:[a-f0-9]{64}$/.test(worker.artifact?.digest ?? '')
       && worker.job?.name === row.jobName && worker.artifact?.name === row.artifactName
-      && (worker.stateSha256 === null || sessionHash(worker.stateSha256)) && typeof worker.resourceQualified === 'boolean' && sessionHash(worker.sessionSha256) && !jobs.has(worker.job.id) && !artifacts.has(worker.artifact.id));
+      && sessionHash(worker.stateSha256) && typeof worker.resourceQualified === 'boolean' && sessionHash(worker.sessionSha256) && !jobs.has(worker.job.id) && !artifacts.has(worker.artifact.id));
     jobs.add(worker.job.id); artifacts.add(worker.artifact.id);
     const session = validateSessionEnvelope(worker.session, row, value.cohort, worker.job.id);
     require(!sessions.has(session.sessionId) && Array.isArray(worker.reports) && worker.reports.length === SESSION.caseIds.length
-      && Array.isArray(worker.native) && worker.native.length === SESSION.caseIds.length
-      && session.images.runner === value.images.loadGenerator
-      && (row.target !== 'KeyLoad' || session.images.server === value.images.server));
+      && Array.isArray(worker.native) && worker.native.length === SESSION.caseIds.length);
     require(session.outcome === 'failure' ? worker.job.conclusion === 'failure' : worker.job.conclusion === 'success');
     validateSessionQualification(worker.qualification,session,worker.native);
     sessions.add(session.sessionId);

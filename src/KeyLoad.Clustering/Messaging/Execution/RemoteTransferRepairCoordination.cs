@@ -1,11 +1,10 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.Clustering;
 
 internal static class RemoteTransferRepairCoordination
 {
-    internal static async Task AdvanceAsync(RemoteTransferSignedExecution execution, DatabaseEngine database,
+    internal static async Task AdvanceAsync(RemoteTransferSignedExecution execution, GrainRequestCodec codec,
         RemoteTransferCoordinationHint hint, string intentToken, QueueTransferRepairStage stage,
         string? receiptToken, CancellationToken token)
     {
@@ -31,7 +30,7 @@ internal static class RemoteTransferRepairCoordination
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
         }
-        var witness = database.Verify<RemoteTransferRepairClaims>(value.RepairWitness, database.Limits.MaxBatchBytes);
+        var witness = codec.VerifySigned<RemoteTransferRepairClaims>(value.RepairWitness, codec.Limits.MaxBatchBytes);
         var id = RemoteTransferRepairIdentity.AdvanceId(hint, stage, witness.OutcomeDigest);
         var reply = await execution.ApplyAsync(hint.PrincipalId, new(id, hint.Source.Partition,
             [new AdvanceQueueTransferRepair(hint.Source, hint.TransferId, stage, hint.AcceptGeneration,

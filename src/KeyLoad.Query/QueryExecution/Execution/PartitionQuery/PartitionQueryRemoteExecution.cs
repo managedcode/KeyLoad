@@ -9,11 +9,15 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal static partial class PartitionQueryRemoteExecution
 {
     private const int FirstLeafIndex = 0;
+    private const long NoReadBytes = 0;
     private const string DeadlineExceededDetail = "The read execution deadline is exceeded.";
+    private const string InsufficientGrant = "The partition query grants exceed the original operation budget.";
     internal static async Task<PartitionQueryPageV1> ExecuteAsync(QueryEngine engine,
         PartitionQueryRequestV1 request,
-        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, PartitionQueryPreparedLeaf> prepare,
-        Func<CancellationToken, Task> revalidate, TimeProvider clock, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
+        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
+            Task<PartitionQueryPreparedLeaf>> prepare,
+        Func<CancellationToken, Task> revalidate, TimeProvider clock, DateTimeOffset originalExpiry,
+        CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
@@ -22,6 +26,7 @@ internal static partial class PartitionQueryRemoteExecution
             budget.AttachResourceLifetimeBinding(binding);
         }
         QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
+        budget.ConstrainLifetime(originalExpiry);
         budget.Check();
         using var admission = database.AdmitQuery(cancellationToken);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), clock);
@@ -35,7 +40,7 @@ internal static partial class PartitionQueryRemoteExecution
                 database.Limits, engine.Execution, budget.MaximumResultBytes);
             _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
             var grants = Reserve(plan, budget);
-            var preparedLeaves = PrepareLeaves(plan, grants, budget, prepare);
+            var preparedLeaves = await PrepareLeavesAsync(plan, grants, budget, prepare, execution.Token).ConfigureAwait(true);
             var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);
             var owners = ImmutableArray.CreateBuilder<PhysicalShardRecord>(plan.Leaves.Length);
             var concurrency = Math.Min(engine.Execution.MaximumConcurrentPartitionLeaves, plan.Leaves.Length);
@@ -43,17 +48,18 @@ internal static partial class PartitionQueryRemoteExecution
             {
                 budget.Check();
                 var actual = await PartitionQueryParallelBatch.RunAsync(preparedLeaves, offset,
-                    Math.Min(concurrency, plan.Leaves.Length - offset), execution).ConfigureAwait(false);
+                    Math.Min(concurrency, plan.Leaves.Length - offset), execution).ConfigureAwait(true);
                 for (var index = FirstLeafIndex; index < actual.Length; index++)
                 {
                     budget.Check();
-                    await preparedLeaves[offset + index].CompleteAsync(actual[index], execution.Token).ConfigureAwait(false);
+                    await preparedLeaves[offset + index].CompleteAsync(actual[index], execution.Token).ConfigureAwait(true);
+                    budget.CompleteReadGrant(grants[offset + index]);
                     budget.Check();
                     leaves.Add(actual[index].Result);
                     owners.Add(actual[index].Owner);
                 }
             }
-            await RevalidateAsync(revalidate, deadline, execution.Token, cancellationToken).ConfigureAwait(false);
+            await RevalidateAsync(revalidate, deadline, execution.Token, cancellationToken).ConfigureAwait(true);
             budget.Check();
             CompleteReadAccounting(leaves, grants);
             var result = PartitionQueryMerge.Complete(plan, leaves.MoveToImmutable(), identity,
@@ -71,15 +77,16 @@ internal static partial class PartitionQueryRemoteExecution
         }
     }
 
-    private static PartitionQueryPreparedLeaf[] PrepareLeaves(PartitionQueryPlanV1 plan,
+    private static async Task<PartitionQueryPreparedLeaf[]> PrepareLeavesAsync(PartitionQueryPlanV1 plan,
         ReadExecutionBudgetReadGrant[] grants, ReadExecutionBudget budget,
-        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, PartitionQueryPreparedLeaf> prepare)
+        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
+            Task<PartitionQueryPreparedLeaf>> prepare, CancellationToken token)
     {
         var preparedLeaves = new PartitionQueryPreparedLeaf[plan.Leaves.Length];
         for (var index = FirstLeafIndex; index < preparedLeaves.Length; index++)
         {
             budget.Check();
-            preparedLeaves[index] = prepare(plan.Leaves[index], grants[index], budget);
+            preparedLeaves[index] = await prepare(plan.Leaves[index], grants[index], budget, token).ConfigureAwait(true);
         }
         return preparedLeaves;
     }
@@ -102,7 +109,7 @@ internal static partial class PartitionQueryRemoteExecution
     {
         try
         {
-            await revalidate(execution).ConfigureAwait(false);
+            await revalidate(execution).ConfigureAwait(true);
         }
         catch (OperationCanceledException) when (original.IsCancellationRequested)
         {
@@ -117,10 +124,17 @@ internal static partial class PartitionQueryRemoteExecution
 
     private static ReadExecutionBudgetReadGrant[] Reserve(PartitionQueryPlanV1 plan, ReadExecutionBudget budget)
     {
+        var availableBytes = budget.RemainingReadGrantBytes - budget.MaximumResultBytes;
+        if (availableBytes < NoReadBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InsufficientGrant);
+        }
+        var bytesPerLeaf = availableBytes / plan.Leaves.Length;
         var grants = new ReadExecutionBudgetReadGrant[plan.Leaves.Length];
         for (var index = FirstLeafIndex; index < plan.Leaves.Length; index++)
         {
-            grants[index] = budget.CreateReadGrant(plan.Leaves[index].MaxReadBytes, plan.Leaves[index].MaxExaminedRecords);
+            grants[index] = budget.CreateReadGrant(Math.Min(plan.Leaves[index].MaxReadBytes, bytesPerLeaf),
+                plan.Leaves[index].MaxExaminedRecords);
         }
         return grants;
     }

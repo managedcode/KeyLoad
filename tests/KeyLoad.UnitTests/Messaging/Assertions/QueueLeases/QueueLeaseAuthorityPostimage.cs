@@ -25,7 +25,7 @@ internal static class QueueLeaseAuthorityPostimage
         await CountersAsync(store, state, retained, healthySettled);
         await QueueLeaseAuthorityIndices.RequireAsync(store, state, metadata);
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(state.Original.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(state.Original.CommandId);
         var kind = state.Kind == QueueLeaseAuthorityOperation.Processing ? nameof(DeliveryAction.Ack) : state.Kind.ToString();
         var settled = new MutationReceipt(kind, state.Lane.Queue, state.Message.MessageId, QueueLeaseAuthorityProtocol.Three);
         MutationReceipt[] expected = state.Kind == QueueLeaseAuthorityOperation.Processing
@@ -52,7 +52,7 @@ internal static class QueueLeaseAuthorityPostimage
         {
             return;
         }
-        var request = JsonSerializer.Deserialize<ProcessingRequest>(state.Original.PayloadJson, JsonDefaults.Options)!;
+        var request = NativeSerialization.Deserialize<ProcessingRequest>(state.Original.Value!.Input.Span);
         var document = database.GetDocument(QueueLeaseAuthorityProtocol.Root,
             new(state.Lane.Partition, QueueLeaseAuthorityProtocol.Collection, QueueLeaseAuthorityProtocol.Document))!;
         await Assert.That(document.Reference).IsEqualTo(new EntityRef(state.Lane.Partition,
@@ -90,7 +90,7 @@ internal static class QueueLeaseAuthorityPostimage
         QueueLeaseAuthorityOperation.Renew => state.Metadata with
         {
             StateVersion = QueueLeaseAuthorityProtocol.Three,
-            LeaseUntil = state.Original.EvaluatedAt.AddSeconds(QueueLeaseAuthorityProtocol.LeaseSeconds)
+            LeaseUntil = new DateTimeOffset(state.Original.Timestamp).AddSeconds(QueueLeaseAuthorityProtocol.LeaseSeconds)
         },
         QueueLeaseAuthorityOperation.Nack => state.Metadata with
         {
@@ -98,7 +98,7 @@ internal static class QueueLeaseAuthorityPostimage
             StateVersion = QueueLeaseAuthorityProtocol.Three,
             LeaseOwner = null,
             LeaseUntil = null,
-            NotBefore = state.Original.EvaluatedAt.AddMilliseconds(QueueLeaseAuthorityProtocol.RetryMilliseconds),
+            NotBefore = new DateTimeOffset(state.Original.Timestamp).AddMilliseconds(QueueLeaseAuthorityProtocol.RetryMilliseconds),
             SafeFailureCode = QueueLeaseAuthorityProtocol.RetryReason
         },
         _ => throw new ArgumentOutOfRangeException(nameof(state))

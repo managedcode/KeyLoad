@@ -22,7 +22,8 @@ internal static class ClusterFixtureProtocol
     internal const string DataRootArgument = "--KeyLoad:DataRoot=";
     internal const string EphemeralArgument = "--KeyLoad:Ephemeral=true";
     internal const string SiloCountArgument = "--KeyLoad:SiloCount=3";
-    internal const string ReplicaCountArgument = "--KeyLoad:ReplicaCount=3";
+    internal const string ReplicaCountArgument = "--KeyLoad:ReplicaCount=";
+    internal const string StorageModeArgument = "--KeyLoad:StorageMode=";
     internal const string CommandBytesSetting = "KeyLoad__CommandAdmission__MaxRetainedBytes";
     internal const string DatabaseLimitsSettingPrefix = "KeyLoad__DatabaseLimits__";
     internal const string HttpBodyBytesSetting = "KeyLoad__HttpAdmission__MaxBodyBytes";

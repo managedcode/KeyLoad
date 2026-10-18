@@ -26,7 +26,7 @@ $script:Psm = [ordered]@{
     MaximumPathCharacters = 4096
     InvalidRoot = 'The production identity root is absent, linked or unsupported.'
     InvalidInventory = 'The production project inventory is unsafe, oversized or ambiguous.'
-    InvalidArtifact = 'An actual Release project DLL or PDB is absent or unsupported.'
+    InvalidArtifact = 'An actual Debug project DLL or PDB is absent or unsupported.'
     BindingProjectLabel = 'project='
     BindingMissingCountLabel = '; missingSourceCount='
     BindingMissingPathsLabel = '; firstMissingSourcePaths='
@@ -34,23 +34,14 @@ $script:Psm = [ordered]@{
     MaximumBindingDiagnosticPaths = 8
     InvalidReceipt = 'The production source manifest or a referenced native image receipt is invalid.'
     Drift = 'A source, native image, compile input or producer changed during identity capture.'
-    ProjectNames = @(
-        'KeyLoad.Abstractions','KeyLoad.Analyzers','KeyLoad.AppHost','KeyLoad.Cli','KeyLoad.Client','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering',
-        'KeyLoad.Query','KeyLoad.Replication','KeyLoad.Server',
-        'KeyLoad.Storage.ZoneTree'
-    )
     TestProjects = @('KeyLoad.UnitTests','KeyLoad.RecoveryTests','KeyLoad.IntegrationTests')
     CentralNames = @('global.json','Directory.Build.props','Directory.Build.targets',
         'Directory.Packages.props','KeyLoad.slnx')
-    ScriptExtensions = @('.ps1','.mjs','.sh','.xml','.json','.dockerfile')
+    ScriptExtensions = @('.ps1','.mjs','.xml','.json')
     ScriptInventoryMaximumEntries = 5000
     ContractPath = 'scripts/Features/CodeQuality/functional-coverage.contract.json'
     ContributorRegistryPath = 'scripts/Features/CodeQuality/functional-coverage.product-contributors.json'
     MaximumJsonDepth = 32
-    ProductionModuleRoster = @(
-        'KeyLoad.Abstractions','KeyLoad.Cli','KeyLoad.Client','KeyLoad.Core',
-        'KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query','KeyLoad.Replication','KeyLoad.Server','KeyLoad.Storage.ZoneTree'
-    )
     SettingsPath = 'scripts/Features/CodeQuality/functional-coverage.production.settings.xml'
     SettingsEvidenceName = 'functional-coverage.production.settings.xml'
     ProducerPath = 'build/CodeQuality/FunctionalCompilationIdentity.targets'
@@ -152,8 +143,8 @@ function Get-PsmCentralInputs([string] $Root, [string] $ProjectName, [bool] $IsT
 
 function Get-PsmProjectIdentity([string] $Root, [string] $ProjectName, [bool] $IsTest) {
     $tree = Get-FcProjectSourceDirectory $ProjectName $IsTest
-    $dll = $tree + '/bin/Release/net10.0/' + $ProjectName + '.dll'
-    $pdb = $tree + '/bin/Release/net10.0/' + $ProjectName + '.pdb'
+    $dll = $tree + '/bin/Debug/net10.0/' + $ProjectName + '.dll'
+    $pdb = $tree + '/bin/Debug/net10.0/' + $ProjectName + '.pdb'
     $sources = @(Get-PsmCompiledSources $Root $ProjectName $IsTest $dll)
     Assert-PsmSourceTree $Root $ProjectName $IsTest $sources
     $central = @(Get-PsmCentralInputs $Root $ProjectName $IsTest)
@@ -182,10 +173,9 @@ function Get-PsmProjectIdentity([string] $Root, [string] $ProjectName, [bool] $I
 
 function Get-PsmProductRows([string] $Root) {
     $rows = [Collections.Generic.List[object]]::new()
-    foreach ($name in $script:Psm.ProjectNames) {
-        $identity = Get-PsmProjectIdentity $Root $name $false
-        $role = if ($name -ceq 'KeyLoad.AppHost' -or $name -ceq 'KeyLoad.Analyzers') { 'infrastructure' } else { 'production' }
-        $rows.Add([ordered]@{ module = $name; role = $role; sources = $identity.sources; compiledIdentity = $identity.compiledIdentity })
+    foreach ($project in @(Get-FcCompiledProjectRoster $Root)) {
+        $identity = Get-PsmProjectIdentity $Root $project.name $false
+        $rows.Add([ordered]@{ module = $project.name; role = $project.role; sources = $identity.sources; compiledIdentity = $identity.compiledIdentity })
     }
     @($rows.ToArray())
 }
@@ -224,7 +214,7 @@ function Get-PsmScriptInventory([string] $Root) {
         $item = Get-Item -LiteralPath $path -Force
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
             $item -isnot [IO.FileInfo]) { throw $script:Psm.InvalidInventory }
-        $include = $item.Name -ceq '.dockerignore'
+        $include = $false
         if ($item.Name.StartsWith('functional-coverage', [StringComparison]::Ordinal)) {
             $include = $false
             foreach ($extension in $script:Psm.ScriptExtensions) {
@@ -256,7 +246,7 @@ function Get-PsmManifest([string] $Root, [object[]] $ScriptInventory) {
     $settingsPath = Resolve-FcPath $Root $script:Psm.SettingsPath
     $settingsBytes = Read-PsmBounded $settingsPath
     $products = @(Get-PsmProductRows $Root)
-    if ($products.Count -ne 16) { throw $script:Psm.InvalidReceipt }
+    if ($products.Count -ne @(Get-FcCompiledProjectRoster $Root).Count) { throw $script:Psm.InvalidReceipt }
     $producerPath = Resolve-FcPath $Root $script:Psm.ProducerPath
     $producer = [ordered]@{ path = $script:Psm.ProducerPath; sha256 = Get-FcHash $producerPath }
     $testImages = [ordered]@{}

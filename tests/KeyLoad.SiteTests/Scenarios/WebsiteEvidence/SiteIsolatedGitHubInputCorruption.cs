@@ -11,9 +11,8 @@ internal static class SiteIsolatedGitHubInputCorruption
         {
             Relative(SiteIsolatedGitHubTokens.Aggregate, SiteIsolatedGitHubTokens.Manifest),
             Relative(SiteIsolatedGitHubTokens.ProviderDirectory, SiteIsolatedGitHubTokens.Proof),
-            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, "github/" + SiteIsolatedGitHubTokens.ImageProof),
-            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, "github/" + SiteIsolatedGitHubTokens.Images +
-                SiteIsolatedGitHubTokens.Slash + SiteIsolatedGitHubTokens.ServerManifest),
+            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, "github/runtime/benchmark-runtime.json"),
+            Relative(SiteIsolatedGitHubTokens.ProviderDirectory, "github/functional/native-process-shutdown.json"),
             receipt.Files.First(file => file.Path.EndsWith(SiteIsolatedGitHubTokens.Slash +
                 SiteIsolatedGitHubTokens.Raw, StringComparison.Ordinal)).Path,
         };

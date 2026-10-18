@@ -21,7 +21,7 @@ internal static class QueueClaimVersionExhaustionColdRepair
             .IsEqualTo(new MessageInspection(new(state.Body.Id, MessageState.Ready, 0, 1, 1, null, null), state.Body.PayloadJson, state.Body.HeadersJson));
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, failed);
         var fresh = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, fresh, fresh.RequestId, state.Time));
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Receive, fresh, fresh.RequestId, state.Time));
         var result = database.Apply(operation);
         var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await QueueClaimVersionExhaustionAssertions.EqualAsync(delivery, new Delivery(state.Body.Id,

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure.Processes;
 using KeyLoad.Server;
+using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -31,13 +32,25 @@ internal static class BenchmarkSessionClientProcess
         var output = stdout.CaptureAsync(process.StandardOutput, CancellationToken.None);
         var error = stderr.CaptureAsync(process.StandardError, CancellationToken.None);
         var failures = new List<Exception>();
-        var original = LocalClusterOwnedProcessLifetime.ObserveAsync(exit, output, error, TimeProvider.System, token);
-        var primary = await OwnedProcessFailureObserver.CaptureAsync(original);
-        if (primary is not null)
+        try
+        {
+            await LocalClusterOwnedProcessLifetime.ObserveAsync(exit, output, error, TimeProvider.System, token);
+        }
+        catch (Exception primary) when (CqrsRuntimeFailures.FindFatal(primary) is null)
         {
             failures.Add(primary);
             await ServerFailureObserver.ObserveAsync(() => LocalClusterOwnedProcessLifetime.TerminateAndJoinAsync(
                 process, exit, output, error, failures, execution, TimeProvider.System), failures);
+        }
+        catch (Exception primary) when (CqrsRuntimeFailures.FindFatal(primary) is not null)
+        {
+            failures.Add(primary);
+            await ServerFailureObserver.ObserveAsync(() => LocalClusterOwnedProcessLifetime.TerminateAndJoinAsync(
+                process, exit, output, error, failures, execution, TimeProvider.System), failures);
+        }
+        finally
+        {
+            await Task.WhenAll(exit, output, error).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         }
         await ServerFailureObserver.ObserveAsync(async () =>
         {

@@ -23,9 +23,8 @@ internal static class QueueReceiveReplayAssertions
         }
         else
         {
-            await Assert.That(actual.Error).IsEqualTo(ErrorCode.StaleLease);
-            await Assert.That(actual.SafeDetail).IsEqualTo("The delivery lease is stale.");
-            await Assert.That(actual.Json).IsNull();
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+            await Assert.That(actual.Problem?.Detail).IsEqualTo("The delivery lease is stale.");
             await Assert.That(actual.Value).IsNull();
         }
         var after = store.Read(view => view.ReadOwnedValue(key));

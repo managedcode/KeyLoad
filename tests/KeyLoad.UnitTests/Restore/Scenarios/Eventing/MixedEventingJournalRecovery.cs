@@ -8,6 +8,8 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class MixedEventingJournalRecovery
 {
+    private const long SingleStorageCommit = 1;
+    private const string MissingReference = "The queue lifecycle reference does not match its metadata.";
     private const string FullDetail = "The queue dead-letter sublimit is exhausted.";
 
     internal static async Task RunAsync(TestDatabase source, QueueLifecycleTestState state,
@@ -22,6 +24,7 @@ internal static class MixedEventingJournalRecovery
         source.Store.Commit((transaction, _) => { transaction.Delete(key); return true; });
         var corrupt = QueueLifecycleImage.Capture(source.Store, state.Lane);
         var before = source.Store.Position;
+        var beforeCut = source.ReadCanonicalCut();
         var corruptRaw = QueueWholeFlowStorage.Bytes(source.Store);
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, state.Partition, [new ParkPendingQueueMessage(state.Lane.Queue,
@@ -30,58 +33,61 @@ internal static class MixedEventingJournalRecovery
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => source.SubmitIssued(operation));
         originalFailures.Add(failure);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(failure.Message).IsEqualTo(MissingReference);
+        await Assert.That(source.ReadCanonicalCut()).IsEqualTo(beforeCut);
         await Assert.That(source.Store.Position).IsEqualTo(before);
         await QueueLifecycleImage.SameAsync(source.Store, state.Lane, corrupt);
         await Assert.That(QueueWholeFlowStorage.Bytes(source.Store))
             .IsEquivalentTo(corruptRaw, CollectionOrdering.Matching);
-        var retained = source.ReadStoredOutcome(id);
-        var journal = source.ReadCanonicalCut();
-        await Assert.That(journal.LastIndex).IsEqualTo(retained.CanonicalSequence);
-        await Assert.That(journal.CommittedIndex).IsEqualTo(retained.CanonicalSequence);
-        await Assert.That(journal.Term).IsEqualTo(retained.Term);
+        var rejectedCut = source.ReadCanonicalCut();
         var outcomeKey = KeySpace.PartitionOutcome(state.Partition, operation.UserId!, id);
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(outcomeKey))).IsNull();
         await RetainedRefusalAsync(source, state, operation, originalFailures, corruptRaw, before);
-        var repairedCut = before;
-        var applied = source.RecoverFaultOwnedRow(operation,
-            () =>
-            {
-                source.Store.Commit((transaction, _) => { transaction.Put(key, exact); return true; });
-                repairedCut = source.Store.Position;
-            },
-            originalFailures, cancellationToken);
-        await Assert.That(applied.Index).IsEqualTo(retained.CanonicalSequence);
-        await Assert.That(applied.Term).IsEqualTo(retained.Term);
-        await Assert.That(applied.Operation!.CommandId).IsEqualTo(id);
-        await Assert.That(applied.Operation.Value!.Input.ToArray()).IsEquivalentTo(
-            retained.PreparedCommand!.Value!.Input.ToArray(), CollectionOrdering.Matching);
-        await Assert.That(source.Database.LastApplied).IsEqualTo(retained.CanonicalSequence);
+        source.Store.Commit((transaction, _) => { transaction.Put(key, exact); return true; });
+        var repairedCut = source.ReadCanonicalCut();
+        await Assert.That(repairedCut.AppliedPosition).IsEqualTo(rejectedCut.AppliedPosition);
+        await Assert.That(repairedCut.StorePosition).IsEqualTo(before + SingleStorageCommit);
+        await Assert.That(QueueWholeFlowStorage.Bytes(source.Store))
+            .IsEquivalentTo(corruptRaw.Append(Convert.ToHexString(key) + ":" + Convert.ToHexString(exact))
+                .Order(StringComparer.Ordinal), CollectionOrdering.Matching);
+        var result = source.SubmitIssuedEmbedded(operation, cancellationToken);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(FullDetail);
+        await Assert.That(result.Value).IsNull();
+        var retained = source.ReadStoredOutcome(id);
+        var expectedSequence = checked(repairedCut.AppliedPosition + SingleStorageCommit);
+        await Assert.That(retained.CanonicalSequence).IsEqualTo(expectedSequence);
+        await Assert.That(source.Database.LastApplied).IsEqualTo(expectedSequence);
+        await Assert.That(retained.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
+        await Assert.That(retained.PreparedCommand.UserId).IsEqualTo(operation.UserId);
+        await Assert.That(retained.PreparedCommand.Value!.Kind).IsEqualTo(operation.Value!.Kind);
+        await Assert.That(retained.PreparedCommand.Value.Input.Span.SequenceEqual(operation.Value.Input.Span)).IsTrue();
         await QueueLifecycleImage.SameAsync(source.Store, state.Lane, whole);
         await QueueLifecycleAccountingAssertions.InitialAsync(source.Store, state);
-        await MixedEventingFailurePostimage.RequireAsync(source, state, operation, corruptRaw, key, exact,
-            outcomeKey, repairedCut, retained.CanonicalSequence);
-        await RequireOutcomeAsync(source, state, operation, outcomeKey, retained.CanonicalSequence, retained.Term);
+        await MixedEventingFailurePostimage.RequireAsync(source, state, retained.PreparedCommand, corruptRaw, key, exact,
+            outcomeKey, repairedCut.StorePosition, expectedSequence);
+        await RequireOutcomeAsync(source, state, operation, outcomeKey, expectedSequence);
     }
 
     private static async Task RetainedRefusalAsync(TestDatabase source, QueueLifecycleTestState state,
         Command<DatabaseCommand> operation, List<Exception> originalFailures, string[] corruptRaw, long position)
     {
-        var journal = source.ReadCanonicalCut();
-        var retained = NativeSerialization.Serialize(source.ReadStoredOutcome(operation.CommandId));
+        var cut = source.ReadCanonicalCut();
         var identity = NativeSerialization.Serialize(source.Store.Identity);
         var repeated = Assert.ThrowsExactly<KeyLoadException>(() => source.SubmitIssued(operation));
         originalFailures.Add(repeated);
         await Assert.That(repeated.Code).IsEqualTo(ErrorCode.RecoveryRequired);
-        await Assert.That(source.ReadCanonicalCut()).IsEqualTo(journal);
-        await Assert.That(NativeSerialization.Serialize(source.ReadStoredOutcome(operation.CommandId)))
-            .IsEquivalentTo(retained, CollectionOrdering.Matching);
+        await Assert.That(repeated.Message).IsEqualTo(MissingReference);
+        await Assert.That(source.ReadCanonicalCut()).IsEqualTo(cut);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(source.Store, corruptRaw, position, identity);
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(
             KeySpace.PartitionOutcome(state.Partition, operation.UserId!, operation.CommandId)))).IsNull();
+        await Assert.That(source.Store.Read(view => view.ReadOwnedValue(
+            KeySpace.OutcomeLocatorV2(state.Partition, operation.UserId!, operation.CommandId)))).IsNull();
     }
 
     private static async Task RequireOutcomeAsync(TestDatabase source, QueueLifecycleTestState state,
-        Command<DatabaseCommand> operation, byte[] outcomeKey, long index, long term)
+        Command<DatabaseCommand> operation, byte[] outcomeKey, long index)
     {
         var expected = source.Database.ResolveOutcome(operation);
         await Assert.That(Errors.Code(expected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -97,7 +103,6 @@ internal static class MixedEventingJournalRecovery
         await Assert.That(replay.Value).IsNull();
         await Assert.That(source.Store.Position).IsEqualTo(cut);
         await Assert.That(source.ReadStoredOutcome(operation.CommandId).CanonicalSequence).IsEqualTo(index);
-        await Assert.That(source.ReadStoredOutcome(operation.CommandId).Term).IsEqualTo(term);
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(outcomeKey)))
             .IsEquivalentTo(exact, CollectionOrdering.Matching);
         await ChangedAsync(source, state, operation, cut);

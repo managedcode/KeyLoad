@@ -10,12 +10,6 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
     internal async ValueTask<object> ExecuteAsync(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (kind == GrainReadKind.PartitionQuery)
-        {
-            return queries.QueryPartitions(principal,
-                GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(payload), expectedOwner, clock,
-                cancellationToken);
-        }
         if (kind == GrainReadKind.WaitForIndex)
         {
             return await search.WaitForIndexAsync(principal, GrainNativePayload.Read<WaitForIndexRequest>(payload), cancellationToken).ConfigureAwait(true);
@@ -63,12 +57,6 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
         {
             return PartitionQueryLeafExecution.Execute(queries, principal,
                 GrainNativePayload.Read<PartitionQueryOwnedLeafRequest>(payload), expectedOwner, clock, cancellationToken);
-        }
-        if (kind == GrainReadKind.PartitionQuery)
-        {
-            return queries.QueryPartitionsBound(principal,
-                GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(payload), expectedOwner, clock,
-                binding, cancellationToken);
         }
         if (kind == GrainReadKind.WaitForIndex)
         {

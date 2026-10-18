@@ -28,7 +28,7 @@ internal static class QueueLeaseAuthorityRefusals
         await Assert.That(resolved.Value).IsNull();
         await UnchangedAsync(store, position, image);
         var outcome = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, state.Original.Id)));
+            state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, state.Original.CommandId)));
         await Assert.That(outcome).IsNull();
         await Assert.That(database.GetDocument(QueueLeaseAuthorityProtocol.Root,
             new(state.Lane.Partition, QueueLeaseAuthorityProtocol.Collection, QueueLeaseAuthorityProtocol.Document))).IsNull();

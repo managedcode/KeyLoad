@@ -20,11 +20,8 @@ internal static class QueueScheduledAuthorityTrial
             Time = due.AddSeconds(1)
         };
         var request = new ReceiveRequest(Guid.NewGuid(), flow.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds);
-        var receive = QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, flow.Time)
-            with
-        {
-            PrincipalId = QueueLifecycleTestProtocol.Administrator
-        };
+        var receive = fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId,
+            QueueLifecycleTestProtocol.Administrator, flow.Time, NativeSerialization.Serialize(request));
         var state = new QueueScheduledAuthorityState(flow, due, key, exact, receive);
         await QueueScheduledAuthorityImage.ScheduledAsync(fixture.Database, fixture.Store, state);
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);

@@ -14,15 +14,19 @@
 ## Storage access modes
 
 Follow [ADR-136](../../docs/ADR/ADR-136-native-orleans-partition-ownership.md).
+`ReplicaCopyOptions.StorageMode` binds `KeyLoad:StorageMode`; it defaults to
+`IsolatedVolumes`. `SharedVolume` requires `ReplicaCount=1` and never rewrites a
+requested copy count. The silo count remains independently configured.
 Isolated volumes have silo-local file owners reached through Orleans. A shared
 volume requires one open owner for each mutable physical partition, lazy opening
 and joined close before another silo reopens the same files; no data copies are
 created by a shared mount. Never open the same mutable ZoneTree eagerly on every
 silo. Cross-partition queries address logical partitions once and aggregate
 bounded partial results without counting replicas twice. These lifetime and
-query paths remain open implementation and qualification gates; a configuration
-flag alone does not implement them. StatelessWorker activations are automatically
-managed by Orleans and are not individually addressable.
+query paths retain their original scopes, native owner pins, cancellation and
+budgets. Their complete runtime and delivered-source qualification remains open;
+a configuration flag alone is not proof. StatelessWorker activations are
+automatically managed by Orleans and are not individually addressable.
 
 ## Boundaries and protected risks
 
@@ -33,7 +37,7 @@ Follow the [root policy](../../AGENTS.md) and the owning feature specification. 
 From the repository root:
 
 ```sh
-dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
 Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.

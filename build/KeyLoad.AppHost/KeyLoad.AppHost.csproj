@@ -2,7 +2,6 @@
   <Sdk Name="Aspire.AppHost.Sdk" />
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configuration>Release</Configuration>
     <IsAspireHost>true</IsAspireHost>
     <AspireUseCliBundle>true</AspireUseCliBundle>
     <OutputType>Exe</OutputType>

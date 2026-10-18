@@ -2,13 +2,13 @@ import { verifyDocumentFunctionalGate } from './document-functional-gate.mjs';
 import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { readJson, hashRegularFile } from './isolated-github-files.mjs';
-import { flattenPages } from './isolated-github-validation.mjs';
+import { flattenPages, projectJob, projectArtifact } from './isolated-github-validation.mjs';
 import { SESSION, requireSession, sessionPath, sessionHash, sessionCount, exactSession } from './session-contract.mjs';
 import { validateSessionAggregate } from './session-aggregate-contract.mjs';
 import { selectSessionSiteProducer, requirePublishableSessionMeasurements } from './site-session-selection.mjs';
 import { validateSessionSiteReceipt, sessionSuiteFiles } from './site-session-receipt.mjs';
 import { readSessionRuntimeIdentity, validateSessionRuntimeImport } from './session-runtime-identity.mjs';
-import { readPreparedImages } from './image-bundle-read.mjs';
+import { validateSessionProcesses } from './session-process-identity.mjs';
 import { produceIsolatedProjection } from '../../../site/Features/BenchmarkComparisons/isolated-projection.mjs';
 
 async function verifyFiles(input, files) {
@@ -28,7 +28,7 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   await verifyFiles(input, receipt.metadataFiles);
   await verifyFiles(input, Object.values(receipt.archives));
   await verifyFiles(input, receipt.workerArchives);
-  await verifyFiles(input, [receipt.image.archive, receipt.runtimeIdentity.archive, receipt.functional.archive]);
+  await verifyFiles(input, [receipt.runtimeIdentity.archive, receipt.functional.archive]);
   await verifyFiles(input, receipt.inputFiles);
   const metadata = validateSessionSiteReceipt(await readJson(path.join(input, 'metadata-proof.json')));
   requireSession(isDeepStrictEqual({ ...receipt, state: 'metadata_verified', archives: null, inputFiles: null }, metadata));
@@ -52,10 +52,10 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
       && worker.artifact.digest === original.artifact.digest);
   }
   const providerRoot = path.join(input, 'input', 'provider');
-  const imageProof = await readJson(path.join(providerRoot, 'github', 'image-proof.json'));
-  requireSession(isDeepStrictEqual(imageProof.cohort, receipt.cohort) && imageProof.job.id === selected.native.image.job.id
-    && imageProof.artifact.id === selected.native.image.artifact.id && imageProof.artifact.digest === selected.native.image.artifact.digest
-    && isDeepStrictEqual(imageProof.images, aggregate.images));
+  requireSession(isDeepStrictEqual(receipt.preparation.job, projectJob(selected.native.preparation, receipt.cohort, SESSION.prepareSteps))
+    && isDeepStrictEqual(receipt.preparation.compiledArtifact, projectArtifact(selected.native.compiledArtifact))
+    && isDeepStrictEqual(receipt.preparation.job, aggregate.preparation.job)
+    && isDeepStrictEqual(receipt.preparation.compiledArtifact, aggregate.preparation.compiledArtifact));
   const runtimeIdentity = await readSessionRuntimeIdentity(path.join(providerRoot, 'github', 'runtime'), receipt.cohort);
   requireSession(isDeepStrictEqual(receipt.runtimeIdentity.artifact, aggregate.preparation.runtimeIdentity.artifact)
     && receipt.runtimeIdentity.artifact.id === selected.native.runtimeArtifact.id
@@ -64,19 +64,15 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   for (const worker of aggregate.workers) {
     const file = path.join(input, 'input', 'aggregate', 'workers', worker.id, worker.session.outerRuntime.path);
     validateSessionRuntimeImport(await readJson(file, SESSION.sessionBytes), receipt.cohort, runtimeIdentity);
+    validateSessionProcesses(worker.session.processes, worker, runtimeIdentity);
   }
   const functional = aggregate.preparation.functional;
   requireSession(isDeepStrictEqual(receipt.functional.artifact, functional.artifact));
   // Verify against the original archive in the capture root; provider files remain extracted originals.
-  await verifyDocumentFunctionalGate(input, functional, capture, receipt.cohort, aggregate.images.server, input, providerRoot);
-  const prepared = await readPreparedImages(path.join(providerRoot, 'github', 'images'), {
-    sourceSha: receipt.cohort.sourceRevision, runId: String(receipt.cohort.runId), runAttempt: String(receipt.cohort.attempt),
-    repository: SESSION.repository, ref: SESSION.ref });
-  requireSession(prepared.receipt.images.server.reference === aggregate.images.server
-    && prepared.receipt.images.comparisons.reference === aggregate.images.loadGenerator);
+  await verifyDocumentFunctionalGate(input, functional, capture, receipt.cohort, runtimeIdentity, input, providerRoot);
   await produceIsolatedProjection({ input: path.join(input, 'input', 'aggregate') });
   const proof = await readJson(path.join(input, 'input', 'provider', 'proof.json'));
-  requireSession(isDeepStrictEqual(proof.cohort, aggregate.cohort) && isDeepStrictEqual(proof.images, aggregate.images)
+  requireSession(isDeepStrictEqual(proof.cohort, aggregate.cohort)
     && isDeepStrictEqual(proof.preparation, aggregate.preparation)
     && isDeepStrictEqual(proof.workers, aggregate.workers.map(({session,reports,native,qualification,resourceQualified,stateSha256,...worker}) => worker)));
   return { workers: aggregate.workers.length, files: receipt.inputFiles.length };
@@ -85,10 +81,9 @@ function identity(receipt) {
   return { source: receipt.source, cohort: receipt.cohort, aggregateJobId: receipt.aggregateJob?.id ?? receipt.aggregateJobId,
     suiteArtifactId: receipt.artifacts?.suite.id ?? receipt.suiteArtifactId,
     providerArtifactId: receipt.artifacts?.provider.id ?? receipt.providerArtifactId,
-    preparation: receipt.image ? {jobId:receipt.image.job.id,imageArtifactId:receipt.image.artifact.id,
-      imageDigest:receipt.image.artifact.digest,runtimeArtifactId:receipt.runtimeIdentity.artifact.id,
-      runtimeDigest:receipt.runtimeIdentity.artifact.digest,compiledArtifactId:receipt.image.compiledArtifact.id,
-      compiledDigest:receipt.image.compiledArtifact.digest,functionalArtifactId:receipt.functional.artifact.id,
+    preparation: receipt.preparation?.job ? {jobId:receipt.preparation.job.id,runtimeArtifactId:receipt.runtimeIdentity.artifact.id,
+      runtimeDigest:receipt.runtimeIdentity.artifact.digest,compiledArtifactId:receipt.preparation.compiledArtifact.id,
+      compiledDigest:receipt.preparation.compiledArtifact.digest,functionalArtifactId:receipt.functional.artifact.id,
       functionalDigest:receipt.functional.artifact.digest} : receipt.preparation,
     workers: receipt.workers.map(worker => ({ id: worker.id, jobId: worker.job?.id ?? worker.jobId,
       artifactId: worker.artifact?.id ?? worker.artifactId, digest: worker.artifact?.digest ?? worker.digest })) };

@@ -46,10 +46,7 @@ internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt at
         {
             await ServerFailureObserver.ObserveAsync(() => host.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
-        if (native is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => native.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
+        await CloseNativeAsync(failures).ConfigureAwait(false);
         foreach (var failure in failures)
         {
             attempt.RecordFailure(failure);
@@ -57,4 +54,24 @@ internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt at
         ServerFailureObserver.Observe(attempt.RequireReleased, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
+
+    private async Task CloseNativeAsync(List<Exception> failures)
+    {
+        try
+        {
+            if (native is not null)
+            {
+                await native.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+    }
+
 }

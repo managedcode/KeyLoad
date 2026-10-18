@@ -16,7 +16,7 @@ internal sealed class BenchmarkSessionStartupFixture : IDisposable
     internal const string User = "Benchmarks__Native__User";
     internal const string Password = "Benchmarks__Native__Password";
     private const string NativePrefix = "Benchmarks__Native__";
-    private readonly ImageBundleTestDirectory directory = new();
+    private readonly NativeArtifactTestDirectory directory = new();
 
     internal Dictionary<string, string> Settings(string target = "KeyLoad", int nodes = 3)
     {

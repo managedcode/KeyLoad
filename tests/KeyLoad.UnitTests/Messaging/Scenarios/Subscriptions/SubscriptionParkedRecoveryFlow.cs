@@ -20,7 +20,7 @@ internal static class SubscriptionParkedRecoveryFlow
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var first = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 1);
-        var firstOperation = Create(OperationKind.ReceiveSubscription, first, first.RequestId, time);
+        var firstOperation = Create(fixture.Database, OperationKind.ReceiveSubscription, first, first.RequestId, time);
         var firstResult = fixture.Database.Apply(firstOperation);
         var deliveries = firstResult.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(
@@ -34,7 +34,7 @@ internal static class SubscriptionParkedRecoveryFlow
             await AckAsync(fixture.Database, fixture.Store, group, delivery, time.AddMilliseconds(500), receipts);
         }
         var retry = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 1);
-        var retryOperation = Create(OperationKind.ReceiveSubscription, retry, retry.RequestId, time.AddSeconds(2));
+        var retryOperation = Create(fixture.Database, OperationKind.ReceiveSubscription, retry, retry.RequestId, time.AddSeconds(2));
         var retryResult = fixture.Database.Apply(retryOperation);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(retryOperation), retryResult);
         claims.Add((retryOperation, retryResult, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, retry.RequestId)));
@@ -43,7 +43,7 @@ internal static class SubscriptionParkedRecoveryFlow
             reclaimed.Token, 2L, time.AddSeconds(3), 2));
         await Assert.That(reclaimed.Token).IsNotEqualTo(deliveries[0].Token);
         var park = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 1);
-        var parkOperation = Create(OperationKind.ReceiveSubscription, park, park.RequestId, time.AddSeconds(4));
+        var parkOperation = Create(fixture.Database, OperationKind.ReceiveSubscription, park, park.RequestId, time.AddSeconds(4));
         var parked = fixture.Database.Apply(parkOperation);
         await Assert.That(parked.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
         await SubscriptionParkedRecoveryAssertions.StatusAsync(fixture.Database, group, policy, 1, 0, 3, 3, true, "AttemptsExhausted");
@@ -78,7 +78,7 @@ internal static class SubscriptionParkedRecoveryFlow
         DateTimeOffset time, string[] source, CancellationToken token)
     {
         var seek = new SeekSubscriptionRequest(Guid.NewGuid(), group, 1, SubscriptionStart.FromBeginning);
-        var seekOperation = Create(OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(6));
+        var seekOperation = Create(db, OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(6));
         var sought = db.Apply(seekOperation);
         await Assert.That(JsonSerializer.Serialize(sought.Get<SubscriptionInfo>(), JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(db.GetSubscription("root", group), JsonDefaults.Options));
@@ -86,7 +86,7 @@ internal static class SubscriptionParkedRecoveryFlow
         receipts.Add((seekOperation, sought, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, seek.CommandId)));
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(store, group);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 2, false);
-        var resumeOperation = Create(OperationKind.SetSubscriptionPaused, resume, resume.CommandId, time.AddSeconds(7));
+        var resumeOperation = Create(db, OperationKind.SetSubscriptionPaused, resume, resume.CommandId, time.AddSeconds(7));
         var resumed = db.Apply(resumeOperation);
         await Assert.That(JsonSerializer.Serialize(resumed.Get<SubscriptionInfo>(), JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(db.GetSubscription("root", group), JsonDefaults.Options));
@@ -100,7 +100,7 @@ internal static class SubscriptionParkedRecoveryFlow
         }
         await SubscriptionParkedRecoveryAssertions.FencedAsync(db, store, group, oldDeliveries[0].Token, time.AddSeconds(7));
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 1);
-        var operation = Create(OperationKind.ReceiveSubscription, request, request.RequestId, time.AddSeconds(8));
+        var operation = Create(db, OperationKind.ReceiveSubscription, request, request.RequestId, time.AddSeconds(8));
         var original = db.Apply(operation);
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Length).IsEqualTo(3);
@@ -159,9 +159,9 @@ internal static class SubscriptionParkedRecoveryFlow
         token.ThrowIfCancellationRequested();
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event4", "Created", "{\"n\":4}")])]);
-        db.Apply(Create(OperationKind.Batch, publish, publish.CommandId, time)).Get<CommitReceipt>();
+        db.Apply(Create(db, OperationKind.Batch, publish, publish.CommandId, time)).Get<CommitReceipt>();
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 1, LeaseSeconds: 1);
-        var operation = Create(OperationKind.ReceiveSubscription, request, request.RequestId, time);
+        var operation = Create(db, OperationKind.ReceiveSubscription, request, request.RequestId, time);
         var original = db.Apply(operation);
         var delivery = await Assert.That(original.Get<ReceiveSubscriptionResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery.Event.Position).IsEqualTo(4L);
@@ -186,13 +186,13 @@ internal static class SubscriptionParkedRecoveryFlow
         List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> receipts)
     {
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
-        var operation = Create(OperationKind.SubscriptionDelivery, ack, ack.CommandId, time);
+        var operation = Create(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, time);
         var original = db.Apply(operation);
         await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(original, ack, delivery.Event.Position);
         receipts.Add((operation, original, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, ack.CommandId)));
     }
 
-    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
-        => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    private static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, DateTimeOffset time)
+        => database.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }
 

@@ -38,7 +38,7 @@ internal static class SampleChunkWorkDiscovery
                     return true;
                 }, afterKey: afterKey, cancellationToken: cancellationToken);
             budget.Check();
-            return new SampleChunkWorkPage(hints.ToImmutable(), scan.HasMore ? last : null, scan.HasMore);
+            return new SampleChunkWorkPage(hints.ToImmutable(), scan.HasMore && last is not null ? ImmutableArray.CreateRange(last) : null, scan.HasMore);
         });
     }
 }

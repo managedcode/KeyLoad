@@ -50,7 +50,7 @@ internal static class MongoDiagnosticProcess
         var start = new ProcessStartInfo(Node) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
         start.ArgumentList.Add(Eval);
         start.ArgumentList.Add(harness);
-        start.ArgumentList.Add(Path.Combine(ImageBundleRealProtocol.RepositoryRoot(), SourcePath));
+        start.ArgumentList.Add(Path.Combine(SessionNodeProcess.RepositoryRoot(), SourcePath));
         start.ArgumentList.Add(scenario);
         return start;
     }

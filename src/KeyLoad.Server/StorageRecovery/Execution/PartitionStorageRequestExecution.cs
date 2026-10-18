@@ -10,12 +10,13 @@ namespace KeyLoad.Server;
 /// <summary>Owns accepted storage Tasks and joins their actual local leases before session cleanup.</summary>
 internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, NativeRequestWorkOwner workOwner,
     GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
-    IOptions<GrainRoutingOptions> options, ILogger diagnostics, IGrainContext context)
+    IOptions<GrainRoutingOptions> options, ILogger diagnostics)
 {
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, (GrainReadKind Kind, NativeRequestWorkLease Work)> active = [];
 
-    internal async Task<GrainOperationReply> ExecuteAsync(string signed, string? actorKey, CancellationToken token)
+    internal async Task<GrainOperationReply> ExecuteAsync(string signed, string? actorKey, IGrainContext context,
+        CancellationToken token)
     {
         var requestId = Guid.Empty;
         var command = false;
@@ -26,7 +27,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
             requestId = request.Envelope.RequestId;
             command = request.Envelope.CommandKind is not null;
             GrainIdentityContext.Validate(request.Envelope, requestId);
-            return await RunOwnedAsync(request, actorKey, token).ConfigureAwait(true);
+            return await RunOwnedAsync(request, actorKey, context, token).ConfigureAwait(true);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -35,7 +36,8 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         }
     }
 
-    private async Task<GrainOperationReply> RunOwnedAsync(DecodedGrainRequest request, string? actorKey, CancellationToken token)
+    private async Task<GrainOperationReply> RunOwnedAsync(DecodedGrainRequest request, string? actorKey,
+        IGrainContext context, CancellationToken token)
     {
         var work = NativeCapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
             NativeRequestWorkKind.NativeTransport, database.OperationLimitsOptions, token)
@@ -52,7 +54,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
                     sessionId = SessionId(request);
                     Register(sessionId, request.Envelope.ReadKind ?? GrainReadKind.OnlineTextMaintenance, original);
                     registered = sessionId != Guid.Empty;
-                    return await ExecuteAdmittedAsync(request, actorKey, work).ConfigureAwait(true);
+                    return await ExecuteAdmittedAsync(request, actorKey, context, work).ConfigureAwait(true);
                 }
                 catch (Exception failure)
                 {
@@ -74,7 +76,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
     }
 
     private Task<GrainOperationReply> ExecuteAdmittedAsync(DecodedGrainRequest request, string? actorKey,
-        NativeCapabilityWorkLifetime work)
+        IGrainContext context, NativeCapabilityWorkLifetime work)
     {
         if (actorKey is not null)
         {
@@ -84,10 +86,11 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
                 () => services.GetRequiredService<INativeDropTableExecution>());
             return executor.ExecuteAsync(request, actorKey, work.Token, context);
         }
-        return ExecuteReadAsync(request, work);
+        return ExecuteReadAsync(request, context, work);
     }
 
-    private async Task<GrainOperationReply> ExecuteReadAsync(DecodedGrainRequest request, NativeCapabilityWorkLifetime work)
+    private async Task<GrainOperationReply> ExecuteReadAsync(DecodedGrainRequest request, IGrainContext context,
+        NativeCapabilityWorkLifetime work)
     {
         if (NativeConnectionParentExecution.Handles(request.Envelope.CommandKind))
         {

@@ -47,7 +47,8 @@ internal static class DueFreshAttemptAssertions
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         var stored = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, CreatorId, commandId);
         await Assert.That(stored).IsNotNull();
-        await Assert.That(stored!.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        var actual = stored ?? throw new InvalidOperationException("The denied recurring outcome is absent.");
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
     }
 
     internal static async Task AssertNoEffectsAsync(RecurringSagaDatabase fixture, Guid scheduleId,

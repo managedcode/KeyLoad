@@ -23,7 +23,7 @@ internal static class TransactionalReadViewCommands
         await DocumentIndexCommittedScanOracle.AssertOldCutAsync(
             DocumentIndexCommittedScanOracle.ReadCut(state.Store, fixture.Partition), state.OldPosition);
         var id = Guid.NewGuid();
-        state.Writer = Operation(id, new(id, fixture.Partition,
+        state.Writer = Operation(state.Database, id, new(id, fixture.Partition,
             [new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.ReplaceId,
                 DocumentIndexCommittedScanOracle.ReplacementJson, 1L, ExplicitReplacement: true),
              new DeleteDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.DeleteId, 1L),
@@ -33,8 +33,8 @@ internal static class TransactionalReadViewCommands
              new("deleteDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.DeleteId, 2L),
              new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.InsertId, 1L)], DurabilityProfile.ProcessDurable, 1);
     }
-    internal static Command<DatabaseCommand> Operation(Guid id, CommandRequest request)
-        => new(id, OperationKind.Batch, "root", default, System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation(DatabaseEngine database, Guid id, CommandRequest request)
+        => database.CreateCommand(OperationKind.Batch, id, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
     internal static string[] QueueImage(global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store)
         => store.Read(view =>
         {

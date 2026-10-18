@@ -29,7 +29,6 @@ internal static class GrainRequestScope
 
         if (!NativeAdministratorAuthenticationScope.Validate(request)
             && !TextMaintenanceChildScope.Validate(request) && !MultiLaneReceiveChildScope.Validate(request)
-            && !AnnProjectionJobChildScope.Validate(request)
             && !AnnMaintenanceChildScope.Validate(request)
             && !Bm25RequestScope.Validate(request) && !AnnProjectionObservationScope.Validate(request)
             && !OnlineTextRequestScope.Validate(request)

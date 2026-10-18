@@ -13,7 +13,7 @@ Follow the [root policy](../../../AGENTS.md) and the owning feature specificatio
 From the repository root:
 
 ```sh
-dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
 Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.

@@ -23,7 +23,7 @@ internal static class SubscriptionProcessingAtomicFlow
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
-        var claim = Create(OperationKind.ReceiveSubscription, receive, receive.RequestId, time);
+        var claim = Create(fixture.Database, OperationKind.ReceiveSubscription, receive, receive.RequestId, time);
         var originalClaim = fixture.Database.Apply(claim);
         var deliveries = originalClaim.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(
@@ -32,17 +32,17 @@ internal static class SubscriptionProcessingAtomicFlow
         var request = new SubscriptionProcessingRequest(Guid.NewGuid(), group, deliveries[0].Token, "worker", 1,
             [new PutDocument("orders", "first", "{\"n\":1}", 0),
              new PutDocument("orders", "second", "{\"n\":2}", 9)]);
-        var failed = Create(OperationKind.SubscriptionProcessing, request, request.CommandId, time.AddSeconds(1));
+        var failed = Create(fixture.Database, OperationKind.SubscriptionProcessing, request, request.CommandId, time.AddSeconds(1));
         if (fault is { } selected)
         {
             await CorruptSubscriptionProcessingAssertions.RefuseAndRestoreAsync(fixture, group, failed, selected);
         }
-        var before = SubscriptionProcessingAtomicAssertions.DomainImage(fixture.Store, group, failed.Id);
+        var before = SubscriptionProcessingAtomicAssertions.DomainImage(fixture.Store, group, failed.CommandId);
         var position = fixture.Store.Position;
         var failure = fixture.Database.Apply(failed);
         await SubscriptionProcessingAtomicAssertions.RollbackAsync(fixture.Database, fixture.Store,
             group, failed, failure, before, position + 1);
-        var failureBytes = SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, failed.Id);
+        var failureBytes = SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, failed.CommandId);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(fixture.Database, fixture.Store,
             group, failed, failure, failureBytes);
         var cut = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -72,18 +72,18 @@ internal static class SubscriptionProcessingAtomicFlow
             Effects = [new PutDocument("orders", "first", "{\"n\":1}", 0),
                        new PutDocument("orders", "second", "{\"n\":2}", 0)]
         };
-        var operation = Create(OperationKind.SubscriptionProcessing, repaired, repaired.CommandId, time.AddSeconds(2));
+        var operation = Create(db, OperationKind.SubscriptionProcessing, repaired, repaired.CommandId, time.AddSeconds(2));
         var result = db.Apply(operation);
         await SubscriptionProcessingAtomicAssertions.SuccessAsync(db, group, repaired, result);
-        var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id);
+        var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
         await SubscriptionProcessingAtomicAssertions.SuccessReplayAsync(db, store, group, operation, result, saved);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(db, store, group, failed, failure, failureBytes);
         var once = repaired with
         {
             CommandId = Guid.NewGuid()
         };
-        var onceOperation = Create(OperationKind.SubscriptionProcessing, once, once.CommandId, time.AddSeconds(3));
-        var beforeOnce = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, onceOperation.Id);
+        var onceOperation = Create(db, OperationKind.SubscriptionProcessing, once, once.CommandId, time.AddSeconds(3));
+        var beforeOnce = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, onceOperation.CommandId);
         var oncePosition = store.Position;
         var onceResult = db.Apply(onceOperation);
         await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, onceOperation, beforeOnce, oncePosition + 1);
@@ -95,13 +95,13 @@ internal static class SubscriptionProcessingAtomicFlow
         await SubscriptionProcessingAtomicAssertions.DocumentsAsync(db, group);
         var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (operation, result, saved), (onceOperation, onceResult,
-            SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, onceOperation.Id)) };
+            SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, onceOperation.CommandId)) };
         var ackReceipts = new List<(SubscriptionDeliveryCommand Command, Result<object> Result)>();
         var deliveries = originalClaim.Get<ReceiveSubscriptionResult>().Deliveries;
         foreach (var delivery in deliveries.Skip(1))
         {
             var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
-            var ack = Create(OperationKind.SubscriptionDelivery, command, command.CommandId, time.AddSeconds(4));
+            var ack = Create(db, OperationKind.SubscriptionDelivery, command, command.CommandId, time.AddSeconds(4));
             var receipt = db.Apply(ack);
             await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(receipt, command, delivery.Event.Position);
             await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(db, store, command, receipt, token);
@@ -150,7 +150,7 @@ internal static class SubscriptionProcessingAtomicFlow
             QueueWholeFlowStorage.Clock(second).AddSeconds(1), token);
     }
 
-    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
-        => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    private static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, DateTimeOffset time)
+        => database.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }
 

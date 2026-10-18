@@ -8,12 +8,11 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Bounded queue events are flushed by native timers; persisted due records survive activation loss.</summary>
 [StatelessWorker]
-internal sealed class RecurringDueWorkerGrain(DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
+internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
     TimeProvider clock, IOptions<DueCoordinationOptions> options, IOptions<BackgroundWorkerOptions> batching,
     ILogger<RecurringDueWorkerGrain> diagnostics) : Grain, IRecurringDueWorkerGrain
 {
     private const int NoRejectedDueHints = 0;
-    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly Queue<DueWorkHint> pending = new();
     private DueSweepCursor? due;
     private QueueDeadlineCursor? deadlines;
@@ -62,28 +61,26 @@ internal sealed class RecurringDueWorkerGrain(DatabaseEngine database, Func<ICom
     }
 
     private Task<RemoteTransferPendingCursor?> RunTransferCycleAsync(RemoteTransferPendingCursor? cursor, CancellationToken token)
-        => RemoteTransferServiceCycle.RunAsync(database, coordinator, grainFactory, clock, diagnostics, options, cursor, token);
+        => RemoteTransferServiceCycle.RunAsync(storage, grainFactory, clock, diagnostics, options, cursor, token);
 
     private Task<QueueDeadlineCursor?> RunQueueCycleAsync(QueueDeadlineCursor? cursor, CancellationToken cancellationToken)
-        => QueueDeadlineServiceCycle.RunAsync(database, coordinator, grainFactory, clock, diagnostics, options, cursor, cancellationToken);
+        => QueueDeadlineServiceCycle.RunAsync(storage, grainFactory, clock, diagnostics, options, cursor, cancellationToken);
 
     private async Task<DueSweepCursor?> RunCycleAsync(DueSweepCursor? cursor,
         CancellationToken cancellationToken)
     {
         try
         {
-            var page = await ReadAndDispatchPage(cursor, cancellationToken).ConfigureAwait(true);
-            cursor = page.Cursor;
-            if (page.Rejected.Length > NoRejectedDueHints)
+            var discovery = await ReadAndDispatchPage(cursor, cancellationToken).ConfigureAwait(true);
+            cursor = discovery.Cursor;
+            if (discovery.PrefixError is { } error)
             {
-                RecurringDueDiagnostics.PageRejected(diagnostics, page.Rejected.Length);
+                RecurringDueDiagnostics.PrefixRejected(diagnostics, error);
             }
-        }
-        catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
-            && failure.Message == DueWorkProtocol.KeyExceedsBound)
-        {
-            cursor = DueWorkCursor.DeferNext(database.Store.Identity, cursor);
-            RecurringDueDiagnostics.PrefixRejected(diagnostics, failure.Code);
+            else if (discovery.Page!.Rejected.Length > NoRejectedDueHints)
+            {
+                RecurringDueDiagnostics.PageRejected(diagnostics, discovery.Page.Rejected.Length);
+            }
         }
         catch (KeyLoadException failure)
         {
@@ -96,17 +93,21 @@ internal sealed class RecurringDueWorkerGrain(DatabaseEngine database, Func<ICom
         return cursor;
     }
 
-    private async Task<DueWorkPage> ReadAndDispatchPage(DueSweepCursor? cursor,
+    private async Task<DueWorkDiscoveryResult> ReadAndDispatchPage(DueSweepCursor? cursor,
         CancellationToken cancellationToken)
     {
-        await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
-        var page = DueWorkDiscovery.ReadPage(database, cursor, clock.GetUtcNow(), cancellationToken);
+        var discovery = await storage.Operations.ReadDueWorkPageAsync(cursor, cancellationToken).ConfigureAwait(true);
+        if (discovery.PrefixError is not null)
+        {
+            return discovery;
+        }
+        var page = discovery.Page ?? throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidWakeInstant);
         foreach (var hint in page.Jobs)
         {
             cancellationToken.ThrowIfCancellationRequested();
             await Dispatch(hint, cancellationToken).ConfigureAwait(true);
         }
-        return page;
+        return discovery;
     }
 
     private async Task Dispatch(DueWorkHint hint, CancellationToken cancellationToken)

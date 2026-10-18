@@ -3,9 +3,9 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Comparisons;
 using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 

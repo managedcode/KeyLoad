@@ -10,7 +10,7 @@ internal sealed class IsolatedGitHubFailureDiagnosticsTests
     [Arguments("retention-conflict")]
     public async Task AcIso007FailedNativeChildRetainsBoundedPrivateEvidenceThenJoinsHealthyContinuation(string failure)
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         try
         {
             var result = await SessionNodeProcess.RunAsync(

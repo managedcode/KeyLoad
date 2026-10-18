@@ -14,7 +14,7 @@ internal static class SharedDomainProcessingFlow
             candidate => SharedDomainNativeImage.Capture(database.Store, candidate.Partition));
         var lane = new QueueLaneRef(scope.Partition, scope.Queue!);
         var request = new ReceiveRequest(Guid.NewGuid(), lane);
-        var operation = SharedDomainOperations.Operation(OperationKind.Receive, request.RequestId, request);
+        var operation = SharedDomainOperations.Operation(database, OperationKind.Receive, request.RequestId, request);
         var started = TimeProvider.System.GetUtcNow();
         var expectedPosition = database.Store.Position + FirstRevision;
         var received = SharedDomainOperations.Apply(database, operation, token);
@@ -36,7 +36,7 @@ internal static class SharedDomainProcessingFlow
         await SharedDomainHistoryOperations.SaveAsync(database.Store, state, scope.Partition, operation, received);
         var processing = SharedDomainCorpus.Processing(scope, delivery.Token, Guid.NewGuid());
         await SharedDomainRefusals.ConsumerAsync(database, state, processing, token);
-        var processingOperation = SharedDomainOperations.Operation(OperationKind.Processing, processing.CommandId, processing);
+        var processingOperation = SharedDomainOperations.Operation(database, OperationKind.Processing, processing.CommandId, processing);
         var processingPosition = database.Store.Position + FirstRevision;
         var completed = SharedDomainOperations.Apply(database, processingOperation, token);
         await SharedDomainValueAssertions.ProcessingAsync(completed, processing, database.Store.Identity, processingPosition);

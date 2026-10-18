@@ -1,5 +1,7 @@
 using System.Text.Json;
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Exceptions;
 
@@ -20,7 +22,7 @@ internal sealed class StreamCommandIdentityTests
         using var fixture = new StreamReadResourceFixture();
         var commandId = Guid.NewGuid();
         var command = Append(fixture.Partition, commandId);
-        var operation = Operation(Guid.NewGuid(), command);
+        var operation = Operation(fixture.Database, Guid.NewGuid(), command);
 
         var result = fixture.Apply(operation);
 
@@ -35,7 +37,7 @@ internal sealed class StreamCommandIdentityTests
     {
         using var fixture = new StreamReadResourceFixture();
         var commandId = Guid.NewGuid();
-        var operation = Operation(commandId, Append(fixture.Partition, commandId));
+        var operation = Operation(fixture.Database, commandId, Append(fixture.Partition, commandId));
 
         var committed = fixture.Apply(operation);
         var receipt = committed.Get<CommitReceipt>();
@@ -52,7 +54,7 @@ internal sealed class StreamCommandIdentityTests
     {
         using var fixture = new StreamReadResourceFixture();
         var commandId = Guid.NewGuid();
-        var committed = fixture.Apply(Operation(commandId, Append(fixture.Partition, commandId)));
+        var committed = fixture.Apply(Operation(fixture.Database, commandId, Append(fixture.Partition, commandId)));
         var receipt = committed.Get<CommitReceipt>();
         var original = receipt.Mutations.Single();
         var mutation = original with
@@ -64,14 +66,11 @@ internal sealed class StreamCommandIdentityTests
             Mutations = [mutation]
         };
         await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<CommitReceipt>(
-            committed with
-            {
-                NativeValue = changed
-            }, committed));
+            Result<object>.Succeed(changed), committed));
     }
 
-    private static Command<DatabaseCommand> Operation(Guid envelopeId, CommandRequest command)
-        => new(envelopeId, OperationKind.Batch, AdministratorId, TimeProvider.System.GetUtcNow(),
+    private static Command<DatabaseCommand> Operation(DatabaseEngine database, Guid envelopeId, CommandRequest command)
+        => database.CreateCommand(OperationKind.Batch, envelopeId, AdministratorId, database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(command, JsonDefaults.Options));
 
     private static CommandRequest Append(PartitionRef partition, Guid commandId)

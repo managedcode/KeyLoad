@@ -68,7 +68,7 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         siloBuilder.AddJournalStorage<RuntimeJournalStorageProvider>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME,
             services => ActivatorUtilities.CreateInstance<RuntimeJournalStorageProvider>(services));
         ConfigureGraph(siloBuilder);
-        NativeJobGraphRegistration.Extend(siloBuilder.Services);
+        NativeJobGraphRegistration.ExtendJournalStorage(siloBuilder.Services);
         siloBuilder.UseOrleansCommunication();
     }
 

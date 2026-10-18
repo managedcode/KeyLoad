@@ -15,4 +15,4 @@ runs:
       run: dotnet restore KeyLoad.slnx
     - name: Build functional CLUSTER tests
       shell: bash
-      run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release -warnaserror
+      run: dotnet build tests/KeyLoad.IntegrationTests --no-restore -warnaserror

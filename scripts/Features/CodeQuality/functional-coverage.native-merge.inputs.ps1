@@ -8,7 +8,7 @@ $script:FcNativeMergeInput = [ordered]@{
     ReferenceCatalog = $null
     ReferenceBytes = 0L
     ScriptHashes = $null
-    NativeToolVersion = '18.11.2'
+    NativeToolVersion = '18.12.0'
     ToolPackageId = 'dotnet-coverage'
     ClusterNodeCount = 3
     MaximumJsonDepth = 32
@@ -16,11 +16,8 @@ $script:FcNativeMergeInput = [ordered]@{
     InvalidEvidence = 'A native coverage merge input is absent, changed or outside its evidence root.'
     InvalidSource = 'The native coverage merge source identity is incomplete or stale.'
     InvalidReceipt = 'An original native coverage terminal receipt is incomplete or mismatched.'
-    ModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Analyzers','KeyLoad.AppHost','KeyLoad.Cli',
-        'KeyLoad.Client','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query','KeyLoad.Replication',
-        'KeyLoad.Server','KeyLoad.Storage.ZoneTree')
-    ServerModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query',
-        'KeyLoad.Replication','KeyLoad.Server','KeyLoad.Storage.ZoneTree')
+    ProcessAttributionOpen = 'Native server-process coverage attribution is unverified: aggregate Server hits and lifecycle originals do not prove collection from every observed PID and start identity.'
+    ModuleRoster = @()
 }
 
 function Assert-FcNativeExactKeys([Collections.IDictionary] $Value, [string[]] $Names) {
@@ -140,11 +137,13 @@ function Read-FcNativeJsonReference([string] $Root, [object] $Reference, [long] 
 }
 
 function Assert-FcNativeSourceManifest([string] $Repository, [object] $Manifest) {
+    $roster = @(Get-FcCompiledProjectRoster $Repository)
+    $script:FcNativeMergeInput.ModuleRoster = @($roster | ForEach-Object name)
     Assert-FcNativeExactKeys $Manifest @('schemaVersion','sourceRevision','repository','contractSha256',
         'compiledProducts','compiledTestsManifest','compilationProducer','contributors','settingsSha256','scripts')
     if ($Manifest.schemaVersion -ne $script:FcNativeMergeInput.SourceManifestVersion -or
         $Manifest.sourceRevision -cnotmatch '\A[0-9a-f]{40}\z' -or
-        [IO.Path]::GetFullPath([string] $Manifest.repository) -cne [IO.Path]::GetFullPath($Repository) -or
+        $Manifest.repository -cne 'managedcode/KeyLoad' -or
         $Manifest.contractSha256 -cnotmatch '\A[0-9a-f]{64}\z' -or
         $Manifest.settingsSha256 -cnotmatch '\A[0-9a-f]{64}\z' -or
         $Manifest.compiledProducts.Count -ne $script:FcNativeMergeInput.ModuleRoster.Count) {
@@ -160,15 +159,32 @@ function Assert-FcNativeSourceManifest([string] $Repository, [object] $Manifest)
     foreach ($product in $Manifest.compiledProducts) {
         Assert-FcNativeExactKeys $product @('module','role','sources','compiledIdentity')
         if ($product.module -cnotin $script:FcNativeMergeInput.ModuleRoster -or -not $modules.Add([string] $product.module) -or
-            $product.role -cne (if ($product.module -in @('KeyLoad.Analyzers','KeyLoad.AppHost')) { 'infrastructure' } else { 'production' }) -or $product.sources.Count -le 0 -or
+            $product.role -cne @($roster | Where-Object name -CEQ $product.module)[0].role -or $product.sources.Count -le 0 -or
             $product.compiledIdentity.compiledSourceBindingComplete -ne $true) { throw $script:FcNativeMergeInput.InvalidSource }
         $identity = $product.compiledIdentity
+        if ([IO.Path]::GetFullPath([string] $identity.inspectedSourceRoot) -cne [IO.Path]::GetFullPath($Repository)) {
+            throw $script:FcNativeMergeInput.InvalidSource
+        }
         if ($identity.compileReceipt.producer.path -cne $producer.path -or
             $identity.compileReceipt.producer.sha256 -cne $producer.sha256) {
             throw $script:FcNativeMergeInput.InvalidSource
         }
         $actualIdentity = Read-FcCompiledIdentity $Repository ([string] $identity.dll) ([string] $identity.pdb) `
             @($product.sources) ([string] $identity.originalCompilationRoot)
+        $central = @($identity.compileReceipt.centralInputs)
+        $expectedInputs = [string[]]@('global.json','Directory.Build.props','Directory.Build.targets',
+            'Directory.Packages.props','KeyLoad.slnx',@($roster | Where-Object name -CEQ $product.module)[0].path)
+        $centralPaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+        foreach ($input in $central) {
+            Assert-FcNativeExactKeys $input @('path','sha256')
+            if (-not $centralPaths.Add([string] $input.path) -or $input.sha256 -cnotmatch '\A[0-9a-f]{64}\z' -or
+                (Get-FcHash (Resolve-FcPath $Repository $input.path)) -cne $input.sha256) { throw $script:FcNativeMergeInput.InvalidSource }
+        }
+        if ($central.Count -ne $expectedInputs.Count -or -not $centralPaths.SetEquals($expectedInputs)) {
+            throw $script:FcNativeMergeInput.InvalidSource
+        }
+        $actualIdentity['compileReceipt'] = Read-FcNativeCompileReceipt (Resolve-FcPath $Repository $identity.dll) `
+            @($product.sources) $central $currentProducer
         $actualJson = ConvertTo-Json -InputObject $actualIdentity -Depth 12 -Compress
         $expectedJson = ConvertTo-Json -InputObject $identity -Depth 12 -Compress
         if ($actualJson -cne $expectedJson) { throw $script:FcNativeMergeInput.InvalidSource }

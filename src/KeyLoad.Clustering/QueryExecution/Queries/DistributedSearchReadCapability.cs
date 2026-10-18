@@ -16,16 +16,14 @@ internal static class DistributedSearchReadCapability
     {
         ArgumentNullException.ThrowIfNull(binding);
         var options = services.GetRequiredService<IOptions<QueryExecutionOptions>>();
-        var execution = new DistributedSearchLocalExecution(database, principal.Id,
-            services.GetRequiredService<PhysicalShardRecord>(), options, clock,
-            request.Envelope.ExpiresAt, binding);
+        var execution = new DistributedSearchRemoteExecution(database, principal.Id, services, codec, request);
         Func<CancellationToken, Task>? observed = null;
         if (codec.HasPhaseObserver)
         {
             observed = new DistributedSearchStatisticsObservation(codec, request, requestId, context).ObserveAsync;
         }
         return DistributedSearchCoordinator.ExecuteBoundAsync(database,
-            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), options, execution.Prepare,
+            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), options, execution.PrepareAsync,
             services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync,
             clock, request.Envelope.ExpiresAt, observed, binding, token);
     }

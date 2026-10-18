@@ -29,12 +29,12 @@ internal static class SeriesPortableBackupAssertions
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
-        var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, partition));
+        var owner = database.Store.Read(view => database.ReadPlacementWitness(view, partition));
         await BackupPersistedPolicyAssertions.SameAsync(new CommitToken(owner.Incarnation,
-            partition.AtomicPartitionId, database.Store.Position), receipt.Token);
+            partition.AtomicPartitionId, database.LastApplied), receipt.Token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(database.LastApplied);
         await Assert.That(receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
     }
 

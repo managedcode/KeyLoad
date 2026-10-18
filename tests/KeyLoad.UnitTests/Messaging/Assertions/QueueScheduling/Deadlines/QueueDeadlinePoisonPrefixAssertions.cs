@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -10,16 +11,21 @@ internal static class QueueDeadlinePoisonPrefixAssertions
     {
         token.ThrowIfCancellationRequested();
         var key = store.Read(view => view.Scan(KeyCodec.Encode(QueueDeadlinePoisonPrefixProtocol.Scheduled), QueueDeadlinePoisonPrefixProtocol.First).Records.Single().Key.ToArray());
+        var expected = key.ToArray();
+        var owned = ImmutableArray.CreateRange(key);
         var cursor = QueueDeadlineCursor.Match(store.Identity, null) with
         {
-            Scheduled = new DuePrefixCursor(true, key, key)
+            Scheduled = new DuePrefixCursor(true, owned, owned)
         };
         var deferred = QueueDeadlineCursor.DeferNext(store.Identity, cursor);
         await Assert.That(deferred.Next).IsEqualTo(QueueDeadlineCursor.LeasedIndex);
-        await Assert.That(deferred.Scheduled.UpperKey!.SequenceEqual(key)).IsTrue();
-        await Assert.That(deferred.Scheduled.LastKey!.SequenceEqual(key)).IsTrue();
-        await Assert.That(ReferenceEquals(deferred.Scheduled.UpperKey, key)).IsFalse();
-        await Assert.That(cursor.Scheduled.UpperKey!.SequenceEqual(key)).IsTrue();
+        await Assert.That(deferred.Scheduled.UpperKey!.Value.AsSpan().SequenceEqual(expected)).IsTrue();
+        await Assert.That(deferred.Scheduled.LastKey!.Value.AsSpan().SequenceEqual(expected)).IsTrue();
+        key[QueueDeadlinePoisonPrefixProtocol.Initial] ^= QueueDeadlinePoisonPrefixProtocol.PoisonByte;
+        await Assert.That(key.AsSpan().SequenceEqual(expected)).IsFalse();
+        await Assert.That(deferred.Scheduled.UpperKey!.Value.AsSpan().SequenceEqual(expected)).IsTrue();
+        await Assert.That(deferred.Scheduled.LastKey!.Value.AsSpan().SequenceEqual(expected)).IsTrue();
+        await Assert.That(cursor.Scheduled.UpperKey!.Value.AsSpan().SequenceEqual(expected)).IsTrue();
         var original = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);

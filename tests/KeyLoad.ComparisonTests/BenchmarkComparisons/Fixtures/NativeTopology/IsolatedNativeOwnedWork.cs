@@ -1,8 +1,8 @@
 using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;

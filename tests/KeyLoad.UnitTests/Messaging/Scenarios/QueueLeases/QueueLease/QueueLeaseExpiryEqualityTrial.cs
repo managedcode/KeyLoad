@@ -79,7 +79,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         {
             var replay = Apply(database, command, state.Boundary);
             await QueueLeaseExpiryEqualityAssertions.RefusalAsync(replay, ErrorCode.LeaseExpired);
-            await Assert.That(replay.Problem?.Detail).IsEqualTo(result.SafeDetail);
+            await Assert.That(replay.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
         }
         var claim = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, state.Claim,

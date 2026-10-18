@@ -12,9 +12,9 @@ internal static class CliBackupRestoreProcess
     private const string DotnetCommand = "dotnet";
     private const string SolutionFileName = "KeyLoad.slnx";
     private const string CliProjectPath = "src/KeyLoad.Cli/KeyLoad.Cli.csproj";
-    private const string CliAssemblyPath = "src/KeyLoad.Cli/bin/Release/net10.0/KeyLoad.Cli.dll";
-    private const string StartFailureMessage = "The Release KeyLoad CLI process did not start.";
-    private const string UnsettledMessage = "The original Release KeyLoad CLI process did not settle within its cleanup threshold.";
+    private const string CliAssemblyPath = "src/KeyLoad.Cli/bin/Debug/net10.0/KeyLoad.Cli.dll";
+    private const string StartFailureMessage = "The native KeyLoad CLI process did not start.";
+    private const string UnsettledMessage = "The original native KeyLoad CLI process did not settle within its cleanup threshold.";
 
     internal static IOptions<TestExecutionOptions> CaptureExecutionOptions()
     {

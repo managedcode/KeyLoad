@@ -6,7 +6,7 @@ internal static class NativeBoundLeaseDisposalFlow
 {
     internal static async Task ExecuteAsync(bool failures, bool completionFirst, CancellationToken token)
     {
-        var session = new NativeLocalChildLifetimeSession();
+        var session = new NativeBoundLeaseSession();
         var errors = new List<Exception>();
         Exception? original = failures ? new InvalidOperationException(nameof(NativeBoundLeaseDisposalFlow)) : null;
         Exception? cleanup = failures ? new IOException(nameof(NativeBoundLeaseDisposalFlow)) : null;
@@ -22,11 +22,11 @@ internal static class NativeBoundLeaseDisposalFlow
                 linked = CancellationTokenSource.CreateLinkedTokenSource(token, bound.Token);
                 await fixture.InitializeAsync(linked.Token);
                 await other.InitializeAsync(linked.Token);
-                var state = await NativeLocalChildLifetimeSeed.CreateAsync(fixture, other, linked.Token);
+                var state = await NativeBoundLeaseSeed.CreateAsync(fixture, other, linked.Token);
                 var operation = session.Initialize(state, linked.Token);
-                await NativeBoundLeaseDisposalOperation.ExecuteAsync(session, state, operation, original, cleanup, completionFirst);
+                await NativeBoundLeaseDisposalOperation.ExecuteAsync(state, operation, original, cleanup, completionFirst);
                 await NativeBoundLeaseDisposalFollowing.ExecuteAsync(state, operation, linked.Token);
-                await NativeLocalChildLifetimeConservation.VerifyAsync(fixture, state, linked.Token);
+                await NativeBoundLeaseConservation.VerifyAsync(fixture, state, linked.Token);
                 var shutdown = operation.Owner.DisposeAsync().AsTask();
                 await Assert.That(operation.Owner.DisposeAsync().AsTask()).IsSameReferenceAs(shutdown);
                 await shutdown.WaitAsync(new NativeRuntimeTestOptions().ShutdownTimeout, linked.Token);

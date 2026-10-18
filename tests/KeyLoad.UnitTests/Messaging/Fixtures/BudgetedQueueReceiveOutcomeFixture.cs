@@ -14,7 +14,7 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
     internal PrincipalRecord Worker { get; private set; } = null!;
     internal Command<DatabaseCommand> OriginalIntent { get; private set; } = null!;
     internal byte[] OriginalIntentBytes { get; private set; } = null!;
-    internal Result<object> Result { get; private set; } = null!;
+    internal Result<object> Result { get; private set; }
     internal QueueLaneRef Lane => new(Database.Partition, P.Queue);
     private bool header;
 

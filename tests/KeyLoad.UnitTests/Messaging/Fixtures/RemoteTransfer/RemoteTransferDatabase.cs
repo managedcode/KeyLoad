@@ -54,7 +54,6 @@ internal sealed class RemoteTransferDatabase : IDisposable
             ClusterAdministrator = true
         },
             DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
-        PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         Configure(SourceQueue, sourceFields, sourceHeaders);
         Configure(DestinationQueue, destinationFields, destinationHeaders, destinationPolicy);
     }
@@ -116,7 +115,6 @@ internal sealed class RemoteTransferDatabase : IDisposable
         store.Dispose();
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(replacementLimits ?? limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider: timeProvider);
-        PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 
     public void Dispose()

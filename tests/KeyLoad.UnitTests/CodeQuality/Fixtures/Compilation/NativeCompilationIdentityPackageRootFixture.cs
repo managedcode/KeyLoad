@@ -9,6 +9,7 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
 
 internal sealed class NativeCompilationIdentityPackageRootFixture : IAsyncDisposable
 {
+    internal const string Configuration = "Debug";
     internal const string ProjectRelativePath = "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj";
     internal const string SourceRelativePath = "tests/KeyLoad.UnitTests/Owned.cs";
     internal const string ProducerRelativePath = "build/CodeQuality/FunctionalCompilationIdentity.targets";
@@ -57,7 +58,7 @@ internal sealed class NativeCompilationIdentityPackageRootFixture : IAsyncDispos
 
     internal string Root { get; } = Path.Combine(Path.GetFullPath(Path.GetTempPath()), FixturePrefix + Guid.NewGuid().ToString(GuidFormat));
     internal string ProjectPath => Path.Combine(Root, ProjectRelativePath.Replace('/', Path.DirectorySeparatorChar));
-    internal string OutputDirectory => Path.Combine(Path.GetDirectoryName(ProjectPath)!, "bin", "Release", TargetFramework);
+    internal string OutputDirectory => Path.Combine(Path.GetDirectoryName(ProjectPath)!, "bin", Configuration, TargetFramework);
     internal string DllPath => Path.Combine(OutputDirectory, TestAssemblyName + ".dll");
     internal string PdbPath => Path.Combine(OutputDirectory, TestAssemblyName + ".pdb");
     internal string TUnitPropsPath { get; private set; } = string.Empty;

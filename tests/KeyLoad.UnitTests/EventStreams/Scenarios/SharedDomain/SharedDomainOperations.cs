@@ -8,8 +8,8 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal static class SharedDomainOperations
 {
-    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T request, string principal = Writer)
-        => new(id, kind, principal, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine database, OperationKind kind, Guid id, T request, string principal = Writer)
+        => database.CreateCommand(kind, id, principal, database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
 
     internal static Result<object> Apply(DatabaseEngine database, Command<DatabaseCommand> operation, CancellationToken token)
         => database.ApplyEmbedded(operation, token);
@@ -36,7 +36,7 @@ internal static class SharedDomainOperations
 
     internal static void ConfigurePrincipal(DatabaseEngine database, SharedDomainState state, bool denied, CancellationToken token)
     {
-        var operation = Operation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), new ConfigurePrincipalRequest(Principal(state, denied)), Root);
+        var operation = Operation(database, OperationKind.ConfigurePrincipal, Guid.NewGuid(), new ConfigurePrincipalRequest(Principal(state, denied)), Root);
         _ = Apply(database, operation, token).Get<PrincipalRecord>();
     }
 }

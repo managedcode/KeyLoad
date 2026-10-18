@@ -23,15 +23,15 @@ internal sealed class EventAppendWholeFlowTests
         })).ToArray();
         start.SetResult();
         var results = await Task.WhenAll(workers).ConfigureAwait(false);
-        var winner = await Assert.That(Enumerable.Range(0, contenders).Where(index => results[index].Error is null)).HasSingleItem();
+        var winner = await Assert.That(Enumerable.Range(0, contenders).Where(index => Errors.Code(results[index].Problem) is null)).HasSingleItem();
         var winningEvent = ((AppendEvents)commands[winner].Mutations[^1]).Events.Single();
         await fixture.AssertPageAsync(EventAppendWholeFlowFixture.Data(EventAppendWholeFlowFixture.InitialId), winningEvent);
         for (var index = 0; index < contenders; index++)
         {
             if (index != winner)
             {
-                await Assert.That(results[index].Error).IsEqualTo(ErrorCode.RevisionConflict);
-                await Assert.That(results[index].SafeDetail).IsEqualTo("The expected stream revision does not match.");
+                await Assert.That(Errors.Code(results[index].Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+                await Assert.That(results[index].Problem?.Detail).IsEqualTo("The expected stream revision does not match.");
             }
             await fixture.AssertProducerAsync("producer-" + index.ToString(CultureInfo.InvariantCulture), index == winner);
         }

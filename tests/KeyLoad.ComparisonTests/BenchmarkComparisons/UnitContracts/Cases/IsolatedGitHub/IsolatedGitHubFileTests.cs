@@ -15,7 +15,7 @@ internal sealed class IsolatedGitHubFileTests
     [Arguments("unsafe-entry")]
     public async Task AcIso007RealNativeFileStreamAndInventoryRejectChangedOrUnsafeEvidence(string corruption)
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubFileProgram.Source,
                 SessionNodeProcess.Module("isolated-github-stream.mjs"), directory.Root, corruption],
@@ -35,7 +35,7 @@ internal sealed class IsolatedGitHubFileTests
     public async Task AcIso007LargeNativeStreamRetainsOriginalBytesRefusesOneOverAndJoinsHealthyContinuation(
         int length, string writer)
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         try
         {
             var result = await SessionNodeProcess.RunAsync(

@@ -38,10 +38,10 @@ internal static class MixedEventingRetentionBackupInbox
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
         var issued = fixture.ReadTargetIssuedOperation(receive.RequestId);
-        await Assert.That(issued.Id).IsEqualTo(receive.RequestId);
-        await Assert.That(issued.Kind).IsEqualTo(OperationKind.Receive);
-        await Assert.That(issued.PrincipalId).IsEqualTo(EventingArtifactFixture.Principal);
-        await Assert.That(delivery.LeaseUntil).IsEqualTo(issued.EvaluatedAt.AddSeconds(30));
+        await Assert.That(issued.CommandId).IsEqualTo(receive.RequestId);
+        await Assert.That(issued.Value!.Kind).IsEqualTo(OperationKind.Receive);
+        await Assert.That(issued.UserId!).IsEqualTo(EventingArtifactFixture.Principal);
+        await Assert.That(delivery.LeaseUntil).IsEqualTo(new DateTimeOffset(issued.Timestamp).AddSeconds(30));
         var request = state.Inbox with
         {
             CommandId = Guid.NewGuid(),

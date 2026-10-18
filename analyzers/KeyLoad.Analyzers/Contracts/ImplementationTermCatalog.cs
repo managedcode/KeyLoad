@@ -38,6 +38,7 @@ internal static class ImplementationTermCatalog
     internal const string DataServerAssembly = "KeyLoad.Server";
     internal const string NativeLoggingProcessorAssembly = "OpenTelemetry";
     internal const string NativeLoggingProcessorType = "OpenTelemetry.SimpleLogRecordExportProcessor";
+    internal const string NativeActivityProcessorType = "OpenTelemetry.SimpleActivityExportProcessor";
     internal const string DataRecordFamiliesType = "KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies";
     internal const string DataReadKindType = "KeyLoad.Clustering.GrainReadKind";
     internal const string DataRequestPhaseType = "KeyLoad.Clustering.GrainRequestPhase";
@@ -105,7 +106,21 @@ internal static class ImplementationTermCatalog
         "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SeriesSet",
         "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SampleId",
         "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SampleValue",
-        "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SampleAt"
+        "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SampleAt",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.RefreshRollupKind",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.DropRollupKind",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.Sample",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.SamplesKind",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.ExpireSamplesKind",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.OpenChunkKind",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.SealChunkKind",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.MergeChunkKind",
+        "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.DropChunkKind",
+        "KeyLoad.UnitTests.Features.ClusterRouting.PartitionRecordInventoryTests.ExpectedFamilies",
+        "KeyLoad.UnitTests.Features.BackupRestore.SeriesPortableBackupSeed.EventPrefix",
+        "KeyLoad.UnitTests.Features.BackupRestore.SeriesPortableBackupAssertions.MaximumSampleRows",
+        "KeyLoad.UnitTests.Features.Search.SearchTests.SampleId",
+        "KeyLoad.UnitTests.Features.Search.SearchTests.LargeFiniteSampleValue"
     ];
     internal static readonly string[] NativeModelContracts =
     [

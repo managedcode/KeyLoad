@@ -26,29 +26,6 @@ internal static class SearchMaintenanceRequestIssuance
         _ = AnnMaintenanceChildScope.Validate(envelope);
         return codec.Issue(envelope);
     }
-    internal static string CreateAnnProjectionJobChild(GrainRequestCodec codec, Guid requestId, string principalId,
-        Guid commandId, byte[] payload, DateTimeOffset expiry)
-    {
-        var context = codec.LifetimeReadContext;
-        if (expiry <= context.Now)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-        var envelope = new GrainRequestEnvelope
-        {
-            Purpose = AnnProjectionJobChildScope.Purpose,
-            RequestId = requestId,
-            PrincipalId = principalId,
-            Incarnation = context.Scope.Incarnation,
-            ReadKind = null,
-            CommandKind = OperationKind.MaintainAnnIndex,
-            CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
-            ExpiresAt = expiry < context.Now + context.Lifetime ? expiry : context.Now + context.Lifetime
-        };
-        _ = AnnProjectionJobChildScope.Validate(envelope);
-        return codec.Issue(envelope);
-    }
     internal static string CreateTextMaintenanceChild(GrainRequestCodec codec, Guid requestId, string principalId,
         GrainReadKind? readKind, OperationKind? commandKind, Guid commandId, byte[] payload, DateTimeOffset expiry)
     {

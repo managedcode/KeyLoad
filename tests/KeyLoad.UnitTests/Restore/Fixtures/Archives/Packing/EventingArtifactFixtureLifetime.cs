@@ -1,3 +1,4 @@
+using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
@@ -8,33 +9,31 @@ internal static class EventingArtifactFixtureLifetime
     internal static async Task RunAsync(EventingArtifactFixture fixture, Func<EventingArtifactFixture, Task> operation)
     {
         var failures = new List<Exception>();
-        var fatal = TestDatabaseJoinedLifetime.Observe(fixture.InitializeSource, failures);
+        ServerFailureObserver.Observe(fixture.InitializeSource, failures);
         try
         {
             if (failures.Count == 0)
             {
-                fatal ??= await TestDatabaseJoinedLifetime.ObserveAsync(() => operation(fixture), failures);
+                await ServerFailureObserver.ObserveAsync(() => operation(fixture), failures);
             }
         }
         finally
         {
-            var targetFatal = TestDatabaseJoinedLifetime.Observe(fixture.JoinTarget, failures);
-            fatal ??= targetFatal;
+            ServerFailureObserver.Observe(fixture.JoinTarget, failures);
             if (fixture.Source is { } source)
             {
-                var sourceFatal = TestDatabaseJoinedLifetime.Observe(source.JoinOwnedResources, failures);
-                fatal ??= sourceFatal;
+                ServerFailureObserver.Observe(source.JoinOwnedResources, failures);
             }
         }
         if (failures.Count == 0)
         {
-            fatal ??= TestDatabaseJoinedLifetime.Observe(() => Directory.Delete(fixture.Root, true), failures);
+            ServerFailureObserver.Observe(() => Directory.Delete(fixture.Root, true), failures);
         }
         foreach (var failure in failures)
         {
             failure.Data[RootEvidenceKey] = fixture.Root;
         }
-        TestDatabaseJoinedLifetime.ThrowIfAny(failures, fatal);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
 }

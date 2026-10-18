@@ -1,3 +1,4 @@
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
@@ -12,7 +13,8 @@ internal static class QueueOrderedRetryBackupRestore
     internal static async Task RunAsync(ZoneTreeStore source, QueueOrderedRetryState original, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+            Prefix + Guid.NewGuid().ToString("N"));
         var backup = Path.Combine(root, Backup);
         var target = Path.Combine(root, Target);
         var failures = new List<Exception>();

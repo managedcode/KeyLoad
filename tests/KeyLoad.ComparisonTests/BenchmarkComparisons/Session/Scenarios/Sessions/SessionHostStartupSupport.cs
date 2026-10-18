@@ -32,7 +32,7 @@ internal static class SessionHostStartupSupport
         [Endpoints + "0"] = "http://127.0.0.1:1",
         [Endpoints + "1"] = "http://127.0.0.1:2",
         [Endpoints + "2"] = "http://127.0.0.1:3",
-        ["GITHUB_ACTIONS"] = "true",
+        [ComparisonExecutionIdentitySupport.GitHubActions] = "true",
         [SessionFields.RunEnvironment] = "37070000000",
         [SessionFields.AttemptEnvironment] = "1",
         [SessionFields.RepositoryEnvironment] = "managedcode/KeyLoad",

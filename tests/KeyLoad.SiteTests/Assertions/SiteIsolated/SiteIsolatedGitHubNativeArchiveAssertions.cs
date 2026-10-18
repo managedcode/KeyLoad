@@ -36,7 +36,7 @@ internal static class SiteIsolatedGitHubNativeArchiveAssertions
         [
             SiteIsolatedGitHubTokens.Source, SiteIsolatedGitHubFields.Repository, SiteIsolatedGitHubFields.WorkflowKey,
             SiteIsolatedGitHubTokens.Run, SiteIsolatedGitHubTokens.Cohort, SiteIsolatedGitHubTokens.AggregateJob,
-            SiteIsolatedGitHubTokens.Artifacts, SiteIsolatedGitHubTokens.Workers, SiteIsolatedGitHubFields.Image,
+            SiteIsolatedGitHubTokens.Artifacts, SiteIsolatedGitHubTokens.Workers, SiteIsolatedGitHubFields.Preparation,
             SiteIsolatedFields.RuntimeIdentity, SiteIsolatedFields.Functional,
         ];
         foreach (var field in fields)

@@ -2,7 +2,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { constants } from 'node:fs';
 import { open } from 'node:fs/promises';
-import { requireOutputFile } from './image-bundle-files.mjs';
+import { requireOutputFile } from './native-files.mjs';
 import { writeJson } from './isolated-github-files.mjs';
 import { SESSION, SESSION_TARGETS, requireSession, sessionRows } from './session-contract.mjs';
 

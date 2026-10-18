@@ -109,4 +109,39 @@ internal static class NativeBackupJournalRepairAssertions
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal),
             CollectionOrdering.Matching);
     }
+
+    internal static async Task OriginalSourceAsync(NativeBackupCutFixture fixture,
+        (StoreIdentity Identity, long Position, string[] Rows) source)
+    {
+        const long CapturedPosition = 2L;
+        const long InitialAuthorityValue = 1L;
+        string[] expected =
+        [
+            Convert.ToHexString(MetadataBackupFixture.StoredKeyBytes) + ":" + Convert.ToHexString(NativeSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(InitialAuthorityValue)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.ClockKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(InitialAuthorityValue))
+        ];
+        await Assert.That(source.Position).IsEqualTo(CapturedPosition);
+        await Assert.That(source.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal), CollectionOrdering.Matching);
+        await Assert.That(NativeSerialization.Serialize(source.Identity)
+            .SequenceEqual(NativeSerialization.Serialize(fixture.Identity))).IsTrue();
+    }
+
+    internal static async Task OriginalSourceAndArchiveAsync(NativeBackupCutFixture fixture,
+        (StoreIdentity Identity, long Position, string[] Rows) source, Dictionary<string, byte[]> archive,
+        CancellationToken token)
+    {
+        await SameCutAsync(source, Read(fixture.Source, token));
+        await SameArchiveAsync(archive, fixture.Backup, token);
+    }
+
+    internal static async Task RepairArchiveAsync(string backup, Dictionary<string, byte[]> original)
+    {
+        foreach (var row in original)
+        {
+            await File.WriteAllBytesAsync(Path.Combine(backup, row.Key), row.Value, CancellationToken.None);
+        }
+        await SameArchiveAsync(original, backup, CancellationToken.None);
+    }
+
 }

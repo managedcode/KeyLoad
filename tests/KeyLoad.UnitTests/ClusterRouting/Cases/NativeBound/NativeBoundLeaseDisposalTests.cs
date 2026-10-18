@@ -3,11 +3,11 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class NativeBoundLeaseDisposalTests
 {
     [Test]
-    public Task BoundAsyncDisposalJoinsRealChildAndAllowsNextQuery()
+    public Task BoundAsyncDisposalPreservesQueryAndAllowsNextQuery()
         => NativeBoundLeaseDisposalFlow.ExecuteAsync(false, false, TestContext.Current!.Execution.CancellationToken);
 
     [Test]
-    public Task BoundAsyncDisposalPreservesFirstOriginalAndCleanupThroughRealChild()
+    public Task BoundAsyncDisposalPreservesFirstOriginalAndCleanup()
         => NativeBoundLeaseDisposalFlow.ExecuteAsync(true, false, TestContext.Current!.Execution.CancellationToken);
 
     [Test]

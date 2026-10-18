@@ -16,13 +16,7 @@ internal static class SiteIsolatedGitHubTokens
     public const string Workers = "workers";
     public const string Raw = "session.json";
     public const string Proof = "proof.json";
-    public const string ImageProof = "image-proof.json";
     public const string ProviderDirectory = "provider";
-    public const string Images = "images";
-    public const string Bundle = "image-bundle.json";
-    public const string ImageReceipt = "image-receipt.json";
-    public const string ServerManifest = "server-manifest.json";
-    public const string ComparisonsManifest = "comparisons-manifest.json";
     public const string Module = "scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs";
     public const string Probe = "site-isolated-github-probe.mjs";
     public const string Request = "request.json";

@@ -9,7 +9,8 @@ internal static partial class DistributedSearchCoordinator
 {
     internal static Task<DistributedSearchPageV1> ExecuteBoundAsync(DatabaseEngine database,
         DistributedSearchRequestV1 request, IOptions<QueryExecutionOptions> options,
-        Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, DistributedSearchPreparedLeaf> prepare,
+        Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
+            Task<DistributedSearchPreparedLeaf>> prepare,
         Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,
         Func<CancellationToken, Task>? statisticsCaptured, IResourceLifetimeWorkBinding binding,
         CancellationToken original)

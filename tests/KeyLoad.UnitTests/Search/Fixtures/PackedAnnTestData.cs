@@ -84,8 +84,8 @@ internal static class PackedAnnTestData
         var values = new float[dimension];
         for (var component = 0; component < values.Length; component++)
         {
-            var sample = Next(ref state);
-            values[component] = (float)(((sample >> 40) / 8_388_608d) - 1d);
+            var draw = Next(ref state);
+            values[component] = (float)(((draw >> 40) / 8_388_608d) - 1d);
         }
         return values;
     }

@@ -12,6 +12,14 @@ const reject = callback => {
   try { callback(); } catch { rejections++; }
 };
 const clone = value => structuredClone(value);
+const binary = { executablePath: '/usr/share/dotnet/dotnet', executableSha256: '1'.repeat(64),
+  assemblyPath: '/workspace/runtime.dll', assemblySha256: '2'.repeat(64), pdbPath: '/workspace/runtime.pdb',
+  pdbSha256: '3'.repeat(64), sourceCount: 12, sourceCompositionSha256: '4'.repeat(64) };
+const processes = (target, count) => ({ client: { name: 'comparison-client', processId: 500,
+  startedAtUtc: '2026-10-09T10:02:00Z', aspireStartedAtUtc: null, binary },
+  servers: target === 'KeyLoad' ? Array.from({length: count}, (_, index) => ({name: 'node' + (index + 1),
+    processId: 100 + index, startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z', binary })) : [] });
+const pendingResources = { id: 'matched-native-process-resources', status: 'notExecuted', failureType: 'MatchedProcessResourceQualificationOpen' };
 const cohort = { sourceRevision: 'a'.repeat(40), runId: 12345, attempt: 2,
   repository: contract.SESSION.repository, ref: contract.SESSION.ref,
   workflow: contract.SESSION.workflow, profile: contract.SESSION.profile };
@@ -54,7 +62,7 @@ if (scenario === 'plan') {
   reject(() => reports.validateSessionNativeResults(native.replace('LoadMillion','Other'),cases));
   reject(() => reports.validateSessionNativeResults(native.replace('outcome="Passed"','outcome="Failed"'),cases));
 } else if (scenario === 'profile-accounting') {
-  const hash='1'.repeat(64),server='sha256:'+'2'.repeat(64),runner='sha256:'+'3'.repeat(64);
+  const hash='1'.repeat(64),server='sha256:'+'2'.repeat(64);
   const methods={'load-million':'LoadMillion',index:'BuildIndexes','sequential-read':'SequentialRead',
     'random-read':'RandomRead',search:'Search',mixed:'Mixed','verify-final':'VerifyFinalState'};
   const originalReports=contract.SESSION.caseIds.map(caseId=>({caseId,status:'unavailable',
@@ -66,7 +74,7 @@ if (scenario === 'plan') {
   let capabilitySession;
   for(const row of selected) {
     const session={schemaVersion:contract.SESSION.schema,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,
-      ...cohort,jobId:10,images:{server,runner},targetProfile:null,
+      ...cohort,jobId:10,images:{server},processes:processes(row.target,row.nodeCount),targetProfile:null,
       runtime:{operatingSystem:'Linux',architecture:'X64',logicalProcessors:4,framework:'.NET 10',storage:'native bound mount'},
       assemblies:[{path:'ComparisonHost.dll',sha256:hash,pdbSha256:hash},{path:'Comparisons.dll',sha256:hash,pdbSha256:hash}],
       cases:contract.SESSION.caseIds.map(id=>({id,path:`reports/${id}.json`,sha256:hash})),
@@ -77,7 +85,7 @@ if (scenario === 'plan') {
     delete session.profile;
     capabilitySession=clone(session);
     const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,nativeExitCode:0,
-      status:'passed',reason:null,steps:[{id:'server-resource-cancellation',status:'notApplicable',failureType:null},
+      status:'passed',reason:null,steps:[{id:'server-resource-cancellation',status:row.nodeCount===1?'passed':'notApplicable',failureType:null},
         {id:'native-correctness',status:row.target==='KurrentDB'?'passed':'notApplicable',failureType:null}]};
     const native=reports.validateSessionNativeResults(nativeXml('Passed'),originalReports);
     originalReports.forEach(report=>reports.validateSessionCase(report,report.caseId));
@@ -104,7 +112,7 @@ if (scenario === 'plan') {
     ['SurrealDB',"SurrealDB Community's experimental TiKV clustering is outside the qualified native topology; only the persistent standalone server is measured."],
     ['HelixDB',"The self-hosted HelixDB server is standalone; managed cloud high availability is outside this native comparison."]]) {
     const row=contract.sessionRows().find(row=>row.target===target&&row.nodeCount===3);
-    const session={...capabilitySession,sessionId:row.id,target,nodeCount:3,images:{server:null,runner},
+    const session={...capabilitySession,sessionId:row.id,target,nodeCount:3,images:{server:null},
       resourceReport:null,reason:contract.SESSION.topologyUnavailable};
     const cases=originalReports.map(report=>({...report,detail}));
     const native=reports.validateSessionNativeResults(nativeXml('Passed'),cases);
@@ -114,9 +122,9 @@ if (scenario === 'plan') {
     reports.validateSessionEnvelope(session,row,cohort,10);
     reports.validateSessionQualification(qualification,session,native);
     reports.validateSessionProfileAccounting(session,cases,native,qualification);
-    reject(()=>reports.validateSessionEnvelope({...session,images:{server,runner}},row,cohort,10));
+    reject(()=>reports.validateSessionEnvelope({...session,images:{server}},row,cohort,10));
     const cleanupFailure={...session,outcome:'failure',reason:'NativeSessionTestFailure'};
-    const failedExit={...qualification,nativeExitCode:1,status:'notExecuted',reason:'NativeRunnerFailed'};
+    const failedExit={...qualification,nativeExitCode:1,status:'notExecuted',reason:'NativeClientFailed'};
     reports.validateSessionEnvelope(cleanupFailure,row,cohort,10);
     reports.validateSessionQualification(failedExit,cleanupFailure,native);
     reports.validateSessionProfileAccounting(cleanupFailure,cases,native,failedExit);
@@ -138,8 +146,8 @@ if (scenario === 'plan') {
   reports.validateSessionQualification(failedQualifier,qualifierFailure,passed);
   reports.validateSessionProfileAccounting(qualifierFailure,originalReports,passed,failedQualifier);
   const row=contract.sessionRows().find(row=>row.target==='KeyLoad'&&row.nodeCount===1);
-  const failure={...capabilitySession,sessionId:row.id,target:row.target,nodeCount:1,targetProfile:null,images:{server,runner},
-    resourceReport:{path:'session-resource-evidence.json',sha256:hash},outcome:'failure',reason:'NativeSessionTestFailure'};
+  const failure={...capabilitySession,sessionId:row.id,target:row.target,nodeCount:1,targetProfile:null,images:{server:null},processes:processes('KeyLoad',1),
+    resourceReport:null,outcome:'failure',reason:'NativeSessionTestFailure'};
   const failed=originalReports.map(report=>({...report,status:'failed',detail:'NativeInitializationFailed'}));
   failed[0].elapsedSeconds=1;
   failed[0].lanes=[{id:'create',firstStartedMs:0,lastCompletedMs:1,samples:[
@@ -151,7 +159,7 @@ if (scenario === 'plan') {
   reports.validateSessionEnvelope(failure,row,cohort,10);
   const native=reports.validateSessionNativeResults(nativeXml('Failed'),failed);
   const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:1,nativeExitCode:1,
-    status:'notExecuted',reason:'NativeRunnerFailed',steps:[]};
+    status:'notExecuted',reason:'NativeClientFailed',steps:[pendingResources]};
   reports.validateSessionQualification(qualification,failure,native);
   reports.validateSessionProfileAccounting(failure,failed,native,qualification);
   reject(()=>reports.validateSessionProfileAccounting(failure,failed,native,{...qualification,nativeExitCode:0,status:'passed'}));
@@ -222,16 +230,16 @@ if (scenario === 'plan') {
     const altered=clone(value);change(altered);reject(()=>validateSessionRuntimeImport(altered,cohort,expected));
   }
 } else if (scenario === 'qualification') {
-  const session = {sessionId:'keyload-n1',target:'KeyLoad',nodeCount:1,targetProfile:{},outcome:'success',reason:null};
+  const session = {sessionId:'redis-n1',target:'Redis',nodeCount:1,targetProfile:{},outcome:'success',reason:null};
   const native = contract.SESSION.caseIds.map(() => ({outcome:'Passed'}));
   const value = {schemaVersion:1,sessionId:session.sessionId,target:session.target,nodeCount:1,nativeExitCode:0,
     status:'passed',reason:null,steps:['server-resource-cancellation','native-correctness'].map(id => ({id,status:'passed',failureType:null}))};
   reports.validateSessionQualification(value,session,native);accepted=true;
   for (const change of [v=>v.steps.pop(),v=>v.steps[0].status='notApplicable',v=>v.nativeExitCode=1,
-    v=>v.steps[0].failureType='fake',v=>v.sessionId='keyload-n3',v=>v.steps.reverse()]) {
+    v=>v.steps[0].failureType='fake',v=>v.sessionId='redis-n3',v=>v.steps.reverse()]) {
     const altered=clone(value);change(altered);reject(()=>reports.validateSessionQualification(altered,session,native));
   }
-  const cleanup={...value,nativeExitCode:1,status:'notExecuted',reason:'NativeRunnerFailed',steps:[]};
+  const cleanup={...value,nativeExitCode:1,status:'notExecuted',reason:'NativeClientFailed',steps:[]};
   reports.validateSessionQualification(cleanup,{...session,outcome:'failure',reason:'NativeSessionTestFailure'},native);
   const failed=clone(value);failed.status='failed';failed.reason='NativeSessionQualificationFailed';
   failed.steps[0]={...failed.steps[0],status:'failed',failureType:'ActualControlledException'};
@@ -261,8 +269,8 @@ if (scenario === 'plan') {
       repository_id:repository.id,head_repository_id:repository.id}});
   const capture = {run,jobs:rows.map((row,index) => job(index+1,row.jobName,contract.SESSION.workerSteps,index === 0 ? 'failure':'success')),
     artifacts:rows.map((row,index) => artifact(index+100,row.artifactName))};
-  capture.jobs.push(job(99,contract.SESSION.prepareJob,['Check Docker image export and import','Save Docker images','Test canonical benchmark worker selection','Save compiled runtime identities']));
-  capture.artifacts.push(artifact(200,'comparison-image-bundle'),artifact(201,'comparison-compiled-test-bundle'),artifact(202,'comparison-compiled-runtime-identity'));
+  capture.jobs.push(job(99,contract.SESSION.prepareJob,contract.SESSION.prepareSteps));
+  capture.artifacts.push(artifact(201,'comparison-compiled-test-bundle'),artifact(202,'comparison-compiled-runtime-identity'));
   accepted = selection.selectSessionEvidence(capture,cohort).workers.length === 22;
   for (const change of [value => value.jobs.shift(),value => value.jobs[0].head_sha='c'.repeat(40),
     value => value.jobs[0].run_attempt=1,value => value.artifacts[0].expired=true,

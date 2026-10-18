@@ -733,7 +733,6 @@
         "KeyLoad.Query",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
-        "KeyLoad.Replication",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "Real AppHost CLUSTER SDK and official MCP return the same independently ordered full references across explicit, fallback and empty partitions, including equal text IDs in separate partitions, hidden sort fields and ties."
@@ -754,7 +753,6 @@
         "KeyLoad.Client",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -776,7 +774,6 @@
         "KeyLoad.Client",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -798,7 +795,6 @@
         "KeyLoad.Client",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -823,7 +819,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -849,7 +844,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -875,7 +869,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -901,7 +894,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -927,7 +919,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -953,7 +944,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -979,7 +969,6 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Replication",
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
@@ -1000,7 +989,7 @@
         "KeyLoad.Abstractions",
         "KeyLoad.Core",
         "KeyLoad.Diagnostics",
-        "KeyLoad.Replication",
+        "KeyLoad.Clustering",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "Two distinct actual RecoveryProcess processes execute the same command around process termination and restart; complete receipt and single document/event/queue/outbox effects survive retries, changed content conflicts without replacing outcome or effects, and an authorized healthy follow-up persists."

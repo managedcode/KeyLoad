@@ -2,9 +2,17 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
-internal sealed record QueueDeadlineCursor(Guid Incarnation, long ReadGeneration, int Next,
-    DuePrefixCursor Scheduled, DuePrefixCursor Leased, DuePrefixCursor Metadata)
+/// <summary>Resumes the actual scheduled, leased and metadata discovery prefixes.</summary>
+[Orleans.GenerateSerializer, Orleans.Alias(QueueDeadlineCursor.SerializerAlias)]
+public sealed record QueueDeadlineCursor([property: Orleans.Id(0)] Guid Incarnation,
+    [property: Orleans.Id(1)] long ReadGeneration,
+    [property: Orleans.Id(2)] int Next,
+    [property: Orleans.Id(3)] DuePrefixCursor Scheduled,
+    [property: Orleans.Id(4)] DuePrefixCursor Leased,
+    [property: Orleans.Id(5)] DuePrefixCursor Metadata)
 {
+    internal const string SerializerAlias = "keyload.core.queue-deadline-cursor.v1";
+
     internal const int ScheduledIndex = 0;
     internal const int LeasedIndex = 1;
     internal const int MetadataIndex = 2;
@@ -24,12 +32,7 @@ internal sealed record QueueDeadlineCursor(Guid Incarnation, long ReadGeneration
             Schedules = previous.Metadata
         };
         return DueWorkCursor.IsValid(validator) && DueWorkCursor.IsValid(second)
-            ? previous with
-            {
-                Scheduled = Copy(previous.Scheduled),
-                Leased = Copy(previous.Leased),
-                Metadata = Copy(previous.Metadata)
-            }
+            ? previous
             : Match(identity, null);
     }
 
@@ -48,9 +51,9 @@ internal sealed record QueueDeadlineCursor(Guid Incarnation, long ReadGeneration
 
     internal QueueDeadlineCursor Advance(DuePrefixCursor bounds) => Next switch
     {
-        ScheduledIndex => this with { Scheduled = Copy(bounds), Next = LeasedIndex },
-        LeasedIndex => this with { Leased = Copy(bounds), Next = MetadataIndex },
-        _ => this with { Metadata = Copy(bounds), Next = ScheduledIndex }
+        ScheduledIndex => this with { Scheduled = bounds, Next = LeasedIndex },
+        LeasedIndex => this with { Leased = bounds, Next = MetadataIndex },
+        _ => this with { Metadata = bounds, Next = ScheduledIndex }
     };
 
     internal string Space => Next switch
@@ -60,10 +63,4 @@ internal sealed record QueueDeadlineCursor(Guid Incarnation, long ReadGeneration
         _ => QueueDeadlineRecordDecoder.Metadata
     };
 
-    private static DuePrefixCursor Copy(DuePrefixCursor value)
-        => value with
-        {
-            UpperKey = value.UpperKey?.ToArray(),
-            LastKey = value.LastKey?.ToArray()
-        };
 }

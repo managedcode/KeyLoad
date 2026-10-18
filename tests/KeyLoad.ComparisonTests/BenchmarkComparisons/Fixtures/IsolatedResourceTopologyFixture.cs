@@ -1,7 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -87,7 +87,7 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
     {
         var names = nodes.Select(node => node.Name).ToArray();
         await Assert.That(client.Resources.Count).IsEqualTo(names.Length);
-        await Assert.That(names.All(name => client.Resources.Contains(name))).IsTrue();
+        await Assert.That(names.All(client.Resources.Contains)).IsTrue();
     }
 
     public async ValueTask DisposeAsync()

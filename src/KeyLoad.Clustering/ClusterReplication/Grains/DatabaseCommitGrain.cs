@@ -4,118 +4,27 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Orleans serializes commands; storage remains in the addressed silo-local Grain Services.</summary>
-public sealed class DatabaseCommitGrain(SiloDatabaseClient storage, IClusterMembershipService membership,
-    IOptions<ReplicaCopyOptions> options) : Grain, IDatabaseCommitGrain
+/// <summary>Orleans serializes canonical commands and owns the shared-file activation when configured.</summary>
+public sealed partial class DatabaseCommitGrain(SiloDatabaseClient storage, IClusterMembershipService membership,
+    IOptions<ReplicaCopyOptions> options, ILocalDatabaseRuntime? localRuntime = null) : Grain, IDatabaseCommitGrain
 {
+    private SiloStorageCopyExecution? copies;
+    private SiloStorageCopyExecution Copies => copies ??= new(storage, membership, options, this.GetPrimaryKey());
+    private bool UsesSharedVolume => options.Value.StorageMode == StorageAccessMode.SharedVolume;
+
     /// <inheritdoc />
-    public async Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    public Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+        => UsesSharedVolume ? Shared.ApplyAsync(operation, cancellationToken) : Copies.ApplyAsync(operation, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
+        => UsesSharedVolume ? Task.FromResult(Shared.ReadCut(cancellationToken)) : Copies.ReadCutAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public Task<SiloAddress> GetReadOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var owners = Owners();
-        var prepared = await PrepareAsync(owners, operation, cancellationToken).ConfigureAwait(true);
-        try
-        {
-            StorageOperationResult? original = null;
-            foreach (var owner in owners)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var applied = await storage.On(owner).ApplyAsync(prepared.Command, prepared.Sequence, cancellationToken).ConfigureAwait(true);
-                original ??= applied;
-                if (applied.Sequence != original.Sequence || !StorageCopyAcknowledgements.Same(applied.Result, original.Result))
-                {
-                    throw Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.DifferentOutcomes);
-                }
-            }
-            return StorageCopyAcknowledgements.Attach(original!.Result, owners.Length);
-        }
-        catch (Exception error) when (error is OperationCanceledException or OrleansException or TimeoutException)
-        {
-            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.WriteUncertain, error);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
-        => (await ReadAvailableAsync(cancellationToken).ConfigureAwait(true)).Cut;
-
-    /// <inheritdoc />
-    public async Task<SiloAddress> GetReadOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken)
-        => (await ReadAvailableAsync(cancellationToken, preferredSilo).ConfigureAwait(true)).Owner;
-
-    private SiloAddress[] Owners()
-    {
-        var settings = options.Value;
-        settings.Validate();
-        var owners = ActiveSilos().Take(settings.ReplicaCount).ToArray();
-        if (owners.Length != settings.ReplicaCount)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.OwnersUnavailable);
-        }
-        return owners;
-    }
-
-    private SiloAddress[] ActiveSilos()
-        => membership.CurrentSnapshot.Members.Values.Where(member => member.Status == SiloStatus.Active)
-            .OrderBy(member => member.Name, StringComparer.Ordinal).Select(member => member.SiloAddress).ToArray();
-
-    private async Task<StoredCommand> PrepareAsync(SiloAddress[] owners, Command<DatabaseCommand> operation,
-        CancellationToken cancellationToken)
-    {
-        var cuts = new SiloStorageCut[owners.Length];
-        for (var index = StorageCopyContract.FirstOwner; index < owners.Length; index++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            cuts[index] = await ReadCutAsync(owners[index], cancellationToken).ConfigureAwait(true);
-        }
-        var maximum = cuts.Max(cut => cut.Position);
-        var minimum = cuts.Min(cut => cut.Position);
-        var newest = owners[Array.FindIndex(cuts, cut => cut.Position == maximum)];
-        var stored = await storage.On(newest).ReadStoredCommandAsync(operation, cancellationToken).ConfigureAwait(true);
-        if (minimum != maximum && (stored is null || stored.Sequence != maximum ||
-            maximum - minimum != StorageCopyContract.NextSequence))
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);
-        }
-        if (stored is not null)
-        {
-            return stored;
-        }
-        if (maximum == long.MaxValue)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, StorageCopyContract.SequenceExhausted);
-        }
-        var prepared = await storage.On(newest).PrepareAsync(operation, cancellationToken).ConfigureAwait(true);
-        return new(maximum + StorageCopyContract.NextSequence, prepared);
-    }
-
-    private async Task<(SiloAddress Owner, SiloStorageCut Cut)> ReadAvailableAsync(CancellationToken cancellationToken,
-        SiloAddress? preferredSilo = null)
-    {
-        SiloAddress? selectedOwner = null;
-        SiloStorageCut? selectedCut = null;
-        foreach (var owner in ActiveSilos())
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var cut = await ReadCutAsync(owner, cancellationToken).ConfigureAwait(true);
-            if (selectedCut is null || cut.Position > selectedCut.Position ||
-                cut.Position == selectedCut.Position && owner.Equals(preferredSilo))
-            {
-                selectedOwner = owner;
-                selectedCut = cut;
-            }
-        }
-        return selectedCut is not null ? (selectedOwner!, selectedCut)
-            : throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.OwnersUnavailable);
-    }
-
-    private async Task<SiloStorageCut> ReadCutAsync(SiloAddress owner, CancellationToken cancellationToken)
-    {
-        var cut = await storage.On(owner).ReadCutAsync(cancellationToken).ConfigureAwait(true);
-        if (cut.Incarnation != this.GetPrimaryKey())
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);
-        }
-        return cut;
+        return UsesSharedVolume ? Task.FromResult(Shared.Address)
+            : Copies.GetReadOwnerAsync(preferredSilo, cancellationToken);
     }
 }

@@ -1,5 +1,5 @@
 import { RUNTIME_IDENTITY } from './session-runtime-identity.mjs';
-import { GH, timestamp } from './isolated-github-contract.mjs';
+import { timestamp } from './isolated-github-contract.mjs';
 import { uniqueNamed, validateArtifact, validateCompletedJob, validateSuccessfulJob } from './isolated-github-validation.mjs';
 import { SESSION, requireSession, sessionRows, validateSessionCohort } from './session-contract.mjs';
 
@@ -27,11 +27,10 @@ export function selectSessionEvidence(capture, cohort) {
     && new Set(selected.map(item => item.artifact.id)).size === SESSION.workers
     && selected.reduce((sum, item) => sum + item.artifact.size_in_bytes, 0) <= SESSION.allArchiveBytes);
   const preparation = validateSuccessfulJob(uniqueNamed(jobs, SESSION.prepareJob), cohort, SESSION.prepareJob,
-    [...GH.imageSteps, 'Test canonical benchmark worker selection', RUNTIME_IDENTITY.step]);
-  const imageArtifact = validateArtifact(uniqueNamed(artifacts, GH.imageArtifact), run, preparation, GH.imageArtifact, GH.imageZipBytes);
+    SESSION.prepareSteps);
   const compiledArtifact = validateArtifact(uniqueNamed(artifacts, 'comparison-compiled-test-bundle'), run,
-    preparation, 'comparison-compiled-test-bundle', GH.imageZipBytes);
+    preparation, 'comparison-compiled-test-bundle', 6_576_668_672);
   const runtimeArtifact = validateArtifact(uniqueNamed(artifacts, RUNTIME_IDENTITY.artifact), run, preparation,
     RUNTIME_IDENTITY.artifact, RUNTIME_IDENTITY.maximumBytes);
-  return { runtimeArtifact, workers: selected, image: { job: preparation, artifact: imageArtifact }, compiledArtifact };
+  return { runtimeArtifact, workers: selected, preparation, compiledArtifact };
 }

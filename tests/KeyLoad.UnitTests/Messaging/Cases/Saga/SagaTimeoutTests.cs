@@ -20,7 +20,7 @@ internal sealed class SagaTimeoutTests
             new CompareExchangeSaga(fixture.Queue, sagaId, 0, SagaPhase.Waiting, State, deadline, timeout));
 
         var early = Expire(fixture, sagaId, 1, deadline.AddTicks(-1));
-        await Assert.That(early.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(early.Problem)).IsEqualTo(ErrorCode.Validation);
         var stillWaiting = fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal, fixture.Queue, sagaId)!;
         await Assert.That(stillWaiting.Phase).IsEqualTo(SagaPhase.Waiting);
         await Assert.That(stillWaiting.Revision).IsEqualTo(1);
@@ -40,7 +40,7 @@ internal sealed class SagaTimeoutTests
         await Assert.That(message.Metadata.ExpiresAt).IsEqualTo(deadline.AddHours(1));
         await Assert.That(message.PayloadJson).IsEqualTo(TimeoutPayload);
         await Assert.That(message.HeadersJson).IsEqualTo(TimeoutHeaders);
-        await Assert.That(Expire(fixture, sagaId, 1, deadline).Error).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(Expire(fixture, sagaId, 1, deadline).Problem)).IsEqualTo(ErrorCode.RevisionConflict);
     }
 
     [Test]
@@ -56,7 +56,7 @@ internal sealed class SagaTimeoutTests
             SagaPhase.Waiting, State, deadline, Timeout(fixture, TimeSpan.FromMinutes(5))));
         _ = fixture.Commit(fixture.Partition, new CompareExchangeSaga(fixture.Queue, completedId, 1,
             SagaPhase.Completed, "{\"phase\":\"done\"}"));
-        await Assert.That(Expire(fixture, completedId, 1, deadline).Error).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(Expire(fixture, completedId, 1, deadline).Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, completedId)!.Phase).IsEqualTo(SagaPhase.Completed);
         await Assert.That(fixture.Database.InspectMessage(RecurringSagaDatabase.RootPrincipal,
@@ -73,7 +73,7 @@ internal sealed class SagaTimeoutTests
             new CompareExchangeSaga(fixture.Queue, blockedId, 0,
                 SagaPhase.Waiting, State, blockedDeadline, Timeout(fixture, TimeSpan.FromMinutes(5))));
         var rejected = Expire(fixture, blockedId, 1, blockedDeadline);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         var unchanged = fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal, fixture.Queue, blockedId)!;
         await Assert.That(unchanged.Phase).IsEqualTo(SagaPhase.Waiting);
         await Assert.That(unchanged.Revision).IsEqualTo(1);

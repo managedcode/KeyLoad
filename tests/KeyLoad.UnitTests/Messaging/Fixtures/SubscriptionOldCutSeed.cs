@@ -26,7 +26,7 @@ internal static class SubscriptionOldCutSeed
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), state.Group, state.OriginalClaim.Deliveries[2].Token, DeliveryAction.Ack);
         state.Apply(fixture.Database, OperationKind.SubscriptionDelivery, ack, ack.CommandId).Get<CommitReceipt>();
         var request = state.Processing(state.OriginalClaim.Deliveries[1].Token);
-        state.OriginalProcessingOperation = state.Create(OperationKind.SubscriptionProcessing, request, request.CommandId);
+        state.OriginalProcessingOperation = state.Create(fixture.Database, OperationKind.SubscriptionProcessing, request, request.CommandId);
         var cut = fixture.Store.Position;
         var result = fixture.Database.Apply(state.OriginalProcessingOperation);
         state.OriginalProcessing = result.Get<SubscriptionProcessingResult>();
@@ -62,7 +62,7 @@ internal static class SubscriptionOldCutSeed
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
         var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
-        var original = state.Successes.Single(pair => pair.Key.Kind == OperationKind.ReceiveSubscription);
+        var original = state.Successes.Single(pair => pair.Key.Value!.Kind == OperationKind.ReceiveSubscription);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(original.Key), original.Value);
         await SubscriptionOldCutAssertions.ConservedAsync(fixture.Store, bytes, cut, identity);
     }

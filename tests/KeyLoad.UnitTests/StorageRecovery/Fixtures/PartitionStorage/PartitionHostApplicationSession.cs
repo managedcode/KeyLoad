@@ -5,56 +5,93 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal sealed class PartitionHostApplicationSession
+internal sealed class PartitionHostApplicationSession : IAsyncDisposable
 {
-    private readonly RequestCqrsHostedRuntimeFixture native;
+    private readonly RequestCqrsHostedRuntimeFixture native = new();
+    private PartitionHostApplicationOwner? owner;
+    private readonly Lock lifecycle = new();
+    private Task? closing;
 
-    private PartitionHostApplicationSession(NodeOptions options, RequestCqrsHostedRuntimeFixture native)
-    {
-        this.native = native;
-        Owner = new(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),
-            new CommandAdmissionGovernor(UnitAdmissionOptions.Command(options.CommandAdmission)),
-            TimeProvider.System, NullLogger<PartitionHost>.Instance, native.Grains);
-    }
+    private PartitionHostApplicationSession() { }
 
     internal static async Task<PartitionHostApplicationSession> CreateAsync(NodeOptions options)
     {
-        var native = new RequestCqrsHostedRuntimeFixture();
-        await native.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+        var session = new PartitionHostApplicationSession();
         try
         {
-            return new(options, native);
+            await session.native.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+            session.owner = new(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),
+                new CommandAdmissionGovernor(UnitAdmissionOptions.Command(options.CommandAdmission)),
+                TimeProvider.System, NullLogger<PartitionHost>.Instance, session.native.Grains);
+            return session;
         }
         catch (Exception failure)
         {
             var failures = new List<Exception> { failure };
-            await ServerFailureObserver.ObserveAsync(() => native.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            try
+            {
+                await session.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
     }
 
-    internal PartitionHostApplicationOwner Owner
-    {
-        get;
-    }
+    internal PartitionHostApplicationOwner Owner => owner
+        ?? throw new InvalidOperationException(nameof(PartitionHostApplicationOwner));
 
     internal Exception? ExpectedOpeningFailure
     {
         get; set;
     }
 
-    internal async Task CloseAsync(List<Exception> failures)
+    internal Task CloseAsync(List<Exception> failures)
+        => ServerFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), failures);
+
+    public ValueTask DisposeAsync()
     {
-        var closing = Owner.DisposeAsync().AsTask();
-        var observed = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => closing, observed).ConfigureAwait(false);
-        failures.AddRange(observed.Where(error => !ReferenceEquals(error, ExpectedOpeningFailure)));
-        await ServerFailureObserver.ObserveAsync(async () =>
+        lock (lifecycle)
         {
-            await Assert.That(ReferenceEquals(closing, Owner.DisposeAsync().AsTask())).IsTrue();
-            await Assert.That(Owner.CanReleaseRoot).IsTrue();
-        }, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => native.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            return new(closing ??= CloseCoreAsync());
+        }
+    }
+
+    private async Task CloseCoreAsync()
+    {
+        await Task.Yield();
+        var failures = new List<Exception>();
+        if (owner is not null)
+        {
+            var closing = owner.DisposeAsync().AsTask();
+            var observed = new List<Exception>();
+            await ServerFailureObserver.ObserveAsync(() => closing, observed).ConfigureAwait(false);
+            failures.AddRange(observed.Where(error => !ReferenceEquals(error, ExpectedOpeningFailure)));
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await Assert.That(ReferenceEquals(closing, owner.DisposeAsync().AsTask())).IsTrue();
+                await Assert.That(owner.CanReleaseRoot).IsTrue();
+            }, failures).ConfigureAwait(false);
+        }
+        try
+        {
+            await native.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -15,35 +15,28 @@ internal static class DueWorkCursor
         {
             return DueSweepCursor.Empty(identity.Incarnation, identity.ReadGeneration);
         }
-        return Clone(supplied);
+        return supplied;
     }
 
     internal static bool IsValid(DueSweepCursor cursor)
         => Enum.IsDefined(cursor.NextPrefix) && Valid(cursor.Schedules) && Valid(cursor.Sagas);
-
-    internal static DueSweepCursor Clone(DueSweepCursor cursor)
-        => cursor with
-        {
-            Schedules = Clone(cursor.Schedules),
-            Sagas = Clone(cursor.Sagas)
-        };
 
     internal static DueSweepCursor WithPrefix(DueSweepCursor cursor, DueWorkKind kind,
         DuePrefixCursor prefix)
         => kind == DueWorkKind.Schedule
             ? cursor with
             {
-                Schedules = Clone(prefix),
+                Schedules = prefix,
                 NextPrefix = DueWorkKind.Saga
             }
             : cursor with
             {
-                Sagas = Clone(prefix),
+                Sagas = prefix,
                 NextPrefix = DueWorkKind.Schedule
             };
 
     internal static DuePrefixCursor GetPrefix(DueSweepCursor cursor, DueWorkKind kind)
-        => Clone(kind == DueWorkKind.Schedule ? cursor.Schedules : cursor.Sagas);
+        => kind == DueWorkKind.Schedule ? cursor.Schedules : cursor.Sagas;
 
     internal static DueSweepCursor Complete(DueSweepCursor cursor, DueWorkKind kind)
     {
@@ -59,16 +52,10 @@ internal static class DueWorkCursor
 
     private static bool Valid(DuePrefixCursor? cursor)
         => cursor is not null && (cursor.HasUpperBound
-            ? cursor.UpperKey is { Length: > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes }
+            ? cursor.UpperKey is { IsDefault: false, Length: > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes }
             : cursor.UpperKey is null && cursor.LastKey is null)
-            && (cursor.LastKey is null || cursor.LastKey.Length is > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes)
-            && (cursor.LastKey is null || cursor.UpperKey is not null
-                && cursor.LastKey.AsSpan().SequenceCompareTo(cursor.UpperKey) <= EqualOrder);
-
-    private static DuePrefixCursor Clone(DuePrefixCursor prefix)
-        => prefix with
-        {
-            UpperKey = prefix.UpperKey?.ToArray(),
-            LastKey = prefix.LastKey?.ToArray()
-        };
+            && (cursor.LastKey is null || cursor.LastKey is
+            { IsDefault: false, Length: > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes })
+            && (cursor.LastKey is null || cursor.UpperKey is { } upper
+                && cursor.LastKey.Value.AsSpan().SequenceCompareTo(upper.AsSpan()) <= EqualOrder);
 }

@@ -5,22 +5,9 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class NativeBoundLeaseDisposalCleanup
 {
-    internal static async Task JoinAsync(NativeLocalChildLifetimeSession session,
+    internal static async Task JoinAsync(NativeBoundLeaseSession session,
         Exception? expectedCleanup, List<Exception> errors)
     {
-        session.ReleaseProducer.TrySetResult();
-        foreach (var producer in session.Producers)
-        {
-            await ServerFailureObserver.ObserveAsync(() =>
-                producer.WaitAsync(new NativeRuntimeTestOptions().ShutdownTimeout), errors);
-        }
-        foreach (var reservation in session.Reservations)
-        {
-            await ServerFailureObserver.ObserveAsync(() =>
-                CloseAsync(reservation.Child, null, errors.FirstOrDefault()), errors);
-            await ServerFailureObserver.ObserveAsync(async () =>
-                _ = await reservation.CompleteDispatchAsync(errors.FirstOrDefault(), []), errors);
-        }
         if (session.Parent is { } parent)
         {
             await ServerFailureObserver.ObserveAsync(() =>

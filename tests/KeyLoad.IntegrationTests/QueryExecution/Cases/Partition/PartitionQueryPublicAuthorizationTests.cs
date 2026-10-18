@@ -1,11 +1,12 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.Authorization;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 /// <summary>AC-PQUERY-002 fails closed when a later canonical leaf lacks persisted read authority.</summary>
-[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
+[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = PublicQueryStorageSelection.Key)]
 [NotInParallel]
 internal sealed class PartitionQueryPublicAuthorizationTests(ClusterFixture fixture)
 {

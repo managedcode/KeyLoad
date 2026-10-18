@@ -6,7 +6,7 @@ import { readJson, hashRegularFile } from './isolated-github-files.mjs';
 import { downloadArtifact } from './isolated-github-api.mjs';
 import { validateDownloadedArchive } from './isolated-github-stream.mjs';
 import { inspectNativeZip, extractNativeEntry } from './isolated-github-zip.mjs';
-import { createDirectory } from './image-bundle-files.mjs';
+import { createDirectory } from './native-files.mjs';
 import { projectArtifact } from './isolated-github-validation.mjs';
 
 export const RUNTIME_IDENTITY = Object.freeze({ artifact: 'comparison-compiled-runtime-identity',

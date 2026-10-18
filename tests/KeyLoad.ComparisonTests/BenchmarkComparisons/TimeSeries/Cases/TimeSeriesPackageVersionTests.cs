@@ -14,7 +14,7 @@ internal sealed class TimeSeriesPackageVersionTests
     [Test]
     public async Task AcIso006PackageIdentityMatchesTheActuallyLoadedCentrallyPinnedPackage()
     {
-        var source = XDocument.Load(Path.Combine(ImageBundleRealProtocol.RepositoryRoot(), CentralPackages));
+        var source = XDocument.Load(Path.Combine(SessionNodeProcess.RepositoryRoot(), CentralPackages));
         var pin = source.Descendants(PackageVersion).Single(item => item.Attribute(Include)?.Value == Package)
             .Attribute(Version)!.Value;
         var actual = TimeSeriesComparisonPackageVersion.Read();

@@ -9,6 +9,9 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
     private readonly IGrainFactory grains = services.GetRequiredService<IGrainFactory>();
     private readonly ILocalSiloDetails local = services.GetRequiredService<ILocalSiloDetails>();
 
+    /// <summary>The current native silo generation, independent of persisted physical storage identity.</summary>
+    public SiloAddress LocalSiloAddress => local.SiloAddress;
+
     /// <summary>Borrows the storage service on the exact native silo generation.</summary>
     public ISiloDatabaseService On(SiloAddress address) => GetGrainService(address);
 
@@ -30,8 +33,8 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
     public async Task<GrainOperationReply> ExecuteCommandAsync(Guid incarnation, string signedRequest,
         string actorKey, CancellationToken cancellationToken)
     {
-        var owner = await ReadOwnerAsync(incarnation, cancellationToken).ConfigureAwait(false);
+        var owner = await ReadOwnerAsync(incarnation, cancellationToken).ConfigureAwait(true);
         return await grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests())
-            .ExecuteCommandAsync(owner, signedRequest, actorKey, cancellationToken).ConfigureAwait(false);
+            .ExecuteCommandAsync(owner, signedRequest, actorKey, cancellationToken).ConfigureAwait(true);
     }
 }

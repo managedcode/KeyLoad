@@ -11,7 +11,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
     private const string RowSeparator = ":";
     private const string MissingReceive = "The original native receive is absent from its retained history.";
 
-    internal static async Task ClaimAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample,
+    internal static async Task ClaimAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state,
         bool scheduled)
     {
         var id = Guid.NewGuid();
@@ -24,59 +24,59 @@ internal static class EventQueueStateEnvelopeQueueContinuation
         var expected = new ReceiveResult(id,
             [new(message, Payload, Headers, token, FirstLeaseVersion, time.AddSeconds(LeaseSeconds), FirstAttempt, InitialGeneration)],
             NextToken(fixture));
-        var entry = await SubmitAsync(fixture, sample, OperationKind.Receive, id, request, time, expected);
+        var entry = await SubmitAsync(fixture, state, OperationKind.Receive, id, request, time, expected);
         var received = entry.Result.Get<ReceiveResult>();
         await EventQueueStateEnvelopeSourceAssertions.EqualAsync(fixture.Database.Verify<DeliveryClaims>(
             received.Deliveries.Single().Token), claims);
         if (scheduled)
         {
-            sample.ScheduledClaim = received;
+            state.ScheduledClaim = received;
         }
         else
         {
-            sample.ReadyClaim = received;
+            state.ReadyClaim = received;
         }
     }
 
-    internal static async Task ProcessAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample)
+    internal static async Task ProcessAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state)
     {
-        var claim = sample.ReadyClaim ?? throw new InvalidOperationException(MissingReceive);
+        var claim = state.ReadyClaim ?? throw new InvalidOperationException(MissingReceive);
         var id = Guid.NewGuid();
         var request = new ProcessingRequest(id, fixture.Lane, claim.Deliveries.Single().Token, Handler, InitialGeneration,
             [new PutDocument(Documents, Processed, Payload, NoUsage)]);
         var expected = new CommitReceipt(id, NextToken(fixture), [new(PutMutation, Documents, Processed, InitialRevision), new(nameof(DeliveryAction.Ack), Queue, Item, ReadyAckVersion)], DurabilityProfile.ProcessDurable, 1);
-        _ = await SubmitAsync(fixture, sample, OperationKind.Processing, id, request, fixture.At, expected);
-        sample.InboxBytes = Required(fixture, InboxKey(fixture));
-        sample.Processing = request;
-        sample.ProcessingReceipt = expected;
-        ConsumeReceive(sample, claim.RequestId);
+        _ = await SubmitAsync(fixture, state, OperationKind.Processing, id, request, fixture.At, expected);
+        state.InboxBytes = Required(fixture, InboxKey(fixture));
+        state.Processing = request;
+        state.ProcessingReceipt = expected;
+        ConsumeReceive(state, claim.RequestId);
     }
 
-    internal static async Task CompleteScheduledAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample)
+    internal static async Task CompleteScheduledAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state)
     {
-        var claim = sample.ScheduledClaim ?? throw new InvalidOperationException(MissingReceive);
+        var claim = state.ScheduledClaim ?? throw new InvalidOperationException(MissingReceive);
         var id = Guid.NewGuid();
         var request = new DeliveryCommand(id, fixture.Lane, claim.Deliveries.Single().Token, DeliveryAction.Ack);
         var expected = new CommitReceipt(id, NextToken(fixture), [new(nameof(DeliveryAction.Ack), Queue, Scheduled, ScheduledAckVersion)], DurabilityProfile.ProcessDurable, 1);
-        _ = await SubmitAsync(fixture, sample, OperationKind.Delivery, id, request, fixture.ScheduledAt, expected);
-        ConsumeReceive(sample, claim.RequestId);
+        _ = await SubmitAsync(fixture, state, OperationKind.Delivery, id, request, fixture.ScheduledAt, expected);
+        ConsumeReceive(state, claim.RequestId);
     }
 
-    internal static async Task DuplicateProcessingAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample)
+    internal static async Task DuplicateProcessingAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state)
     {
-        var request = (sample.Processing ?? throw new InvalidOperationException(MissingReceive)) with
+        var request = (state.Processing ?? throw new InvalidOperationException(MissingReceive)) with
         {
             CommandId = Guid.NewGuid()
         };
-        var expected = sample.ProcessingReceipt ?? throw new InvalidOperationException(MissingReceive);
+        var expected = state.ProcessingReceipt ?? throw new InvalidOperationException(MissingReceive);
         var before = Domain(fixture, request.CommandId);
         var expectedPosition = checked(fixture.Store.Position + CommitPositionStep);
-        _ = await SubmitAsync(fixture, sample, OperationKind.Processing, request.CommandId, request, fixture.ScheduledAt, expected);
+        _ = await SubmitAsync(fixture, state, OperationKind.Processing, request.CommandId, request, fixture.ScheduledAt, expected);
         await Assert.That(fixture.Store.Position).IsEqualTo(expectedPosition);
         await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Clock(fixture.Store)).IsEqualTo(fixture.ScheduledAt);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await EventQueueStateEnvelopeHistoryAssertions.InboxAsync(fixture, sample);
+        await EventQueueStateEnvelopeHistoryAssertions.InboxAsync(fixture, state);
     }
 
     internal static byte[] InboxKey(EventQueueStateEnvelopeFixture fixture)
@@ -95,11 +95,11 @@ internal static class EventQueueStateEnvelopeQueueContinuation
                 && !row.StartsWith(clock, StringComparison.Ordinal)).ToArray();
     }
 
-    internal static void ConsumeReceive(EventQueueStateEnvelopeSample sample, Guid id)
+    internal static void ConsumeReceive(EventQueueStateEnvelopeState state, Guid id)
     {
-        var entry = sample.History.Single(value => value.Operation.CommandId == id);
-        var index = sample.History.IndexOf(entry);
-        sample.History[index] = entry with
+        var entry = state.History.Single(value => value.Operation.CommandId == id);
+        var index = state.History.IndexOf(entry);
+        state.History[index] = entry with
         {
             ConsumedReceive = true
         };

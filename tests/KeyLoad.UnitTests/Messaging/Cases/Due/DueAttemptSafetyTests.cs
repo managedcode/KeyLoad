@@ -18,8 +18,9 @@ internal sealed class DueAttemptSafetyTests
 
         var notDueCommand = Guid.NewGuid();
         var notDue = Emit(fixture, scheduleId, 1, notDueCommand, RecurringSagaDatabase.Epoch);
-        await Assert.That(notDue.Error).IsNull();
-        var storedNotDue = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, notDueCommand)!;
+        await Assert.That(Errors.Code(notDue.Problem)).IsNull();
+        var storedNotDue = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, notDueCommand)
+            ?? throw new InvalidOperationException("The original recurring outcome is absent.");
         var storedNotDueReceiptBytes = NativeSerialization.Serialize(storedNotDue.Get<CommitReceipt>());
         fixture.Reopen();
         var scheduleBeforeDue = Schedule(fixture, scheduleId);
@@ -27,11 +28,14 @@ internal sealed class DueAttemptSafetyTests
         await Assert.That(Message(fixture, scheduleId, 1, 0)).IsNull();
 
         var replayAtDue = Emit(fixture, scheduleId, 1, notDueCommand, firstDue);
-        await Assert.That(replayAtDue.Error).IsEqualTo(notDue.Error);
-        await Assert.That(replayAtDue.SafeDetail).IsEqualTo(notDue.SafeDetail);
+        await Assert.That(Errors.Code(replayAtDue.Problem)).IsEqualTo(Errors.Code(notDue.Problem));
+        await Assert.That(replayAtDue.Problem?.Detail).IsEqualTo(notDue.Problem?.Detail);
         await Assert.That(NativeSerialization.Serialize(replayAtDue.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(notDue.Get<CommitReceipt>()).AsSpan())).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, notDueCommand)!.Get<CommitReceipt>()).AsSpan()
+        var retainedNotDue = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition,
+            RecurringSagaDatabase.RootPrincipal, notDueCommand)
+            ?? throw new InvalidOperationException("The original not-due outcome is absent.");
+        await Assert.That(NativeSerialization.Serialize(retainedNotDue.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(storedNotDueReceiptBytes)).IsTrue();
         await Assert.That(Schedule(fixture, scheduleId).NextOrdinal).IsEqualTo(0);
         await Assert.That(Message(fixture, scheduleId, 1, 0)).IsNull();
@@ -39,7 +43,7 @@ internal sealed class DueAttemptSafetyTests
         var freshCommand = Guid.NewGuid();
         await Assert.That(freshCommand).IsNotEqualTo(notDueCommand);
         var emitted = Emit(fixture, scheduleId, 1, freshCommand, firstDue);
-        await Assert.That(emitted.Error).IsNull();
+        await Assert.That(Errors.Code(emitted.Problem)).IsNull();
         await Assert.That(Schedule(fixture, scheduleId).NextOrdinal).IsEqualTo(1);
         await AssertOccurrence(fixture, scheduleId, 1, 0, firstDue);
         await Assert.That(Message(fixture, scheduleId, 1, 1)).IsNull();
@@ -60,7 +64,7 @@ internal sealed class DueAttemptSafetyTests
             Task.Run(() => Emit(fixture, scheduleId, 1, firstCommand, RecurringSagaDatabase.Epoch)),
             Task.Run(() => Emit(fixture, scheduleId, 1, secondCommand, RecurringSagaDatabase.Epoch)));
 
-        await Assert.That(results.All(result => result.Error is null)).IsTrue();
+        await Assert.That(results.All(result => Errors.Code(result.Problem) is null)).IsTrue();
         await Assert.That(Schedule(fixture, scheduleId).NextOrdinal).IsEqualTo(1);
         await AssertOccurrence(fixture, scheduleId, 1, 0, RecurringSagaDatabase.Epoch);
         await Assert.That(Message(fixture, scheduleId, 1, 1)).IsNull();
@@ -79,26 +83,29 @@ internal sealed class DueAttemptSafetyTests
 
         var staleCommand = Guid.NewGuid();
         var stale = Emit(fixture, scheduleId, 1, staleCommand, RecurringSagaDatabase.Epoch);
-        await Assert.That(stale.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        var originalError = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, staleCommand)!;
+        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        var originalError = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, staleCommand)
+            ?? throw new InvalidOperationException("The original recurring outcome is absent.");
         var current = Schedule(fixture, scheduleId);
         await Assert.That(current.Generation).IsEqualTo(2);
         await Assert.That(current.NextOrdinal).IsEqualTo(0);
         await Assert.That(Message(fixture, scheduleId, 1, 0)).IsNull();
 
         var staleReplay = Emit(fixture, scheduleId, 1, staleCommand, RecurringSagaDatabase.Epoch.AddSeconds(1));
-        await Assert.That(staleReplay.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(staleReplay.SafeDetail).IsEqualTo(stale.SafeDetail);
-        var retainedError = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, staleCommand)!;
-        await Assert.That(retainedError.Error).IsEqualTo(originalError.Error);
-        await Assert.That(retainedError.SafeDetail).IsEqualTo(originalError.SafeDetail);
-        await Assert.That(retainedError.Json).IsEqualTo(originalError.Json);
+        await Assert.That(Errors.Code(staleReplay.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(staleReplay.Problem?.Detail).IsEqualTo(stale.Problem?.Detail);
+        var retainedError = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, staleCommand)
+            ?? throw new InvalidOperationException("The original recurring outcome is absent.");
+        await Assert.That(Errors.Code(retainedError.Problem)).IsEqualTo(Errors.Code(originalError.Problem));
+        await Assert.That(retainedError.Problem?.Detail).IsEqualTo(originalError.Problem?.Detail);
+        await Assert.That(NativeSerialization.Serialize(retainedError).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(originalError))).IsTrue();
         await Assert.That(Schedule(fixture, scheduleId).NextOrdinal).IsEqualTo(0);
 
         var freshCommand = Guid.NewGuid();
         await Assert.That(freshCommand).IsNotEqualTo(staleCommand);
         var fresh = Emit(fixture, scheduleId, 2, freshCommand, RecurringSagaDatabase.Epoch.AddSeconds(1));
-        await Assert.That(fresh.Error).IsNull();
+        await Assert.That(Errors.Code(fresh.Problem)).IsNull();
         await Assert.That(Schedule(fixture, scheduleId).NextOrdinal).IsEqualTo(1);
         await AssertOccurrence(fixture, scheduleId, 2, 0, RecurringSagaDatabase.Epoch);
         await Assert.That(Message(fixture, scheduleId, 1, 0)).IsNull();

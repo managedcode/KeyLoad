@@ -48,7 +48,7 @@ substitute or second container lifecycle here.
 From the repository root:
 
 ```sh
-dotnet build build/KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj --no-restore --configuration Release -warnaserror
+dotnet build build/KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj --no-restore -warnaserror
 ```
 
 The lead coordinates execution windows. Every build uses `-warnaserror`.

@@ -30,8 +30,7 @@ internal static class QueueOrderedCeilingCancellationContinuation
             OriginalTerminalVersion, OriginalGeneration)).Get<CommitReceipt>();
         var image = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var stale = QueueOrderedRetryOperations.Complete(database, state, state.FirstLease!, DeliveryAction.Ack);
-        await Assert.That(stale.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(stale.Json).IsNull();
+        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(stale.Value).IsNull();
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
         QueueOrderedRetryOperations.Complete(database, state, state.SecondLease!, DeliveryAction.Ack).Get<CommitReceipt>();

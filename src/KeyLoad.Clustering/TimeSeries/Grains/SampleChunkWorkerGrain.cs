@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,11 +7,10 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Buffers time-series hints per native stateless worker activation and flushes on a grain timer.</summary>
 [StatelessWorker]
-internal sealed class SampleChunkWorkerGrain(DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
+internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
     IOptions<BackgroundWorkerOptions> batching, ILogger<SampleChunkWorkerGrain> diagnostics)
     : Grain, ISampleChunkWorkerGrain
 {
-    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly Queue<SampleChunkWorkHint> pending = new();
     private byte[]? after;
     private IGrainFactory grains => GrainFactory;
@@ -60,14 +58,13 @@ internal sealed class SampleChunkWorkerGrain(DatabaseEngine database, Func<IComm
     {
         try
         {
-            await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-            var page = SampleChunkWorkDiscovery.Read(database, after, token);
+            var page = await storage.Operations.ReadSampleChunkWorkPageAsync(after, token).ConfigureAwait(true);
             foreach (var hint in page.Hints)
             {
                 token.ThrowIfCancellationRequested();
                 await ScheduleJoinedAsync(hint, token).ConfigureAwait(true);
             }
-            return page.AfterKey;
+            return page.AfterKey?.ToArray();
         }
         catch (KeyLoadException failure)
         {

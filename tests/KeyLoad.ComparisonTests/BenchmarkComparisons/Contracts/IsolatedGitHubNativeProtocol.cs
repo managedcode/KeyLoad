@@ -13,7 +13,10 @@ internal static class IsolatedGitHubNativeProtocol
     internal const string Run = "run_id";
     internal const string Status = "status";
     internal const string Workflow = "workflow_name";
-    internal const string ImageJob = "Build Docker images";
+    internal const string PreparationJob = "Prepare comparison runtime";
+    internal const string Node = "node";
+    internal const string ShaEnvironment = "GITHUB_SHA";
+    internal const string RunEnvironment = "GITHUB_RUN_ID";
     internal const string WorkflowName = "Benchmarks";
     internal const string InProgress = "in_progress";
     internal const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID=";

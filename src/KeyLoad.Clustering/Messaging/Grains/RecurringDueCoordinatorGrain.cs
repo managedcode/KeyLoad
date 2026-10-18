@@ -11,14 +11,13 @@ namespace KeyLoad.Clustering;
 
 [Immovable(ImmovableKind.Any)]
 [GrainType(DueCoordinatorAliases.Coordinator), PreferLocalPlacement]
-internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, DatabaseEngine database,
-    Func<ICommitCoordinator> borrowCoordinator, IServiceProvider services, TimeProvider clock,
+internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, BackgroundStorageClient storage,
+    IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
     IOptions<DueCoordinationOptions> options, IOptions<GrainRoutingOptions> routingOptions,
     ILocalDurableJobManager durableJobs, RuntimeJournalAdmission runtimeJournalAdmission)
     : Grain, IRecurringDueCoordinatorGrain, IDurableJobHandler
 {
-    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     public async Task<DueDispatchResult> ProcessDueAsync(DueWorkHint hint, CancellationToken cancellationToken)
     {
         using var admission = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
@@ -27,12 +26,11 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(admission.Token, timeout.Token);
         var token = deadline.Token;
         ValidateHint(hint);
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
+        var principal = await storage.Operations.ReadDueCreatorAsync(hint, token).ConfigureAwait(true);
 
         if (hint.Kind == DueWorkKind.Saga)
         {
-            var eligibility = NativeSagaTimeoutEligibility.Read(database, hint, clock.GetUtcNow());
-            if (eligibility.IsEligible)
+            if (principal is not null)
             {
                 var schedule = NativeSagaTimeoutJobContract.CreateScheduleRequest(this.GetGrainId(),
                     clock.GetUtcNow(), hint);
@@ -42,21 +40,21 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
             return new(null);
         }
 
-        var principal = database.Store.Read(view => database.Principal(view, hint.CreatorPrincipalId, clock.GetUtcNow()));
+        var creator = principal ?? throw Errors.Fail(ErrorCode.Corruption, DueCoordinatorFields.InvalidHint);
         var commandId = Guid.NewGuid();
         var mutation = RecurringDueCommand.Create(hint);
         var payload = NativeSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [mutation]));
-        var result = await DispatchWithOneUncertaintyRetry(principal, commandId, payload, token).ConfigureAwait(true);
+        var result = await DispatchWithOneUncertaintyRetry(creator, commandId, payload, token).ConfigureAwait(true);
         return new(result.Error);
     }
 
     public Task<DueDispatchResult> ProcessQueueDeadlineAsync(QueueDeadlineHint hint, CancellationToken cancellationToken)
-        => QueueDeadlineCoordination.ExecuteAsync(hint, this.GetPrimaryKeyString(), database, coordinator,
+        => QueueDeadlineCoordination.ExecuteAsync(hint, this.GetPrimaryKeyString(), storage,
             clock, options, runtimeJournalAdmission, DispatchWithOneUncertaintyRetry, cancellationToken);
 
     public Task<DueDispatchResult> ProcessQueueTransferAsync(RemoteTransferCoordinationHint hint, CancellationToken cancellationToken)
-        => RemoteTransferCoordination.ExecuteAsync(hint, this.GetPrimaryKeyString(), database, coordinator,
-            new(codec, database, services, GrainFactory, clock, chunkSerializer, routingOptions),
+        => RemoteTransferCoordination.ExecuteAsync(hint, this.GetPrimaryKeyString(), codec,
+            new(codec, storage, hint, services, GrainFactory, clock, chunkSerializer, routingOptions),
             clock, options, runtimeJournalAdmission, cancellationToken);
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
@@ -70,14 +68,13 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(attemptCancellationToken, timeout.Token);
         var token = deadline.Token;
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-        var state = NativeSagaTimeoutEligibility.Read(database, hint, clock.GetUtcNow());
-        if (!state.IsEligible)
+        var principal = await storage.Operations.ReadDueCreatorAsync(hint, token).ConfigureAwait(true);
+        if (principal is null)
         {
             return;
         }
 
-        var result = await DispatchNativeTimeoutAsync(hint, state, token).ConfigureAwait(true);
+        var result = await DispatchNativeTimeoutAsync(hint, principal, token).ConfigureAwait(true);
         await SettleNativeTimeoutResultAsync(hint, result, token).ConfigureAwait(true);
     }
 
@@ -97,12 +94,12 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
     }
 
     private Task<GrainOperationReply> DispatchNativeTimeoutAsync(DueWorkHint hint,
-        NativeSagaTimeoutState state, CancellationToken cancellationToken)
+        PrincipalRecord principal, CancellationToken cancellationToken)
     {
         var commandId = Guid.NewGuid();
         var payload = NativeSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition,
             [new ExpireSaga(hint.Lane, hint.Id, hint.Revision)]));
-        return DispatchWithOneUncertaintyRetry(state.Creator!, commandId, payload, cancellationToken);
+        return DispatchWithOneUncertaintyRetry(principal, commandId, payload, cancellationToken);
     }
 
     private async Task SettleNativeTimeoutResultAsync(DueWorkHint hint, GrainOperationReply result,
@@ -120,9 +117,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
 
         if (result.Error is ErrorCode.NotFound or ErrorCode.RevisionConflict or ErrorCode.UnknownWriteOutcome)
         {
-            await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
-            var current = NativeSagaTimeoutEligibility.Read(database, hint, clock.GetUtcNow());
-            if (!current.IsEligible)
+            var current = await storage.Operations.ReadDueCreatorAsync(hint, cancellationToken).ConfigureAwait(true);
+            if (current is null)
             {
                 return;
             }

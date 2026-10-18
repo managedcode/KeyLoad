@@ -1,0 +1,120 @@
+using KeyLoad.Clustering;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.Messaging;
+
+namespace KeyLoad.Server;
+
+internal sealed partial class BackgroundStorageOperations
+{
+    public Task<DueWorkDiscoveryResult> ReadDueWorkPageAsync(DueSweepCursor? cursor, CancellationToken cancellationToken)
+    {
+        return BackgroundStorageReadExecution.RunLocalAsync<DueWorkDiscoveryResult>(storage, token =>
+        {
+            token.ThrowIfCancellationRequested();
+            var database = Database;
+            try
+            {
+                var page = DueWorkDiscovery.ReadPage(database, cursor, clock.GetUtcNow(), token);
+                return new DueWorkDiscoveryResult(page, page.Cursor, null);
+            }
+            catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
+                && failure.Message == DueWorkProtocol.KeyExceedsBound)
+            {
+                return new DueWorkDiscoveryResult(null,
+                    DueWorkCursor.DeferNext(database.Store.Identity, cursor), failure.Code);
+            }
+
+        }, cancellationToken);
+    }
+
+    public Task<QueueDeadlineDiscoveryResult> ReadQueueDeadlinePageAsync(QueueDeadlineCursor? cursor,
+        CancellationToken cancellationToken)
+    {
+        return BackgroundStorageReadExecution.RunLocalAsync<QueueDeadlineDiscoveryResult>(storage, token =>
+        {
+            token.ThrowIfCancellationRequested();
+            var database = Database;
+            try
+            {
+                var page = QueueDeadlineDiscovery.ReadPage(database, cursor, clock.GetUtcNow(), token);
+                return new QueueDeadlineDiscoveryResult(page, page.Cursor, null);
+            }
+            catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
+                && failure.Message == DueWorkProtocol.KeyExceedsBound)
+            {
+                return new QueueDeadlineDiscoveryResult(null,
+                    QueueDeadlineCursor.DeferNext(database.Store.Identity, cursor), failure.Code);
+            }
+
+        }, cancellationToken);
+    }
+
+    public Task<RemoteTransferPendingPage?> ReadQueueTransferPendingAsync(RemoteTransferPendingCursor? cursor,
+        CancellationToken cancellationToken)
+    {
+        return BackgroundStorageReadExecution.RunLocalAsync<RemoteTransferPendingPage?>(storage, token =>
+        {
+            token.ThrowIfCancellationRequested();
+            return due.Value.TransferCoordinatorPrincipalId is { } subject
+                ? RemoteTransferPendingDiscovery.Read(Database, subject, cursor, token) : null;
+
+        }, cancellationToken);
+    }
+
+    public Task<PrincipalRecord?> ReadDueCreatorAsync(DueWorkHint hint, CancellationToken cancellationToken)
+    {
+        return BackgroundStorageReadExecution.RunLocalAsync<PrincipalRecord?>(storage, token =>
+        {
+            token.ThrowIfCancellationRequested();
+            ArgumentNullException.ThrowIfNull(hint);
+            DatabaseEngine.ValidatePartition(hint.Lane.Partition);
+            if (hint.Kind == DueWorkKind.Saga)
+            {
+                var eligible = NativeSagaTimeoutEligibility.Read(Database, hint, clock.GetUtcNow());
+                return eligible.IsEligible ? eligible.Creator : null;
+            }
+            return Database.Store.Read(view =>
+                Database.Principal(view, hint.CreatorPrincipalId, clock.GetUtcNow()));
+
+        }, cancellationToken);
+    }
+
+    public Task<PrincipalRecord> ReadQueueDeadlineCreatorAsync(QueueDeadlineHint hint,
+        CancellationToken cancellationToken)
+    {
+        return BackgroundStorageReadExecution.RunLocalAsync<PrincipalRecord>(storage, token =>
+        {
+            token.ThrowIfCancellationRequested();
+            if (hint is null || hint.Lane?.Partition is null || hint.Mutation is null || hint.Mutation.Queue != hint.Lane.Queue)
+            {
+                throw Errors.Fail(ErrorCode.Validation, DueCoordinatorFields.InvalidHint);
+            }
+            DatabaseEngine.ValidatePartition(hint.Lane.Partition);
+            JsonData.Identifier(hint.Lane.Queue);
+            var subject = due.Value.QueueDeadlinePrincipalId
+                ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, QueueDeadlineCoordination.UnavailablePrincipal);
+            return Database.Store.Read(view => Database.Principal(view, subject, clock.GetUtcNow()));
+
+        }, cancellationToken);
+    }
+
+    public Task<PrincipalRecord> ReadTransferCoordinatorAsync(RemoteTransferCoordinationHint hint,
+        CancellationToken cancellationToken)
+    {
+        return BackgroundStorageReadExecution.RunLocalAsync<PrincipalRecord>(storage, token =>
+        {
+            token.ThrowIfCancellationRequested();
+            ArgumentNullException.ThrowIfNull(hint);
+            if (hint.Source?.Partition is null)
+            {
+                throw Errors.Fail(ErrorCode.Validation, RemoteTransferCoordinationProtocol.InvalidHint);
+            }
+            var subject = due.Value.TransferCoordinatorPrincipalId
+                ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferCoordinationProtocol.Unavailable);
+            RemoteTransferCoordination.RequireHint(hint, hint.Source.Partition.AtomicPartitionId,
+                subject, Database.Store.Identity.Incarnation);
+            return Database.Store.Read(view => Database.Principal(view, subject, clock.GetUtcNow()));
+
+        }, cancellationToken);
+    }
+}

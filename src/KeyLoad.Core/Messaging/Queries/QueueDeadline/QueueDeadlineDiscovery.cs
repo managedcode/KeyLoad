@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -46,7 +47,7 @@ internal static class QueueDeadlineDiscovery
                 upper = DueWorkRecordDecoder.CopyKey(key);
                 return false;
             }, observer: page.ObserveBytes, cancellationToken: page.CancellationToken);
-            bounds = upper is null ? DuePrefixCursor.Empty : new(true, upper, null);
+            bounds = upper is null ? DuePrefixCursor.Empty : new(true, ImmutableArray.CreateRange(upper), null);
         }
         if (!bounds.HasUpperBound)
         {
@@ -58,7 +59,7 @@ internal static class QueueDeadlineDiscovery
         {
             return state.Complete(false);
         }
-        var result = view.VisitRange(prefix, remaining, state.Visit, bounds.LastKey,
+        var result = view.VisitRange(prefix, remaining, state.Visit, bounds.LastKey?.ToArray(),
             observer: page.ObserveBytes, cancellationToken: page.CancellationToken);
         if (result.HasMore && !result.StoppedByVisitor)
         {

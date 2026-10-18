@@ -15,13 +15,7 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
     private bool contextFrozen;
     private Exception? originalFailure;
     private Exception? cleanupFailure;
-    internal NativeRequestWorkChildReservation? ChildReservation
-    {
-        get; set;
-    }
     public NativeRequestWorkLease OriginalProducer => this;
-    internal bool OwnsResultRetention => ChildReservation is null;
-    internal ImmutableArray<Exception> ChildCleanupFailures { get; set; } = [];
     internal bool Completing => publication.Completing;
     internal Task? CompletionDriver
     {
@@ -76,20 +70,10 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
         ResultRetention.Reserve(actualLifetimes);
         owner.Bind(this, actualLifetimes);
     }
-    internal NativeRequestWorkLease RequireOriginalParentBinding()
-        => owner.RequireOriginalParentBinding(this);
-
-    internal NativeRequestWorkChildReservation ReserveLocalChild(DecodedGrainRequest verified,
-        PhysicalShardRecord expectedOwner, SiloStorageIdentity expectedRuntime)
-        => owner.ReserveLocalChild(this, verified, expectedOwner, expectedRuntime);
-
     internal void AdmitPublication() => owner.AdmitPublication(this);
     internal Task<Exception?> CancelAsync() => NativeRequestWorkSettlement.CancelAsync(cancellation);
 
-    internal bool ClosePublication(bool retainCancellation) => publication.ClosePublication(retainCancellation);
-    internal void RetainCompletionObserver() => publication.RetainCompletionObserver();
     internal Task BeginCompletion() => publication.BeginCompletion();
-    internal TaskCompletionSource? ReleaseCloseObserver() => publication.ReleaseCloseObserver();
     internal void RequirePublicationOpen() => publication.RequirePublicationOpen();
 
     internal Task PrepareCompletionAsync() => owner.PrepareCompletionAsync(this);
@@ -97,10 +81,9 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
     internal Task<NativeRequestWorkOriginalSettlement> CompleteAsync(Exception? original, Exception? cleanup)
         => owner.CompleteAsync(this, original, cleanup);
 
-    internal async Task FinishAsync(Task start, Task observers)
+    internal async Task FinishAsync(Task start)
     {
         await start.ConfigureAwait(false);
-        await observers.ConfigureAwait(false);
         Finish();
     }
 
@@ -108,7 +91,6 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
     {
         var failures = ImmutableArray.CreateBuilder<Exception>();
         Add(cleanupFailure, failures);
-        failures.AddRange(ChildCleanupFailures);
         Add(DisposeCancellation(), failures);
         Add(ReleaseAdmission(), failures);
         var outcome = new NativeRequestWorkOriginalSettlement(originalFailure, failures.ToImmutable());

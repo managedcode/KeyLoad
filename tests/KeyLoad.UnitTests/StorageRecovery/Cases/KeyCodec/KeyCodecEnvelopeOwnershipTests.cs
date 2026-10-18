@@ -18,7 +18,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
             throw new InvalidOperationException("The generated storage directory must be unowned.");
         }
 
-        var key = KeyCodec.Encode("ownership", "sample\0key");
+        var key = KeyCodec.Encode("ownership", "source\0key");
         var expectedKey = key.ToArray();
         var value = ArrayPool<byte>.Shared.Rent(128);
         var returned = false;

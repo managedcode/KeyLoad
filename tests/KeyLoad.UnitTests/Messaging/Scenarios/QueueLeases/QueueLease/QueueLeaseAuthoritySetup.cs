@@ -21,7 +21,7 @@ internal static class QueueLeaseAuthoritySetup
         var produced = QueueWholeFlowStorage.Apply(fixture.Database, OperationKind.Batch, producer, producer.CommandId, start);
         produced.Get<CommitReceipt>();
         var request = new ReceiveRequest(Guid.NewGuid(), lane, LeaseSeconds: QueueLeaseAuthorityProtocol.LeaseSeconds);
-        var claim = Create(OperationKind.Receive, request, request.RequestId, start);
+        var claim = Create(fixture.Database, OperationKind.Receive, request, request.RequestId, start);
         var claimed = fixture.Database.Apply(claim);
         var delivery = await Assert.That(claimed.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery).IsEqualTo(new Delivery(message.MessageId, QueueLeaseAuthorityProtocol.Payload,
@@ -39,7 +39,7 @@ internal static class QueueLeaseAuthoritySetup
         var key = FaultKey(lane, fault, bodyKey, delivery.LeaseUntil);
         var bytes = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         return new(lane, start, message, producer, produced, claim, claimed, delivery,
-            Original(lane, kind, delivery.Token, start.AddSeconds(QueueLeaseAuthorityProtocol.One)),
+            Original(fixture.Database, lane, kind, delivery.Token, start.AddSeconds(QueueLeaseAuthorityProtocol.One)),
             kind, metadata, counters, bodyBytes, key, bytes);
     }
 
@@ -118,8 +118,8 @@ internal static class QueueLeaseAuthoritySetup
         return NativeSerialization.Serialize(damaged);
     }
 
-    internal static Command<DatabaseCommand> Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)
-        => new(id, kind, QueueLeaseAuthorityProtocol.Root, time, JsonSerializer.Serialize(value, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T value, Guid id, DateTimeOffset time)
+        => database.CreateCommand(kind, id, QueueLeaseAuthorityProtocol.Root, time, JsonSerializer.Serialize(value, JsonDefaults.Options));
 
     private static byte[] FaultKey(QueueLaneRef lane, QueueLeaseAuthorityFault fault, byte[] bodyKey, DateTimeOffset deadline)
         => fault switch
@@ -134,12 +134,12 @@ internal static class QueueLeaseAuthoritySetup
             _ => KeySpace.Partition(QueueLeaseAuthorityProtocol.LeaseSpace, lane.Partition, lane.Queue, deadline, QueueLeaseAuthorityProtocol.Message)
         };
 
-    private static Command<DatabaseCommand> Original(QueueLaneRef lane, QueueLeaseAuthorityOperation kind, string token, DateTimeOffset time)
+    private static Command<DatabaseCommand> Original(DatabaseEngine database, QueueLaneRef lane, QueueLeaseAuthorityOperation kind, string token, DateTimeOffset time)
     {
         var id = Guid.NewGuid();
         if (kind == QueueLeaseAuthorityOperation.Processing)
         {
-            return Create(OperationKind.Processing, new ProcessingRequest(id, lane, token, QueueLeaseAuthorityProtocol.Handler,
+            return Create(database, OperationKind.Processing, new ProcessingRequest(id, lane, token, QueueLeaseAuthorityProtocol.Handler,
                 QueueLeaseAuthorityProtocol.One, [new PutDocument(QueueLeaseAuthorityProtocol.Collection,
                     QueueLeaseAuthorityProtocol.Document, QueueLeaseAuthorityProtocol.Payload)]), id, time);
         }
@@ -150,7 +150,7 @@ internal static class QueueLeaseAuthoritySetup
             QueueLeaseAuthorityOperation.Renew => DeliveryAction.Renew,
             _ => throw new ArgumentOutOfRangeException(nameof(kind))
         };
-        return Create(OperationKind.Delivery, new DeliveryCommand(id, lane, token, action,
+        return Create(database, OperationKind.Delivery, new DeliveryCommand(id, lane, token, action,
             kind == QueueLeaseAuthorityOperation.Renew ? QueueLeaseAuthorityProtocol.LeaseSeconds : null), id, time);
     }
 }

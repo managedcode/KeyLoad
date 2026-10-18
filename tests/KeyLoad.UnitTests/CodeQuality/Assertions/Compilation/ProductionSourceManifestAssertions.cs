@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using KeyLoad.UnitTests.Features.CodeQuality.Processes;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
@@ -8,8 +9,6 @@ internal static class ProductionSourceManifestAssertions
 {
     private const int SchemaVersion = 3;
     private const int CentralInputCount = 6;
-    private const int AnalyzerModuleIndex = 1;
-    private const int AppHostModuleIndex = 2;
     private const int FirstProductIndex = 0;
     private const int MinimumOwnedSourceCount = 1;
     private const string Sha256Pattern = "\\A[0-9a-f]{64}\\z";
@@ -56,13 +55,6 @@ internal static class ProductionSourceManifestAssertions
     private const string ExpectedProducerPath = "build/CodeQuality/FunctionalCompilationIdentity.targets";
     private const string ProducerPathProperty = "path";
 
-    private static readonly string[] ExpectedModules =
-    [
-        "KeyLoad.Abstractions", "KeyLoad.Analyzers", "KeyLoad.AppHost", "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core", "KeyLoad.Diagnostics", "KeyLoad.Clustering",
-        "KeyLoad.Query", "KeyLoad.Replication", "KeyLoad.Server",
-        "KeyLoad.Storage.ZoneTree"
-    ];
-
     internal static async Task AssertManifestAsync(string evidenceRoot)
     {
         var manifestPath = Path.Combine(evidenceRoot, "functional-coverage.production-source-manifest.json");
@@ -92,22 +84,26 @@ internal static class ProductionSourceManifestAssertions
     private static async Task AssertProductsAsync(JsonElement productRows)
     {
         var products = productRows.EnumerateArray().ToArray();
-        await Assert.That(products.Length).IsEqualTo(ExpectedModules.Length);
+        var projects = ReadProjects(ProductionSourceManifestProcess.RepositoryRoot);
+        await Assert.That(products.Select(product => product.GetProperty(ModuleProperty).GetString()
+            ?? throw new InvalidDataException("A compiled product module is missing.")).Order(StringComparer.Ordinal))
+            .IsEquivalentTo(projects.Keys.Order(StringComparer.Ordinal), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         for (var index = FirstProductIndex; index < products.Length; index++)
         {
             var product = products[index];
             await AssertFieldsAsync(product, [ModuleProperty, RoleProperty, SourcesProperty, CompiledIdentityProperty]);
-            await Assert.That(product.GetProperty(ModuleProperty).GetString()).IsEqualTo(ExpectedModules[index]);
-            var expectedRole = index is AnalyzerModuleIndex or AppHostModuleIndex ? "infrastructure" : "production";
+            var module = product.GetProperty(ModuleProperty).GetString()!;
+            var project = projects[module];
+            var expectedRole = project.StartsWith("src/", StringComparison.Ordinal) ? "production" : "infrastructure";
             await Assert.That(product.GetProperty(RoleProperty).GetString()).IsEqualTo(expectedRole);
             var sourceRows = product.GetProperty(SourcesProperty).EnumerateArray().ToArray();
             await Assert.That(sourceRows.Length).IsGreaterThan(MinimumOwnedSourceCount);
-            var sourceRoot = index == AnalyzerModuleIndex ? "analyzers/" : index == AppHostModuleIndex ? "build/" : "src/";
+            var sourceRoot = Path.GetDirectoryName(project)!.Replace(Path.DirectorySeparatorChar, '/') + "/";
             foreach (var source in sourceRows)
             {
                 var path = source.GetProperty(PathProperty).GetString()!;
                 await AssertFieldsAsync(source, [PathProperty, Sha256Property]);
-                await Assert.That(path.StartsWith(sourceRoot + ExpectedModules[index] + "/", StringComparison.Ordinal)).IsTrue();
+                await Assert.That(path.StartsWith(sourceRoot, StringComparison.Ordinal)).IsTrue();
                 await Assert.That(Regex.IsMatch(source.GetProperty(Sha256Property).GetString()!, Sha256Pattern, RegexOptions.CultureInvariant)).IsTrue();
             }
             var compiledIdentity = product.GetProperty(CompiledIdentityProperty);
@@ -122,9 +118,20 @@ internal static class ProductionSourceManifestAssertions
             await Assert.That(compiledIdentity.GetProperty(CompileReceiptProperty).GetProperty(CentralInputCountProperty).GetInt32()).IsEqualTo(CentralInputCount);
             await AssertHashAsync(compiledIdentity.GetProperty(DllHashProperty).GetString());
             await AssertHashAsync(compiledIdentity.GetProperty(PdbHashProperty).GetString());
-            await ProductionSourceManifestNativeIdentityAssertions.AssertAsync(compiledIdentity, ExpectedModules[index]);
+            await ProductionSourceManifestNativeIdentityAssertions.AssertAsync(compiledIdentity, module);
         }
     }
+
+    internal static HashSet<string> ProductionModules(string repositoryRoot)
+        => ReadProjects(repositoryRoot).Where(project => project.Value.StartsWith("src/", StringComparison.Ordinal))
+            .Select(project => project.Key).ToHashSet(StringComparer.Ordinal);
+
+    private static Dictionary<string, string> ReadProjects(string repositoryRoot)
+        => XDocument.Load(Path.Combine(repositoryRoot, "KeyLoad.slnx")).Descendants("Project")
+            .Select(project => project.Attribute("Path")?.Value ?? throw new InvalidDataException("A solution project path is missing."))
+            .Where(path => path.StartsWith("src/", StringComparison.Ordinal)
+                || path.StartsWith("build/", StringComparison.Ordinal) || path.StartsWith("analyzers/", StringComparison.Ordinal))
+            .ToDictionary(path => Path.GetFileNameWithoutExtension(path), path => path, StringComparer.Ordinal);
 
     private static async Task AssertHashAsync(string? hash)
         => await Assert.That(Regex.IsMatch(hash ?? string.Empty, Sha256Pattern, RegexOptions.CultureInvariant)).IsTrue();

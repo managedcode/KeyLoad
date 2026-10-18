@@ -1,8 +1,9 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
+[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = PublicQueryStorageSelection.Key)]
 [NotInParallel]
 internal sealed class PartitionQueryMcpSchemaTests(ClusterFixture fixture)
 {

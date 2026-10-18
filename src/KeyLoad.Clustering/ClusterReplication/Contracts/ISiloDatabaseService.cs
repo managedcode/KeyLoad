@@ -6,7 +6,7 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Typed Orleans access to one silo's exclusively owned ZoneTree database.</summary>
 [Version(BackgroundWorkerIdentity.InterfaceVersion)]
-public interface ISiloDatabaseService : IGrainService
+public partial interface ISiloDatabaseService : IGrainService
 {
     /// <summary>Reads the durable local cut without changing storage.</summary>
     Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken);

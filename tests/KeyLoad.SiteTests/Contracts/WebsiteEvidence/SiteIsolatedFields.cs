@@ -83,7 +83,6 @@ internal static class SiteIsolatedFields
     internal const string ElapsedSeconds = "elapsedSeconds";
     internal const string Entry = "entry";
     internal const string Functional = "functional";
-    internal const string Image = "image";
     internal const string Lanes = "lanes";
     internal const string Outcome = "outcome";
     internal const string Preparation = "preparation";

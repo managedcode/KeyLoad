@@ -250,7 +250,7 @@ required gates but never product coverage contributors.
 | Purpose | Command |
 |---|---|
 | Restore | `dotnet restore KeyLoad.slnx` |
-| Build | `dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror` |
+| Build | `dotnet build KeyLoad.slnx --no-restore -warnaserror` |
 | Analyzer project (Debug, for the formatter) | `dotnet build analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug -warnaserror` |
 | Format (apply, then verify) | `dotnet format KeyLoad.slnx --no-restore`; `dotnet format KeyLoad.slnx --verify-no-changes --no-restore` |
 | Governance | `node scripts/Features/RepositoryGovernance/verify.mjs` |

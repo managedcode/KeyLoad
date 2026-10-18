@@ -3,7 +3,7 @@
 Status: Accepted; complete runtime and publication qualification remains open.
 Date: 2026-10-06. Owner: benchmark integrator.
 Related: REQ-BC-001–009/019/021/050–058, AC-BC-001–009,
-AC-PERF-001–009, AC-ISO-001–009, AC-IMAGE-002/006,
+AC-PERF-001–009, AC-ISO-001–009,
 AC-HOST-001–007 and AC-KLEVENT-001–003 in
 [BenchmarkComparisons](../Features/BenchmarkComparisons.md).
 
@@ -11,16 +11,13 @@ AC-HOST-001–007 and AC-KLEVENT-001–003 in
 
 The canonical comparison targets are KeyLoad, PostgreSQL + pgvector, Qdrant,
 RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB.
-The current plan derives 924 workers from its checked-in contracts:
-220 controls, 176 scaled cells and 528 vector cells. These are planned workers,
-not passing tests or completed measurements. Active scale profiles contain
-exactly 100,000 or 1,000,000 actual records, and applicable workload cells measure
-at least 100,000 operations. A small control fixture cannot qualify either scale.
-
-[ADR-056](ADR-056-isolated-linux-comparison-cells.md) owns physical
-one/three-node isolated cells; [ADR-103](ADR-103-scaled-fair-comparisons.md)
-owns the scaled/vector cohort. Derive source inventories, schema versions,
-profile parameters and supported dispositions from their canonical contracts.
+[ADR-142](ADR-142-shared-live-benchmark-sessions.md) owns the current 22 shared
+sessions: eleven databases at native one/three-node topologies. Active scale
+requirements retain 100,000 and 1,000,000 actual records and at least 100,000
+measured operations per applicable workload. The document session starts with a
+measured million-record corpus; it does not complete remaining model-family or
+physical 100,000-corpus qualification. A small control fixture cannot qualify a
+scale profile. Derive inventories and supported dispositions from actual source.
 Single/Replicated library values describe comparison profiles; they do not
 establish physical membership. Product KeyLoad execution remains genuine cluster.
 A benchmark topology requires its explicitly qualified native contract.
@@ -42,7 +39,7 @@ claims unsupported by each engine's consistency and durability contract.
 
 | Engine | Required native proof and boundary |
 |---|---|
-| KeyLoad | The configured number of ready Orleans silos (three by default) with `KeyLoad:ReplicaCount` silo-local ZoneTree owners; persisted authorization and required-copy acknowledgementnowledged receipts. Process-kill proof does not establish power-loss durability. |
+| KeyLoad | The configured number of ready Orleans silos (three by default) with `KeyLoad:ReplicaCount` silo-local ZoneTree owners; persisted authorization and required-copy acknowledged receipts. Process-kill proof does not establish power-loss durability. |
 | PostgreSQL + pgvector | Actual native primary/standby membership, configured synchronous quorum and observed replication/WAL state. Exact, HNSW and IVFFlat workloads require their own accuracy and concurrent-update results. No automatic-failover claim follows from a replication probe. |
 | Qdrant | Actual peer agreement, collection replication/write-consistency settings and active seeded shard copies. No transactional/WAL equivalence is inferred. |
 | RabbitMQ | Connected native nodes and online quorum-queue members; persistent messages, publisher confirms, manual ACK and ordered barriers. |
@@ -55,7 +52,7 @@ claims unsupported by each engine's consistency and durability contract.
 | HelixDB | Genuine centrally pinned native deployment and observed topology under its source-owned capability contract. Standalone or unsupported configurations cannot be relabelled as replicated. |
 
 Keep `IComparisonTarget` / `IComparisonSession`, native client ownership,
-`ClusterEvidence`, corpus hashes, image manifest digests, source revision and
+`ClusterEvidence`, corpus hashes, external image digests, actual native DLL/PDB/process identities, source revision and
 raw per-operation results. Targets own created SDK/transferred HTTP clients;
 sessions borrow them. Aspire owns cluster resource startup. HTTPS trust, transport
 security and production authorization are mandatory on benchmark paths.
@@ -70,14 +67,25 @@ KeyLoad and PostgreSQL public session reads must return the actual stored event
 or absence through existing SDK/native operations; timing success without public
 readback fails AC-KLEVENT-001–003 / AC-PERF-004.
 
-## Source, image and publication contracts
+## Native infrastructure, source and publication contracts
 
-Build exact-source Linux product/load-generator images with existing Docker
-Buildx into the job-owned loopback registry. Validate actual manifest bytes,
-digest headers and revision labels before allocating consumers. Infrastructure
-base/configuration digests or Git revisions are not final product image digests.
-Use native Aspire container/image annotations and retain actual owned cleanup.
-No host-process or Dockerfile fallback may substitute for a qualified cell.
+The primary KeyLoad AppHost runs native server project processes plus Azurite for
+Orleans membership. A separate LoadTests AppHost owns selected comparison database
+infrastructure, readiness, discovered endpoints and joined cleanup. The workload
+client runs as a native process outside that graph. External databases use pinned
+native images, image entry points/users and anonymous session volumes. Remove
+only resources owned by that execution. Ordinary build/start/test/load does not
+publish or run KeyLoad or workload-client images; SDK `PublishContainer` belongs
+to explicit release/publication.
+
+The compiled runtime and actual process observations bind server/client DLL/PDB,
+source composition and process start identities. A deliberate fault uses the
+AppHost-owned identity-checked native process command and awaits actual exit.
+Graceful shutdown is not abrupt-fault proof. Local sessions have absent GitHub
+provenance; public aggregation independently requires authenticated original
+source/run/attempt/job/artifact evidence. Matched resource qualification for
+native server processes remains open and must not be inferred from Docker stats
+or a successful workload.
 
 Validate the distinct KeyLoad HTTP(S) node origins (three in the default topology), with the primary
 matching index zero, before client allocation. Bind these discovered resource
@@ -120,7 +128,7 @@ flowchart TB
 
 ## Implementation, join and rollback
 
-1. Freeze each workload/topology/image/caller packet against the owning feature
+1. Freeze each workload/topology/native-source/caller packet against the owning feature
    requirements and exact source contracts. Keep feature paths disjoint; shared
    contracts, packages and AppHost/workflows are single-owner.
 2. Implement native clients and real membership/ACK/readback checks before
@@ -131,7 +139,7 @@ flowchart TB
    Local functional development uses the native TUnit test entry and
    discovered resources; it is distinct from delivered-source qualification.
 4. Run every required exact-source Linux GitHub ordinary/scalar, recovery,
-   Docker cluster, comparison, coverage/complexity and publication gate. The genuine
+   native Aspire cluster, comparison, coverage/complexity and publication gate. The genuine
    .NET and official MCP callers remain mandatory for their owning contracts.
    Retain original run/job/artifact identities; no failed or skipped suite passes.
 5. Publish figures only from admitted originals and complete current website
@@ -147,10 +155,19 @@ cannot authorize experimental APIs or change database execution ownership.
 
 Rollback stops failing qualification/publication and repairs the owning source.
 Keep original measurement artifacts immutable; no legacy reader, previous-format
-path, alternate topology, weaker bound or host-process fallback is authorized.
+path, alternate topology, weaker bound or alternate execution is authorized.
 Source implementation, local development and a pushed commit alone do not mark
 this decision Implemented or establish a performance winner.
 
-## Exact clean source checkout regression
+## Exact clean source checkout
 
-REQ-BC-SOURCE-001 / AC-BC-SOURCE-001 (with AC-IMAGE-006) in the owning feature: native `verifySourceCheckout` must reject unignored untracked files as well as tracked changes before Dockerfile checks, Docker/registry allocation, receipts and GitHub outputs. It uses Git's existing porcelain status with `--untracked-files=all`, retaining repository ignore rules, revision equality, bounded child execution and the existing exact diagnostics. The real test `SourceCheckoutIdentityTests.CleanSourceIdentityRejectsUntrackedInputAndRecoversWithoutChangingHead` uses a real committed temporary checkout (`TemporaryGitCheckout` fixture): it must admit the checkout, reject an added untracked source only for the expected dirty diagnostic, recover after removing that owned file, and preserve HEAD and tracked bytes; a generated ignored file remains admissible. Existing genuine image export/import and preflight gates remain mandatory; no Git-only result establishes image identity or GitHub qualification. No schema migration or rollout path is introduced; if qualification fails, fix the narrow source/check pair while retaining original evidence, with no alternate permissive reader.
+REQ-BC-SOURCE-001 / AC-BC-SOURCE-001 require native `verifySourceCheckout` in
+`source-checkout.mjs` to reject unignored untracked files and tracked changes
+before delivered-source runtime packaging, receipts and GitHub outputs. Native
+Git honors repository ignore rules; revision equality and bounded joined child
+execution remain mandatory. `SourceCheckoutIdentityTests` uses its existing real
+committed checkout fixture: it admits the real HEAD, rejects an added untracked
+source for the expected diagnostic, admits the same HEAD after removing only that
+file, accepts ignored generated output and preserves tracked bytes. This proves
+source admission only; actual runtime/process and GitHub qualification remain
+separate gates. Failed admission preserves original evidence and fails closed.

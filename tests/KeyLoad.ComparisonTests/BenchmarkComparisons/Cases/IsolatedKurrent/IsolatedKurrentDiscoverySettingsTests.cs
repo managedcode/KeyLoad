@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Net;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons.Targets;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KurrentDB.Client;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;

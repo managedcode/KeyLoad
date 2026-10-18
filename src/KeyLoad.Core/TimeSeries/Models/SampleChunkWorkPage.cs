@@ -2,5 +2,11 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.Core.Features.TimeSeries;
 
-internal sealed record SampleChunkWorkPage(ImmutableArray<SampleChunkWorkHint> Hints,
-    byte[]? AfterKey, bool HasMore);
+/// <summary>Reports bounded chunk-work hints without exposing retained series contents.</summary>
+[Orleans.GenerateSerializer, Orleans.Alias(SampleChunkWorkPage.SerializerAlias)]
+public sealed record SampleChunkWorkPage([property: Orleans.Id(0)] ImmutableArray<SampleChunkWorkHint> Hints,
+    [property: Orleans.Id(1)] ImmutableArray<byte>? AfterKey,
+    [property: Orleans.Id(2)] bool HasMore)
+{
+    internal const string SerializerAlias = "keyload.core.sample-chunk-work-page.v1";
+}

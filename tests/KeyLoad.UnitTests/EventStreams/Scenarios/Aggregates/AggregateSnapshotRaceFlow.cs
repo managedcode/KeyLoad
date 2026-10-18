@@ -66,10 +66,11 @@ internal static class AggregateSnapshotRaceFlow
     {
         fixture.Healthy = fixture.Snapshot(3, "{\"total\":6}", 1);
         var position = fixture.Store.Position + 1;
-        fixture.HealthyResult = fixture.Database.Apply(AggregateSnapshotRaceFixture.Operation(fixture.Healthy));
+        var result = fixture.Database.Apply(fixture.Operation(fixture.Healthy));
+        fixture.HealthyResult = result;
         fixture.HealthyRaw = fixture.Store.Read(view => view.ReadOwnedValue(KeyLoad.Core.KeySpace.PartitionOutcome(
             fixture.Harness.Partition, AggregateSnapshotRaceFixture.Worker, fixture.Healthy.CommandId)))!;
-        await AggregateSnapshotRaceValues.ReceiptAsync(fixture, fixture.Healthy, fixture.HealthyResult, position, 2);
+        await AggregateSnapshotRaceValues.ReceiptAsync(fixture, fixture.Healthy, result, position, 2);
     }
     internal static async Task ObserveAsync(AggregateSnapshotRaceFixture fixture, Func<Task> action)
     {

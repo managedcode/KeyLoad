@@ -13,20 +13,18 @@ namespace KeyLoad.Clustering;
 [Immovable(ImmovableKind.Any)]
 [GrainType(AnnProjectionJobProtocol.GrainAlias), PreferLocalPlacement]
 internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, ILocalDurableJobManager jobs,
-    DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator, RuntimeJournalAdmission runtime,
-    PhysicalShardRecord physicalOwner,
-    Func<INativeAnnMaintenance> borrowNative, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
+    BackgroundStorageClient storage, RuntimeJournalAdmission runtime,
+    GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal)
     : Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
 {
-    private readonly ICommitCoordinator coordinator = borrowCoordinator();
-    private readonly AnnProjectionJobStateOwner owner = new(state, journal, database.Limits.MaxBatchBytes);
-    private readonly AnnProjectionJobExecution execution = new(database, borrowNative(),
+    private readonly AnnProjectionJobStateOwner owner = new(state, journal, codec.Limits.MaxBatchBytes);
+    private readonly AnnProjectionJobExecution execution = new(storage,
         new(codec, services, clock, serializer, routing));
 
     public Task ScheduleAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId, CancellationToken cancellationToken)
-        => AnnProjectionJobOperation.RunAsync(services, database,
+        => AnnProjectionJobOperation.RunAsync(services, codec.OperationLimits,
             (binding) => ScheduleCoreAsync(consumer, generation, nodeId, binding), cancellationToken);
 
     private async Task ScheduleCoreAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId,
@@ -38,27 +36,21 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        var budget = new ReadExecutionBudget(codec.OperationLimits, clock, token);
         budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-        var work = execution.Read(consumer, generation, budget, binding);
-        RequireHost(work.Placement);
-        if (work.NodeId != nodeId)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
-        }
+        var target = await storage.ResolveAnnOwnerAsync(nodeId, token).ConfigureAwait(true);
         var current = owner.Current;
         if (current is null)
         {
-            current = await execution.InitializeAsync(work, budget, binding, token).ConfigureAwait(true);
+            current = await execution.PrepareAsync(target, consumer, generation, nodeId, null, budget, expiry, binding, token).ConfigureAwait(true);
             if (current is null)
             {
                 return;
             }
             await WriteAsync(current, binding, token).ConfigureAwait(true);
         }
-        var next = await execution.NextAsync(current, work, budget, binding, token).ConfigureAwait(true);
+        var next = await execution.PrepareAsync(target, consumer, generation, nodeId, current, budget, expiry, binding, token).ConfigureAwait(true);
         if (next is null)
         {
             return;
@@ -86,7 +78,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
         => RequestContextHelper.RunWithCurrentCallerAsync(typeof(AnnProjectionCoordinatorGrain).FullName!,
             nameof(IDurableJobHandler.ExecuteJobAsync), () => AnnProjectionJobOperation.RunAsync(
-                services, database,
+                services, codec.OperationLimits,
                 (binding) => ExecuteOriginalAsync(context, binding), cancellationToken));
 
     private async Task ExecuteOriginalAsync(IJobRunContext context, NativeCapabilityWorkLifetime binding)
@@ -104,14 +96,14 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        var budget = new ReadExecutionBudget(codec.OperationLimits, clock, token);
         budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
+        var target = await storage.ResolveAnnOwnerAsync(original.PendingRequest.NodeId, token).ConfigureAwait(true);
         AnnMaintenanceResult result;
         try
         {
-            result = await execution.ExecuteAsync(GrainFactory, original, budget, expiry, binding, token).ConfigureAwait(true);
+            result = await execution.ExecuteAsync(GrainFactory, target, original, budget, expiry, binding, token).ConfigureAwait(true);
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated
             or ErrorCode.TokenInvalidated)
@@ -146,15 +138,6 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             await owner.WriteAsync(value, token).ConfigureAwait(true);
         }
         catch (Exception) { DeactivateOnIdle(); throw; }
-    }
-
-    private void RequireHost(PhysicalShardRecord placement)
-    {
-        if (physicalOwner.PhysicalShardId != placement.PhysicalShardId
-            || physicalOwner.Incarnation != placement.Incarnation)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
-        }
     }
 
     private void RequireKey(ProjectionConsumerRef consumer, long generation, Guid nodeId)

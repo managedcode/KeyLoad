@@ -34,7 +34,7 @@ internal static class QueueLeaseAuthorityTrial
         var restored = QueueWholeFlowStorage.Open(cold);
         await NativeReplayResultAssertions.Same<CommitReceipt>(restored.Apply(state.Original), original);
         await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,
-            state.Producer, state.Producer.CommandId, state.Original.EvaluatedAt), state.Produced);
+            state.Producer, state.Producer.CommandId, new DateTimeOffset(state.Original.Timestamp)), state.Produced);
         await OriginalClaimAsync(restored, cold, state);
         await QueueLeaseAuthorityHealthy.ReplayAsync(restored, cold, state, healthy);
         await QueueLeaseAuthorityPostimage.RequireAsync(restored, cold, state, original, healthySettled: true);
@@ -55,7 +55,7 @@ internal static class QueueLeaseAuthorityTrial
             await Assert.That(replay.Value).IsNull();
         }
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, state.Claim.Id)))!;
+            state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, state.Claim.CommandId)))!;
         await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, state.Claimed);
     }
 }

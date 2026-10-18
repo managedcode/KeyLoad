@@ -41,7 +41,8 @@ internal static class QueueOrderedRetryOperations
         {
             await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Problem));
             await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
-            await Assert.That(actual.Json).IsEqualTo(original.Json);
+            await Assert.That(NativeSerialization.Serialize(actual)).IsEquivalentTo(NativeSerialization.Serialize(original),
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await Assert.That(actual.Value).IsNull();
             return;
         }
@@ -63,7 +64,8 @@ internal static class QueueOrderedRetryOperations
     }
     private static async Task DispatchReplayAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(actual.Json).IsEqualTo(expected.Json);
+        await Assert.That(NativeSerialization.Serialize(actual)).IsEquivalentTo(NativeSerialization.Serialize(expected),
+            TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(bool));

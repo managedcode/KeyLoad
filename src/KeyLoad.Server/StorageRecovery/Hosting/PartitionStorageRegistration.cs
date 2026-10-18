@@ -16,6 +16,7 @@ internal static class PartitionStorageRegistration
             throw new InvalidOperationException(StorageFirst);
         }
         services.TryAddSingleton<PartitionHostApplicationOwner>();
+        services.TryAddSingleton<ILocalDatabaseRuntime>(provider => provider.GetRequiredService<PartitionHostApplicationOwner>());
         services.TryAddSingleton<Func<IPartitionStoragePublication>>(provider =>
         {
             var borrowed = provider.GetRequiredService<PartitionHostApplicationOwner>();

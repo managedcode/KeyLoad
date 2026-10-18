@@ -33,7 +33,7 @@ internal sealed class AspireTestEntryArtifactModelTests
             new[]
             {
                 "test", "--project", Path.Combine(root, "tests", "KeyLoad.UnitTests"), "--no-build", "--no-restore",
-                "--configuration", "Release", "--results-directory", Path.Combine(root, "artifacts/test results"),
+                "--results-directory", Path.Combine(root, "artifacts/test results"),
                 "--report-trx", "--coverage", "--coverage-settings", Path.Combine(root, "config/coverage settings.runsettings"),
                 "--coverage-output-format", "cobertura", "--coverage-output", Path.Combine(root, "artifacts/coverage results")
             }, CollectionOrdering.Matching);

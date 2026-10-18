@@ -1,7 +1,8 @@
 namespace KeyLoad.Core.Features.Messaging;
 
+/// <summary>Carries bounded original due-work identity without its retained business payload.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(DueWorkAliases.Hint)]
-internal sealed record DueWorkHint(
+public sealed record DueWorkHint(
     [property: global::Orleans.Id(DueWorkFields.Kind)] DueWorkKind Kind,
     [property: global::Orleans.Id(DueWorkFields.Lane)] QueueLaneRef Lane,
     [property: global::Orleans.Id(DueWorkFields.Id)] Guid Id,

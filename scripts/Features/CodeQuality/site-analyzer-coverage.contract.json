@@ -14,7 +14,7 @@
     "AC-CQ-033"
   ],
   "module": "KeyLoad.Analyzers",
-  "collectorVersion": "18.11.2",
+  "collectorVersion": "18.12.0",
   "sourceDirectory": "analyzers/KeyLoad.Analyzers",
   "sources": [
     {

@@ -15,7 +15,7 @@ internal static class RecurringSagaSchemaCold
             var image = QueueWholeFlowStorage.Bytes(owner.Store);
             var position = owner.Store.Position;
             var applied = owner.Database.LastApplied;
-            var journal = owner.JournalCut();
+            var cut = owner.ReadCanonicalCut();
             var identity = NativeSerialization.Serialize(owner.Store.Identity);
             await owner.ReopenAsync();
             var failures = new List<Exception>();
@@ -24,7 +24,7 @@ internal static class RecurringSagaSchemaCold
                 await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
                 await Assert.That(owner.Store.Position).IsEqualTo(position);
                 await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-                await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+                await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(cut);
                 await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
             }, failures);
             await ServerFailureObserver.ObserveAsync(() => RecurringSagaSchemaCanonical.CurrentAsync(owner, state), failures);

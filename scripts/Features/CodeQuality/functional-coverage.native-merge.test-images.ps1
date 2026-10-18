@@ -104,7 +104,7 @@ function Read-FcNativeTestIdentityManifest([string] $Path, [string] $Repository,
     Assert-FcNativeTestImageBuildInputs $manifest.buildInputs $expectedProject $Repository
     $projectDirectory = $expectedProject.Substring(0, $expectedProject.LastIndexOf('/'))
     $assembly = [string] $script:FcNativeTestImageProjects[$Suite].assembly
-    $expectedDll = $projectDirectory + '/bin/Release/net10.0/' + $assembly
+    $expectedDll = $projectDirectory + '/bin/Debug/net10.0/' + $assembly
     if ($manifest.compiledIdentity.dll -cne $expectedDll -or
         $manifest.compiledIdentity.pdb -cne [IO.Path]::ChangeExtension($expectedDll, '.pdb')) {
         throw $script:FcNativeTestImages.Invalid

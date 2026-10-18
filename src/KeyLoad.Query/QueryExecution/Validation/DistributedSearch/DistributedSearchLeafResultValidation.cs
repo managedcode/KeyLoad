@@ -19,7 +19,8 @@ internal static class DistributedSearchLeafResultValidation
             || result.Witness.Owner is null || result.Witness.Statistics is null
             || result.Witness.Partition != request.Search.Partition
             || !DistributedSearchWitnessEquality.SameOwner(request.Owner, result.Witness.Owner)
-            || result.Witness.NodeId == Guid.Empty || result.Witness.Incarnation != request.Owner.Incarnation
+            || result.Witness.NodeId == Guid.Empty || result.Witness.NodeId != request.Owner.PhysicalShardId
+            || result.Witness.Incarnation != request.Owner.Incarnation
             || result.ReadBytes < NoBytes || result.ReadBytes > request.MaxReadBytes
             || result.ExaminedRecords < NoRecords || result.ExaminedRecords > request.MaxExaminedRecords
             || !ValidSlots(request, result)

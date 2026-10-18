@@ -52,10 +52,12 @@ function Invoke-FcNativeMergePlan([object] $Plan) {
     Assert-FcNativeMergeInputsUnchanged $Plan
     Assert-FcNativeCurrentSourceGeneration $Plan
     Write-FcNativeMergeReceipt $Plan $output $inputRows $outputRows $counts
+    throw $script:FcNativeMergeInput.ProcessAttributionOpen
 }
 
 function Invoke-FcNativeMergeOutputs([object] $Plan, [string] $Output, [string[]] $Inputs) {
     Export-FcNativeIndividualReports $Plan $Output
+    Assert-FcNativeClusterServerCoverage $Plan $Output
     Invoke-FcNativeMergeCommands $Plan $Output $Inputs
     Invoke-FcNativeRepeatedInputCommands $Plan $Output $Inputs
     $bounds = $Plan.descriptor.bounds
@@ -157,11 +159,24 @@ function Write-FcNativeMergeReceipt([object] $Plan, [string] $Output, [object[]]
         lineCounts = [ordered]@{ covered = $Counts.linesCovered; valid = $Counts.linesValid }
         nativeCoberturaBranchPairs = $Counts.nativeCoberturaBranchPairs
         branchUnion = $Counts.branchUnion
-        controlInvariant = $true; productQualification = 'not established by merge tooling source'
+        controlInvariant = $true; productQualification = $script:FcNativeMergeInput.ProcessAttributionOpen
+        nativeProcessLifecycleOriginals = $Plan.descriptor.clusterLifecycles
     }
     $bytes = [Text.UTF8Encoding]::new($false).GetBytes((ConvertTo-Json -InputObject $receipt -Depth 16 -Compress) + "`n")
     if ($bytes.Length -gt $bounds.maximumManifestBytes) { throw $script:FcNativeMergeInput.InvalidEvidence }
     Write-FcNativeCreateOnly (Join-Path $Output 'merge-receipt.json') $bytes
     [ordered]@{ outputDirectory = $Output; inputCount = $Plan.inputs.Count; lineCounts = $receipt.lineCounts
         nativeCoberturaBranchPairs = $receipt.nativeCoberturaBranchPairs; branchUnion = $receipt.branchUnion }
+}
+
+function Assert-FcNativeClusterServerCoverage([object] $Plan, [string] $Output) {
+    $cluster = @($Plan.inputs | Where-Object { $_.kind -ceq 'suite' -and $_.suite -ceq 'cluster' })
+    if ($cluster.Count -ne 1) { throw $script:FcNativeMergeInput.InvalidEvidence }
+    $index = [Array]::IndexOf([object[]] $Plan.inputs, $cluster[0])
+    $path = Join-Path $Output ('input-' + $index.ToString('D4') + '.cobertura')
+    $report = Read-FcNativeMergeCoverage $path $Plan.descriptor.bounds.maximumReportBytes $Plan.manifest
+    if (-not $report.packages.ContainsKey('KeyLoad.Server') -or
+        $report.packages['KeyLoad.Server'].linesValid -le 0 -or $report.packages['KeyLoad.Server'].linesCovered -le 0) {
+        throw 'The original native cluster MTP report contains no executed source-bound KeyLoad.Server code.'
+    }
 }

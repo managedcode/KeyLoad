@@ -1,6 +1,6 @@
 $script:FunctionalCoverage = [ordered]@{
     SchemaVersion = 2
-    CollectorVersion = '18.11.2'
+    CollectorVersion = '18.12.0'
     Module = 'KeyLoad.Query'
     ModuleFile = 'KeyLoad.Query.dll'
     ContractName = 'functional-coverage.contract.json'
@@ -9,9 +9,9 @@ $script:FunctionalCoverage = [ordered]@{
     ReportJsonName = 'functional-coverage.report.json'
     ReportMarkdownName = 'functional-coverage.report.md'
     SettingsCopyName = 'functional-coverage.settings.xml'
-    DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Release/net10.0'
+    DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Debug/net10.0'
     SourceDirectory = 'src/KeyLoad.Query'
-    SourceCount = 189
+    SourceCount = 262
     ContributorSourceCount = 21
     ContributorClassCount = 10
     ContributorCaseCount = 25
@@ -32,7 +32,7 @@ $script:FunctionalCoverage = [ordered]@{
     ErrorStale = 'Prepare refuses existing functional-coverage evidence.'
     ErrorContract = 'The frozen functional coverage contract is invalid.'
     ErrorInventory = 'KeyLoad.Query source inventory differs from the frozen contract.'
-    ErrorDeployment = 'Release test deployment must contain the Query DLL and matching PDB.'
+    ErrorDeployment = 'Debug test deployment must contain the Query DLL and matching PDB.'
     ErrorManifest = 'Prepared functional coverage manifest is missing, stale, or invalid.'
     ErrorCoverage = 'A required native Cobertura report is missing or malformed.'
     ErrorTrx = 'PartitionQuery TRX cases differ from the exact admitted class, method, or instance inventory.'
@@ -207,6 +207,43 @@ function Assert-FcExpectedCases([object] $Contract) {
 function Get-FcProjectSourceDirectory([string] $ProjectName, [bool] $IsTest) {
     if ($IsTest) { return 'tests/' + $ProjectName }
     if ($ProjectName -ceq 'KeyLoad.Analyzers') { return 'analyzers/' + $ProjectName }
-    if ($ProjectName -ceq 'KeyLoad.AppHost') { return 'build/' + $ProjectName }
+    if ($ProjectName -cin @('KeyLoad.AppHost','KeyLoad.LoadTests.AppHost')) { return 'build/' + $ProjectName }
     return 'src/' + $ProjectName
+}
+
+function Get-FcCompiledProjectRoster([string] $Root) {
+    $solution = Resolve-FcPath $Root 'KeyLoad.slnx'
+    $settings = [Xml.XmlReaderSettings]::new()
+    $settings.DtdProcessing = [Xml.DtdProcessing]::Prohibit
+    $settings.XmlResolver = $null
+    $reader = [Xml.XmlReader]::Create($solution, $settings)
+    $document = [Xml.XmlDocument]::new()
+    try { $document.Load($reader) }
+    finally { $reader.Dispose() }
+    $rows = [Collections.Generic.List[object]]::new()
+    $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $sources = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($entry in $document.SelectNodes('/Solution/Folder/Project')) {
+        $relative = [string] $entry.Path
+        if ($relative -cnotmatch '\A(src|build|analyzers)/(KeyLoad\.[A-Za-z0-9.]+)/\2\.csproj\z') { continue }
+        $role = if ($Matches[1] -ceq 'src') { 'production' } else { 'infrastructure' }
+        $name = $Matches[2]
+        $path = Resolve-FcPath $Root $relative
+        if (-not [IO.File]::Exists($path) -or -not $names.Add($name) -or $rows.Count -ge 256) {
+            throw $script:FunctionalCoverage.ErrorInventory
+        }
+        if ($role -ceq 'production') { [void] $sources.Add($relative) }
+        $rows.Add([ordered]@{ name = $name; path = $relative; role = $role })
+    }
+    $actual = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($directory in [IO.DirectoryInfo]::new((Resolve-FcPath $Root 'src')).EnumerateDirectories()) {
+        if ($directory.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw $script:FunctionalCoverage.ErrorPath }
+        foreach ($project in $directory.EnumerateFiles('*.csproj')) {
+            if ($project.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw $script:FunctionalCoverage.ErrorPath }
+            $relative = [IO.Path]::GetRelativePath($Root, $project.FullName).Replace('\','/')
+            if (-not $actual.Add($relative)) { throw $script:FunctionalCoverage.ErrorInventory }
+        }
+    }
+    if ($sources.Count -eq 0 -or -not $sources.SetEquals($actual)) { throw $script:FunctionalCoverage.ErrorInventory }
+    @($rows.ToArray() | Sort-Object name -CaseSensitive)
 }

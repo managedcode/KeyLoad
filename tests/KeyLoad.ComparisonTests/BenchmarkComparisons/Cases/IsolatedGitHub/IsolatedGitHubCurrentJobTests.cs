@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-006/007: read-only authenticated GitHub capture in the actual trusted comparison-images job.</summary>
+/// <summary>AC-ISO-006/007: read-only authenticated GitHub capture in the actual trusted native preparation job.</summary>
 internal sealed class IsolatedGitHubCurrentJobTests
 {
     [Test]
@@ -21,11 +21,11 @@ internal sealed class IsolatedGitHubCurrentJobTests
         var id = job.GetProperty(IsolatedGitHubNativeProtocol.Id).GetInt64();
         await Assert.That(id).IsGreaterThan(0);
         await Assert.That(job.GetProperty(IsolatedGitHubNativeProtocol.Name).GetString())
-            .IsEqualTo(IsolatedGitHubNativeProtocol.ImageJob);
+            .IsEqualTo(IsolatedGitHubNativeProtocol.PreparationJob);
         await Assert.That(job.GetProperty(IsolatedGitHubNativeProtocol.Source).GetString())
-            .IsEqualTo(IsolatedGitHubNativeProtocol.Required(ComparisonImageProtocol.ShaEnvironment));
+            .IsEqualTo(IsolatedGitHubNativeProtocol.Required(IsolatedGitHubNativeProtocol.ShaEnvironment));
         await Assert.That(job.GetProperty(IsolatedGitHubNativeProtocol.Run).GetInt64())
-            .IsEqualTo(long.Parse(IsolatedGitHubNativeProtocol.Required(ComparisonImageProtocol.RunEnvironment), CultureInfo.InvariantCulture));
+            .IsEqualTo(long.Parse(IsolatedGitHubNativeProtocol.Required(IsolatedGitHubNativeProtocol.RunEnvironment), CultureInfo.InvariantCulture));
         await Assert.That(job.GetProperty(IsolatedGitHubNativeProtocol.Status).GetString())
             .IsEqualTo(IsolatedGitHubNativeProtocol.InProgress);
         await Assert.That(job.GetProperty(IsolatedGitHubNativeProtocol.Workflow).GetString())

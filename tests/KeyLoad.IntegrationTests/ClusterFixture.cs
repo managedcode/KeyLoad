@@ -1,14 +1,15 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.Query;
-using Microsoft.Extensions.DependencyInjection;
-using TUnit.Core.Interfaces;
-using Microsoft.Extensions.Options;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using TUnit.Core.Interfaces;
 using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFixtureResourceCleanup;
 
 namespace KeyLoad.IntegrationTests;
@@ -97,7 +98,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         try
         {
             using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
-            var arguments = ClusterFixtureComposition.PrepareArguments(Root);
+            var arguments = ClusterFixtureComposition.PrepareArguments(Root, PublicQueryStorageSelection.Read(Key));
             ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
             var builder = await ClusterFixtureComposition.CreateBuilderAsync(arguments, telemetry, timeout.Token);
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
@@ -155,11 +156,21 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             : App.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.ApplicationCleanupTimeout,
             TimeProvider.System);
         var failures = new List<Exception>();
-        await SaveDiagnosticsAsync(diagnostics, cleanup.Token, failures).ConfigureAwait(false);
+        await SaveDiagnosticsAsync(diagnostics, failures, cleanup.Token).ConfigureAwait(false);
         if (diagnostics is not null)
         {
-            await ServerFailureObserver.ObserveAsync(() => diagnostics.DisposeAsync().AsTask(), failures)
-                .ConfigureAwait(false);
+            try
+            {
+                await diagnostics.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
             diagnostics = null;
         }
         var ownedApp = App;

@@ -22,26 +22,26 @@ internal static class SubscriptionPausedDrainFlow
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event1", "Created", "{\"n\":1}"),
                 new("event2", "Created", "{\"n\":2}"), new("event3", "Created", "{\"n\":3}")])]);
-        Add(fixture.Database, fixture.Store, group, Create(OperationKind.Batch, publish, publish.CommandId, time), history)
+        Add(fixture.Database, fixture.Store, group, Create(fixture.Database, OperationKind.Batch, publish, publish.CommandId, time), history)
             .Get<CommitReceipt>();
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
-        var claim = Create(OperationKind.ReceiveSubscription, request, request.RequestId, time.AddSeconds(1));
+        var claim = Create(fixture.Database, OperationKind.ReceiveSubscription, request, request.RequestId, time.AddSeconds(1));
         var original = fixture.Database.Apply(claim);
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
-        var claimSaved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, claim.Id);
+        var claimSaved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, claim.CommandId);
         await SubscriptionInboxConflictAssertions.InitialClaimsAsync(fixture.Database, group, deliveries, time);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), original);
         var pause = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 1, true);
-        Add(fixture.Database, fixture.Store, group, Create(OperationKind.SetSubscriptionPaused, pause, pause.CommandId,
+        Add(fixture.Database, fixture.Store, group, Create(fixture.Database, OperationKind.SetSubscriptionPaused, pause, pause.CommandId,
             time.AddSeconds(2)), history).Get<SubscriptionInfo>();
         await SubscriptionPausedDrainAssertions.StatusAsync(fixture.Database, group, 0, 3, true);
         var denied = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
         await SubscriptionPausedDrainAssertions.RefuseAsync(fixture.Database, fixture.Store, group,
-            Create(OperationKind.ReceiveSubscription, denied, denied.RequestId, time.AddSeconds(3)), history);
+            Create(fixture.Database, OperationKind.ReceiveSubscription, denied, denied.RequestId, time.AddSeconds(3)), history);
         var renew = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, deliveries[0].Token, DeliveryAction.Renew, 30);
         var renewed = Add(fixture.Database, fixture.Store, group,
-            Create(OperationKind.SubscriptionDelivery, renew, renew.CommandId, time.AddSeconds(4)), history);
+            Create(fixture.Database, OperationKind.SubscriptionDelivery, renew, renew.CommandId, time.AddSeconds(4)), history);
         await SubscriptionPausedDrainAssertions.ReceiptAsync(renewed, renew, 1);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), original);
         await AckAsync(fixture.Database, fixture.Store, group, deliveries[2], history);
@@ -72,7 +72,7 @@ internal static class SubscriptionPausedDrainFlow
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, 3, 3, true);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 1, false);
-        Add(db, cold, group, Create(OperationKind.SetSubscriptionPaused, resume, resume.CommandId,
+        Add(db, cold, group, Create(db, OperationKind.SetSubscriptionPaused, resume, resume.CommandId,
             QueueWholeFlowStorage.Clock(cold).AddSeconds(1)), history).Get<SubscriptionInfo>();
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, 3, 3, false);
         await SubscriptionPausedDrainAssertions.ReplayAsync(db, cold, group, history);
@@ -114,9 +114,9 @@ internal static class SubscriptionPausedDrainFlow
         var time = QueueWholeFlowStorage.Clock(store).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event" + number, "Created", "{\"n\":" + number + "}")])]);
-        Add(db, store, group, Create(OperationKind.Batch, publish, publish.CommandId, time), history).Get<CommitReceipt>();
+        Add(db, store, group, Create(db, OperationKind.Batch, publish, publish.CommandId, time), history).Get<CommitReceipt>();
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 1);
-        var operation = Create(OperationKind.ReceiveSubscription, request, request.RequestId, time);
+        var operation = Create(db, OperationKind.ReceiveSubscription, request, request.RequestId, time);
         var original = db.Apply(operation);
         var delivery = await Assert.That(original.Get<ReceiveSubscriptionResult>().Deliveries).HasSingleItem();
         var expected = new SubscriptionDelivery(new SourceEventRecord(group.Source, number, number,
@@ -136,7 +136,7 @@ internal static class SubscriptionPausedDrainFlow
         List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
         var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
-        var result = Add(db, store, group, Create(OperationKind.SubscriptionDelivery, command, command.CommandId,
+        var result = Add(db, store, group, Create(db, OperationKind.SubscriptionDelivery, command, command.CommandId,
             QueueWholeFlowStorage.Clock(store).AddSeconds(1)), history);
         await SubscriptionPausedDrainAssertions.ReceiptAsync(result, command, delivery.Event.Position);
     }
@@ -149,7 +149,7 @@ internal static class SubscriptionPausedDrainFlow
         return result;
     }
 
-    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
-        => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    private static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, DateTimeOffset time)
+        => database.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }
 

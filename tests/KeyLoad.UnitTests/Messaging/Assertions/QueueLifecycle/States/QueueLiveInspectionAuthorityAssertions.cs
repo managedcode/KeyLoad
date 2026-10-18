@@ -91,12 +91,12 @@ internal static class QueueLiveInspectionAuthorityAssertions
     internal static async Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLeaseAuthorityState state,
         QueuePendingAuthorityCut damaged)
     {
-        await Assert.That(Outcome(store, state, state.Original.Id)).IsNull();
+        await Assert.That(Outcome(store, state, state.Original.CommandId)).IsNull();
         var error = Assert.ThrowsExactly<KeyLoadException>(() => owner.InspectMessage(QueueLeaseAuthorityProtocol.Root,
             state.Lane, state.Message.MessageId));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(error.Message).IsEqualTo("The queue lifecycle body is unavailable.");
-        await Assert.That(Outcome(store, state, state.Original.Id)).IsNull();
+        await Assert.That(Outcome(store, state, state.Original.CommandId)).IsNull();
         await QueuePendingAuthorityHistory.SameAsync(store, damaged);
     }
 
@@ -106,11 +106,11 @@ internal static class QueueLiveInspectionAuthorityAssertions
         var before = QueuePendingAuthorityHistory.Capture(store);
         foreach (var (operation, result) in new[] { (state.Original, processed), (state.Claim, state.Claimed) })
         {
-            var saved = Outcome(store, state, operation.Id)!;
+            var saved = Outcome(store, state, operation.CommandId)!;
             await Assert.That(saved.Incarnation).IsEqualTo(store.Identity.Incarnation);
             await Assert.That(NativeSerialization.Serialize(saved.Result).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
             var replay = owner.Apply(operation);
-            if (operation.Kind == OperationKind.Receive)
+            if (operation.Value!.Kind == OperationKind.Receive)
             {
                 await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
 
@@ -132,12 +132,12 @@ internal static class QueueLiveInspectionAuthorityAssertions
     internal static async Task PositiveRefuseAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLeaseAuthorityState state,
         (CommandRequest Producer, Result<object> Result) positive, string target, QueuePendingAuthorityCut damaged)
     {
-        await Assert.That(Outcome(store, state, state.Original.Id)).IsNull();
+        await Assert.That(Outcome(store, state, state.Original.CommandId)).IsNull();
         var lane = new QueueLaneRef(state.Lane.Partition, PositiveQueue);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => owner.InspectMessage(QueueLeaseAuthorityProtocol.Root, lane, target));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(error.Message).IsEqualTo("The queue lifecycle body is unavailable.");
-        await Assert.That(Outcome(store, state, state.Original.Id)).IsNull();
+        await Assert.That(Outcome(store, state, state.Original.CommandId)).IsNull();
         await QueuePendingAuthorityHistory.SameAsync(store, damaged);
         await LeasedAsync(owner, store, state);
         var sibling = positive.Producer.Mutations.Cast<EnqueueMessage>().Single(message => message.MessageId != target);

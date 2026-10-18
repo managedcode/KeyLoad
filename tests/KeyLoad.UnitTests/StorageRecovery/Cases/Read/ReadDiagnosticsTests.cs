@@ -41,7 +41,7 @@ internal sealed class ReadDiagnosticsTests
     }
 
     [Test]
-    public async Task AcMp011StagedReplacementTombstoneAndFallbackCountEachLookupOnce()
+    public async Task AcMp011StagedReplacementTombstoneAndCommittedReadsCountEachLookupOnce()
     {
         using var fixture = new StoreFixture();
         fixture.Store.Commit((tx, _) =>

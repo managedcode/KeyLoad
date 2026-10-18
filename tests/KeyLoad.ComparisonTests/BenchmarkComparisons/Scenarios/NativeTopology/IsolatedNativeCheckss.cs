@@ -1,8 +1,8 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;

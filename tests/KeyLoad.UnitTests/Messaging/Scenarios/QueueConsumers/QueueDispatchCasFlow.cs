@@ -28,10 +28,10 @@ internal static class QueueDispatchCasFlow
             SchemaVersion = Initial + Step
         });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, true, Initial + Step);
-        var pauseOutcome = fixture.Outcome(pause.Id) ?? throw new InvalidOperationException();
+        var pauseOutcome = fixture.Outcome(pause.CommandId) ?? throw new InvalidOperationException();
         await QueueDispatchCasAssertions.FailureAsync(fixture,
-            fixture.Apply(fixture.Command(pause.Id, Initial, false)), ErrorCode.Conflict, true, Initial + Step);
-        await Assert.That(fixture.Outcome(pause.Id)!.SequenceEqual(pauseOutcome)).IsTrue();
+            fixture.Apply(fixture.Command(pause.CommandId, Initial, false)), ErrorCode.Conflict, true, Initial + Step);
+        await Assert.That(fixture.Outcome(pause.CommandId)!.SequenceEqual(pauseOutcome)).IsTrue();
         var stale = fixture.Command(Guid.NewGuid(), Initial, false);
         await QueueDispatchCasAssertions.FailureAsync(fixture, fixture.Apply(stale),
             ErrorCode.RevisionConflict, true, Initial + Step);
@@ -50,8 +50,8 @@ internal static class QueueDispatchCasFlow
             SchemaVersion = Initial + Step + Step
         });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, false, Initial + Step + Step);
-        var resumeOutcome = fixture.Outcome(resume.Id) ?? throw new InvalidOperationException();
-        var staleOutcome = fixture.Outcome(stale.Id) ?? throw new InvalidOperationException();
+        var resumeOutcome = fixture.Outcome(resume.CommandId) ?? throw new InvalidOperationException();
+        var staleOutcome = fixture.Outcome(stale.CommandId) ?? throw new InvalidOperationException();
         for (var cycle = 0; cycle < ColdCycles; cycle++)
         {
             fixture.Reopen();
@@ -62,9 +62,9 @@ internal static class QueueDispatchCasFlow
             await QueueDispatchCasAssertions.CurrentAsync(fixture, false, Initial + Step + Step);
             await QueueDispatchCasAssertions.FailureAsync(fixture, fixture.Apply(stale),
                 ErrorCode.RevisionConflict, false, Initial + Step + Step);
-            await Assert.That(fixture.Outcome(pause.Id)!.SequenceEqual(pauseOutcome)).IsTrue();
-            await Assert.That(fixture.Outcome(resume.Id)!.SequenceEqual(resumeOutcome)).IsTrue();
-            await Assert.That(fixture.Outcome(stale.Id)!.SequenceEqual(staleOutcome)).IsTrue();
+            await Assert.That(fixture.Outcome(pause.CommandId)!.SequenceEqual(pauseOutcome)).IsTrue();
+            await Assert.That(fixture.Outcome(resume.CommandId)!.SequenceEqual(resumeOutcome)).IsTrue();
+            await Assert.That(fixture.Outcome(stale.CommandId)!.SequenceEqual(staleOutcome)).IsTrue();
         }
         await HealthyAsync(fixture);
     }

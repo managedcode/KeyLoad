@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -12,22 +13,27 @@ internal static class ComparisonHostLaunchSettings
     private const string HostProjectName = "KeyLoad.ComparisonHost.csproj";
     private const string HostAssemblyName = "KeyLoad.ComparisonHost.dll";
     private const string BuildOutputDirectory = "bin";
-    private const string ReleaseConfiguration = "Release";
     private const string TargetFramework = "net10.0";
     private const string BenchmarkEnvironmentPrefix = "Benchmarks__";
     private const string ConnectionEnvironmentPrefix = "ConnectionStrings__";
     private const string BenchmarkColonEnvironmentPrefix = "Benchmarks:";
     private const string ConnectionColonEnvironmentPrefix = "ConnectionStrings:";
     private const string MissingRepositoryMessage = "The KeyLoad repository root is unavailable.";
-    private const string MissingHostMessage = "The Release comparison host is not built.";
+    private const string MissingHostMessage = "The native comparison host is not built.";
     private const string MaximumParallelTestsArgument = "--maximum-parallel-tests";
     private const string ExclusiveMeasurementParallelism = "1";
 
     internal static ProcessStartInfo Create(string[] arguments, IReadOnlyDictionary<string, string>? environment)
     {
         var root = RepositoryRoot();
+        var configuration = typeof(ComparisonHostLaunchSettings).Assembly
+            .GetCustomAttribute<AssemblyConfigurationAttribute>()?.Configuration;
+        if (string.IsNullOrWhiteSpace(configuration))
+        {
+            throw new InvalidOperationException("The native test assembly build configuration is absent.");
+        }
         var assembly = Path.Combine(root, BenchmarksDirectory, HostDirectory, BuildOutputDirectory,
-            ReleaseConfiguration, TargetFramework, HostAssemblyName);
+            configuration, TargetFramework, HostAssemblyName);
         if (!File.Exists(assembly))
         {
             throw new FileNotFoundException(MissingHostMessage, assembly);

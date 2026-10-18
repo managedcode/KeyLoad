@@ -75,8 +75,10 @@ internal static class AggregateReplayAuthorizationContinuation
                 AggregateReplayFixture.WorkerId, oldCommandId))));
         await Assert.That(records.Event!.AsSpan().SequenceEqual(originalRecords.Event)).IsTrue();
         await Assert.That(records.Outcome!.AsSpan().SequenceEqual(originalRecords.Outcome)).IsTrue();
-        await EqualAsync(oldReceipt, OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition,
-            AggregateReplayFixture.WorkerId, oldCommandId)!.Get<CommitReceipt>());
+        var originalOutcome = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition,
+            AggregateReplayFixture.WorkerId, oldCommandId)
+            ?? throw new InvalidOperationException("The original snapshot outcome is absent.");
+        await EqualAsync(oldReceipt, originalOutcome.Get<CommitReceipt>());
         await PageAsync(fixture.Read(maximumEvents: RetainedTailMaximum), expectedPage);
     }
 

@@ -12,7 +12,7 @@ internal static class SubscriptionOldCutReplay
     internal static async Task ProcessingAsync(DatabaseEngine database, ZoneTreeStore store, SubscriptionOldCutState state)
     {
         var failures = new List<Exception>();
-        foreach (var item in state.Successes.Where(pair => pair.Key.Kind is OperationKind.SubscriptionProcessing
+        foreach (var item in state.Successes.Where(pair => pair.Key.Value!.Kind is OperationKind.SubscriptionProcessing
             or OperationKind.SubscriptionDelivery or OperationKind.Batch))
         {
             var bytes = QueueWholeFlowStorage.Bytes(store);
@@ -20,12 +20,12 @@ internal static class SubscriptionOldCutReplay
             var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var key = KeySpace.PartitionOutcome(state.Group.Source.Partition, item.Key.PrincipalId, item.Key.Id);
+                var key = KeySpace.PartitionOutcome(state.Group.Source.Partition, item.Key.UserId!, item.Key.CommandId);
                 var raw = store.Read(view => view.ReadOwnedValue(key))
                     ?? throw new InvalidOperationException("The original outcome is missing.");
                 var replay = database.Apply(item.Key);
                 var stored = NativeSerialization.Deserialize<StoredOutcome>(raw).Result;
-                if (item.Key.Kind == OperationKind.SubscriptionProcessing)
+                if (item.Key.Value!.Kind == OperationKind.SubscriptionProcessing)
                 {
                     await SameProcessingAsync(replay, item.Value);
                     await SameProcessingAsync(stored, item.Value);

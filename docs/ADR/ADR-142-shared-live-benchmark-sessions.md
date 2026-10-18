@@ -9,7 +9,7 @@ A comparison runs two measurement jobs per database (one per native topology). P
 
 ```mermaid
 flowchart LR
-    Prep[One preparation job builds images and runner bundle] --> Worker[One worker per database and topology]
+    Prep[One preparation job builds native runtime bundle] --> Worker[One worker per database and topology]
     Worker --> Topology[Aspire starts native topology once]
     Topology --> Load[First test measures the million-record load]
     Load --> Ops[Later operation and mixed tests use the live state]
@@ -28,9 +28,17 @@ and exact final-state oracles. The canonical inventory and unsupported native
 capabilities are explicit; a document-only implementation does not qualify the
 complete database/model comparison requirement.
 
-One preparation job builds the solution, native images and compiled runner
-bundle. Workers import and hash-check same-source/run/attempt images, DLLs/PDBs,
-NuGet assets and required Aspire native tools without their own restore/build.
+One preparation job builds the solution and compiled native runtime bundle. Workers
+import and hash-check same-source/run/attempt DLLs/PDBs, NuGet assets and required
+Aspire tools without their own restore/build. The primary KeyLoad AppHost contains
+native server project processes and Azurite for development and functional tests.
+The separate LoadTests AppHost contains selected database infrastructure only;
+the native workload client owns requests and measurements outside its resource
+graph. KeyLoad and its workload client are never containers in ordinary execution.
+External databases keep their pinned native images and image user defaults. Each
+owned lifecycle removes only its own resources, including anonymous volumes.
+Native SDK container publication remains explicit release work.
+
 The preparation and each worker retain original reports. Aggregation requires
 all 22 database/topology workers, native test outcomes, artifact identities,
 source identity, measured counts and matching operation statistics. Failed
@@ -41,6 +49,12 @@ No warmup, hidden reseed, per-test database restart, retry that improves samples
 legacy producer, report compatibility fallback or fabricated unavailable report
 is part of this design. Reusable native operations and transport retain their
 actual contracts.
+
+Local sessions preserve real source/DLL/PDB/process evidence without invented
+GitHub provenance. Public aggregation still authenticates original GitHub source,
+run, attempt, jobs and artifacts. Actual workload results remain distinct from
+matched native-process resource qualification, which is open; no container-shaped
+identity or resource observation may stand in for a native server process.
 
 ## Consequences and qualification
 

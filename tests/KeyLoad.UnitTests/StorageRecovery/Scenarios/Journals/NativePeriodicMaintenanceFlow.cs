@@ -103,13 +103,20 @@ internal static class NativePeriodicMaintenanceFlow
         var merger = await disk.Created.Task.WaitAsync(token);
         disk.Release();
         await Assert.That(await disk.Ended.Task.WaitAsync(token)).IsEqualTo(MergeResult.SUCCESS);
-        await runtime.Maintainer.WaitForBackgroundThreadsAsync().WaitAsync(token);
-        merger.Join();
+        JoinNativeMaintenance(runtime, merger, token);
         if (disk.Failure is { } failure)
         {
             throw failure;
         }
         await NativeMaintenanceState.LiteralAsync(store, healthy: false);
+    }
+
+    private static void JoinNativeMaintenance(ZoneTreeStoreRuntime runtime, Thread merger, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        runtime.Maintainer.WaitForBackgroundThreads();
+        token.ThrowIfCancellationRequested();
+        merger.Join();
     }
 
     private static void StartDisposalUnderRead(ZoneTreeStoreRuntime runtime, ZoneTreeStore store, Action<Task> started)

@@ -94,11 +94,17 @@ function renderWorker(document, worker) {
     const report = worker.report;
     const target = report.targets[0];
     fields.push(['Host OS', report.hostOs], ['Architecture', report.architecture], ['Logical processors', report.logicalProcessors],
-      ['Runtime', report.runtime], ['Storage', report.storage], ['Load generator image', report.loadGeneratorImage],
-      ['Selected native server image', report.nativeServerImage], ['Server version', target.version], ['Observed profile image', target.image], ['Native topology', target.topology],
+      ['Runtime', report.runtime], ['Storage', report.storage],
+      ['Workload client PID', report.client.processId], ['Workload client DLL SHA-256', report.client.binary.assemblySha256],
+      ['Workload client PDB SHA-256', report.client.binary.pdbSha256],
+      ['Server version', target.version], ['Native topology', target.topology],
       ['Data copies', target.cluster.dataCopies], ['Write acknowledgement', target.writeAcknowledgement],
       ['Read contract', target.readContract], ['Transport', target.transport], ['Authorization', target.authorization],
       ['Native observations', target.cluster.observations.join('; ')]);
+    if (report.serverProcesses.length > 0) fields.push(['KeyLoad server processes', report.serverProcesses.map(process =>
+      process.name + ': PID ' + process.processId + ', DLL ' + process.binary.assemblySha256
+      + ', PDB ' + process.binary.pdbSha256).join('; ')]);
+    if (report.nativeServerImage !== null) fields.push(['External database image', report.nativeServerImage]);
   }
   const list = element(document, 'dl');
   for (const [name, value] of fields) list.append(element(document, 'dt', name), element(document, 'dd', String(value)));

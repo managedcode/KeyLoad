@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
@@ -6,7 +5,8 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, DatabaseEngine database,
+internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, BackgroundStorageClient storage,
+    RemoteTransferCoordinationHint hint,
     IServiceProvider services, IGrainFactory grainFactory, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing)
@@ -14,7 +14,7 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Dat
     internal async Task<T?> ReadAsync<T>(string subject, GrainReadKind kind, ReadOnlyMemory<byte> payload, CancellationToken token) where T : class
     {
         var requestId = Guid.NewGuid();
-        var principal = database.Store.Read(view => database.Principal(view, subject, clock.GetUtcNow()));
+        var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
         var connection = NativeConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, Guid.Empty, token, connectionId: connection);
         var signed = codec.CreateRead(requestId, principal.Id, kind, payload);
@@ -30,11 +30,21 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Dat
     internal async Task<GrainOperationReply> ApplyAsync(string subject, CommandRequest request, CancellationToken token)
     {
         var requestId = Guid.NewGuid();
-        var principal = database.Store.Read(view => database.Principal(view, subject, clock.GetUtcNow()));
+        var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
         var connection = NativeConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, request.CommandId, token, connectionId: connection);
         var signed = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, NativeSerialization.Serialize(request));
         return await DrainAsync(connection, requestId, signed, token).ConfigureAwait(true);
+    }
+
+    private async Task<PrincipalRecord> CurrentPrincipalAsync(string subject, CancellationToken token)
+    {
+        var principal = await storage.Operations.ReadTransferCoordinatorAsync(hint, token).ConfigureAwait(true);
+        if (principal.Id != subject)
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
+        }
+        return principal;
     }
 
     private Task<GrainOperationReply> DrainAsync(Guid connection, Guid requestId, string signed, CancellationToken token)

@@ -79,7 +79,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
             return true;
         });
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var operation = fixture.Database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive,
+        var operation = fixture.Database.OwnCommand(QueueLeaseAuthoritySetup.Create(fixture.Database, OperationKind.Receive,
             request, request.RequestId, time.AddSeconds(2)));
         var body = new MessageBody(message.MessageId, message.PayloadJson, message.HeadersJson, message.OrderingKey, JsonData.Fingerprint(message));
         return new(lane, time.AddSeconds(2), producer, produced, key, row, maximum, body, operation);

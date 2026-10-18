@@ -1,8 +1,8 @@
 import { link, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { setTimeout as wait } from 'node:timers/promises';
-import { runBounded } from './image-process.mjs';
-import { createDirectory } from './image-bundle-files.mjs';
+import { runBounded } from './native-process.mjs';
+import { createDirectory } from './native-files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { writeCapture, writeJson } from './isolated-github-files.mjs';
 import { streamHttpToFile } from './isolated-github-stream.mjs';

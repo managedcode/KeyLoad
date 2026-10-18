@@ -6,10 +6,10 @@ namespace KeyLoad.Clustering;
 
 internal static class QueueDeadlineCoordination
 {
-    private const string UnavailablePrincipal = "Queue deadline coordination has no configured principal.";
+    internal const string UnavailablePrincipal = "Queue deadline coordination has no configured principal.";
 
     internal static async Task<DueDispatchResult> ExecuteAsync(QueueDeadlineHint hint, string partitionId,
-        DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
+        BackgroundStorageClient storage, TimeProvider clock,
         IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission admission,
         Func<PrincipalRecord, Guid, ReadOnlyMemory<byte>, CancellationToken, Task<GrainOperationReply>> dispatch,
         CancellationToken cancellationToken)
@@ -27,8 +27,11 @@ internal static class QueueDeadlineCoordination
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             admission.SchedulingToken, timeout.Token);
-        await coordinator.ReadBarrierAsync(lifetime.Token).ConfigureAwait(true);
-        var principal = database.Store.Read(view => database.Principal(view, subject, clock.GetUtcNow()));
+        var principal = await storage.Operations.ReadQueueDeadlineCreatorAsync(hint, lifetime.Token).ConfigureAwait(true);
+        if (principal.Id != subject)
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
+        }
         var commandId = Guid.NewGuid();
         var body = NativeSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [hint.Mutation]));
         var reply = await dispatch(principal, commandId, body, lifetime.Token).ConfigureAwait(true);

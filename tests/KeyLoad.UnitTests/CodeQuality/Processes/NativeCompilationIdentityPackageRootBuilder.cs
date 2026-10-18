@@ -7,7 +7,7 @@ internal static class NativeCompilationIdentityPackageRootBuilder
 {
     private const string Dotnet = "dotnet";
     private const string Build = "build";
-    private const string Release = "Release";
+    private const string WarningsAsErrorsOption = "-warnaserror";
     private const string Framework = "net10.0";
     private const string Quiet = "quiet";
     private const string ConfigurationOption = "--configuration";
@@ -38,7 +38,8 @@ internal static class NativeCompilationIdentityPackageRootBuilder
         start.ArgumentList.Add(Build);
         start.ArgumentList.Add(fixture.ProjectPath);
         start.ArgumentList.Add(ConfigurationOption);
-        start.ArgumentList.Add(Release);
+        start.ArgumentList.Add(NativeCompilationIdentityPackageRootFixture.Configuration);
+        start.ArgumentList.Add(WarningsAsErrorsOption);
         start.ArgumentList.Add(FrameworkOption);
         start.ArgumentList.Add(Framework);
         if (forceCompile)

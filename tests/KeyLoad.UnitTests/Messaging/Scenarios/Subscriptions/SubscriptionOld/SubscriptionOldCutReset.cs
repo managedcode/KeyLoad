@@ -19,7 +19,7 @@ internal static class SubscriptionOldCutReset
         var first = Receive(database, state);
         await ClaimsAsync(first, state, 1, SubscriptionOldCutState.Epoch.AddSeconds(30));
         var denied = state.Processing(first.Deliveries[1].Token);
-        await SubscriptionOldCutSavedFailure.RunAsync(database, store, state, state.Create(OperationKind.SubscriptionProcessing,
+        await SubscriptionOldCutSavedFailure.RunAsync(database, store, state, state.Create(database, OperationKind.SubscriptionProcessing,
             denied, denied.CommandId, SubscriptionOldCutState.Worker), ErrorCode.PermissionDenied,
             "The principal cannot perform this operation in this scope.");
         await SubscriptionOldCutAssertions.StatusAsync(database, state, 2, 0, 3, 3);

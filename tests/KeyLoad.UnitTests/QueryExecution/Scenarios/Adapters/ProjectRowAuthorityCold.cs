@@ -1,7 +1,6 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.GraphTraversal;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

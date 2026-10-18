@@ -7,14 +7,14 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal static class EventQueueStateEnvelopeGraphAssertions
 {
-    internal static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample,
+    internal static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state,
         CancellationToken token)
     {
         var from = new EntityRef(fixture.Partition, Documents, Item);
         var to = new EntityRef(fixture.Partition, Documents, Target);
         var edge = new EdgeRecord(Item, from, to, Label, EmptyObject, InitialRevision);
         var key = KeySpace.Partition(EdgeFamily, fixture.Partition, Graph, Item);
-        await Assert.That(Required(fixture, key).AsSpan().SequenceEqual(sample.GraphBytes)).IsTrue();
+        await Assert.That(Required(fixture, key).AsSpan().SequenceEqual(state.GraphBytes)).IsTrue();
         await EventQueueStateEnvelopeSourceAssertions.EqualAsync(
             fixture.Store.Read(view => view.GetRecord<EdgeRecord>(key)), edge);
         var traversal = fixture.Database.Traverse(Root, fixture.Partition, Graph, from, cancellationToken: token);

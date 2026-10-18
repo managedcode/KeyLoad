@@ -53,7 +53,7 @@ internal sealed class AspireTestEntryModelTests
                 new[]
                 {
                     "test", "--project", Path.Combine(repository, "tests", project), "--no-build", "--no-restore",
-                    "--configuration", "Release", "--results-directory", Path.Combine(repository, "TestResults", suite),
+                    "--results-directory", Path.Combine(repository, "TestResults", suite),
                     MaximumParallelTestsArgument, suite == ComparisonSuite ? ComparisonMaximumParallelTests : DefaultMaximumParallelTests
                 }, CollectionOrdering.Matching);
                 var environment = configuration.EnvironmentVariables.ToDictionary();
@@ -83,7 +83,7 @@ internal sealed class AspireTestEntryModelTests
             new[]
             {
                 "test", "--project", Path.Combine(RepositoryRoot(), "tests", "KeyLoad.UnitTests"), "--no-build",
-                "--no-restore", "--configuration", "Release", "--results-directory",
+                "--no-restore", "--results-directory",
                 Path.Combine(RepositoryRoot(), "TestResults", "unit"), MaximumParallelTestsArgument,
                 DefaultMaximumParallelTests, "--treenode-filter", "Suite.Filter"
             }, CollectionOrdering.Matching);

@@ -13,7 +13,7 @@ internal sealed class ComparisonHostCleanupTests
     [Test]
     public async Task NativeSessionEndpointFailureRetainsEveryActualCaseAndDoesNotAcknowledgeAnInitialLoad()
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         var settings = SessionHostStartupSupport.ValidSettings();
         settings[SessionHostStartupSupport.Target] = "OpenSearch";
         settings[SessionFields.SessionEnvironment] = "opensearch-n3";
@@ -53,7 +53,7 @@ internal sealed class ComparisonHostCleanupTests
     [Test]
     public async Task RetentionAndBothNativeDisposalFailuresKeepTheirOriginalObjectsInOrder()
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         var path = Path.Combine(directory.Root, "original-retention.json");
         await File.WriteAllTextAsync(path, "original");
         var retention = RetainExclusiveAsync(path);
@@ -98,7 +98,7 @@ internal sealed class ComparisonHostCleanupTests
     [Test]
     public async Task FailedOperationAndFailedOriginalReportRetentionKeepBothNativeErrors()
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         var missing = Path.Combine(directory.Root, "missing-operation-input.json");
         var operation = File.ReadAllBytesAsync(missing);
         var original = await NativeComparisonFailure.ObserveAsync(operation);

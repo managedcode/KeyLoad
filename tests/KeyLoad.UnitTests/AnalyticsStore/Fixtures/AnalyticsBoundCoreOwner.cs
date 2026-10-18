@@ -18,7 +18,6 @@ internal static class AnalyticsBoundCoreOwner
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
-            owner.BindPhysicalOwner(new(fixture.Store.Identity.NodeId, fixture.Store.Identity.Incarnation));
             await ServerFailureObserver.ObserveAsync(() => body(fixture, owner, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

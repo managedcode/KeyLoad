@@ -13,7 +13,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 internal static class ColdBootstrapCliStatus
 {
     private const string Dotnet = "dotnet";
-    private const string CliAssembly = "src/KeyLoad.Cli/bin/Release/net10.0/KeyLoad.Cli.dll";
+    private const string CliAssembly = "src/KeyLoad.Cli/bin/Debug/net10.0/KeyLoad.Cli.dll";
     private const string StatusCommand = "status";
     private const string CredentialEnvironment = "KEYLOAD_API_KEY";
     private const string Missing = "The actual bootstrap CLI process or typed status was absent.";

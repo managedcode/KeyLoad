@@ -1,4 +1,4 @@
-import { createRunContext } from './image-inputs.mjs';
+import { createRunContext } from './source-context.mjs';
 import { GH } from './isolated-github-contract.mjs';
 import { SESSION, requireSession, sessionRows, validateSessionCohort } from './session-contract.mjs';
 

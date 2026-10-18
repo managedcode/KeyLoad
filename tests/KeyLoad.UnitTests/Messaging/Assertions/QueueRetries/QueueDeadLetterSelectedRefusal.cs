@@ -38,7 +38,7 @@ internal static class QueueDeadLetterSelectedRefusal
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(damaged, CollectionOrdering.Matching);
         await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(state.Lane.Partition,
-            QueueDeadLetterSelectedProtocol.Administrator, state.Original.Id)))).IsNull();
+            QueueDeadLetterSelectedProtocol.Administrator, state.Original.CommandId)))).IsNull();
         await QueueDeadLetterSelectedRetainedInbox.RequireAsync(database, store, state);
     }
 }

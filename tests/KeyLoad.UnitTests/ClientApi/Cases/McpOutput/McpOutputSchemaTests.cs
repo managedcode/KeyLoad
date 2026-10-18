@@ -86,10 +86,10 @@ internal sealed class McpOutputSchemaTests
         var credentials = ResultSchema(McpCatalogExpectations.CredentialsConfigure);
         await Assert.That(ResolvesToType(credentials.Root, credentials.Node, McpSchemaInspector.Null)).IsTrue();
 
-        var samples = ResultSchema(McpCatalogExpectations.SeriesRead);
-        await Assert.That(ResolvesToType(samples.Root, samples.Node, McpSchemaInspector.Array)).IsTrue();
-        var sampleItems = samples.Node.GetProperty(McpSchemaInspector.Items);
-        await Assert.That(ResolvesToType(samples.Root, sampleItems, ObjectType)).IsTrue();
+        var seriesSchema = ResultSchema(McpCatalogExpectations.SeriesRead);
+        await Assert.That(ResolvesToType(seriesSchema.Root, seriesSchema.Node, McpSchemaInspector.Array)).IsTrue();
+        var pointSchema = seriesSchema.Node.GetProperty(McpSchemaInspector.Items);
+        await Assert.That(ResolvesToType(seriesSchema.Root, pointSchema, ObjectType)).IsTrue();
 
         var ranked = ResultSchema(McpCatalogExpectations.SearchExecute);
         await Assert.That(ResolvesToType(ranked.Root, ranked.Node, McpSchemaInspector.Array)).IsTrue();

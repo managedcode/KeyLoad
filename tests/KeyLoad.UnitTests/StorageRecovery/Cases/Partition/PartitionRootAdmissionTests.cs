@@ -58,10 +58,6 @@ internal sealed class PartitionRootAdmissionTests
             CreateFile, VerifyFileAsync, File.Delete);
         await AssertRejectedThenHealthyAsync(KeyLoad.Server.Features.Search.NativeTextOnlineRoot.DirectoryName,
             CreateLink, VerifyLinkAsync, File.Delete);
-        await AssertRejectedThenHealthyAsync(KeyLoad.Server.ClusterBackupOwnerArchive.DirectoryName,
-            CreateFile, VerifyFileAsync, File.Delete);
-        await AssertRejectedThenHealthyAsync(KeyLoad.Server.ClusterBackupOwnerArchive.DirectoryName,
-            CreateLink, VerifyLinkAsync, File.Delete);
         await AssertRejectedThenHealthyAsync(KeyLoad.Server.UserAnalyticsGenerationPaths.DirectoryName,
             CreateFile, VerifyFileAsync, File.Delete);
         await AssertRejectedThenHealthyAsync(KeyLoad.Server.UserAnalyticsGenerationPaths.DirectoryName,

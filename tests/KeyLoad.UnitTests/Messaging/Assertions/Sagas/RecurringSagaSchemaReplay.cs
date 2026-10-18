@@ -20,7 +20,7 @@ internal static class RecurringSagaSchemaReplay
         {
             await RecurringSagaSchemaProjection.ObserveAsync(owner, state, async () =>
             {
-                var actual = owner.Database.Apply(command.Operation, command.Entry.Index);
+                var actual = owner.Database.Apply(command.Operation);
                 await ResultAsync(actual, command.Result);
                 await EntryAsync(owner, command);
             });
@@ -55,15 +55,14 @@ internal static class RecurringSagaSchemaReplay
         await Assert.That(stored.BlobAuthority is null).IsTrue();
         await Assert.That(stored.CompositionAuthority is null).IsTrue();
         await Assert.That(stored.OnlineTextAuthority is null).IsTrue();
-        await Assert.That(stored.RemoteTransferAuthority is null).IsTrue();
         await Assert.That(stored.RemoteTransferFailureAuthority is null).IsTrue();
         await ResultAsync(stored.Result, command.Result);
     }
 
     private static async Task EntryAsync(SafeProjectorOperationDatabase owner, SafeProjectorOperationCommand command)
     {
-        var entry = owner.Entry(command.Operation);
-        await SafeProjectorOperationSeed.EqualAsync(entry, command.Entry);
+        var entry = owner.ReadOutcome(command.Operation);
+        await SafeProjectorOperationSeed.EqualAsync(entry, command.Outcome);
         var operation = entry.PreparedCommand ?? throw new InvalidOperationException(MissingOperation);
         await Assert.That(operation.Value!.Input.IsEmpty).IsFalse();
         await Assert.That(operation.Value!.Input.Span.SequenceEqual(command.Operation.Value!.Input.Span)).IsTrue();

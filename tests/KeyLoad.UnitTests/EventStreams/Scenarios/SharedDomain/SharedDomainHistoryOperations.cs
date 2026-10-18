@@ -32,7 +32,6 @@ internal static class SharedDomainHistoryOperations
         await Assert.That(outcome.Fingerprint.All(char.IsAsciiHexDigit)).IsTrue();
         await Assert.That(outcome.BlobAuthority).IsNull();
         await Assert.That(outcome.OnlineTextAuthority).IsNull();
-        await Assert.That(outcome.RemoteTransferAuthority).IsNull();
         await Assert.That(outcome.RemoteTransferFailureAuthority).IsNull();
         if (result.Value is ReceiveResult)
         {

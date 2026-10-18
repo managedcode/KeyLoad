@@ -4,13 +4,19 @@ Status: Accepted; current source implementation and delivered-source qualificati
 
 ## Decision
 
-Every current benchmark worker is a separate Linux GitHub Actions runner with its own database topology, load generator and evidence. The source-derived current plan contains **924 website worker identities**: 220 control cells, 176 scale cells, and 528 vector cells, plus the separately admitted 418-cell document-v1 family under ADR-122. The scale inventory uses exactly 100,000 or 1,000,000 actual records and at least 100,000 measured operations for each applicable workload. Vector profiles use the same two record counts and at least 100,000 measured queries. The control family keeps its existing workload contract. The separate 20-cell TimeSeries family is governed by ADR-059 and is not counted in these 924 website workers.
+Each current benchmark session has a separate Linux GitHub runner, one selected
+native database topology and a native workload client outside its infrastructure
+resource graph. [ADR-142](ADR-142-shared-live-benchmark-sessions.md) owns the
+current 22 sessions: eleven databases at one and three nodes. The initial million
+is measured and applicable lanes retain at least 100,000 operations. Remaining
+model-family, physical 100,000-corpus, vector and intensive TimeSeries requirements
+remain separate open gates; they are not invented additional publication jobs.
 
-The 11 targets are KeyLoad, PostgreSQL with pgvector, Qdrant, RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB. Actual supported node counts are 1, 2 or 3. A cell proves its own native membership, copies, acknowledgement/durability behavior, resource envelope and workload result. If a target cannot provide the required native topology, its slot records an explicit unsupported disposition; independent standalone processes are never presented as a cluster.
+The 11 targets are KeyLoad, PostgreSQL with pgvector, Qdrant, RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB. The current publication topologies have one or three nodes. A cell proves its own native membership, copies, acknowledgement/durability behavior, resource envelope and workload result. If a target cannot provide the required native topology, its slot records an explicit unsupported disposition; independent standalone processes are never presented as a cluster.
 
 ```mermaid
 flowchart LR
-    Plan[Current source-derived plan] --> Cells[924 website workers and 418 document workers]
+    Plan[Current source-derived plan] --> Cells[22 live database and topology sessions]
     Cells --> Native[Actual target topology and workload]
     Native --> Outcome[Measured, unsupported, or terminal failed row]
     Outcome --> Proof[Authenticated source, run, job, and artifact proof]
@@ -32,7 +38,7 @@ The feature specification is the canonical source for the plan, profiles, per-ce
 | REQ-BC-051: one isolated worker per target/topology/workload identity | AC-ISO-002: source-derived inventory and native resource ownership match the complete plan. |
 | REQ-BC-052: actual native topology and honest unsupported states | AC-ISO-003: observed native membership, copies and acknowledgements match each supported cell. |
 | REQ-BC-053: safe benchmark-only KeyLoad replica-count selection | AC-ISO-004: invalid/changed configuration rejects; SDK/MCP restart, required-copy-loss and replicated-cluster contracts remain intact. |
-| REQ-BC-054: shared workload correctness and failure retention | AC-ISO-005: deterministic inputs, disjoint setup/warmup/measurement, full result oracles, attempt/failure accounting and settled operations are retained. |
+| REQ-BC-054: shared workload correctness and failure retention | AC-ISO-005: deterministic inputs, measured initial load without warmup, full result oracles, attempt/failure accounting and settled operations are retained. |
 | REQ-BC-055: exact worker envelope and provenance | AC-ISO-006: each original versioned worker report matches its exact target, scenario, run and native observations. |
 | REQ-BC-056: complete authenticated aggregation | AC-ISO-007: all source-planned slots and original artifacts are strictly validated before aggregation. |
 | REQ-BC-057: site metrics derive from validated current evidence | AC-ISO-008: the derived projection preserves source values and passes the specified site/browser/coverage gates. |
@@ -50,8 +56,17 @@ The following supplemental predicates remain active. The concise contracts here 
 
 ### Original operations, process ownership, and evidence
 
-- **AC-IMAGE-006 ([ADR-034](ADR-034-cluster-comparisons.md)):** Build exact-source Linux product and load-generator images with Buildx into the job-owned loopback registry. Before allocating consumers, validate actual manifest bytes, digest headers and source-revision labels. Use the native Aspire image annotations and retain owned resource cleanup. Required server and load-generator image references fail safely when absent/invalid and never select a host-process fallback. Keep credentials and private payloads out of report metadata. Image import retains the exact image/manifest/source/output and cleanup oracles; this does not change a public database API or persisted format.
-- **AC-IMAGE-LIFE-001..004 / REQ-BC-PROCESS-IDENTITY-001:** The existing 30-second HTTP/readiness lifetime owns and observes the original request through terminal body work. Abort, success, fault and invalid-bound flows retain their original result/reason/exception, real child exit, no late abort and strict PID plus captured start-time identity. Keep the original bounded cleanup and owned stdout/stderr/process-tree joins; no detached race, replacement process, or PID-only success inference. Native image import separately preserves exact manifest/image/source/output and cleanup oracles.
+The primary AppHost owns native KeyLoad server project processes and Azurite.
+The separate LoadTests AppHost owns selected infrastructure, discovered endpoints,
+readiness and run-owned cleanup. External DBs retain pinned native images and
+anonymous session volumes; native SDK product publication is explicit release
+work only. Actual DLL/PDB/source/process identities replace product image inputs.
+REQ-BC-PROCESS-IDENTITY-001 retains exact PID and captured start identity, original
+cancellation/error objects and bounded joined stdout/stderr/process-tree cleanup.
+AppHost's identity-checked deliberate Kill and awaited exit prove an abrupt fault;
+graceful Stop does not. Local reports have no invented GitHub provenance. Original
+GitHub qualification and matched native-process resources remain independent gates.
+
 - **AC-HT-001..003 (native HTTP timer):** The original referenced lifetime timer remains owned until the original promise and post-abort callback settle, and is cleared in `finally`. Preserve the existing 30-second HTTP/readiness bounds and original outcome; do not use a detached race, retry, global keepalive or abandon original work after timeout.
 - **AC-KF-001..003 (failure aggregation):** Preserve actual original error objects and fatal-runtime precedence through nested/aggregate failures. Deduplicate by reference; the first actual fatal captured by exception dispatch information outranks an ordinary primary, without cloning or synthesizing exceptions. Keep original failure stage/status, counters, locks, cancellation and lifecycle settlement.
 - **AC-PQ-001..002 / AC-MP-012:** Every AppHost-owned TUnit invocation has its own named results directory so one invocation cannot overwrite another's original report. Retain every unmodified report and associated original logs, then match each to the exact source, case, summary, run, job and artifact identity. Coverage merging checks the real report set and source association; no rewritten report, synthetic count or log-count substitute is accepted. Keep workflow invocation, filters, ordering, permissions, native boundaries and publication gates intact.
@@ -67,25 +82,14 @@ This decision changes benchmark execution and evidence accounting, not database 
 The ADR remains Accepted until the required implementation and exact-source Linux evidence are complete. The canonical feature documents and status records remain the authority for which gates have actually passed.
 
 
-## Native image annotation oracle correction, 2026-10-09
+## Native external database annotations
 
-REQ/AC-BC-IMAGE-MODEL-001 preserve AC-ISO-002/003 and
-AC-IMAGE-006. Pinned Aspire 13.6 `WithImage` creates `ContainerImageAnnotation`
-with the parsed registry/image combined in `Image`, leaving nullable `Registry`
-unset. The HelixDB and SurrealDB resource-model cases therefore require exactly
-null `Registry`; they retain every existing digest, image/tag, mount, endpoint,
-secret parameter, configuration, wait and unsupported-topology assertion.
-
-Ordered implementation: freeze this oracle contract; correct only the two existing
-ComparisonTests expectations; build and run the complete native
-`/*/*/Isolated*Resource*/*` comparison selection with 20 native slots; then the fresh
-exact-source Linux image prerequisite and all independent matrices remain mandatory.
-Owned files are `IsolatedHelixDbResourceTests.cs` and `IsolatedSurrealDbResourceTests.cs`
-under ComparisonTests/Features/BenchmarkComparisons/Cases, plus this ADR and the
-feature trace. No data migration, product boundary or provider change is involved;
-rollback restores these test/doc changes without rewriting original reports.
-Original556c preparation errors remain authentic failed evidence. Model/configuration
-verification cannot qualify actual native membership, workload or publication.
+REQ/AC-BC-IMAGE-MODEL-001 retains actual pinned Aspire ContainerImageAnnotation
+semantics for external databases. Image/registry/digest, readonly bootstrap,
+anonymous writable session volume, client endpoint bindings and readiness remain
+verified by their real model owners. Unsupported topologies allocate no database
+or workload resource. A model pass does not qualify native startup, membership,
+workload results or publication.
 
 ## Measurement scheduling and ingestion contract, 2026-10-09
 

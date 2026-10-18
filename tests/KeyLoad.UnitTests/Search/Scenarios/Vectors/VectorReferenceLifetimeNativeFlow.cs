@@ -1,10 +1,9 @@
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.Storage;
+using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.Search.VectorReferenceLifetimeNativeProtocol;
-
-using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Search;
 

@@ -2,7 +2,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class SourceCheckoutIdentityTests
 {
-    private const string DirtySourceMessage = "Tracked source changes are not allowed for image preparation.";
+    private const string DirtySourceMessage = "Source changes are not allowed for delivered-source qualification.";
 
     [Test]
     public async Task CleanSourceIdentityRejectsUntrackedInputAndRecoversWithoutChangingHead()

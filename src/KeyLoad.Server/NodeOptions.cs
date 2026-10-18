@@ -1,8 +1,9 @@
 using System.Net;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
-/// <summary>Native Orleans hosting identity and the files exclusively owned by this silo.</summary>
+/// <summary>Native Orleans hosting identity and physical storage access.</summary>
 [ConfigurationOptions]
 internal sealed record NodeOptions
 {
@@ -17,7 +18,7 @@ internal sealed record NodeOptions
     private const int SigningKeyBytes = 32;
     private const int MinimumAdministratorKeyCharacters = 32;
 
-    /// <summary>Private directory containing this silo's ZoneTree files.</summary>
+    /// <summary>Configured directory containing the physical ZoneTree files.</summary>
     public string DataDirectory { get; init; } = DefaultDirectory;
     /// <summary>Public API origin, independent of Orleans membership and data-copy selection.</summary>
     public string PublicEndpoint { get; init; } = DefaultPublicEndpoint;
@@ -27,6 +28,8 @@ internal sealed record NodeOptions
     public string ClusterId { get; init; } = DefaultClusterId;
     /// <summary>Number of provisioned Orleans silos.</summary>
     public int SiloCount { get; init; } = InitialCount;
+    /// <summary>Whether silo owners access separate files or one shared physical store.</summary>
+    public StorageAccessMode StorageMode { get; init; } = StorageAccessMode.IsolatedVolumes;
     /// <summary>Number of persisted data copies required for acknowledgement.</summary>
     public int ReplicaCount { get; init; } = InitialCount;
     /// <summary>Database incarnation, stable across silo restarts.</summary>
@@ -58,6 +61,7 @@ internal sealed record NodeOptions
         Span<byte> secret = stackalloc byte[SigningKeyBytes];
         if (Incarnation == Guid.Empty || string.IsNullOrWhiteSpace(DataDirectory)
             || SiloCount < InitialCount || ReplicaCount < InitialCount || ReplicaCount > SiloCount
+            || !Enum.IsDefined(StorageMode) || (StorageMode == StorageAccessMode.SharedVolume && ReplicaCount != InitialCount)
             || string.IsNullOrWhiteSpace(SiloName) || string.IsNullOrWhiteSpace(ClusterId)
             || string.IsNullOrWhiteSpace(SiloAddress) || SiloPort is <= IPEndPoint.MinPort or > IPEndPoint.MaxPort
             || !Convert.TryFromBase64String(SigningKey, secret, out var length) || length != secret.Length

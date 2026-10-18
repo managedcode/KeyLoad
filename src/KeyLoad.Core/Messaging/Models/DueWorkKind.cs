@@ -1,8 +1,11 @@
 namespace KeyLoad.Core.Features.Messaging;
 
+/// <summary>Distinguishes the persisted schedule and saga discovery prefixes.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(DueWorkAliases.Kind)]
-internal enum DueWorkKind
+public enum DueWorkKind
 {
+    /// <summary>Scheduled recurring queue work.</summary>
     Schedule = 0,
+    /// <summary>Persisted saga timeout work.</summary>
     Saga = 1
 }

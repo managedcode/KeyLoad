@@ -14,7 +14,7 @@ internal static class QueueRetainedInboxAuthorityTrial
         var state = await QueuePendingAuthorityOperations.SeedAsync(fixture);
         await QueuePendingAuthorityImage.RequireAsync(fixture.Database, fixture.Store, state, QueuePendingAuthorityPhase.Pending);
         var history = state.Processed.Single();
-        var equivalent = Operation(state, history.Request with
+        var equivalent = Operation(fixture.Database, state, history.Request with
         {
             CommandId = Guid.NewGuid()
         });
@@ -46,7 +46,7 @@ internal static class QueueRetainedInboxAuthorityTrial
             });
             await QueuePendingAuthorityImage.RequireAsync(owner, cold, state, QueuePendingAuthorityPhase.Pending);
             await QueueRetainedInboxAuthorityAssertions.EquivalentAsync(owner, cold, state, equivalent, history, key, exact);
-            refusedGeneration = Operation(state, history.Request with
+            refusedGeneration = Operation(owner, state, history.Request with
             {
                 CommandId = Guid.NewGuid(),
                 ExecutionGeneration = 2
@@ -67,8 +67,8 @@ internal static class QueueRetainedInboxAuthorityTrial
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);
     }
 
-    private static Command<DatabaseCommand> Operation(QueuePendingAuthorityState state, ProcessingRequest request)
-        => new(request.CommandId, OperationKind.Processing, QueueLifecycleTestProtocol.Administrator, state.Flow.Time,
+    private static Command<DatabaseCommand> Operation(DatabaseEngine database, QueuePendingAuthorityState state, ProcessingRequest request)
+        => database.CreateCommand(OperationKind.Processing, request.CommandId, QueueLifecycleTestProtocol.Administrator, state.Flow.Time,
             JsonSerializer.Serialize(request, JsonDefaults.Options));
 
     private static void Put(ZoneTreeStore store, byte[] key, byte[] value)

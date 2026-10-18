@@ -22,12 +22,15 @@ internal static class QueueDeadlineCapacityRefusal
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
-        await Assert.That(OutcomeStoreOracle.Read(store, state.Attempt)).IsEqualTo(refusal);
+        var original = OutcomeStoreOracle.Read(store, state.Attempt)
+            ?? throw new InvalidOperationException("The failed outcome is absent.");
+        await Assert.That(NativeSerialization.Serialize(original)).IsEquivalentTo(NativeSerialization.Serialize(refusal),
+            TUnit.Assertions.Enums.CollectionOrdering.Matching);
         var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(state.Lane.Partition,
-            state.Attempt.PrincipalId, state.Attempt.Id)));
+            state.Attempt.UserId!, state.Attempt.CommandId)));
         await Assert.That(locator).IsNotNull();
         await Assert.That(locator!).IsEquivalentTo(KeySpace.PartitionOutcome(state.Lane.Partition,
-            state.Attempt.PrincipalId, state.Attempt.Id), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            state.Attempt.UserId!, state.Attempt.CommandId), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(database.Apply(state.Attempt)).IsEqualTo(refusal);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
         await Assert.That(database.ResolveOutcome(state.Attempt)).IsEqualTo(refusal);
@@ -35,7 +38,9 @@ internal static class QueueDeadlineCapacityRefusal
         foreach (var item in state.Outcomes)
         {
             token.ThrowIfCancellationRequested();
-            await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.Read(store, item.Operation)))
+            var stored = OutcomeStoreOracle.Read(store, item.Operation)
+                ?? throw new InvalidOperationException("The original outcome is absent.");
+            await Assert.That(NativeSerialization.Serialize(stored))
                 .IsEquivalentTo(NativeSerialization.Serialize(item.Result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         }
     }

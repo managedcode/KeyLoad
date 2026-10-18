@@ -102,60 +102,81 @@ internal static class QueueReadyAuthorityTrial
 
     internal static async Task RunAsync(QueueReadyAuthorityFault fault, bool expired, CancellationToken token)
     {
-        var owningFailures = new List<Exception>();
-        try
+        token.ThrowIfCancellationRequested();
+        using var fixture = new TestDatabase();
+        fixture.Configure("jobs", ResourceKind.WorkQueue);
+        fixture.Configure("orders", ResourceKind.Collection);
+        fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("worker", "tenant",
+            [new("database", "jobs", Capability.QueueConsume | Capability.QueueAck),
+                new("database", "orders", Capability.DocumentsWrite)], []))).Get<PrincipalRecord>();
+        var now = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var producer = Guid.NewGuid();
+        fixture.Submit(OperationKind.Batch, new CommandRequest(producer, fixture.Partition,
+            [new EnqueueMessage("jobs", "input", "{\"input\":1}", ExpiresAt: expired ? now.AddSeconds(1) : null)]),
+            id: producer, time: now).Get<CommitReceipt>();
+        var lane = new QueueLaneRef(fixture.Partition, "jobs");
+        var id = Guid.NewGuid();
+        var original = fixture.Database.CreateCommand(OperationKind.Receive, id, "worker", now.AddSeconds(2),
+            NativeSerialization.Serialize(new ReceiveRequest(id, lane)));
+        var input = NativeSerialization.Serialize(original);
+        var row = QueueReadyAuthorityFaultRow.Damage(fixture, lane, fault);
+        var image = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var position = fixture.Store.Position;
+        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var cut = fixture.ReadCanonicalCut();
+        var failures = new List<Exception>();
+        for (var repeat = 0; repeat < 2; repeat++)
         {
             token.ThrowIfCancellationRequested();
-            using var fixture = new TestDatabase();
-            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-            {
-                fixture.Configure("jobs", ResourceKind.WorkQueue);
-                fixture.Configure("orders", ResourceKind.Collection);
-                fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("worker", "tenant",
-                    [new("database", "jobs", Capability.QueueConsume | Capability.QueueAck),
-                        new("database", "orders", Capability.DocumentsWrite)], []))).Get<PrincipalRecord>();
-                var now = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
-                var producer = Guid.NewGuid();
-                fixture.Submit(OperationKind.Batch, new CommandRequest(producer, fixture.Partition,
-                    [new EnqueueMessage("jobs", "input", "{\"input\":1}", ExpiresAt: expired ? now.AddSeconds(1) : null)]),
-                    id: producer, time: now).Get<CommitReceipt>();
-                var lane = new QueueLaneRef(fixture.Partition, "jobs");
-                var row = QueueReadyAuthorityFaultRow.Damage(fixture, lane, fault);
-                var image = QueueWholeFlowStorage.Bytes(fixture.Store);
-                var position = fixture.Store.Position;
-                var identity = NativeSerialization.Serialize(fixture.Store.Identity);
-                var id = Guid.NewGuid();
-                var request = new ReceiveRequest(id, lane);
-                var failures = new List<Exception>();
-                var expectedError = QueueReadyAuthorityRefusalAssertions.ExpectedError(fault);
-                var first = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Submit(OperationKind.Receive,
-                    request, principal: "worker", id: id, time: now.AddSeconds(2)));
-                failures.Add(first);
-                await Assert.That(first.Code).IsEqualTo(ErrorCode.RecoveryRequired);
-                var retained = fixture.ReadStoredOutcome(id);
-                var original = retained.PreparedCommand ?? throw new InvalidOperationException("The failed native entry is absent.");
-                await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
-                var cut = fixture.ReadCanonicalCut();
-                var repeat = Assert.ThrowsExactly<KeyLoadException>(() => fixture.SubmitIssued(original));
-                failures.Add(repeat);
-                await Assert.That(repeat.Code).IsEqualTo(ErrorCode.RecoveryRequired);
-                await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
-                await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
-                var recovered = fixture.RecoverFaultOwnedRow(original,
-                    () => QueueReadyAuthorityFaultRow.Restore(fixture, row.Key, row.Original), failures, token, expectedError);
-                await Assert.That(recovered.Index).IsEqualTo(retained.CanonicalSequence);
-                await Assert.That(recovered.Operation!.CommandId).IsEqualTo(id);
-                await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
-                await Assert.That(recovered.Operation!.Value!.Input.ToArray()).IsEquivalentTo(original.Value!.Input.ToArray(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
-                await QueueReadyAuthorityRefusalAssertions.RequireOriginalFailuresAsync(failures, expectedError);
-                var receive = fixture.SubmitIssued(original).Get<ReceiveResult>();
-                await QueueReadyAuthorityRefusalAssertions.RequireRepairedReplayAsync(fixture, original, receive);
-                await QueueReadyAuthorityHealthy.CompleteOriginalAsync(fixture, lane, receive, expired, now.AddSeconds(2));
-                await QueueReadyAuthorityHealthy.RunAsync(fixture, lane, now.AddSeconds(2), token);
-            }, owningFailures);
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Apply(original));
+            failures.Add(failure);
+            await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
+            await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
+            await Assert.That(NativeSerialization.Serialize(original).AsSpan().SequenceEqual(input)).IsTrue();
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
-        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(owningFailures);
+        await QueueReadyAuthorityRefusalAssertions.RequireOriginalFailuresAsync(failures,
+            QueueReadyAuthorityRefusalAssertions.ExpectedError(fault));
+        QueueReadyAuthorityFaultRow.Restore(fixture, row.Key, row.Original);
+        await Assert.That(fixture.ReadCanonicalCut().AppliedPosition).IsEqualTo(cut.AppliedPosition);
+        var receive = fixture.Database.Apply(original).Get<ReceiveResult>();
+        await Assert.That(NativeSerialization.Serialize(original).AsSpan().SequenceEqual(input)).IsTrue();
+        await QueueReadyAuthorityRefusalAssertions.RequireRepairedReplayAsync(fixture, original, receive);
+        await QueueReadyAuthorityHealthy.CompleteOriginalAsync(fixture, lane, receive, expired, now.AddSeconds(2));
+        await QueueReadyAuthorityHealthy.RunAsync(fixture, lane, now.AddSeconds(2), token);
+        await ReopenCompletedAsync(fixture, original, receive, expired, token);
+    }
+
+    private static async Task ReopenCompletedAsync(TestDatabase fixture, Command<DatabaseCommand> original,
+        ReceiveResult receive, bool expired, CancellationToken token)
+    {
+        var image = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var position = fixture.Store.Position;
+        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var cut = fixture.ReadCanonicalCut();
+        fixture.JoinOwnedResources();
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            token.ThrowIfCancellationRequested();
+            using var cold = new global::KeyLoad.Storage.ZoneTree.ZoneTreeStore(new(fixture.Directory),
+                fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            var owner = fixture.CreateConfiguredDatabase(cold);
+            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+            var stored = OutcomeStoreOracle.Read(cold, original)
+                ?? throw new InvalidOperationException("The repaired original receive outcome is absent.");
+            await global::KeyLoad.UnitTests.Features.ResourceExecution.NativeReplayResultAssertions.Same<ReceiveResult>(
+                stored, ManagedCode.Communication.Result<object>.Succeed(receive));
+            var replay = owner.Apply(original);
+            if (expired)
+            {
+                await global::KeyLoad.UnitTests.Features.ResourceExecution.NativeReplayResultAssertions.Same<ReceiveResult>(replay, stored);
+            }
+            else
+            {
+                await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
+                await Assert.That(replay.Value).IsNull();
+            }
+            await Assert.That(owner.LastApplied).IsEqualTo(cut.AppliedPosition);
+            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        }
     }
 }

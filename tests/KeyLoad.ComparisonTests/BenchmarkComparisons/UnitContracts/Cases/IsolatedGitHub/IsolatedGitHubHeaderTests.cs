@@ -30,7 +30,7 @@ internal sealed class IsolatedGitHubHeaderTests
     [Arguments(4096)]
     public async Task AcIso007ControlledHeaderBoundaryPreservesBinaryBodyAcrossChunks(int blockSize)
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", Source, SessionNodeProcess.Module("isolated-github-headers.mjs"),
                 directory.Root, blockSize.ToString(System.Globalization.CultureInfo.InvariantCulture)],

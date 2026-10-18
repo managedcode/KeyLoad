@@ -19,15 +19,12 @@ internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
     private UserAnalyticsHostBoundWork(IOptions<GrainRoutingOptions> routing)
         => owner = new NativeRequestWorkOwner(routing);
 
-    internal static async Task<UserAnalyticsHostBoundWork> OpenAsync(PartitionHost host,
-        IOptions<GrainRoutingOptions> routing, CancellationToken token)
+    internal static async Task<UserAnalyticsHostBoundWork> OpenAsync(IOptions<GrainRoutingOptions> routing, CancellationToken token)
     {
         var work = new UserAnalyticsHostBoundWork(routing);
         try
         {
             token.ThrowIfCancellationRequested();
-            var identity = host.Database.Store.Identity;
-            work.owner.BindPhysicalOwner(new(identity.NodeId, identity.Incarnation));
             return work;
         }
         catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))

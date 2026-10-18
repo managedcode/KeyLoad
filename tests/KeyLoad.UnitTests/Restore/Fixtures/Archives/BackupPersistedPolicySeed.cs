@@ -47,10 +47,10 @@ internal static class BackupPersistedPolicySeed
     {
         var database = fixture.Source.Database;
         var resource = Resource(fixture.Partition);
-        await Assert.That(Send(database, OperationKind.ConfigureResource,
-            new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, resource), token).Error).IsNull();
-        await Assert.That(Send(database, OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(Principal(fixture.Partition, false)), token).Error).IsNull();
+        await Assert.That(Errors.Code(Send(database, OperationKind.ConfigureResource,
+            new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, resource), token).Problem)).IsNull();
+        await Assert.That(Errors.Code(Send(database, OperationKind.ConfigurePrincipal,
+            new ConfigurePrincipalRequest(Principal(fixture.Partition, false)), token).Problem)).IsNull();
         await Assert.That(Send(database, OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(LiveKey), token).Get<bool>()).IsTrue();
         await Assert.That(Send(database, OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(RevokedKey), token).Get<bool>()).IsTrue();
         var id = Guid.NewGuid();

@@ -19,7 +19,7 @@ internal static class SubscriptionOldCutSavedFailure
         var position = store.Position;
         var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
         var outcomeKey = KeySpace.PartitionOutcome(partition, operation.UserId!, operation.CommandId);
-        var fingerprint = DatabaseCommandFingerprint.Compute(operation);
+        var fingerprint = operation.Value!.Fingerprint;
         var next = checked(database.LastApplied + 1);
         var outcome = new StoredOutcome(fingerprint, store.Identity.Incarnation, 2, Result<object>.Fail(Errors.Problem(code, detail)), operation)
         {

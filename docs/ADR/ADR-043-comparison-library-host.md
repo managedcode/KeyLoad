@@ -5,13 +5,14 @@ Related: REQ-BC-019 / AC-HOST-001..007, AC-CQ-001/005/006, AC-MP-010/012; ADR-03
 
 ## Decision
 
-Keep KeyLoad.Comparisons as the library consumed by real tests and comparison composition. KeyLoad.ComparisonHost owns the sole comparison command-line entry point and its process lifecycle. Preserve the library's public CLR signatures, report serialization, target registrations, settings precedence, and existing AppHost resource ownership.
+Keep KeyLoad.Comparisons as the library consumed by real tests and comparison composition. KeyLoad.ComparisonHost owns the sole comparison command-line entry point and its process lifecycle. Preserve the library's public CLR signatures, report serialization, target registrations, settings precedence, and actual AppHost infrastructure ownership. The workload process remains outside the infrastructure graph; tests own its requests, measurements and joined completion.
 
 ```mermaid
 flowchart LR
-    Aspire[Aspire-owned comparison resource] --> Host[ComparisonHost process]
+    Aspire[LoadTests AppHost discovered database endpoints] --> Tests[Real native TUnit session owner]
+    Tests --> Host[ComparisonHost process outside resource graph]
     Host --> Library[Comparisons library]
-    Tests[Real TUnit and native tests] --> Library
+    Tests --> Library
     Library --> Targets[Isolated native targets]
 ```
 

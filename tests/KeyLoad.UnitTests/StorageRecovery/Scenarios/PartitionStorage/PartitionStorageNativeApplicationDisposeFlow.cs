@@ -20,7 +20,7 @@ internal static class PartitionStorageNativeApplicationDisposeFlow
         var failures = new List<Exception>();
         var directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
             DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        var ports = new TestClusterPortAllocator();
+        using var ports = new TestClusterPortAllocator();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var port = ports.AllocateConsecutivePortPairs(OneSilo).Item1;

@@ -1,7 +1,7 @@
 using Aspire.Hosting;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using KeyLoad.Core;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
@@ -29,7 +29,7 @@ internal sealed class CentralAppHostOptionsTests
         var policy = ScaleServerObservationPolicySnapshot.Capture(runtime.ServerResources);
         await Assert.That(policy.MaxSampleMetadataBytes).IsEqualTo(128);
         await Assert.That(policy.CadenceMilliseconds).IsEqualTo(100);
-        await Assert.That(ReferenceEquals(runtime, AppHostOptionsRegistration.Get(builder))).IsTrue();
+        await Assert.That(ReferenceEquals(runtime, LoadTestsOptionsRegistration.Get(builder))).IsTrue();
     }
 
     [Test]
@@ -37,7 +37,7 @@ internal sealed class CentralAppHostOptionsTests
     {
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
         builder.Configuration[NativeReadBufferBytesSetting] = "0";
-        var failure = Assert.ThrowsExactly<OptionsValidationException>(() => AppHostOptionsRegistration.Get(builder));
+        var failure = Assert.ThrowsExactly<OptionsValidationException>(() => LoadTestsOptionsRegistration.Get(builder));
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(ScaleServerResourceOptions));
         await Assert.That(builder.Resources.Count).IsEqualTo(0);
     }
@@ -47,7 +47,7 @@ internal sealed class CentralAppHostOptionsTests
     {
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
         builder.Configuration[RequestsPerScopeSetting] = "2";
-        var runtime = AppHostOptionsRegistration.Get(builder);
+        var runtime = LoadTestsOptionsRegistration.Get(builder);
         var governor = new HttpAdmissionGovernor(IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(runtime.IsolatedAdmission));
         builder.Configuration[RequestsPerScopeSetting] = "3";
         using (var first = governor.Begin("/v1/documents/get", 0))
@@ -60,7 +60,7 @@ internal sealed class CentralAppHostOptionsTests
             await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(2);
         }
         await Assert.That(governor.Status().Node.Commands).IsEqualTo(0);
-        await Assert.That(ReferenceEquals(runtime, AppHostOptionsRegistration.Get(builder))).IsTrue();
+        await Assert.That(ReferenceEquals(runtime, LoadTestsOptionsRegistration.Get(builder))).IsTrue();
     }
 
 }

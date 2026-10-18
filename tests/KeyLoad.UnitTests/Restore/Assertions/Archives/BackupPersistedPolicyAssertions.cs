@@ -60,7 +60,7 @@ internal static class BackupPersistedPolicyAssertions
             QueryRow[] rows = [new(BackupPersistedPolicySeed.DocumentId, 1L, BackupPersistedPolicySeed.Json, false, [])];
             await SameAsync(rows, page.Rows.ToArray());
             await Assert.That(page.Cursor).IsNull();
-            await Assert.That(page.CutPosition).IsEqualTo(cut.Position);
+            await Assert.That(page.CutPosition).IsEqualTo(database.LastApplied);
             var reference = new EntityRef(fixture.Partition, BackupPersistedPolicySeed.Collection, BackupPersistedPolicySeed.DocumentId);
             await SameAsync(new DocumentResult(reference, 1L, BackupPersistedPolicySeed.Json, false, []),
                 database.GetDocument(BackupPersistedPolicySeed.Reader, reference, cancellationToken: token));
@@ -86,10 +86,10 @@ internal static class BackupPersistedPolicyAssertions
     internal static async Task ReceiptAsync(DatabaseEngine database, PartitionRef partition, Guid id, CommitReceipt receipt)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(id);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
-        var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, partition));
+        await Assert.That(receipt.Token.Position).IsEqualTo(database.LastApplied);
+        var owner = database.Store.Read(view => database.ReadPlacementWitness(view, partition));
         await SameAsync(new CommitToken(owner.Incarnation, partition.AtomicPartitionId,
-            database.Store.Position), receipt.Token);
+            database.LastApplied), receipt.Token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
     }

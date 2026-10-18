@@ -33,22 +33,22 @@ internal static class QueueDeadLetterSelectedSetup
         await QueueDeadLetterSelectedRetainedInbox.SeedAsync(fixture.Database, lane, time, history);
         var producer = new CommandRequest(Guid.NewGuid(), lane.Partition,
             [Message(QueueDeadLetterSelectedProtocol.Original), Message(QueueDeadLetterSelectedProtocol.Foreign)]);
-        Execute(fixture.Database, history, Create(OperationKind.Batch, producer, producer.CommandId, time)).Get<CommitReceipt>();
+        Execute(fixture.Database, history, Create(fixture.Database, OperationKind.Batch, producer, producer.CommandId, time)).Get<CommitReceipt>();
         foreach (var id in new[] { QueueDeadLetterSelectedProtocol.Original, QueueDeadLetterSelectedProtocol.Foreign })
         {
             var request = new ReceiveRequest(Guid.NewGuid(), lane, LeaseSeconds: QueueDeadLetterSelectedProtocol.LeaseSeconds);
-            var result = Execute(fixture.Database, history, Create(OperationKind.Receive, request, request.RequestId, time));
+            var result = Execute(fixture.Database, history, Create(fixture.Database, OperationKind.Receive, request, request.RequestId, time));
             var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
             await Assert.That(delivery).IsEqualTo(new Delivery(id, QueueDeadLetterSelectedProtocol.Payload,
                 QueueDeadLetterSelectedProtocol.Headers, delivery.Token, QueueDeadLetterSelectedProtocol.One,
                 time.AddSeconds(QueueDeadLetterSelectedProtocol.LeaseSeconds), QueueDeadLetterSelectedProtocol.One,
                 QueueDeadLetterSelectedProtocol.One));
             var nack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Nack);
-            Execute(fixture.Database, history, Create(OperationKind.Delivery, nack, nack.CommandId, time)).Get<CommitReceipt>();
+            Execute(fixture.Database, history, Create(fixture.Database, OperationKind.Delivery, nack, nack.CommandId, time)).Get<CommitReceipt>();
         }
         var target = fault is QueueDeadLetterSelectedFault.IndexAlias or QueueDeadLetterSelectedFault.WitnessMetadataAlias
             ? QueueDeadLetterSelectedProtocol.Foreign : QueueDeadLetterSelectedProtocol.Original;
-        var original = Lifecycle(lane, target, kind, time);
+        var original = Lifecycle(fixture.Database, lane, target, kind, time);
         var keys = fault == QueueDeadLetterSelectedFault.IndexAlias
             ? new[] { Key(lane, QueueDeadLetterSelectedProtocol.DeadLetter, QueueDeadLetterSelectedProtocol.Original) }
             : fault is QueueDeadLetterSelectedFault.MetadataAlias or QueueDeadLetterSelectedFault.WitnessMetadataAlias
@@ -89,13 +89,13 @@ internal static class QueueDeadLetterSelectedSetup
             return true;
         });
 
-    internal static Command<DatabaseCommand> Lifecycle(QueueLaneRef lane, string target, QueueDeadLetterSelectedOperation kind, DateTimeOffset time)
+    internal static Command<DatabaseCommand> Lifecycle(DatabaseEngine database, QueueLaneRef lane, string target, QueueDeadLetterSelectedOperation kind, DateTimeOffset time)
     {
         var id = Guid.NewGuid();
         Mutation mutation = kind == QueueDeadLetterSelectedOperation.Redrive
             ? new RedriveQueueMessage(lane.Queue, target, QueueDeadLetterSelectedProtocol.Three, QueueDeadLetterSelectedProtocol.One)
             : new CancelQueueMessage(lane.Queue, target, QueueDeadLetterSelectedProtocol.Three, QueueDeadLetterSelectedProtocol.One);
-        return Create(OperationKind.Batch, new CommandRequest(id, lane.Partition, [mutation]), id, time);
+        return Create(database, OperationKind.Batch, new CommandRequest(id, lane.Partition, [mutation]), id, time);
     }
 
     internal static Result<object> Execute(DatabaseEngine database, List<QueueDeadLetterSelectedSaved> history, Command<DatabaseCommand> operation)
@@ -105,8 +105,8 @@ internal static class QueueDeadLetterSelectedSetup
         return result;
     }
 
-    internal static Command<DatabaseCommand> Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)
-        => new(id, kind, QueueDeadLetterSelectedProtocol.Administrator, time, JsonSerializer.Serialize(value, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T value, Guid id, DateTimeOffset time)
+        => database.CreateCommand(kind, id, QueueDeadLetterSelectedProtocol.Administrator, time, JsonSerializer.Serialize(value, JsonDefaults.Options));
     internal static byte[] Key(QueueLaneRef lane, string space, params object?[] suffix)
         => KeySpace.Partition(space, lane.Partition, [lane.Queue, .. suffix]);
     internal static EnqueueMessage Message(string id) => new(QueueDeadLetterSelectedProtocol.Queue, id,

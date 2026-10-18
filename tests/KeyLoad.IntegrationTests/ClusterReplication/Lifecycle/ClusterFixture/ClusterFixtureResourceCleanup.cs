@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 internal static class ClusterFixtureResourceCleanup
 {
     internal static Task SaveDiagnosticsAsync(ClusterFixtureDiagnostics? diagnostics,
-        CancellationToken token, List<Exception> failures)
+        List<Exception> failures, CancellationToken token)
         => diagnostics is { } owned
             ? ServerFailureObserver.ObserveAsync(() => owned.SaveAsync(token), failures)
             : Task.CompletedTask;

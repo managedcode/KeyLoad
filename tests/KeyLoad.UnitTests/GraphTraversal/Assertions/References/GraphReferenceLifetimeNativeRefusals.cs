@@ -1,8 +1,7 @@
 using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.GraphTraversal.GraphReferenceLifetimeNativeProtocol;
-
-using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 

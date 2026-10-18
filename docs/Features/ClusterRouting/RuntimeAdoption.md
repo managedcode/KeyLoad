@@ -109,7 +109,7 @@ mandatory.
 
 ## Verification and rollout
 
-After code changes: `dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror`,
+After code changes: `dotnet build KeyLoad.slnx --no-restore -warnaserror`,
 `dotnet format KeyLoad.slnx --verify-no-changes --no-restore`, and the unit,
 unit-scalar, recovery and cluster TUnit suites with Aspire-owned resources and the
 real .NET SDK and official MCP clients. Focused filters are development evidence

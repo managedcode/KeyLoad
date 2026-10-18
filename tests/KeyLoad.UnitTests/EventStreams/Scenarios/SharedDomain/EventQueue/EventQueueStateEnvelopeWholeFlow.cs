@@ -18,50 +18,50 @@ internal static class EventQueueStateEnvelopeWholeFlow
 
     private static async Task RunOwnedAsync(EventQueueStateEnvelopeFixture fixture, CancellationToken token)
     {
-        var sample = new EventQueueStateEnvelopeSample();
+        var state = new EventQueueStateEnvelopeState();
         await EventQueueStateEnvelopeKeyAssertions.CurrentAsync(fixture);
-        await EventQueueStateEnvelopeProducer.SeedAsync(fixture, sample, token);
-        await EventQueueStateEnvelopeQueueAssertions.CurrentAsync(fixture, sample, EventQueueStateEnvelopeStage.Produced);
-        await EventQueueStateEnvelopeBodyOwnershipAssertions.CallerBuffersCannotChangeNativeProducerBodiesAsync(fixture, sample);
-        await EventQueueStateEnvelopeQueueContinuation.ClaimAsync(fixture, sample, scheduled: false);
-        await EventQueueStateEnvelopeSubscriptionContinuation.ConfigureAsync(fixture, sample);
-        await EventQueueStateEnvelopeSubscriptionContinuation.ClaimAsync(fixture, sample);
-        await CurrentAsync(fixture, sample, EventQueueStateEnvelopeStage.Claimed, groupCompleted: false, token);
+        await EventQueueStateEnvelopeProducer.SeedAsync(fixture, state, token);
+        await EventQueueStateEnvelopeQueueAssertions.CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Produced);
+        await EventQueueStateEnvelopeBodyOwnershipAssertions.CallerBuffersCannotChangeNativeProducerBodiesAsync(fixture, state);
+        await EventQueueStateEnvelopeQueueContinuation.ClaimAsync(fixture, state, scheduled: false);
+        await EventQueueStateEnvelopeSubscriptionContinuation.ConfigureAsync(fixture, state);
+        await EventQueueStateEnvelopeSubscriptionContinuation.ClaimAsync(fixture, state);
+        await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Claimed, groupCompleted: false, token);
         var first = Capture(fixture);
         fixture.Reopen();
         await SameAsync(fixture, first);
-        await CurrentAsync(fixture, sample, EventQueueStateEnvelopeStage.Claimed, groupCompleted: false, token);
-        await ReplayAllAsync(fixture, sample, token);
+        await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Claimed, groupCompleted: false, token);
+        await ReplayAllAsync(fixture, state, token);
         await SameAsync(fixture, first);
-        await EventQueueStateEnvelopeQueueContinuation.ProcessAsync(fixture, sample);
-        await EventQueueStateEnvelopeSubscriptionContinuation.CompleteAsync(fixture, sample);
-        await CurrentAsync(fixture, sample, EventQueueStateEnvelopeStage.Processed, groupCompleted: true, token);
-        await EventQueueStateEnvelopeQueueContinuation.ClaimAsync(fixture, sample, scheduled: true);
-        await CurrentAsync(fixture, sample, EventQueueStateEnvelopeStage.ScheduledClaimed, groupCompleted: true, token);
-        await EventQueueStateEnvelopeQueueContinuation.CompleteScheduledAsync(fixture, sample);
-        await EventQueueStateEnvelopeQueueContinuation.DuplicateProcessingAsync(fixture, sample);
-        await CurrentAsync(fixture, sample, EventQueueStateEnvelopeStage.Completed, groupCompleted: true, token);
-        await ReplayAllAsync(fixture, sample, token);
+        await EventQueueStateEnvelopeQueueContinuation.ProcessAsync(fixture, state);
+        await EventQueueStateEnvelopeSubscriptionContinuation.CompleteAsync(fixture, state);
+        await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Processed, groupCompleted: true, token);
+        await EventQueueStateEnvelopeQueueContinuation.ClaimAsync(fixture, state, scheduled: true);
+        await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.ScheduledClaimed, groupCompleted: true, token);
+        await EventQueueStateEnvelopeQueueContinuation.CompleteScheduledAsync(fixture, state);
+        await EventQueueStateEnvelopeQueueContinuation.DuplicateProcessingAsync(fixture, state);
+        await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Completed, groupCompleted: true, token);
+        await ReplayAllAsync(fixture, state, token);
         var final = Capture(fixture);
         fixture.Reopen();
         await SameAsync(fixture, final);
-        await CurrentAsync(fixture, sample, EventQueueStateEnvelopeStage.Completed, groupCompleted: true, token);
-        await ReplayAllAsync(fixture, sample, token);
+        await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Completed, groupCompleted: true, token);
+        await ReplayAllAsync(fixture, state, token);
         await SameAsync(fixture, final);
     }
 
-    private static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample,
+    private static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state,
         EventQueueStateEnvelopeStage stage, bool groupCompleted, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         await EventQueueStateEnvelopeKeyAssertions.CurrentAsync(fixture);
-        await EventQueueStateEnvelopeSourceAssertions.CurrentAsync(fixture, sample);
-        await EventQueueStateEnvelopeGraphAssertions.CurrentAsync(fixture, sample, token);
-        await EventQueueStateEnvelopeQueueAssertions.CurrentAsync(fixture, sample, stage);
+        await EventQueueStateEnvelopeSourceAssertions.CurrentAsync(fixture, state);
+        await EventQueueStateEnvelopeGraphAssertions.CurrentAsync(fixture, state, token);
+        await EventQueueStateEnvelopeQueueAssertions.CurrentAsync(fixture, state, stage);
         await EventQueueStateEnvelopeSubscriptionAssertions.CurrentAsync(fixture, groupCompleted);
         if (stage >= EventQueueStateEnvelopeStage.Processed)
         {
-            await InboxAsync(fixture, sample);
+            await InboxAsync(fixture, state);
         }
     }
 }

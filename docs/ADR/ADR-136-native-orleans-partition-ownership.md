@@ -1,7 +1,7 @@
 # ADR-136: Orleans execution and physical storage ownership
 
-Status: Accepted design. Shared-volume lifetime and distributed partition-query
-execution remain open implementation and qualification gates.
+Status: Accepted design. Both storage modes and native partition-query dispatch
+are in source; their complete runtime and delivered-source qualification is open.
 
 ## Decision
 
@@ -23,6 +23,15 @@ request lifetimes; storage services expose self-contained typed Task calls.
 |---|---|---|
 | Shared volume | The same configured volume and physical partition paths are visible to the participating silos. Exactly one open storage owner holds each mutable ZoneTree and its file locks. | An ordinary logical owner grain routes work to that open owner through Orleans. Moving ownership drains borrowers and joins the original close before reopening the same files on another silo. Shared access creates no extra persisted copies and requires no data copying. |
 | Isolated volumes | Each silo-local Grain Service owns its configured local files, WAL, locks and ordered apply gate. | Logical partition grains call the required storage owners through Orleans. Optional copies are actual independent persisted stores. A cross-partition query calls each logical partition once and merges bounded partial results. |
+
+`KeyLoad:StorageMode` selects `IsolatedVolumes` by default or `SharedVolume`.
+`KeyLoad:SiloCount` and `KeyLoad:ReplicaCount` remain explicit positive settings;
+copies cannot exceed silos. `SharedVolume` requires `ReplicaCount=1` and rejects
+other copy counts rather than changing them. The native Aspire host supplies
+`DataRoot/<silo-name>` for isolated storage and the same `DataRoot/shared` path
+to every shared-storage node. It forwards the selected mode to each server.
+Comparison scenarios retain their required copy counts and reject a conflicting
+shared-volume selection.
 
 A shared mount makes files reachable; it does not make ZoneTree a concurrent
 multi-process writable database. The pinned ZoneTree WAL uses exclusive file
@@ -62,12 +71,29 @@ retained results, cancellation, idempotent command effects and native telemetry.
 
 ## Current implementation and verification
 
-The current database commit grain selects actual native silo addresses and sends
-one prepared command to its configured storage copies. Reads select an available
-canonical copy. This is full-copy routing; it is not distributed partition-query
-execution. The current physical host opens one store per silo eagerly. It does
-not implement lazy, single-owner shared-volume opening. These limits remain
-explicit in [status.json](../implementation/status.json).
+In isolated mode, the database commit grain selects actual native silo addresses
+and sends one prepared command to its configured storage copies. Reads select an
+available canonical copy. These are full database copies; query fan-out does not
+turn them into separate data shards.
+
+In shared mode, the ordinary database grain acquires one local physical session
+during activation. The silo-local owner opens the configured files and binds
+scoped database, search, maintenance and analytics services to that exact session.
+Other silos forward through their Grain Service to the ordinary owner. Accepted
+operations await their original local Tasks, with native call-chain reentrancy
+for callbacks. Deactivation joins the physical work ledger and scoped borrowers
+before closing the files. Activation failure after acquisition also joins that
+same session's close. An RPC timeout alone never authorizes releasing files.
+
+`PartitionQuery` and `DistributedSearch` address ordinary partition query grains
+through the shared identity helper. Each request resolves and retains one native
+silo address and physical identity per distinct logical partition, then uses
+that owner for its bounded leaf stages. Returned owner, incarnation, cut and
+resource accounting are validated before aggregation. Replica stores are not
+extra logical partitions. Workers and durable coordinators obtain bounded typed
+reads from the same storage owners instead of capturing a database in their
+constructors. Verification limits remain explicit in
+[status.json](../implementation/status.json).
 
 Qualify both storage modes with real SDK/MCP operations, actual file identities,
 concurrent requests, duplicate commands, fresh authorization, cancellation,

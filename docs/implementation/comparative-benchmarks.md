@@ -71,9 +71,16 @@ them visible instead of hiding them.
   says so.
 - The load model is closed loop. It does not correct coordinated omission and does
   not qualify overload, endurance or power-loss behaviour.
-- Every report records the exact source revision, run and job, runtime and CPU, image
+- Every report records the exact source revision, run and job, runtime and CPU, native DLL/PDB/process identities or external image
   digests, engine versions, topology, resource limits, read consistency, index
   settings and effective acknowledgement and durability.
+
+The primary development/functional AppHost runs native KeyLoad projects and
+Azurite. The separate LoadTests AppHost owns selected database infrastructure and
+exposes endpoints to the client-owned workload, then removes only its own
+resources. Ordinary execution never publishes KeyLoad server or client images.
+Native-process resource equivalence remains an open publication gate; observed
+workload figures alone are not comparable server-resource proof.
 
 ## Topology and guarantees
 

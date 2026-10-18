@@ -1,8 +1,9 @@
 import { SESSION, exactSession as exact, requireSession as require, sessionHash, sessionPath,
   sessionPositive, sessionCount, sessionText, sessionUnavailableTopology, validateSessionCohort } from './session-contract.mjs';
+import { validateSessionProcesses } from './session-process-identity.mjs';
 
 const envelopeFields = ['schemaVersion', 'sessionId', 'target', 'nodeCount', 'sourceRevision', 'runId', 'attempt',
-  'jobId', 'repository', 'ref', 'workflow', 'images', 'targetProfile', 'runtime', 'assemblies', 'cases', 'nativeReport', 'resourceReport', 'outerRuntime', 'qualificationReport', 'outcome', 'reason'];
+  'jobId', 'repository', 'ref', 'workflow', 'images', 'processes', 'targetProfile', 'runtime', 'assemblies', 'cases', 'nativeReport', 'resourceReport', 'outerRuntime', 'qualificationReport', 'outcome', 'reason'];
 const caseFields = ['caseId', 'status', 'detail', 'initialRecords', 'expectedRecords', 'verifiedRecords', 'lanes', 'elapsedSeconds'];
 const measurementFields = ['attempts', 'successes', 'failures', 'elapsedSeconds', 'usefulOperationsPerSecond',
   'latency', 'uniqueCompletedMessages', 'enqueue', 'receive', 'ack', 'clientResources'];
@@ -104,7 +105,7 @@ export function validateSessionCase(value, id, original = true) {
   }
   return value;
 }
-export function validateSessionEnvelope(value, row, cohort, jobId) {
+export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdentity = null) {
   validateSessionCohort(cohort);
   require(exact(value, envelopeFields) && value.schemaVersion === SESSION.schema && value.target === row.target
     && value.nodeCount === row.nodeCount && value.jobId === jobId && sessionPositive(jobId)
@@ -114,8 +115,9 @@ export function validateSessionEnvelope(value, row, cohort, jobId) {
   require(value.outcome === 'success' ? value.reason === null : sessionText(value.reason));
   const topologyFailure = sessionUnavailableTopology(row) && value.outcome === 'failure'
     && value.reason === 'NativeSessionTestFailure' && value.targetProfile === null;
-  require(exact(value.images, ['server', 'runner']) && image(value.images.runner)
-    && (value.images.server === null ? value.targetProfile === null && (topologyFailure
+  validateSessionProcesses(value.processes, row, runtimeIdentity);
+  require(exact(value.images, ['server'])
+    && (row.target === 'KeyLoad' ? value.images.server === null : value.images.server === null ? value.targetProfile === null && (topologyFailure
       || value.outcome === 'unavailable' && value.reason === SESSION.topologyUnavailable && sessionUnavailableTopology(row))
       : image(value.images.server)));
   require(exact(value.runtime, ['operatingSystem', 'architecture', 'logicalProcessors', 'framework', 'storage'])
@@ -134,7 +136,7 @@ export function validateSessionEnvelope(value, row, cohort, jobId) {
       && sessionText(profile.cluster.state) && Array.isArray(profile.cluster.observations)
       && profile.cluster.observations.length <= 128 && profile.cluster.observations.every(sessionText));
   }
-  if (value.resourceReport === null) require(value.images.server === null && value.targetProfile === null
+  if (value.resourceReport === null) require(row.target === 'KeyLoad' || value.images.server === null && value.targetProfile === null
     && (topologyFailure || value.outcome === 'unavailable' && value.reason === SESSION.topologyUnavailable
       && sessionUnavailableTopology(row)));
   else require(validateSessionReference(value.resourceReport).path === 'session-resource-evidence.json'
@@ -169,13 +171,14 @@ export function validateSessionProfileAccounting(session, reports, native, quali
   require(reports.length === SESSION.caseIds.length
     && reports.every((report,index) => report.caseId === SESSION.caseIds[index] && report.status !== 'measured'));
   if (session.outcome === 'failure') {
-    if (session.images.server === null) require(sessionUnavailableTopology(session) && session.resourceReport === null
+    if (sessionUnavailableTopology(session)) require(session.images.server === null && session.resourceReport === null
       && session.reason === 'NativeSessionTestFailure' && qualification.nativeExitCode !== 0
-      && qualification.status === 'notExecuted' && qualification.reason === 'NativeRunnerFailed'
+      && qualification.status === 'notExecuted' && qualification.reason === 'NativeClientFailed'
       && reports.every(report => report.status === 'unavailable' && report.lanes.length === 0
         && report.elapsedSeconds === 0 && report.verifiedRecords === 0)
       && native.length === SESSION.caseIds.length && native.every(test => test.outcome === 'Passed'));
-    else require(image(session.images.server) && session.resourceReport !== null
+    else require((session.target === 'KeyLoad' ? session.images.server === null && session.resourceReport === null
+      : image(session.images.server) && session.resourceReport !== null)
       && (qualification.nativeExitCode !== 0 || qualification.status === 'failed'));
     return session;
   }
@@ -212,21 +215,28 @@ export function validateSessionQualification(value, session, native) {
     && value.schemaVersion === 1 && value.sessionId === session.sessionId && value.target === session.target
     && value.nodeCount === session.nodeCount && Number.isInteger(value.nativeExitCode)
     && value.nativeExitCode >= -2_147_483_648 && value.nativeExitCode <= 2_147_483_647 && ['passed', 'failed', 'notExecuted', 'notApplicable'].includes(value.status)
-    && Array.isArray(value.steps) && value.steps.length <= 2
+    && Array.isArray(value.steps) && value.steps.length <= 3
     && (value.status === 'passed' ? value.reason === null : sessionText(value.reason)));
   require(value.nativeExitCode === 0 ? value.status !== 'notExecuted' && native.every(item => item.outcome === 'Passed')
     : value.status === 'notExecuted' && session.outcome === 'failure' && session.reason === 'NativeSessionTestFailure');
   if (value.status === 'notApplicable') require(session.targetProfile === null && value.steps.length === 0 && value.reason === 'NativeTopologyUnavailable');
-  else if (value.status === 'notExecuted') require(value.nativeExitCode !== 0 && value.steps.length === 0 && value.reason === 'NativeRunnerFailed');
+  else if (value.status === 'notExecuted') require(value.nativeExitCode !== 0
+    && value.steps.length === (session.target === 'KeyLoad' ? 1 : 0) && value.reason === 'NativeClientFailed');
   else {
-    require(value.steps.length === 2 && value.steps.every((step,index) => exact(step, ['id', 'status', 'failureType'])
+    const actual = value.steps.slice(0, 2);
+    require(value.steps.length === (session.target === 'KeyLoad' ? 3 : 2) && actual.every((step,index) => exact(step, ['id', 'status', 'failureType'])
       && step.id === ['server-resource-cancellation', 'native-correctness'][index]
       && ['passed', 'failed', 'notApplicable'].includes(step.status)
       && (step.status === 'failed' ? sessionText(step.failureType) : step.failureType === null)));
-    const applicable = [session.target === 'KeyLoad' && session.nodeCount === 1,
+    const applicable = [session.target !== 'KeyLoad' && session.nodeCount === 1,
       ['KeyLoad', 'KurrentDB', 'PostgreSQL + pgvector', 'Redis', 'OpenSearch', 'MongoDB', 'Neo4j'].includes(session.target)];
-    require(value.steps.every((step,index) => applicable[index] ? step.status !== 'notApplicable' : step.status === 'notApplicable'));
-    require(value.status === (value.steps.some(step => step.status === 'failed') ? 'failed' : 'passed'));
+    require(actual.every((step,index) => applicable[index] ? step.status !== 'notApplicable' : step.status === 'notApplicable'));
+    require(value.status === (actual.some(step => step.status === 'failed') ? 'failed' : 'passed'));
+  }
+  if (session.target === 'KeyLoad') {
+    const pending = value.steps.at(-1);
+    require(exact(pending, ['id', 'status', 'failureType']) && pending.id === 'matched-native-process-resources'
+      && pending.status === 'notExecuted' && pending.failureType === 'MatchedProcessResourceQualificationOpen');
   }
   if (value.status === 'failed') require(value.reason === 'NativeSessionQualificationFailed'
     && session.outcome === 'failure' && session.reason === 'NativeSessionQualificationFailed');

@@ -8,7 +8,14 @@ CI starts native TUnit/Microsoft.Testing.Platform after build. TUnit fixtures us
 
 REQ-TUNIT-ENTRY-001: every CI suite and isolated benchmark workload invokes TUnit directly; infrastructure remains Aspire-owned within tests. AC-TUNIT-ENTRY-001: native command selections preserve project, filter, bounded parallelism, original TRX/coverage output and nonzero exit codes. AC-TUNIT-ENTRY-002: cluster coverage preparation executes as a TUnit session lifecycle using the existing Aspire preparation resource, propagates its verified original manifest and policy, joins output and cleanup, and does not recursively launch a test runner. Existing real fixture and workload tests remain mandatory Linux acceptance evidence.
 
-The comparison host is a native TUnit workload case using the existing C# client library. Aspire still owns the pinned load-generator container and its dependencies; the container runs TUnit with Detailed output and copies its bounded original TRX into the cell qualification artifact. Native TRX stays separate from website measurement JSON archives. No package, storage, serialization or authentication contract changes. Rollback requires owner review. Static checks cannot establish runtime qualification.
+The comparison host is a native TUnit workload case using the existing C# client
+library. The separate LoadTests AppHost owns selected database infrastructure and
+exposes actual endpoints; tests start the native workload client outside its
+resource graph, retain Detailed output and original TRX, and join its real
+completion and readers before disposing infrastructure. Ordinary execution has no
+KeyLoad/workload-client image prerequisite. Native TRX remains separate from
+website measurement JSON; source/DLL/PDB/process and authenticated GitHub evidence
+are independently validated. Static checks establish no runtime qualification.
 
 ## Isolated measurements and heavy load scheduling
 

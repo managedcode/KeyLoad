@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -14,14 +15,15 @@ internal static class RemoteTransferPendingCursorSelection
         {
             return new(identity.Incarnation, identity.ReadGeneration, null, null);
         }
-        return new(identity.Incarnation, identity.ReadGeneration, supplied.UpperKey?.ToArray(), supplied.LastKey?.ToArray());
+        return supplied;
     }
 
     private static bool IsValid(RemoteTransferPendingCursor supplied)
         => supplied.UpperKey is null ? supplied.LastKey is null
-            : IsKey(supplied.UpperKey) && (supplied.LastKey is null
-                || IsKey(supplied.LastKey) && supplied.LastKey.AsSpan().SequenceCompareTo(supplied.UpperKey) <= RemoteTransferCoordinationProtocol.FirstIndex);
+            : supplied.UpperKey is { } upper && IsKey(upper) && (supplied.LastKey is null
+                || supplied.LastKey is { } last && IsKey(last)
+                    && last.AsSpan().SequenceCompareTo(upper.AsSpan()) <= RemoteTransferCoordinationProtocol.FirstIndex);
 
-    private static bool IsKey(byte[] key)
-        => key.Length <= DueWorkProtocol.MaximumKeyBytes && key.AsSpan().StartsWith(Prefix);
+    private static bool IsKey(ImmutableArray<byte> key)
+        => !key.IsDefault && key.Length <= DueWorkProtocol.MaximumKeyBytes && key.AsSpan().StartsWith(Prefix);
 }

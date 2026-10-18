@@ -28,7 +28,7 @@ internal sealed class RestoreIdentityOverrideFixture
     }
 
     internal Command<DatabaseCommand> Batch(DatabaseEngine database, Guid id, params Mutation[] mutations)
-        => new(id, OperationKind.Batch, RestoreIdentityOverrideState.Principal, database.EvaluationClock.GetUtcNow(),
+        => database.CreateCommand(OperationKind.Batch, id, RestoreIdentityOverrideState.Principal, database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new CommandRequest(id, Partition, [.. mutations]), JsonDefaults.Options));
 
     internal long CreateBackup() => Source.Store.CreateBackup(BackupDirectory);

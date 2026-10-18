@@ -27,7 +27,9 @@ internal static class AspireProcessFaultCommand
 
     private static InteractionInput Input(string name, long value) => new()
     {
-        Name = name, InputType = InputType.Text, Value = value.ToString(CultureInfo.InvariantCulture)
+        Name = name,
+        InputType = InputType.Text,
+        Value = value.ToString(CultureInfo.InvariantCulture)
     };
 
     internal static ProcessFaultCommandProtocol.Result ReadResult(ExecuteCommandResult command,

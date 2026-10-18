@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -23,7 +24,7 @@ internal static class DuePrefixScanner
         {
             return CompletePage(cursor, kind, state);
         }
-        var upper = bounds.UpperKey ?? throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidCursor);
+        var upper = (bounds.UpperKey ?? throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidCursor)).ToArray();
         return ScanBoundedPrefix(database, view, cursor, kind, bounds, upper, prefix, state);
     }
 
@@ -37,7 +38,7 @@ internal static class DuePrefixScanner
             upper = DueWorkRecordDecoder.CopyKey(key);
             return false;
         }, observer: state.ObserveBytes, cancellationToken: state.CancellationToken);
-        return upper is null ? DuePrefixCursor.Empty : new(true, upper, null);
+        return upper is null ? DuePrefixCursor.Empty : new(true, ImmutableArray.CreateRange(upper), null);
     }
 
     private static DueWorkPage ScanBoundedPrefix(DatabaseEngine database, IKeyValueView view,
@@ -50,7 +51,7 @@ internal static class DuePrefixScanner
             return DuePrefixScanState.EmptyPage(cursor, kind, bounds, upper, state);
         }
         var scanState = new DuePrefixScanState(database, cursor, kind, bounds, upper, state);
-        var scan = view.VisitRange(prefix, remaining, scanState.Visit, bounds.LastKey,
+        var scan = view.VisitRange(prefix, remaining, scanState.Visit, bounds.LastKey?.ToArray(),
             observer: state.ObserveBytes, cancellationToken: state.CancellationToken);
         if (scan.Records == EmptyElementCount && !scan.HasMore && !scan.StoppedByVisitor)
         {

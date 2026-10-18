@@ -10,7 +10,7 @@ internal static class QueueStrictHeadBodyAssertions
     internal static async Task RefusalAsync(DatabaseEngine owner, ZoneTreeStore store, QueueStrictHeadBodyState state)
     {
         var queue = state.Queue;
-        var key = KeySpace.PartitionOutcome(queue.Partition, queue.Principal, state.BlockedReceive.Id);
+        var key = KeySpace.PartitionOutcome(queue.Partition, queue.Principal, state.BlockedReceive.CommandId);
         for (var repeat = 0; repeat < 2; repeat++)
         {
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(key))).IsNull();
@@ -35,13 +35,13 @@ internal static class QueueStrictHeadBodyAssertions
         var before = QueueLifecycleConditionAssertions.Capture(store);
         foreach (var (operation, result) in queue.Outcomes)
         {
-            if (operation.Kind == OperationKind.Receive)
+            if (operation.Value!.Kind == OperationKind.Receive)
             {
                 var current = result.Get<ReceiveResult>().Deliveries.All(item => item.Id == currentMessageId);
                 await QueueReceiveReplayAssertions.SameAsync(store, queue.Partition, operation, result, current,
                     () => owner.Apply(operation));
             }
-            else if (operation.Kind is OperationKind.Batch or OperationKind.Delivery)
+            else if (operation.Value!.Kind is OperationKind.Batch or OperationKind.Delivery)
             {
                 await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result);
             }

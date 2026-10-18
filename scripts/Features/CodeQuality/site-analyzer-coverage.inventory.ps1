@@ -53,6 +53,10 @@ function Assert-CoverageSourceFileInventory([string] $RepositoryRoot, [object] $
     foreach ($sourceFile in $entries) {
         if (($sourceFile.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw $tokens.ErrorUnsafePath }
         if ($sourceFile.PSIsContainer -or $sourceFile.Extension -cne $tokens.CSharpExtension) { continue }
+        $sourceRelative = ([IO.Path]::GetRelativePath($sourceRoot, $sourceFile.FullName)).Replace([string] $tokens.PathSeparator, $tokens.PathSlash).Replace([string] $tokens.PathBackslash, $tokens.PathSlash)
+        # Only the project's native SDK output roots are outside the authored source inventory.
+        if ($sourceRelative.StartsWith($tokens.NativeIntermediateOutputPrefix, [StringComparison]::Ordinal) -or
+            $sourceRelative.StartsWith($tokens.NativeBuildOutputPrefix, [StringComparison]::Ordinal)) { continue }
         $path = ([IO.Path]::GetRelativePath($RepositoryRoot, $sourceFile.FullName)).Replace([string] $tokens.PathSeparator, $tokens.PathSlash).Replace([string] $tokens.PathBackslash, $tokens.PathSlash)
         if (-not $expected.Remove($path)) { throw $tokens.ErrorSourceInventory }
     }

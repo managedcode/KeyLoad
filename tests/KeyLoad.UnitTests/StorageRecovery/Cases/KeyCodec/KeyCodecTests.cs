@@ -48,14 +48,14 @@ internal sealed class KeyCodecTests
     [Test]
     public async Task StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide()
     {
-        var samples = new[] { "", "a", "a\0", "a\0b", "aa", "b", "é", "ї", "😀", "\uffff" };
-        foreach (var value in samples)
+        var values = new[] { "", "a", "a\0", "a\0b", "aa", "b", "é", "ї", "😀", "\uffff" };
+        foreach (var value in values)
         {
             await Assert.That(KeyCodec.Decode(KeyCodec.Encode(value))[0]).IsEqualTo(value);
         }
 
-        var expected = samples.OrderBy(System.Text.Encoding.UTF8.GetBytes, BinaryKeyComparer.Instance).ToArray();
-        await Assert.That(samples.OrderBy(value => KeyCodec.Encode(value), BinaryKeyComparer.Instance).ToArray())
+        var expected = values.OrderBy(System.Text.Encoding.UTF8.GetBytes, BinaryKeyComparer.Instance).ToArray();
+        await Assert.That(values.OrderBy(value => KeyCodec.Encode(value), BinaryKeyComparer.Instance).ToArray())
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
         await Assert.That(KeyCodec.Encode("a", "bc")).IsNotEquivalentTo(KeyCodec.Encode("ab", "c"), CollectionOrdering.Matching);
         await Assert.That(BinaryKeyComparer.Instance.Compare(KeyCodec.Encode(1.00m), KeyCodec.Encode(1m))).IsEqualTo(0);

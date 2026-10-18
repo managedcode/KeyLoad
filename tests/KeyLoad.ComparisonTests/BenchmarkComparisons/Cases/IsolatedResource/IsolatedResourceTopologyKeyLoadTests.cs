@@ -10,6 +10,8 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
     private const string SiloCountSetting = "KeyLoad__SiloCount";
     private const string CopyCountSetting = "KeyLoad__ReplicaCount";
     private const string SiloNameSetting = "KeyLoad__SiloName";
+    private const string DataDirectorySetting = "KeyLoad__DataDirectory";
+    private const string NativeImageSetting = IsolatedResourceTopologyFixture.NativePrefix + "Image";
     private const string AdminParameter = "admin-key";
     private const string AdminSetting = "Benchmarks__AdminKey";
     private const string AdminNativeSetting = "KeyLoad__AdminKey";
@@ -34,7 +36,7 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
             .IsEquivalentTo(Enumerable.Range(1, count).Select(index => "node" + index).ToArray());
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, nodes);
         var runnerEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
-        await Assert.That(runnerEnvironment.ContainsKey(IsolatedResourceTopologyFixture.NativePrefix + "Image")).IsFalse();
+        await Assert.That(runnerEnvironment.ContainsKey(NativeImageSetting)).IsFalse();
         await Assert.That(runnerEnvironment[AdminSetting]).IsEqualTo("{" + AdminParameter + ".value}");
         foreach (var node in nodes)
         {
@@ -54,7 +56,7 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
     {
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
         var directory = Path.GetFullPath(Path.Combine(fixture.Context.Root, "native", "keyload", node.Name));
-        await Assert.That(environment["KeyLoad__DataDirectory"]).IsEqualTo(directory);
+        await Assert.That(environment[DataDirectorySetting]).IsEqualTo(directory);
         await Assert.That(Directory.Exists(directory)).IsTrue();
         await Assert.That(node.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.Server.csproj");
         await Assert.That(environment[SiloNameSetting]).IsEqualTo(node.Name);

@@ -40,7 +40,6 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private readonly TimeProvider clock;
     private readonly IOptions<EventSourceExecutionOptions> eventSourceOptions = UnitExecutionOptions.EventSource();
     private ZoneTreeStore store = null!;
-    private DatabaseEngine database = null!;
 
     public StreamReadResourceFixture(int eventCount = 0, bool protectedFields = false, string? directory = null, TimeProvider? timeProvider = null)
     {
@@ -55,12 +54,11 @@ internal sealed class StreamReadResourceFixture : IDisposable
         try
         {
             Open(new());
-            database.Bootstrap(new(AdministratorId, SystemTenantId, [new(AllScopes, AllScopes, Capability.All)], [AllScopes])
+            Database.Bootstrap(new(AdministratorId, SystemTenantId, [new(AllScopes, AllScopes, Capability.All)], [AllScopes])
             {
                 ClusterAdministrator = true
             },
                 DatabaseEngine.Credential(AdministratorId, AdministratorId, CredentialSecret));
-            PhysicalShardTestBootstrap.Bootstrap(database, AdministratorId);
             ConfigureResource(protectedFields);
             ConfigureReader();
             AppendEvents(eventCount);
@@ -80,17 +78,17 @@ internal sealed class StreamReadResourceFixture : IDisposable
     }
 
     public StreamPage Read(long afterRevision = 0, long generation = 1, int limit = 100, CancellationToken cancellationToken = default)
-        => database.ReadStream(ReaderId, new(Partition, StreamSetName, StreamId, generation), afterRevision, limit, cancellationToken);
+        => Database.ReadStream(ReaderId, new(Partition, StreamSetName, StreamId, generation), afterRevision, limit, cancellationToken);
 
     internal StreamPage Traverse(ReadStreamRequest request, CancellationToken cancellationToken = default)
-        => database.ReadStream(ReaderId, request, cancellationToken);
+        => Database.ReadStream(ReaderId, request, cancellationToken);
 
     internal ReadStreamRequest Traversal(StreamReadDirection direction = StreamReadDirection.Forward,
         int limit = 100, int maxBytes = 0, string? cursor = null, long after = 0)
         => new(new(Partition, StreamSetName, StreamId, 1), after, limit, direction, maxBytes, cursor);
 
     internal (long Position, string[] Image) Cut()
-        => (store.Position, KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementRawImage.Bytes(store));
+        => (store.Position, CanonicalStoreImage.Bytes(store));
 
     internal void SetReader(bool allowed)
     {
@@ -104,11 +102,13 @@ internal sealed class StreamReadResourceFixture : IDisposable
         }));
     }
 
+    internal DatabaseEngine Database { get; private set; } = null!;
+
     internal AtomicPartitionPlacementResolution Placement
-        => database.ReadAtomicPartitionPlacement(AdministratorId, Partition);
+        => Database.ReadAtomicPartitionPlacement(AdministratorId, Partition);
 
     internal StreamPage TraverseConfigured(ReadStreamRequest request, PhysicalShardRecord owner)
-        => (StreamPage)new KeyLoad.Clustering.GrainCoreReadCapabilities(database).Execute(
+        => (StreamPage)new KeyLoad.Clustering.GrainCoreReadCapabilities(Database).Execute(
             KeyLoad.Clustering.GrainReadKind.Stream, ReaderId, NativeSerialization.Serialize(request), default, owner)!;
 
     internal TimeSpan CursorLifetime => eventSourceOptions.Value.CursorLifetime;
@@ -116,16 +116,15 @@ internal sealed class StreamReadResourceFixture : IDisposable
     internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
 
     internal EventSourceHead EventSourceHead
-        => database.ReadEventSource(AdministratorId,
+        => Database.ReadEventSource(AdministratorId,
             new(new(Partition, StreamSetName, EventSourceKind.Stream, StreamId))).Head;
 
-    internal Result<object> Apply(Command<DatabaseCommand> operation) => database.Apply(operation);
+    internal Result<object> Apply(Command<DatabaseCommand> operation) => Database.Apply(operation);
 
     public void Reopen(DatabaseLimits limits)
     {
         store.Dispose();
         Open(limits);
-        PhysicalShardTestBootstrap.RequireExisting(database);
     }
 
     public long HeadAndFirstEventReadBytes()
@@ -179,7 +178,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private void Open(DatabaseLimits limits)
     {
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
-        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), eventSourceOptions, UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), clock);
+        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), eventSourceOptions, UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), clock);
     }
 
     private void ConfigureResource(bool protectedFields)
@@ -214,7 +213,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private void Submit<T>(OperationKind kind, T payload)
     {
         var id = kind == OperationKind.Batch && payload is CommandRequest command ? command.CommandId : Guid.NewGuid();
-        var operation = database.CreateCommand(kind, id, AdministratorId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
-        database.Apply(operation).Get<object>();
+        var operation = Database.CreateCommand(kind, id, AdministratorId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        Database.Apply(operation).Get<object>();
     }
 }

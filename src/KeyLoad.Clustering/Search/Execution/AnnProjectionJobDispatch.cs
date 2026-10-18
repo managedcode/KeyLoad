@@ -1,6 +1,5 @@
 using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
@@ -19,31 +18,53 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         var requestId = Guid.NewGuid();
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
         var failures = new List<Exception>();
-        var cleanup = new List<Exception>();
         AnnMaintenanceResult? result = null;
-        NativeRequestWorkChildReservation? reservation = null;
         byte[]? payload = null;
         try
         {
-            payload = NativeSerialization.Serialize(original);
-            var signed = codec.CreateAnnProjectionJobChild(requestId, principal.Id, original.CommandId, payload, expiry);
-            var verified = codec.VerifyRequest(signed, requestId);
             if (binding is not INativeRequestWorkBinding native
                 || !ReferenceEquals(binding.ResultRetention, native.OriginalProducer.ResultRetention))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
             }
-            reservation = native.OriginalProducer.ReserveLocalChild(verified,
-                services.GetRequiredService<PhysicalShardRecord>(), services.GetRequiredService<SiloStorageIdentityProvider>().Read());
-            result = await AnnProjectionJobDispatchSettlement.RunOwnedAsync(services, principal, requestId,
-                original.CommandId, connectionId, reservation,
-                scopeToken => ReadAsync(grains, signed, requestId, original, connectionId, scopeToken), failures, cleanup, token).ConfigureAwait(true);
+            var context = codec.LifetimeReadContext;
+            if (expiry <= context.Now)
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+            }
+            native.OriginalProducer.AdmitPublication();
+            payload = NativeSerialization.Serialize(original);
+            var signed = codec.Issue(GrainRequestEnvelopeConstruction.Command(requestId, codec.Incarnation,
+                principal.Id, OperationKind.MaintainAnnIndex, original.CommandId, payload,
+                expiry < context.Now + context.Lifetime ? expiry : context.Now + context.Lifetime));
+            using var identity = new GrainRequestIdentityScope(services, principal, requestId,
+                original.CommandId, token, connectionId: connectionId);
+            try
+            {
+                result = await ReadAsync(grains, signed, requestId, original, connectionId, token).ConfigureAwait(true);
+            }
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        await AnnProjectionJobDispatchSettlement.CompleteAsync(reservation, payload, failures, cleanup).ConfigureAwait(true);
+        Capture(() =>
+        {
+            if (payload is not null)
+            {
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(payload);
+            }
+        }, failures);
         AnnProjectionJobFailures.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, InvalidResult);
+    }
+
+    private static void Capture(Action cleanup, List<Exception> failures)
+    {
+        try
+        { cleanup(); }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
     }
 
     private async Task<AnnMaintenanceResult> ReadAsync(global::Orleans.IGrainFactory grains, string signed,

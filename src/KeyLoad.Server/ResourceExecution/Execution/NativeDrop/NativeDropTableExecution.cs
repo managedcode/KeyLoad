@@ -5,7 +5,7 @@ using ManagedCode.Communication;
 namespace KeyLoad.Server.Features.ResourceExecution;
 
 /// <summary>Submits the authorized table deletion through the native database command owner.</summary>
-internal sealed class NativeDropTableExecution(PartitionHostApplicationOwner owner, TimeProvider clock)
+internal sealed class NativeDropTableExecution(PartitionHost partition, TimeProvider clock)
     : INativeDropTableExecution
 {
     private const string InvalidRequest = "The table deletion request identity or deadline is invalid.";
@@ -25,7 +25,6 @@ internal sealed class NativeDropTableExecution(PartitionHostApplicationOwner own
         }
         using var timeout = new CancellationTokenSource(remaining, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
-        var partition = owner.Borrow();
         var work = new ReadExecutionBudget(partition.Database.OperationLimitsOptions, clock, deadline.Token);
         work.ConstrainLifetime(originalExpiry);
         await partition.Coordinator.ReadBarrierAsync(deadline.Token).ConfigureAwait(false);

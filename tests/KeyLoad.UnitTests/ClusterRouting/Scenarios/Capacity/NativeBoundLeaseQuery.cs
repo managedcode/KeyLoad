@@ -1,0 +1,31 @@
+using KeyLoad.Query;
+using KeyLoad.Query.Features.QueryExecution;
+using K = KeyLoad.UnitTests.Features.ClusterRouting.NativeBoundLeaseProtocol;
+
+namespace KeyLoad.UnitTests.Features.ClusterRouting;
+
+internal static class NativeBoundLeaseQuery
+{
+    internal static PartitionQueryOwnedLeafRequestV2 Create(NativeBoundLeaseSeeded state,
+        NativeBoundLeaseOperation operation)
+    {
+        var database = state.Leader.Database.Database;
+        var budget = operation.Budget;
+        var grant = budget.CreateReadGrant(database.Limits.MaxQueryReadBytes / K.GrantDivisor,
+            database.Limits.MaxScanRecords / K.GrantDivisor);
+        var request = new AstQueryRequest(K.Partition,
+            new(K.Collection, null, [new(K.Projection, K.ProjectionAlias)], null, [], K.RowCount), AllowFullScan: true);
+        var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
+        var normalized = QueryValidation.Normalize(request, database.Limits, engine.Execution);
+        return database.WithPartitionQueryFenceView(K.Root, K.Partition, K.Collection, grant,
+            (view, principal, resource, _) =>
+            {
+                var coverage = budget.CaptureResourceLifetimes(database, budget.CreateView(view, grant),
+                    K.Partition, [resource]);
+                var plan = PartitionQueryPlanFactory.Create(normalized, database.Store.Identity,
+                    [K.Partition], database.Limits, engine.Execution).Leaves.Single();
+                return new PartitionQueryOwnedLeafRequestV2(new(plan, state.PhysicalOwner, principal.TenantId),
+                    resource, coverage, principal);
+            }, budget);
+    }
+}

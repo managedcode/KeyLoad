@@ -70,10 +70,10 @@ internal static class QueueExpiredDlqAssertions
     {
         var image = QueueLifecycleImage.Capture(store, state.Lane);
         var actual = state.Batch(database, mutation);
-        await Assert.That(actual.Error).IsEqualTo(code);
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(code);
         if (code == ErrorCode.Validation)
         {
-            await Assert.That(actual.SafeDetail).IsEqualTo(ExpiredDetail);
+            await Assert.That(actual.Problem?.Detail).IsEqualTo(ExpiredDetail);
         }
         await Assert.That(actual.Value).IsNull();
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);

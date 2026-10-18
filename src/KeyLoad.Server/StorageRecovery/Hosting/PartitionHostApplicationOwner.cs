@@ -1,21 +1,22 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
 
 /// <summary>Silo-local original physical opening and shutdown; native service initialization publishes the one owner.</summary>
 internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options, IAuthorizationPolicy authorization,
     CommandAdmissionGovernor admission, TimeProvider clock, ILogger<PartitionHost> logger, IGrainFactory grains, OrleansNode? node = null,
-    ServerConnectionRegistry? connections = null,
-    UserAnalyticsRuntime? userAnalytics = null)
-    : IPartitionStoragePublication, IAsyncDisposable
+    ServerConnectionRegistry? connections = null, IServiceScopeFactory? scopeFactory = null)
+    : IPartitionStoragePublication, ILocalDatabaseRuntime, IAsyncDisposable
 {
     private const string NativeBorrowersUnjoined = "The original native storage borrowers have not joined; retain the physical owner.";
     private const string Unpublished = "The original physical host opening has not completed successfully.";
     private readonly Lock lifecycle = new();
-    private readonly PartitionHostOwnership ownership = new();
+    private PartitionHostOwnership ownership = new();
     private readonly TaskCompletionSource<Task?> openingAnnounced = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private PartitionHost? host;
+    private PartitionStorageSession? session;
+    private IGrainContext? sharedOwner;
     private Task? opening;
     private Task? shutdown;
     private bool published;
@@ -23,31 +24,25 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
     private bool connectionsJoined = connections is null;
 
     /// <inheritdoc />
-    public Task? Opening
-    {
-        get
-        {
-            lock (lifecycle)
-            {
-                return opening;
-            }
-        }
-    }
+    public Task? Opening => Volatile.Read(ref opening);
 
-    internal Task? Closing
-    {
-        get
-        {
-            lock (lifecycle)
-            {
-                return shutdown;
-            }
-        }
-    }
+    internal Task? Closing => Volatile.Read(ref shutdown);
 
     internal bool CanReleaseRoot => Volatile.Read(ref connectionsJoined)
-        && (userAnalytics?.CanReleasePhysical ?? true)
+        && (session?.CanReleaseRoot ?? ownership.CanReleaseRoot)
         && (node?.HasJoinedRequestWork ?? true) && ownership.CanReleaseRoot;
+
+    internal PartitionStorageSession Session
+    {
+        get
+        {
+            lock (lifecycle)
+            {
+                ObjectDisposedException.ThrowIf(stopping, this);
+                return published && session is not null ? session : throw new InvalidOperationException(Unpublished);
+            }
+        }
+    }
 
     /// <inheritdoc />
     public async Task WaitForOpenAsync(CancellationToken cancellationToken)
@@ -58,6 +53,10 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         lock (lifecycle)
         {
             ObjectDisposedException.ThrowIf(stopping, this);
+            if (!published || !ReferenceEquals(original, opening))
+            {
+                throw new InvalidOperationException(Unpublished);
+            }
         }
     }
 
@@ -66,7 +65,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         lock (lifecycle)
         {
             ObjectDisposedException.ThrowIf(stopping, this);
-            return published && host is not null ? host : throw new InvalidOperationException(Unpublished);
+            return published && session is not null ? session.Host : throw new InvalidOperationException(Unpublished);
         }
     }
 
@@ -75,6 +74,10 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         lock (lifecycle)
         {
             ObjectDisposedException.ThrowIf(stopping, this);
+            if (options.Node.Value.StorageMode == StorageAccessMode.SharedVolume)
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, Unpublished);
+            }
             opening ??= OpenCoreAsync();
             openingAnnounced.TrySetResult(opening);
             return opening;
@@ -83,16 +86,86 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
 
     private async Task OpenCoreAsync()
     {
-        var opened = await PartitionHost.OpenAsync(options, authorization, admission, clock, logger, grains, ownership)
-            .ConfigureAwait(false);
+        var physical = new PartitionStorageSession(ownership);
         lock (lifecycle)
         {
-            host = opened;
+            session = physical;
         }
-        userAnalytics?.Open(opened);
+        await physical.OpenAsync(options, authorization, admission, clock, logger, grains, scopeFactory).ConfigureAwait(false);
         lock (lifecycle)
         {
             published = true;
+        }
+    }
+
+    public async Task<ISharedDatabaseSession> OpenSharedAsync(IGrainContext owner, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        cancellationToken.ThrowIfCancellationRequested();
+        Task original;
+        lock (lifecycle)
+        {
+            ObjectDisposedException.ThrowIf(stopping, this);
+            if (options.Node.Value.StorageMode != StorageAccessMode.SharedVolume
+                || sharedOwner is not null && !ReferenceEquals(sharedOwner, owner))
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, Unpublished);
+            }
+            sharedOwner = owner;
+            opening ??= OpenCoreAsync();
+            original = opening;
+            openingAnnounced.TrySetResult(original);
+        }
+        try
+        {
+            await original.ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            return Session;
+        }
+        catch (Exception failure)
+        {
+            var failures = new List<Exception> { failure };
+            if (session is { } physical)
+            {
+                await ServerFailureObserver.ObserveAsync(() => CloseSharedAsync(physical), failures).ConfigureAwait(false);
+            }
+            else if (ownership.CanReleaseRoot)
+            {
+                ResetShared();
+            }
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    public async Task CloseSharedAsync(ISharedDatabaseSession expected)
+    {
+        PartitionStorageSession physical;
+        lock (lifecycle)
+        {
+            if (!ReferenceEquals(session, expected) || session is null || sharedOwner is null)
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, Unpublished);
+            }
+            physical = session;
+        }
+        await physical.DisposeAsync().ConfigureAwait(false);
+        if (!physical.CanReleaseRoot)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, NativeBorrowersUnjoined);
+        }
+        ResetShared();
+    }
+
+    private void ResetShared()
+    {
+        lock (lifecycle)
+        {
+            published = false;
+            sharedOwner = null;
+            session = null;
+            opening = null;
+            ownership = new();
         }
     }
 
@@ -118,39 +191,19 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         {
             await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
         }
-        if (connections is not null)
-        {
-            var prior = failures.Count;
-            await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(CancellationToken.None), failures)
-                .ConfigureAwait(false);
-            Volatile.Write(ref connectionsJoined, failures.Count == prior);
-        }
-        if (node is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => node.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
-        }
-        if (userAnalytics is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => userAnalytics.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
-        if (!(userAnalytics?.CanReleasePhysical ?? true)
-            || !Volatile.Read(ref connectionsJoined)
-            || node is { HasJoinedRequestWork: false })
-        {
-            failures.Add(Errors.Fail(ErrorCode.OwnershipLost, NativeBorrowersUnjoined));
-            ServerFailureObserver.ThrowIfAny(failures);
-        }
-        if (host is not null)
+        var joined = await OrleansNodeHostShutdown.JoinApplicationAsync(connections, node, failures).ConfigureAwait(false);
+        Volatile.Write(ref connectionsJoined, joined);
+        if (session is not null)
         {
             try
             {
-                await host.DisposeAsync().ConfigureAwait(false);
+                await session.DisposeAsync().ConfigureAwait(false);
             }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }

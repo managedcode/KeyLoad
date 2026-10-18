@@ -44,7 +44,7 @@ internal static class MixedEventingRetentionBackupTopic
             state.PurgeReceipt.Mutations.ToArray());
         await Assert.That(state.PurgeReceipt.Token.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         var originalPurge = owner.ReadStoredOutcome(state.Purge.CommandId);
-        await Assert.That(originalPurge.CanonicalSequence).IsEqualTo(checked(journalBefore.CommittedIndex + OriginalApplyStep));
+        await Assert.That(originalPurge.CanonicalSequence).IsEqualTo(checked(journalBefore.AppliedPosition + OriginalApplyStep));
         await Assert.That(state.PurgeReceipt.Token.Position).IsEqualTo(originalPurge.CanonicalSequence);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(originalPurge.CanonicalSequence);
         await Assert.That(owner.Store.Position).IsEqualTo(checked(physicalBefore + OriginalApplyStep));

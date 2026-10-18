@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 
-/// <summary>Owns the bounded snapshot passed to native test-image preparation and original collector settlement.</summary>
+/// <summary>Owns the bounded snapshot passed to native CLI deployment and original collector settlement.</summary>
 [ConfigurationOptions]
 internal sealed class NativeCoverageExecutionOptions
 {
@@ -23,7 +23,7 @@ internal sealed class NativeCoverageExecutionOptions
     private const int FormatMaximumReportBytes = 512 * 1_024 * 1_024;
     private const int DefaultShutdownSeconds = 10;
     private const int DefaultSettlementSeconds = 20;
-    private const int DefaultContainerStopSeconds = 45;
+    private const int DefaultProcessStopSeconds = 45;
     private const int DefaultApplicationCleanupSeconds = 180;
     private const int MaximumDurationSeconds = 600;
     private const int ClusterNodeCount = 3;
@@ -38,7 +38,7 @@ internal sealed class NativeCoverageExecutionOptions
     public int MaximumReportBytes { get; set; } = DefaultReportBytes;
     public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(DefaultShutdownSeconds);
     public TimeSpan SettlementTimeout { get; set; } = TimeSpan.FromSeconds(DefaultSettlementSeconds);
-    public TimeSpan ContainerStopTimeout { get; set; } = TimeSpan.FromSeconds(DefaultContainerStopSeconds);
+    public TimeSpan ProcessStopTimeout { get; set; } = TimeSpan.FromSeconds(DefaultProcessStopSeconds);
     public TimeSpan ApplicationCleanupTimeout { get; set; } = TimeSpan.FromSeconds(DefaultApplicationCleanupSeconds);
 
     internal bool IsValid() => MaximumDescriptorBytes is >= MinimumValue and <= NativeCoverageProtocol.MaximumDescriptorFormatBytes
@@ -53,9 +53,9 @@ internal sealed class NativeCoverageExecutionOptions
         && MaximumManifestBytes <= MaximumFileBytes
         && MaximumReportBytes is >= MinimumValue and <= FormatMaximumReportBytes
         && WholeSeconds(ShutdownTimeout) && WholeSeconds(SettlementTimeout)
-        && WholeSeconds(ContainerStopTimeout) && WholeSeconds(ApplicationCleanupTimeout)
-        && ShutdownTimeout + SettlementTimeout < ContainerStopTimeout
-        && ApplicationCleanupTimeout.Ticks > ClusterNodeCount * ContainerStopTimeout.Ticks;
+        && WholeSeconds(ProcessStopTimeout) && WholeSeconds(ApplicationCleanupTimeout)
+        && ShutdownTimeout + SettlementTimeout < ProcessStopTimeout
+        && ApplicationCleanupTimeout.Ticks > ClusterNodeCount * ProcessStopTimeout.Ticks;
 
     private static bool WholeSeconds(TimeSpan value) => value > TimeSpan.Zero
         && value.Ticks <= MaximumDurationSeconds * TimeSpan.TicksPerSecond

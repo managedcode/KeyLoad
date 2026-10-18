@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Owns only the original call's linked cancellation and, for a root producer, its one result ledger.</summary>
+/// <summary>Owns the original call's linked cancellation and result ledger until its enumerator settles.</summary>
 internal sealed class NativeBoundCqrsStreamWork : IAsyncDisposable
 {
     private CancellationTokenSource? deadline;
@@ -35,11 +35,8 @@ internal sealed class NativeBoundCqrsStreamWork : IAsyncDisposable
             ownerRequest = CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
             execution = CancellationTokenSource.CreateLinkedTokenSource(ownerRequest.Token, deadline.Token);
             lease = acquireVerified();
-            if (lease.OwnsResultRetention)
-            {
-                ownedRetention = new(databaseLimits);
-                lease.AttachResultRetention(ownedRetention);
-            }
+            ownedRetention = new(databaseLimits);
+            lease.AttachResultRetention(ownedRetention);
             _ = lease.ResultRetention;
             selected = CancellationTokenSource.CreateLinkedTokenSource(execution.Token, lease.Cancellation);
             purpose.SetWork(lease);

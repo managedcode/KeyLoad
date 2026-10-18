@@ -1,7 +1,8 @@
 namespace KeyLoad.Clustering;
 
+/// <summary>Retains the original native ANN job identity, physical binding and settled result.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(AnnProjectionJobProtocol.StateAlias)]
-internal sealed record AnnProjectionJobState(
+public sealed record AnnProjectionJobState(
     [property: global::Orleans.Id(0)] ProjectionMaintenanceAuthority Authority,
     [property: global::Orleans.Id(1)] AnnMaintenanceRequest InitialRequest,
     [property: global::Orleans.Id(2)] AnnMaintenanceRequest? PendingRequest,

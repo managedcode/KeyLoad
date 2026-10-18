@@ -62,7 +62,8 @@ internal static class QueueVisibilityBoundaryAssertions
                     .IsEquivalentTo(NativeSerialization.Serialize(original.Result), CollectionOrdering.Matching);
                 await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Result.Problem));
                 await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Result.Problem?.Detail);
-                await Assert.That(actual.Json).IsEqualTo(original.Result.Json);
+                await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
+                    .SequenceEqual(NativeSerialization.Serialize(original.Result))).IsTrue();
                 await Assert.That(actual.Value).IsNull();
             }
             else

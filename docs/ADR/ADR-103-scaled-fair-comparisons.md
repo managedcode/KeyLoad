@@ -81,7 +81,9 @@ and cleanup failures retained. Local runs are development evidence; delivered
 qualification remains exact-source Linux GitHub evidence.
 
 The scale-resource collector remains one AppHost-owned observation of up to
-three actual native server containers, separate from workload timing. Its
+three actual external-database containers, separate from workload timing.
+KeyLoad now runs as native project processes; Docker observations cannot qualify
+its server resources. Matched native-process resource evidence remains open. Its
 original sidecar stays bounded to 64 KiB, resource samples use the specified
 five-second cadence and 1,680-sample/140-minute limits, and unavailable or
 truncated observations remain unqualified. The original 30-second cleanup bound

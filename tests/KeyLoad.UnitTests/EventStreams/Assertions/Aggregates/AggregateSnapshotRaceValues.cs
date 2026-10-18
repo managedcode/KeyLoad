@@ -46,12 +46,12 @@ internal static class AggregateSnapshotRaceValues
     }
     private static async Task SeedAsync(AggregateSnapshotRaceFixture fixture)
     {
-        var expected = new CommitReceipt(fixture.SeedOperation.Id, new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, fixture.SeedPosition), [new("appendEvents", AggregateSnapshotRaceFixture.StreamSet, AggregateSnapshotRaceFixture.StreamId, 3)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(fixture.SeedOperation.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, fixture.SeedPosition), [new("appendEvents", AggregateSnapshotRaceFixture.StreamSet, AggregateSnapshotRaceFixture.StreamId, 3)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(fixture.SeedResult.Get<CommitReceipt>(), expected);
         await Assert.That(fixture.SeedResult.Get<CommitReceipt>().Mutations.Single().CompositionReferences).IsEmpty();
         await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.SeedOperation), fixture.SeedResult);
         var raw = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
-            fixture.Harness.Partition, "root", fixture.SeedOperation.Id)));
+            fixture.Harness.Partition, "root", fixture.SeedOperation.CommandId)));
         await Assert.That(raw is not null && raw.AsSpan().SequenceEqual(fixture.SeedRaw)).IsTrue();
     }
     internal static async Task ReplayAsync(AggregateSnapshotRaceFixture fixture, bool fenced, bool rawInputDenied = false)

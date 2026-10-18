@@ -30,10 +30,10 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(expected.Image, CollectionOrdering.Matching);
     }
 
-    internal static async Task ReplayAllAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample,
+    internal static async Task ReplayAllAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state,
         CancellationToken token)
     {
-        foreach (var entry in sample.History)
+        foreach (var entry in state.History)
         {
             token.ThrowIfCancellationRequested();
             var before = Capture(fixture);
@@ -82,12 +82,12 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
         }
     }
 
-    internal static async Task InboxAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample)
+    internal static async Task InboxAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state)
     {
-        var request = sample.Processing ?? throw new InvalidOperationException(MissingProcessing);
-        var receipt = sample.ProcessingReceipt ?? throw new InvalidOperationException(MissingProcessing);
+        var request = state.Processing ?? throw new InvalidOperationException(MissingProcessing);
+        var receipt = state.ProcessingReceipt ?? throw new InvalidOperationException(MissingProcessing);
         var key = KeySpace.Partition(InboxFamily, fixture.Partition, Queue, Item, Handler, InitialGeneration);
-        await Assert.That(Required(fixture, key).AsSpan().SequenceEqual(sample.InboxBytes)).IsTrue();
+        await Assert.That(Required(fixture, key).AsSpan().SequenceEqual(state.InboxBytes)).IsTrue();
         var actual = NativeSerialization.Deserialize<InboxRecord>(Required(fixture, key));
         var fingerprint = JsonData.Fingerprint(new
         {

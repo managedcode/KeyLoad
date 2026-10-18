@@ -42,7 +42,7 @@ internal sealed class GrainFailureDiagnosticsTests
         }
     }
 
-    /// <summary>A tagged typed-payload failure overrides the caller fallback with its closed stage metadata.</summary>
+    /// <summary>A tagged typed-payload failure replaces the caller-supplied stage with its closed stage metadata.</summary>
     [Test]
     public async Task TaggedTypedPayloadFailureReportsItsStageAndSafeValidationReply()
     {
@@ -59,7 +59,7 @@ internal sealed class GrainFailureDiagnosticsTests
         await Assert.That(output).DoesNotContain(JsonCanary);
     }
 
-    /// <summary>Unknown exception metadata falls back to the supplied stage and cannot enter provider output.</summary>
+    /// <summary>Unknown exception metadata preserves the supplied stage and cannot enter provider output.</summary>
     [Test]
     public async Task UnknownMetadataCannotInjectPrivateLogText()
     {

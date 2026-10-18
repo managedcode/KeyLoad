@@ -6,7 +6,7 @@ internal sealed class NativeWorkloadTestReportRetentionTests
     [Test]
     public async Task OriginalReportBytesRemainSeparateFromMeasurementArchivesAndCannotBeOverwritten()
     {
-        using var directory = new ImageBundleTestDirectory();
+        using var directory = new NativeArtifactTestDirectory();
         var output = Path.Combine(directory.Root, "output");
         var reports = Path.Combine(output, "TestResults");
         var evidence = Path.Combine(directory.Root, "isolated", "workers", "actual-cell");

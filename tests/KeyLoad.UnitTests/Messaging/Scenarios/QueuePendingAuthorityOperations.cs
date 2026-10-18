@@ -58,7 +58,7 @@ internal static class QueuePendingAuthorityOperations
         var receipt = result.Get<CommitReceipt>();
         state.Flow.Successes.Add((state.Park, result));
         await Assert.That(store.Position).IsEqualTo(before + 1);
-        await Assert.That(receipt.CommandId).IsEqualTo(state.Park.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(state.Park.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Flow.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);

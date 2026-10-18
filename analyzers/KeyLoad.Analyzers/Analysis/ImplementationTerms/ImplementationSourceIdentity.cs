@@ -36,7 +36,10 @@ internal static class ImplementationSourceIdentity
         {
             return false;
         }
-        return term == ImplementationTermCatalog.ResourceWord && HasExecutionOwner(source, model.Compilation, testOwners, token) ||
+        return term == ImplementationTermCatalog.ResourceWord &&
+            (ImplementationTermSymbols.PathContains(source.FilePath, ImplementationTermCatalog.TestPath) &&
+             ImplementationTermSymbols.PathContains(source.FilePath, ImplementationTermCatalog.TestOwnerPath) ||
+             HasExecutionOwner(source, model.Compilation, testOwners, token)) ||
             term == ImplementationTermCatalog.DataWord &&
             (ImplementationTermSymbols.PathContains(source.FilePath, ImplementationTermCatalog.TimeSeriesPath) ||
              HasDomainRecords(source, model.Compilation, token));

@@ -41,8 +41,8 @@ jobs:
         run: dotnet restore KeyLoad.slnx
       - name: Build analyzer tests
         run: |
-          dotnet build build/KeyLoad.AppHost --no-restore --configuration Release -warnaserror
-          dotnet build tests/KeyLoad.Analyzers.Tests --no-restore --configuration Release -warnaserror
+          dotnet build build/KeyLoad.AppHost --no-restore -warnaserror
+          dotnet build tests/KeyLoad.Analyzers.Tests --no-restore -warnaserror
       - name: Prepare source-bound analyzer coverage
         shell: pwsh
         run: |
@@ -123,7 +123,7 @@ jobs:
         run: dotnet restore KeyLoad.slnx
       - name: Build KeyLoad
         id: build
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+        run: dotnet build KeyLoad.slnx --no-restore -warnaserror
       - name: Prepare native source and native test assembly identity receipts
         id: native-source-identity
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
@@ -237,7 +237,7 @@ jobs:
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
       - name: Build the complete native coverage cohort
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+        run: dotnet build KeyLoad.slnx --no-restore -warnaserror
       - name: Prepare original source and native test assembly receipts
         id: coverage-source
         shell: pwsh

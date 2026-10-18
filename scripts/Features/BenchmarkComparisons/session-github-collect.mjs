@@ -1,22 +1,21 @@
 import { collectDocumentFunctionalGate } from './document-functional-gate.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { createDirectory } from './image-bundle-files.mjs';
-import { verifySourceCheckout } from './prepare-images.mjs';
+import { createDirectory } from './native-files.mjs';
+import { verifySourceCheckout } from './source-checkout.mjs';
 import { captureRun, downloadArtifact } from './isolated-github-api.mjs';
 import { initializeTransport } from './isolated-github-transport.mjs';
 import { inspectNativeZip, extractNativeEntry } from './isolated-github-zip.mjs';
 import { validateDownloadedArchive } from './isolated-github-stream.mjs';
 import { readJson, writeJson } from './isolated-github-files.mjs';
 import { projectArtifact, projectJob } from './isolated-github-validation.mjs';
-import { collectImageEvidence } from './isolated-github-images.mjs';
 import { createSessionContext } from './session-github-context.mjs';
 import { selectSessionEvidence } from './session-github-selection.mjs';
 import { SESSION, requireSession } from './session-contract.mjs';
-import { collectSessionRuntimeIdentity } from './session-runtime-identity.mjs';
+import { collectSessionRuntimeIdentity, readSessionRuntimeIdentity } from './session-runtime-identity.mjs';
 import { validateSessionEnvelope } from './session-report-validation.mjs';
 
-export async function collectSessionWorker(input, selected, context, images) {
+export async function collectSessionWorker(input, selected, context, runtimeIdentity) {
   const { row, job, artifact } = selected;
   const archive = path.join(input, 'archives', `${row.id}.zip`);
   await downloadArtifact(artifact, archive, SESSION.archiveBytes, context);
@@ -26,10 +25,8 @@ export async function collectSessionWorker(input, selected, context, images) {
   const directory = await createDirectory(path.join(input, 'workers', row.id));
   const raw = await extractNativeEntry(archive, 'session.json', path.join(directory, 'session.json'), SESSION.sessionBytes, context);
   const envelope = validateSessionEnvelope(await readJson(path.join(directory, 'session.json')),
-    row, context.cohort, job.id);
-  requireSession(envelope.images.runner === images.loadGenerator
-    && (row.target !== 'KeyLoad' || envelope.images.server === images.server)
-    && (envelope.outcome === 'failure' ? job.conclusion === 'failure' : job.conclusion === 'success'));
+    row, context.cohort, job.id, runtimeIdentity);
+  requireSession(envelope.outcome === 'failure' ? job.conclusion === 'failure' : job.conclusion === 'success');
   const references = [...envelope.cases, envelope.nativeReport, envelope.outerRuntime, envelope.qualificationReport, ...(envelope.resourceReport ? [envelope.resourceReport] : [])];
   const directories = new Set([directory]);
   for (const reference of references) {
@@ -44,10 +41,8 @@ export async function collectSessionWorker(input, selected, context, images) {
       reference === envelope.nativeReport ? SESSION.nativeBytes : SESSION.reportBytes, context);
     requireSession(extracted.sha256 === reference.sha256);
   }
-  if (envelope.resourceReport) {
-    requireSession(inventory.includes('session-state.json'));
-    await extractNativeEntry(archive, 'session-state.json', path.join(directory, 'session-state.json'), SESSION.sessionBytes, context);
-  }
+  requireSession(inventory.includes('session-state.json'));
+  await extractNativeEntry(archive, 'session-state.json', path.join(directory, 'session-state.json'), SESSION.sessionBytes, context);
   return { id: row.id, target: row.target, nodeCount: row.nodeCount,
     job: projectJob(job, context.cohort, SESSION.workerSteps), artifact: projectArtifact(artifact), sessionSha256: raw.sha256 };
 }
@@ -61,15 +56,14 @@ export async function collectSessionEvidence(environment = process.env, argv = p
   await initializeTransport(context, input, path.join(input, 'github'));
   const capture = await captureRun(path.join(input, 'github'), context, true);
   const selected = selectSessionEvidence(capture, context.cohort);
-  const image = await collectImageEvidence(input, selected.image, context);
-  await writeJson(path.join(input, 'github', 'image-proof.json'), image);
   const runtimeIdentity = await collectSessionRuntimeIdentity(input, selected.runtimeArtifact, context);
-  const functional = await collectDocumentFunctionalGate(input, capture, context, image.images.server);
+  const identity = await readSessionRuntimeIdentity(path.join(input, 'github', 'runtime'), context.cohort);
+  const functional = await collectDocumentFunctionalGate(input, capture, context, identity);
   const workers = [];
-  for (const worker of selected.workers) workers.push(await collectSessionWorker(input, worker, context, image.images));
+  for (const worker of selected.workers) workers.push(await collectSessionWorker(input, worker, context, identity));
   const proof = { schemaVersion: SESSION.schema, cohort: context.cohort, workers,
-    preparation: { job: image.job, artifact: image.artifact, compiledArtifact: projectArtifact(selected.compiledArtifact), runtimeIdentity, functional },
-    images: image.images };
+    preparation: { job: projectJob(selected.preparation, context.cohort, SESSION.prepareSteps),
+      compiledArtifact: projectArtifact(selected.compiledArtifact), runtimeIdentity, functional } };
   await writeJson(path.join(input, 'proof.json'), proof);
   return { schemaVersion: SESSION.schema, workers: workers.length };
 }

@@ -74,7 +74,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         await Assert.That(page.Stream).IsEqualTo(Stream);
         await Assert.That(page.Head).IsEqualTo(new StreamHead(expected.Length, 1, 1));
         await Assert.That(page.HasMore).IsFalse();
-        await Assert.That(page.CutPosition).IsEqualTo(Database.Store.Position);
+        await Assert.That(page.CutPosition).IsEqualTo(Database.Database.LastApplied);
         var records = expected.Select((data, index) => new EventRecord(Stream, index + 1L,
             index + 1L, data, Now));
         await Assert.That(page.Events.Select(value => JsonSerializer.Serialize(value, JsonDefaults.Options)))
@@ -110,7 +110,6 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         var retry = Submit(command);
         await Assert.That(NativeSerialization.Serialize(retry))
             .IsEquivalentTo(NativeSerialization.Serialize(original), CollectionOrdering.Matching);
-        await Assert.That(retry.Json).IsEqualTo(original.Json);
         await Assert.That(Errors.Code(retry.Problem)).IsEqualTo(Errors.Code(original.Problem));
         await Assert.That(retry.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
         await Assert.That(retry.Value).IsNull();

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Explicit validated native options for actual Orleans routing regression fixtures.</summary>
+/// <summary>Explicit validated native options for actual Orleans routing tests.</summary>
 internal static class UnitRoutingOptions
 {
     internal static IOptions<GrainRoutingOptions> Routing(GrainRoutingOptions? configured = null)

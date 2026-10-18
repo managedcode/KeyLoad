@@ -37,7 +37,7 @@ internal sealed record ComparisonExecutionIdentity(GitHubProvenance? Provenance)
         }
         if (!string.Equals(configuration[GitHubActionsSetting], bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
-            return new(null);
+            return new(Provenance: null);
         }
         var runId = PositiveInt64(Required(configuration, RunIdSetting));
         var runAttempt = PositiveInt32(Required(configuration, RunAttemptSetting));

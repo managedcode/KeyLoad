@@ -9,7 +9,7 @@ internal static class TransactionalReadViewContinuation
     {
         var before = state.Store.Position;
         var id = Guid.NewGuid();
-        state.Healthy = TransactionalReadViewCommands.Operation(id, new(id, state.Harness.Partition,
+        state.Healthy = TransactionalReadViewCommands.Operation(state.Database, id, new(id, state.Harness.Partition,
             [new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.HealthyId,
                 DocumentIndexCommittedScanOracle.HealthyJson, 0L)]));
         state.HealthyReceipt = new(id, new(state.Identity.Incarnation, state.Harness.Partition.AtomicPartitionId, before + 1L), [new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.HealthyId, 1L)], DurabilityProfile.ProcessDurable, 1);

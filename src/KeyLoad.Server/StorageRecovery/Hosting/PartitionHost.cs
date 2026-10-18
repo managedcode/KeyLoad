@@ -38,7 +38,8 @@ internal sealed class PartitionHost : IAsyncDisposable
         {
             OpenDatabase(runtimeOptions, authorization, clock);
             OpenSearch(runtimeOptions, clock);
-            Coordinator = new(Database, grains);
+            Coordinator = runtimeOptions.Node.Value.StorageMode == StorageAccessMode.SharedVolume
+                ? new LocalStorageCommitCoordinator(Database) : new SiloCommandCoordinator(Database, grains);
             ownership.Host.BeginNativeConstructor();
             AnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
             ownership.Host.NativeConstructorReturned();
@@ -121,7 +122,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         get; private set;
     } = null!;
     /// <summary>Routes commands through native Orleans scheduling to silo-local storage services.</summary>
-    public SiloCommandCoordinator Coordinator { get; private set; } = null!;
+    public ICommitCoordinator Coordinator { get; private set; } = null!;
 
     private void DisposeRowVisibility(List<Exception> failures)
         => PartitionHostConstructionCleanup.DisposeRowVisibility(rowVisibility, failures);

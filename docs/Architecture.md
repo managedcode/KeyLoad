@@ -69,13 +69,13 @@ own; scaling means adding silos to the Orleans cluster.
   The connection grain never caches trusted roles and never owns storage.
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
-- **Silo-local ZoneTree owner.** A Grain Service is per silo and always local.
-  Every silo hosts one ZoneTree owner Grain Service that maintains that node's
-  own ZoneTree and owns its files: ZoneTree stores, WAL/journals, file locks and
-  ordered apply. Other code on the same node obtains ZoneTree from it through
-  dependency injection. The owner opens the files once through the native silo
-  lifecycle and closes them at silo shutdown. Files never move with grain
-  activations; a migrated grain simply calls the owners again.
+- **Silo-local ZoneTree owner.** Each silo hosts a Grain Service; typed Orleans
+  calls can address it on another silo. The physical owner retains ZoneTree,
+  WAL/journals, locks and ordered apply. Local scoped services borrow that exact
+  open session through DI. Isolated stores open during native silo startup.
+  Shared storage opens lazily for its ordinary database grain and closes after
+  that activation's original work and borrowers join. Open handles never move
+  with activations.
 - **Copies.** The writer finds the target silos through native Orleans
   membership (`IClusterMembershipService` / `IManagementGrain`) and sends the
   write through ordinary Orleans calls to the ZoneTree owner Grain Services on
@@ -135,10 +135,14 @@ A physical replica is another copy of one partition, not another partition to co
 in the result. Stateless workers perform interchangeable Task-based work using
 Orleans-managed activation pools.
 
-The current runtime eagerly opens a silo-local store and applies full copies.
-Shared-volume lazy ownership and distributed partition-query execution remain open
-implementation and qualification gates. A configured mount or a full-copy cluster
-does not qualify either behavior.
+The source implements lazy shared-session acquisition and joined close, isolated
+full-copy routing, and ordinary partition grains for `PartitionQuery` and
+`DistributedSearch`. A request pins one actual owner per distinct logical
+partition and preserves its expiry, cumulative budgets and read-cut checks across
+all leaf stages. Full copies remain copies of the same database; this does not
+implement a partition-to-disk sharding scheme. Both modes still require complete
+runtime and exact-source Linux qualification, including the deployed shared
+volume's locking and flush behavior.
 
 Sources: [Orleans stateless workers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains),
 [native grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory),

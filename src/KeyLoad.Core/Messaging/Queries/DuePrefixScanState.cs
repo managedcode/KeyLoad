@@ -28,7 +28,7 @@ internal sealed class DuePrefixScanState
         this.kind = kind;
         this.upper = upper;
         this.page = page;
-        lastKey = bounds.LastKey;
+        lastKey = bounds.LastKey?.ToArray();
     }
 
     internal bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
@@ -72,7 +72,7 @@ internal sealed class DuePrefixScanState
         var completed = reachedUpper && !deferred;
         var next = completed
             ? DueWorkCursor.Complete(cursor, kind)
-            : DueWorkCursor.WithPrefix(cursor, kind, new(true, upper.ToArray(), lastKey?.ToArray()));
+            : DueWorkCursor.WithPrefix(cursor, kind, new(true, ImmutableArray.CreateRange(upper), lastKey is null ? null : ImmutableArray.CreateRange(lastKey)));
         return new([.. hints], [.. rejected], next, kind, completed,
             page.ExaminedRecords, page.ExaminedBytes, admittedBytes);
     }
@@ -80,7 +80,7 @@ internal sealed class DuePrefixScanState
     internal static DueWorkPage EmptyPage(DueSweepCursor cursor, DueWorkKind kind,
         DuePrefixCursor bounds, byte[] upper, DuePageState page)
     {
-        var next = DueWorkCursor.WithPrefix(cursor, kind, new(true, upper.ToArray(), bounds.LastKey?.ToArray()));
+        var next = DueWorkCursor.WithPrefix(cursor, kind, new(true, ImmutableArray.CreateRange(upper), bounds.LastKey));
         return new([], [], next, kind, false, page.ExaminedRecords, page.ExaminedBytes, NoRetainedBytes);
     }
 

@@ -7,15 +7,14 @@ namespace KeyLoad.Clustering;
 internal static class RemoteTransferCoordination
 {
     internal static async Task<DueDispatchResult> ExecuteAsync(RemoteTransferCoordinationHint hint, string owner,
-        DatabaseEngine database, ICommitCoordinator coordinator, RemoteTransferSignedExecution execution, TimeProvider clock,
+        GrainRequestCodec codec, RemoteTransferSignedExecution execution, TimeProvider clock,
         IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission admission, CancellationToken cancellationToken)
     {
         var subject = options.Value.TransferCoordinatorPrincipalId
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferCoordinationProtocol.Unavailable);
-        RequireHint(hint, owner, subject, database.Store.Identity.Incarnation);
+        RequireHint(hint, owner, subject, codec.Incarnation);
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, admission.SchedulingToken, timeout.Token);
-        await coordinator.ReadBarrierAsync(lifetime.Token).ConfigureAwait(true);
         var source = await SourceAsync(execution, hint, lifetime.Token).ConfigureAwait(true);
         if (source is null || source.State != QueueTransferState.OutputPending)
         {
@@ -32,12 +31,12 @@ internal static class RemoteTransferCoordination
             {
                 if (hint.AcceptAttemptCeiling is not null && error == ErrorCode.ResourceExhausted)
                 {
-                    await RemoteTransferAttemptCoordination.AdvanceAsync(execution, database, hint, source.IntentToken,
+                    await RemoteTransferAttemptCoordination.AdvanceAsync(execution, codec, hint, source.IntentToken,
                         lifetime.Token).ConfigureAwait(true);
                 }
                 if (hint.RepairCeiling is not null && error == ErrorCode.PermissionDenied)
                 {
-                    await RemoteTransferRepairCoordination.AdvanceAsync(execution, database, hint, source.IntentToken,
+                    await RemoteTransferRepairCoordination.AdvanceAsync(execution, codec, hint, source.IntentToken,
                         QueueTransferRepairStage.Accept, null, lifetime.Token).ConfigureAwait(true);
                 }
                 return new(error);
@@ -48,10 +47,10 @@ internal static class RemoteTransferCoordination
         {
             return new(ErrorCode.UnknownWriteOutcome);
         }
-        return await CompleteAsync(execution, database, hint, receipt, lifetime.Token).ConfigureAwait(true);
+        return await CompleteAsync(execution, codec, hint, receipt, lifetime.Token).ConfigureAwait(true);
     }
 
-    private static async Task<DueDispatchResult> CompleteAsync(RemoteTransferSignedExecution execution, DatabaseEngine database,
+    private static async Task<DueDispatchResult> CompleteAsync(RemoteTransferSignedExecution execution, GrainRequestCodec codec,
         RemoteTransferCoordinationHint hint, QueueTransferReceiptInspection receipt, CancellationToken token)
     {
         var source = await SourceAsync(execution, hint, token).ConfigureAwait(true);
@@ -69,7 +68,7 @@ internal static class RemoteTransferCoordination
             [new CompleteQueueTransfer(hint.Source, hint.TransferId, receipt.ReceiptToken)]), token).ConfigureAwait(true);
         if (hint.RepairCeiling is not null && reply.Error == ErrorCode.PermissionDenied)
         {
-            await RemoteTransferRepairCoordination.AdvanceAsync(execution, database, hint, source.IntentToken,
+            await RemoteTransferRepairCoordination.AdvanceAsync(execution, codec, hint, source.IntentToken,
                 QueueTransferRepairStage.Complete, receipt.ReceiptToken, token).ConfigureAwait(true);
         }
         return new(reply.Error);
@@ -100,7 +99,7 @@ internal static class RemoteTransferCoordination
         return receipt;
     }
 
-    private static void RequireHint(RemoteTransferCoordinationHint hint, string owner, string subject, Guid incarnation)
+    internal static void RequireHint(RemoteTransferCoordinationHint hint, string owner, string subject, Guid incarnation)
     {
         if (hint is null || hint.Source?.Partition is null || hint.Destination?.Partition is null || hint.SourceCut is null
             || hint.Source.Partition.AtomicPartitionId != owner || hint.PrincipalId != subject || hint.TransferId == Guid.Empty

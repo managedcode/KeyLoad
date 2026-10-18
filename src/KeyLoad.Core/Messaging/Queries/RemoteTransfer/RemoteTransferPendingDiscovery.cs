@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -29,7 +30,7 @@ internal static class RemoteTransferPendingDiscovery
             _ = view.VisitReverseRange(Prefix, RemoteTransferCoordinationProtocol.SingleRecord, (key, _) =>
             {
                 budget.Check();
-                upper = DueWorkRecordDecoder.CopyKey(key);
+                upper = ImmutableArray.CreateRange(DueWorkRecordDecoder.CopyKey(key));
                 return false;
             },
                 observer: budget.Observe, cancellationToken: token);
@@ -59,21 +60,22 @@ internal static class RemoteTransferPendingDiscovery
         RemoteTransferPendingCursor cursor, RemoteTransferPendingBudget budget, CancellationToken token)
     {
         var last = cursor.LastKey;
+        var upper = cursor.UpperKey ?? throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidCursor);
         RemoteTransferCoordinationHint? hint = null;
         var reachedTail = false;
         var scanned = view.VisitRange(Prefix, budget.Remaining - RemoteTransferCoordinationProtocol.SingleRecord, (key, value) =>
         {
             budget.Check();
-            if (key.SequenceCompareTo(cursor.UpperKey) > RemoteTransferCoordinationProtocol.FirstIndex)
+            if (key.SequenceCompareTo(upper.AsSpan()) > RemoteTransferCoordinationProtocol.FirstIndex)
             {
                 reachedTail = true;
                 return false;
             }
-            last = DueWorkRecordDecoder.CopyKey(key);
+            last = ImmutableArray.CreateRange(DueWorkRecordDecoder.CopyKey(key));
             hint = database.ReadTransferCoordinationHint(budget.View(view), key, value, subject);
-            reachedTail = key.SequenceEqual(cursor.UpperKey);
+            reachedTail = key.SequenceEqual(upper.AsSpan());
             return hint is null && !reachedTail;
-        }, cursor.LastKey, observer: budget.Observe, cancellationToken: token);
+        }, cursor.LastKey?.ToArray(), observer: budget.Observe, cancellationToken: token);
         var completed = reachedTail || !scanned.HasMore && !scanned.StoppedByVisitor;
         return new(hint, completed ? cursor with
         {

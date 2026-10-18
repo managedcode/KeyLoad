@@ -7,12 +7,11 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Activation-local ANN hints; canonical records remain the durable work source.</summary>
 [StatelessWorker]
-internal sealed class AnnProjectionWorkerGrain(DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
+internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
     IServiceProvider services, TimeProvider clock, IOptions<DatabaseLimits> limits,
     IOptions<BackgroundWorkerOptions> batching, ILogger<AnnProjectionWorkerGrain> diagnostics)
     : Grain, IAnnProjectionWorkerGrain
 {
-    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly Queue<AnnProjectionWorkerEvent> pending = new();
     private byte[]? after;
     private IGrainFactory grains => GrainFactory;
@@ -63,7 +62,7 @@ internal sealed class AnnProjectionWorkerGrain(DatabaseEngine database, Func<ICo
     {
         try
         {
-            return await AnnProjectionJobOperation.RunAsync<byte[]?>(services, database,
+            return await AnnProjectionJobOperation.RunAsync<byte[]?>(services, limits,
                 binding => CycleCoreAsync(after, binding), token).ConfigureAwait(true);
         }
         catch (OperationCanceledException) when (!token.IsCancellationRequested)
@@ -77,18 +76,21 @@ internal sealed class AnnProjectionWorkerGrain(DatabaseEngine database, Func<ICo
         var token = binding.Token;
         try
         {
-            await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
             var budget = new ReadExecutionBudget(limits, clock, token);
-            var page = database.ReadAnnProjectionWorkPageBound(after, budget, binding);
+            budget.AttachResourceLifetimeBinding(binding);
+            var targetOwner = await storage.AnnDiscoveryTargetAsync(token).ConfigureAwait(true);
+            var page = await BackgroundStorageReadAccounting.ReadAsync<AnnProjectionDiscoveryPage>(budget, binding, budget.ExpiresAt,
+                (bounds, cancellation) => storage.Operations.ReadAnnProjectionWorkPageAsync(targetOwner, after,
+                    bounds, cancellation), token: token).ConfigureAwait(true);
             foreach (var rejection in page.Rejected)
             {
                 AnnProjectionJobDiagnostics.Failed(diagnostics, rejection);
             }
-            foreach (var work in page.Items)
+            foreach (var work in page.Hints)
             {
                 budget.Check();
-                var consumer = work.Consumer.Consumer;
-                var generation = work.Consumer.Definition.IndexGeneration;
+                var consumer = work.Consumer;
+                var generation = work.Generation;
                 var target = grains.GetGrain<IAnnProjectionCoordinatorGrain>(
                     AnnProjectionJobProtocol.GrainKey(consumer, generation, work.NodeId));
                 try
@@ -101,7 +103,7 @@ internal sealed class AnnProjectionWorkerGrain(DatabaseEngine database, Func<ICo
                     AnnProjectionJobDiagnostics.Failed(diagnostics, refusal.Code);
                 }
             }
-            return page.AfterKey;
+            return page.AfterKey?.ToArray();
         }
         catch (KeyLoadException failure)
         {

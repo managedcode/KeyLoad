@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Security.Cryptography;
-using KeyLoad.AppHost.Hosting;
 
 namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 

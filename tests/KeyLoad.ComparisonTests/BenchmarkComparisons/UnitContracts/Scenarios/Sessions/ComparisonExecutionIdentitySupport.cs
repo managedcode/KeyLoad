@@ -9,6 +9,7 @@ internal static class ComparisonExecutionIdentitySupport
     internal const string EvidenceProfile = "Benchmarks__EvidenceProfile";
     internal const string Topology = "Benchmarks__Topology";
     internal const string RunId = "GITHUB_RUN_ID";
+    internal const string GitHubActions = "GITHUB_ACTIONS";
     internal const string RunAttempt = "GITHUB_RUN_ATTEMPT";
     internal const string Repository = "GITHUB_REPOSITORY";
     internal const string GitHubRef = "GITHUB_REF";
@@ -22,7 +23,7 @@ internal static class ComparisonExecutionIdentitySupport
     internal static Dictionary<string, string> ValidSettings(string profile = "session-v1")
     {
         var settings = ComparisonHostBindingsSupport.ValidSettings();
-        settings["GITHUB_ACTIONS"] = "true";
+        settings[GitHubActions] = "true";
         settings[SourceRevision] = Revision;
         settings[EvidenceProfile] = profile;
         settings[RunId] = "37070000000";

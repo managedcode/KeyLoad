@@ -25,7 +25,7 @@ internal static class PartitionStorageNativePreStartDisposeFlow
         var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
             RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var directory = Path.Combine(root, DirectoryName);
-        var ports = new TestClusterPortAllocator();
+        using var ports = new TestClusterPortAllocator();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             Directory.CreateDirectory(root);

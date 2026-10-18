@@ -2,7 +2,6 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.GraphTraversal;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

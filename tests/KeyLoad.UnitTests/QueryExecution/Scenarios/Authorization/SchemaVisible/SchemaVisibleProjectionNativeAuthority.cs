@@ -51,7 +51,7 @@ internal static class SchemaVisibleProjectionNativeAuthority
             var result = fixture.Submit(OperationKind.ConfigureResource, request, id: id);
             await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
             await Assert.That(result.Problem?.Detail).IsEqualTo(InvalidIdentifier);
-                await Assert.That(result.Value is null).IsTrue();
+            await Assert.That(result.Value is null).IsTrue();
             var error = Assert.ThrowsExactly<KeyLoadException>(() => result.Get<ResourceDefinition>());
             await BinderFieldLineagePages.EqualAsync(result, fixture.Submit(OperationKind.ConfigureResource, request, id: id));
             await BinderFieldLineagePages.EqualAsync(domainBefore, DomainImage(fixture));

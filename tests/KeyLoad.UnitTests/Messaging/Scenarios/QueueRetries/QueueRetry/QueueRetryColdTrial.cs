@@ -85,7 +85,8 @@ internal static class QueueRetryColdTrial
                 rejected.Command.CommandId, time);
             await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(rejected.Result.Problem));
             await Assert.That(actual.Problem?.Detail).IsEqualTo(rejected.Result.Problem?.Detail);
-            await Assert.That(actual.Json).IsEqualTo(rejected.Result.Json);
+            await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
+                .SequenceEqual(NativeSerialization.Serialize(rejected.Result))).IsTrue();
             await Assert.That(actual.Value).IsNull();
         }
         foreach (var original in state.Completed)

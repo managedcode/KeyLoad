@@ -32,7 +32,7 @@ internal static class QueuePendingAuthorityHistory
 
     private static async Task MissingOutcomeAsync(ZoneTreeStore store, QueuePendingAuthorityState state)
         => await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Flow.Partition, QueueLifecycleTestProtocol.Administrator, state.Park.Id)))).IsNull();
+            state.Flow.Partition, QueueLifecycleTestProtocol.Administrator, state.Park.CommandId)))).IsNull();
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, QueuePendingAuthorityState state)
     {
@@ -40,11 +40,11 @@ internal static class QueuePendingAuthorityHistory
         foreach (var (operation, result) in state.Flow.Successes)
         {
             var saved = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-                state.Flow.Partition, QueueLifecycleTestProtocol.Administrator, operation.Id)))!;
+                state.Flow.Partition, QueueLifecycleTestProtocol.Administrator, operation.CommandId)))!;
             await Assert.That(saved.Incarnation).IsEqualTo(store.Identity.Incarnation);
             await Assert.That(NativeSerialization.Serialize(saved.Result).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
             var replay = owner.Apply(operation);
-            if (operation.Kind == OperationKind.Receive)
+            if (operation.Value!.Kind == OperationKind.Receive)
             {
                 await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
 

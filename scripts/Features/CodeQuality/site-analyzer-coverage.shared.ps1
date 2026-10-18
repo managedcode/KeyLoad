@@ -39,6 +39,8 @@ $script:CoverageTokens = [ordered]@{
     HelperDirectory = 'scripts/Features/CodeQuality'
     HelperFilePattern = 'site-analyzer-coverage*.ps1'
     CSharpExtension = '.cs'
+    NativeIntermediateOutputPrefix = 'obj/'
+    NativeBuildOutputPrefix = 'bin/'
     ManifestTempSuffix = '.tmp'
     Utf8Encoding = [Text.UTF8Encoding]::new($false)
     XmlRoot = 'coverage'
@@ -154,7 +156,7 @@ $script:CoverageTokens = [ordered]@{
     NativeSourceRoots = 'captured-checkout-or-explicit-unique-source-root'
     NativeUnverifiedRoots = 'fail-closed'
     NativeHitSemantics = 'non-negative integer; covered iff positive; source-line union across distinct class identities; conflicting identical identity fails'
-    NativeCollectorVersion = '18.11.2'
+    NativeCollectorVersion = '18.12.0'
     SiteSourceRevisionVariable = 'KEYLOAD_SITE_SOURCE_REVISION'
     GitHubRevisionVariable = 'GITHUB_SHA'
 }

@@ -7,20 +7,21 @@ import { validateSuccessfulJob, validateArtifact, uniqueNamed, projectJob, proje
 import { downloadArtifact } from './isolated-github-api.mjs';
 import { inspectNativeZip, extractNativeEntry } from './isolated-github-zip.mjs';
 import { validateDownloadedArchive } from './isolated-github-stream.mjs';
-import { hashRegularFile } from './isolated-github-files.mjs';
-import { createDirectory } from './image-bundle-files.mjs';
-import { readPreparedImages } from './image-bundle-read.mjs';
-import { runBounded } from './image-process.mjs';
+import { hashRegularFile, readJson } from './isolated-github-files.mjs';
+import { createDirectory } from './native-files.mjs';
+import { validateFunctionalProcesses } from './functional-process-evidence.mjs';
+import { validateNativeProcess } from './session-process-identity.mjs';
+import { runBounded } from './native-process.mjs';
 import { exactKeys, AGGREGATE } from './aggregate-contracts.mjs';
 
 export const FUNCTIONAL = Object.freeze({
   job: 'KeyLoad functional CLUSTER million-record ingestion', artifact: 'keyload-functional-heavy-load',
-  steps: Object.freeze(['Test exclusive heavy-load admission', 'Test ingestion while SDK and MCP reads are active', 'Save original functional load results and image receipts']),
+  steps: Object.freeze(['Test exclusive heavy-load admission', 'Test ingestion while SDK and MCP reads are active', 'Save original functional load results and native process receipts']),
   archive: 'archives/keyload-functional-heavy-load.zip',
   className: 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadClusterTests',
   methodName: 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads',
-  files: Object.freeze(['github/functional/original.trx', 'github/functional/images/image-receipt.json',
-    'github/functional/images/server-manifest.json', 'github/functional/images/comparisons-manifest.json']),
+  files: Object.freeze(['github/functional/original.trx', 'github/functional/native-process-startup.json',
+    'github/functional/native-process-before-shutdown.json', 'github/functional/native-process-shutdown.json']),
   maximumBytes: 33554432,
 });
 
@@ -32,7 +33,7 @@ export function selectDocumentFunctionalGate(capture, cohort) {
 }
 
 export function validateDocumentFunctionalProof(proof, cohort) {
-  requireGitHub(exactKeys(proof, ['job', 'artifact', 'archive', 'files', 'test', 'server'])
+  requireGitHub(exactKeys(proof, ['job', 'artifact', 'archive', 'files', 'test', 'processes'])
     && exactKeys(proof.job, ['id', 'name', 'url', 'conclusion', 'steps'])
     && Number.isSafeInteger(proof.job.id) && proof.job.id > 0 && proof.job.name === FUNCTIONAL.job
     && proof.job.url === canonicalJobUrl(cohort, proof.job.id) && proof.job.conclusion === 'success'
@@ -56,7 +57,8 @@ export function validateDocumentFunctionalProof(proof, cohort) {
     && exactKeys(proof.test, ['className', 'methodName', 'instanceName', 'count'])
     && proof.test.className === FUNCTIONAL.className && proof.test.methodName === FUNCTIONAL.methodName
     && proof.test.instanceName === FUNCTIONAL.methodName && proof.test.count === 1
-    && typeof proof.server === 'string' && /@sha256:[a-f0-9]{64}$/u.test(proof.server));
+    && Array.isArray(proof.processes) && proof.processes.length === 3);
+  for (const [index, process] of proof.processes.entries()) validateNativeProcess(process, 'server', 'node' + (index + 1));
   return proof;
 }
 
@@ -76,23 +78,24 @@ export async function parseDocumentFunctionalTrx(trx, workspace) {
 
 function originalEntries(entries) {
   const predicates = [entry => /(?:^|\/)cluster-heavy-load\/.+\.trx$/u.test(entry),
-    ...['image-receipt.json', 'server-manifest.json', 'comparisons-manifest.json']
-      .map(name => entry => entry.endsWith('/keyload-images/' + name) || entry === 'keyload-images/' + name)];
-  return predicates.map(predicate => {
+    ...FUNCTIONAL.files.slice(1).map(name => entry => new RegExp('(?:^|/)cluster-heavy-load/qualification/[a-f0-9-]{32,36}/'
+      + path.basename(name).replaceAll('.', '\\.') + '$', 'u').test(entry))];
+  const selected = predicates.map(predicate => {
     const matches = entries.filter(predicate);
     requireGitHub(matches.length === 1);
     return matches[0];
   });
+  requireGitHub(new Set(selected.slice(1).map(entry => path.posix.dirname(entry))).size === 1);
+  return selected;
 }
 
-export async function collectDocumentFunctionalGate(output, capture, context, server) {
+export async function collectDocumentFunctionalGate(output, capture, context, runtimeIdentity) {
   const selected = selectDocumentFunctionalGate(capture, context.cohort);
   const archive = path.join(output, FUNCTIONAL.archive);
   await downloadArtifact(selected.artifact, archive, GH.workerZipBytes, context);
   await validateDownloadedArchive(archive, selected.artifact, GH.workerZipBytes);
   const entries = originalEntries(await inspectNativeZip(archive, [], path.join(output, 'github/functional-inventory.txt'), context));
   await createDirectory(path.join(output, 'github/functional'));
-  await createDirectory(path.join(output, 'github/functional/images'));
   const files = [];
   for (const [index, entry] of entries.entries()) {
     const raw = await extractNativeEntry(archive, entry, path.join(output, FUNCTIONAL.files[index]), FUNCTIONAL.maximumBytes, context);
@@ -100,17 +103,19 @@ export async function collectDocumentFunctionalGate(output, capture, context, se
   }
   const raw = await hashRegularFile(archive, GH.workerZipBytes);
   const test = await parseDocumentFunctionalTrx(path.join(output, FUNCTIONAL.files[0]), context.native.workspace);
+  const processes = validateFunctionalProcesses(...await Promise.all(FUNCTIONAL.files.slice(1)
+    .map(file => readJson(path.join(output, file), FUNCTIONAL.maximumBytes))), runtimeIdentity);
   const proof = { job: projectJob(selected.job, context.cohort, FUNCTIONAL.steps), artifact: projectArtifact(selected.artifact),
-    archive: { path: FUNCTIONAL.archive, bytes: raw.bytes, sha256: raw.sha256 }, files, test, server };
-  await verifyDocumentFunctionalGate(output, proof, capture, context.cohort, server, context.native.workspace);
+    archive: { path: FUNCTIONAL.archive, bytes: raw.bytes, sha256: raw.sha256 }, files, test, processes };
+  await verifyDocumentFunctionalGate(output, proof, capture, context.cohort, runtimeIdentity, context.native.workspace);
   return proof;
 }
 
-export async function verifyDocumentFunctionalGate(input, supplied, capture, cohort, server, workspace = input, filesRoot = input) {
+export async function verifyDocumentFunctionalGate(input, supplied, capture, cohort, runtimeIdentity, workspace = input, filesRoot = input) {
   const proof = validateDocumentFunctionalProof(supplied, cohort);
   const selected = selectDocumentFunctionalGate(capture, cohort);
   requireGitHub(isDeepStrictEqual(proof.job, projectJob(selected.job, cohort, FUNCTIONAL.steps))
-    && isDeepStrictEqual(proof.artifact, projectArtifact(selected.artifact)) && proof.server === server);
+    && isDeepStrictEqual(proof.artifact, projectArtifact(selected.artifact)));
   const archive = path.join(input, proof.archive.path);
   const raw = await hashRegularFile(archive, GH.workerZipBytes);
   requireGitHub(raw.bytes === proof.archive.bytes && raw.sha256 === proof.archive.sha256);
@@ -126,9 +131,9 @@ export async function verifyDocumentFunctionalGate(input, supplied, capture, coh
         && original.bytes === actual.bytes && original.sha256 === actual.sha256);
     }
     requireGitHub(isDeepStrictEqual(proof.test, await parseDocumentFunctionalTrx(path.join(filesRoot, FUNCTIONAL.files[0]), workspace)));
-    const images = await readPreparedImages(path.join(filesRoot, 'github/functional/images'), { sourceSha: cohort.sourceRevision,
-      runId: String(cohort.runId), runAttempt: String(cohort.attempt), repository: cohort.repository, ref: cohort.ref });
-    requireGitHub(images.receipt.images.server.reference === server);
+    const processes = validateFunctionalProcesses(...await Promise.all(FUNCTIONAL.files.slice(1)
+      .map(file => readJson(path.join(filesRoot, file), FUNCTIONAL.maximumBytes))), runtimeIdentity);
+    requireGitHub(isDeepStrictEqual(processes, proof.processes));
   } finally { await rm(temporary, { recursive: true, force: true }); }
   return proof;
 }

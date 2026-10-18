@@ -7,7 +7,7 @@ const processFields = ['name', 'processId', 'startedAtUtc', 'aspireStartedAtUtc'
 const absolute = value => sessionText(value) && path.isAbsolute(value) && path.normalize(value) === value;
 const utc = value => typeof value === 'string' && /Z$/u.test(value) && Number.isFinite(Date.parse(value)) && Date.parse(value) > 0;
 
-function validateProcess(value, role, expectedName, runtimeIdentity) {
+export function validateNativeProcess(value, role, expectedName, runtimeIdentity = null) {
   require(exact(value, processFields) && value.name === expectedName && sessionPositive(value.processId)
     && value.processId <= 2_147_483_647 && utc(value.startedAtUtc)
     && (value.aspireStartedAtUtc === null ? role === 'comparison-client' : utc(value.aspireStartedAtUtc))
@@ -29,10 +29,10 @@ function validateProcess(value, role, expectedName, runtimeIdentity) {
 export function validateSessionProcesses(value, row, runtimeIdentity = null) {
   require(exact(value, ['client', 'servers']) && Array.isArray(value.servers)
     && value.servers.length === (row.target === 'KeyLoad' ? row.nodeCount : 0));
-  validateProcess(value.client, 'comparison-client', 'comparison-client', runtimeIdentity);
+  validateNativeProcess(value.client, 'comparison-client', 'comparison-client', runtimeIdentity);
   const pids = new Set([value.client.processId]);
   for (const [index, server] of value.servers.entries()) {
-    validateProcess(server, 'server', 'node' + (index + 1), runtimeIdentity);
+    validateNativeProcess(server, 'server', 'node' + (index + 1), runtimeIdentity);
     require(server.aspireStartedAtUtc !== null && !pids.has(server.processId)
       && Date.parse(server.startedAtUtc) <= Date.parse(value.client.startedAtUtc));
     pids.add(server.processId);

@@ -6,26 +6,21 @@ internal sealed class PartitionRecordInventoryTests
 {
     private const string Suffix = "inventory-probe";
     private const string Value = "raw-value";
-    internal const int ExpectedFamilyCount = 87;
+    internal const int ExpectedFamilyCount = 71;
     private static readonly PartitionRef Partition = new(PartitionRecordNativeFixture.TenantId,
         PartitionRecordNativeFixture.DatabaseId, PartitionRecordNativeFixture.DomainId, PartitionRecordNativeFixture.PartitionKey);
     internal static readonly string[] ExpectedFamilies =
     [
         "adjacency", "aggregate-snapshot-v1", "analytics-event", "analytics-generation", "blob-head-v1", "blob-part-v1", "blob-partmeta-v1",
         "blob-state-v1", "bm25-corpus-current", "dead-letter", "document", "document-epoch", "edge", "event", "event-feed",
-        "event-id", "event-sequence", "event-vector-capacity-v1", "event-vector-coverage-proof-v1",
-        "event-vector-map-v1", "event-vector-offer-v1", "event-vector-page-v1",
-        "event-vector-parent-call-v1", "event-vector-parent-outcome-index-v1", "event-vector-source-capacity-v1",
-        "event-vector-source-phase-v1", "event-vector-source-pin-v1", "graph-cross-partition-capacity", "graph-cross-partition-intent",
-        "graph-cross-reverse-adjacency", "graph-edge-owner-version", "graph-remote-capacity-v1",
-        "graph-remote-completion-v1", "graph-remote-intent-v1", "graph-remote-receiver-v1",
+        "event-id", "event-sequence", "graph-cross-partition-capacity", "graph-cross-partition-intent",
+        "graph-cross-reverse-adjacency", "graph-edge-owner-version",
         "inbox", "index", "lease", "message-body", "message-meta",
         "online-text-current", "outbox", "outbox-head", "outcome-locator-v1", "outcome-locator-v2", "outcome-v2",
         "processing-inbox", "processing-inbox-capacity", "projection-consumer", "projection-receipt", "queue-counters",
         "queue-dead-letter-order", "queue-order", "queue-pending-dead-letter",
         "queue-transfer-intent", "queue-transfer-source-capacity", "queue-transfer-target-capacity",
         "queue-transfer-target-receipt", "ready", "recurring-saga-capacity", "recurring-schedule",
-        "resource-owner-inventory-member-v1", "resource-owner-inventory-proof-v1",
         "saga-state", "sample", "sample-chunk-block", "sample-chunk-correction", "sample-chunk-manifest",
         "sample-chunk-window", "sample-id", "sample-retention-v1", "sample-rollup-v1", "sample-sequence", "scheduled",
         "stream-head", "subscription", "subscription-completion", "subscription-inbox",

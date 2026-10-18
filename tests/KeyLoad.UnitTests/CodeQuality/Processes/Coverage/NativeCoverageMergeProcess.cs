@@ -47,16 +47,16 @@ internal static class NativeCoverageMergeProcess
         return new(NativeCoverageToolPackage.Read(), coverage, testOptions, repositoryRoot, settings);
     }
 
-    internal static NativeCoverageImageSourceSnapshot CaptureCliSource(ToolingOptions options)
+    internal static NativeCoverageDeploymentSnapshot CaptureCliSource(ToolingOptions options)
     {
         var limits = options.Coverage;
         var source = NativeCoverageCliDeployment.CliOutput;
-        return NativeCoverageImageSourceSnapshot.Capture(source, limits.MaximumFiles,
+        return NativeCoverageDeploymentSnapshot.Capture(source, limits.MaximumFiles,
             limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.MaximumPathCharacters,
             limits.ReadBufferBytes);
     }
 
-    internal static void VerifyCliSource(ToolingOptions options, NativeCoverageImageSourceSnapshot source)
+    internal static void VerifyCliSource(ToolingOptions options, NativeCoverageDeploymentSnapshot source)
     {
         var limits = options.Coverage;
         source.VerifyUnchanged(NativeCoverageCliDeployment.CliOutput, limits.MaximumFiles,

@@ -10,11 +10,10 @@ internal static class ProductionSourceManifestScriptAssertions
     private const long MaximumScriptBytes = 33554432;
     private const int FirstIndex = 0;
     private const string ScriptPrefix = "functional-coverage";
-    private const string DockerIgnoreName = ".dockerignore";
     private const string ScriptDirectory = "scripts/Features/CodeQuality";
     private const string NameProperty = "name";
     private const string HashProperty = "sha256";
-    private static readonly string[] AllowedExtensions = [".ps1", ".mjs", ".sh", ".xml", ".json", ".dockerfile"];
+    private static readonly string[] AllowedExtensions = [".ps1", ".mjs", ".xml", ".json"];
 
     internal static async Task AssertAsync(JsonElement scripts)
     {
@@ -62,7 +61,7 @@ internal static class ProductionSourceManifestScriptAssertions
             {
                 throw new InvalidOperationException();
             }
-            if (item.Name.Equals(DockerIgnoreName, StringComparison.Ordinal) || IsIncludedScript(item.Name))
+            if (IsIncludedScript(item.Name))
             {
                 names.Add(item.Name);
             }

@@ -1,5 +1,5 @@
-using KeyLoad.AppHost.Features.ClusterReplication;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;

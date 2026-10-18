@@ -26,8 +26,10 @@ has one ordinary Orleans grain owner and one open ZoneTree instance; other silos
 call that owner. Orleans chooses and relocates the activation. Existing file
 ownership guards remain mandatory, and reopening waits for actual handle release.
 A shared mount is not permission for several processes to write the same ZoneTree
-files concurrently. Shared-volume support remains an open implementation and
-qualification gate until its lazy owner lifetime and filesystem behavior are proven.
+files concurrently. The source acquires one physical session per ordinary owner
+and joins its work and scoped borrowers before close. Complete runtime and
+delivered-source qualification, including deployed filesystem behavior, remains
+open. `SharedVolume` requires `ReplicaCount=1`; reject conflicting settings.
 
 With isolated storage, each silo-local Grain Service owns that node's ZoneTree
 files, native WAL, locks and ordered apply gate. Local code borrows storage through
@@ -185,6 +187,10 @@ Use .NET 10 and centrally pinned packages. Do not generate or commit
 `packages.lock.json`. Ignore build outputs, local databases and test artifacts.
 Every `dotnet build` invocation uses `-warnaserror`; preserve compiler and analyzer
 severity. No suppressions, disabled analyzers or reduced gates to obtain green.
+Local development, normal Aspire startup and functional tests use the SDK's
+default Debug configuration. Do not force Release or build both configurations
+for development checks. Keep compiled source identities and test artifact paths
+aligned with the selected configuration.
 
 Required development commands:
 
@@ -192,7 +198,7 @@ Required development commands:
 dotnet restore KeyLoad.slnx
 dotnet format KeyLoad.slnx --no-restore
 dotnet format KeyLoad.slnx --no-restore --verify-no-changes
-dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+dotnet build KeyLoad.slnx --no-restore -warnaserror
 node scripts/Features/RepositoryGovernance/verify.mjs
 ```
 

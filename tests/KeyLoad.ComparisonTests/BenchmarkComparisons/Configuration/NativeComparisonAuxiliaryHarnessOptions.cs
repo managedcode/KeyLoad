@@ -13,8 +13,6 @@ internal sealed partial record NativeComparisonHarnessOptions
     private const int MaximumMongoAuthenticationTimeoutSeconds = 2;
     private const int MaximumMongoReadinessTimeoutSeconds = 300;
     private const int MaximumMongoReadinessCleanupTimeoutSeconds = 30;
-    private const int MaximumImageBundleProcessTimeoutMinutes = 15;
-    private const int MaximumImageBundleCleanupTimeoutSeconds = 10;
     private const int MaximumGitHubNativeProcessTimeoutMinutes = 120;
     private const int MaximumGitHubNativeProcessCleanupTimeoutSeconds = 10;
     private const int MaximumKeyLoadPublicChecksTimeoutMinutes = 5;
@@ -28,8 +26,8 @@ internal sealed partial record NativeComparisonHarnessOptions
     private const int MaximumProgressWriteTimeoutSeconds = 5;
     private const int MaximumMongoAuthenticationMaximumPoolSize = 4;
     private const int MaximumProgressFileBufferBytes = 512;
-    private const int MaximumImageBundleReadBufferCharacters = 4096;
-    private const int MaximumImageBundleMaximumOutputCharacters = 65536;
+    private const int MaximumNativeToolReadBufferCharacters = 4096;
+    private const int MaximumNativeToolMaximumOutputCharacters = 65536;
     private const int MaximumKeyLoadFaultMaximumEvidenceBytes = 262144;
 
     public TimeSpan NativeDatabaseFlowTimeout { get; init; } = TimeSpan.FromMinutes(MaximumNativeDatabaseFlowTimeoutMinutes);
@@ -43,8 +41,6 @@ internal sealed partial record NativeComparisonHarnessOptions
     public TimeSpan MongoAuthenticationTimeout { get; init; } = TimeSpan.FromSeconds(MaximumMongoAuthenticationTimeoutSeconds);
     public TimeSpan MongoReadinessTimeout { get; init; } = TimeSpan.FromSeconds(MaximumMongoReadinessTimeoutSeconds);
     public TimeSpan MongoReadinessCleanupTimeout { get; init; } = TimeSpan.FromSeconds(MaximumMongoReadinessCleanupTimeoutSeconds);
-    public TimeSpan ImageBundleProcessTimeout { get; init; } = TimeSpan.FromMinutes(MaximumImageBundleProcessTimeoutMinutes);
-    public TimeSpan ImageBundleCleanupTimeout { get; init; } = TimeSpan.FromSeconds(MaximumImageBundleCleanupTimeoutSeconds);
     public TimeSpan GitHubNativeProcessTimeout { get; init; } = TimeSpan.FromMinutes(MaximumGitHubNativeProcessTimeoutMinutes);
     public TimeSpan GitHubNativeProcessCleanupTimeout { get; init; } = TimeSpan.FromSeconds(MaximumGitHubNativeProcessCleanupTimeoutSeconds);
     public TimeSpan KeyLoadPublicChecksTimeout { get; init; } = TimeSpan.FromMinutes(MaximumKeyLoadPublicChecksTimeoutMinutes);
@@ -58,8 +54,8 @@ internal sealed partial record NativeComparisonHarnessOptions
     public TimeSpan ProgressWriteTimeout { get; init; } = TimeSpan.FromSeconds(MaximumProgressWriteTimeoutSeconds);
     public int MongoAuthenticationMaximumPoolSize { get; init; } = MaximumMongoAuthenticationMaximumPoolSize;
     public int ProgressFileBufferBytes { get; init; } = MaximumProgressFileBufferBytes;
-    public int ImageBundleReadBufferCharacters { get; init; } = MaximumImageBundleReadBufferCharacters;
-    public int ImageBundleMaximumOutputCharacters { get; init; } = MaximumImageBundleMaximumOutputCharacters;
+    public int NativeToolReadBufferCharacters { get; init; } = MaximumNativeToolReadBufferCharacters;
+    public int NativeToolMaximumOutputCharacters { get; init; } = MaximumNativeToolMaximumOutputCharacters;
     public int KeyLoadFaultMaximumEvidenceBytes { get; init; } = MaximumKeyLoadFaultMaximumEvidenceBytes;
 
     private const int MaximumKeyLoadFaultExitedTimeoutSeconds = 20;
@@ -101,8 +97,6 @@ internal sealed partial record NativeComparisonHarnessOptions
             && MongoAuthenticationTimeout > TimeSpan.Zero && MongoAuthenticationTimeout.Ticks <= MaximumMongoAuthenticationTimeoutSeconds * TimeSpan.TicksPerSecond
             && MongoReadinessTimeout > TimeSpan.Zero && MongoReadinessTimeout.Ticks <= MaximumMongoReadinessTimeoutSeconds * TimeSpan.TicksPerSecond
             && MongoReadinessCleanupTimeout > TimeSpan.Zero && MongoReadinessCleanupTimeout.Ticks <= MaximumMongoReadinessCleanupTimeoutSeconds * TimeSpan.TicksPerSecond
-            && ImageBundleProcessTimeout > TimeSpan.Zero && ImageBundleProcessTimeout.Ticks <= MaximumImageBundleProcessTimeoutMinutes * TimeSpan.TicksPerMinute
-            && ImageBundleCleanupTimeout > TimeSpan.Zero && ImageBundleCleanupTimeout.Ticks <= MaximumImageBundleCleanupTimeoutSeconds * TimeSpan.TicksPerSecond
             && GitHubNativeProcessTimeout > TimeSpan.Zero && GitHubNativeProcessTimeout.Ticks <= MaximumGitHubNativeProcessTimeoutMinutes * TimeSpan.TicksPerMinute
             && GitHubNativeProcessCleanupTimeout > TimeSpan.Zero && GitHubNativeProcessCleanupTimeout.Ticks <= MaximumGitHubNativeProcessCleanupTimeoutSeconds * TimeSpan.TicksPerSecond
             && KeyLoadPublicChecksTimeout > TimeSpan.Zero && KeyLoadPublicChecksTimeout.Ticks <= MaximumKeyLoadPublicChecksTimeoutMinutes * TimeSpan.TicksPerMinute
@@ -116,10 +110,10 @@ internal sealed partial record NativeComparisonHarnessOptions
             && ProgressWriteTimeout > TimeSpan.Zero && ProgressWriteTimeout.Ticks <= MaximumProgressWriteTimeoutSeconds * TimeSpan.TicksPerSecond
             && MongoAuthenticationMaximumPoolSize is >= PositiveMinimum and <= MaximumMongoAuthenticationMaximumPoolSize
             && ProgressFileBufferBytes is >= PositiveMinimum and <= MaximumProgressFileBufferBytes
-            && ImageBundleReadBufferCharacters is >= PositiveMinimum and <= MaximumImageBundleReadBufferCharacters
-            && ImageBundleMaximumOutputCharacters is >= PositiveMinimum and <= MaximumImageBundleMaximumOutputCharacters
+            && NativeToolReadBufferCharacters is >= PositiveMinimum and <= MaximumNativeToolReadBufferCharacters
+            && NativeToolMaximumOutputCharacters is >= PositiveMinimum and <= MaximumNativeToolMaximumOutputCharacters
             && KeyLoadFaultMaximumEvidenceBytes is >= PositiveMinimum and <= MaximumKeyLoadFaultMaximumEvidenceBytes
-            && ImageBundleReadBufferCharacters <= ImageBundleMaximumOutputCharacters
+            && NativeToolReadBufferCharacters <= NativeToolMaximumOutputCharacters
             && KeyLoadFaultExitedTimeout > TimeSpan.Zero && KeyLoadFaultExitedTimeout.Ticks <= MaximumKeyLoadFaultExitedTimeoutSeconds * TimeSpan.TicksPerSecond
             && KeyLoadFaultAttemptTimeout > TimeSpan.Zero && KeyLoadFaultAttemptTimeout.Ticks <= MaximumKeyLoadFaultAttemptTimeoutSeconds * TimeSpan.TicksPerSecond
             && KeyLoadFaultReadinessTimeout > TimeSpan.Zero && KeyLoadFaultReadinessTimeout.Ticks <= MaximumKeyLoadFaultReadinessTimeoutSeconds * TimeSpan.TicksPerSecond

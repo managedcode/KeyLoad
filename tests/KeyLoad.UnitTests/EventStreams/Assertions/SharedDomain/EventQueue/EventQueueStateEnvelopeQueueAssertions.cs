@@ -17,17 +17,17 @@ internal static class EventQueueStateEnvelopeQueueAssertions
     private const string ParkedFamily = "queue-dead-letter-order";
     private const string OrderFamily = "queue-order";
 
-    internal static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample,
+    internal static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state,
         EventQueueStateEnvelopeStage stage)
     {
         var ready = Ready(stage, fixture.At);
         var scheduled = ScheduledMetadata(stage, fixture);
-        var storedBytes = await MessageAsync(fixture, sample, ready) + await MessageAsync(fixture, sample, scheduled);
+        var storedBytes = await MessageAsync(fixture, state, ready) + await MessageAsync(fixture, state, scheduled);
         var retained = (ready.State == MessageState.Acked ? NoUsage : SingleResult)
             + (scheduled.State == MessageState.Acked ? NoUsage : SingleResult);
         var leased = ready.State == MessageState.Leased || scheduled.State == MessageState.Leased;
         var active = ready.State == MessageState.Leased ? Item : Scheduled;
-        var inFlightBytes = leased ? sample.Bodies[Convert.ToHexString(
+        var inFlightBytes = leased ? state.Bodies[Convert.ToHexString(
             KeySpace.Partition(BodyFamily, fixture.Partition, Queue, active))].LongLength : NoUsage;
         var sequence = stage >= EventQueueStateEnvelopeStage.ScheduledClaimed ? ScheduledReadySequence : ReadySequence;
         await EventQueueStateEnvelopeSourceAssertions.EqualAsync(fixture.Store.Read(view => view.GetRecord<QueueCounters>(
@@ -62,7 +62,7 @@ internal static class EventQueueStateEnvelopeQueueAssertions
         };
     }
 
-    private static async Task<long> MessageAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample,
+    private static async Task<long> MessageAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state,
         MessageMetadata metadata)
     {
         var retained = metadata.State != MessageState.Acked;
@@ -79,7 +79,7 @@ internal static class EventQueueStateEnvelopeQueueAssertions
         }
         var input = EventQueueStateEnvelopeProducer.Message(fixture, metadata.Id == Scheduled);
         await Assert.That(body).IsNotNull();
-        await Assert.That(body!.AsSpan().SequenceEqual(sample.Bodies[Convert.ToHexString(key)])).IsTrue();
+        await Assert.That(body!.AsSpan().SequenceEqual(state.Bodies[Convert.ToHexString(key)])).IsTrue();
         await EventQueueStateEnvelopeSourceAssertions.EqualAsync(NativeSerialization.Deserialize<MessageBody>(body),
             new MessageBody(metadata.Id, Payload, Headers, null, JsonData.Fingerprint(input)));
         return body.LongLength;

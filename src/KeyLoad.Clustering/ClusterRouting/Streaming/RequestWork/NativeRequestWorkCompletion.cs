@@ -1,6 +1,6 @@
 namespace KeyLoad.Clustering;
 
-/// <summary>Synchronizes the original lease completion and cancellation-observer barrier on its owner's gate.</summary>
+/// <summary>Synchronizes the original lease's first failure context and async settlement on its owner's gate.</summary>
 internal static class NativeRequestWorkCompletion
 {
     internal static Task PrepareAsync(Lock gate, NativeRequestWorkLease lease)
@@ -21,7 +21,8 @@ internal static class NativeRequestWorkCompletion
             {
                 lease.FreezeContext(original, cleanup);
                 start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-                lease.CompletionDriver = lease.FinishAsync(start.Task, lease.BeginCompletion());
+                _ = lease.BeginCompletion();
+                lease.CompletionDriver = lease.FinishAsync(start.Task);
             }
         }
         start?.TrySetResult();
@@ -56,13 +57,4 @@ internal static class NativeRequestWorkCompletion
         }
     }
 
-    internal static void ReleaseCloseObserver(Lock gate, NativeRequestWorkLease lease)
-    {
-        TaskCompletionSource? released;
-        lock (gate)
-        {
-            released = lease.ReleaseCloseObserver();
-        }
-        released?.TrySetResult();
-    }
 }

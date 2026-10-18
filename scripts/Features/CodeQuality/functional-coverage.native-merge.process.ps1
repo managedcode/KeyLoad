@@ -263,10 +263,10 @@ function Invoke-FcCoverageMerge([string] $ToolRoot, [string[]] $Inputs, [string]
     $result
 }
 
-function Read-FcNativeToolClosure([string] $ToolRoot, [string] $Version, [object] $Bounds, [object[]] $ContextEntries) {
+function Read-FcNativeToolClosure([string] $ToolRoot, [string] $Version, [object] $Bounds, [object[]] $ExpectedEntries) {
     $helper = Join-Path $PSScriptRoot 'functional-coverage.native-merge.tool.mjs'
     $boundsJson = ConvertTo-Json -InputObject $Bounds -Depth 4 -Compress
-    $entriesJson = if ($null -eq $ContextEntries) { 'null' } else { ConvertTo-Json -InputObject @($ContextEntries) -Depth 4 -Compress }
+    $entriesJson = if ($null -eq $ExpectedEntries) { 'null' } else { ConvertTo-Json -InputObject @($ExpectedEntries) -Depth 4 -Compress }
     $arguments = [string[]] @($helper,$ToolRoot,$Version,$boundsJson,$entriesJson)
     $result = Invoke-FcCoverageProcess 'node' $arguments ([int] $Bounds.applicationCleanupTimeoutSeconds) `
         ([int] $Bounds.maximumManifestBytes)

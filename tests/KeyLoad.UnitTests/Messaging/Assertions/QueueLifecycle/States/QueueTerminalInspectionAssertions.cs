@@ -51,7 +51,7 @@ internal static class QueueTerminalInspectionAssertions
         var before = QueueLifecycleConditionAssertions.Capture(store);
         foreach (var (operation, result) in state.Successes)
         {
-            if (operation.Kind == OperationKind.Receive)
+            if (operation.Value!.Kind == OperationKind.Receive)
             {
                 var current = result.Get<ReceiveResult>().Deliveries.All(item => item.Id == currentMessageId);
                 await QueueReceiveReplayAssertions.SameAsync(store, state.Partition, operation, result, current,

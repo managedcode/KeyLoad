@@ -18,8 +18,9 @@ function viewWorker(worker, report) {
   return { ...worker, rawSha256: worker.sessionSha256, disposition: report.status === 'notQualified' || unqualified ? 'failed'
     : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status, reason: unqualified ? worker.qualification.status === 'failed' ? worker.session.reason : 'Native profile or session resource qualification incomplete.' : report.detail,
     report: { hostOs: runtime.operatingSystem, architecture: runtime.architecture, logicalProcessors: runtime.logicalProcessors,
-      runtime: runtime.framework, storage: runtime.storage, loadGeneratorImage: worker.session.images.runner,
-      nativeServerImage: worker.session.images.server ?? notRecorded, targets: [target] } };
+      runtime: runtime.framework, storage: runtime.storage, client: worker.session.processes.client,
+      serverProcesses: worker.session.processes.servers,
+      nativeServerImage: worker.target === 'KeyLoad' ? null : worker.session.images.server ?? notRecorded, targets: [target] } };
 }
 export function selectedIsolatedRows(projection, scenario, nodeCount, repetition, metric, target) {
   const [caseId, laneId] = scenario.split('/');

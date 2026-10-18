@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Explicit validated native options for standalone text-projection regression owners.</summary>
+/// <summary>Explicit validated native options for standalone text-projection owners.</summary>
 internal static class UnitNativeTextOptions
 {
     internal static IOptions<NativeTextExecutionOptions> Execution(NativeTextExecutionOptions? configured = null)

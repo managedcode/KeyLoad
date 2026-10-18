@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedGitHubNativeProcess
 {
-    internal static async Task<ImageBundleRealResult> RunAsync(CancellationToken cancellationToken)
+    internal static async Task<NativeToolProcessResult> RunAsync(CancellationToken cancellationToken)
     {
         using var process = new Process { StartInfo = StartInfo() };
         if (!process.Start())
@@ -15,8 +15,8 @@ internal static class IsolatedGitHubNativeProcess
 
         using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.GitHubNativeProcessTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
-        var output = ImageBundleRealOutput.ReadAsync(process.StandardOutput, deadline.Token);
-        var error = ImageBundleRealOutput.ReadAsync(process.StandardError, deadline.Token);
+        var output = NativeToolProcessOutput.ReadAsync(process.StandardOutput, deadline.Token);
+        var error = NativeToolProcessOutput.ReadAsync(process.StandardError, deadline.Token);
         try
         {
             await process.WaitForExitAsync(deadline.Token);
@@ -31,16 +31,16 @@ internal static class IsolatedGitHubNativeProcess
             finally
             {
                 await deadline.CancelAsync();
-                await ImageBundleRealOutput.ObserveAsync(output);
-                await ImageBundleRealOutput.ObserveAsync(error);
+                await NativeToolProcessOutput.ObserveAsync(output);
+                await NativeToolProcessOutput.ObserveAsync(error);
             }
         }
     }
 
     private static ProcessStartInfo StartInfo()
     {
-        var root = ImageBundleRealProtocol.RepositoryRoot();
-        var start = new ProcessStartInfo(ImageBundleRealProtocol.Node)
+        var root = SessionNodeProcess.RepositoryRoot();
+        var start = new ProcessStartInfo(IsolatedGitHubNativeProtocol.Node)
         {
             WorkingDirectory = root,
             UseShellExecute = false,
@@ -48,8 +48,7 @@ internal static class IsolatedGitHubNativeProcess
             RedirectStandardError = true,
             CreateNoWindow = true,
         };
-        start.ArgumentList.Add(Path.Combine(root, ImageBundleRealProtocol.Scripts, ImageBundleRealProtocol.Features,
-            ImageBundleRealProtocol.Slice, IsolatedGitHubNativeProtocol.Entry));
+        start.ArgumentList.Add(SessionNodeProcess.Module(IsolatedGitHubNativeProtocol.Entry));
         return start;
     }
 

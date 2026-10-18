@@ -13,6 +13,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null) : IAsyncDisposable
 {
+    private const string ExternalImageRequired = "An external database comparison requires its configured container image.";
     internal TimeProvider Clock { get; } = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
     private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
@@ -48,20 +49,24 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         target = settings.Selection.Target switch
         {
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, native),
-            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image!, executionOptions, provider: Clock),
-            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, provider: Clock),
-            IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, executionOptions, lifecycleOptions, topology, provider: Clock),
+            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(native), executionOptions, provider: Clock),
+            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(native), executionOptions, provider: Clock),
+            IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, RequireExternalImage(native), executionOptions, lifecycleOptions, topology, provider: Clock),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),
-            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, PrimaryEndpointIndex), provider: Clock),
-            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, executionOptions, diagnostics, topology, [.. native.Replicas], provider: Clock),
-            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, topology, lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, native.Image, topology, lifecycleOptions, diagnostics, provider: Clock),
+            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, RequireExternalImage(native), lifecycleOptions, topology, CreateClient(native, PrimaryEndpointIndex), provider: Clock),
+            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, RequireExternalImage(native), lifecycleOptions, executionOptions, diagnostics, topology, [.. native.Replicas], provider: Clock),
+            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(native), lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, RequireExternalImage(native), topology, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(native), topology, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, RequireExternalImage(native), topology, lifecycleOptions, diagnostics, provider: Clock),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
     }
+
+    private static string RequireExternalImage(IsolatedHostNativeSettings native)
+        => !string.IsNullOrWhiteSpace(native.Image) ? native.Image
+            : throw new InvalidOperationException(ExternalImageRequired);
 
     private KeyLoadTarget CreateKeyLoad(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
     {
@@ -79,7 +84,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(native);
-        return new(clients[ClientsFirstIndex], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Topology, clients, provider: Clock);
+        return new(clients[ClientsFirstIndex], settings.RunId, RequireExternalImage(native), executionOptions, lifecycleOptions, settings.Selection.Topology, clients, provider: Clock);
     }
 
     private HttpClient[] CreateClients(IsolatedHostNativeSettings native)

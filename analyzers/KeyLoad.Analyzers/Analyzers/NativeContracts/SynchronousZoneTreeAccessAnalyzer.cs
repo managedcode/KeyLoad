@@ -26,9 +26,9 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
         ArgumentNullException.ThrowIfNull(context);
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
-        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
-        context.RegisterOperationAction(AnalyzeProperty, OperationKind.PropertyReference);
-        context.RegisterOperationAction(AnalyzeUsing, OperationKind.Using, OperationKind.UsingDeclaration);
+        context.RegisterOperationAction(AnalyzeInvocation, Microsoft.CodeAnalysis.OperationKind.Invocation);
+        context.RegisterOperationAction(AnalyzeProperty, Microsoft.CodeAnalysis.OperationKind.PropertyReference);
+        context.RegisterOperationAction(AnalyzeUsing, Microsoft.CodeAnalysis.OperationKind.Using, Microsoft.CodeAnalysis.OperationKind.UsingDeclaration);
     }
 
     private static void AnalyzeInvocation(OperationAnalysisContext context)

@@ -50,7 +50,7 @@ function Read-FcNativeContributors([object] $SourceManifest, [object] $Bounds, [
         Assert-FcNativeUniqueLabels $entry.executedModules '\AKeyLoad\.[A-Za-z0-9.]{1,96}\z'
         foreach ($module in $entry.executedModules) {
             if (-not $allowedModules.Contains([string]$module) -or
-                $module -cin @('KeyLoad.AppHost','KeyLoad.Analyzers')) { throw $script:FcNativeContributors.Invalid }
+                $module -cin @('KeyLoad.AppHost','KeyLoad.LoadTests.AppHost','KeyLoad.Analyzers')) { throw $script:FcNativeContributors.Invalid }
         }
         $bySuite[[string] $entry.suite].Add($entry)
     }

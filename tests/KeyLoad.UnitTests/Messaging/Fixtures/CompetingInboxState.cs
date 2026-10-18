@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
@@ -29,6 +30,7 @@ internal sealed class CompetingInboxState(PartitionRef partition, DateTimeOffset
     internal Mutation[] Effects(int index) => [new PutDocument(Documents, "effect", Json(index), 0),
         new AppendEvents(Streams, "effect", [new("effect", "Completed", Json(index))], ExpectedStreamRevision.NoStream),
         new EnqueueMessage(Output, "effect", Json(index))];
-    internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T request, Guid id)
-        => new(id, kind, "root", Time, System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
+    internal Command<DatabaseCommand> Operation<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
+        => database.CreateCommand(kind, id, "root", Time,
+            System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
 }

@@ -85,7 +85,7 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
                 var arguments = new[]
                 {
                     "--input-type=module", "-e", SetupProgram,
-                    SessionNodeProcess.Module("image-process.mjs"),
+                    SessionNodeProcess.Module("native-process.mjs"),
                     Path.Combine(repository, ".gitignore"), root
                 };
                 var result = await SessionNodeProcess.RunAsync(arguments, token);
@@ -119,7 +119,7 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
     {
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", VerifyProgram,
-                SessionNodeProcess.Module("prepare-images.mjs"), root, head], token);
+                SessionNodeProcess.Module("source-checkout.mjs"), root, head], token);
         if (result.ExitCode != 0 || result.Error.Length != 0)
         {
             throw new InvalidOperationException("Production source checkout validation did not settle successfully.");

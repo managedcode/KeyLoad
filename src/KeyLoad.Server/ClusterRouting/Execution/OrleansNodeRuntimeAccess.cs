@@ -4,7 +4,6 @@ namespace KeyLoad.Server;
 
 internal static class OrleansNodeRuntimeAccess
 {
-    internal static KeyLoad.Query.QueryEngine BorrowPartitionQueries(this OrleansNode node) => node.RuntimeServices.GetRequiredService<KeyLoad.Query.QueryEngine>();
 
     internal static GrainRequestCodec CatalogRequestCodec(this OrleansNode node) => node.RuntimeServices.GetRequiredService<GrainRequestCodec>();
 

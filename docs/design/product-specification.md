@@ -51,7 +51,7 @@ membership, transport, placement or movement mechanism of its own.
   same paths to participating silos and require one open owner per mutable
   physical partition, joined close before reopening and no data copying.
   [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md) defines these
-  contracts and their open implementation and qualification gates.
+  contracts and their open runtime and delivered-source qualification gates.
 - **Copies.** The writer finds the target silos through native Orleans membership
   (`IClusterMembershipService` / `IManagementGrain`) and sends the write through
   ordinary Orleans calls to the ZoneTree owner Grain Services on
@@ -182,7 +182,13 @@ version + checkpoint               version + checkpoint
 
 `Partition grain`: an ordinary Orleans grain that serializes and routes the commands of one logical partition to the ZoneTree owners on `ReplicaCount` silos. The number of grains follows the number of operational partitions. A per-document grain may be an optional facade; the base data path works with partition batches. The base architecture creates no grain per edge, sample or ANN node. Orleans may migrate a partition grain; migration does not move files.
 
-`ZoneTree owner`: an Orleans Grain Service, local to every silo. It holds that node's ZoneTree: engine instances, file handles, WAL/journals, file locks, the maintainer, reader leases and ordered apply. Other code on the node gets ZoneTree from it through DI. Its lifetime matches the native silo lifecycle; grain deactivation or migration is not a command to delete or move the data directory.
+`ZoneTree owner`: a silo-local physical owner exposed through an Orleans Grain
+Service. It holds engine instances, file handles, WAL/journals, locks, maintenance,
+reader leases and ordered apply. Scoped local services borrow its exact session
+through DI. Isolated volumes open on silo initialization. Shared volumes open
+lazily for an ordinary database activation and close only after that activation's
+original work and scoped borrowers join. No handle crosses RPC; another silo can
+reopen the shared files after actual release. Deactivation never deletes data.
 
 `QueryCoordinator` plans a query, bounds fan-out, collects top-k and manages the overall budget. CPU-heavy traversal, scoring, vector distance and compaction run in separate bounded execution pools. No external API calls run inside long grain turns or write gates.
 
@@ -194,7 +200,15 @@ One shared helper per identity kind creates every grain key and every object, co
 
 ### Cluster startup
 
-Every node starts as an Orleans silo from configuration: `KeyLoad:SiloCount`, `KeyLoad:ReplicaCount`, a local data directory and the native Orleans clustering provider configured by Aspire. Orleans provides membership, discovery, failure detection, the directory and placement; KeyLoad adds no cluster infrastructure of its own. During the native silo lifecycle the ZoneTree owner opens and recovers the local files, and only then does the node accept database operations. Scaling means adding silos to the Orleans cluster; `ReplicaCount`, read at startup, sets the number of copies.
+Every node starts as an Orleans silo with `KeyLoad:SiloCount`,
+`KeyLoad:ReplicaCount`, `KeyLoad:StorageMode`, its configured data path and the
+native clustering provider configured by Aspire. Orleans owns membership,
+discovery, failure detection, directory and placement. Isolated owners recover
+their files during native silo initialization. Shared storage opens only at its
+ordinary database owner; other API nodes can route there without opening files.
+Database readiness checks the canonical owner through Orleans. Scaling adds
+silos; startup copy settings describe independent persisted stores. Shared mode
+requires one copy because all participating silos reach the same physical files.
 
 ## 4. Partition model and physical storage
 

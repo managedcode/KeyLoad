@@ -16,7 +16,7 @@ internal static class EventQueueStateEnvelopeSourceAssertions
     private const string TopicHeadFamily = "topic-head";
     private const string TopicIdentityFamily = "topic-event-id";
 
-    internal static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample)
+    internal static async Task CurrentAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state)
     {
         var record = new EventRecord(fixture.Stream, InitialRevision, InitialRevision,
             new(Item, EventType, Payload, Headers), fixture.At);
@@ -47,10 +47,10 @@ internal static class EventQueueStateEnvelopeSourceAssertions
         }
         await TopicAsync(fixture);
         await ClassificationAsync(fixture);
-        await RetainSourcesAsync(fixture, sample);
+        await RetainSourcesAsync(fixture, state);
     }
 
-    private static async Task RetainSourcesAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeSample sample)
+    private static async Task RetainSourcesAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state)
     {
         var keys = new[]
         {
@@ -70,13 +70,13 @@ internal static class EventQueueStateEnvelopeSourceAssertions
         {
             var bytes = Required(fixture, key);
             var identity = Convert.ToHexString(key);
-            if (sample.SourceRows.TryGetValue(identity, out var original))
+            if (state.SourceRows.TryGetValue(identity, out var original))
             {
                 await Assert.That(bytes.AsSpan().SequenceEqual(original)).IsTrue();
             }
             else
             {
-                sample.SourceRows.Add(identity, bytes);
+                state.SourceRows.Add(identity, bytes);
             }
         }
     }

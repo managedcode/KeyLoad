@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+
 namespace KeyLoad.UnitTests;
 
 /// <summary>One actual canonical store view, including physical identity and complete retained bytes.</summary>

@@ -22,7 +22,7 @@ internal static class NativeCoverageMergeScenario
         NativeCoverageMergeProcess.ToolingOptions options, CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
-        NativeCoverageImageSourceSnapshot? source = null;
+        NativeCoverageDeploymentSnapshot? source = null;
         ServerFailureObserver.Observe(() => source = NativeCoverageMergeProcess.CaptureCliSource(options), failures);
         if (source is not null)
         {
@@ -41,7 +41,7 @@ internal static class NativeCoverageMergeScenario
 
     private static async Task RunOperationsAsync(CliBackupRestoreFixture fixture,
         NativeCoverageMergeProcess.ToolingOptions options, string ownedRoot,
-        NativeCoverageImageSourceSnapshot source, CancellationToken cancellationToken)
+        NativeCoverageDeploymentSnapshot source, CancellationToken cancellationToken)
     {
         var coverageRoot = Path.Combine(fixture.Root, CoverageDirectoryName);
         Directory.CreateDirectory(coverageRoot);
@@ -57,7 +57,7 @@ internal static class NativeCoverageMergeScenario
 
     private static async Task<SortedDictionary<string, byte[]>> RunBackupAndPackAsync(CliBackupRestoreFixture fixture,
         NativeCoverageMergeProcess.ToolingOptions options, string ownedRoot,
-        NativeCoverageImageSourceSnapshot source, string backupReport, string packReport,
+        NativeCoverageDeploymentSnapshot source, string backupReport, string packReport,
         CancellationToken cancellationToken)
     {
         var backup = await NativeCoverageCliCollector.CollectCliAsync(options, ownedRoot, source, BackupCliImageName,
@@ -76,7 +76,7 @@ internal static class NativeCoverageMergeScenario
 
     private static async Task RunRestoreAsync(CliBackupRestoreFixture fixture,
         NativeCoverageMergeProcess.ToolingOptions options, string ownedRoot,
-        NativeCoverageImageSourceSnapshot source, string restoreReport, CancellationToken cancellationToken)
+        NativeCoverageDeploymentSnapshot source, string restoreReport, CancellationToken cancellationToken)
     {
         var restore = await NativeCoverageCliCollector.CollectCliAsync(options, ownedRoot, source, RestoreCliImageName,
             ["restore", fixture.BackupDirectory, fixture.RestoredDirectory], restoreReport, cancellationToken);

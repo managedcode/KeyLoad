@@ -13,6 +13,7 @@ internal static class PartitionQueryLeafOwnerValidation
         if (physicalOwner is not null)
         {
             if (result is null || result.Partition != partition || result.NodeId == Guid.Empty
+                || result.NodeId != physicalOwner.PhysicalShardId
                 || result.Incarnation != physicalOwner.Incarnation || result.ReadGeneration < InitialGeneration)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, InvalidOwnerDetail);

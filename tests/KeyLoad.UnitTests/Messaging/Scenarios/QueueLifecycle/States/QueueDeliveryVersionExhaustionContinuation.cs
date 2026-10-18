@@ -23,7 +23,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, data, failed);
         var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         var command = new DeliveryCommand(Guid.NewGuid(), data.Lane, state.Delivery.Token, action);
-        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command,
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Delivery, command,
             command.CommandId, new DateTimeOffset(data.Operation.Timestamp)));
         var result = database.Apply(operation);
         await QueueDeliveryVersionExhaustionAssertions.ReceiptAsync(result, command, data.Body.Id, 3);
@@ -79,7 +79,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         if (action != DeliveryAction.Ack)
         {
             var command = new DeliveryCommand(Guid.NewGuid(), data.Lane, delivery.Token, DeliveryAction.Ack);
-            var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command, command.CommandId, at));
+            var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Delivery, command, command.CommandId, at));
             var result = database.Apply(operation);
             version++;
             await QueueDeliveryVersionExhaustionAssertions.ReceiptAsync(result, command, data.Body.Id, version);
@@ -98,13 +98,13 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         var data = state.Data;
         var at = new DateTimeOffset(data.Operation.Timestamp).AddSeconds(2);
         var request = new CommandRequest(Guid.NewGuid(), data.Lane.Partition, [new EnqueueMessage(data.Lane.Queue, id, payload, headers)]);
-        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Batch, request, request.CommandId, at));
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Batch, request, request.CommandId, at));
         var created = database.Apply(operation);
         created.Get<CommitReceipt>();
         receipts.Add((operation, created));
         var delivery = await ClaimAsync(database, data.Lane, id, payload, headers, at, 1);
         var ack = new DeliveryCommand(Guid.NewGuid(), data.Lane, delivery.Token, DeliveryAction.Ack);
-        var completion = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, ack, ack.CommandId, at));
+        var completion = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Delivery, ack, ack.CommandId, at));
         var result = database.Apply(completion);
         await QueueDeliveryVersionExhaustionAssertions.ReceiptAsync(result, ack, id, 3);
         receipts.Add((completion, result));
@@ -116,7 +116,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         string payload, string headers, DateTimeOffset at, int attempt)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, at));
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Receive, request, request.RequestId, at));
         var result = database.Apply(operation);
         var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await QueueClaimVersionExhaustionAssertions.EqualAsync(delivery, new Delivery(id, payload, headers, delivery.Token,
@@ -145,7 +145,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         await Assert.That(stale.Value).IsNull();
 
         var original = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Data.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, state.Claim.Id)))!;
+            state.Data.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, state.Claim.CommandId)))!;
         await QueueClaimVersionExhaustionAssertions.EqualAsync(original.Result, state.Claimed);
         await QueueDeliveryVersionExhaustionAssertions.TerminalAsync(database, store, state, terminal, true);
         await Assert.That(database.InspectMessage(QueueClaimVersionExhaustionProtocol.Root, state.Data.Lane, "healthy"))

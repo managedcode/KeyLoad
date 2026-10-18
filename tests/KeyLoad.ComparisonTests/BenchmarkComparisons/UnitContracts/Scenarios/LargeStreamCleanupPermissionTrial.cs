@@ -49,7 +49,7 @@ internal sealed class LargeStreamCleanupPermissionTrial
         UnauthorizedAccessException? surfaced = null;
         try
         {
-            using var directory = new ImageBundleTestDirectory();
+            using var directory = new NativeArtifactTestDirectory();
             root = directory.Root;
             try
             {

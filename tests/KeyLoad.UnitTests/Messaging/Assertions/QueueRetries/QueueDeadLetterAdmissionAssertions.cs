@@ -25,7 +25,7 @@ internal static class QueueDeadLetterAdmissionAssertions
         await Assert.That(store.Identity).IsEqualTo(identity);
         await Image(store, position, image);
         await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(state.Lane.Partition,
-            QueueDeadLetterSelectedProtocol.Administrator, state.Original.Id)))).IsNull();
+            QueueDeadLetterSelectedProtocol.Administrator, state.Original.CommandId)))).IsNull();
         await QueueDeadLetterSelectedRetainedInbox.RequireAsync(owner, store, state);
         await Image(store, position, image);
     }

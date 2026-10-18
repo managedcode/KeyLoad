@@ -43,14 +43,13 @@ internal static class SiteIsolatedGitHubFields
     public const string Steps = "steps";
     public const string Job = "job";
     public const string Artifact = "artifact";
-    public const string Image = "image";
+    public const string Preparation = "preparation";
     public const string ControlledArchive = "controlled.zip";
     public const string CaseDuplicate = "AGGREGATE.JSON";
     public const string Traversal = "../aggregate.json";
     public const string Unexpected = "unexpected.json";
     public const string RequestsDirectory = "requests";
     public const string GhHelp = "gh-api-help.txt";
-    public const string ImageInventory = "image-zip-inventory.txt";
     public const string ZipInventorySuffix = "-zip-inventory.txt";
     public const string BodySuffix = ".body";
     public const string CliOperation = "cli";

@@ -53,7 +53,8 @@ internal static class QueueOrderedRetryRestoreAuthority
         foreach (var prior in original.Outcomes.Where(item => item.Operation.Value!.Kind == OperationKind.Batch && Errors.Code(item.Result.Problem) is null))
         {
             await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image);
-            var current = database.OwnCommand(database.CreateCommand(prior.Operation.Value!.Kind, prior.Operation.CommandId, prior.Operation.UserId!, new DateTimeOffset(prior.Operation.Timestamp), ReadOnlyMemory<byte>.Empty));
+            var current = database.CreateCommand(prior.Operation.Value!.Kind, prior.Operation.CommandId,
+                prior.Operation.UserId!, new DateTimeOffset(prior.Operation.Timestamp), prior.Operation.Value.Input);
             await RefusedAsync(database, state, current, image, ErrorCode.TokenInvalidated);
         }
         await RequireAsync(database, state);
@@ -124,10 +125,12 @@ internal static class QueueOrderedRetryRestoreAuthority
         Command<DatabaseCommand> operation, string[] image)
     {
         var before = database.Store.Position;
-        var apply = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
-        var resolve = Assert.ThrowsExactly<KeyLoadException>(() => database.ResolveOutcome(operation));
-        await Assert.That(apply.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(resolve.Code).IsEqualTo(ErrorCode.Corruption);
+        var apply = database.Apply(operation);
+        var resolve = database.ResolveOutcome(operation);
+        await Assert.That(Errors.Code(apply.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(resolve.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(apply.Value).IsNull();
+        await Assert.That(resolve.Value).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(before);
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
     }

@@ -17,7 +17,7 @@ internal static class UserAnalyticsHostRuntimeTrial
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 runtime.Open(host);
-                await using var work = originalWork = await UserAnalyticsHostBoundWork.OpenAsync(host, UnitRoutingOptions.Routing(), CancellationToken.None);
+                await using var work = originalWork = await UserAnalyticsHostBoundWork.OpenAsync(UnitRoutingOptions.Routing(), CancellationToken.None);
                 await body(new(runtime, work));
                 var closing = runtime.DisposeAsync().AsTask();
                 await closing;
