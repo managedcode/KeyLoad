@@ -23,7 +23,7 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
         var failures = new List<Exception>();
         try
         {
-            using var database = new TestDatabase(nativeReplicaAdmission: true);
+            using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var flow = new Bm25CorpusPublicationFlow(database);

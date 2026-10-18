@@ -93,7 +93,6 @@ internal static class McpToolDescriptions
         AnnSearchProtocol.Tool => AnnSearchProtocol.Description,
         McpToolNames.SearchExecute => SearchExecute,
         McpToolNames.SearchGraph => SearchGraph,
-        ClusterBackupProtocol.Tool => ClusterBackupProtocol.Description,
         McpToolNames.AdminBackup or McpToolNames.AdminAdmission or McpToolNames.AdminStatus
             => AdminDescription(name),
         McpToolNames.DocumentsCommit => DocumentsCommit,

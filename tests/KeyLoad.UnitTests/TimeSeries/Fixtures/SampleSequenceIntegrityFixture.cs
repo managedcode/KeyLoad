@@ -16,7 +16,7 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
     private bool preserve;
     private ExceptionDispatchInfo? closeFailure;
     private ExceptionDispatchInfo? disposalFailure;
-    internal SampleChunkCanonicalFixture Source { get; } = new(nativeReplicaAdmission: true);
+    internal SampleChunkCanonicalFixture Source { get; } = new();
     internal ZoneTreeStore Store => cold ?? (!sourceJoined ? Source.Owner.Store : throw new InvalidOperationException(Unknown));
     private DatabaseEngine? ColdDatabase
     {

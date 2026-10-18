@@ -13,7 +13,7 @@ internal sealed class QueryRuleOptimizationFixture(bool includeNull, bool includ
     internal TestDatabase Harness
     {
         get;
-    } = new(nativeReplicaAdmission: true);
+    } = new();
     internal List<(CommandRequest Command, CommitReceipt Receipt, byte[] Outcome)> Originals
     {
         get;

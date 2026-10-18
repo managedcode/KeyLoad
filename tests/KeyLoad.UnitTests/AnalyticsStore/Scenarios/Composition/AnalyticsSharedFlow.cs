@@ -25,7 +25,7 @@ internal static class AnalyticsSharedFlow
 
     internal static async Task MixedAsync(CancellationToken token)
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         Configure(fixture);
         var anchor = new CommandRequest(Guid.NewGuid(), fixture.Partition, [new PutDocument(P.Documents, P.Anchor, P.Json, 0)]);
         var seed = await CommitAsync(fixture, anchor, [new(P.PutKind, P.Documents, P.Anchor, 1)]);

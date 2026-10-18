@@ -12,7 +12,7 @@ internal static class AnalyticsBoundsPrivacyFlow
     private const string UseDenied = "The query requires a protected field-use grant.";
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         AnalyticsEventData[] events = [D.Event(db, D.First, P.Padded, 2, true), D.Event(db, D.Second, P.Plain, 4, true)];
         await AnalyticsBoundsOwner.SeedAsync(db, events);
         var definition = new ResourceDefinition(D.Store, ResourceKind.AnalyticsStore, db.Partition.TransactionDomainId)

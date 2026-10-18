@@ -21,6 +21,7 @@ dotnet_sort_system_directives_first = true
 
 # Native Orleans checks resolved field IDs, including constants and partial models.
 dotnet_diagnostic.ORLEANS0012.severity = error
+dotnet_diagnostic.KLD0038.severity = error
 
 # Don't use this. qualifier
 dotnet_style_qualification_for_field = false:warning

@@ -53,4 +53,11 @@ internal sealed record StoredOutcome(
         get; init;
     }
 
+    [JsonIgnore]
+    [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.CanonicalSequence)]
+    public long CanonicalSequence
+    {
+        get; init;
+    }
+
 }

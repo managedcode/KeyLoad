@@ -1,10 +1,7 @@
-using KeyLoad.Clustering;
-using Orleans.Services;
-
 namespace KeyLoad.Server;
 
-/// <summary>Joins original producers and replica drain before the one late physical close.</summary>
-internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner owner, IServiceProvider services)
+/// <summary>Closes storage after Orleans has joined its native request and activation lifetimes.</summary>
+internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner owner)
     : ILifecycleParticipant<ISiloLifecycle>
 {
     private const string LifecycleName = "KeyLoad.PartitionStorage";
@@ -32,7 +29,7 @@ internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner ow
         // Retain the original close before cancellation callbacks can synchronously reenter.
         await Task.Yield();
         var failures = new List<Exception>();
-        // The same terminal owner joins connections before node/producers/transport, including DI fallback.
+        // The same terminal owner joins accepted connections and requests, including DI fallback.
         await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ThrowOriginalFailures(failures);
     }

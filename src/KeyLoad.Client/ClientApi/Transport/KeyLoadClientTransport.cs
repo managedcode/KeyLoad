@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using ManagedCode.Communication;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Client.Features.ClientApi;
@@ -14,58 +13,16 @@ internal sealed class KeyLoadClientTransport
     private readonly HttpClient http;
     private readonly string apiKey;
     private readonly IOptions<KeyLoadClientExecutionOptions> execution;
-    private readonly CqrsStreamClientOptions? streaming;
-
     internal KeyLoadClientTransport(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> executionOptions)
-        : this(http, apiKey, executionOptions, null) { }
-
-    internal KeyLoadClientTransport(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> executionOptions,
-        IOptions<CqrsStreamClientOptions>? streamingOptions)
     {
         ArgumentNullException.ThrowIfNull(http);
         ArgumentNullException.ThrowIfNull(executionOptions);
         execution = KeyLoadClientExecutionOptions.Snapshot(executionOptions);
         this.http = http;
         this.apiKey = apiKey;
-        streaming = streamingOptions is null ? null : KeyLoadClientStreamPolicy.Snapshot(streamingOptions);
-    }
-
-    internal static KeyLoadClientTransport CreateStreaming(HttpClient http, string apiKey,
-        IOptions<KeyLoadClientExecutionOptions> executionOptions, IOptions<CqrsStreamClientOptions> streamingOptions)
-    {
-        ArgumentNullException.ThrowIfNull(streamingOptions);
-        return new KeyLoadClientTransport(http, apiKey, executionOptions, streamingOptions);
     }
 
     internal KeyLoadClientExecutionOptions ExecutionOptions => execution.Value;
-
-    internal IAsyncEnumerable<CqrsStreamChunk<EventFeedTailProgress, EventFeedControlResult>> TailEventFeedAsync(
-        EventFeedControlRequest request, CancellationToken cancellationToken)
-    {
-        var policy = streaming ?? throw new OptionsValidationException(KeyLoadClientStreamPolicy.SectionName,
-            typeof(CqrsStreamClientOptions), [KeyLoadClientStreamPolicy.Invalid]);
-        if (request.Action != EventFeedControlAction.Tail || request.CommandId == Guid.Empty)
-        {
-            throw Errors.Fail(ErrorCode.Validation, KeyLoadClientStreamPolicy.Invalid);
-        }
-        cancellationToken.ThrowIfCancellationRequested();
-        return http.SendForCqrsStreamAsync<EventFeedTailProgress, EventFeedControlResult>(
-            CreateMessage, policy, cancellationToken);
-
-        HttpRequestMessage CreateMessage()
-        {
-            var authorization = new AuthenticationHeaderValue(ClientTransportMessages.BearerScheme, apiKey);
-            var message = new HttpRequestMessage(HttpMethod.Post, EventFeedTailClientProtocol.Route)
-            {
-                Version = http.DefaultRequestVersion,
-                VersionPolicy = http.DefaultVersionPolicy,
-                Content = JsonContent.Create(request, options: JsonDefaults.Options)
-            };
-            message.Headers.Authorization = authorization;
-            message.Headers.Add(CommandIdHeader, request.CommandId.ToString());
-            return message;
-        }
-    }
 
     internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
         HttpMethod? method = null)

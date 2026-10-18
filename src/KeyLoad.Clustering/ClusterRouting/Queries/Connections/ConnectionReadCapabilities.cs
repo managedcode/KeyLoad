@@ -41,11 +41,6 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return GrainLifetimeReadCapabilities.Execute(localDatabase, services, runtimeClock,
                 principal, request, binding, cancellationToken);
         }
-        if (PhysicalOwnerReadCapabilities.Handles(kind))
-        {
-            return await PhysicalOwnerReadCapabilities.ExecuteAsync(services, runtimeClock,
-                principal, request, cancellationToken).ConfigureAwait(true);
-        }
         if (GrainNativeMaintenanceReadCapabilities.Handles(kind))
         {
             return await GrainNativeMaintenanceReadCapabilities.ExecuteAsync(services, principal,

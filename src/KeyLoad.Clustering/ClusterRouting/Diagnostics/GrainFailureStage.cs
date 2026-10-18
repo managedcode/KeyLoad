@@ -14,7 +14,7 @@ internal enum GrainFailureStage
     /// <summary>Atomic partition resolution rejected the request.</summary>
     PartitionResolution,
     /// <summary>The operation could not establish a quorum read barrier.</summary>
-    QuorumRead,
+    ReadBarrier,
     /// <summary>Persisted authorization rejected the request.</summary>
     Authorization,
     /// <summary>Capability execution rejected or failed the operation.</summary>

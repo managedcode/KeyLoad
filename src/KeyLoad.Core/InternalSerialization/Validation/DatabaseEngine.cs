@@ -25,6 +25,7 @@ public sealed partial class DatabaseEngine
             OperationKind.CommitInbox => NormalizePayload<CommitInboxRequest>(operation.PayloadJson),
             OperationKind.ConfigureResource => NormalizePayload<ConfigureResourceRequest>(operation.PayloadJson),
             OperationKind.CreateTable => NormalizePayload<CreateTableRequest>(operation.PayloadJson),
+            OperationKind.DropTable => NormalizePayload<DropTableRequest>(operation.PayloadJson),
             OperationKind.SetQueueDispatch => NormalizePayload<QueueDispatchControlRequest>(operation.PayloadJson),
             OperationKind.ConfigurePrincipal => NormalizePayload<ConfigurePrincipalRequest>(operation.PayloadJson),
             OperationKind.ConfigureApiKey => NormalizePayload<ConfigureApiKeyRequest>(operation.PayloadJson),

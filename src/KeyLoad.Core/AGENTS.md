@@ -6,7 +6,7 @@
 - Current principal types include `DatabaseEngine`, `KeySpace`, document/event/messaging/graph models, admission governors, queues, subscriptions and projection outbox; see the named source files at this project root.
 - New feature behavior belongs under `<SliceName>/` with the canonical `docs/Features/<SliceName>.md`; shared primitives outside a slice require genuine cross-feature use.
 - Core logic must not take ownership of physical node storage. The silo-local ZoneTree owner (node-local `PartitionHost`) owns its storage, journals, file locks and the apply gate, and files never move with activations; Orleans grains route commands and Orleans does all clustering (ADR-136).
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Use the installed Orleans skill for native runtime design and serialization decisions.
 - Transactions, command ordering, admission, projections and recovery contracts are high-risk. Runtime claims require the exact GitHub Actions run/SHA/artifacts; process-kill evidence does not establish power-loss durability.
 
 ## Boundaries and protected risks

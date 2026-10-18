@@ -78,17 +78,14 @@ internal sealed class LocalClusterImageModelTests
         await AssertRejectedAsync(Suite, Filter, Enabled, "--GITHUB_ACTIONS=true");
         await AssertRejectedAsync(Suite, Filter, Enabled, "--KEYLOAD_IMAGE_RECEIPT=/tmp/receipt.json");
         await AssertRejectedAsync(Suite, Filter, Enabled, "--KeyLoad:ContainerImages:Server=registry/keyload:tag@sha256=" + new string('a', 64));
-        await AssertRejectedAsync(Suite, Filter, Enabled, "--KeyLoadTests:ProtocolCohort:Enabled=true");
         await AssertRejectedAsync(Suite, Filter, Enabled, "--Benchmarks:Target=ZoneTree");
     }
 
     [Test]
-    public async Task ChildImageModelRejectsProtocolAndComparisonSelectorsBeforeResources()
+    public async Task ChildImageModelRejectsComparisonSelectorsBeforeResources()
     {
         foreach (var selector in new[]
         {
-            "--KeyLoadTests:ProtocolCohort:Enabled=false",
-            "--KeyLoadTests:ProtocolCohort:Voters:node4=not-configured",
             "--Benchmarks:Enabled=false",
             "--Benchmarks:Target=ZoneTree",
             "--Benchmarks:NodeCount=1",

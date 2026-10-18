@@ -13,7 +13,7 @@ internal static class AnalyticsBoundCoreOwner
     internal static async Task RunAsync(Func<TestDatabase, NativeRequestWorkOwner, CancellationToken, Task> body,
         CancellationToken token)
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         await AnalyticsBoundsOwner.SeedAsync(fixture, [D.Event(fixture, D.First, D.Alpha, 2) with { Links = [] }]);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

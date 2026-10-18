@@ -15,15 +15,6 @@ public interface INodeAdministration
     /// <returns>Backup identifier and materialized cut.</returns>
     Task<BackupReceipt> BackupAsync(CancellationToken cancellationToken);
 
-    /// <summary>Captures or verifies one stable native owner archive under current persisted credential authority.</summary>
-    /// <param name="principalId">Actual freshly authenticated request principal.</param>
-    /// <param name="capability">Server-created native request and credential witness sealed by the unique read grain.</param>
-    /// <param name="work">Original bounded request lifetime and work.</param>
-    /// <param name="cancellationToken">Original cancellation, retained by the joined native producer.</param>
-    /// <returns>The exact complete original owner archive receipt.</returns>
-    Task<ClusterBackupOwnerReceipt> CaptureClusterBackupOwnerAsync(string principalId,
-        ReadOnlyMemory<byte> capability, ReadExecutionBudget work, CancellationToken cancellationToken);
-
     /// <summary>Read bounded command and HTTP admission diagnostics for this node.</summary>
     /// <returns>Configured limits and current counters.</returns>
     NodeAdmissionStatus Admission();

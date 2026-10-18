@@ -19,7 +19,7 @@ internal sealed class NativeTextOrderedStageCancellationTests
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                database = new(nativeReplicaAdmission: true);
+                database = new();
                 database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
                 var token = TestContext.Current!.Execution.CancellationToken;
                 _ = await NativeTextMaintenanceSeed.CommitAsync(database, token);

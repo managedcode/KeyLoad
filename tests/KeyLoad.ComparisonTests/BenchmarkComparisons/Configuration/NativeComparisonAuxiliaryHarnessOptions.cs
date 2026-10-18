@@ -89,12 +89,6 @@ internal sealed partial record NativeComparisonHarnessOptions
     private const int CeilingMaximumResourceDiagnosticRecords = 128;
     public int MaximumResourceDiagnosticRecords { get; init; } = CeilingMaximumResourceDiagnosticRecords;
 
-    private const int CeilingMaximumProtectedReplayLogBytes = 8192;
-    public int MaximumProtectedReplayLogBytes { get; init; } = CeilingMaximumProtectedReplayLogBytes;
-
-    private const int CeilingMaximumOriginalReplayLogCharacters = 1024;
-    public int MaximumOriginalReplayLogCharacters { get; init; } = CeilingMaximumOriginalReplayLogCharacters;
-
     private bool IsAuxiliaryValid()
         => NativeDatabaseFlowTimeout > TimeSpan.Zero && NativeDatabaseFlowTimeout.Ticks <= MaximumNativeDatabaseFlowTimeoutMinutes * TimeSpan.TicksPerMinute
             && FixtureDisposalTimeout > TimeSpan.Zero && FixtureDisposalTimeout.Ticks <= MaximumFixtureDisposalTimeoutSeconds * TimeSpan.TicksPerSecond
@@ -135,8 +129,5 @@ internal sealed partial record NativeComparisonHarnessOptions
             && MongoReadinessOutputCharacters is >= PositiveMinimum and <= MaximumMongoReadinessOutputCharacters
             && MongoReadinessErrorCharacters is >= PositiveMinimum and <= MaximumMongoReadinessErrorCharacters
             && KeyLoadFaultPollInterval < KeyLoadFaultReadinessTimeout
-            && MaximumResourceDiagnosticRecords is >= PositiveMinimum and <= CeilingMaximumResourceDiagnosticRecords
-            && MaximumProtectedReplayLogBytes is >= PositiveMinimum and <= CeilingMaximumProtectedReplayLogBytes
-            && MaximumOriginalReplayLogCharacters is >= PositiveMinimum and <= CeilingMaximumOriginalReplayLogCharacters
-            && MaximumProtectedReplayLogBytes <= MaximumResourceLogBytes;
+            && MaximumResourceDiagnosticRecords is >= PositiveMinimum and <= CeilingMaximumResourceDiagnosticRecords;
 }

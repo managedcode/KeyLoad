@@ -1,5 +1,4 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo(KeyLoad.Features.InternalSerialization.NativePayloadVersion.TestAssembly)]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(KeyLoad.Features.InternalSerialization.NativePayloadVersion.ReplicationAssembly)]
 
 namespace KeyLoad.Features.InternalSerialization;
 

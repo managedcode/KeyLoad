@@ -15,7 +15,7 @@ internal static class ZoneTreeCheckpointPublication
     }
 
     internal static StorageSnapshot RequireReplayable(FileStream stream, ZoneTreeStoreOptions options,
-        ResourceRetirementConservationFloorV1? requiredFloor = null, ZoneTreeConservationBudget? work = null)
+        ZoneTreeCheckpointBudget? work = null)
     {
         RequireStream(stream);
         if (stream.Length > options.MaxSnapshotBytes)
@@ -23,6 +23,6 @@ internal static class ZoneTreeCheckpointPublication
             throw Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.SnapshotBytesExceeded);
         }
         stream.Position = FileStart;
-        return ZoneTreeCheckpointReader.Read(stream, options, static _ => { }, requiredFloor: requiredFloor, work: work);
+        return ZoneTreeCheckpointReader.Read(stream, options, static _ => { }, work: work);
     }
 }

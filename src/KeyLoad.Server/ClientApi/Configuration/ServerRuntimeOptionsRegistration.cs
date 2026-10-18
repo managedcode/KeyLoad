@@ -11,6 +11,8 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class ServerRuntimeOptionsRegistration
 {
+    private const int NoCount = 0;
+    private const string InvalidCopies = "Invalid silo or data-copy count.";
     internal static IServiceCollection AddRuntimeOptions(this IServiceCollection services, IConfiguration configuration)
     {
         CoreRuntimeOptionsRegistration.AddCoreRuntimeOptions(services, configuration);
@@ -26,13 +28,13 @@ internal static class ServerRuntimeOptionsRegistration
     {
         services.AddDueCoordinationOptions(configuration);
         services.AddOptions<BackgroundWorkerOptions>().Bind(configuration.GetSection(BackgroundWorkerOptions.SectionName))
-            .Validate(options => options.FlushInterval > TimeSpan.Zero && options.MaximumBufferedEvents > 0,
+            .Validate(options => options.FlushInterval > TimeSpan.Zero && options.MaximumBufferedEvents > NoCount,
                 BackgroundWorkerOptions.SectionName).ValidateOnStart();
         services.AddOptions<NativeDurableJobOptions>().Bind(configuration.GetSection(NativeDurableJobOptions.SectionName))
             .Validate(options => options.IsValid(), NativeDurableJobOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaCopyOptions>().Bind(configuration.GetSection(ReplicaCopyOptions.SectionName))
-            .Validate(options => options.SiloCount > 0 && options.ReplicaCount > 0
-                && options.ReplicaCount <= options.SiloCount, "Invalid silo or data-copy count.").ValidateOnStart();
+            .Validate(options => options.SiloCount > NoCount && options.ReplicaCount > NoCount
+                && options.ReplicaCount <= options.SiloCount, InvalidCopies).ValidateOnStart();
         services.AddOptions<GrainRoutingOptions>()
             .Bind(configuration.GetSection(GrainRoutingOptions.SectionName))
             .Validate(options => options.IsValid(), GrainRoutingOptions.ValidationMessage).ValidateOnStart();
@@ -53,9 +55,6 @@ internal static class ServerRuntimeOptionsRegistration
     private static void RegisterHostExecution(IServiceCollection services, IConfiguration configuration)
     {
         AddDatabasePhaseOptions(services, configuration);
-        services.AddOptions<ClusterBackupExecutionOptions>()
-            .Bind(configuration.GetSection(ClusterBackupExecutionOptions.SectionName), binding => binding.ErrorOnUnknownConfiguration = true)
-            .Validate(options => options.IsValid(), ClusterBackupExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ServerExecutionOptions>()
             .Bind(configuration.GetSection(ServerExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ServerExecutionOptions.ValidationMessage).ValidateOnStart();
@@ -81,7 +80,7 @@ internal static class ServerRuntimeOptionsRegistration
     private static void RegisterNodeProjections(IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<NodeOptions>().Bind(configuration.GetSection(ServerProtocol.ConfigurationSection))
-            .PostConfigure(node => ConfigureNode(node, configuration)).ValidateOnStart();
+            .PostConfigure(ConfigureNode).ValidateOnStart();
         services.AddSingleton<IValidateOptions<NodeOptions>, NodeOptionsValidator>();
         services.AddOptions<CommandAdmissionLimits>();
         services.AddSingleton<IOptionsFactory<CommandAdmissionLimits>>(provider =>
@@ -105,7 +104,7 @@ internal static class ServerRuntimeOptionsRegistration
         return services;
     }
 
-    internal static void ConfigureNode(NodeOptions node, IConfiguration configuration)
+    internal static void ConfigureNode(NodeOptions node)
     {
         node.Validate();
     }

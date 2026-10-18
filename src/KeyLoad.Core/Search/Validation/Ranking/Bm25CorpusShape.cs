@@ -22,8 +22,8 @@ internal static class Bm25CorpusShape
             || current.Statistics is null || current.FormatVersion != Bm25CorpusProtocol.Format
             || current.Generation == Guid.Empty || current.Incarnation == Guid.Empty
             || current.SourceOwner.Incarnation != current.Incarnation
-            || current.SourceOwner.PhysicalShardId == Guid.Empty || current.SourceOwner.PlacementEpoch <= UninitializedPublicationVersion
-            || current.SourceOwner.VoterIds.IsDefaultOrEmpty || current.PolicyEpoch < InitialPolicyEpoch || current.SchemaVersion <= UninitializedPublicationVersion
+            || current.SourceOwner.PhysicalShardId == Guid.Empty
+            || current.PolicyEpoch < InitialPolicyEpoch || current.SchemaVersion <= UninitializedPublicationVersion
             || current.SourceOutboxTail < MinimumOutboxTail || current.CapturePosition < MinimumNativeCut || current.CaptureApplied < MinimumNativeCut
             || current.CaptureReadGeneration < MinimumNativeCut || string.IsNullOrWhiteSpace(current.Field)
             || string.IsNullOrWhiteSpace(current.TokenizerVersion) || !Digest(current.ResourcePolicyDigest)
@@ -66,7 +66,6 @@ internal static class Bm25CorpusShape
             || phase.SourcePlacement.Partition != phase.Current.Partition
             || phase.SourcePlacement.PhysicalShardId != phase.Current.SourceOwner?.PhysicalShardId
             || phase.SourcePlacement.Incarnation != phase.Current.Incarnation
-            || phase.SourcePlacement.PlacementEpoch <= UninitializedPublicationVersion || phase.SourcePlacement.VoterIds.IsDefaultOrEmpty
             || phase.ExpectedGeneration == Guid.Empty)
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);

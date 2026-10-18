@@ -29,7 +29,6 @@ internal static class ApiEndpoints
         ChangeFeedApi.Map(app);
         AuthorizationApi.Map(app);
         AdminDashboardApi.Map(app);
-        ClusterBackupApi.Map(app);
         app.MapGet(AdmissionPath, (Func<HttpContext, Task<IResult>>)(context =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Admission)));
         app.MapPost(BackupPath, (Func<HttpContext, Task<IResult>>)(context =>

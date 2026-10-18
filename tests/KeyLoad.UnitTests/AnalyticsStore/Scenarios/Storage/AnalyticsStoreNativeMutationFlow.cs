@@ -10,7 +10,7 @@ internal static class AnalyticsStoreNativeMutationFlow
     private const string DeleteKind = "deleteAnalyticsEvents";
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         await O.InitializeAsync(db, false);
         AnalyticsEventData[] rows = [D.Event(db, D.First, D.Alpha, 2), D.Event(db, D.Second, D.Alpha, 4), D.Event(db, D.Third, D.Beta, 8)];
         var seed = await O.CommitAsync(db, new UpsertAnalyticsEvents(D.Store, [.. rows], O.Revisions((D.First, 0), (D.Second, 0), (D.Third, 0))), UpsertKind, D.Third, 1, token);

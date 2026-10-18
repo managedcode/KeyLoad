@@ -20,7 +20,7 @@ internal static class Bm25PrivateAdmissionFlow
         var failures = new List<Exception>();
         try
         {
-            using var database = new TestDatabase(nativeReplicaAdmission: true);
+            using var database = new TestDatabase();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
         }
         catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))

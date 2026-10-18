@@ -24,7 +24,6 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, GraphDeliveryPartitionMismatch);
         }
         RequireGraphWrite(view, principal, source, destination.Partition, graph);
-        RequireSameGraphOwner(view, source, destination.Partition);
         var intent = CurrentIntent(view, source, graph, edgeId, destination, Limits);
         if (intent is { Deleted: false })
         {

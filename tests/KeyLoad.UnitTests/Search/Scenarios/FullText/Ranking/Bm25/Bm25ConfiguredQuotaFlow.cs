@@ -21,7 +21,7 @@ internal sealed class Bm25ConfiguredQuotaFlow(TestDatabase database)
         {
             var limits = capacity.HasValue ? new DatabaseLimits { MaxBatchBytes = capacity.Value } : new DatabaseLimits();
             limits.Validate();
-            using var database = new TestDatabase(limits, nativeReplicaAdmission: true);
+            using var database = new TestDatabase(limits);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var flow = new Bm25ConfiguredQuotaFlow(database);

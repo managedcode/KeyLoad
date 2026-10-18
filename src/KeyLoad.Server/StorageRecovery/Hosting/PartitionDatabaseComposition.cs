@@ -14,6 +14,7 @@ internal static class PartitionDatabaseComposition
         ArgumentNullException.ThrowIfNull(admission);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(grains);
         options.Validate();
     }
 

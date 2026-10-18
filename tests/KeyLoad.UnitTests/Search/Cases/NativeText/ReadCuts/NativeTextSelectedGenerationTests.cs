@@ -10,7 +10,7 @@ internal sealed class NativeTextSelectedGenerationTests
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var database = new TestDatabase(nativeReplicaAdmission: true);
+            using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);

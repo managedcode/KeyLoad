@@ -7,8 +7,9 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
 {
     private const string Target = "KeyLoad";
     private const string HttpEndpoint = "http";
-    private const string PeerPrefix = "KeyLoad__Peers__";
-    private const string BenchmarkSetting = "KeyLoad__BenchmarkTopology";
+    private const string SiloCountSetting = "KeyLoad__SiloCount";
+    private const string CopyCountSetting = "KeyLoad__ReplicaCount";
+    private const string SiloNameSetting = "KeyLoad__SiloName";
     private const string AdminParameter = "admin-key";
     private const string AdminSetting = "Benchmarks__AdminKey";
     private const string AdminNativeSetting = "KeyLoad__AdminKey";
@@ -16,11 +17,11 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
     private const string RequestCount = "512";
     private const string ReservedBytes = "2147483648";
 
-    /// <summary>AC-ISO-003/004: actual fixed voters share authority and retain independent native data.</summary>
+    /// <summary>AC-ISO-003/004: real silos share credentials and retain independent ZoneTree directories.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task SelectedKeyLoadBuildsOnlyExactNativeVotersAndOneRunner(int count)
+    public async Task SelectedKeyLoadBuildsTheExpectedNativeSilosAndOneRunner(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedKeyLoadResources.Add(fixture.Context);
@@ -37,7 +38,7 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         await Assert.That(runnerEnvironment[AdminSetting]).IsEqualTo("{" + AdminParameter + ".value}");
         foreach (var node in nodes)
         {
-            await VerifyVoterAsync(fixture, node, count);
+            await VerifySiloAsync(fixture, node, count);
         }
         var endpoints = runnerEnvironment.Where(item => item.Key.StartsWith(
             IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__", StringComparison.Ordinal)).ToArray();
@@ -49,12 +50,14 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         }
     }
 
-    private static async Task VerifyVoterAsync(IsolatedResourceTopologyFixture fixture, ContainerResource node, int count)
+    private static async Task VerifySiloAsync(IsolatedResourceTopologyFixture fixture, ContainerResource node, int count)
     {
         await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(node, fixture.Context.Root, "keyload");
         await IsolatedResourceTopologyFixture.VerifyUserAsync(node);
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
-        await Assert.That(environment[BenchmarkSetting]).IsEqualTo("true");
+        await Assert.That(environment[SiloNameSetting]).IsEqualTo(node.Name);
+        await Assert.That(environment[SiloCountSetting]).IsEqualTo(count.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        await Assert.That(environment[CopyCountSetting]).IsEqualTo(count.ToString(System.Globalization.CultureInfo.InvariantCulture));
         await Assert.That(environment[AdminNativeSetting]).IsEqualTo("{" + AdminParameter + ".value}");
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxRequests)]).IsEqualTo(RequestCount);
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxTenantRequests)]).IsEqualTo(RequestCount);
@@ -63,12 +66,6 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxTenantControlRequests)]).IsEqualTo(RequestCount);
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxPrincipalControlRequests)]).IsEqualTo(RequestCount);
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxReservedBytes)]).IsEqualTo(ReservedBytes);
-        var peers = environment.Where(item => item.Key.StartsWith(PeerPrefix, StringComparison.Ordinal)).ToArray();
-        await Assert.That(peers.Length).IsEqualTo(count);
-        for (var index = 0; index < count; index++)
-        {
-            await Assert.That(environment[PeerPrefix + index]).IsEqualTo("http://node" + (index + 1) + ":8080");
-        }
         var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
         await Assert.That(image.SHA256).IsEqualTo(new string('a', 64));
         await Assert.That(node.Annotations.OfType<ContainerNetworkAliasAnnotation>().Single().Alias).IsEqualTo(node.Name);

@@ -20,7 +20,7 @@ internal static class RetainedSubmissionBudgetFlow
     internal static async Task RunAsync()
     {
         // Real local ordered native fixture; this is not a multi-voter/CLUSTER acknowledgement test.
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         fixture.Configure(Collection, ResourceKind.Collection);
         var subject = new PrincipalRecord(Subject, fixture.Partition.TenantId,
             [new(fixture.Partition.DatabaseId, Collection, Capability.DocumentsWrite)], [])

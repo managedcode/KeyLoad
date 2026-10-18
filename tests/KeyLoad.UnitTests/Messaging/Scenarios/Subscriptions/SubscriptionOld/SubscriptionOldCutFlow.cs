@@ -16,7 +16,7 @@ internal static class SubscriptionOldCutFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new TestDatabase(timeProvider: clock, nativeReplicaAdmission: true);
+            fixture = new TestDatabase(timeProvider: clock);
             await OwnedAsync(fixture, token);
         }, failures);
         if (fixture is not null)

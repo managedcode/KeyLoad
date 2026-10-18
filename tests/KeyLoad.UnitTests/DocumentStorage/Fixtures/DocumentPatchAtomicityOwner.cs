@@ -25,8 +25,7 @@ internal sealed class DocumentPatchAtomicityOwner
     private DocumentPatchAtomicityOwner()
     {
         var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
-        Source = new(directory: directory, nativeReplicaAdmission: true,
-            nativeReplicaDirectory: directory + TestDatabaseReplicaDirectory.Suffix);
+        Source = new(directory: directory);
         originalIdentity = Source.Store.Identity;
     }
 

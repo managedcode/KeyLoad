@@ -110,7 +110,7 @@ public sealed partial class DatabaseEngine
         Authorization.RequireFieldUse(principal, resource, request.Field);
         var current = ReadAtomicPartitionPlacement(view, principal.Id, request.Consumer.Partition);
         if (current.PhysicalShardId != request.Placement.PhysicalShardId
-            || current.Incarnation != request.Placement.Incarnation
+            || current.Incarnation != request.Placement.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.MissingAuthority);
         }

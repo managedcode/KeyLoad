@@ -11,7 +11,7 @@ internal sealed class NativeTextIncrementalExpiryTests
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var database = new TestDatabase(nativeReplicaAdmission: true);
+            using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(() => NativeTextIncrementalExpiryTrial.RunAsync(database,
                 TestContext.Current!.Execution.CancellationToken), failures);
         }, failures);

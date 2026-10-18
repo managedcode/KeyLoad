@@ -1,10 +1,10 @@
 namespace KeyLoad;
 
-/// <summary>Reports the actual final catalog replicated commit after completed owner settlement and logical cleanup.</summary>
+/// <summary>Reports the actual committed table metadata and logical data removal.</summary>
 /// <param name="TenantId">The tenant scope.</param>
 /// <param name="DatabaseId">The database scope.</param>
 /// <param name="ResourceName">The resolved table name.</param>
-/// <param name="Receipt">The original source catalog commit receipt; this does not promise physical erasure.</param>
+/// <param name="Receipt">The actual metadata commit receipt; this does not promise physical erasure.</param>
 [Orleans.GenerateSerializer, Orleans.Alias(DropTableContract.DropTableResultAlias)]
 public sealed record DropTableResult(
     [property: Orleans.Id(0)] string TenantId,

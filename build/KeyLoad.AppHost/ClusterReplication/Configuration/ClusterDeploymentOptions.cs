@@ -30,5 +30,5 @@ internal sealed record ClusterDeploymentOptions
         && ReplicaCount >= MinimumPositive && ReplicaCount <= SiloCount
         && !string.IsNullOrWhiteSpace(LoggingLevel)
         && FirstPublicPort >= MinimumPositive
-        && FirstPublicPort <= IPEndPoint.MaxPort - SiloCount + MinimumPositive;
+        && FirstPublicPort <= IPEndPoint.MaxPort;
 }

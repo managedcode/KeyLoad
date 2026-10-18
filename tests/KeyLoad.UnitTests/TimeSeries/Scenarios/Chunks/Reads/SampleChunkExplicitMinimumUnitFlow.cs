@@ -19,7 +19,7 @@ internal static class SampleChunkExplicitMinimumUnitFlow
         SampleChunkCanonicalFixture? fixture = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new SampleChunkCanonicalFixture(nativeReplicaAdmission: true);
+            fixture = new SampleChunkCanonicalFixture();
             var commands = await SeedAsync(fixture);
             var minimum = commands.Last().Receipt.Token;
             await SampleChunkExplicitMinimumUnitReads.RunAsync(fixture.Owner.Database, fixture.Owner.Store,

@@ -6,6 +6,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string LocalAnnObservationInvalid = "The native ANN observation scope is no longer current.";
+
     internal LocalAnnObservationFence CaptureLocalAnnObservation(string principalId, AnnMaintenanceRequest original,
         ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null)
         => CaptureLocalAnnObservationCore(principalId, original, budget, sourceMetadata, bindResourceLifetime: false);
@@ -28,7 +30,7 @@ public sealed partial class DatabaseEngine
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             if (!principal.ClusterAdministrator && principal.TenantId != original.Consumer.Partition.TenantId)
             {
-                throw Errors.Fail(ErrorCode.PermissionDenied, RemoteAnnReadInvalid);
+                throw Errors.Fail(ErrorCode.PermissionDenied, LocalAnnObservationInvalid);
             }
             Authorization.Require(principal, original.Consumer.Partition, original.Collection, Capability.VectorSearch);
             var resource = bindResourceLifetime
@@ -45,19 +47,19 @@ public sealed partial class DatabaseEngine
             }
             var current = ReadPlacementWitness(bounded, original.Consumer.Partition);
             if (current.PhysicalShardId != original.Placement.PhysicalShardId
-                || current.Incarnation != original.Placement.Incarnation
+                || current.Incarnation != original.Placement.Incarnation)
             {
-                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
+                throw Errors.Fail(ErrorCode.OwnershipLost, LocalAnnObservationInvalid);
             }
             var state = ReadProjectionMaintenanceEligibilityCore(view, original.Consumer, original.IndexGeneration, budget, null);
             if (!state.InitialAnnMaintenanceSettled || state.InitialAnnMaintenance is not { } retained)
             {
-                throw Errors.Fail(ErrorCode.HistoryUnavailable, RemoteAnnReadInvalid);
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, LocalAnnObservationInvalid);
             }
             RequireSameAnnObservation(retained, original, budget);
             var actual = Store.Identity;
             return new LocalAnnObservationFence(principal.Id, principal.TenantId, principal.PolicyEpoch,
-                actual.NodeId, actual.ReadGeneration, RemoteAnnDigest(resource, budget), RemoteAnnDigest(state, budget));
+                actual.NodeId, actual.ReadGeneration, LocalAnnObservationDigest(resource, budget), LocalAnnObservationDigest(state, budget));
         });
     }
 
@@ -66,7 +68,7 @@ public sealed partial class DatabaseEngine
     {
         if (CaptureLocalAnnObservation(principalId, original, budget, sourceMetadata) != admitted)
         {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
+            throw Errors.Fail(ErrorCode.TokenInvalidated, LocalAnnObservationInvalid);
         }
     }
 
@@ -84,7 +86,7 @@ public sealed partial class DatabaseEngine
             if (retainedBytes.Length != retainedSize || originalBytes.Length != originalSize
                 || !retainedBytes.AsSpan().SequenceEqual(originalBytes))
             {
-                throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
+                throw Errors.Fail(ErrorCode.TokenInvalidated, LocalAnnObservationInvalid);
             }
         }
         finally
@@ -96,4 +98,23 @@ public sealed partial class DatabaseEngine
             }
         }
     }
+    private static string LocalAnnObservationDigest<T>(T value, ReadExecutionBudget budget)
+    {
+        var measured = NativeSerialization.Measure(value);
+        budget.ChargeBytes(measured);
+        var bytes = NativeSerialization.Serialize(value);
+        try
+        {
+            if (bytes.Length != measured)
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, LocalAnnObservationInvalid);
+            }
+            return Convert.ToHexStringLower(SHA256.HashData(bytes));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(bytes);
+        }
+    }
+
 }

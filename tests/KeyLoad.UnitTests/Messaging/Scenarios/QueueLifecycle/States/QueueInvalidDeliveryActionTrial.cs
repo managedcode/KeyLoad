@@ -20,7 +20,7 @@ internal static class QueueInvalidDeliveryActionTrial
         try
         {
             token.ThrowIfCancellationRequested();
-            using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+            using var fixture = new TestDatabase();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var (lane, delivery, now) = await SeedAsync(fixture, jitter);

@@ -12,7 +12,7 @@ internal static class OrleansTelemetryAncestryFlow
         OrleansRuntimeTelemetryFixture? telemetry = null;
         await ServerFailureObserver.ObserveAsync(() =>
         {
-            fixture = new(nativeReplicaAdmission: true);
+            fixture = new();
             return InitializeAsync(fixture);
         }, failures);
         if (failures.Count == 0)

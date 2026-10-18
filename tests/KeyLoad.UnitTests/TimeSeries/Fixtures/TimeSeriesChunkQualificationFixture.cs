@@ -8,7 +8,7 @@ internal sealed class TimeSeriesChunkQualificationFixture : IDisposable
     internal TestDatabase Harness
     {
         get;
-    } = new(nativeReplicaAdmission: true);
+    } = new();
     internal Guid Window
     {
         get;

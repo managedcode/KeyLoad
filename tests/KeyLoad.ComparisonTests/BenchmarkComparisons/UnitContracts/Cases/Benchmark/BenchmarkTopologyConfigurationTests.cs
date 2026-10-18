@@ -1,121 +1,61 @@
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-004: trusted benchmark topology never changes the production default or quorum.</summary>
+/// <summary>Startup keeps native silo count separate from the required number of persisted copies.</summary>
 internal sealed class BenchmarkTopologyConfigurationTests
 {
-    private const string BenchmarkSetting = "KeyLoad:BenchmarkTopology";
     private const string ConfigurationSection = "KeyLoad";
-    private const string Enabled = "true";
-
-    [Test]
-    [Arguments(1)]
-    [Arguments(2)]
-    public async Task AcIso004ProductionDefaultsRejectSmallVoterSets(int nodes)
-    {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes);
-        var options = BenchmarkTopologyConfigurationFixture.Node(nodes);
-        await Assert.That(configuration.BenchmarkTopology).IsFalse();
-        await Assert.That(options.BenchmarkTopology).IsFalse();
-        Assert.ThrowsExactly<InvalidOperationException>(configuration.Validate);
-        Assert.ThrowsExactly<InvalidOperationException>(options.Validate);
-    }
+    private const string SiloSetting = "KeyLoad:SiloCount";
+    private const string CopySetting = "KeyLoad:ReplicaCount";
 
     [Test]
     [Arguments(1, 1)]
-    [Arguments(3, 2)]
-    public async Task AcIso004ExplicitBenchmarkUsesTheSameComputedMajority(int nodes, int majority)
-    {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes) with
-        {
-            BenchmarkTopology = true
-        };
-        var options = BenchmarkTopologyConfigurationFixture.Node(nodes) with
-        {
-            BenchmarkTopology = true
-        };
-        configuration.Validate();
-        options.Validate();
-        var startupConfiguration = options.CreateReplicaConfiguration(options.DataDirectory);
-        startupConfiguration.Validate();
-        await Assert.That(configuration.Majority).IsEqualTo(majority);
-        await Assert.That(startupConfiguration.Majority).IsEqualTo(majority);
-        await Assert.That(startupConfiguration.BenchmarkTopology).IsTrue();
-        await Assert.That(startupConfiguration.VoterIds.Length).IsEqualTo(nodes);
-    }
-
-    [Test]
+    [Arguments(2, 1)]
+    [Arguments(2, 2)]
     [Arguments(3, 2)]
     [Arguments(5, 3)]
-    public async Task AcIso004ProductionOddGroupsRemainSupported(int nodes, int majority)
+    [Arguments(5, 5)]
+    [Arguments(64, 2)]
+    public async Task IndependentPositiveSiloAndCopyCountsAreAccepted(int silos, int copies)
     {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes);
-        var options = BenchmarkTopologyConfigurationFixture.Node(nodes);
-        configuration.Validate();
+        var options = BenchmarkTopologyConfigurationFixture.Node(silos, copies);
         options.Validate();
-        await Assert.That(configuration.Majority).IsEqualTo(majority);
-        await Assert.That(options.CreateReplicaConfiguration(options.DataDirectory).BenchmarkTopology).IsFalse();
+        var configured = new ReplicaCopyOptions { SiloCount = silos, ReplicaCount = copies };
+        configured.Validate();
+        await Assert.That(options.SiloCount).IsEqualTo(silos);
+        await Assert.That(options.ReplicaCount).IsEqualTo(copies);
     }
 
     [Test]
-    [Arguments(0)]
-    [Arguments(2)]
-    [Arguments(4)]
-    [Arguments(5)]
-    public void AcIso004BenchmarkOptInDoesNotAdmitOtherCounts(int nodes)
+    [Arguments(0, 1)]
+    [Arguments(1, 0)]
+    [Arguments(1, 2)]
+    [Arguments(2, 3)]
+    [Arguments(-1, 1)]
+    [Arguments(3, -1)]
+    public void InvalidCountsAreRejectedBeforeOpeningStorage(int silos, int copies)
     {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes) with
-        {
-            BenchmarkTopology = true
-        };
-        var options = BenchmarkTopologyConfigurationFixture.Node(nodes) with
-        {
-            BenchmarkTopology = true
-        };
-        Assert.ThrowsExactly<InvalidOperationException>(configuration.Validate);
+        var options = BenchmarkTopologyConfigurationFixture.Node(silos, copies);
+        var configured = new ReplicaCopyOptions { SiloCount = silos, ReplicaCount = copies };
         Assert.ThrowsExactly<InvalidOperationException>(options.Validate);
+        Assert.ThrowsExactly<InvalidOperationException>(configured.Validate);
     }
 
     [Test]
-    public void AcIso004BenchmarkOptInDoesNotAdmitMalformedAuthorities()
+    public void NativeHostingAndCredentialValidationRemainRequired()
     {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(3) with
-        {
-            BenchmarkTopology = true
-        };
-        ReplicaConfiguration[] invalid =
-        [
-            configuration with { VoterIds = default },
-            configuration with { VoterIds = [configuration.LocalId, configuration.LocalId] },
-            configuration with { VoterIds = [configuration.LocalId, string.Empty] },
-            configuration with { LocalId = string.Empty },
-            configuration with { LocalId = BenchmarkTopologyConfigurationFixture.OutsideVoter },
-            configuration with { Incarnation = Guid.Empty },
-            configuration with { RpcTimeout = TimeSpan.Zero }
-        ];
-        foreach (var item in invalid)
-        {
-            Assert.ThrowsExactly<InvalidOperationException>(item.Validate);
-        }
-    }
-
-    [Test]
-    public void AcIso004BenchmarkOptInPreservesTransportAndCredentialValidation()
-    {
-        var options = BenchmarkTopologyConfigurationFixture.Node(3) with
-        {
-            BenchmarkTopology = true
-        };
+        var options = BenchmarkTopologyConfigurationFixture.Node(3, 2);
         NodeOptions[] invalid =
         [
-            options with { Peers = [options.PublicEndpoint, options.PublicEndpoint] },
-            options with { PublicEndpoint = BenchmarkTopologyConfigurationFixture.OutsideVoter },
-            options with { PhysicalShardId = Guid.Empty },
+            options with { DataDirectory = string.Empty },
+            options with { SiloName = string.Empty },
+            options with { SiloAddress = string.Empty },
+            options with { ClusterId = string.Empty },
             options with { Incarnation = Guid.Empty },
             options with { SigningKey = string.Empty },
-            options with { PeerSecret = string.Empty },
             options with { AdminKey = string.Empty },
             options with { SiloPort = 0 }
         ];
@@ -123,19 +63,20 @@ internal sealed class BenchmarkTopologyConfigurationTests
         {
             Assert.ThrowsExactly<InvalidOperationException>(item.Validate);
         }
+        options.Validate();
     }
 
     [Test]
-    public async Task AcIso004OptInIsBoundFromTheTrustedStartupConfiguration()
+    public async Task BothCountsBindFromTheirIndependentStartupSettings()
     {
-        var production = new ConfigurationBuilder().Build();
-        var benchmark = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { [BenchmarkSetting] = Enabled }).Build();
-        using var productionLifetime = production as IDisposable;
-        using var benchmarkLifetime = benchmark as IDisposable;
-        var ordinary = production.GetSection(ConfigurationSection).Get<NodeOptions>() ?? new();
-        var selected = benchmark.GetSection(ConfigurationSection).Get<NodeOptions>()!;
-        await Assert.That(ordinary.BenchmarkTopology).IsFalse();
-        await Assert.That(selected.BenchmarkTopology).IsTrue();
+        using var configuration = new ConfigurationManager();
+        configuration[SiloSetting] = "5";
+        configuration[CopySetting] = "2";
+        var selected = configuration.GetSection(ConfigurationSection).Get<NodeOptions>()!;
+        await Assert.That(selected.SiloCount).IsEqualTo(5);
+        await Assert.That(selected.ReplicaCount).IsEqualTo(2);
+        var ordinary = new NodeOptions();
+        await Assert.That(ordinary.SiloCount).IsEqualTo(1);
+        await Assert.That(ordinary.ReplicaCount).IsEqualTo(1);
     }
 }

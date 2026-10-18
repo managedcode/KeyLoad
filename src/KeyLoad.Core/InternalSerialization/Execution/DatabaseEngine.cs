@@ -40,6 +40,7 @@ public sealed partial class DatabaseEngine
             OperationKind.CommitInbox => Identity<CommitInboxRequest>(payload),
             OperationKind.ConfigureResource => Identity<ConfigureResourceRequest>(payload),
             OperationKind.CreateTable => Identity<CreateTableRequest>(payload),
+            OperationKind.DropTable => Identity<DropTableRequest>(payload),
             OperationKind.SetQueueDispatch => Identity<QueueDispatchControlRequest>(payload),
             OperationKind.ConfigurePrincipal => Identity<ConfigurePrincipalRequest>(payload),
             OperationKind.ConfigureApiKey => Identity<ConfigureApiKeyRequest>(payload),

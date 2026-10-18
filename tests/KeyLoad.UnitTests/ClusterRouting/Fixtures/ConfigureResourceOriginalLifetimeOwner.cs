@@ -11,7 +11,7 @@ internal static class ConfigureResourceOriginalLifetimeOwner
 {
     internal static async Task RunAsync(Func<TestDatabase, NativeRequestWorkOwner, Task> body, CancellationToken token)
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

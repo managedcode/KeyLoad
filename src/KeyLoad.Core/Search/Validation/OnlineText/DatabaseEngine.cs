@@ -37,7 +37,7 @@ public sealed partial class DatabaseEngine
             || source.PolicyEpoch != principal.PolicyEpoch || source.SchemaVersion != resource.SchemaVersion
             || source.ResourceSha256 != resourceSha
             || placement.PhysicalShardId != request.Placement.PhysicalShardId
-            || placement.Incarnation != request.Placement.Incarnation
+            || placement.Incarnation != request.Placement.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication);
         }

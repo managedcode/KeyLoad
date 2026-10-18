@@ -9,7 +9,7 @@ internal static class AnalyticsBoundsSourceFlow
 {
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         var events = Enumerable.Range(0, P.SourceRows).Select(index => D.Event(db, P.Id(index), D.Alpha, 1)).ToArray();
         await AnalyticsBoundsOwner.SeedAsync(db, events);
         var query = P.Query(db);

@@ -69,7 +69,6 @@ internal static partial class GrainFailureDiagnostics
         var causeKind = CauseKind(error, category);
         var level = category == GrainFailureCategory.Unexpected ? LogLevel.Error : LogLevel.Warning;
         LogFailure(logger, level, requestId, stage, category, safeCode, causeKind, null);
-        ReplicaReadFailureLog.Observe(logger, error, requestId);
     }
 
     private static GrainFailureCauseKind CauseKind(Exception error, GrainFailureCategory category)

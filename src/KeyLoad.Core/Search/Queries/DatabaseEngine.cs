@@ -80,8 +80,7 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidMaintenanceAuthority);
         var principal = Principal(bounded, authority.PrincipalId, EvaluationClock.GetUtcNow());
         var placement = ReadAtomicPartitionPlacement(bounded, principal.Id, consumer.Partition);
-        var physical = new PhysicalShardRecord(placement.PhysicalShardId, placement.Incarnation,
-            placement.VoterIds, placement.PlacementEpoch);
+        var physical = new PhysicalShardRecord(placement.PhysicalShardId, placement.Incarnation);
         if (physical.Incarnation != Store.Identity.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, InvalidMaintenanceAuthority);

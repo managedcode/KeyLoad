@@ -14,7 +14,7 @@ internal static class NativeTextOnlineReplacementRollbackFlow
         {
             try
             {
-                fixture = new TestDatabase(nativeReplicaAdmission: true);
+                fixture = new TestDatabase();
                 await RunOwnedAsync(fixture, failures, token);
             }
             catch (Exception primary) { failures.Add(primary); throw; }

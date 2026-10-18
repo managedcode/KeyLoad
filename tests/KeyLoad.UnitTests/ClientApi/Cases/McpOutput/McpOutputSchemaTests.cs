@@ -119,7 +119,7 @@ internal sealed class McpOutputSchemaTests
     [Test]
     public async Task CredentialNoDataProjectionPreservesNativeTrueOutcomeAndExactSameIdReplay()
     {
-        using var database = new TestDatabase(nativeReplicaAdmission: true);
+        using var database = new TestDatabase();
         var commandId = Guid.NewGuid();
         var credential = global::KeyLoad.Core.DatabaseEngine.Credential("status-native-key", "root", "status-native-secret");
         var request = new ConfigureApiKeyRequest(credential);

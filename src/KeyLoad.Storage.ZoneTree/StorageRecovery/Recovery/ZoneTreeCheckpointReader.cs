@@ -13,23 +13,21 @@ internal static class ZoneTreeCheckpointReader
 
     internal static StorageSnapshot Read(FileStream input, ZoneTreeStoreOptions options,
         Action<StorageMutation>? apply = null, Action<StorageMutation>? validate = null,
-        ResourceRetirementConservationFloorV1? requiredFloor = null, ZoneTreeConservationBudget? work = null)
+        ZoneTreeCheckpointBudget? work = null)
     {
         if (input.Length > options.MaxSnapshotBytes && apply is null)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.SnapshotBytesExceeded);
         }
 
-        var budget = work ?? new ZoneTreeConservationBudget(options, TimeProvider.System, CancellationToken.None);
-        var index = new ZoneTreeCheckpointAuthorityIndex();
+        var budget = work ?? new ZoneTreeCheckpointBudget(options, TimeProvider.System, CancellationToken.None);
         var start = input.Position;
-        var snapshot = ReadCore(input, budget, index, null, validate);
+        var snapshot = ReadCore(input, budget, null, validate);
         var end = input.Position;
-        ZoneTreeCheckpointConservation.Require(input, options, index, budget, requiredFloor);
         if (apply is not null)
         {
             input.Position = start;
-            ReadCore(input, budget, null, apply, null);
+            ReadCore(input, budget, apply, null);
         }
         input.Position = end;
         return snapshot;
@@ -37,7 +35,7 @@ internal static class ZoneTreeCheckpointReader
 
     private static StorageSnapshot ReadCore(
         FileStream input,
-        ZoneTreeConservationBudget budget, ZoneTreeCheckpointAuthorityIndex? index,
+        ZoneTreeCheckpointBudget budget,
         Action<StorageMutation>? apply = null,
         Action<StorageMutation>? validate = null)
     {
@@ -49,12 +47,10 @@ internal static class ZoneTreeCheckpointReader
         var appliedKey = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey);
         while (true)
         {
-            var frameOffset = input.Position;
             var frame = budget.ReadFrame(input);
             if (metadata is null)
             {
                 metadata = ReadMetadata(frame);
-                index?.Metadata = metadata;
             }
             else
             {
@@ -76,7 +72,6 @@ internal static class ZoneTreeCheckpointReader
                 ApplyRecords(frame.Payload, appliedKey, apply, mutation =>
                 {
                     budget.Charge(InitialRecordCount);
-                    index?.Observe(mutation, frameOffset);
                     validate?.Invoke(mutation);
                 }, ref count, ref applied, ref previousKey);
             }
@@ -104,7 +99,6 @@ internal static class ZoneTreeCheckpointReader
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
         }
-        ZoneTreeCheckpointConservationShape.Require(metadata);
         return metadata;
     }
 
@@ -166,7 +160,6 @@ internal static class ZoneTreeCheckpointReader
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointVerificationFailed);
         }
 
-        ZoneTreeCheckpointConservationShape.RequireCount(metadata, count);
         return new(metadata.Incarnation, metadata.Position, metadata.AppliedPosition, count);
     }
 }

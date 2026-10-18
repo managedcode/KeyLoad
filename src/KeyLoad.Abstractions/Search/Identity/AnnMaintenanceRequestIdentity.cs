@@ -12,8 +12,6 @@ internal static class AnnMaintenanceRequestIdentity
             && first.NodeId == second.NodeId && first.Mode == second.Mode
             && first.MaintenanceProfile == second.MaintenanceProfile
             && first.Placement.PhysicalShardId == second.Placement.PhysicalShardId
-            && first.Placement.Incarnation == second.Placement.Incarnation
-            && first.Placement.PlacementEpoch == second.Placement.PlacementEpoch
-            && first.Placement.VoterIds.SequenceEqual(second.Placement.VoterIds, StringComparer.Ordinal);
+            && first.Placement.Incarnation == second.Placement.Incarnation;
     }
 }

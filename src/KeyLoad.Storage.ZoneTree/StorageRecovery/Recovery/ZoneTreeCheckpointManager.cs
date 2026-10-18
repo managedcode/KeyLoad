@@ -31,7 +31,7 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
         }
 
         return ZoneTreeCheckpointWriter.Write(path, runtime.Options, runtime.Identity,
-            runtime.Position, applied, runtime.Tree, runtime.View);
+            runtime.Position, applied, runtime.Tree);
     }
 
     private long AppliedPosition() => runtime.View.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, LastAppliedKey)) is { } value
@@ -81,17 +81,9 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
 
             runtime.NativeReadCuts.RequireNoActiveLeaseForTreeReplacement();
 
-            var budget = new ZoneTreeConservationBudget(runtime.Options, runtime.Clock, CancellationToken.None);
-            var view = new ZoneTreeConservationView(runtime.View, budget);
-            var liveFloor = ResourceRetirementConservationRead.ReadFloor(view, runtime.Options.MaxFrameBytes);
+            var budget = new ZoneTreeCheckpointBudget(runtime.Options, runtime.Clock, CancellationToken.None);
             File.Copy(path, temporary, false);
-            var snapshot = ReadStaged(temporary, expectedAppliedPosition, liveFloor, view, budget);
-            var finalFloor = ResourceRetirementConservationRead.ReadFloor(view, runtime.Options.MaxFrameBytes);
-            if ((liveFloor is null) != (finalFloor is null)
-                || liveFloor is not null && !ResourceRetirementConservation.Same(liveFloor, finalFloor!))
-            {
-                throw Errors.Fail(ErrorCode.OwnershipLost, SnapshotCutLost);
-            }
+            var snapshot = ReadStaged(temporary, expectedAppliedPosition, budget);
             ZoneTreeCheckpointGeneration.Replace(runtime, temporary, snapshot.Position, replaceTree: true);
             return snapshot;
         }
@@ -102,16 +94,11 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
     }
 
     private StorageSnapshot ReadStaged(string temporary, long expectedAppliedPosition,
-        ResourceRetirementConservationFloorV1? requiredFloor, IKeyValueView view, ZoneTreeConservationBudget budget)
+        ZoneTreeCheckpointBudget budget)
     {
         using var input = new FileStream(temporary, FileMode.Open, FileAccess.ReadWrite, FileShare.None,
             runtime.Options.StreamBufferBytes);
-        var header = ZoneTreeCheckpointReader.ReadMetadata(budget.ReadFrame(input));
-        if (header.ConservationFloor is { } incomingFloor)
-        {
-            ResourceRetirementConservationCatalog.RequireOwner(view, incomingFloor.PhysicalOwner, runtime.Options.MaxFrameBytes);
-        }
-        var snapshot = ZoneTreeCheckpointPublication.RequireReplayable(input, runtime.Options, requiredFloor, budget);
+        var snapshot = ZoneTreeCheckpointPublication.RequireReplayable(input, runtime.Options, budget);
         if (snapshot.Incarnation != runtime.Identity.Incarnation || snapshot.AppliedPosition != expectedAppliedPosition
             || input.Position != input.Length)
         {

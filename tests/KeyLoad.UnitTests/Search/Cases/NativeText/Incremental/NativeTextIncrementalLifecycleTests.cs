@@ -19,7 +19,7 @@ internal sealed class NativeTextIncrementalLifecycleTests
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                fixture = new(nativeReplicaAdmission: true);
+                fixture = new();
                 fixture.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
                 _ = await NativeTextMaintenanceSeed.CommitAsync(fixture, token);
                 var request = await NativeTextMaintenanceRequestFixture.CreateAsync(fixture, token);

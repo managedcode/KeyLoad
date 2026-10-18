@@ -40,7 +40,6 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.ApproximateSearch => new(true, true, false),
         GrainReadKind.Search => new(true, true, false),
         GrainReadKind.GraphSearch or GrainReadKind.SqlGraphSearch => new(true, true, false),
-        GrainReadKind.ClusterBackupOwner => new(false, true, false),
         GrainReadKind.Backup => new(false, false, false),
         GrainReadKind.Admission => new(true, true, false),
         GrainReadKind.NodeStatus => new(true, true, false),

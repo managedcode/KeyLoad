@@ -106,7 +106,7 @@ internal static class QueueReadyAuthorityTrial
         try
         {
             token.ThrowIfCancellationRequested();
-            using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+            using var fixture = new TestDatabase();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 fixture.Configure("jobs", ResourceKind.WorkQueue);

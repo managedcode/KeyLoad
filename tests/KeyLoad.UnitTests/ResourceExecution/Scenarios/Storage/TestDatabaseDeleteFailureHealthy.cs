@@ -12,7 +12,7 @@ internal static class TestDatabaseDeleteFailureHealthy
         var joined = false;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new(nativeReplicaAdmission: true);
+            fixture = new();
             var state = await TestDatabaseConcurrentCloseSeeding.RunAsync(fixture, TestDatabaseConcurrentCloseProtocol.HealthyId);
             joined = true;
             fixture.JoinOwnedResources();

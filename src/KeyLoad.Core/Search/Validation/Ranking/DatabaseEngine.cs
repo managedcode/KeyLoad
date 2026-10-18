@@ -24,7 +24,6 @@ public sealed partial class DatabaseEngine
         if (receipt is null || receipt.CommandId != phase.CommandId || receipt.Token is null
             || receipt.Token.AtomicPartitionId != phase.Current.Partition.AtomicPartitionId
             || receipt.Token.Incarnation != phase.Current.Incarnation || receipt.Token.Position <= NoBm25ReceiptPosition
-            || receipt.Token.OwnershipEpoch != phase.SourcePlacement.PlacementEpoch
             || receipt.Mutations.IsDefault || !receipt.Mutations.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);

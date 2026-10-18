@@ -47,7 +47,6 @@ public sealed partial class DatabaseEngine
         if (edge.To.Partition != partition)
         {
             RequireGraphWrite(tx, principal, partition, edge.To.Partition, edge.Graph);
-            RequireSameGraphOwner(tx, partition, edge.To.Partition);
         }
 
         PersistCanonicalEdge(tx, partition, edge, key, previous, record);

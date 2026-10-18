@@ -12,10 +12,10 @@ internal static class AnnLifetimeNativeFixture
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var source = new TestDatabase(nativeReplicaAdmission: true);
+            using var source = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var target = new TestDatabase(nativeReplicaAdmission: true);
+                using var target = new TestDatabase();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     AnnLifetimeNativeSeed.Configure(source, source: true, derived, cross);

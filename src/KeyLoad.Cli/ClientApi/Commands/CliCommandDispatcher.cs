@@ -5,14 +5,12 @@ using KeyLoad.Cli.Features.ClientApi;
 internal static class CliCommandDispatcher
 {
     private const int CommandArgumentIndex = 0;
-    private const int NoOperandArguments = 1;
     private const int OneOperandArguments = 2;
     private const int TwoOperandArguments = 3;
     private const string StatusCommand = "status";
     private const string BackupCommand = "backup";
     private const string CompactCommand = "compact";
     private const string RestoreCommand = "restore";
-    private const string RestoreClusterCommand = "restore-cluster";
     private const string PackBackupCommand = "pack-backup";
     private const string InspectArtifactCommand = "inspect-artifact";
     private const string CopyArtifactCommand = "copy-artifact";
@@ -25,7 +23,6 @@ internal static class CliCommandDispatcher
             StatusCommand when args.Length is OneOperandArguments or TwoOperandArguments => CliCommand.Status,
             BackupCommand when args.Length == TwoOperandArguments => CliCommand.Backup,
             CompactCommand when args.Length == OneOperandArguments => CliCommand.Compact,
-            RestoreClusterCommand when args.Length == NoOperandArguments => CliCommand.RestoreCluster,
             RestoreCommand when args.Length == TwoOperandArguments => CliCommand.Restore,
             PackBackupCommand when args.Length == TwoOperandArguments => CliCommand.PackBackup,
             InspectArtifactCommand when args.Length == OneOperandArguments => CliCommand.InspectArtifact,
@@ -40,7 +37,6 @@ internal static class CliCommandDispatcher
     internal static Task DispatchAsync(CliCommand command, string[] args) => command switch
     {
         CliCommand.Status => RunStatusAsync(args),
-        CliCommand.RestoreCluster => CliClusterRestore.RunAsync(),
         CliCommand.Backup or CliCommand.Compact or CliCommand.Restore or
         CliCommand.PackBackup or CliCommand.InspectArtifact or CliCommand.CopyArtifact or
         CliCommand.UnpackBackup => RunBackupRestoreAsync(command, args),
@@ -66,7 +62,6 @@ internal static class CliCommandDispatcher
         Backup,
         Compact,
         Restore,
-        RestoreCluster,
         PackBackup,
         InspectArtifact,
         CopyArtifact,

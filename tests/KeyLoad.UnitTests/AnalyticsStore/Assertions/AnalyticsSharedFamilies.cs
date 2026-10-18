@@ -12,7 +12,7 @@ internal static class AnalyticsSharedFamilies
 {
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         AnalyticsSharedFlow.Configure(fixture);
         var partition = fixture.Partition with
         {

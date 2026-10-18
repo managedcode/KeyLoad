@@ -21,6 +21,10 @@ public sealed partial class DatabaseEngine
                 var create = Payload<CreateTableRequest>(operation);
                 ObserveCatalogLifetime(view, create.TenantId, create.DatabaseId, create.Definition.Name);
                 return true;
+            case OperationKind.DropTable:
+                var drop = Payload<DropTableRequest>(operation);
+                ObserveCatalogLifetime(view, drop.TenantId, drop.DatabaseId, drop.ResourceName);
+                return true;
             case OperationKind.SetQueueDispatch:
                 var dispatch = Payload<QueueDispatchControlRequest>(operation);
                 ObserveCatalogLifetime(view, dispatch.TenantId, dispatch.DatabaseId, dispatch.Queue);

@@ -94,7 +94,6 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         {
             return true;
         }
-        DatabaseEngine.RequireSameGraphOwner(view, state.SourcePartition, request.Target.Partition, grant);
         var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersionV1>(view,
             GraphCrossPartitionKeys.OwnerVersion(state.SourcePartition, request.Graph, state.EdgeId), grant)
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);

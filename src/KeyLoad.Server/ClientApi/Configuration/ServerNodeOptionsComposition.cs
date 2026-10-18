@@ -11,7 +11,7 @@ internal static class ServerNodeOptionsComposition
         var factory = new OptionsFactory<NodeOptions>(
             [new ConfigureFromConfigurationOptions<NodeOptions>(configuration.GetSection(ServerProtocol.ConfigurationSection))],
             [new PostConfigureOptions<NodeOptions>(Options.DefaultName,
-                node => ServerRuntimeOptionsRegistration.ConfigureNode(node, configuration))],
+                ServerRuntimeOptionsRegistration.ConfigureNode)],
             [new NodeOptionsValidator()]);
         return new OptionsManager<NodeOptions>(factory);
     }

@@ -11,7 +11,7 @@ internal sealed class PartitionQueryMcpContractTests
     [Test]
     public async Task FrozenGeneratedAliasesAndFieldIdsRemainExact()
     {
-        using var fixture = new TestDatabase(bootstrapPhysicalShardCatalog: false);
+        using var fixture = new TestDatabase();
         var request = PartitionQueryMcpTestData.Request();
         PartitionQueryMcpTestData.Seed(fixture, request);
         var nativeRequest = NativeSerialization.Deserialize<PartitionQueryRequestV1>(NativeSerialization.Serialize(request));
@@ -24,7 +24,7 @@ internal sealed class PartitionQueryMcpContractTests
     [Test]
     public async Task LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints()
     {
-        using var fixture = new TestDatabase(bootstrapPhysicalShardCatalog: false);
+        using var fixture = new TestDatabase();
         var request = PartitionQueryMcpTestData.Request();
         PartitionQueryMcpTestData.Seed(fixture, request);
         _ = await PartitionQueryMcpTestData.ExecuteAsync(fixture, PartitionQueryMcpTestData.Decode(request));
@@ -35,7 +35,7 @@ internal sealed class PartitionQueryMcpContractTests
     public async Task PublicAndNativeRequestBodiesRoundTripTheSameTypedValues()
     {
         var request = PartitionQueryMcpTestData.Request();
-        using var fixture = new TestDatabase(bootstrapPhysicalShardCatalog: false);
+        using var fixture = new TestDatabase();
         PartitionQueryMcpTestData.Seed(fixture, request);
         var bytes = NativeSerialization.Serialize(request);
         var native = NativeSerialization.Deserialize<PartitionQueryRequestV1>(bytes)!;
@@ -56,7 +56,7 @@ internal sealed class PartitionQueryMcpContractTests
     [Test]
     public async Task PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses()
     {
-        using var fixture = new TestDatabase(bootstrapPhysicalShardCatalog: false);
+        using var fixture = new TestDatabase();
         var request = PartitionQueryMcpTestData.Request();
         PartitionQueryMcpTestData.Seed(fixture, request);
         var page = await PartitionQueryMcpTestData.ExecuteAsync(fixture, request);
@@ -79,7 +79,7 @@ internal sealed class PartitionQueryMcpContractTests
         var decoded = await McpNativePayloadAssertions.DecodeCanonical(item);
         await McpNativePayloadAssertions.AssertNativeWritersAgree(item, decoded);
         var request = (PartitionQueryRequestV1)decoded;
-        using var fixture = new TestDatabase(bootstrapPhysicalShardCatalog: false);
+        using var fixture = new TestDatabase();
         PartitionQueryMcpTestData.Seed(fixture, request, McpCanonicalTestData.Entity);
         var position = fixture.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution())

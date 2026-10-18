@@ -10,7 +10,7 @@ internal sealed class NativeTextOnlineWholeOperationTests
     [Test]
     public async Task NativeOrderedPublicationPreservesFullOriginalReceiptAndSameViewBilingualReads()
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var seed = await NativeTextOnlineSeedFixture.CreateAsync(fixture, token);
         await using var runtime = new NativeTextOnlineTestRuntime(fixture);
@@ -28,7 +28,7 @@ internal sealed class NativeTextOnlineWholeOperationTests
     [Test]
     public async Task AlreadyCancelledActualMaintenanceJoinsBeforeFreshNativePublicationAndFullHealthyRead()
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var seed = await NativeTextOnlineSeedFixture.CreateAsync(fixture, token);
         await using var runtime = new NativeTextOnlineTestRuntime(fixture);
@@ -45,7 +45,7 @@ internal sealed class NativeTextOnlineWholeOperationTests
     [Test]
     public async Task GenuineCompetingCapturedMaintenanceRefusesAtSharedLeaseCeilingThenJoinedAbortAllowsFullHealthyPublication()
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var seed = await NativeTextOnlineSeedFixture.CreateAsync(fixture, token);
         await using var runtime = new NativeTextOnlineTestRuntime(fixture);
@@ -95,7 +95,7 @@ internal sealed class NativeTextOnlineWholeOperationTests
     [Test]
     public async Task NativeDeleteAndGenerationSwapPreserveOriginalReceiptAndCompleteDeletedExclusion()
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var seed = await NativeTextOnlineSeedFixture.CreateAsync(fixture, token);
         await using var runtime = new NativeTextOnlineTestRuntime(fixture);
@@ -120,7 +120,7 @@ internal sealed class NativeTextOnlineWholeOperationTests
     [Test]
     public async Task ActualPinnedSnapshotAllowsNativeUpdateDeleteThenOrderedDeltaPublishesCompleteLiteralCorpus()
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var seed = await NativeTextOnlineSeedFixture.CreateAsync(fixture, token);
         await using var runtime = new NativeTextOnlineTestRuntime(fixture);
@@ -155,7 +155,7 @@ internal sealed class NativeTextOnlineWholeOperationTests
     [Test]
     public async Task RealOldNativeReaderRetainsItsOriginalFilesAcrossOnlineSwapUntilJoinedOwnerShutdown()
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var seed = await NativeTextOnlineSeedFixture.CreateAsync(fixture, token);
         await using var runtime = new NativeTextOnlineTestRuntime(fixture);

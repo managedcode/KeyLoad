@@ -26,7 +26,7 @@ internal static class Bm25InvalidationDependencyFlow
         var failures = new List<Exception>();
         try
         {
-            using var database = new TestDatabase(nativeReplicaAdmission: true);
+            using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))

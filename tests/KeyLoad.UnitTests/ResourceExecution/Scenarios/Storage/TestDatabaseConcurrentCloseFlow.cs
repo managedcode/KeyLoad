@@ -18,7 +18,7 @@ internal static class TestDatabaseConcurrentCloseFlow
         TestDatabase? fixture = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new(nativeReplicaAdmission: true);
+            fixture = new();
             var state = await TestDatabaseConcurrentCloseSeeding.RunAsync(fixture, commandId);
             await TestDatabaseConcurrentCloseReopen.HeldAsync(fixture);
             if (joinFirst)

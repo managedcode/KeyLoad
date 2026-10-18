@@ -34,7 +34,6 @@ internal static class ClusterResources
     private const string SiloAddressEnvironment = "KeyLoad__SiloAddress";
     private const string SiloPortEnvironment = "KeyLoad__SiloPort";
     private const string HttpPortEnvironment = "ASPNETCORE_HTTP_PORTS";
-    private const int SingleFunctionalNodeCount = 1;
     private const int FirstNodeIndex = 0;
     private const int HttpPort = 8080;
     private const int SiloPort = 11111;
@@ -106,8 +105,7 @@ internal static class ClusterResources
     {
         resourceName ??= name;
         var options = AppHostOptionsRegistration.Get(builder);
-        var replicaCount = benchmarkNodeCount ?? (options.Control.Value.FunctionalNodeCount == SingleFunctionalNodeCount
-            ? SingleFunctionalNodeCount : options.Cluster.Value.ReplicaCount);
+        var replicaCount = benchmarkNodeCount ?? options.Cluster.Value.ReplicaCount;
         if (replicaCount > nodeNames.Length)
         {
             throw new InvalidOperationException(ClusterDeploymentOptions.ValidationMessage);

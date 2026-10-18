@@ -10,7 +10,7 @@ internal static class AnalyticsBoundsNativeFlow
 {
     internal static async Task GroupsAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         await AnalyticsBoundsOwner.SeedAsync(db, [D.Event(db, D.First, D.Alpha, 2), D.Event(db, D.Second, D.Beta, 4)]);
         await N.UnchangedAsync(db, async () =>
         {
@@ -23,7 +23,7 @@ internal static class AnalyticsBoundsNativeFlow
 
     internal static async Task SumAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         await AnalyticsBoundsOwner.SeedAsync(db,
             [D.Event(db, D.First, D.Alpha, double.MaxValue), D.Event(db, D.Second, D.Alpha, double.MaxValue)]);
         await N.UnchangedAsync(db, async () =>
@@ -42,7 +42,7 @@ internal static class AnalyticsBoundsNativeFlow
 
     internal static async Task ResultAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         await AnalyticsBoundsOwner.SeedAsync(db, [D.Event(db, D.First, D.Alpha, 2), D.Event(db, D.Second, D.Beta, 4)]);
         var expected = new AnalyticsAggregateResult([P.Row(D.Alpha, 1, 2), P.Row(D.Beta, 1, 4)], 2);
         var bound = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options).Length - 1;

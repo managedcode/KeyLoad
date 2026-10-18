@@ -33,7 +33,7 @@ internal sealed class QueryReadCutObservationCapture : IQueryReadCutObserver
         var failures = new List<Exception>();
         try
         {
-            using var db = new TestDatabase(nativeReplicaAdmission: true);
+            using var db = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(() => body(db), failures);
         }
         catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))

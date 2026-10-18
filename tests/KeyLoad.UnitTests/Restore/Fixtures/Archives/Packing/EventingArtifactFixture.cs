@@ -58,8 +58,7 @@ internal sealed class EventingArtifactFixture
     internal void InitializeSource()
     {
         Directory.CreateDirectory(Root);
-        Source = new(directory: Path.Combine(Root, SourceDirectory), nativeReplicaAdmission: nativeAdmission,
-            nativeReplicaDirectory: nativeAdmission ? Path.Combine(Root, SourceDirectory + TestDatabaseReplicaDirectory.Suffix) : null);
+        Source = new(directory: Path.Combine(Root, SourceDirectory));
     }
 
     internal void InitializeTime() => Time = Source.Database.EvaluationClock.GetUtcNow();

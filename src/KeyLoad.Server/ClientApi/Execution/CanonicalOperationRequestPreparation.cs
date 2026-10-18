@@ -17,10 +17,6 @@ internal static class CanonicalOperationRequestPreparation
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
         }
-        if (readKind == GrainReadKind.ClusterBackupOwner)
-        {
-            payload = ClusterBackupCredentialCapability.Wrap(context, payload);
-        }
         var actual = CanonicalOperationSigning.Create(context.RequestServices, principal,
             readKind, commandKind, commandId, payload, cancellationToken);
         OperationResponseHeaders.Publish(context, actual.RequestId);

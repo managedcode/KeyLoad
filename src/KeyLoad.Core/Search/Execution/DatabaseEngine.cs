@@ -14,14 +14,12 @@ public sealed partial class DatabaseEngine
     {
         var view = work.CreateView(raw);
         var placement = ReadPlacementWitness(view, request.Partition);
-        var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
-            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Bm25CorpusProtocol.Invalid);
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         var identity = Store.Identity;
         var current = new Bm25CorpusCurrentV1(Bm25CorpusProtocol.Format, request.Partition,
             request.Collection, request.TextField!, tokenizer, principal.Id, principal.PolicyEpoch,
-            resource.SchemaVersion, Bm25CorpusDigest.Resource(resource, work), catalog.DefaultShard,
+            resource.SchemaVersion, Bm25CorpusDigest.Resource(resource, work), new(identity.NodeId, identity.Incarnation),
             ReadOutboxHead(view, request.Partition).Tail, Store.Position,
             NativeSerialization.Deserialize<long>(appliedBytes), identity.ReadGeneration,
             identity.Incarnation, statistics, commandId, string.Empty);

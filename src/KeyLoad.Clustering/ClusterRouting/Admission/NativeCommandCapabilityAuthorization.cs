@@ -9,7 +9,7 @@ internal static class NativeCommandCapabilityAuthorization
         ICommitCoordinator coordinator, TimeProvider clock, GrainRoutingOptions settings,
         GrainRequestCodec? codec, DecodedGrainRequest request, IGrainContext? context, CancellationToken token)
     {
-        var stage = GrainFailureStage.QuorumRead;
+        var stage = GrainFailureStage.ReadBarrier;
         try
         {
             await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);

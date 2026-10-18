@@ -8,7 +8,7 @@ namespace KeyLoad.Storage.ZoneTree;
 /// The checksummed redo journal is canonical. ZoneTree is its ordered materialization.
 /// The gate prevents readers from seeing a partially applied transaction. No network work runs inside it.
 /// </summary>
-public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogBackupStore
+public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
 {
     private const string InvalidNativeReadCutContextMessage = "A native read cut must be captured inside this store's gated read callback.";
 
@@ -171,17 +171,6 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     /// <returns>The captured local journal position.</returns>
     public long CreateBackup(string directory) => runtime.Backups.CreateBackup(directory);
 
-    /// <inheritdoc />
-    public NativeCatalogBackupCapture CreateCatalogBackup(string directory,
-        Func<IKeyValueView, long, StoreIdentity, byte[]> capture, CancellationToken cancellationToken)
-        => runtime.Backups.CreateCatalogBackup(directory, capture, cancellationToken);
-
-    /// <inheritdoc />
-    public NativeCatalogBackupCapture CaptureOrReadCatalogBackup(string directory, Action<IKeyValueView> authorize,
-        Func<IKeyValueView, long, StoreIdentity, byte[]> capture, Action<NativeCatalogBackupCapture> requireCaptured,
-        CancellationToken cancellationToken)
-        => runtime.Backups.CaptureOrReadCatalogBackup(directory, authorize, capture, requireCaptured, cancellationToken);
-
     /// <summary>Validates the original identity, checksums, native journal and committed cut of a backup.</summary>
     /// <param name="directory">The private immutable backup directory.</param>
     /// <param name="executionOptions">Validated native storage verification policy.</param>
@@ -194,27 +183,6 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
         return ZoneTreeBackupVerification.Verify(directory, executionOptions);
     }
 
-    /// <summary>Verifies the complete native owner archive and reads its exact bounded catalog cut metadata.</summary>
-    /// <param name="backup">Published native catalog archive directory.</param>
-    /// <param name="executionOptions">Original centrally validated native storage execution policy.</param>
-    /// <param name="cancellationToken">Original owning operation cancellation.</param>
-    /// <returns>The verified original physical position and exact owned cut metadata.</returns>
-    public static NativeCatalogBackupCapture ReadVerifiedCatalogBackup(string backup,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, CancellationToken cancellationToken) =>
-        ZoneTreeCatalogBackupMetadataFile.ReadArchive(backup, executionOptions, cancellationToken);
-
-    /// <summary>Runs a bounded offline reader against actual recovered original archive state under the native gate.</summary>
-    /// <typeparam name="T">Independent owned result; the callback cannot retain its gated view.</typeparam>
-    /// <param name="directory">Original immutable validated archive directory.</param>
-    /// <param name="executionOptions">Original centrally validated native policy owner.</param>
-    /// <param name="read">Borrowed current original-cut native view, never snapshot-supplied authority.</param>
-    /// <param name="cancellationToken">Original operation cancellation.</param>
-    /// <returns>The genuine callback result after all temporary native ownership is joined.</returns>
-    public static T ReadVerifiedCatalogBackup<T>(string directory,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
-        Func<IKeyValueView, StoreIdentity, long, ReadOnlyMemory<byte>, T> read, CancellationToken cancellationToken)
-        => ZoneTreeCatalogArchiveView.Read(directory, executionOptions, read, cancellationToken);
-
     /// <summary>Restores a verified backup under a new node identity with dispatch paused.</summary>
     /// <param name="backup">Directory containing the verified backup manifest and files.</param>
     /// <param name="destination">Empty private directory for the restored store.</param>
@@ -225,63 +193,6 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     public static StoreIdentity Restore(string backup, string destination,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation = null, byte[]? newSigningKey = null)
         => ZoneTreeBackupRestore.Restore(backup, destination, executionOptions, newIncarnation, newSigningKey);
-
-    /// <summary>Restores a verified catalog archive only after original native cut validation in unpublished staging.</summary>
-    /// <param name="backup">Complete immutable native catalog owner archive.</param>
-    /// <param name="destination">Clean operator-owned unpublished target canonical directory.</param>
-    /// <param name="executionOptions">Original centrally validated native storage execution policy.</param>
-    /// <param name="verifyCatalog">Synchronous actual credential and complete cut validator; it cannot retain or re-enter the view.</param>
-    /// <param name="newIncarnation">Explicit new replicated group incarnation.</param>
-    /// <param name="newSigningKey">Actual new group signing key, retained only in private operator configuration.</param>
-    /// <param name="cancellationToken">Original owning offline workflow cancellation.</param>
-    /// <returns>The genuinely restored native identity with dispatch paused.</returns>
-    public static StoreIdentity RestoreCatalogBackup(string backup, string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
-        Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>> verifyCatalog,
-        Guid newIncarnation, byte[] newSigningKey, CancellationToken cancellationToken) =>
-        ZoneTreeCatalogRestoreEntry.Restore(backup, destination, executionOptions, verifyCatalog,
-            newIncarnation, newSigningKey, cancellationToken);
-
-    /// <summary>Restores a conserved archive to an explicitly configured genuinely fresh physical owner.</summary>
-    /// <param name="backup">Original complete archive.</param>
-    /// <param name="destination">Empty unpublished destination.</param>
-    /// <param name="executionOptions">Validated original storage budgets.</param>
-    /// <param name="newIncarnation">Explicit target incarnation.</param>
-    /// <param name="newSigningKey">Distinct target signing identity.</param>
-    /// <param name="targetOwner">Actual target owner configuration, never derived from an incarnation.</param>
-    /// <param name="cancellationToken">Original workflow cancellation.</param>
-    /// <returns>The new paused identity after conserved publication.</returns>
-    public static StoreIdentity Restore(string backup, string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid newIncarnation,
-        byte[] newSigningKey, PhysicalShardRecord targetOwner, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(targetOwner);
-        return ZoneTreeBackupRestoreRestore.Restore(backup, destination, executionOptions, newIncarnation,
-            newSigningKey, cancellationToken: cancellationToken, targetOwner: targetOwner);
-    }
-
-    /// <summary>Restores a catalog archive with explicit verified original-to-target conservation provenance.</summary>
-    /// <param name="backup">Original catalog archive.</param>
-    /// <param name="destination">Empty unpublished target.</param>
-    /// <param name="executionOptions">Validated original storage budgets.</param>
-    /// <param name="verifyCatalog">Original synchronous credential and complete-cut validator.</param>
-    /// <param name="newIncarnation">Explicit new group incarnation.</param>
-    /// <param name="newSigningKey">Distinct new signing identity.</param>
-    /// <param name="cancellationToken">Original owning workflow cancellation.</param>
-    /// <param name="resolveOwnerMapping">Actual verified mapping resolved after catalog validation on the same source transaction.</param>
-    /// <returns>The new paused identity after conserved publication.</returns>
-    public static StoreIdentity RestoreCatalogBackup(string backup, string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
-        Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>> verifyCatalog,
-        Guid newIncarnation, byte[] newSigningKey,
-        Func<IKeyValueView, StoreIdentity, long, ClusterRestoreOwnerMapping> resolveOwnerMapping,
-        CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(verifyCatalog);
-        ArgumentNullException.ThrowIfNull(resolveOwnerMapping);
-        return ZoneTreeBackupRestoreRestore.Restore(backup, destination, executionOptions, newIncarnation,
-            newSigningKey, verifyCatalog, resolveOwnerMapping, cancellationToken: cancellationToken);
-    }
 
     /// <summary>Returns cumulative logical read work for this store's nonpersisted diagnostics session.</summary>
     /// <remarks>
@@ -320,48 +231,6 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     /// <summary>Disables acceleration and retires entries, preserving charges held by active readers.</summary>
     /// <remarks>Does not acquire the store gate, wait for callbacks or change durable data.</remarks>
     public void DisablePointCache() => runtime.CacheLifecycle.DisableAdmission();
-
-    /// <summary>Continues the same admitted native catalog restore slot and returns only actual joined transaction evidence.</summary>
-    /// <param name="backup">Exact original verified immutable four-file native archive.</param>
-    /// <param name="destination">Initially absent owned slot publication path.</param>
-    /// <param name="stage">Original deterministic admitted unpublished stage.</param>
-    /// <param name="executionOptions">Original centrally validated native policy owner.</param>
-    /// <param name="clock">The original configured owning clock.</param>
-    /// <param name="context">Immutable original operation/source/target identity.</param>
-    /// <param name="targetSigningKey">Separately supplied original target signer, never persisted in CLI plan.</param>
-    /// <param name="verifyOrReconcile">Actual original-source transaction callback; its long value is the native next commit position.</param>
-    /// <param name="verifyRecovered">Actual complete recovered-state and fresh persisted operator verification.</param>
-    /// <param name="observer">Optional internal post-barrier process-cut observation; supplies no authority.</param>
-    /// <param name="cancellationToken">Original downward cancellation.</param>
-    /// <param name="resolveOwnerMapping">Verified explicit original-to-target mapping resolved after reconciliation on the same transaction.</param>
-    /// <returns>Genuine native rows independently observed after stores/readers have joined.</returns>
-    public static NativeCatalogRestoreSlotCompletion RestoreCatalogBackupSlot(string backup, string destination,
-        string stage, Microsoft.Extensions.Options.IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
-        TimeProvider clock, ClusterRestoreSlotContext context, ReadOnlyMemory<byte> targetSigningKey,
-        Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>, ClusterRestoreSlotContext> verifyOrReconcile,
-        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verifyRecovered,
-        Action<NativeClusterRestoreStage>? observer, CancellationToken cancellationToken,
-        Func<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext, ClusterRestoreOwnerMapping>? resolveOwnerMapping = null)
-        => ZoneTreeRestoreSlotDriver.Restore(backup, destination, stage, executionOptions, clock, context,
-            targetSigningKey, verifyOrReconcile, verifyRecovered, observer, cancellationToken, resolveOwnerMapping);
-
-    /// <summary>Requires the exact existing original completed slot without copy, reconciliation or authority reset.</summary>
-    /// <param name="backup">The unchanged verified native source archive.</param>
-    /// <param name="destination">The originally admitted existing slot.</param>
-    /// <param name="executionOptions">The original centrally validated storage options.</param>
-    /// <param name="clock">The original owning clock.</param>
-    /// <param name="context">The immutable admitted slot identity and source cut.</param>
-    /// <param name="targetSigningKey">The separately supplied original signer.</param>
-    /// <param name="verifyRecovered">The complete current native state and persisted operator verification.</param>
-    /// <param name="cancellationToken">Original downward cancellation.</param>
-    /// <returns>The genuine original slot completion after the native owner is joined.</returns>
-    public static NativeCatalogRestoreSlotCompletion ObserveCatalogBackupSlot(string backup, string destination,
-        Microsoft.Extensions.Options.IOptions<ZoneTreeStorageExecutionOptions> executionOptions, TimeProvider clock,
-        ClusterRestoreSlotContext context, ReadOnlyMemory<byte> targetSigningKey,
-        Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verifyRecovered,
-        CancellationToken cancellationToken)
-        => ZoneTreeRestoreSlotObserver.Require(backup, destination, executionOptions, clock, context,
-            targetSigningKey, verifyRecovered, cancellationToken);
 
     /// <summary>Closes the store handles and releases its exclusive directory lock.</summary>
     public void Dispose() => runtime.Dispose();

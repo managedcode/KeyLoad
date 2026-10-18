@@ -33,8 +33,7 @@ internal sealed class CompositionPrefixPrepareOwner
         token.ThrowIfCancellationRequested();
         Token = token;
         var directory = Path.Combine(Path.GetTempPath(), D.DirectoryPrefix + Guid.NewGuid().ToString(D.GuidFormat));
-        Source = new(limits, directory, nativeReplicaAdmission: true,
-            nativeReplicaDirectory: directory + TestDatabaseReplicaDirectory.Suffix);
+        Source = new(limits, directory);
         identity = Source.Store.Identity;
         try
         {

@@ -58,7 +58,7 @@ internal static class NativeSearchTerminalPrivacy
             || principal.PolicyEpoch != original.PolicyEpoch || resource.SchemaVersion != original.SchemaVersion
             || ResourceHash(resource, budget) != original.ResourceSha256
             || placement.PhysicalShardId != original.Placement.PhysicalShardId
-            || placement.Incarnation != original.Placement.Incarnation
+            || placement.Incarnation != original.Placement.Incarnation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, Changed);
         }

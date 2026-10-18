@@ -7,7 +7,7 @@ internal static class NativeTextCapturedSnapshotFlow
 {
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         var seed = await NativeTextOnlineSeedFixture.CreateAsync(fixture, token);
         await using var runtime = new NativeTextOnlineTestRuntime(fixture);
         var request = new OnlineTextIndexMaintenanceRequest(Guid.NewGuid(), seed.Pin.Consumer,

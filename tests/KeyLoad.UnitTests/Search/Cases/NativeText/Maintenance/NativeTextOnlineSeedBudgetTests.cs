@@ -8,7 +8,7 @@ internal sealed class NativeTextOnlineSeedBudgetTests
     [Test]
     public async Task CombinedOriginalGrantRefusesDuringActualSeedThenJoinedPinAllowsFullHealthySeed()
     {
-        using var database = new TestDatabase(nativeReplicaAdmission: true);
+        using var database = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var fixture = await NativeTextOnlineSeedFixture.CreateAsync(database, token);
         var metadataBytes = await NativeTextOnlineSeedAssertions.HealthyAsync(database, fixture, token);
@@ -30,7 +30,7 @@ internal sealed class NativeTextOnlineSeedBudgetTests
     [Test]
     public async Task ActualCapturedSeedCancellationJoinsBeforeFreshFullHealthySeed()
     {
-        using var database = new TestDatabase(nativeReplicaAdmission: true);
+        using var database = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
         var fixture = await NativeTextOnlineSeedFixture.CreateAsync(database, token);
         using var source = CancellationTokenSource.CreateLinkedTokenSource(token);

@@ -15,7 +15,7 @@ internal sealed class SqlParserAdmissionFixture : IDisposable
         MaxQueryTokens = 128,
         MaxQueryDepth = 16
     },
-        nativeReplicaAdmission: true, timeProvider: new ControlledReadClock(Epoch));
+timeProvider: new ControlledReadClock(Epoch));
     internal List<(CommandRequest Request, CommitReceipt Receipt, byte[] Outcome)> Additional
     {
         get;

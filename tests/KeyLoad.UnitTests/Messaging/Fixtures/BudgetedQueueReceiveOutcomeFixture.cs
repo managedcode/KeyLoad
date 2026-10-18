@@ -8,7 +8,7 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
 {
     private const int FirstMutationIndex = 0;
     private const int SecondMutationIndex = 1;
-    internal TestDatabase Database { get; } = new(nativeReplicaAdmission: true);
+    internal TestDatabase Database { get; } = new();
     internal ResourceDefinition Resource { get; private set; } = null!;
     internal PrincipalRecord Worker { get; private set; } = null!;
     internal ReplicatedOperation OriginalIntent { get; private set; } = null!;

@@ -33,7 +33,7 @@ internal sealed class SafeProjectorOperationDatabase
         CallerToken = callerToken;
         callerToken.ThrowIfCancellationRequested();
         replicaDirectory = directory + TestDatabaseReplicaDirectory.Suffix;
-        Source = new(directory: directory, nativeReplicaAdmission: true, nativeReplicaDirectory: replicaDirectory);
+        Source = new(directory: directory);
         canonicalIdentity = Source.Store.Identity;
     }
 

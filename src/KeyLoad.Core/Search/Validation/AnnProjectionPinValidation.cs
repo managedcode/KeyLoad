@@ -56,7 +56,7 @@ internal static class AnnProjectionPinValidation
         var expected = request.Placement;
         if (database.Store.Identity.NodeId != request.NodeId
             || database.Store.Identity.Incarnation != expected.Incarnation
-            || actual.PhysicalShardId != expected.PhysicalShardId || actual.Incarnation != expected.Incarnation
+            || actual.PhysicalShardId != expected.PhysicalShardId || actual.Incarnation != expected.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerLost);
         }

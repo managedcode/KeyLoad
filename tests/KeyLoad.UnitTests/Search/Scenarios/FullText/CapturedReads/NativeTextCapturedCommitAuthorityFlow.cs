@@ -15,7 +15,7 @@ internal static class NativeTextCapturedCommitAuthorityFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new(nativeReplicaAdmission: true);
+            fixture = new();
             fixture.Configure(P.Collection, ResourceKind.Collection);
             var principal = P.Principal(fixture.Partition);
             await Assert.That(principal.ClusterAdministrator).IsFalse();

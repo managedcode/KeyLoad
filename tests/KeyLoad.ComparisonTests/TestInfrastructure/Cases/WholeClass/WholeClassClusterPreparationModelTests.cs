@@ -34,7 +34,7 @@ internal sealed class WholeClassClusterPreparationModelTests
     private static readonly string[] ForeignIdentity =
     [
         "--GITHUB_SHA=foreign", "--KEYLOAD_IMAGE_RECEIPT=foreign", "--KEYLOAD_IMAGE_PROVENANCE=foreign",
-        "--KEYLOAD_LOCAL_IMAGE_RECEIPT=foreign", "--Benchmarks:Target=ZoneTree", "--KeyLoadTests:ProtocolCohort:Enabled=true"
+        "--KEYLOAD_LOCAL_IMAGE_RECEIPT=foreign", "--Benchmarks:Target=ZoneTree"
     ];
     private static readonly string[] EmptyIdentity =
     [

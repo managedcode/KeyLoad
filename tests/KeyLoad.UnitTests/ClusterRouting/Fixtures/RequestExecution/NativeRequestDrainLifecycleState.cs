@@ -19,7 +19,7 @@ internal sealed class NativeRequestDrainLifecycleState : IDisposable
         Failures = failures;
         Token = token;
         ExpectsFailure = callbackFailure;
-        Database = new(timeProvider: clock, nativeReplicaAdmission: true);
+        Database = new(timeProvider: clock);
         try
         {
             Original = new(Guid.NewGuid(), Database.Partition,

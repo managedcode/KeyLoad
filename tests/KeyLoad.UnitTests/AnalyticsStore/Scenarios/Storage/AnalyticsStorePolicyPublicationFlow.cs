@@ -9,7 +9,7 @@ internal static class AnalyticsStorePolicyPublicationFlow
 {
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         await O.InitializeAsync(db, privacy: true);
         var other = new ResourceDefinition(S.OtherCollection, ResourceKind.Collection, db.Partition.TransactionDomainId);
         await O.EqualAsync(other, AnalyticsExpectedResourceCreation.Configure(db, other, AnalyticsExpectedResourceCreation.Unrelated));

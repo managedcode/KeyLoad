@@ -21,7 +21,7 @@ internal sealed class SampleChunkMixedAtomicTests
     [Test]
     public async Task AcChunk008012DocumentAndChunkEffectsRollbackTogetherBeforeHealthyAtomicSeal()
     {
-        using var fixture = new SampleChunkCanonicalFixture(nativeReplicaAdmission: true);
+        using var fixture = new SampleChunkCanonicalFixture();
         var configureId = Guid.NewGuid();
         fixture.Owner.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(
             fixture.Owner.Partition.TenantId, fixture.Owner.Partition.DatabaseId,

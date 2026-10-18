@@ -8,7 +8,7 @@ namespace KeyLoad.Server;
 internal static class NativeJobGraphRegistration
 {
     private const string ExistingPolicyRequired = "The native jobs graph requires the existing default-deny policy instance.";
-    private const string EverySourceMethod = "*";
+    private const string EverySourceMethod = ManagedCode.Orleans.Graph.Interfaces.Constants.AnyMethod;
 
     internal static void Extend(IServiceCollection services)
     {
@@ -91,6 +91,8 @@ internal static class NativeJobGraphRegistration
             nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync));
         Add<SampleChunkCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
         Add<AnnProjectionCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
+        Add<ISampleChunkCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
+        Add<IAnnProjectionCoordinatorGrain, IDatabaseCommitGrain>(graph, EverySourceMethod, nameof(IDatabaseCommitGrain.ReadCutAsync));
         graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IConnectionGrain).FullName!,
             new GrainTransition(RuntimeJournalClient.ReadCoreCallerMethod, nameof(IConnectionGrain.ExecuteStreamAsync)));
         graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IConnectionGrain).FullName!,

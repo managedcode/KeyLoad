@@ -110,7 +110,6 @@ internal static class PartitionRootAdmission
     private static bool IsCurrentDirectory(string name) => name is PartitionStoreProtocol.CanonicalDirectory
         or SearchIndexDirectory or AnnIndexDirectory or NativeTextIncrementalProtocol.RootDirectory or BackupDirectory
             or KeyLoad.Server.Features.Search.NativeTextOnlineRoot.DirectoryName
-            or ClusterBackupOwnerArchive.DirectoryName
             or UserAnalyticsGenerationPaths.DirectoryName;
 
     private static KeyLoadException Unsupported() => Errors.Fail(ErrorCode.FormatUnsupported, InvalidLayout);

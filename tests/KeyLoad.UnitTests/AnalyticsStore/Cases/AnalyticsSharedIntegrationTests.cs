@@ -14,7 +14,7 @@ internal sealed class AnalyticsSharedIntegrationTests
     [Test]
     public async Task PolicyOnlySchemaCasCannotChangeAnalyticsStoreShape()
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         AnalyticsSharedFlow.Configure(fixture);
         var before = fixture.Store.Read(view => fixture.Database.Resource(view, fixture.Partition, P.Store));
         var replacement = before with

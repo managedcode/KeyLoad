@@ -22,15 +22,14 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
         IGrainRequestPhaseObserver? observer = null,
         Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeMaintenance = null,
         IGrainRequestPurposeObserver? purposeObserver = null,
-        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime>? nativeAnnMaintenance = null,
-        bool nativeReplicaAdmission = false)
+        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime>? nativeAnnMaintenance = null)
     {
         nativeFactory = nativeMaintenance;
         nativeAnnFactory = nativeAnnMaintenance;
-        UsesNativeAdmission = nativeReplicaAdmission || nativeFactory is not null || nativeAnnFactory is not null;
+        UsesNativeAdmission = nativeFactory is not null || nativeAnnFactory is not null;
         Clock = clock ?? TimeProvider.System;
         RoutingOptions = UnitRoutingOptions.Routing(routing);
-        Database = new TestDatabase(timeProvider: Clock, nativeReplicaAdmission: UsesNativeAdmission);
+        Database = new TestDatabase(timeProvider: Clock);
         try
         {
             RequestCqrsFixtureOwners.Register(ownerId, this);

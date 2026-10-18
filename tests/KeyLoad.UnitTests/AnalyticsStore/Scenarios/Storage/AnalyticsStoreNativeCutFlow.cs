@@ -9,7 +9,7 @@ internal static class AnalyticsStoreNativeCutFlow
     private const string UpsertKind = "upsertAnalyticsEvents";
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         await O.InitializeAsync(db, false);
         var initial = D.Event(db, D.First, D.Alpha, 2);
         await O.CommitAsync(db, new UpsertAnalyticsEvents(D.Store, [initial], O.Revisions((D.First, 0))), UpsertKind, D.First, 1, token);

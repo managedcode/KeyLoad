@@ -23,7 +23,7 @@ internal static class ZoneTreeBackupRestoreFiles
             throw Errors.Fail(ErrorCode.Conflict, BackupDestinationNotEmpty);
         }
 
-        ZoneTreeCatalogBackupPublication.RequirePath(directory);
+        ZoneTreeBackupPathValidation.Require(directory);
         cancellationToken.ThrowIfCancellationRequested();
         ZoneTreeStoreFiles.CreatePrivateDirectory(directory);
         runtime.Journal.Flush(true);

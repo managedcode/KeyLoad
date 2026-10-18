@@ -10,7 +10,7 @@ internal static class AnalyticsStoreNativePrivacyFlow
     private const string FieldDenied = "The query requires a protected field-use grant.";
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         await O.InitializeAsync(db, true);
         AnalyticsEventData[] rows = [D.Event(db, D.First, D.Alpha, 2, true), D.Event(db, D.Second, D.Alpha, 4, true), D.Event(db, D.Third, D.Beta, 8, true)];
         var hidden = D.Event(db, D.Hidden, D.Beta, 999) with

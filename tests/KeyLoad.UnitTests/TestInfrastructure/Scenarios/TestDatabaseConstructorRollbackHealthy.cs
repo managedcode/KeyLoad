@@ -13,7 +13,7 @@ internal static class TestDatabaseConstructorRollbackHealthy
         TestDatabase? fixture = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new(directory: directory, nativeReplicaAdmission: true);
+            fixture = new(directory: directory);
             var state = await TestDatabaseConcurrentCloseSeeding.RunAsync(fixture,
                 TestDatabaseConcurrentCloseProtocol.HealthyId);
             await TestDatabaseConcurrentCloseReopen.HeldAsync(fixture);

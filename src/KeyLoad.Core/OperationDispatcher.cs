@@ -35,6 +35,7 @@ public sealed partial class DatabaseEngine
             OperationKind.PurgeOutbox => ExecutePurgeOutbox(transaction, operation),
             OperationKind.ConfigureResource => ExecuteConfigureResource(transaction, operation),
             OperationKind.CreateTable => ExecuteCreateTable(transaction, operation),
+            OperationKind.DropTable => ExecuteDropTable(transaction, operation, position),
             OperationKind.SetQueueDispatch => ExecuteQueueDispatchControl(transaction, operation),
             OperationKind.ConfigurePrincipal => ExecuteConfigurePrincipal(transaction, operation),
             OperationKind.ConfigureApiKey => ExecuteConfigureApiKey(transaction, operation),

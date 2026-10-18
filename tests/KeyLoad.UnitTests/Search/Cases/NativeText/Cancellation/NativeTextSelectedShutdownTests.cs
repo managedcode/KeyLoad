@@ -12,7 +12,7 @@ internal sealed class NativeTextSelectedShutdownTests
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var clock = new QueryObservedWorkClock();
-            using var database = new TestDatabase(timeProvider: clock, nativeReplicaAdmission: true);
+            using var database = new TestDatabase(timeProvider: clock);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);

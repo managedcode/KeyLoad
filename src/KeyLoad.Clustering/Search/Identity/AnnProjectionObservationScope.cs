@@ -3,7 +3,7 @@ namespace KeyLoad.Clustering;
 internal static class AnnProjectionObservationScope
 {
     internal static bool SamePhysicalIdentity(PhysicalShardRecord host, PhysicalShardRecord original)
-        => host.PhysicalShardId == original.PhysicalShardId && host.Incarnation == original.Incarnation
+        => host.PhysicalShardId == original.PhysicalShardId && host.Incarnation == original.Incarnation;
 
     internal static bool Handles(GrainReadKind? kind) => kind == GrainReadKind.AnnProjectionObservation;
 

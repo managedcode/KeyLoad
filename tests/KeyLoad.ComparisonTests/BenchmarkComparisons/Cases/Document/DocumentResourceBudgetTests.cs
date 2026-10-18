@@ -14,13 +14,10 @@ internal sealed class DocumentResourceBudgetTests
     private const string ConnectionsEvidence = "Benchmarks__Deployment__DocumentPostgresMaximumConnections";
     private const string ScanRecords = "KeyLoad__DatabaseLimits__MaxScanRecords";
     private const string QueryReadBytes = "KeyLoad__DatabaseLimits__MaxQueryReadBytes";
-    private const string SnapshotThreshold = "KeyLoad__SnapshotThreshold";
     private const string ScanEvidence = "Benchmarks__Deployment__DocumentKeyLoadMaximumScanRecords";
     private const string ReadEvidence = "Benchmarks__Deployment__DocumentKeyLoadMaximumQueryReadBytes";
-    private const string SnapshotEvidence = "Benchmarks__Deployment__DocumentKeyLoadSnapshotThreshold";
     private const string ExpectedScans = "1100000";
     private const string ExpectedBytes = "2147483648";
-    private const string ExpectedSnapshot = "2000000";
     private const string ExpectedConnections = "512";
     private const string DeploymentPrefix = "Benchmarks:Deployment:";
     private const string AdmissionPrefix = "KeyLoad__HttpAdmission__";
@@ -49,7 +46,7 @@ internal sealed class DocumentResourceBudgetTests
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task KeyLoadDocumentBoundsCoverMillionPlusCreateAndRetainSnapshotPolicy(int nodes)
+    public async Task KeyLoadDocumentBoundsCoverMillionPlusCreateAndReadBudgets(int nodes)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, nodes);
         IsolatedKeyLoadResources.Add(fixture.Context);
@@ -62,14 +59,12 @@ internal sealed class DocumentResourceBudgetTests
             await Assert.That(environment[AdmissionPrefix + nameof(HttpAdmissionLimits.MaxPrincipalRequests)]).IsEqualTo(Requests);
             await Assert.That(environment[ScanRecords]).IsEqualTo(ExpectedScans);
             await Assert.That(environment[QueryReadBytes]).IsEqualTo(ExpectedBytes);
-            await Assert.That(environment[SnapshotThreshold]).IsEqualTo(ExpectedSnapshot);
         }
         var evidence = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Runner.Resource);
         await Assert.That(evidence[AdmissionRequests]).IsEqualTo(Requests);
         await Assert.That(evidence[AdmissionMode]).IsEqualTo(bool.TrueString);
         await Assert.That(evidence[ScanEvidence]).IsEqualTo(ExpectedScans);
         await Assert.That(evidence[ReadEvidence]).IsEqualTo(ExpectedBytes);
-        await Assert.That(evidence[SnapshotEvidence]).IsEqualTo(ExpectedSnapshot);
     }
 
     [Test]
@@ -88,7 +83,6 @@ internal sealed class DocumentResourceBudgetTests
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadRequestsPerScope), "500")]
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadMaximumScanRecords), "1000000")]
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadMaximumQueryReadBytes), "67108864")]
-    [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadSnapshotThreshold), "1024")]
     public async Task InsufficientDocumentBoundsRejectBeforeNativeDirectories(string option, string value)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, 3);
@@ -104,7 +98,6 @@ internal sealed class DocumentResourceBudgetTests
             nameof(BenchmarkDeploymentOptions.DocumentKeyLoadRequestsPerScope) => Requests,
             nameof(BenchmarkDeploymentOptions.DocumentKeyLoadMaximumScanRecords) => ExpectedScans,
             nameof(BenchmarkDeploymentOptions.DocumentKeyLoadMaximumQueryReadBytes) => ExpectedBytes,
-            nameof(BenchmarkDeploymentOptions.DocumentKeyLoadSnapshotThreshold) => ExpectedSnapshot,
             _ => throw new ArgumentOutOfRangeException(nameof(option))
         };
         IsolatedKeyLoadResources.Add(fixture.Context);

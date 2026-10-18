@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnProviderQualificationOwner : IDisposable
 {
-    internal TestDatabase Source { get; } = new(nativeReplicaAdmission: false);
+    internal TestDatabase Source { get; } = new();
     internal ZoneTreeStore Store
     {
         get; private set;

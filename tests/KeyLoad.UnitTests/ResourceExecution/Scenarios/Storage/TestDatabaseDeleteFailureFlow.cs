@@ -17,7 +17,7 @@ internal static class TestDatabaseDeleteFailureFlow
         var joinAttempted = false;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new(nativeReplicaAdmission: true);
+            fixture = new();
             state = await TestDatabaseConcurrentCloseSeeding.RunAsync(fixture, TestDatabaseConcurrentCloseProtocol.OriginalId);
             joinAttempted = true;
             fixture.JoinOwnedResources();

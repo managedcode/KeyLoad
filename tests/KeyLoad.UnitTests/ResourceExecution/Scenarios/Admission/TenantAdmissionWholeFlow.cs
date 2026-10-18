@@ -9,7 +9,7 @@ internal static class TenantAdmissionWholeFlow
 
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var fixture = new TestDatabase(nativeReplicaAdmission: true);
+        using var fixture = new TestDatabase();
         TenantAdmissionOperations.Provision(fixture);
         var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new()
         {

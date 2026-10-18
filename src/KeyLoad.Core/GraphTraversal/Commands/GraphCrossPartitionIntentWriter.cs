@@ -105,7 +105,6 @@ internal static class GraphCrossPartitionIntentWriter
                  .ThenBy(pair => pair.Key.Id, StringComparer.Ordinal))
         {
             database.RequireGraphWrite(transaction, principal, source, target.Partition, graph);
-            DatabaseEngine.RequireSameGraphOwner(transaction, source, target.Partition);
             var deleted = next is null || target != next.To;
             var edge = deleted ? snapshot with
             {

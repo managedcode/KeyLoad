@@ -66,31 +66,6 @@ public static class BackupArtifact
         flush.Flush(true);
     }
 
-    /// <summary>Packages the exact native catalog backup, requiring its original capture receipt digest.</summary>
-    /// <param name="backupDirectory">Actual verified four-file source directory.</param>
-    /// <param name="artifactPath">New operation-owned artifact path.</param>
-    /// <param name="pieceBytes">Existing native transfer piece bound.</param>
-    /// <param name="expectedManifestDigest">Separately retained original capture receipt digest.</param>
-    /// <param name="options">Original centrally validated native storage execution options.</param>
-    /// <param name="timeProvider">Borrowed artifact catalog clock.</param>
-    /// <param name="cancellationToken">Original operation cancellation.</param>
-    public static void PackCatalogBackup(string backupDirectory, string artifactPath, int pieceBytes,
-        string expectedManifestDigest, Microsoft.Extensions.Options.IOptions<KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions> options,
-        TimeProvider timeProvider, CancellationToken cancellationToken) =>
-        CatalogBackupArtifactOperations.Pack(backupDirectory, artifactPath, pieceBytes, expectedManifestDigest,
-            options, timeProvider, cancellationToken);
-
-    /// <summary>Verifies and publishes the exact four-file native archive into an empty destination.</summary>
-    /// <param name="artifactPath">Original bounded-piece artifact path.</param>
-    /// <param name="destination">Explicit clean operator-owned destination.</param>
-    /// <param name="expectedManifestDigest">Separately retained original capture receipt digest.</param>
-    /// <param name="options">Original centrally validated native storage execution options.</param>
-    /// <param name="cancellationToken">Original operation cancellation.</param>
-    public static void UnpackCatalogBackup(string artifactPath, string destination, string expectedManifestDigest,
-        Microsoft.Extensions.Options.IOptions<KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions> options,
-        CancellationToken cancellationToken) =>
-        CatalogBackupArtifactOperations.Unpack(artifactPath, destination, expectedManifestDigest, options, cancellationToken);
-
     private static FileInfo[] GetCanonicalFiles(string root, ImmutableArray<string> requiredNames)
     {
         var files = requiredNames.Select(name => new FileInfo(Path.Combine(root, name))).ToArray();

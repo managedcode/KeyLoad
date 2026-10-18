@@ -27,7 +27,6 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, InvalidDeliveryTarget);
         }
         RequireGraphWrite(tx, principal, request.SourcePartition, targetPartition, request.Graph);
-        RequireSameGraphOwner(tx, request.SourcePartition, targetPartition);
         var intent = CurrentIntent(tx, request.SourcePartition, request.Graph, request.EdgeId,
             request.Destination, Limits);
         if (intent is null || intent.Revision != request.ExpectedRevision)
@@ -97,7 +96,6 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, InvalidCompletionSource);
         }
         RequireGraphWrite(tx, principal, sourcePartition, request.Destination.Partition, request.Graph);
-        RequireSameGraphOwner(tx, sourcePartition, request.Destination.Partition);
         var intent = CurrentIntent(tx, sourcePartition, request.Graph, request.EdgeId,
             request.Destination, Limits);
         if (intent is null || intent.Revision != request.ExpectedRevision)

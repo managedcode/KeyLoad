@@ -2,7 +2,6 @@ using Aspire.Hosting;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.Clustering;
 using KeyLoad.Comparisons;
 using KeyLoad.Core;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +18,6 @@ internal sealed class CentralAppHostOptionsTests
     private const string CadenceSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.Cadence);
     private const string NativeReadBufferBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.NativeReadBufferBytes);
     private const string RequestsPerScopeSetting = IsolatedKeyLoadAdmissionOptions.SectionName + ":" + nameof(IsolatedKeyLoadAdmissionOptions.RequestsPerScope);
-    private const string ReadBarrierPerVoterSetting = IsolatedKeyLoadReplayOptionsRegistration.SectionName + ":" + nameof(ReplicaReplayLimits.ReadBarrierPerVoter);
 
     [Test]
     public async Task ConfiguredExecutionChangesTimeoutAndFilterAdmission()
@@ -95,13 +93,4 @@ internal sealed class CentralAppHostOptionsTests
         await Assert.That(ReferenceEquals(runtime, AppHostOptionsRegistration.Get(builder))).IsTrue();
     }
 
-    [Test]
-    public async Task InvalidIsolatedReplayRejectsBeforeContainerComposition()
-    {
-        var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
-        builder.Configuration[ReadBarrierPerVoterSetting] = "196609";
-        var failure = Assert.ThrowsExactly<OptionsValidationException>(() => AppHostOptionsRegistration.Get(builder));
-        await Assert.That(failure.OptionsType).IsEqualTo(typeof(ReplicaReplayLimits));
-        await Assert.That(builder.Resources.Count).IsEqualTo(0);
-    }
 }

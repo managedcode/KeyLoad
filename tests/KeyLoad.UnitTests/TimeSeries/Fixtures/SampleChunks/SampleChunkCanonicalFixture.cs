@@ -41,10 +41,9 @@ internal sealed class SampleChunkCanonicalFixture : IDisposable
     internal Guid WindowId { get; } = Guid.NewGuid();
 
     internal SampleChunkCanonicalFixture(KeyLoad.Core.TimeSeriesExecutionOptions? execution = null,
-        TimeProvider? timeProvider = null, bool nativeReplicaAdmission = false)
+        TimeProvider? timeProvider = null)
     {
-        Owner = new(timeSeriesExecution: execution, timeProvider: timeProvider,
-            nativeReplicaAdmission: nativeReplicaAdmission);
+        Owner = new(timeSeriesExecution: execution, timeProvider: timeProvider);
         try
         {
             SampleAggregateTestData.Configure(Owner);

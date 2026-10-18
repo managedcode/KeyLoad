@@ -22,24 +22,10 @@ internal static class PartitionRecordFamilies
     internal const string EventFeed = "event-feed";
     internal const string EventIdentity = "event-id";
     internal const string EventSequence = "event-sequence";
-    internal const string EventVectorCapacity = "event-vector-capacity-v1";
-    internal const string EventVectorCoverageProof = "event-vector-coverage-proof-v1";
-    internal const string EventVectorMap = "event-vector-map-v1";
-    internal const string EventVectorOffer = "event-vector-offer-v1";
-    internal const string EventVectorPage = "event-vector-page-v1";
-    internal const string EventVectorParentCall = "event-vector-parent-call-v1";
-    internal const string EventVectorParentOutcomeIndex = "event-vector-parent-outcome-index-v1";
-    internal const string EventVectorSourceCapacity = "event-vector-source-capacity-v1";
-    internal const string EventVectorSourcePhase = "event-vector-source-phase-v1";
-    internal const string EventVectorSourcePin = "event-vector-source-pin-v1";
     internal const string GraphCrossPartitionCapacity = "graph-cross-partition-capacity";
     internal const string GraphCrossPartitionIntent = "graph-cross-partition-intent";
     internal const string GraphCrossReverseAdjacency = "graph-cross-reverse-adjacency";
     internal const string GraphEdgeOwnerVersion = "graph-edge-owner-version";
-    internal const string GraphRemoteIntent = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.IntentFamily;
-    internal const string GraphRemoteReceiver = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.ReceiverFamily;
-    internal const string GraphRemoteCapacity = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.CapacityFamily;
-    internal const string GraphRemoteCompletion = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.CompletionFamily;
     internal const string Inbox = "inbox";
     internal const string Index = "index";
     internal const string Lease = "lease";
@@ -66,8 +52,6 @@ internal static class PartitionRecordFamilies
     internal const string Ready = "ready";
     internal const string RecurringSagaCapacity = "recurring-saga-capacity";
     internal const string RecurringSchedule = "recurring-schedule";
-    internal const string ResourceOwnerInventoryMember = "resource-owner-inventory-member-v1";
-    internal const string ResourceOwnerInventoryProof = "resource-owner-inventory-proof-v1";
     internal const string SagaState = "saga-state";
     internal const string Sample = "sample";
     internal const string SampleChunkBlock = "sample-chunk-block";
@@ -115,24 +99,10 @@ internal static class PartitionRecordFamilies
         EventFeed,
         EventIdentity,
         EventSequence,
-        EventVectorCapacity,
-        EventVectorCoverageProof,
-        EventVectorMap,
-        EventVectorOffer,
-        EventVectorPage,
-        EventVectorParentCall,
-        EventVectorParentOutcomeIndex,
-        EventVectorSourceCapacity,
-        EventVectorSourcePhase,
-        EventVectorSourcePin,
         GraphCrossPartitionCapacity,
         GraphCrossPartitionIntent,
         GraphCrossReverseAdjacency,
         GraphEdgeOwnerVersion,
-        GraphRemoteCapacity,
-        GraphRemoteCompletion,
-        GraphRemoteIntent,
-        GraphRemoteReceiver,
         Inbox,
         Index,
         Lease,
@@ -159,8 +129,6 @@ internal static class PartitionRecordFamilies
         Ready,
         RecurringSagaCapacity,
         RecurringSchedule,
-        ResourceOwnerInventoryMember,
-        ResourceOwnerInventoryProof,
         SagaState,
         Sample,
         SampleChunkBlock,

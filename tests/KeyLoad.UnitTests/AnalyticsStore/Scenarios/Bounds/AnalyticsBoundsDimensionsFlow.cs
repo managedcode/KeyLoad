@@ -9,7 +9,7 @@ internal static class AnalyticsBoundsDimensionsFlow
 {
     internal static async Task RunAsync(CancellationToken token)
     {
-        using var db = new TestDatabase(nativeReplicaAdmission: true);
+        using var db = new TestDatabase();
         string[] values = [string.Empty, P.Padded, P.Plain, P.Composed, P.Decomposed, P.Control];
         var events = values.Select((value, index) => D.Event(db, P.Id(index), value, index + 1)).ToArray();
         await AnalyticsBoundsOwner.SeedAsync(db, events);
