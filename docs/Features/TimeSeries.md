@@ -147,7 +147,7 @@ Canonical samples still use their existing per-record ZoneTree representation. T
 Canonical slice map: Core `Features/TimeSeries/SampleChunk*`; TUnit
 UnitTests `Features/TimeSeries/SampleChunk*`. Benchmark measurement is owned by
 the shared [BenchmarkComparisons](BenchmarkComparisons.md) feature in
-`benchmarks/KeyLoad.BenchmarkScenarios/BenchmarkComparisons/` and uses
+`benchmarks/KeyLoad.BenchmarkScenarios/` and uses
 the existing KeyLoad.Benchmarks executable. Frontend, SDK/MCP/HTTP and
 Orleans request surfaces are N/A for this transient private codec: their public
 contracts are unchanged. StorageRecovery, CrashHost, RecoveryTests and cluster chunk

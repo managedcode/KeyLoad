@@ -17,9 +17,9 @@ internal sealed partial record NativeComparisonHarnessOptions
     private const int MaximumImageBundleCleanupTimeoutSeconds = 10;
     private const int MaximumGitHubNativeProcessTimeoutMinutes = 120;
     private const int MaximumGitHubNativeProcessCleanupTimeoutSeconds = 10;
-    private const int MaximumKeyLoadPublicRegressionTimeoutMinutes = 5;
+    private const int MaximumKeyLoadPublicChecksTimeoutMinutes = 5;
     private const int MaximumKeyLoadMcpCleanupTimeoutSeconds = 30;
-    private const int MaximumKeyLoadFaultRegressionTimeoutMinutes = 10;
+    private const int MaximumKeyLoadFaultChecksTimeoutMinutes = 10;
     private const int MaximumKeyLoadFaultCliTimeoutSeconds = 30;
     private const int MaximumKeyLoadFaultRestartTimeoutSeconds = 120;
     private const int MaximumKeyLoadFaultProcessDrainTimeoutSeconds = 5;
@@ -47,9 +47,9 @@ internal sealed partial record NativeComparisonHarnessOptions
     public TimeSpan ImageBundleCleanupTimeout { get; init; } = TimeSpan.FromSeconds(MaximumImageBundleCleanupTimeoutSeconds);
     public TimeSpan GitHubNativeProcessTimeout { get; init; } = TimeSpan.FromMinutes(MaximumGitHubNativeProcessTimeoutMinutes);
     public TimeSpan GitHubNativeProcessCleanupTimeout { get; init; } = TimeSpan.FromSeconds(MaximumGitHubNativeProcessCleanupTimeoutSeconds);
-    public TimeSpan KeyLoadPublicRegressionTimeout { get; init; } = TimeSpan.FromMinutes(MaximumKeyLoadPublicRegressionTimeoutMinutes);
+    public TimeSpan KeyLoadPublicChecksTimeout { get; init; } = TimeSpan.FromMinutes(MaximumKeyLoadPublicChecksTimeoutMinutes);
     public TimeSpan KeyLoadMcpCleanupTimeout { get; init; } = TimeSpan.FromSeconds(MaximumKeyLoadMcpCleanupTimeoutSeconds);
-    public TimeSpan KeyLoadFaultRegressionTimeout { get; init; } = TimeSpan.FromMinutes(MaximumKeyLoadFaultRegressionTimeoutMinutes);
+    public TimeSpan KeyLoadFaultChecksTimeout { get; init; } = TimeSpan.FromMinutes(MaximumKeyLoadFaultChecksTimeoutMinutes);
     public TimeSpan KeyLoadFaultCliTimeout { get; init; } = TimeSpan.FromSeconds(MaximumKeyLoadFaultCliTimeoutSeconds);
     public TimeSpan KeyLoadFaultRestartTimeout { get; init; } = TimeSpan.FromSeconds(MaximumKeyLoadFaultRestartTimeoutSeconds);
     public TimeSpan KeyLoadFaultProcessDrainTimeout { get; init; } = TimeSpan.FromSeconds(MaximumKeyLoadFaultProcessDrainTimeoutSeconds);
@@ -105,9 +105,9 @@ internal sealed partial record NativeComparisonHarnessOptions
             && ImageBundleCleanupTimeout > TimeSpan.Zero && ImageBundleCleanupTimeout.Ticks <= MaximumImageBundleCleanupTimeoutSeconds * TimeSpan.TicksPerSecond
             && GitHubNativeProcessTimeout > TimeSpan.Zero && GitHubNativeProcessTimeout.Ticks <= MaximumGitHubNativeProcessTimeoutMinutes * TimeSpan.TicksPerMinute
             && GitHubNativeProcessCleanupTimeout > TimeSpan.Zero && GitHubNativeProcessCleanupTimeout.Ticks <= MaximumGitHubNativeProcessCleanupTimeoutSeconds * TimeSpan.TicksPerSecond
-            && KeyLoadPublicRegressionTimeout > TimeSpan.Zero && KeyLoadPublicRegressionTimeout.Ticks <= MaximumKeyLoadPublicRegressionTimeoutMinutes * TimeSpan.TicksPerMinute
+            && KeyLoadPublicChecksTimeout > TimeSpan.Zero && KeyLoadPublicChecksTimeout.Ticks <= MaximumKeyLoadPublicChecksTimeoutMinutes * TimeSpan.TicksPerMinute
             && KeyLoadMcpCleanupTimeout > TimeSpan.Zero && KeyLoadMcpCleanupTimeout.Ticks <= MaximumKeyLoadMcpCleanupTimeoutSeconds * TimeSpan.TicksPerSecond
-            && KeyLoadFaultRegressionTimeout > TimeSpan.Zero && KeyLoadFaultRegressionTimeout.Ticks <= MaximumKeyLoadFaultRegressionTimeoutMinutes * TimeSpan.TicksPerMinute
+            && KeyLoadFaultChecksTimeout > TimeSpan.Zero && KeyLoadFaultChecksTimeout.Ticks <= MaximumKeyLoadFaultChecksTimeoutMinutes * TimeSpan.TicksPerMinute
             && KeyLoadFaultCliTimeout > TimeSpan.Zero && KeyLoadFaultCliTimeout.Ticks <= MaximumKeyLoadFaultCliTimeoutSeconds * TimeSpan.TicksPerSecond
             && KeyLoadFaultRestartTimeout > TimeSpan.Zero && KeyLoadFaultRestartTimeout.Ticks <= MaximumKeyLoadFaultRestartTimeoutSeconds * TimeSpan.TicksPerSecond
             && KeyLoadFaultProcessDrainTimeout > TimeSpan.Zero && KeyLoadFaultProcessDrainTimeout.Ticks <= MaximumKeyLoadFaultProcessDrainTimeoutSeconds * TimeSpan.TicksPerSecond

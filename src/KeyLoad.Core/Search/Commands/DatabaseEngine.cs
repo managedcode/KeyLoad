@@ -31,6 +31,6 @@ public sealed partial class DatabaseEngine
         }
         Bm25CorpusFamilyAdmission.Require(transaction, key, current, Limits);
         transaction.PutRecord(key, current);
-        return Result(new CommitReceipt(operation.Id, Token(transaction, current.Partition, position), [], Durability));
+        return Result(new CommitReceipt(operation.Id, Token(transaction, current.Partition, position), [], Durability, AcknowledgedPersistedCopies));
     }
 }

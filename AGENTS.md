@@ -49,6 +49,12 @@ ad-hoc concatenation. Do not change user entity casing implicitly.
 - Use ZoneTree.FullTextSearch for full-text indexing and ZoneTree.Analytics for
   approved analytics integration. Derived indexes, caches and analytics never
   become a second authority for database records or permissions.
+- Access ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics through their
+  public synchronous native APIs. Their asynchronous API calls and dispatching
+  engine work through `Task.Run`, `Task.Factory.StartNew` or a thread-pool callback
+  are compiler errors (`KLD0039`). Do not wrap synchronous engine operations to
+  bypass this rule. Orleans, HTTP and other actual asynchronous transports remain
+  asynchronous; the rule makes no claim about a dependency's internal scheduling.
 - Use native generated Orleans binary serialization with explicit stable
   `[GenerateSerializer]`, `[Id]` and `[Alias]` contracts internally. Preserve raw
   ZoneTree bytes, sortable keys, public JSON and exact user content. Introduce no
@@ -88,8 +94,11 @@ stashing. Keep changes visible. Do not use Azure CLI.
 - `build/`: Aspire AppHost and shared build targets.
 - `tests/`: TUnit functional, recovery, integration and tooling tests.
 - `benchmarks/`: comparison workloads and their test project.
-- Every C# project groups populated responsibilities under
-  `<project>/<SliceName>/<Role>/`; keep thematic folders under `Cases/`.
+- A C# project owning one feature groups populated responsibilities directly in
+  role folders under the project root. Do not add a directory that merely repeats
+  that single feature. Projects owning multiple real features use
+  `<project>/<SliceName>/<Role>/`; keep thematic folders under `Cases/` in either
+  structure.
   Use `Restore/` for backup/restore implementation. Shared composition stays at
   its actual owner; do not create empty folders or generic forwarding chains.
 - `Program.cs` shows real initialization, mode selection, host composition, run

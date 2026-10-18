@@ -89,7 +89,7 @@ internal sealed class IsolatedResourceTopologyRedisTests
 
     private static async Task VerifyNativeTransportAsync(RedisResource node)
     {
-        // Inspect the actual pinned Aspire annotation; a missing explicit opt-out must fail this regression.
+        // Inspect the actual pinned Aspire annotation; a missing explicit opt-out must fail this checks.
 #pragma warning disable ASPIRECERTIFICATES001
         var certificate = node.Annotations.OfType<HttpsCertificateAnnotation>().Single();
         await Assert.That(certificate.Certificate).IsNull();

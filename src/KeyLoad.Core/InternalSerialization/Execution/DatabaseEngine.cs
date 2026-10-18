@@ -11,7 +11,7 @@ public sealed partial class DatabaseEngine
     /// <param name="kind">The exact command capability.</param>
     /// <param name="id">Stable command identity.</param>
     /// <param name="principalId">Persisted principal selected by the caller's trusted boundary.</param>
-    /// <param name="evaluatedAt">Leader evaluation time.</param>
+    /// <param name="evaluatedAt">Original operation evaluation time.</param>
     /// <param name="payload">Native attributed payload for this capability.</param>
     /// <returns>The typed internal operation; public JSON is retained solely for its existing fingerprint.</returns>
     public ReplicatedOperation CreateNativeOperation(OperationKind kind, Guid id, string principalId,

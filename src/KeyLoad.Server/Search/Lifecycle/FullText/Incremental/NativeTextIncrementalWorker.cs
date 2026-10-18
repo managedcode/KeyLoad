@@ -1,16 +1,15 @@
 namespace KeyLoad.Server.Features.Search;
 
-/// <summary>Owns the original admitted operation including its initial canonical capture.</summary>
+/// <summary>Bounds synchronous native work and joins accepted work before releasing its owner.</summary>
 internal sealed class NativeTextIncrementalWorker : IAsyncDisposable
 {
     private readonly Lock gate = new();
-    private Task? active;
-    private Task? disposal;
+    private TaskCompletionSource? active;
     private bool closed;
 
-    internal async Task<T> RunAsync<T>(Func<T> operation)
+    internal T Run<T>(Func<T> operation)
     {
-        Task<T> original;
+        TaskCompletionSource original;
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
@@ -18,47 +17,29 @@ internal sealed class NativeTextIncrementalWorker : IAsyncDisposable
             {
                 throw NativeTextErrors.BoundExceeded();
             }
-            original = Task.Run(operation, CancellationToken.None);
+            original = new(TaskCreationOptions.RunContinuationsAsynchronously);
             active = original;
         }
         try
         {
-            return await original.ConfigureAwait(false);
+            return operation();
         }
         finally
         {
             lock (gate)
             {
-                if (ReferenceEquals(active, original))
-                {
-                    active = null;
-                }
+                original.TrySetResult();
+                active = null;
             }
         }
     }
 
     public ValueTask DisposeAsync()
     {
-        TaskCompletionSource start;
-        Task actual;
         lock (gate)
         {
-            if (disposal is not null)
-            {
-                return new(disposal);
-            }
             closed = true;
-            start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            actual = JoinAsync(start.Task, active ?? Task.CompletedTask);
-            disposal = actual;
+            return new(active?.Task ?? Task.CompletedTask);
         }
-        start.TrySetResult();
-        return new(actual);
-    }
-
-    private static async Task JoinAsync(Task start, Task original)
-    {
-        await start.ConfigureAwait(false);
-        await original.ConfigureAwait(false);
     }
 }

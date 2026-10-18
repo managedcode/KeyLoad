@@ -12,7 +12,6 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private const int AtomicCommandCommitFirstElementIndex = 0;
     private const int AtomicCommandCommitInitialSequence = 0;
 
     private const string InvalidCommandBudgetMessage = "The operation ID or byte budget is invalid.";
@@ -81,6 +80,10 @@ public sealed partial class DatabaseEngine
         {
             return new(outcome.CanonicalSequence, outcome.Result);
         }
+        if (!siloLocal)
+        {
+            RequireNextCanonicalSequence(rosterTransaction, replicationIndex);
+        }
         outcome = outcome with { CanonicalSequence = replicationIndex };
         PersistCommandOutcome(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
         var result = ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex,
@@ -94,7 +97,7 @@ public sealed partial class DatabaseEngine
     {
         replayed = false;
         selection = CommandOutcomeKeyResolver.ForNew(operation.PrincipalId, operation.Id, partitionScope);
-        persistOutcome = true;
+        persistOutcome = false;
         long policyEpoch = AtomicCommandCommitInitialSequence;
         BlobOutcomeAuthority? blobAuthority = null;
         var onlineTextAuthority = CaptureOnlineTextOutcomeAuthority(operation);
@@ -105,8 +108,9 @@ public sealed partial class DatabaseEngine
         {
             var principal = Principal(transaction, operation.PrincipalId, operation.EvaluatedAt);
             policyEpoch = principal.PolicyEpoch;
-            var placement = AuthorizeOperation(transaction, principal, operation);
             selection = CommandOutcomeKeyResolver.Select(transaction, operation.PrincipalId, operation.Id, partitionScope);
+            persistOutcome = selection.Outcome is null;
+            var placement = AuthorizeOperation(transaction, principal, operation);
             if (selection.Outcome is { } previous)
             {
                 RequireStoredCanonicalSequence(transaction, previous, siloLocal);
@@ -140,11 +144,11 @@ public sealed partial class DatabaseEngine
             replayed = false;
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
-        persistOutcome = selection.Outcome is null;
         var actualOutcome = BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority,
             partitionScope, onlineTextAuthority, transferFailure) with
         {
-            CanonicalSequence = selection.Outcome?.CanonicalSequence ?? replicationIndex
+            CanonicalSequence = selection.Outcome?.CanonicalSequence
+                ?? (persistOutcome ? replicationIndex : ReadCanonicalSequence(transaction))
         };
         return actualOutcome;
     }
@@ -220,7 +224,7 @@ public sealed partial class DatabaseEngine
         {
             transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
         }
-        if (!persistOutcome || outcomeAlreadyStored && replicationIndex <= AtomicCommandCommitInitialSequence)
+        if (!persistOutcome || replicationIndex <= AtomicCommandCommitInitialSequence)
         {
             return;
         }

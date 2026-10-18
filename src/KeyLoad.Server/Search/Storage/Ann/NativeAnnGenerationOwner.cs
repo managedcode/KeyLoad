@@ -64,7 +64,7 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         {
             ObjectDisposedException.ThrowIf(closed, this);
             NativeAnnSlotRetention.RequireResident(slots, options, checked(seed.PeakBytesUpperBound + publicReads.Bytes));
-            return worker.RunAsync(() => BuildAndPublish(request, seed, intent, budget));
+            return Task.FromResult(worker.Run(() => BuildAndPublish(request, seed, intent, budget)));
         }
     }
 

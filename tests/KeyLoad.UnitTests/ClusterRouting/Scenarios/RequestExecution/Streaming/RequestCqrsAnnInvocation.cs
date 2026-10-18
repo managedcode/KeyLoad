@@ -17,12 +17,12 @@ internal static class RequestCqrsAnnInvocation
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
-        var connection = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
-        using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+        var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
+        using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             id, request.CommandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
             execution => ObserveAsync(connection.ExecuteStreamAsync(signed, execution), frames, execution),
-            fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, fixture.RoutingOptions,
             new NativeCqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
         await Assert.That(reply.Error).IsNull();

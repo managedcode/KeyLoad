@@ -36,10 +36,10 @@ internal static class NativeAnnCrashOperations
         id = Guid.NewGuid();
         _ = Apply(commands, OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(id, consumer, new(NativeAnnCrashContract.Generation, [], [.. Kinds]), InitialCheckpoint), id).Get<ProjectionConsumerInfo>();
-        var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal, partition);
+        var identity = database.Store.Identity;
         return new(Guid.NewGuid(), consumer, NativeAnnCrashContract.Collection, NativeAnnCrashContract.Field,
             NativeAnnCrashContract.Space, NativeAnnCrashContract.Generation, database.Store.Identity.NodeId,
-            new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch), AnnMaintenanceMode.Build);
+            new(identity.NodeId, identity.Incarnation), AnnMaintenanceMode.Build);
     }
     internal static PutVector Vector(int index, ImmutableArray<float> values)
         => new(NativeAnnCrashContract.Collection, NativeAnnCrashContract.Id(index), NativeAnnCrashContract.Field,

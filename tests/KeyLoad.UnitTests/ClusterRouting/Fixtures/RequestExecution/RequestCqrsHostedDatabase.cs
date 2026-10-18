@@ -1,12 +1,13 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-internal sealed class RequestCqrsHostedDatabase(RequestCqrsHostedNodeResources owner, ReplicaLifecycleFixture journal)
+internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
 {
-    internal DatabaseEngine Database => journal.Database;
-    internal string Directory => journal.CanonicalDirectoryPath;
+    internal DatabaseEngine Database => owner.Database;
+    internal string Directory => owner.DirectoryPath;
     internal ZoneTreeStore Store => (ZoneTreeStore)Database.Store;
     internal PartitionRef Partition
     {
@@ -14,21 +15,15 @@ internal sealed class RequestCqrsHostedDatabase(RequestCqrsHostedNodeResources o
     } = new(RequestCqrsHostedProtocol.Tenant, RequestCqrsHostedProtocol.Database,
         RequestCqrsHostedProtocol.Domain, RequestCqrsHostedProtocol.Partition);
     internal ICommitCoordinator Coordinator => owner.Coordinator;
-    internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()
-    {
-        var original = journal.Log.State;
-        return (original.LastIndex, original.CommittedIndex, original.Term);
-    }
-
-    internal ReplicatedOperation ReadRetainedOperation(Guid commandId, CancellationToken token)
-        => RequestCqrsRetainedOperationReader.Read(journal.Log, commandId, Database.Limits, token);
+    internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
+        => Store.Read(_ => (Database.LastApplied, Store.Position));
 
     internal OperationResult Submit<T>(OperationKind kind, T payload, string principal,
         Guid? id, DateTimeOffset? time, CancellationToken cancellationToken)
     {
         if (time is not null)
         {
-            throw new ArgumentException(RequestCqrsHostedProtocol.LeaderEvaluationTime, nameof(time));
+            throw new ArgumentException(RequestCqrsHostedProtocol.CoordinatorEvaluationTime, nameof(time));
         }
         owner.Coordinator.ReadBarrierAsync(cancellationToken).GetAwaiter().GetResult();
         var result = owner.Coordinator.SubmitNativeAsync(kind, id ?? Guid.NewGuid(), principal,

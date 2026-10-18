@@ -107,7 +107,7 @@ public sealed partial class BlobStorageOperations(DatabaseEngine database, TimeP
 
     private OperationResult Result<T>(IKeyValueView view, ReplicatedOperation operation, BlobCommandScope scope, long position, T value)
     {
-        var receipt = new CommitReceipt(operation.Id, database.Token(view, scope.Blob.Partition, position), [], database.Durability);
+        var receipt = new CommitReceipt(operation.Id, database.Token(view, scope.Blob.Partition, position), [], database.Durability, database.AcknowledgedPersistedCopies);
         return new(null)
         {
             NativeValue = new BlobCommitResult<T>(receipt, value)

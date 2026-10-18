@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    /// <summary>Reads an actual retained result after the owner's applied quorum cut without changing new-command denials.</summary>
+    /// <summary>Reads an actual retained result after the owner's committed database cut without changing new-command denials.</summary>
     internal OperationResult? ReadRetainedSubmissionOutcome(ReplicatedOperation operation)
         => ReadRetainedSubmissionOutcomeCore(operation, null);
 

@@ -17,7 +17,7 @@ internal sealed class NativeTextOnlineWorker : IAsyncDisposable
             {
                 throw NativeTextErrors.Busy();
             }
-            original = Task.Run(operation, CancellationToken.None);
+            original = operation();
             active = original;
         }
         try

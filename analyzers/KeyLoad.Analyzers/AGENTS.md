@@ -2,10 +2,10 @@
 
 ## Purpose, entry points and ownership
 
-- Own the source-editable compiler rules in `CodeQuality/`; project entry is `KeyLoad.Analyzers.csproj`. Feature contract: `docs/Features/CodeQuality.md`; implementation decision: ADR-033.
+- Own the source-editable compiler rules in the root `Analyzers/`, `Analysis/`, `Contracts/`, `Models/` and `Validation/` role folders; project entry is `KeyLoad.Analyzers.csproj`. Feature contract: `docs/Features/CodeQuality.md`; implementation decision: ADR-033.
 - Compile against Roslyn shipped by the pinned .NET SDK. Attach centrally as an analyzer, never as a runtime product dependency. All rule behavior belongs to the CodeQuality slice.
 - Preserve imported semantics while adapting KeyLoad assembly/method ownership. No sibling reference, fake framework symbols, silent severity reduction or runtime contract migration.
-- Generated code is excluded using Roslyn's official generated-code API. Keep semantic analysis cancellable and concurrent.
+- Use Roslyn's generated-code API for each rule's actual contract. KLD0038 and KLD0039 analyze generated code without blanket exceptions; retain only their explicit semantic ownership permissions. Keep semantic analysis cancellable and concurrent.
 - Keep diagnostic IDs stable and unique. Compiler references must use the pinned SDK, with no private dependency payload attached to consumer runtime outputs. Preserve all unrelated dirty checkout changes.
 
 ## Boundaries and protected risks

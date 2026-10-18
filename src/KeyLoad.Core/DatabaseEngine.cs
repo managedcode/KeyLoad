@@ -134,6 +134,10 @@ public sealed partial class DatabaseEngine
     {
         get; set;
     }
+    private const int NoPersistedCopies = 0;
+    internal int AcknowledgedPersistedCopies => Durability == DurabilityProfile.Buffered
+        ? NoPersistedCopies : CommitReceipt.LocalCopyCount;
+
     /// <summary>Gets the canonical store's last applied replicated position.</summary>
     public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : DatabaseEngineNoRetainedBytes);
 

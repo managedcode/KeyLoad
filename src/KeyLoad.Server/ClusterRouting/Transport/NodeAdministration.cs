@@ -29,7 +29,7 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy);
             }
-            var operation = Task.Run(() => CreateBackup(cancellationToken), cancellationToken);
+            var operation = Task.FromResult(CreateBackup(cancellationToken));
             backup = operation;
             return operation.WaitAsync(cancellationToken);
         }
@@ -59,7 +59,7 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
         var silos = membership.Members.Values.Count(member => member.Status == SiloStatus.Active);
         var copies = services.GetRequiredService<IOptions<NodeOptions>>().Value.ReplicaCount;
         return Task.FromResult(new NodeStatus(identity.NodeId.ToString(), identity.Incarnation,
-            partition.Database.Store.Position, silos, copies, partition.Database.Durability,
+            partition.Database.LastApplied, silos, copies, partition.Database.Durability,
             services.GetRequiredService<OrleansNode>().DatabaseReady, Environment.ProcessId, identity.ReadGeneration));
     }
 

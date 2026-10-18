@@ -2,12 +2,12 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Bounded policy for native comparison regression execution and joined cleanup.</summary>
+/// <summary>Bounded policy for native comparison checks execution and joined cleanup.</summary>
 [ConfigurationOptions]
 internal sealed partial record NativeComparisonHarnessOptions
 {
     internal const string SectionName = "KeyLoad:NativeComparisonHarness";
-    internal const string ValidationMessage = "Native comparison regression policy is outside its supported bounds.";
+    internal const string ValidationMessage = "Native comparison checks policy is outside its supported bounds.";
     internal const int PositiveMinimum = 1;
     internal const int TargetDisposeSeconds = 15, SchemaCleanupSeconds = 10, CancellationSettlementSeconds = 10;
     internal const int RollbackSeconds = 10, LockObservationSeconds = 20, LockPollMilliseconds = 50;

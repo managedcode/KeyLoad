@@ -12,7 +12,8 @@ internal sealed class IsolatedResourceTopologyRouteTests
     private const string SourceSetting = "Benchmarks__SourceRevision";
     private const string TargetSetting = "Benchmarks__Target";
     private const string CountSetting = "Benchmarks__NodeCount";
-    private const string BenchmarkSetting = "KeyLoad__BenchmarkTopology";
+    private const string SiloCountSetting = "KeyLoad__SiloCount";
+    private const string ReplicaCountSetting = "KeyLoad__ReplicaCount";
     private const string EnabledSetting = "Benchmarks:Enabled";
     private const string EndpointsPrefix = IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__";
     private const string ScaleProfileEnvironment = "Benchmarks__ScaleProfile";
@@ -110,9 +111,9 @@ internal sealed class IsolatedResourceTopologyRouteTests
         await Assert.That(Directory.Exists(Path.Combine(model.Root, "native"))).IsFalse();
     }
 
-    /// <summary>AC-ISO-004: normal production composition retains CLUSTER and cannot enable the benchmark opt-in.</summary>
+    /// <summary>AC-ISO-004: ordinary composition builds its configured native silo and data-copy counts.</summary>
     [Test]
-    public async Task DefaultProductionEntryStillBuildsThreeVotersWithoutBenchmarkOptIn()
+    public async Task DefaultProductionEntryBuildsItsConfiguredNativeTopology()
     {
         await using var model = new IsolatedResourceTopologyApplication();
         var resources = await model.BuildAsync(null, 3);
@@ -120,7 +121,8 @@ internal sealed class IsolatedResourceTopologyRouteTests
         foreach (var node in resources)
         {
             var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
-            await Assert.That(environment.ContainsKey(BenchmarkSetting)).IsFalse();
+            await Assert.That(environment[SiloCountSetting]).IsEqualTo("3");
+            await Assert.That(environment[ReplicaCountSetting]).IsEqualTo("3");
         }
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsTrue();
         await Assert.That(Directory.Exists(model.Output)).IsFalse();

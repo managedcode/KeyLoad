@@ -15,7 +15,7 @@ internal sealed class KeyLoadTimeSeriesIntensiveReceiptTests
     {
         var receipt = ValidReceipt(revision: 731, position: 908);
         var actual = KeyLoadTimeSeriesIntensiveReceipt.Validate(receipt, CommandId, Incarnation,
-            Partition().AtomicPartitionId, Set, Series, expectedRevision: null);
+            Partition().AtomicPartitionId, Set, Series, expectedRevision: null, expectedCopies: 3);
         await Assert.That(actual.Receipt.CommandId).IsEqualTo(CommandId);
         await Assert.That(actual.Receipt.Sequence).IsEqualTo(731L);
         await Assert.That(actual.Position).IsEqualTo(908L);
@@ -26,11 +26,11 @@ internal sealed class KeyLoadTimeSeriesIntensiveReceiptTests
     {
         var receipt = ValidReceipt(revision: 512, position: 1024);
         var actual = KeyLoadTimeSeriesIntensiveReceipt.Validate(receipt, CommandId, Incarnation,
-            Partition().AtomicPartitionId, Set, Series, expectedRevision: 512);
+            Partition().AtomicPartitionId, Set, Series, expectedRevision: 512, expectedCopies: 3);
         await Assert.That(actual.Receipt.Sequence).IsEqualTo(512L);
         var error = Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
             KeyLoadTimeSeriesIntensiveReceipt.Validate(receipt, CommandId, Incarnation,
-                Partition().AtomicPartitionId, Set, Series, expectedRevision: 256));
+                Partition().AtomicPartitionId, Set, Series, expectedRevision: 256, expectedCopies: 3));
         await Assert.That(error.ObservedSequence).IsEqualTo(512L);
     }
 
@@ -39,11 +39,11 @@ internal sealed class KeyLoadTimeSeriesIntensiveReceiptTests
     {
         var receipt = ValidReceipt(revision: 29, position: 4) with
         {
-            Token = new(Guid.NewGuid(), "wrong-partition", 4, 2)
+            Token = new(Guid.NewGuid(), "wrong-partition", 4)
         };
         var error = Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
             KeyLoadTimeSeriesIntensiveReceipt.Validate(receipt, CommandId, Incarnation,
-                Partition().AtomicPartitionId, Set, Series, expectedRevision: null));
+                Partition().AtomicPartitionId, Set, Series, expectedRevision: null, expectedCopies: 3));
         await Assert.That(error.ObservedSequence).IsEqualTo(29L);
     }
 
@@ -69,7 +69,7 @@ internal sealed class KeyLoadTimeSeriesIntensiveReceiptTests
         {
             var error = Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
                 KeyLoadTimeSeriesIntensiveReceipt.Validate(candidate, CommandId, Incarnation,
-                    Partition().AtomicPartitionId, Set, Series, expectedRevision: null));
+                    Partition().AtomicPartitionId, Set, Series, expectedRevision: null, expectedCopies: 3));
             await Assert.That(error.ObservedSequence).IsNull();
         }
     }
@@ -84,24 +84,24 @@ internal sealed class KeyLoadTimeSeriesIntensiveReceiptTests
             valid with { Token = null! },
             valid with { Token = valid.Token with { Incarnation = Guid.NewGuid() } },
             valid with { Token = valid.Token with { AtomicPartitionId = "wrong-partition" } },
-            valid with { Token = valid.Token with { OwnershipEpoch = 2 } },
+            valid with { PersistedCopies = 2 },
             valid with { Token = valid.Token with { Position = 0 } },
-            valid with { Durability = DurabilityProfile.ProcessDurable }
+            valid with { Durability = DurabilityProfile.Buffered }
         };
 
         foreach (var candidate in cases)
         {
             var error = Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
                 KeyLoadTimeSeriesIntensiveReceipt.Validate(candidate, CommandId, Incarnation,
-                    Partition().AtomicPartitionId, Set, Series, expectedRevision: null));
+                    Partition().AtomicPartitionId, Set, Series, expectedRevision: null, expectedCopies: 3));
             await Assert.That(error.ObservedSequence).IsEqualTo(29L);
         }
     }
 
     private static CommitReceipt ValidReceipt(long revision, long position) => new(CommandId,
-        new(Incarnation, Partition().AtomicPartitionId, position, KeyLoadTimeSeriesIntensiveProtocol.OwnershipEpoch),
+        new(Incarnation, Partition().AtomicPartitionId, position),
         [new(KeyLoadTimeSeriesIntensiveProtocol.AppendSamplesKind, Set, Series, revision)],
-        DurabilityProfile.QuorumProcessDurable);
+        DurabilityProfile.ProcessDurable) { PersistedCopies = 3 };
 
     private static PartitionRef Partition() => new("tenant", "database", "domain", PartitionKey);
 }

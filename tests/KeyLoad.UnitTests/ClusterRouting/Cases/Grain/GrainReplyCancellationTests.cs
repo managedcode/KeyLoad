@@ -122,7 +122,7 @@ internal sealed class GrainReplyCancellationTests
         using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
         {
             reply = GrainReplyFactory.Failure(error, command, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)),
-                UnitRoutingOptions.Routing(), requestId, GrainFailureStage.QuorumRead, cancellationToken);
+                UnitRoutingOptions.Routing(), requestId, GrainFailureStage.ReadBarrier, cancellationToken);
         }
         return (reply, capture.Text);
     }
@@ -131,7 +131,7 @@ internal sealed class GrainReplyCancellationTests
         GrainFailureCategory category)
     {
         await Assert.That(output).Contains(requestId.ToString());
-        await Assert.That(output).Contains(nameof(GrainFailureStage.QuorumRead));
+        await Assert.That(output).Contains(nameof(GrainFailureStage.ReadBarrier));
         await Assert.That(output).Contains(category.ToString());
         await Assert.That(output).Contains(code.ToString());
         await Assert.That(output).DoesNotContain(PrivateCanary);

@@ -4,9 +4,9 @@
 
 - Owns the BenchmarkDotNet executable for KeyLoad-focused microbenchmarks.
 - Executable entry point: `Program.cs`; project definition: `KeyLoad.Benchmarks.csproj`.
-- New benchmark behavior belongs under `<SliceName>/`; use the same canonical slice name as the corresponding product feature and `docs/Features/<SliceName>.md`.
+- This single-feature executable keeps behavior in populated root role folders; do not add a wrapper directory that repeats its feature name. Keep references to the owning product feature specification.
 - This project measures code paths; it does not own database behavior, comparison corpus/report contracts, cluster orchestration, or qualification claims.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Apply the installed Orleans and Aspire skills when their runtime or composition boundaries are involved.
 - Do not turn microbenchmark output into cluster, durability, endurance, or production-readiness evidence. Preserve centrally pinned packages and the no-lock-file policy.
 
 ## Boundaries and protected risks

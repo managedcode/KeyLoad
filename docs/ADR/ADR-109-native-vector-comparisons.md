@@ -32,7 +32,7 @@ flowchart LR
 Related requirements: REQ-VQ-001..007; acceptance: AC-VQ-001..007.
 
 1. Shared profile/report/interfaces and corpus/query/recall contracts are frozen with focused real-flow TUnit tests before adapter integration.
-2. Native SurrealDB/HelixDB adapters live under `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/Targets/` with matching Aspire resources, immutable image/source pins, host factory registration and native comparison regressions. No global tool installation.
+2. Native SurrealDB/HelixDB adapters live under `benchmarks/KeyLoad.Comparisons/Targets/` with matching Aspire resources, immutable image/source pins, host factory registration and native comparison regressions. No global tool installation.
 3. Corpus, exact reference, runner and PostgreSQL native exact/HNSW/IVFFlat execution live under the same feature's Vector subdomain, with real query/update results, index metadata and recall validation. Other native targets advertise only capabilities they actually implement.
 4. Canonical inventory, isolated plans, per-engine workflow groups, strict original-artifact aggregation and website rendering carry TUnit plan/admission/browser regressions across scripts/site/workflows, without rewriting immutable historical evidence or manufacturing new measured cells.
 5. Integrate configuration/report/image/resource joins, then run governance, restore, build, Aspire-owned unit/comparison/site suites and formatter, and a final canonical solution build. Recovery and cluster gates remain mandatory for product changes; this adapter work does not waive existing qualification.

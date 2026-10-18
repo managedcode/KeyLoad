@@ -2,10 +2,10 @@
 
 ## Purpose, entry points and ownership
 
-- Owns generic bounded callback-free database phase diagnostics in `ResourceExecution/`, under ADR-063 and its feature contract.
+- Owns generic bounded callback-free database phase diagnostics, under ADR-063 and its feature contract. Group implementation in populated role folders directly under this project.
 - Entry points: immutable phase/outcome/quality/snapshot schema, DatabasePhaseBank and root-owned process startup facade.
 - BCL-only shared implementation; no ASP.NET/Orleans/provider/product/package dependency except the existing centrally attached analyzer.
-- Keep feature code in ResourceExecution and root-owned assembly friend metadata outside that slice only when solution-wide.
+- Keep diagnostic implementation in its actual role folder; shared assembly friend metadata belongs to the project composition owner.
 - Preserve both authorized cuts, node-local ZoneTree ownership, all existing gates/async originals/ACK/WAL. This project owns no database state, file, credential, role or protocol.
 - Fixed32/6/16 schema/four stripes, startup bank128KiB, record maximum4 CAS attempts and sticky degradation; no hot callbacks, logging/export, allocations, gates, ambient state, per-request identifiers, reset or live mode changes.
 - Only root freezes public shared signatures/project references and mode/export composition; workers may not invent broader telemetry/control architecture.

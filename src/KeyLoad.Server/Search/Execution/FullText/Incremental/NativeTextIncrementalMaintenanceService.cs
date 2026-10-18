@@ -44,7 +44,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
 
     public Task<TextMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, CancellationToken cancellationToken)
-        => worker.RunAsync(() => Execute(principal, request, null, null, cancellationToken));
+        => Task.FromResult(worker.Run(() => Execute(principal, request, null, null, cancellationToken)));
 
     public Task<TextMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, DateTimeOffset originalExpiry,
@@ -54,7 +54,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         var budget = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, parent.Cancellation);
         budget.ConstrainLifetime(originalExpiry);
         budget.AttachResourceLifetimeBinding(parent);
-        return worker.RunAsync(() => Execute(principal, request, budget, parent, token));
+        return Task.FromResult(worker.Run(() => Execute(principal, request, budget, parent, token)));
     }
 
     private TextMaintenanceCapabilityResult Execute(PrincipalRecord principal,
@@ -116,9 +116,9 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             limits.MaxScanRecords, configured.NativeText, token);
     }
 
-    public async Task AbortAsync(Guid sessionId)
+    public Task AbortAsync(Guid sessionId)
     {
-        _ = await worker.RunAsync(() =>
+        _ = worker.Run(() =>
         {
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() =>
@@ -132,7 +132,8 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             }, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             return sessionId;
-        }).ConfigureAwait(false);
+        });
+        return Task.CompletedTask;
     }
 
     public NativeTextSelectedReadLease EnterBootstrapRead() => selectedAdmission.EnterRead();

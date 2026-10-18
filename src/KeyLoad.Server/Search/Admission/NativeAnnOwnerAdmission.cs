@@ -8,7 +8,7 @@ internal static class NativeAnnOwnerAdmission
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, owner);
-            return worker.RunAsync(() => operation(stages));
+            return Task.FromResult(worker.Run(() => operation(stages)));
         }
     }
 

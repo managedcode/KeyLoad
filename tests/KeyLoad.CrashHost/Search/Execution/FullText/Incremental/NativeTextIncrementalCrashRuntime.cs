@@ -1,74 +1,53 @@
-using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
-using ManagedCode.Communication.CQRS;
+using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.CrashHost.Features.Search;
 
+/// <summary>Owns real canonical storage and native text files across abrupt process recovery.</summary>
 internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
 {
-    private const long ReplicaLogIndexStep = 1;
-    private const int CanonicalDirectoryIndex = 0;
-    private const long MaximumRetainedEntries = 16;
+    private const string CanonicalDirectory = "canonical";
     private readonly ServiceProvider services;
     private readonly NativeTextIncrementalMaintenanceService owner;
-    private readonly ReplicaMaterializer materializer;
     private Guid session = Guid.NewGuid();
-    internal DatabaseEngine Database => Node.Database;
+    internal ZoneTreeStore Store { get; }
+    internal DatabaseEngine Database { get; }
     internal ServerRuntimeOptions Options => services.GetRequiredService<ServerRuntimeOptions>();
-    internal string ProjectionRoot
-    {
-        get;
-    }
-    internal string EvidenceRoot
-    {
-        get;
-    }
-    internal ReplicaCrashNode Node
-    {
-        get;
-    }
+    internal string PhysicalRoot { get; }
+    internal string ProjectionRoot { get; }
+    internal string EvidenceRoot { get; }
 
     internal NativeTextIncrementalCrashRuntime(string root, Guid incarnation,
         Action<NativeTextFaultStage>? observer = null)
     {
         EvidenceRoot = root;
-        Node = ReplicaCrashNode.OpenTarget(root, incarnation);
-        ReplicaMaterializer? openedMaterializer = null;
+        PhysicalRoot = root;
+        Store = new(new(Path.Combine(root, CanonicalDirectory))
+        {
+            Incarnation = incarnation
+        }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         ServiceProvider? openedServices = null;
         try
         {
-            Node.Snapshots.Recover();
-            materializer = openedMaterializer = new(Node.Database, Node.Log, Node.Snapshots, CrashExecutionOptions.Replica());
+            Database = CrashDatabase.Create(Store);
             var registrations = new ServiceCollection().AddRuntimeOptions(new ConfigurationBuilder().Build());
-            registrations.AddSingleton(CrashExecutionOptions.DatabaseLimits(Node.Database.Limits));
+            registrations.AddSingleton(CrashExecutionOptions.DatabaseLimits(Database.Limits));
             services = openedServices = registrations.BuildServiceProvider();
-            var physicalRoot = Path.GetDirectoryName(ReplicaCrashNode.TargetStoreDirectories(root)[CanonicalDirectoryIndex])
-                ?? throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
-            ProjectionRoot = Path.Combine(physicalRoot, NativeTextIncrementalProtocol.RootDirectory);
-            owner = new(Node.Database, physicalRoot, Node.Canonical.Identity.NodeId,
-                services.GetRequiredService<ServerRuntimeOptions>(), Node.Database.EvaluationClock, observer);
+            ProjectionRoot = Path.Combine(PhysicalRoot, NativeTextIncrementalProtocol.RootDirectory);
+            owner = new(Database, PhysicalRoot, Store.Identity.NodeId, Options, Database.EvaluationClock, observer);
         }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
-            if (openedMaterializer is not null)
-            {
-                ServerFailureObserver.Observe(() => openedMaterializer.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-            }
             if (openedServices is not null)
             {
                 ServerFailureObserver.Observe(openedServices.Dispose, failures);
             }
-            try
-            {
-                Node.Dispose();
-            }
-            catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-            catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
+            ServerFailureObserver.Observe(Store.Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -78,61 +57,29 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
         => NativeTextIncrementalCrashQuery.ExecuteAsync(Database, owner, Options, ProjectionRoot, request, term);
 
     internal Task ResumeAppliedAsync(CancellationToken token)
-        => materializer.WaitForApplyAsync(Node.Log.State.CommittedIndex, token);
-
-    internal async Task<T> CommitAsync<T>(OperationKind kind, object payload, Guid commandId, CancellationToken token)
     {
-        const long InitialTerm = 0;
-        const long Increment = 1;
-        var operation = Database.NormalizeOperation(new ReplicatedOperation(commandId, kind,
-            CrashFixtureValues.Principal, Database.EvaluationClock.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)));
-        if (Node.Log.State.LastIndex > MaximumRetainedEntries)
-        {
-            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
-        }
-        for (var retained = Increment; retained <= Node.Log.State.LastIndex; retained += Increment)
-        {
-            token.ThrowIfCancellationRequested();
-            var original = Node.Log.ReadEntry(retained)
-                ?? throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
-            if (original.Operation?.Id != commandId)
-            {
-                continue;
-            }
-            if (retained > Node.Log.State.CommittedIndex)
-            {
-                materializer.Commit(retained);
-            }
-            await materializer.WaitForApplyAsync(retained, token).ConfigureAwait(false);
-            return Database.ResolveOutcome(operation).Get<T>();
-        }
-        if (Node.Log.State.Term == InitialTerm)
-        {
-            Node.Log.SaveTermAndVote(NativeTextIncrementalCrashProtocol.FirstTerm, Node.Configuration.LocalId);
-        }
-        var index = checked(Node.Log.State.LastIndex + Increment);
-        Node.Log.Append([new ReplicaEntry(index, Node.Log.State.Term, operation)]);
-        materializer.Commit(index);
-        await materializer.WaitForApplyAsync(index, token).ConfigureAwait(false);
-        return Database.ResolveOutcome(operation).Get<T>();
+        token.ThrowIfCancellationRequested();
+        _ = Database.LastApplied;
+        token.ThrowIfCancellationRequested();
+        return Task.CompletedTask;
     }
 
-    internal async Task<OperationResult> CommitIssuedAsync(ReplicatedOperation operation, CancellationToken token)
+    internal Task<T> CommitAsync<T>(OperationKind kind, object payload, Guid commandId, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
+        var operation = new ReplicatedOperation(commandId, kind, CrashFixtureValues.Principal, default,
+            System.Text.Json.JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options));
+        return Task.FromResult(Database.ApplyEmbedded(operation, token).Get<T>());
+    }
+
+    internal Task<OperationResult> CommitIssuedAsync(ReplicatedOperation operation, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
         if (operation.Kind != OperationKind.OnlineTextPublicationPhase || operation.Id == Guid.Empty)
         {
             throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
         }
-        var index = checked(Node.Log.State.LastIndex + ReplicaLogIndexStep);
-        if (index > MaximumRetainedEntries)
-        {
-            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
-        }
-        Node.Log.Append([new ReplicaEntry(index, Node.Log.State.Term, operation)]);
-        materializer.Commit(index);
-        await materializer.WaitForApplyAsync(index, token).ConfigureAwait(false);
-        return Database.ResolveOutcome(operation);
+        return Task.FromResult(Database.ApplyEmbedded(Database.VerifyOperationAuthority(operation), token));
     }
 
     internal Task<TextMaintenanceCapabilityResult> PhaseAsync(TextIndexMaintenanceRequest request,
@@ -154,30 +101,9 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        try
-        {
-            await owner.DisposeAsync().ConfigureAwait(false);
-        }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
-        try
-        {
-            await materializer.DisposeAsync().ConfigureAwait(false);
-        }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
-        try
-        {
-            await services.DisposeAsync().ConfigureAwait(false);
-        }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
-        try
-        {
-            Node.Dispose();
-        }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
+        await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures);
+        await ServerFailureObserver.ObserveAsync(() => services.DisposeAsync().AsTask(), failures);
+        ServerFailureObserver.Observe(Store.Dispose, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 
-/// <summary>Explicit configuration keys for native AppHost composition regression inputs.</summary>
+/// <summary>Explicit configuration keys for native AppHost composition checks inputs.</summary>
 internal static class TestOrchestrationConfigurationKeys
 {
     internal const string BenchmarksConcurrency = "Benchmarks:Concurrency";

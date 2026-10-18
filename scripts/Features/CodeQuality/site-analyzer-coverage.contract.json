@@ -15,218 +15,218 @@
   ],
   "module": "KeyLoad.Analyzers",
   "collectorVersion": "18.11.2",
-  "sourceDirectory": "analyzers/KeyLoad.Analyzers/CodeQuality",
+  "sourceDirectory": "analyzers/KeyLoad.Analyzers",
   "sources": [
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/AggregateTypeCodeLineAccumulator.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeLineAccumulator.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/AggregateTypeCodeLineCountAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/AggregateTypeCodeLineCountAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Validation/AggregateTypeLimitException.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Validation/AggregateTypeLimitException.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/CodeQualityAssemblyNames.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/CodeQualityDiagnosticText.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityDiagnosticText.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/ControlFlowNestingAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/ControlFlowNestingAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/ControlFlowNestingWalker.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/ControlFlowNestingWalker.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/ExecutableUnitCodeLineCountAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/ExecutableUnitCodeLineCountAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/ExecutableUnitSyntax.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/ExecutableUnitSyntax.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/FileCodeLineCountAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/FileCodeLineCountAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/NativeContracts/GrainInterfaceVersionAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/GrainInterfaceVersionAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/LiteralMachineKeyAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/LiteralMachineKeyAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Models/MachineKeyAttributeNames.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Models/MachineKeyAttributeNames.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/MachineKey/MachineKeyCodeTokens.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyCodeTokens.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/MachineKeyRuleCatalog.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/MachineKeyRuleCatalog.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/MachineKey/MachineKeySemanticSymbols.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeySemanticSymbols.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Models/NumericAnalyzerTestFriend.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Models/NumericAnalyzerTestFriend.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/NumericCodeLineCounter.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/NumericCodeLineCounter.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/NumericQualityRuleDescriptors.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/NumericQualityRuleDescriptors.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/NativeContracts/OrleansContractConstructorAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansContractConstructorAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/NativeContracts/OrleansGenerateSerializerAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansGenerateSerializerAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/OrleansMetadataNames.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/OrleansMetadataNames.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/NativeContracts/OrleansSerializerAnalysis.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerAnalysis.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/NativeContracts/OrleansSerializerTypeGraph.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerTypeGraph.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramComposition/ProgramCompositionRootAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/ProgramComposition/ProgramCompositionRootAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramComposition/ProgramEndpointMappingAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/ProgramComposition/ProgramEndpointMappingAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/SystemClockAccessAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/SystemClockAccessAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/UntypedCatchAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/UntypedCatchAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/ThreadingMetadataNames.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/ThreadingMetadataNames.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/TypedSynchronizationAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/TypedSynchronizationAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/MagicRuntimeMetadataNames.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/MagicRuntimeMetadataNames.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/MagicRuntimeDurationAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/MagicRuntimeDurationAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/MagicRuntimeStringAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/MagicRuntimeStringAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfigurationOwnership.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationOwnership.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfigurationReadOperations.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationReadOperations.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/HardcodedDurationPolicy.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedDurationPolicy.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/LiteralDeclarationOwnership.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/OperationalPolicyBindings.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OperationalPolicyBindings.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/OptionsSnapshotCapture.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OptionsSnapshotCapture.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/SerializedOptionsSnapshotContract.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/SerializedOptionsSnapshotContract.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/TypedConfigurationAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/TypedConfigurationAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/ConfigurationMetadataNames.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/ConfigurationMetadataNames.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/OperationalPolicyMetadataNames.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/OperationalPolicyMetadataNames.cs",
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfiguredCountingSignal.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfiguredCountingSignal.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/SerializedOptionsMetadata.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/SerializedOptionsMetadata.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/HardcodedPolicyReturns.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedPolicyReturns.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/HardcodedPolicySearch.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedPolicySearch.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/NativeTimerPolicy.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/NativeTimerPolicy.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/OptionsSnapshotOverrides.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OptionsSnapshotOverrides.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/OwnedDiagnosticsPolicy.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/OwnedDiagnosticsPolicy.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/PolicyArgumentSources.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/Configuration/PolicyArgumentSources.cs",
       "classification": "executable"
     }
   ],
@@ -249,144 +249,144 @@
     {
       "diagnostic": "KLD0001",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/LiteralMachineKeyAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/MachineKey/MachineKeySemanticSymbols.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/MachineKeyRuleCatalog.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/LiteralMachineKeyAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeySemanticSymbols.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/MachineKeyRuleCatalog.cs"
       ]
     },
     {
       "diagnostic": "KLD0013",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramComposition/ProgramEndpointMappingAnalyzer.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/ProgramComposition/ProgramEndpointMappingAnalyzer.cs"
       ]
     },
     {
       "diagnostic": "KLD0014",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/NativeContracts/GrainInterfaceVersionAnalyzer.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/GrainInterfaceVersionAnalyzer.cs"
       ]
     },
     {
       "diagnostic": "KLD0020",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/ProgramComposition/ProgramCompositionRootAnalyzer.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/ProgramComposition/ProgramCompositionRootAnalyzer.cs"
       ]
     },
     {
       "diagnostic": "KLD0021",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/NativeContracts/OrleansContractConstructorAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/CodeQualityAssemblyNames.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansContractConstructorAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
       ]
     },
     {
       "diagnostic": "KLD0022",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/SystemClockAccessAnalyzer.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/SystemClockAccessAnalyzer.cs"
       ]
     },
     {
       "diagnostic": "KLD0023",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/NativeContracts/OrleansGenerateSerializerAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/NativeContracts/OrleansSerializerAnalysis.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/NativeContracts/OrleansSerializerTypeGraph.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/CodeQualityAssemblyNames.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansGenerateSerializerAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerAnalysis.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerTypeGraph.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
       ]
     },
     {
       "diagnostic": "KLD0024",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/UntypedCatchAnalyzer.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/UntypedCatchAnalyzer.cs"
       ]
     },
     {
       "diagnostic": "KLD0030",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/FileCodeLineCountAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/NumericCodeLineCounter.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/NumericQualityRuleDescriptors.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/FileCodeLineCountAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/NumericCodeLineCounter.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/NumericQualityRuleDescriptors.cs"
       ]
     },
     {
       "diagnostic": "KLD0031",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/AggregateTypeCodeLineCountAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/AggregateTypeCodeLineAccumulator.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Validation/AggregateTypeLimitException.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/NumericCodeLineCounter.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/NumericQualityRuleDescriptors.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/AggregateTypeCodeLineCountAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeLineAccumulator.cs",
+        "analyzers/KeyLoad.Analyzers/Validation/AggregateTypeLimitException.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/NumericCodeLineCounter.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/NumericQualityRuleDescriptors.cs"
       ]
     },
     {
       "diagnostic": "KLD0032",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/ExecutableUnitCodeLineCountAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/ExecutableUnitSyntax.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/NumericCodeLineCounter.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/NumericQualityRuleDescriptors.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/ExecutableUnitCodeLineCountAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/ExecutableUnitSyntax.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/NumericCodeLineCounter.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/NumericQualityRuleDescriptors.cs"
       ]
     },
     {
       "diagnostic": "KLD0033",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/CodeSize/ControlFlowNestingAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/ControlFlowNestingWalker.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/CodeSize/ExecutableUnitSyntax.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/NumericQualityRuleDescriptors.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/ControlFlowNestingAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/ControlFlowNestingWalker.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/ExecutableUnitSyntax.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/NumericQualityRuleDescriptors.cs"
       ]
     },
     {
       "diagnostic": "KLD0034",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/TypedSynchronizationAnalyzer.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/TypedSynchronizationAnalyzer.cs"
       ]
     },
     {
       "diagnostic": "KLD0035",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/MagicRuntimeDurationAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfigurationOwnership.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/CodeQualityAssemblyNames.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/MagicRuntimeDurationAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/LiteralDeclarationOwnership.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationOwnership.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
       ]
     },
     {
       "diagnostic": "KLD0036",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/RuntimePolicies/MagicRuntimeStringAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfigurationOwnership.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/CodeQualityAssemblyNames.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/MachineKey/MachineKeySemanticSymbols.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/MachineKeyRuleCatalog.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/MagicRuntimeStringAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/LiteralDeclarationOwnership.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationOwnership.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeySemanticSymbols.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/MachineKeyRuleCatalog.cs"
       ]
     },
     {
       "diagnostic": "KLD0037",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analyzers/TypedConfigurationAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfigurationReadOperations.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfigurationOwnership.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/HardcodedDurationPolicy.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/OperationalPolicyBindings.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/OptionsSnapshotCapture.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/SerializedOptionsSnapshotContract.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Contracts/CodeQualityAssemblyNames.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/ConfiguredCountingSignal.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/SerializedOptionsMetadata.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/HardcodedPolicyReturns.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/HardcodedPolicySearch.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/RuntimePolicies/NativeTimerPolicy.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/OptionsSnapshotOverrides.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/OwnedDiagnosticsPolicy.cs",
-        "analyzers/KeyLoad.Analyzers/CodeQuality/Analysis/Configuration/PolicyArgumentSources.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/TypedConfigurationAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationReadOperations.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationOwnership.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedDurationPolicy.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/LiteralDeclarationOwnership.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OperationalPolicyBindings.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OptionsSnapshotCapture.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/SerializedOptionsSnapshotContract.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfiguredCountingSignal.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/SerializedOptionsMetadata.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedPolicyReturns.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedPolicySearch.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/NativeTimerPolicy.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OptionsSnapshotOverrides.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/OwnedDiagnosticsPolicy.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/Configuration/PolicyArgumentSources.cs"
       ]
     }
   ],

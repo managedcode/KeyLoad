@@ -37,6 +37,6 @@ public sealed partial class DatabaseEngine
         transaction.Delete(ResourceLifetimeCatalog.Key(request.TenantId, request.DatabaseId, request.ResourceName));
         var token = new CommitToken(Store.Identity.Incarnation, NativeCatalogRoute.PartitionId, position);
         return Result(new DropTableResult(request.TenantId, request.DatabaseId, request.ResourceName,
-            new(operation.Id, token, [], Durability)));
+            new(operation.Id, token, [], Durability, AcknowledgedPersistedCopies)));
     }
 }

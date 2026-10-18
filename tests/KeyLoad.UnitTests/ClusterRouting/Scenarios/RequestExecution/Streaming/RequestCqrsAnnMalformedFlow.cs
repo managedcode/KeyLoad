@@ -14,7 +14,7 @@ internal static class RequestCqrsAnnMalformedFlow
         var signed = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
             OperationKind.MaintainAnnIndex, request.CommandId, NativeSerialization.Serialize(request));
         var producer = new RequestCqrsProducerObservation();
-        var serializer = fixture.Cluster.ServiceProvider
+        var serializer = fixture.Services
             .GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var stream = NativeCqrsStreamLifetime.RunWithPurpose(
             execution => RequestCqrsAnnProducer.Run(id, original, fault, producer,

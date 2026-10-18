@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-- Own real Roslyn diagnostic regressions under `CodeQuality/`; entry point is `KeyLoad.Analyzers.Tests.csproj`. Follow CodeQuality acceptance and ADR-033.
+- Own real Roslyn diagnostic checks in the root `Cases/`, `Fixtures/`, `Assertions/`, `Contracts/` and `Processes/` role folders; entry point is `KeyLoad.Analyzers.Tests.csproj`. Follow CodeQuality acceptance and ADR-033.
 - TUnit on Microsoft.Testing.Platform is the only runner. Compile valid product examples with real SDK Roslyn and real Orleans metadata. Source snippets are compiler inputs, never substitutes for external framework types.
 - No mocks, stubs, fake Orleans attributes/interfaces or package implementation copies. Assert semantic fixture compiler success before asserting analyzer findings.
 - Test all applicable positive, negative and edge paths, precise IDs, severities and locations. Do not weaken tests to hide analyzer faults.

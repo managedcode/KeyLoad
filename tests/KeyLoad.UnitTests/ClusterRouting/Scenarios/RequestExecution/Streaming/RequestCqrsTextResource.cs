@@ -13,11 +13,12 @@ internal static class RequestCqrsTextResource
         var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId,
             new(NativeTextBilingualAudit.Collection, ResourceKind.Collection, partition.TransactionDomainId));
         var id = Guid.NewGuid();
-        var configured = database.Submit(OperationKind.ConfigureResource, request,
-            RequestCqrsHostedProfile.Root, id, null, token).Get<ResourceDefinition>();
+        var original = database.Database.CreateNativeOperation(OperationKind.ConfigureResource, id,
+            RequestCqrsHostedProfile.Root, database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        var configured = (await database.Coordinator.SubmitVerifiedAsync(original, token).ConfigureAwait(false))
+            .Get<ResourceDefinition>();
         await Assert.That(JsonDefaults.Serialize(configured).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(request.Definition))).IsTrue();
-        var original = database.ReadRetainedOperation(id, token);
         await Assert.That(original.Id).IsEqualTo(id);
         await Assert.That(original.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await Assert.That(original.PrincipalId).IsEqualTo(RequestCqrsHostedProfile.Root);

@@ -45,7 +45,7 @@ internal static class AnalyticsStoreNativeOptions
         options.Ingestion.WorkerCount = SingleWorker;
         options.Ingestion.QueueCapacity = limits.MaxScanRecords;
         options.Ingestion.MaxBufferedRollupRows = limits.MaxScanRecords;
-        options.Ingestion.QueueFullBehavior = QueueFullBehavior.Wait;
+        options.Ingestion.QueueFullBehavior = QueueFullBehavior.Drop;
         options.Retention.RawEvents = null;
         options.Queries.Timeout = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
         options.Queries.MaxDegreeOfParallelism = SingleWorker;

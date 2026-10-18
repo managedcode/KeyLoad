@@ -26,12 +26,11 @@ internal static class NativeTextIncrementalCrashSeed
             new ConfigureProjectionConsumerRequest(configureId, consumer,
                 new(NativeTextIncrementalCrashProtocol.Generation, [NativeTextIncrementalCrashProtocol.Collection],
                     [PutDocumentKind, PatchDocumentKind, DeleteDocumentKind])), configureId, token);
-        var placement = runtime.Database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            partition);
+        var identity = runtime.Database.Store.Identity;
         var request = new TextIndexMaintenanceRequest(Guid.NewGuid(), consumer,
             NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.Field,
             NativeTextIncrementalCrashProtocol.Generation, runtime.Database.Store.Identity.NodeId,
-            new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),
+            new(identity.NodeId, identity.Incarnation),
             TextIndexMaintenanceMode.Build);
         _ = await NativeTextIncrementalCrashReplay.FinishAsync(runtime, request, token);
         var mutation = new CommandRequest(Guid.NewGuid(), partition,

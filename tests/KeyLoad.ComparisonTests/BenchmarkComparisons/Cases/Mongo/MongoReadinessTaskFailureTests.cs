@@ -16,7 +16,7 @@ internal sealed class MongoReadinessTaskFailureTests
         var input = new IOException(Failure);
         var faulted = FaultedAsync(input);
         var cancellation = await Assert.ThrowsAsync<OperationCanceledException>(() => cancelled);
-        var failure = await Assert.ThrowsAsync<AggregateException>(() => MongoNativeReadinessRegressionFailures.JoinAsync(cancelled, faulted))
+        var failure = await Assert.ThrowsAsync<AggregateException>(() => MongoNativeReadinessChecksFailures.JoinAsync(cancelled, faulted))
             ?? throw new InvalidOperationException(Failure);
         await Assert.That(failure.InnerExceptions.Count).IsEqualTo(IndependentFailures);
         await Assert.That(failure.InnerExceptions.OfType<OperationCanceledException>().Single()).IsSameReferenceAs(cancellation);
@@ -29,7 +29,7 @@ internal sealed class MongoReadinessTaskFailureTests
     public async Task SoleIoFailureRetainsOriginalIdentity()
     {
         var input = new IOException(Failure);
-        var failure = await Assert.ThrowsAsync<IOException>(() => MongoNativeReadinessRegressionFailures.JoinAsync(FaultedAsync(input)));
+        var failure = await Assert.ThrowsAsync<IOException>(() => MongoNativeReadinessChecksFailures.JoinAsync(FaultedAsync(input)));
         await Assert.That(failure).IsSameReferenceAs(input);
     }
 
@@ -39,7 +39,7 @@ internal sealed class MongoReadinessTaskFailureTests
     {
         var first = CompletedAsync();
         var second = CompletedAsync();
-        await MongoNativeReadinessRegressionFailures.JoinAsync(first, second);
+        await MongoNativeReadinessChecksFailures.JoinAsync(first, second);
         await Assert.That(first.IsCompletedSuccessfully && second.IsCompletedSuccessfully).IsTrue();
     }
 

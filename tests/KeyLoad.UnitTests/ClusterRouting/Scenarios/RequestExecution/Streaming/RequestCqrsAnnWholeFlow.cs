@@ -10,7 +10,7 @@ internal static class RequestCqrsAnnWholeFlow
         var request = await RequestCqrsAnnTestData.SeedAsync(fixture, token);
         var originalReservationBytes = await RequestCqrsAnnEnrollmentFlow.ReserveAsync(fixture, request, token);
         var before = fixture.Database.Store.Position;
-        var beforeJournal = fixture.Database.ReadJournalCut().LastIndex;
+        var beforeJournal = fixture.Database.ReadCanonicalCut().AppliedPosition;
         var built = await RequestCqrsAnnInvocation.RunAsync(fixture, request, token);
         await RequestCqrsAnnEnrollmentFlow.RequireSettledAsync(fixture, request, built.Result, originalReservationBytes);
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, request, built.Result, before, changed: false, token);
@@ -39,7 +39,7 @@ internal static class RequestCqrsAnnWholeFlow
             Mode = AnnMaintenanceMode.Restore
         };
         before = fixture.Database.Store.Position;
-        beforeJournal = fixture.Database.ReadJournalCut().LastIndex;
+        beforeJournal = fixture.Database.ReadCanonicalCut().AppliedPosition;
         var restored = await RequestCqrsAnnInvocation.RunAsync(fixture, restore, token);
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, restore, restored.Result, before, changed: true, token);
         await Assert.That(restored.Result.Source!.ThroughSequence).IsGreaterThan(built.Result.Source!.ThroughSequence);
@@ -60,7 +60,7 @@ internal static class RequestCqrsAnnWholeFlow
             CommandId = Guid.NewGuid()
         };
         var before = fixture.Database.Store.Position;
-        var applied = fixture.Database.ReadJournalCut().CommittedIndex;
+        var applied = fixture.Database.ReadCanonicalCut().AppliedPosition;
         var unchanged = await RequestCqrsAnnInvocation.RunAsync(fixture, noOp, token);
         await NoOpResultAsync(fixture, noOp, unchanged.Result, restored, before, applied, token);
         await Assert.That(unchanged.Result.Count).IsEqualTo(restored.Count);
@@ -75,7 +75,7 @@ internal static class RequestCqrsAnnWholeFlow
             CommandId = Guid.NewGuid()
         };
         before = fixture.Database.Store.Position;
-        applied = fixture.Database.ReadJournalCut().CommittedIndex;
+        applied = fixture.Database.ReadCanonicalCut().AppliedPosition;
         var healthy = await RequestCqrsAnnInvocation.RunAsync(fixture, fresh, token);
         await NoOpResultAsync(fixture, fresh, healthy.Result, restored, before, applied, token);
         await Assert.That(healthy.Result.Count).IsEqualTo(RequestCqrsAnnTestData.ChangedCount);
@@ -96,7 +96,7 @@ internal static class RequestCqrsAnnWholeFlow
         await Assert.That(source.Position).IsGreaterThanOrEqualTo(before);
         await Assert.That(source.Position).IsLessThanOrEqualTo(fixture.Database.Store.Position);
         await Assert.That(source.AppliedPosition).IsGreaterThanOrEqualTo(applied);
-        await Assert.That(source.AppliedPosition).IsLessThanOrEqualTo(fixture.Database.ReadJournalCut().CommittedIndex);
+        await Assert.That(source.AppliedPosition).IsLessThanOrEqualTo(fixture.Database.ReadCanonicalCut().AppliedPosition);
         await Assert.That(source.ReadGeneration).IsEqualTo(fixture.Database.Store.Identity.ReadGeneration);
         await Assert.That(source.StoreFormatVersion).IsEqualTo(fixture.Database.Store.Identity.FormatVersion);
         await Assert.That(source.KeyCodecVersion).IsEqualTo(fixture.Database.Store.Identity.KeyCodecVersion);

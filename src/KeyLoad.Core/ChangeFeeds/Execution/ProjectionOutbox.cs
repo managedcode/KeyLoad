@@ -254,7 +254,7 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Validation, EmptyProjectionBatchEffectsDetail);
             }
 
-            var emptyReceipt = new CommitReceipt(request.CommandId, Token(tx, request.Consumer.Partition, position), [], Durability);
+            var emptyReceipt = new CommitReceipt(request.CommandId, Token(tx, request.Consumer.Partition, position), [], Durability, AcknowledgedPersistedCopies);
             if (enrollment is not null)
             {
                 var settled = enrollment with
@@ -272,7 +272,7 @@ public sealed partial class DatabaseEngine
         }
         var effects = ApplyMutations(tx, principal, request.Consumer.Partition, request.Effects, now, position,
             allowOutboxProgressReserve: state.LastProgressReservationCut != head.FirstAvailable);
-        var receipt = new CommitReceipt(request.CommandId, Token(tx, request.Consumer.Partition, position), effects, Durability);
+        var receipt = new CommitReceipt(request.CommandId, Token(tx, request.Consumer.Partition, position), effects, Durability, AcknowledgedPersistedCopies);
         var after = ReadOutboxHead(tx, request.Consumer.Partition);
         var usedReserve = effects.Length > EffectsLengthValidationBoundary && (after.StoredRecords > Limits.MaxOutboxRecords || after.StoredBytes > Limits.MaxOutboxBytes);
         tx.PutRecord(ConsumerKey(request.Consumer), state with

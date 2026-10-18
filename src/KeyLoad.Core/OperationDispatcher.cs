@@ -61,7 +61,7 @@ public sealed partial class DatabaseEngine
         var token = new CommitToken(placement.Incarnation, batch.Partition.AtomicPartitionId, position);
         return Result(new CommitReceipt(batch.CommandId, token,
             ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt, position,
-                commitToken: token, operation: operation), Durability));
+                commitToken: token, operation: operation), Durability, AcknowledgedPersistedCopies));
     }
 
     private static OperationResult ExecuteDispatchState(IAtomicTransaction transaction, ReplicatedOperation operation)

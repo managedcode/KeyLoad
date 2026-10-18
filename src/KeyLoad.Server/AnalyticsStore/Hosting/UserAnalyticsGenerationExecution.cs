@@ -15,11 +15,9 @@ internal sealed class UserAnalyticsGenerationExecution(PartitionHost physical)
     internal IReadOnlyList<Exception> CleanupFailures => cleanup;
     internal bool HasUnjoinedEngine => retainedGeneration is { HasJoinedEngine: false };
 
-    internal async Task<NativeAnalyticsAggregate> ExecuteAsync(AnalyticsAggregateSnapshot snapshot,
+    internal NativeAnalyticsAggregate Execute(AnalyticsAggregateSnapshot snapshot,
         IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
-        // Publish the retained original before calling any database or native owner code.
-        await Task.Yield();
         snapshot.Work.RequireResourceLifetimeBinding(binding);
         physical.Database.ValidateAnalyticsAggregatePublication(snapshot);
         var directory = UserAnalyticsGenerationPaths.Create(physical, snapshot);
@@ -30,7 +28,7 @@ internal sealed class UserAnalyticsGenerationExecution(PartitionHost physical)
         {
             generation = new(snapshot, directory);
             retainedGeneration = generation;
-            result = await generation.QueryAsync(cancellationToken).ConfigureAwait(false);
+            result = generation.Query(cancellationToken);
         }
         catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))
         {
@@ -42,7 +40,7 @@ internal sealed class UserAnalyticsGenerationExecution(PartitionHost physical)
         }
         if (generation is not null)
         {
-            await ServerFailureObserver.ObserveAsync(() => generation.DisposeAsync().AsTask(), cleanup).ConfigureAwait(false);
+            ServerFailureObserver.Observe(generation.Dispose, cleanup);
             if (generation.HasJoinedEngine)
             {
                 retainedGeneration = null;

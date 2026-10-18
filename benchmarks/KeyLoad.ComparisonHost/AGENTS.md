@@ -2,11 +2,11 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the native TUnit comparison executable and feature-owned helpers under BenchmarkComparisons/.
+- Owns the native TUnit comparison executable and helpers in root responsibility folders.
 - Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons feature, ADR-033/034/043 and comparison-host acceptance/plan before implementation.
 - Aspire owns resource lifecycle; the comparisons resource keeps its environment, waits and image pins. Never replace the required KeyLoad cluster topology.
 - Keep Program composition-only and feature behavior under the canonical slice. No new package, duplicate entry, compatibility shim, suppression or hardcoded machine keys.
-- Applicable skills: none installed for this host; no skill/tool installation or global configuration changes.
+- Apply the installed Orleans and Aspire skills when their runtime or composition boundaries are involved.
 - Track each client/target ownership transfer and partial construction cleanup; detach console handlers before lifetime disposal. Keep credentials external and error output safe.
 - Preserve every unrelated shared-checkout change. Workers own only this new project; the lead alone changes library, solution, AppHost, inventory, docs and tests references.
 

@@ -33,7 +33,7 @@ internal static class RequestCqrsAnnProgressControls
             OperationKind.MaintainAnnIndex, request.CommandId, NativeSerialization.Serialize(request));
         var observed = new RequestCqrsProducerObservation();
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
-        var serializer = fixture.Cluster.ServiceProvider
+        var serializer = fixture.Services
             .GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var stream = NativeCqrsStreamLifetime.RunWithPurpose(
             execution => RequestCqrsAnnProducer.Run(id, genuineReply, null, observed,

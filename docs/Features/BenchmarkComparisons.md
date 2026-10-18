@@ -68,14 +68,14 @@ evidence contracts.
 
 ## Slice map
 
-- Harness/adapters: `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/`.
-- Embedded scenario library: `benchmarks/KeyLoad.BenchmarkScenarios/BenchmarkComparisons/`; `KeyLoad.Benchmarks` retains only its typed executable runner under [ADR-047](../ADR/ADR-047-embedded-benchmark-host.md).
+- Harness/adapters: `benchmarks/KeyLoad.Comparisons/`.
+- Embedded scenario library: `benchmarks/KeyLoad.BenchmarkScenarios/`; `KeyLoad.Benchmarks` retains only its typed executable runner under [ADR-047](../ADR/ADR-047-embedded-benchmark-host.md).
 - Aspire engine resources: `build/KeyLoad.AppHost/BenchmarkComparisons/`.
 - Tests: `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/`, including the sole benchmark-contract owner `UnitContracts/`; only helpers with actual functional consumers remain shared.
 - Evidence/chart tooling: `scripts/Features/BenchmarkComparisons/`.
 - Site: `site/Features/BenchmarkComparisons/`.
 - Docs: this spec, ADR-034, `implementation/comparative-benchmarks.md` and the README presentation.
-- Time-series profile: Aspire resource in `build/KeyLoad.AppHost/BenchmarkComparisons/`; profile/targets under `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
+- Time-series profile: Aspire resource in `build/KeyLoad.AppHost/BenchmarkComparisons/`; profile/targets under `benchmarks/KeyLoad.Comparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
 - Product persisted schema/public API changes: N/A; engines use isolated per-run benchmark databases/collections/streams.
 
 ## Digest-backed Docker execution
@@ -373,7 +373,7 @@ performance, failover tolerance, native role, copy or ACK proof.
 REQ-BC-CHUNK-001 maps to AC-CHUNK-006 in [TimeSeries](TimeSeries.md) and
 [ADR-079](../ADR/ADR-079-lossless-series-chunk-codecs.md). The shared microbenchmark
 library owns public generated-consumer SampleChunk codec fixtures in
-`benchmarks/KeyLoad.BenchmarkScenarios/BenchmarkComparisons/`; the typed
+`benchmarks/KeyLoad.BenchmarkScenarios/`; the typed
 KeyLoad.Benchmarks switcher remains their CLI. The compared code paths are the current
 per-record native SampleRecord encoding/decoding and the bounded candidate chunk codec.
 Retain exact actual bytes/sample, source, corpus, settings, machine, cost and
@@ -940,7 +940,7 @@ limits remain unchanged, and the test does not serialize unrelated tests globall
 
 Mapping: `REQ-BC-025` and `AC-BC-025` (real browser criteria), plus this focused
 admission acceptance. New TUnit source belongs to
-`tests/KeyLoad.SiteTests/BenchmarkComparisons/`; no site runtime,
+`tests/KeyLoad.SiteTests/`; no site runtime,
 workflow, publication or measurement behavior changes.
 
 Browser lease transfer at factory return: the browser session factory admits one actual

@@ -58,7 +58,7 @@ internal static class Neo4jHarnessConstants
     public const string InvalidQueryResponse = "Neo4j:InvalidQueryResponse";
     public const string FixtureSetupFailure = "Neo4jHarnessFixtureSetupFailed";
     public const string FixtureCleanupFailure = "Neo4jHarnessFixtureCleanupFailed";
-    public const string RegressionFailure = "Neo4jHarnessRegressionFailed";
+    public const string ChecksFailure = "Neo4jHarnessChecksFailed";
     public const string TargetCleanupFailure = "Neo4jHarnessTargetCleanupFailed";
     public const string RunnerSetupFailure = "Neo4jHarnessSetupFailure";
     public const string CapturedFailure = "Neo4jHarnessCapturedFailure";

@@ -3,10 +3,10 @@
 ## Purpose, entry points and ownership
 
 - Owns the reusable comparative benchmark harness library and its database targets under ADR-043; the sole executable belongs to KeyLoad.ComparisonHost in this repository.
-- Library entry point: `BenchmarkComparisons/Session/Execution/BenchmarkSession.cs`; native target adapters and shared corpora remain in the same feature slice. Native TUnit test composition belongs to KeyLoad.ComparisonHost.
+- Library entry point: `Session/Execution/BenchmarkSession.cs`; native target adapters and shared corpora use root responsibility folders. Native TUnit test composition belongs to KeyLoad.ComparisonHost.
 - Own comparative workload definitions, target adapters, sampling and report serialization. Product semantics remain owned by their product slices; CI callers own qualification and publication decisions.
 - Keep the corpus and measurement contract stable and reproducible. Do not substitute an in-memory/single-node KeyLoad target for the required cluster topology.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Apply the installed Orleans and Aspire skills when their runtime or composition boundaries are involved.
 - Never infer durability or production readiness from benchmark results. Keep all target credentials external and preserve centrally pinned packages and no `packages.lock.json` files.
 
 ## Boundaries and protected risks

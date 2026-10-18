@@ -3,7 +3,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-NGR-001 provider captures and cache-policy regressions; fixtures never authenticate a running job.</summary>
+/// <summary>AC-NGR-001 provider captures and cache-policy checkss; fixtures never authenticate a running job.</summary>
 internal sealed class IsolatedCurrentJobCacheTests
 {
     private const string Result = "result";

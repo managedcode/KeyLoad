@@ -53,7 +53,7 @@ internal static class RequestCqrsAnnResultAssertions
         await Assert.That(source.KeyCodecVersion).IsEqualTo(fixture.Database.Store.Identity.KeyCodecVersion);
         await Assert.That(source.Position).IsGreaterThanOrEqualTo(before);
         await Assert.That(source.Position).IsLessThanOrEqualTo(fixture.Database.Store.Position);
-        await Assert.That(source.AppliedPosition).IsLessThanOrEqualTo(fixture.Database.ReadJournalCut().CommittedIndex);
+        await Assert.That(source.AppliedPosition).IsLessThanOrEqualTo(fixture.Database.ReadCanonicalCut().AppliedPosition);
         await Assert.That(source.ThroughSequence).IsEqualTo(changed ? RequestCqrsAnnTestData.ChangedTail : RequestCqrsAnnTestData.OriginalTail);
         await Assert.That(source.CorpusSha256).IsEqualTo(AnnSeedDigestOracle.Compute(request.Field,
             request.Space, RequestCqrsAnnTestData.Records(changed)));
@@ -64,7 +64,7 @@ internal static class RequestCqrsAnnResultAssertions
     {
         var native = fixture.NativeAnnMaintenance ?? throw new InvalidOperationException();
         var search = new SearchEngine(fixture.Database.Database,
-            Options.Create(new QueryExecutionOptions { EnableApproximateSearch = true }), null, native.Owner);
+            Options.Create(new QueryExecutionOptions { EnableApproximateSearch = true }), null, native);
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;
         var actual = await search.ApproximateSearchAsync(RequestCqrsAnnTestData.Principal,

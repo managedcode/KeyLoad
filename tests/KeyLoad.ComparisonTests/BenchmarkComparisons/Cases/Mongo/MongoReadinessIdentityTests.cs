@@ -66,7 +66,7 @@ internal sealed class MongoReadinessIdentityTests
         await Assert.That(() => actual.RequireNode(Name, Image, Node)).Throws<InvalidOperationException>();
     }
 
-    private static MongoNativeReadinessRegressionIdentity Read(string[] aliases)
+    private static MongoNativeReadinessChecksIdentity Read(string[] aliases)
     {
         var input = new Dictionary<string, object>(StringComparer.Ordinal)
         {
@@ -80,6 +80,6 @@ internal sealed class MongoReadinessIdentityTests
             },
             [LabelsKey] = new Dictionary<string, string>(StringComparer.Ordinal)
         };
-        return MongoNativeReadinessRegressionIdentity.Parse(JsonSerializer.Serialize(input));
+        return MongoNativeReadinessChecksIdentity.Parse(JsonSerializer.Serialize(input));
     }
 }

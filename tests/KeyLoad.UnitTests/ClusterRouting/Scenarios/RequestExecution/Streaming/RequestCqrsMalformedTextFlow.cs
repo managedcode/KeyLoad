@@ -13,7 +13,7 @@ internal static class RequestCqrsMalformedTextFlow
         var token = TestContext.Current!.Execution.CancellationToken;
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestValues.Principal, fixture.Clock.GetUtcNow()));
-        var connection = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
+        var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
         var cut = fixture.Database.Store.Position;
         var bytes = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var requestId = Guid.NewGuid();
@@ -21,12 +21,12 @@ internal static class RequestCqrsMalformedTextFlow
         var signed = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.MaintainTextIndex,
             commandId, NativeSerialization.Serialize(false));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
-        using (var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+        using (var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             requestId, commandId, token, connectionId: fixture.ConnectionId))
         {
             var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
                 execution => ObserveAsync(connection.ExecuteStreamAsync(signed, execution), frames, execution),
-                fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+                fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                 requestId, fixture.Clock, fixture.RoutingOptions,
                 new NativeCqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, requestId)), token);
             await Assert.That(reply.Error).IsEqualTo(ErrorCode.Validation);

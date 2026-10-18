@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests;
 internal static class UnitBenchmarkOptions
 {
     private const string SolutionFile = "KeyLoad.slnx";
-    private const string NativePolicyFile = "benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/Configuration/native-execution.json";
+    private const string NativePolicyFile = "benchmarks/KeyLoad.ComparisonHost/Configuration/native-execution.json";
     private const string MissingCheckout = "The native comparison policy requires the actual KeyLoad checkout.";
 
     internal static IOptions<NativeComparisonDiagnosticOptions> Diagnostics()
@@ -74,7 +74,7 @@ internal static class UnitBenchmarkOptions
             throw new DirectoryNotFoundException("The native comparison policy requires the actual KeyLoad checkout.");
         }
         var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
-            .AddJsonFile("benchmarks/KeyLoad.ComparisonHost/BenchmarkComparisons/Configuration/native-execution.json", optional: false).Build();
+            .AddJsonFile("benchmarks/KeyLoad.ComparisonHost/Configuration/native-execution.json", optional: false).Build();
         using var configurationLifetime = configuration as IDisposable;
         var options = new OptionsManager<NativeComparisonExecutionOptions>(
             new OptionsFactory<NativeComparisonExecutionOptions>([new ConfigureFromConfigurationOptions<NativeComparisonExecutionOptions>(

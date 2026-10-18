@@ -72,12 +72,12 @@ internal static class RequestCqrsAnnSettlementReplayFlow
             OperationKind.CommitProjectionBatch, request.CommandId, NativeSerialization.Serialize(request));
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
-        var connection = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
-        using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+        var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
+        using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             id, request.CommandId, token, connectionId: fixture.ConnectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
             execution => connection.ExecuteStreamAsync(signed, execution),
-            fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, fixture.RoutingOptions, token);
     }
 

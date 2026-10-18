@@ -170,7 +170,7 @@ internal static class Bm25InvalidationDependencyFlow
 
     private static (Guid NodeId, Guid Incarnation, long Position, string[] Rows) Image(TestDatabase database)
     {
-        database.JoinNativeReadBarrier(TestContext.Current!.Execution.CancellationToken);
+        database.JoinStorageReadCut(TestContext.Current!.Execution.CancellationToken);
         var budget = database.CreateReadWork(TestContext.Current.Execution.CancellationToken);
         return database.Store.Read(view =>
         {

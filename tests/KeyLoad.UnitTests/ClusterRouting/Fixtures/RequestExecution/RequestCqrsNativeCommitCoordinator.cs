@@ -33,7 +33,7 @@ internal sealed class RequestCqrsNativeCommitCoordinator(TestDatabase owner) : I
     public Task ReadBarrierAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        owner.JoinNativeReadBarrier(cancellationToken);
+        owner.JoinStorageReadCut(cancellationToken);
         return Task.CompletedTask;
     }
 }

@@ -49,6 +49,8 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
         ArgumentNullException.ThrowIfNull(snapshot);
         snapshot.Work.RequireResourceLifetimeBinding(binding);
         cancellationToken.ThrowIfCancellationRequested();
+        UserAnalyticsGenerationExecution execution;
+        var completion = new TaskCompletionSource<NativeAnalyticsAggregate>(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (lifecycle)
         {
             ObjectDisposedException.ThrowIf(stopping, this);
@@ -59,11 +61,18 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, Busy);
             }
-            var execution = new UserAnalyticsGenerationExecution(physical);
-            var original = execution.ExecuteAsync(snapshot, binding, cancellationToken);
-            operations.Add(new(execution, original));
-            return original;
+            execution = new(physical);
+            operations.Add(new(execution, completion.Task));
         }
+        try
+        {
+            completion.SetResult(execution.Execute(snapshot, binding, cancellationToken));
+        }
+        catch (Exception failure)
+        {
+            completion.SetException(failure);
+        }
+        return completion.Task;
     }
 
     public ValueTask DisposeAsync()

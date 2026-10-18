@@ -18,14 +18,14 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
     {
         cancellationToken.ThrowIfCancellationRequested();
         var database = owner.Borrow().Database;
-        return Task.FromResult(database.Store.Read(_ => new SiloStorageCut(database.Store.Identity.Incarnation, database.Store.Position)));
+        return Task.FromResult(database.Store.Read(_ => new SiloStorageCut(database.Store.Identity.Incarnation, database.LastApplied)));
     }
 
     public Task<ReplicatedOperation> PrepareAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
         => Task.FromResult(owner.Borrow().Database.PrepareStorageOperation(operation, cancellationToken));
 
-    public Task<OperationResult> ApplyAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
-        => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, cancellationToken));
+    public Task<StorageOperationResult> ApplyAsync(ReplicatedOperation operation, long sequence, CancellationToken cancellationToken)
+        => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, sequence, cancellationToken));
 
     public IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
         string signedRequest, CancellationToken cancellationToken)

@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class BenchmarkSessionContractTests
 {
-    private static BenchmarkSession Open(SessionRegressionTarget target, int concurrency = 5)
+    private static BenchmarkSession Open(SessionChecksTarget target, int concurrency = 5)
         => new(target, UnitBenchmarkOptions.Native(), new()
         {
             Records = 400,
@@ -15,7 +15,7 @@ internal sealed class BenchmarkSessionContractTests
     [Test]
     public async Task NativeSessionContractKeepsOneDatasetAndMeasuresEveryInitialWriteWithoutWarmup()
     {
-        await using var target = new SessionRegressionTarget();
+        await using var target = new SessionChecksTarget();
         var session = Open(target);
         await Assert.That(target.Initializations).IsEqualTo(0);
         await Assert.That(target.Documents.Count).IsEqualTo(0);
@@ -40,7 +40,7 @@ internal sealed class BenchmarkSessionContractTests
     [Test]
     public async Task AcknowledgedButDiscardedInitialRecordsFailTheIndependentCompleteOracle()
     {
-        await using var target = new SessionRegressionTarget { DiscardWrites = true };
+        await using var target = new SessionChecksTarget { DiscardWrites = true };
         var session = Open(target);
         var token = TestContext.Current!.Execution.CancellationToken;
         var load = await session.LoadAsync(token);
@@ -54,7 +54,7 @@ internal sealed class BenchmarkSessionContractTests
     [Test]
     public async Task AWrongReadFailsActualAccountingAndPoisonsTheSessionWithoutResettingIt()
     {
-        await using var target = new SessionRegressionTarget();
+        await using var target = new SessionChecksTarget();
         var session = Open(target);
         var token = TestContext.Current!.Execution.CancellationToken;
         await session.LoadAsync(token);
@@ -75,7 +75,7 @@ internal sealed class BenchmarkSessionContractTests
     [Arguments(true, 16)]
     public async Task MixedStreamsShareTheSameStateAndTheFinalOracleRejectsDroppedUpdates(bool discardUpdates, int concurrency)
     {
-        await using var target = new SessionQueryRegressionTarget { DiscardUpdates = discardUpdates };
+        await using var target = new SessionQueryChecksTarget { DiscardUpdates = discardUpdates };
         var session = Open(target, concurrency);
         var token = TestContext.Current!.Execution.CancellationToken;
         await Assert.That((await session.LoadAsync(token)).Status).IsEqualTo("measured");
@@ -104,7 +104,7 @@ internal sealed class BenchmarkSessionContractTests
     [Test]
     public async Task GenuineNativeIndexAbsenceLeavesTheLoadedSessionAvailableForReadsAndQueries()
     {
-        await using var target = new SessionQueryRegressionTarget { NativeIndexUnavailable = true };
+        await using var target = new SessionQueryChecksTarget { NativeIndexUnavailable = true };
         var session = Open(target);
         var token = TestContext.Current!.Execution.CancellationToken;
         await Assert.That((await session.LoadAsync(token)).Status).IsEqualTo("measured");
@@ -117,7 +117,7 @@ internal sealed class BenchmarkSessionContractTests
     [Test]
     public async Task FailedInitialLoadRetainsOriginalAcknowledgementsAndCannotReinitializeItsDatabase()
     {
-        await using var target = new SessionRegressionTarget { DiscardWrites = true };
+        await using var target = new SessionChecksTarget { DiscardWrites = true };
         var session = Open(target);
         var token = TestContext.Current!.Execution.CancellationToken;
         var failed = await session.LoadAsync(token);
@@ -132,7 +132,7 @@ internal sealed class BenchmarkSessionContractTests
     [Test]
     public async Task ProductionSessionRejectsNoncanonicalConcurrencyBeforeNativeInitialization()
     {
-        await using var target = new SessionRegressionTarget();
+        await using var target = new SessionChecksTarget();
         await Assert.That(() => new BenchmarkSession(target, UnitBenchmarkOptions.Native(),
             new BenchmarkSessionOptions { Concurrency = 17 })).Throws<InvalidOperationException>();
         await Assert.That(target.Initializations).IsEqualTo(0);
@@ -142,7 +142,7 @@ internal sealed class BenchmarkSessionContractTests
     [Test]
     public async Task SynchronousNativeOperationsStillUseEveryConfiguredClientAndItsDisjointOrdinals()
     {
-        await using var target = new SessionQueryRegressionTarget { SynchronousOperations = true };
+        await using var target = new SessionQueryChecksTarget { SynchronousOperations = true };
         var session = Open(target, concurrency: 16);
         var token = TestContext.Current!.Execution.CancellationToken;
         var reports = new[]

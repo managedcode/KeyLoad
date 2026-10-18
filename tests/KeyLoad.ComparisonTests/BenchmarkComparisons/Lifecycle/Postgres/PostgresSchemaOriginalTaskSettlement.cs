@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 /// <summary>A threshold is reported only after the original native operation has settled.</summary>
 internal static class PostgresSchemaOriginalTaskSettlement
 {
-    private const string SettlementFailure = "PostgreSQL regression threshold and original native operation failed.";
+    private const string SettlementFailure = "PostgreSQL checks threshold and original native operation failed.";
 
     internal static Task JoinAsync(Task original, TimeSpan timeout, CancellationToken cancellationToken)
         => JoinCoreAsync(original, timeout, null, cancellationToken);

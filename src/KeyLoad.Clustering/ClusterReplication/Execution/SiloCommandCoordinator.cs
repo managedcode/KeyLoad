@@ -12,7 +12,7 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Owner.ApplyAsync(database.NormalizeOperation(new(id, kind, principalId, default, payloadJson)), cancellationToken);
+        return SubmitOperationAsync(database.NormalizeOperation(new(id, kind, principalId, default, payloadJson)), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -22,7 +22,7 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        return Owner.ApplyAsync(database.CreateNativeOperation(kind, id, principalId, default, payload), cancellationToken);
+        return SubmitOperationAsync(database.CreateNativeOperation(kind, id, principalId, default, payload), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -31,10 +31,18 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        return Owner.ApplyAsync(database.VerifyOperationAuthority(operation), cancellationToken);
+        return SubmitOperationAsync(database.VerifyOperationAuthority(operation), cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task ReadBarrierAsync(CancellationToken cancellationToken = default)
         => _ = await Owner.ReadCutAsync(cancellationToken).ConfigureAwait(false);
+
+    private Task<OperationResult> SubmitOperationAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return database.IsSiloLocalOperation(operation)
+            ? Task.FromResult(database.ApplyLocalStorageOperation(database.PrepareStorageOperation(operation, cancellationToken), cancellationToken))
+            : Owner.ApplyAsync(operation, cancellationToken);
+    }
 }

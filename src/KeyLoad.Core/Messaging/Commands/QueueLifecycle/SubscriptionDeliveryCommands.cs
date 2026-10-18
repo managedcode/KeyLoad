@@ -52,6 +52,6 @@ public sealed partial class DatabaseEngine
         state = AdvanceCheckpoint(tx, request.Subscription, state, budget);
         tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
         return new(request.CommandId, Token(tx, request.Subscription.Source.Partition, position),
-            [new(request.Action.ToString(), request.Subscription.Source.Resource, delivery.Position.ToString(System.Globalization.CultureInfo.InvariantCulture), delivery.LeaseVersion)], Durability);
+            [new(request.Action.ToString(), request.Subscription.Source.Resource, delivery.Position.ToString(System.Globalization.CultureInfo.InvariantCulture), delivery.LeaseVersion)], Durability, AcknowledgedPersistedCopies);
     }
 }

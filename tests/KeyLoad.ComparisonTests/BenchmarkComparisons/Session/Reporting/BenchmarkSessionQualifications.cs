@@ -33,7 +33,7 @@ internal static class BenchmarkSessionQualifications
             await InvokeAsync(Cancellation, selection.Target == "KeyLoad" && selection.NodeCount == 1,
                 () => ScaleServerCancellationProbe.VerifyAsync(application, containers, selection, root, evidence, token), steps, failures);
             await InvokeAsync(Correctness, CorrectnessTargets.Contains(selection.Target, StringComparer.Ordinal),
-                () => IsolatedNativeRegressions.VerifyAsync(application, selection, evidence, token), steps, failures);
+                () => IsolatedNativeCheckss.VerifyAsync(application, selection, evidence, token), steps, failures);
         }
         var status = nativeExit != 0 ? NotExecuted : unsupported ? NotApplicable : failures.Count == 0 ? Passed : Failed;
         var reason = nativeExit != 0 ? "NativeRunnerFailed" : unsupported ? "NativeTopologyUnavailable"

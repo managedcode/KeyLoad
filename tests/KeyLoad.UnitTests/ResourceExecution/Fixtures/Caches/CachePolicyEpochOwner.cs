@@ -11,7 +11,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class CachePolicyEpochOwner : IDisposable
 {
     private readonly List<NativeStorageOwnerSettlement> attempts = [];
-    private readonly Func<ZoneTreeStore, PhysicalShardRecord?, DatabaseEngine> createDatabase;
+    private readonly Func<ZoneTreeStore, DatabaseEngine> createDatabase;
     private ZoneTreeStore? store;
     private bool closeAttempted;
     private bool disposed;
@@ -67,16 +67,10 @@ internal sealed class CachePolicyEpochOwner : IDisposable
             }
         }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), attempt);
         OpeningCache = store.GetPointCacheDiagnostics();
-        PhysicalShardRecord? physical = null;
-        if (!first)
-        {
-            physical = store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)?.DefaultShard)
-                ?? throw new InvalidOperationException(P.UnknownOwner);
-        }
-        Database = createDatabase(store, physical);
+        Database = createDatabase(store);
         if (first)
         {
-            TestDatabaseEngineFactory.Bootstrap(Database, P.Root, P.RootSecret, true);
+            TestDatabaseEngineFactory.Bootstrap(Database, P.Root, P.RootSecret);
         }
     }
 

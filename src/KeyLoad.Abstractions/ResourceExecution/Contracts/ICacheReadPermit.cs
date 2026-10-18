@@ -1,7 +1,7 @@
 namespace KeyLoad;
 
 /// <summary>Checks disposable cache eligibility without granting database read authority.</summary>
-/// <remarks>Authorization, quorum barriers and committed-storage checks remain mandatory.</remarks>
+/// <remarks>Authorization, committed read barriers and committed-storage checks remain mandatory.</remarks>
 public interface ICacheReadPermit
 {
     /// <summary>Captures a positive local revision only while its receiver-owned lease is eligible.</summary>

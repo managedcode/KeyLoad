@@ -59,14 +59,13 @@ internal static class NativeTextIncrementalCheckpointEvidence
     {
         var original = await NativeTextIncrementalEvidenceFiles.ReadAsync<CommitProjectionBatchRequest>(
             runtime.EvidenceRoot, CommandFile(request.CommandId), token);
-        var before = runtime.Node.Log.State.LastIndex;
         var applied = runtime.Database.LastApplied;
         var position = runtime.Database.Store.Position;
         var replay = await runtime.CommitAsync<ProjectionBatchResult>(OperationKind.CommitProjectionBatch,
             original, original.CommandId, token);
         var retained = await NativeTextIncrementalEvidenceFiles.ReadAsync<ProjectionBatchResult>(
             runtime.EvidenceRoot, ReceiptFile(request.CommandId), token);
-        if (runtime.Node.Log.State.LastIndex != before || runtime.Database.LastApplied != applied
+        if (runtime.Database.LastApplied != applied
             || runtime.Database.Store.Position != position
             || !NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(retained))
             || (observed is not null && !NativeSerialization.Serialize(replay).AsSpan()

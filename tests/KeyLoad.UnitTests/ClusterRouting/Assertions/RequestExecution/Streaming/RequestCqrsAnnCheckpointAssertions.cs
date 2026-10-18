@@ -32,7 +32,7 @@ internal static class RequestCqrsAnnCheckpointAssertions
         await RequestCqrsAnnAssertions.EqualAsync(request.Consumer, intent.Consumer);
         await Assert.That(intent.Effects.Length).IsEqualTo(EmptyEffects);
         await RequestCqrsAnnAssertions.EqualAsync(expected, checkpoint);
-        await Assert.That(database.ReadJournalCut().CommittedIndex).IsEqualTo(finalPosition);
-        await Assert.That(database.ReadJournalCut().LastIndex).IsEqualTo(finalPosition);
+        await Assert.That(database.ReadCanonicalCut().AppliedPosition).IsEqualTo(finalPosition);
+        await Assert.That(database.ReadCanonicalCut().AppliedPosition).IsEqualTo(finalPosition);
     }
 }

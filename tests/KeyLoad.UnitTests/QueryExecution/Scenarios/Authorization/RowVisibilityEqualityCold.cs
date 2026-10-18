@@ -24,7 +24,7 @@ internal static class RowVisibilityEqualityCold
             {
                 var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
                     UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, db.Database.EvaluationClock);
-                var database = create(cold, null);
+                var database = create(cold);
                 var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);

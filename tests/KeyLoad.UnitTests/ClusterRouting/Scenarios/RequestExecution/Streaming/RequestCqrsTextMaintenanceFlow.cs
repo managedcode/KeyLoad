@@ -44,7 +44,7 @@ internal static class RequestCqrsTextMaintenanceFlow
         Exception? failure = null;
         var stream = NativeCqrsStreamLifetime.RunWithPurpose(
             execution => RequestCqrsTextProducer.Run(id, payload, fault, producer, fixture.RoutingOptions.Value.MaximumTotalFrames, execution),
-            fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, producer.MarkActivationSettled, fixture.RoutingOptions, null, purpose, token);
         try
         {

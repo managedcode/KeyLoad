@@ -8,7 +8,6 @@ namespace KeyLoad.CrashHost.Features.Search;
 
 internal sealed class NativeTextOnlineCrashRuntime : IAsyncDisposable
 {
-    private const int OriginalStorageOwnerIndex = 0;
     private readonly NativeTextIncrementalMaintenanceService explicitOwner;
     private readonly ITextProjection projection;
     internal NativeTextIncrementalCrashRuntime Canonical
@@ -33,8 +32,7 @@ internal sealed class NativeTextOnlineCrashRuntime : IAsyncDisposable
         Canonical = new(root, incarnation);
         try
         {
-            PhysicalRoot = Path.GetDirectoryName(ReplicaCrashNode.TargetStoreDirectories(root)[OriginalStorageOwnerIndex])
-                ?? throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+            PhysicalRoot = Canonical.PhysicalRoot;
             var opened = NativeTextHostSearch.Open(Canonical.Database, PhysicalRoot, Canonical.Options,
                 Canonical.Database.EvaluationClock, observer);
             Online = opened.Online;

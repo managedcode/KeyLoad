@@ -20,7 +20,7 @@ internal sealed class OpenSearchNativeVectorIndex(Uri endpoint, int nodeCount) :
     {
         owned = true;
         await OpenSearchIndex.CreateAsync(client, index, Dimensions, nodeCount - 1, token);
-        _ = await OpenSearchClusterEvidence.ObserveAsync(client, index, nodeCount, OpenSearchNativeVectorRegression.Topology(nodeCount), executionOptions, token);
+        _ = await OpenSearchClusterEvidence.ObserveAsync(client, index, nodeCount, OpenSearchNativeVectorChecks.Topology(nodeCount), executionOptions, token);
     }
 
     internal async Task WriteAsync(string id, object source, CancellationToken token)

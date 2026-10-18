@@ -33,7 +33,7 @@ Scope: recognizable shared icons for the public landing and operational console,
 - Production: only `site/Features/BenchmarkComparisons/index.html` head and
   `build-site.mjs`, plus console `Assets/index.html` head and
   `AdminDashboard/Transport/AdminStaticAssets.cs`.
-- Regressions: `SiteMetadata*` files under `tests/KeyLoad.SiteTests/BenchmarkComparisons/`,
+- Regressions: `SiteMetadata*` files under `tests/KeyLoad.SiteTests/`,
   `AdminFaviconAssertions` in `tests/KeyLoad.IntegrationTests/AdminDashboard/Assertions/`,
   and one invocation in `AdminShellAssertions`.
 

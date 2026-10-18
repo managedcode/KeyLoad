@@ -11,22 +11,23 @@ public sealed class DatabaseCommitGrain(SiloDatabaseClient storage, IClusterMemb
     {
         cancellationToken.ThrowIfCancellationRequested();
         var owners = Owners();
-        await RequireMatchingCutsAsync(owners, cancellationToken).ConfigureAwait(true);
+        var cut = await RequireMatchingCutsAsync(owners, cancellationToken).ConfigureAwait(true);
+        var sequence = checked(cut.Position + StorageCopyContract.NextSequence);
         var prepared = await storage.On(owners[StorageCopyContract.FirstOwner]).PrepareAsync(operation, cancellationToken).ConfigureAwait(true);
         try
         {
-            OperationResult? result = null;
+            StorageOperationResult? original = null;
             foreach (var owner in owners)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var applied = await storage.On(owner).ApplyAsync(prepared, cancellationToken).ConfigureAwait(true);
-                result ??= applied;
-                if (applied.Error != result.Error || applied.Json != result.Json)
+                var applied = await storage.On(owner).ApplyAsync(prepared, sequence, cancellationToken).ConfigureAwait(true);
+                original ??= applied;
+                if (applied.Sequence != original.Sequence || !StorageCopyAcknowledgements.Same(applied.Result, original.Result))
                 {
                     throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.DifferentOutcomes);
                 }
             }
-            return result!;
+            return StorageCopyAcknowledgements.Attach(original!.Result, owners.Length);
         }
         catch (Exception error) when (error is OperationCanceledException or OrleansException or TimeoutException)
         {

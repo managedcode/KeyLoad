@@ -44,13 +44,11 @@ internal static class RequestCqrsAnnTestData
         var command = new CommandRequest(id, database.Partition,
             [new PutDocument(Collection, First, FirstJson), new PutVector(Collection, First, Field, [1, 0, 0], Space, OriginalRevision),
              new PutDocument(Collection, Second, FirstJson), new PutVector(Collection, Second, Field, [0, 1, 0], Space, OriginalRevision)]);
-        var journal = database.ReadJournalCut();
+        var journal = database.ReadCanonicalCut();
         var receipt = await RequestCqrsHostedMaintenanceData.ExecuteAsync<CommitReceipt>(database, OperationKind.Batch, command, id, token);
-        await RequestCqrsAnnAssertions.SeedReceiptAsync(database, command, receipt, journal.LastIndex + OneStep);
-        var placement = database.Database.ReadAtomicPartitionPlacement(Principal, database.Partition);
+        await RequestCqrsAnnAssertions.SeedReceiptAsync(database, command, receipt, journal.AppliedPosition + OneStep);
         return new(Guid.NewGuid(), new(database.Partition, Consumer), Collection, Field, Space, Generation,
-            database.Store.Identity.NodeId, new(placement.PhysicalShardId, placement.Incarnation,
-                placement.VoterIds, placement.PlacementEpoch), AnnMaintenanceMode.Build)
+            database.Store.Identity.NodeId, new(database.Store.Identity.NodeId, database.Store.Identity.Incarnation), AnnMaintenanceMode.Build)
         {
             MaintenanceProfile = new(Collection, Field, Space)
         };
@@ -63,13 +61,13 @@ internal static class RequestCqrsAnnTestData
             [new PutDocument(Collection, First, ChangedJson, OriginalRevision, ExplicitReplacement: true),
              new PutVector(Collection, First, Field, [0, 0, 1], Space, ChangedRevision),
              new DeleteDocument(Collection, Second, OriginalRevision)]);
-        var journal = fixture.Database.ReadJournalCut();
+        var journal = fixture.Database.ReadCanonicalCut();
         var receipt = await RequestCqrsHostedMaintenanceData.ExecuteAsync<CommitReceipt>(fixture.Database,
             OperationKind.Batch, command, id, token);
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         MutationReceipt[] expected = [new(PutDocumentKind, Collection, First, ChangedRevision),
             new(PutVectorKind, Collection, First, ChangedRevision), new(DeleteDocumentKind, Collection, Second, ChangedRevision)];
-        await RequestCqrsAnnAssertions.ReceiptAsync(fixture.Database, command, receipt, journal.LastIndex + OneStep, expected);
+        await RequestCqrsAnnAssertions.ReceiptAsync(fixture.Database, command, receipt, journal.AppliedPosition + OneStep, expected);
     }
 
     internal static ImmutableArray<VectorRecord> Records(bool changed) => changed

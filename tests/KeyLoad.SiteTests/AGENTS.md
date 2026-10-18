@@ -2,11 +2,11 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the independently buildable static website qualification suite. Entry: KeyLoad.SiteTests.csproj; canonical slice: BenchmarkComparisons/. Read root/site policy, BenchmarkComparisons design/acceptance/execution contracts and ADR-040 before implementation.
+- Owns the independently buildable static website qualification suite. Entry: KeyLoad.SiteTests.csproj; implementation uses populated role folders directly under this project. Read root/site policy, BenchmarkComparisons design/acceptance/execution contracts and ADR-040 before implementation.
 - TUnit/Microsoft.Testing.Platform, net10.0, centrally pinned packages and all central analyzers are mandatory. No Core/AppHost dependency, alternate runner, mocks/fakes/stubs or browser automation package.
 - Exercise actual production JavaScript through a bounded real Node child process and authentic successful GitHub report files. C# owns independent assertions/oracles. Controlled corrupt inputs are test data and must never be published as measurements.
 - Tests preserve existing median/repetition/failure/unsupported/order intentions and cover validators, confined paths, raw hashes, clean builds and complete emitted assets. Visual/device/lifecycle exceptions require real browser evidence as specified in ADR-040; do not manufacture device-loss or coverage proof.
-- Worker ownership is only BenchmarkComparisons test files. Root owns this policy, project, solution, workflow, shared contracts and governance inventory.
+- Worker ownership is the website qualification implementation in these role folders. Root owns this policy, project, solution, workflow, shared contracts and governance inventory.
 
 ## Boundaries and protected risks
 

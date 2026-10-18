@@ -40,6 +40,6 @@ internal static class IsolatedNativeDataCleanup
 
     private static async Task DockerAsync(string[] arguments)
     {
-        _ = await IsolatedKeyLoadFaultRegressionDocker.RunAsync(arguments, CancellationToken.None);
+        _ = await IsolatedKeyLoadFaultChecksDocker.RunAsync(arguments, CancellationToken.None);
     }
 }

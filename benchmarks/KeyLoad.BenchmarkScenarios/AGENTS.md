@@ -3,14 +3,14 @@
 ## Purpose, entry points and ownership
 
 - Owns the public embedded microbenchmark fixture library required by BenchmarkDotNet's external generated runner.
-- Project entry: KeyLoad.BenchmarkScenarios.csproj; scenario entry: BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs.
+- Project entry: KeyLoad.BenchmarkScenarios.csproj; scenario entry: Benchmarks/EmbeddedBenchmarks.cs.
 - Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons REQ-BC-022, ADR-047 and embedded-benchmark acceptance/plan before implementation.
 - All scenario/fixture/seeding/lifetime behavior belongs to BenchmarkComparisons and docs/Features/BenchmarkComparisons.md.
 - The fixture remains public and unsealed with public Benchmark/GlobalSetup/GlobalCleanup methods because the actual generated external consumer inherits it. Document its public contract with XML; never suppress CA1515 or spoof output/test metadata.
 - KeyLoad.Benchmarks owns the executable and typed BenchmarkSwitcher application; this library owns no CLI, comparative corpus/report/site, database implementation, cluster orchestration or qualification claim.
 - Preserve the three original timed operations, inputs, real engine/store and MemoryDiagnoser. No fake storage, in-process toolchain substitution, optional fallback, payload duplication or local load evidence.
 - Keep acquired storage/directory ownership explicit, IDisposable correct and cleanup complete after partial setup; TimeProvider.System preserves real command time.
-- Applicable skills: none installed; do not install skills/tools or change global configuration.
+- Apply the installed Orleans and Aspire skills when their runtime or composition boundaries are involved.
 - All file/type/unit/depth400/200/64/3 limits apply; no partial-type loophole or analyzer severity/threshold weakening.
 - Preserve unrelated shared-checkout source. No local tests/recovery/runtime probes/load benchmarks, secrets, ignored failures, skipped suites or invented resource/performance numbers.
 - Dry/generated-runner qualification establishes execution only; never report cluster, power-loss, matched performance, coverage, endurance or production readiness from it.

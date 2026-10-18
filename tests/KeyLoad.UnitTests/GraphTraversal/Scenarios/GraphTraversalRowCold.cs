@@ -22,7 +22,7 @@ internal static class GraphTraversalRowCold
             {
                 var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
                     UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, db.Database.EvaluationClock);
-                var engine = create(cold, null);
+                var engine = create(cold);
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);

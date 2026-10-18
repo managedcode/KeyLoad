@@ -20,7 +20,7 @@ internal static class NativeAnnCrashScenario
         var failures = new List<Exception>();
         try
         {
-            using var commands = new NativeAnnCrashCommandOwner(directory, database);
+            var commands = new NativeAnnCrashCommandOwner(database);
             var actual = commands;
             await ServerFailureObserver.ObserveAsync(() => RunCoreAsync(directory, database, boundary, mode, actual), failures);
         }

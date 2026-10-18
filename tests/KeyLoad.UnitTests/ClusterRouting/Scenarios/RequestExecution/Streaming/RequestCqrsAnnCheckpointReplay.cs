@@ -21,12 +21,12 @@ internal static class RequestCqrsAnnCheckpointReplay
             OperationKind.CommitProjectionBatch, original.CommandId, NativeSerialization.Serialize(original));
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
-        var connection = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
-        using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+        var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
+        using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             id, original.CommandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainAsync(
             execution => connection.ExecuteStreamAsync(signed, execution),
-            fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, fixture.RoutingOptions, token);
         await Assert.That(reply.Error).IsNull();
         var replay = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as ProjectionBatchResult

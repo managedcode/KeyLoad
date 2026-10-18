@@ -42,7 +42,7 @@ public sealed partial class DatabaseEngine
             return new(existing.Receipt, true, existing.Receipt.Token);
         }
         var effects = ApplyMutations(transaction, principal, request.Target.Partition, request.Effects, now, position);
-        var receipt = new CommitReceipt(request.CommandId, Token(transaction, request.Target.Partition, position), effects, Durability);
+        var receipt = new CommitReceipt(request.CommandId, Token(transaction, request.Target.Partition, position), effects, Durability, AcknowledgedPersistedCopies);
         var record = NativeSerialization.Serialize(new TargetInboxRecord(identity, fingerprint, receipt));
         var bytes = checked(key.LongLength + record.LongLength);
         var capacity = TargetInboxStorage.Add(currentCapacity,

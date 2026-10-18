@@ -1,0 +1,68 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
+
+namespace KeyLoad.Analyzers.Features.CodeQuality;
+
+/// <summary>Requires synchronous native engine access while preserving asynchronous Orleans and transport calls.</summary>
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
+public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
+{
+    /// <summary>Stable compiler and SARIF diagnostic identifier.</summary>
+    public const string DiagnosticId = ZoneTreeAccessPolicy.DiagnosticId;
+    private static readonly DiagnosticDescriptor Rule = new(DiagnosticId, ZoneTreeAccessPolicy.Title,
+        ZoneTreeAccessPolicy.Message, CodeQualityDiagnosticCategories.Architecture, DiagnosticSeverity.Error,
+        isEnabledByDefault: true, description: ZoneTreeAccessPolicy.Description);
+
+    /// <inheritdoc/>
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
+
+    /// <inheritdoc/>
+    public override void Initialize(AnalysisContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
+        context.EnableConcurrentExecution();
+        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
+        context.RegisterOperationAction(AnalyzeProperty, OperationKind.PropertyReference);
+        context.RegisterOperationAction(AnalyzeUsing, OperationKind.Using, OperationKind.UsingDeclaration);
+    }
+
+    private static void AnalyzeInvocation(OperationAnalysisContext context)
+    {
+        var invocation = (IInvocationOperation)context.Operation;
+        var method = invocation.TargetMethod;
+        if (ZoneTreeAccessPolicy.Native(method) && ZoneTreeAccessPolicy.Asynchronous(method) ||
+            ZoneTreeAccessPolicy.Dispatch(method) && ZoneTreeDispatchAnalysis.ContainsNativeAccess(invocation, context,
+                new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default)))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.Syntax.GetLocation(), method.ToDisplayString()));
+        }
+    }
+
+    private static void AnalyzeProperty(OperationAnalysisContext context)
+    {
+        var reference = (IPropertyReferenceOperation)context.Operation;
+        if (ZoneTreeAccessPolicy.Native(reference.Property) && ZoneTreeAccessPolicy.Awaitable(reference.Property.Type))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rule, reference.Syntax.GetLocation(), reference.Property.ToDisplayString()));
+        }
+    }
+
+    private static void AnalyzeUsing(OperationAnalysisContext context)
+    {
+        var resource = context.Operation switch
+        {
+            IUsingOperation { IsAsynchronous: true } operation => operation.Resources,
+            IUsingDeclarationOperation { IsAsynchronous: true } declaration => declaration.DeclarationGroup,
+            _ => null
+        };
+        if (resource is not null && ZoneTreeDispatchAnalysis.NativeResource(resource))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rule, resource.Syntax.GetLocation(), nameof(IAsyncDisposable.DisposeAsync)));
+        }
+    }
+}

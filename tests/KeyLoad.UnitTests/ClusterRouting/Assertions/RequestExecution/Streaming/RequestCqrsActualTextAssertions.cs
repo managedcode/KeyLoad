@@ -31,7 +31,7 @@ internal static class RequestCqrsActualTextAssertions
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var projection = new NativeTextSelectedProjection(RequestCqrsHostedMaintenanceData.Open(database),
-                runtime.Owner, runtime.Owner);
+                runtime, runtime);
             var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
             var selection = new TextIndexSelectionV1(request.Consumer, request.IndexGeneration);
             if (changed)

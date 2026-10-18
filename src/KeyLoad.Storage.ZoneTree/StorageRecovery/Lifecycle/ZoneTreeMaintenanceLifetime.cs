@@ -40,7 +40,7 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
             };
             Maintainer = created;
             using var flow = ExecutionContext.IsFlowSuppressed() ? default : ExecutionContext.SuppressFlow();
-            worker = Task.Run(() => SweepAsync(tree.Maintenance, swept), CancellationToken.None);
+            worker = SweepAsync(tree.Maintenance, swept);
         }
         catch (Exception original)
         {

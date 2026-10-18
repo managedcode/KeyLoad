@@ -60,7 +60,7 @@ internal static class GraphIncomingRowAuthorityCold
     {
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, database.Database.EvaluationClock);
-        return create(store, null);
+        return create(store);
     }
 
     private static async Task ReplayAsync(DatabaseEngine engine, ZoneTreeStore store,

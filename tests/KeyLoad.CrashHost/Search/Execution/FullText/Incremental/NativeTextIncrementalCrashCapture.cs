@@ -29,7 +29,7 @@ internal static class NativeTextIncrementalCrashCapture
             original.Request, completed.Receipt, CancellationToken.None);
         var result = new NativeTextIncrementalCrashResult(completed.State, replay, checkpoint,
             ukrainian, english, runtime.Database.LastApplied, inventory.Records, inventory.Postings,
-            NativeTextCanonicalStateCapture.Capture(runtime.Node.Canonical), runtime.Database.Store.Position,
+            NativeTextCanonicalStateCapture.Capture(runtime.Store), runtime.Database.Store.Position,
             await runtime.SelectedQueryAsync(original.Request, ukrainian.Revision == NativeTextIncrementalCrashProtocol.HealthyRevision
                 ? NativeTextIncrementalCrashQuery.HealthyTerm : NativeTextIncrementalCrashQuery.ChangedTerm),
             await runtime.SelectedQueryAsync(original.Request, NativeTextIncrementalCrashQuery.RemovedUkrainian),

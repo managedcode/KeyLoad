@@ -3,7 +3,7 @@ using KeyLoad.UnitTests.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Native cohort setup and independent receipt replay against the original journal owner.</summary>
+/// <summary>Production storage setup and independent persisted outcome replay.</summary>
 internal static class RequestCqrsHostedMaintenanceData
 {
     private const string ProjectionDirectory = "bilingual-native-text";
@@ -35,11 +35,9 @@ internal static class RequestCqrsHostedMaintenanceData
                 new(NativeTextMaintenanceTestValues.Generation, [NativeTextBilingualAudit.Collection],
                     [MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument,
                         MutationDiscriminatorNames.DeleteDocument])), configureId, cancellationToken);
-        var placement = database.Database.ReadAtomicPartitionPlacement(NativeTextMaintenanceTestValues.Principal,
-            database.Partition);
         return new(Guid.NewGuid(), consumer, NativeTextBilingualAudit.Collection, NativeTextMaintenanceTestValues.Field,
             NativeTextMaintenanceTestValues.Generation, database.Store.Identity.NodeId,
-            new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),
+            new(database.Store.Identity.NodeId, database.Store.Identity.Incarnation),
             TextIndexMaintenanceMode.Build);
     }
 

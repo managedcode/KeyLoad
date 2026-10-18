@@ -15,7 +15,7 @@ internal sealed class BenchmarkSessionProgressTests
     [Test]
     public async Task ActualLoadCallbacksRetainTerminalAttemptsAndAcknowledgementsWithoutWarmup()
     {
-        await using var target = new SessionRegressionTarget();
+        await using var target = new SessionChecksTarget();
         var progress = new ConcurrentQueue<DocumentComparisonProgress>();
         var session = Open(target, Records, progress.Enqueue);
         var report = await session.LoadAsync(TestContext.Current!.Execution.CancellationToken);
@@ -34,7 +34,7 @@ internal sealed class BenchmarkSessionProgressTests
     [Test]
     public async Task FinalOracleFailureDoesNotEraseTheActualSuccessfulAcknowledgementProgress()
     {
-        await using var target = new SessionRegressionTarget { DiscardWrites = true };
+        await using var target = new SessionChecksTarget { DiscardWrites = true };
         var progress = new ConcurrentQueue<DocumentComparisonProgress>();
         var session = Open(target, Records, progress.Enqueue);
         var report = await session.LoadAsync(TestContext.Current!.Execution.CancellationToken);
@@ -51,7 +51,7 @@ internal sealed class BenchmarkSessionProgressTests
     [Test]
     public async Task CallbackCancellationSettlesRealAttemptsAndPoisonsTheSessionWithoutReseeding()
     {
-        await using var target = new SessionRegressionTarget();
+        await using var target = new SessionChecksTarget();
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         var progress = new ConcurrentQueue<DocumentComparisonProgress>();
         var session = Open(target, CancellationRecords, value =>
@@ -79,7 +79,7 @@ internal sealed class BenchmarkSessionProgressTests
         await Assert.That(target.Opened).IsEqualTo(target.Closed);
     }
 
-    private static BenchmarkSession Open(SessionRegressionTarget target, int records, Action<DocumentComparisonProgress> progress)
+    private static BenchmarkSession Open(SessionChecksTarget target, int records, Action<DocumentComparisonProgress> progress)
         => new(target, UnitBenchmarkOptions.Native(), new BenchmarkSessionOptions
         {
             Records = records,

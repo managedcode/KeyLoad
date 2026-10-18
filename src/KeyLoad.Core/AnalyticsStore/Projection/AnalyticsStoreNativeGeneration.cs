@@ -4,7 +4,7 @@ using ZoneTree.Analytics;
 namespace KeyLoad.Core;
 
 /// <summary>One real engine over a host-owned empty derived generation; no canonical storage gate is retained.</summary>
-public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
+public sealed class AnalyticsStoreNativeGeneration : IDisposable
 {
     private const int StartedState = 1;
     private const int NotStartedState = 0;
@@ -24,13 +24,17 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
     private int started;
     private long tracked;
 
-    /// <summary>Captures validated options for a fresh host-owned generation; native acquisition starts only inside QueryAsync.</summary>
+    /// <summary>Captures validated options for a fresh host-owned generation; native acquisition starts only inside Query.</summary>
     /// <param name="snapshot">The original complete bounded authorized canonical inputs.</param>
     /// <param name="ownedEmptyDirectory">A fresh host-owned generation directory, never a caller-selected path.</param>
     public AnalyticsStoreNativeGeneration(AnalyticsAggregateSnapshot snapshot, string ownedEmptyDirectory)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         snapshot.Work.Check();
+        if (snapshot.Rows.IsDefault || snapshot.Rows.Length > snapshot.Limits.MaxScanRecords)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, AnalyticsStoreValidation.Budget);
+        }
         if (Directory.Exists(ownedEmptyDirectory) && Directory.EnumerateFileSystemEntries(ownedEmptyDirectory).Any())
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, OccupiedGeneration);
@@ -55,7 +59,7 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
     /// <summary>Builds and queries this one generation using the unchanged original request and cancellation.</summary>
     /// <param name="cancellationToken">Original operation/owner cancellation, not a new independent deadline.</param>
     /// <returns>Complete finite native aggregate rows.</returns>
-    public async Task<AnalyticsAggregateResult> QueryAsync(CancellationToken cancellationToken)
+    public AnalyticsAggregateResult Query(CancellationToken cancellationToken)
     {
         if (Interlocked.Exchange(ref started, StartedState) != NotStartedState)
         {
@@ -66,7 +70,7 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, snapshot.Work.Cancellation, deadline.Token);
         try
         {
-            return await QueryOwnedAsync(linked.Token).ConfigureAwait(false);
+            return QueryOwned(linked.Token);
         }
         catch (AnalyticsQueryException error) when (AnalyticsStoreNativeGroupLimit.Exceeded(snapshot))
         {
@@ -79,7 +83,7 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
         }
     }
 
-    private async Task<AnalyticsAggregateResult> QueryOwnedAsync(CancellationToken token)
+    private AnalyticsAggregateResult QueryOwned(CancellationToken token)
     {
         snapshot.Work.Check();
         token.ThrowIfCancellationRequested();
@@ -88,7 +92,8 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
         foreach (var row in snapshot.Rows)
         {
             snapshot.Work.Check();
-            if (!await current.TrackAsync(AnalyticsStoreNativeMapping.Event(snapshot, dimensions, row), token).ConfigureAwait(false))
+            token.ThrowIfCancellationRequested();
+            if (!current.Track(AnalyticsStoreNativeMapping.Event(snapshot, dimensions, row)))
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, IncompleteProjection);
             }
@@ -96,10 +101,10 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
             tracked = checked(tracked + TrackedEventStep);
             failures.RequireHealthy();
         }
-        await current.FlushAsync(token).ConfigureAwait(false);
+        current.Flush(token);
         failures.RequireHealthy();
         snapshot.Work.Check();
-        var result = await current.QueryAsync(AnalyticsStoreNativeMapping.Query(snapshot), token).ConfigureAwait(false);
+        var result = current.Query(AnalyticsStoreNativeMapping.Query(snapshot), token);
         failures.RequireHealthy();
         snapshot.Work.Check();
         var statistics = current.GetStatistics(false);
@@ -116,9 +121,8 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
         return AnalyticsStoreNativeResult.Create(snapshot, dimensions, result);
     }
 
-    /// <summary>Awaits the actual native close; failures retain an unjoined generation for its physical owner.</summary>
-    /// <returns>Completion after the native engine joins and releases its locks.</returns>
-    public async ValueTask DisposeAsync()
+    /// <summary>Joins the actual native close; failures retain an unjoined generation for its physical owner.</summary>
+    public void Dispose()
     {
         if (!acquisitionAttempted)
         {
@@ -126,7 +130,7 @@ public sealed class AnalyticsStoreNativeGeneration : IAsyncDisposable
             return;
         }
         var current = engine ?? throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteAcquisition);
-        await current.DisposeAsync().ConfigureAwait(false);
+        current.Dispose();
         HasJoinedEngine = true;
     }
 }

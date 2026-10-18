@@ -7,10 +7,10 @@ internal sealed class BenchmarkTopologyTargetTests
 {
     private const string ApiKey = "topology-test-key";
     private const string RunId = "topology-contract-test";
-    private const string ClusterTopology = "3 voters, CLUSTER, one physical shard; all processes on one host";
-    private const string QuorumBarrier = "strong quorum barrier";
+    private const string ClusterTopology = "3 Orleans silos, 3 data copies; independent ZoneTree storage on one host";
+    private const string DatabaseReadCut = "authorized database read cut through Orleans";
     private const string BenchmarkAcknowledgement = "benchmark";
-    private const string QualifiedProcessKill = "process-kill qualified";
+    private const string OpenQualification = "qualification pending";
     private const string ExpectedNodesParameter = "expectedNodes";
 
     [Test]
@@ -19,23 +19,22 @@ internal sealed class BenchmarkTopologyTargetTests
         using var http = new HttpClient();
         await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation());
         await Assert.That(target.Profile.Topology).IsEqualTo(ClusterTopology);
-        await Assert.That(target.Profile.ReadContract).Contains(QuorumBarrier);
+        await Assert.That(target.Profile.ReadContract).Contains(DatabaseReadCut);
         await Assert.That(target.Profile.Cluster).IsNull();
     }
 
     [Test]
-    [Arguments(1, "RF1", "quorum 1 of 1", "no replica fault tolerance")]
-    public async Task AcIso004BenchmarkTargetDeclaresActualQuorumAndNoFaultAvailability(int nodes,
-        string replication, string quorum, string availability)
+    [Arguments(1, "1 Orleans silo", "1 data copy")]
+    public async Task AcIso004BenchmarkTargetDeclaresRequiredCopiesWithoutInventingObservedAvailability(int nodes,
+        string silos, string copies)
     {
         using var http = new HttpClient();
         await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
-        await Assert.That(target.Profile.Topology).Contains(replication);
-        await Assert.That(target.Profile.Topology).Contains(quorum);
-        await Assert.That(target.Profile.Topology).Contains(availability);
-        await Assert.That(target.Profile.ReadContract).Contains(QuorumBarrier);
+        await Assert.That(target.Profile.Topology).Contains(silos);
+        await Assert.That(target.Profile.Topology).Contains(copies);
+        await Assert.That(target.Profile.ReadContract).Contains(DatabaseReadCut);
         await Assert.That(target.Profile.WriteAcknowledgement).Contains(BenchmarkAcknowledgement);
-        await Assert.That(target.Profile.WriteAcknowledgement).DoesNotContain(QualifiedProcessKill);
+        await Assert.That(target.Profile.WriteAcknowledgement).Contains(OpenQualification);
         await Assert.That(target.Profile.Cluster).IsNull();
     }
 

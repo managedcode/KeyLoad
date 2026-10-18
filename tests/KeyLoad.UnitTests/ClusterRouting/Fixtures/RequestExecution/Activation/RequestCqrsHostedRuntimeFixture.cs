@@ -1,6 +1,8 @@
+using System.Net;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.ClusterReplication;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.Server;
+using KeyLoad.Server.Features.Search;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.TestingHost;
@@ -8,76 +10,122 @@ using TUnit.Core.Interfaces;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
+/// <summary>Runs the production server composition with native Orleans membership and silo-local storage.</summary>
 internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyncDisposable
 {
-    private static readonly TimeSpan StartupPoll = TimeSpan.FromMilliseconds(250);
+    private const string DirectoryPrefix = "keyload-cqrs-host-";
+    private const string GuidFormat = "N";
+    private const string NotInitialized = "The production CQRS host is not initialized.";
+    private const string Unjoined = "The production CQRS host has not joined its storage borrowers.";
+    private const int OnePort = 1;
+    private readonly Lock lifecycle = new();
     private readonly RequestCqrsHostedProfile profile;
-    private readonly RequestCqrsCohortRuntimeFixture runtime;
+    private readonly TestClusterPortAllocator ports = new();
+    private readonly string directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private WebApplication? application;
+    private OrleansNode? node;
+    private Task? disposal;
+
     internal RequestCqrsHostedRuntimeFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
         IGrainRequestPhaseObserver? observer = null, IGrainRequestPurposeObserver? purposeObserver = null,
         bool nativeTextMaintenance = false, bool nativeAnnMaintenance = false, DatabaseLimits? limits = null)
     {
         profile = new(clock ?? TimeProvider.System, UnitRoutingOptions.Routing(routing), observer, purposeObserver,
             nativeTextMaintenance, nativeAnnMaintenance, limits);
-        runtime = new(hosted: profile);
     }
-    internal TestCluster Cluster => runtime.Cluster;
+
+    internal IGrainFactory Grains => Services.GetRequiredService<IGrainFactory>();
     internal Guid ConnectionId => Services.GetRequiredService<NativeConnectionOwnerIdentity>().Id;
     internal NativeRuntimeTestOptions Timing => profile.Timing;
     internal TimeProvider Clock => profile.Clock;
     internal IOptions<GrainRoutingOptions> RoutingOptions => profile.Routing;
-    internal IServiceProvider Services => profile.LocalServices;
-    private RequestCqrsHostedNodeResources Local => runtime.Node(RequestCqrsCohortScenario.LocalVoter).Hosted
-        ?? throw new InvalidOperationException(RequestCqrsHostedProtocol.LocalOwnerAbsent);
-    internal GrainRequestCodec Codec => Local.Codec;
-    internal NativeRequestWorkOwner RequestWork => Local.Work;
-    internal NativeTextMaintenanceTestRuntime? NativeMaintenance => Local.Text;
-    internal NativeAnnMaintenanceTestRuntime? NativeAnnMaintenance => Local.Ann;
+    internal IServiceProvider Services => application?.Services ?? throw new InvalidOperationException(NotInitialized);
+    private PartitionHost Local => Services.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+    internal GrainRequestCodec Codec => Services.GetRequiredService<GrainRequestCodec>();
+    internal NativeRequestWorkOwner RequestWork => (node ?? throw new InvalidOperationException(NotInitialized)).RequestWork;
+    internal NativeTextIncrementalMaintenanceService? NativeMaintenance => profile.NativeText ? Local.TextMaintenance : null;
+    internal NativeAnnMaintenanceService? NativeAnnMaintenance => profile.NativeAnn ? Local.AnnMaintenance : null;
     internal RequestCqrsHostedDatabase Database { get; private set; } = null!;
 
     public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
+
     internal async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        using var deadline = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.StartupBound, TimeProvider.System);
+        using var deadline = new CancellationTokenSource(Timing.StartupTimeout, TimeProvider.System);
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         try
         {
-            await runtime.InitializeAsync(startup.Token).ConfigureAwait(false);
-            _ = await ReplicaBarrierDeadlineFlow.LeaderAsync(runtime, startup.Token).ConfigureAwait(false);
-            await WaitForLocalBarrierAsync(startup.Token).ConfigureAwait(false);
-            Database = new(Local, runtime.Node(RequestCqrsCohortScenario.LocalVoter).Journal);
+            var (siloPort, _) = ports.AllocateConsecutivePortPairs(OnePort);
+            application = await ServerConfiguration.BuildAsync(profile.Arguments(directory, siloPort),
+                localhostClustering: new(new IPEndPoint(IPAddress.Loopback, siloPort)),
+                phaseObserver: profile.Observer, purposeObserver: profile.PurposeObserver,
+                configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
+            node = Services.GetRequiredService<OrleansNode>();
+            await application.StartAsync(startup.Token).ConfigureAwait(false);
+            await node.StartAsync(startup.Token).ConfigureAwait(false);
+            await Local.Coordinator.ReadBarrierAsync(startup.Token).ConfigureAwait(false);
+            Database = new(Local);
         }
         catch (Exception original)
         {
-            try
-            {
-                await DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception cleanup)
-            {
-                throw new AggregateException(original, cleanup);
-            }
+            var failures = new List<Exception> { original };
+            await ServerFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
     }
 
-    private async Task WaitForLocalBarrierAsync(CancellationToken token)
+    public ValueTask DisposeAsync()
     {
-        while (true)
+        lock (lifecycle)
         {
-            token.ThrowIfCancellationRequested();
-            try
-            {
-                await Local.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-                return;
-            }
-            catch (KeyLoadException error) when (error.Code == ErrorCode.OwnershipLost
-                && error.Message == ReplicaProtocol.NoLeader)
-            {
-                await Task.Delay(StartupPoll, TimeProvider.System, token).ConfigureAwait(false);
-            }
+            return new(disposal ??= DisposeCoreAsync());
         }
     }
 
-    public ValueTask DisposeAsync() => runtime.DisposeAsync();
+    private async Task DisposeCoreAsync()
+    {
+        var failures = new List<Exception>();
+        if (application is not null)
+        {
+            await CloseApplicationAsync(application, failures).ConfigureAwait(false);
+        }
+        if (failures.Count == 0)
+        {
+            ServerFailureObserver.Observe(ports.Dispose, failures);
+            if (Directory.Exists(directory))
+            {
+                ServerFailureObserver.Observe(() => Directory.Delete(directory, recursive: true), failures);
+            }
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task CloseApplicationAsync(WebApplication app, List<Exception> failures)
+    {
+        using var deadline = new CancellationTokenSource(Timing.ShutdownTimeout, TimeProvider.System);
+        var connections = Services.GetRequiredService<ServerConnectionRegistry>();
+        await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(deadline.Token), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        if (node is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => node.StopAsync(deadline.Token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => node.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+            if (!node.HasJoinedRequestWork)
+            {
+                failures.Add(new InvalidOperationException(Unjoined));
+                return;
+            }
+        }
+        await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => Services.GetRequiredService<PartitionStorageLifecycle>()
+            .StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        var owner = Services.GetRequiredService<PartitionHostApplicationOwner>();
+        if (owner.Closing is not { IsCompleted: true } || !owner.CanReleaseRoot)
+        {
+            failures.Add(new InvalidOperationException(Unjoined));
+            return;
+        }
+        await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+    }
 }

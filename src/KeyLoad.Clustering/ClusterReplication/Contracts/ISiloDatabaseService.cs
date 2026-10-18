@@ -14,7 +14,7 @@ public interface ISiloDatabaseService : IGrainService
     /// <summary>Evaluates business time and deterministic command decisions at the selected store.</summary>
     Task<ReplicatedOperation> PrepareAsync(ReplicatedOperation operation, CancellationToken cancellationToken);
     /// <summary>Applies exactly the prepared operation through ZoneTree's atomic commit gate.</summary>
-    Task<OperationResult> ApplyAsync(ReplicatedOperation operation, CancellationToken cancellationToken);
+    Task<StorageOperationResult> ApplyAsync(ReplicatedOperation operation, long sequence, CancellationToken cancellationToken);
     /// <summary>Runs native CQRS execution on this store's local stateless-worker pool.</summary>
     IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
         string signedRequest, CancellationToken cancellationToken);

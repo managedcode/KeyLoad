@@ -23,8 +23,8 @@ contracts and persistence are `N/A` because the slice runs only at build time.
 
 Slice map:
 
-- Analyzer source: `analyzers/KeyLoad.Analyzers/CodeQuality/`
-- Analyzer tests: `tests/KeyLoad.Analyzers.Tests/CodeQuality/`
+- Analyzer source: `analyzers/KeyLoad.Analyzers/`
+- Analyzer tests: `tests/KeyLoad.Analyzers.Tests/`
 - Shared build policy: `Directory.Build.props`, `Directory.Build.targets`,
   `.editorconfig`, `KeyLoad.slnx`, `global.json`
 - Coverage and identity tooling: `scripts/Features/CodeQuality/`,
@@ -48,7 +48,7 @@ flowchart LR
 
 ## Requirements and acceptance
 
-Test names below exist under `tests/KeyLoad.Analyzers.Tests/CodeQuality/Cases/`
+Test names below exist under `tests/KeyLoad.Analyzers.Tests/Cases/`
 unless stated otherwise. A criterion with no automated case names its evidence.
 
 | Requirement | Acceptance (pass condition) | Verified by |

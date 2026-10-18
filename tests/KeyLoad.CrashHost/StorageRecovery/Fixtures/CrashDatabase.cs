@@ -7,14 +7,9 @@ namespace KeyLoad.CrashHost;
 
 internal static class CrashDatabase
 {
-    private const string ThirdCrashVoterId = "crash-c";
-
     internal static DatabaseEngine Create(ZoneTreeStore store, bool boundOutbox = false,
         string tenantId = CrashFixtureValues.System, DatabaseLimits? configuredLimits = null)
     {
-        const string CreateVoterIdsText = "crash-a";
-        const string CreateCreateVoterIdsText = "crash-b";
-
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), configuredLimits is null ? CrashExecutionOptions.DatabaseLimits(boundOutbox) : CrashExecutionOptions.DatabaseLimits(configuredLimits),
             CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
             CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
@@ -24,8 +19,6 @@ internal static class CrashDatabase
             ClusterAdministrator = true
         },
             DatabaseEngine.Credential(CrashFixtureValues.Principal, CrashFixtureValues.Principal, CrashFixtureValues.Credential));
-        RecoveryPhysicalShardBootstrap.Bootstrap(database, CrashFixtureValues.Principal,
-            [CreateVoterIdsText, CreateCreateVoterIdsText, ThirdCrashVoterId]);
         return database;
     }
 

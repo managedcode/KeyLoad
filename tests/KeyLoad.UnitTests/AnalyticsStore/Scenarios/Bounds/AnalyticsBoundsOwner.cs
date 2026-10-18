@@ -11,10 +11,9 @@ internal static class AnalyticsBoundsOwner
 {
     internal static DatabaseEngine ReadEngine(TestDatabase fixture, DatabaseLimits limits)
     {
-        var physical = fixture.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)!.DefaultShard);
         var factory = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(limits),
             UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, fixture.Database.EvaluationClock);
-        return factory(fixture.Store, physical);
+        return factory(fixture.Store);
     }
 
     internal static async Task SeedAsync(TestDatabase db, AnalyticsEventData[] events)
@@ -41,7 +40,7 @@ internal static class AnalyticsBoundsOwner
             db.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new CommandRequest(id, db.Partition,
                 [new UpsertAnalyticsEvents(store, [.. events], revisions)])), work);
         var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-            checked(db.ReadJournalCut().LastIndex + 1), 1),
+            checked(db.Database.LastApplied + 1), 1),
             [new(P.UpsertKind, store, events.OrderBy(row => row.Id, StringComparer.Ordinal).Last().Id, generation)], DurabilityProfile.ProcessDurable);
         var actual = db.SubmitIssued(operation).Get<CommitReceipt>();
         await O.EqualAsync(expected, actual);
