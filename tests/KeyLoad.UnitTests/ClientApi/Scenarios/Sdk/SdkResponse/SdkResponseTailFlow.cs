@@ -66,7 +66,7 @@ internal static class SdkResponseTailFlow
         var reference = new EntityRef(database.Partition, Collection, Document);
         var read = await healthy.GetAsync(reference, token);
         await Assert.That(read.IsSuccess).IsTrue();
-        var document = new DocumentReadResult(new(reference, CommittedRevision, SdkResponseAdmissionProtocol.Json, false, []));
+        var document = new DocumentReadResult(new(database.ExpectedReference(reference), CommittedRevision, SdkResponseAdmissionProtocol.Json, false, []));
         await Assert.That(JsonDefaults.Serialize(read.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(document))).IsTrue();
         await Assert.That(DocumentCommandOutcomeTestSupport.OutcomeBytes(database, Root, expected.CommandId).AsSpan()
             .SequenceEqual(outcome)).IsTrue();

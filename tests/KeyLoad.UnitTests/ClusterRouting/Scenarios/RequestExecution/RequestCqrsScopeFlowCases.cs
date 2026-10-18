@@ -47,6 +47,8 @@ internal static class RequestCqrsScopeFlowCases
         var commandId = Guid.NewGuid();
         var userSlot = RequestCqrsContextSlot.Capture(OrleansIdentityConstants.USER_CLAIMS);
         var stateSlot = RequestCqrsContextSlot.Capture(GrainRequestStreamProtocol.ContextKey);
+        var expectedState = new GrainRequestContextState(requestId, commandId, fixture.ConnectionId,
+            fixture.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress);
         try
         {
             var producerSawScope = false;
@@ -55,14 +57,14 @@ internal static class RequestCqrsScopeFlowCases
             {
                 var reply = await GrainRequestStreamConsumer.DrainAsync(
                     token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                        writer => CompleteWhileScopedAsync(writer, requestId, commandId, principal.Id,
-                            () => producerSawScope = true, fixture.ConnectionId), token),
+                        writer => CompleteWhileScopedAsync(writer, expectedState, principal.Id,
+                            () => producerSawScope = true), token),
                     fixture.Services.GetRequiredService<Serializer<
                         CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                     requestId, TimeProvider.System, fixture.RoutingOptions, CancellationToken.None);
                 await Assert.That(reply.Payload.IsEmpty).IsFalse();
                 await Assert.That(producerSawScope).IsTrue();
-                await AssertPublishedContextAsync(requestId, commandId, principal.Id, fixture.ConnectionId);
+                await AssertPublishedContextAsync(expectedState, principal.Id);
             }
 
             await userSlot.AssertOriginalAsync();
@@ -112,28 +114,28 @@ internal static class RequestCqrsScopeFlowCases
     }
 
     private static async ValueTask<Result<GrainOperationReply>> CompleteWhileScopedAsync(
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, Guid requestId, Guid commandId,
-        string subject, Action producerCompleted, Guid connectionId)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, GrainRequestContextState expectedState,
+        string subject, Action producerCompleted)
     {
-        await AssertPublishedContextAsync(requestId, commandId, subject, connectionId);
-        await writer.StartedAsync(new GrainRequestProgress(requestId));
+        await AssertPublishedContextAsync(expectedState, subject);
+        await writer.StartedAsync(new GrainRequestProgress(expectedState.RequestId));
         try
         {
-            await AssertPublishedContextAsync(requestId, commandId, subject, connectionId);
+            await AssertPublishedContextAsync(expectedState, subject);
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { 1 } });
         }
         finally
         {
-            await AssertPublishedContextAsync(requestId, commandId, subject, connectionId);
+            await AssertPublishedContextAsync(expectedState, subject);
             producerCompleted();
         }
     }
 
-    private static async Task AssertPublishedContextAsync(Guid requestId, Guid commandId, string subject, Guid connectionId)
+    private static async Task AssertPublishedContextAsync(GrainRequestContextState expectedState, string subject)
     {
         var principal = RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS) as ClaimsPrincipal;
         await Assert.That(principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value).IsEqualTo(subject);
         await Assert.That(RequestContext.Get(GrainRequestStreamProtocol.ContextKey))
-            .IsEqualTo(new GrainRequestContextState(requestId, commandId, connectionId));
+            .IsEqualTo(expectedState);
     }
 }

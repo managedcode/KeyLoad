@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using P = KeyLoad.UnitTests.Features.ClientApi.NativeCredentialStatusProtocol;
@@ -23,13 +24,9 @@ internal static class NativeCredentialStatusOutcome
         await Assert.That(operation.UserId!).IsEqualTo(principal.Id);
         var native = NativeSerialization.Deserialize<ConfigureApiKeyRequest>((operation).Value!.Input.Span);
         await Assert.That(native).IsEqualTo(new ConfigureApiKeyRequest(credential));
-        var fingerprint = JsonData.Fingerprint(new
-        {
-            Id = id,
-            Kind = OperationKind.ConfigureApiKey,
-            PrincipalId = principal.Id,
-            PayloadJson = payload
-        });
+        var fingerprint = DatabaseCommandFingerprint.Compute(id, OperationKind.ConfigureApiKey, principal.Id, payload);
+        await Assert.That(entry.Fingerprint).IsEqualTo(fingerprint);
+        await Assert.That(operation.Value!.Fingerprint).IsEqualTo(fingerprint);
         var result = denied ? Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, P.DeniedDetail))
             : Result<object>.Succeed(true);
         var expected = new StoredOutcome(fingerprint, database.Store.Identity.Incarnation, principal.PolicyEpoch, result, operation)

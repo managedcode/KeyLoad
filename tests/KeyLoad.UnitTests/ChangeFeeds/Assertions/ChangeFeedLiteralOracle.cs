@@ -17,8 +17,8 @@ internal static class ChangeFeedLiteralOracle
     {
         DocumentChange[] literal =
         [
-            Change(database.Partition, FirstId, FirstJson, FirstSequence, receipt, committedAt),
-            Change(database.Partition, SecondId, SecondJson, SecondSequence, receipt, committedAt)
+            Change(database, FirstId, FirstJson, FirstSequence, receipt, committedAt),
+            Change(database, SecondId, SecondJson, SecondSequence, receipt, committedAt)
         ];
         await Assert.That(JsonDefaults.Serialize(page.Changes).SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
         await Assert.That(page.ThroughSequence).IsEqualTo(SecondSequence);
@@ -37,10 +37,10 @@ internal static class ChangeFeedLiteralOracle
         await Assert.That(JsonDefaults.Serialize(originalApi.Changes).SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
     }
 
-    private static DocumentChange Change(PartitionRef partition, string id, string json, long sequence,
+    private static DocumentChange Change(TestDatabase database, string id, string json, long sequence,
         CommitReceipt receipt, DateTimeOffset committedAt)
     {
-        var reference = new EntityRef(partition, Collection, id);
+        var reference = database.ExpectedReference(new(database.Partition, Collection, id));
         return new(sequence, receipt.Token, committedAt, reference, FirstRevision, false, null,
             new(reference, FirstRevision, json, false, []));
     }

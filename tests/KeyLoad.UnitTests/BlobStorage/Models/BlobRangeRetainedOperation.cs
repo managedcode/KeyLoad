@@ -3,4 +3,5 @@ using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 
 internal sealed record BlobRangeRetainedOperation(OperationKind Kind, Guid CommandId,
-    string PayloadJson, Result<object> Original, Command<DatabaseCommand> Prepared);
+    string PayloadJson, Result<object> Original, Command<DatabaseCommand> Prepared,
+    CommitToken ExpectedToken, long PreviousStorePosition);

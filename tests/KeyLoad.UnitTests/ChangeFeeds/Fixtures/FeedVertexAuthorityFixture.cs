@@ -48,7 +48,7 @@ internal static class FeedVertexAuthorityFixture
         var key = historical ? global::KeyLoad.Core.KeySpace.Partition(OutboxSpace, database.Partition, 3L)
             : DocumentStorageKeys.RecordKey(new(database.Partition, Collection, "b"));
         var original = database.Store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingRow);
-        return new(command, receipt, time, query, feed.Cursor, live.Cursor, key, original, update, updateReceipt);
+        return new(database, command, receipt, time, query, feed.Cursor, live.Cursor, key, original, update, updateReceipt);
     }
 
     internal static void Damage(TestDatabase database, FeedVertexAuthorityState state, int? historicalFault = null)

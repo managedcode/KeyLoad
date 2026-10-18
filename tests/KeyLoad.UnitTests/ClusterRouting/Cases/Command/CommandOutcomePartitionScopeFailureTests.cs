@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -11,10 +12,15 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
     {
         using var database = new TestDatabase();
         database.Configure(CommandOutcomePartitionScopeTestData.Resource, ResourceKind.Collection);
+        database.Database.ConfigureRuntimeJournal(Options.Create(new RuntimeJournalOptions()));
         var commandId = Guid.NewGuid();
-        var malformed = database.Database.CreateCommand(OperationKind.ConfigureResource, commandId, "root", database.Database.EvaluationClock.GetUtcNow(), "{");
+        var malformedInput = new RuntimeJournalMutation(RuntimeJournalAction.BootstrapIdentity,
+            "outcome-invalid-bootstrap", Guid.Empty, 0, 0, null, ReadOnlyMemory<byte>.Empty, new(StringComparer.Ordinal), []);
+        var malformed = CommandOutcomePartitionScopeTestData.Operation(database, commandId, OperationKind.RuntimeJournal, malformedInput);
         var malformedResult = database.Database.Apply(malformed);
         var unknownKey = KeySpace.UnknownOutcome("root", commandId);
+        var originalFailure = database.Store.Read(view => view.ReadOwnedValue(unknownKey))
+            ?? throw new InvalidOperationException("The original unknown-scope failure is missing.");
 
         var first = CommandOutcomePartitionScopeTestData.Operation(database, commandId, OperationKind.Batch,
             new CommandRequest(commandId, database.Partition, [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, CommandOutcomePartitionScopeTestData.FirstDocument, CommandOutcomePartitionScopeTestData.FirstJson)]));
@@ -25,7 +31,9 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         var firstResult = database.Database.Apply(first);
         var secondResult = database.Database.Apply(second);
         var unknownReplay = database.Database.Apply(malformed);
-        var changedMalformed = database.Database.Apply(database.Database.CreateCommand(malformed.Value!.Kind, malformed.CommandId, malformed.UserId!, new DateTimeOffset(malformed.Timestamp), "["));
+        var beforeRefusal = database.Store.Position;
+        var changedMalformed = database.Database.Apply(CommandOutcomePartitionScopeTestData.Operation(database, commandId,
+            OperationKind.RuntimeJournal, malformedInput with { JournalName = "outcome-changed-bootstrap" }));
 
         await Assert.That(Errors.Code(malformedResult.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
@@ -33,6 +41,9 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         await Assert.That(Errors.Code(unknownReplay.Problem)).IsEqualTo(Errors.Code(malformedResult.Problem));
         await Assert.That(unknownReplay.Problem?.Detail).IsEqualTo(malformedResult.Problem?.Detail);
         await Assert.That(Errors.Code(changedMalformed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(database.Store.Position).IsEqualTo(beforeRefusal);
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(unknownKey)))
+            .IsEquivalentTo(originalFailure, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(unknownKey))?.ScopeKind)
             .IsEqualTo(CommandOutcomeScopeKind.Unknown);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(

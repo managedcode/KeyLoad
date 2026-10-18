@@ -48,7 +48,7 @@ internal static class TeamRowPolicyFlow
         await TeamRowPolicyAssertions.InvalidMembershipAsync(db, principal);
         var queries = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         await TeamRowPolicyAssertions.VisibleAsync(db, db.Database, queries, db.Store, OriginalRevision, OriginalJson, token);
-        await TeamGraphVisibilityAssertions.ReadAsync(db.Database, db.Store, db.Partition, true, token);
+        await TeamGraphVisibilityAssertions.ReadAsync(db, db.Database, db.Store, db.Partition, true, token);
         await TeamRowPolicyAssertions.ForgedAsync(db, principal, token);
         var original = Write(db, OriginalRevision, CurrentJson);
         var receipt = db.Submit(OperationKind.Batch, original, Reader, original.CommandId).Get<CommitReceipt>();
@@ -61,7 +61,7 @@ internal static class TeamRowPolicyFlow
             PolicyEpoch = RemovedEpoch
         });
         await TeamRowPolicyAssertions.HiddenAsync(db, db.Database, queries, db.Store, token);
-        await TeamGraphVisibilityAssertions.ReadAsync(db.Database, db.Store, db.Partition, false, token);
+        await TeamGraphVisibilityAssertions.ReadAsync(db, db.Database, db.Store, db.Partition, false, token);
         await TeamRowPolicyAssertions.OldRefusedAsync(db.Database, db.Store, original, outcome, ErrorCode.PermissionDenied, token);
         await ConfigureAsync(db, principal with
         {
@@ -75,7 +75,7 @@ internal static class TeamRowPolicyFlow
             PolicyEpoch = RepairedEpoch
         });
         await TeamRowPolicyAssertions.VisibleAsync(db, db.Database, queries, db.Store, CurrentRevision, CurrentJson, token);
-        await TeamGraphVisibilityAssertions.ReadAsync(db.Database, db.Store, db.Partition, true, token);
+        await TeamGraphVisibilityAssertions.ReadAsync(db, db.Database, db.Store, db.Partition, true, token);
         await TeamRowPolicyAssertions.OldRefusedAsync(db.Database, db.Store, original, outcome, ErrorCode.PermissionDenied, token);
         var current = Write(db, CurrentRevision, HealthyJson);
         var fresh = db.Submit(OperationKind.Batch, current, Reader, current.CommandId).Get<CommitReceipt>();

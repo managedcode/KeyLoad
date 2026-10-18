@@ -78,7 +78,7 @@ internal static class NativeRequestDrainLifecycleOperation
     {
         var reference = new EntityRef(state.Database.Partition, NativeRequestDrainLifecycleProtocol.Collection,
             NativeRequestDrainLifecycleProtocol.Document);
-        var expected = new DocumentResult(reference, 1L, "{\"value\":\"original\"}", false, []);
+        var expected = new DocumentResult(state.Database.ExpectedReference(reference), 1L, "{\"value\":\"original\"}", false, []);
         await EqualAsync(state.Database.Database.GetDocument(NativeRequestDrainLifecycleProtocol.Root, reference,
             minimumToken: state.Receipt.Token), expected);
         await Assert.That(QueueWholeFlowStorage.Bytes(state.Database.Store).SequenceEqual(state.Image, StringComparer.Ordinal)).IsTrue();
@@ -118,7 +118,7 @@ internal static class NativeRequestDrainLifecycleOperation
             await EqualAsync(receipt, expectedReceipt);
             await AppliedAsync(state, command.CommandId, before + 1L);
             await Assert.That(receipt.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();
-            var expected = new DocumentResult(new(state.Database.Partition, "native-request-drain", "original"),
+            var expected = new DocumentResult(state.Database.ExpectedReference(new(state.Database.Partition, "native-request-drain", "original")),
                 2L, "{\"value\":\"continued\"}", false, []);
             await EqualAsync(state.Database.Database.GetDocument(NativeRequestDrainLifecycleProtocol.Root, expected.Reference,
                 minimumToken: receipt.Token), expected);

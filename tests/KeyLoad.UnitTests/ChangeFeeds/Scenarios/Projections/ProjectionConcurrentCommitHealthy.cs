@@ -21,7 +21,7 @@ internal static class ProjectionConcurrentCommitHealthy
         var batch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(source.Consumer));
         var entry = new OutboxEntry(4L, 0, receipt.Token, source.Time, mutation,
             new MutationReceipt(PutKind, ProjectionConsumerIdentityFixture.Source, "c", 1L), null,
-            new DocumentRecord(new(source.Partition, ProjectionConsumerIdentityFixture.Source, "c"), 1L,
+            new DocumentRecord(source.Creation.ExpectedReference(new(source.Partition, ProjectionConsumerIdentityFixture.Source, "c")), 1L,
                 SourceJson, new RowAccess(), source.Time));
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(source.Consumer, source.Definition, 3L, false), [entry], 4L, batch.Token, false));
@@ -36,10 +36,10 @@ internal static class ProjectionConcurrentCommitHealthy
         await ProjectionConsumerIdentityAssertions.ExactAsync(result, new ProjectionBatchResult(result.Receipt, false, 4L));
         await ProjectionConsumerIdentityAssertions.ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(source.Partition, ProjectionConsumerIdentityFixture.Target, "healthy"), result.Receipt.Token, token),
-            new DocumentResult(new(source.Partition, ProjectionConsumerIdentityFixture.Target, "healthy"), 1L, EffectJson, false, []));
+            new DocumentResult(source.Creation.ExpectedReference(new(source.Partition, ProjectionConsumerIdentityFixture.Target, "healthy")), 1L, EffectJson, false, []));
         await ProjectionConsumerIdentityAssertions.ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(source.Partition, ProjectionConsumerIdentityFixture.Source, "c"), receipt.Token, token),
-            new DocumentResult(new(source.Partition, ProjectionConsumerIdentityFixture.Source, "c"), 1L, SourceJson, false, []));
+            new DocumentResult(source.Creation.ExpectedReference(new(source.Partition, ProjectionConsumerIdentityFixture.Source, "c")), 1L, SourceJson, false, []));
         await AdvanceAsync(owner, store, source, token);
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, command, produced, token);
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, effect, completed, token);

@@ -23,7 +23,7 @@ internal static class FeedDeleteClassificationFixture
         await FeedDeleteClassificationAssertions.HealthyAsync(database.Database, database.Store, state, null, token);
         var entry = NativeSerialization.Deserialize<OutboxEntry>(original) ?? throw new InvalidOperationException(MissingEntry);
         var after = entry.After ?? throw new InvalidOperationException(MissingEntry);
-        var reference = new EntityRef(source.Seed.Partition, FeedVertexAuthorityFixture.Collection, Id);
+        var reference = source.Creation.ExpectedReference(new(source.Seed.Partition, FeedVertexAuthorityFixture.Collection, Id));
         await ProjectionConsumerIdentityAssertions.ExactAsync(entry, new OutboxEntry(4L, 0, deleted.Token,
             source.CommittedAt, new DeleteDocument(reference.Collection, reference.Id, 2L),
             new MutationReceipt(DeleteKind, reference.Collection, reference.Id, 3L),

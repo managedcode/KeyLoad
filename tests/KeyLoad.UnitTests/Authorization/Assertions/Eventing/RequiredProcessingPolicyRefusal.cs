@@ -15,7 +15,7 @@ internal static class RequiredProcessingPolicyRefusal
             throw new InvalidOperationException("The complete required-processing image exceeded its bound.");
         }
         return page.Records.Where(row => !row.Key.Span.SequenceEqual(outcome) && !row.Key.Span.SequenceEqual(locator)
-            && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes))
+            && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes) && !row.Key.Span.SequenceEqual(KeySpace.AppliedBytes))
             .Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
     internal static async Task<byte[]> FreshAsync(RequiredProcessingPolicyFixture fixture, Command<DatabaseCommand> operation,
@@ -28,6 +28,7 @@ internal static class RequiredProcessingPolicyRefusal
         await Assert.That(store.Read(view => view.ReadOwnedValue(locator))).IsNull();
         var before = Image(store, outcome, locator);
         var position = store.Position;
+        var expectedApplied = checked(fixture.Harness.Database.LastApplied + 1L);
         var identity = NativeSerialization.Serialize(store.Identity);
         var clock = store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
         var failures = new List<Exception>();
@@ -35,6 +36,8 @@ internal static class RequiredProcessingPolicyRefusal
             await RequiredProcessingPolicyAssertions.FailureAsync(fixture.Harness.Database.ApplyEmbedded(operation, token), code, detail), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(Image(store, outcome, locator).SequenceEqual(before)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(position + 1L), failures);
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
+            .AsSpan().SequenceEqual(NativeSerialization.Serialize(expectedApplied))).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => view.ReadOwnedValue(locator))!
             .AsSpan().SequenceEqual(outcome)).IsTrue(), failures);

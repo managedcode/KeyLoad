@@ -37,7 +37,10 @@ internal static class NativeConnectionIdentityCollisionAssertions
         PrincipalRecord principal, CommandRequest command)
     {
         var actual = state.Scenario.Observation.Read(requestId);
-        var expected = new GrainRequestProbeIdentity(requestId, command.CommandId, principal.Id, null, OperationKind.Batch);
+        var expected = new GrainRequestProbeIdentity(requestId, command.CommandId, principal.Id, null, OperationKind.Batch)
+        {
+            OriginalExpiresAt = state.OriginalExpiries[requestId]
+        };
         await Assert.That(actual.Identity).IsEqualTo(expected);
         await Assert.That(actual.ActivationId.IsDefault).IsFalse();
     }

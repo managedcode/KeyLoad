@@ -97,6 +97,7 @@ public sealed partial class DatabaseEngine
         replayed = false;
         selection = CommandOutcomeKeyResolver.ForNew(operation.UserId!, operation.CommandId, partitionScope);
         persistOutcome = false;
+        var authorizationPending = false;
         long policyEpoch = AtomicCommandCommitInitialSequence;
         BlobOutcomeAuthority? blobAuthority = null;
         var onlineTextAuthority = CaptureOnlineTextOutcomeAuthority(operation);
@@ -106,16 +107,16 @@ public sealed partial class DatabaseEngine
         try
         {
             var principal = Principal(transaction, operation.UserId!, Clock.GetUtcNow());
+            authorizationPending = true;
             policyEpoch = principal.PolicyEpoch;
+            var placement = AuthorizeOperation(transaction, principal, operation);
+            authorizationPending = false;
             selection = CommandOutcomeKeyResolver.Select(transaction, operation.UserId!, operation.CommandId, partitionScope);
             persistOutcome = selection.Outcome is null;
-            var placement = AuthorizeOperation(transaction, principal, operation);
             if (selection.Outcome is { } previous)
             {
-                RequireStoredCanonicalSequence(transaction, previous, siloLocal);
-                result = ReplayCommand(transaction, operation, previous, selection);
                 replayed = true;
-                return previous;
+                return ReplayCommand(transaction, operation, previous, selection, siloLocal);
             }
             if (!siloLocal)
             {
@@ -133,6 +134,11 @@ public sealed partial class DatabaseEngine
         catch (KeyLoadException exception) when (exception.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
             or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
         {
+            if (authorizationPending)
+            {
+                persistOutcome = CommandOutcomeKeyResolver.IsUnstored(transaction, operation.UserId!, operation.CommandId,
+                    partitionScope);
+            }
             transaction.Reset();
             replayed = false;
             result = ManagedCode.Communication.Result<object>.Fail(Errors.Problem(exception.Code, exception.Message));
@@ -143,13 +149,9 @@ public sealed partial class DatabaseEngine
             replayed = false;
             result = ManagedCode.Communication.Result<object>.Fail(Errors.Problem(ErrorCode.Validation, InvalidCommandJsonMessage));
         }
-        var actualOutcome = BuildStoredOutcome(operation, fingerprint, policyEpoch, result, blobAuthority, compositionAuthority,
-            partitionScope, onlineTextAuthority, transferFailure) with
-        {
-            CanonicalSequence = selection.Outcome?.CanonicalSequence
-                ?? (persistOutcome ? replicationIndex : ReadCanonicalSequence(transaction))
-        };
-        return actualOutcome;
+        return BuildStoredOutcome(operation, fingerprint, policyEpoch, result, blobAuthority, compositionAuthority,
+            partitionScope, onlineTextAuthority, transferFailure,
+            selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : ReadCanonicalSequence(transaction)));
     }
 
     private BlobOutcomeAuthority? CaptureBlobOutcomeAuthority(IAtomicTransaction transaction,
@@ -162,21 +164,23 @@ public sealed partial class DatabaseEngine
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority,
         CommandOutcomePartitionScope partitionScope,
         global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? onlineTextAuthority,
-        global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure)
+        global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence)
         => new(fingerprint, Store.Identity.Incarnation, policyEpoch, result, operation)
         {
             BlobAuthority = Errors.Code(result.Problem) is null ? blobAuthority : null,
             CompositionAuthority = Errors.Code(result.Problem) is null ? compositionAuthority : null,
             ScopeKind = partitionScope.Kind,
             Partition = partitionScope.Partition,
+            CanonicalSequence = canonicalSequence,
             OnlineTextAuthority = onlineTextAuthority,
             RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null
         };
 
-    private Result<object> ReplayCommand(IAtomicTransaction transaction,
+    private StoredOutcome ReplayCommand(IAtomicTransaction transaction,
         Command<DatabaseCommand> operation, StoredOutcome previous,
-        CommandOutcomeSelection selection)
+        CommandOutcomeSelection selection, bool siloLocal)
     {
+        RequireStoredCanonicalSequence(transaction, previous, siloLocal);
         if (previous.Incarnation != Store.Identity.Incarnation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, PreviousCommandIncarnationMessage);
@@ -187,7 +191,7 @@ public sealed partial class DatabaseEngine
         var principal = Principal(transaction, operation.UserId!, current.Timestamp);
         AuthorizeOperation(transaction, principal, current);
         ValidateCachedResult(transaction, principal, current, previous);
-        return previous.Result;
+        return previous;
     }
 
     private static void ValidateCommandClock(AtomicPartitionRosterTransaction view, DateTimeOffset evaluatedAt)

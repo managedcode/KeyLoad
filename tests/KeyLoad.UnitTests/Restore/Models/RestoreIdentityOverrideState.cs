@@ -15,7 +15,7 @@ internal sealed record RestoreIdentityOverrideState(
     internal const string HealthyId = BackupIndexedDocumentDedupFixture.HealthyId;
     internal const string HealthyJson = BackupIndexedDocumentDedupFixture.HealthyJson;
     internal const string PutDocumentKind = "putDocument";
-    internal const string IdentityDetail = "Catalog restore requires a distinct new incarnation and signing identity.";
+    internal const string IdentityDetail = "Restore requires a distinct new incarnation and signing identity.";
     internal static readonly Guid SeedId = Guid.Parse("d83e5da8-e9c6-4af5-88fb-713348f597c3");
     internal static readonly Guid HealthyCommandId = Guid.Parse("afc29eb6-afd8-4f84-8caa-9930a15d3203");
 

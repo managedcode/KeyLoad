@@ -10,7 +10,7 @@ internal static class McpReplyProtocol
     internal const string FailureSummary = "The database operation failed.";
     internal const string NativeOutputExceeded = "The native MCP response exceeds its byte or structural budget.";
     private const string ForeignDocumentIncarnation = "The document session token belongs to another incarnation.";
-    private const string DocumentOutOfScope = "The document session token belongs to another atomic partition or placement.";
+    private const string DocumentOutOfScope = "The document session token belongs to another atomic partition.";
     private const string DocumentInvalidPosition = "The document session token position must be positive.";
     private const string DocumentFuturePosition = "The document session token is beyond the current committed storage cut.";
     private const string SelectedTextMismatch = "The native text projection does not match the authorized source cut.";

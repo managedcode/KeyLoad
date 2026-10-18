@@ -15,7 +15,7 @@ internal static class CliBackupRestore
 {
     private const int SourceArgumentIndex = 1;
     private const int DestinationArgumentIndex = 2;
-    private const string MessagesBaseName = "KeyLoad.Cli.Features.BackupRestore.CliBackupRestoreMessages";
+    private const string MessagesBaseName = "KeyLoad.Cli.Restore.CliBackupRestoreMessages";
     private const string BackupVerifiedMessageKey = "BackupVerified";
     private const string ArchiveCreatedMessageKey = "ArchiveCreated";
     private const string ArchiveTransferFailedMessageKey = "ArchiveTransferFailed";

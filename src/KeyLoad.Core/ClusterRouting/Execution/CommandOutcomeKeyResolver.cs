@@ -15,6 +15,18 @@ internal static class CommandOutcomeKeyResolver
         CommandOutcomePartitionScope scope)
         => new(KeyFor(principalId, commandId, scope), null);
 
+    internal static bool IsUnstored(IKeyValueView view, string principalId, Guid commandId,
+        CommandOutcomePartitionScope scope)
+    {
+        if (view.ReadOwnedValue(KeyFor(principalId, commandId, scope)) is not null)
+        {
+            return false;
+        }
+        return scope.Kind != CommandOutcomeScopeKind.Partition || scope.Partition is null
+            || view.ReadOwnedValue(CommandOutcomePartitionLocatorSerialization.ScopedKey(scope.Partition,
+                principalId, commandId)) is null;
+    }
+
     internal static CommandOutcomeSelection Select(IKeyValueView view, string principalId, Guid commandId,
         CommandOutcomePartitionScope expected, StorageReadObserver? observer = null)
     {
@@ -69,7 +81,8 @@ internal static class CommandOutcomeKeyResolver
     private static void ValidateScoped(IKeyValueView view, StoredOutcome outcome, CommandOutcomePartitionScope expected,
         string principalId, Guid commandId, StorageReadObserver? observer = null)
     {
-        if (!SameScope(outcome, expected))
+        if (!SameScope(outcome, expected) || outcome.PreparedCommand is not { } original
+            || original.CommandId != commandId || original.UserId != principalId)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidMetadataMessage);
         }

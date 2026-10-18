@@ -21,10 +21,12 @@ internal static class BlobWholeFlowAssertions
         await Exact(global, expected);
     }
 
-    internal static async Task Receipt(DatabaseEngine database, CommitReceipt receipt, Guid command, BlobRef blob)
+    internal static async Task Receipt(DatabaseEngine database, CommitReceipt receipt, Guid command, BlobRef blob,
+        CommitToken expectedToken, long previousStorePosition)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(command);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
+        await Assert.That(database.Store.Position).IsEqualTo(checked(previousStorePosition + 1L));
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(blob.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();

@@ -52,6 +52,14 @@ internal static class McpCanonicalTestData
     internal static ImmutableArray<McpDecodeCase> Commands() =>
     [
         Case(McpCatalogExpectations.DocumentsCommit, new CommandRequest(StableId, Partition, Effects()), CommandKey),
+        Case(KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All.Single(entry =>
+            entry.CommandKind == OperationKind.MaintainAnnIndex).Name, McpSearchRequestTestData.Ann(), CommandKey),
+        Case(KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All.Single(entry =>
+            entry.CommandKind == OperationKind.MaintainTextIndex).Name, McpSearchRequestTestData.Text(), CommandKey),
+        Case(QueueDispatchMcpCatalogAssertions.Tool, new QueueDispatchControlRequest(Tenant, Database,
+            Resource, Generation, true), null),
+        Case(McpCatalogExpectations.Entries.Single(entry => entry.CommandKind == OperationKind.DropTable).Name,
+            new DropTableRequest(Tenant, Database, Resource), null),
         Case("keyload_messages_receive_across_lanes", new MultiLaneReceiveRequest(StableId,
             [new ReceiveRequest(Guid.Parse("00000000-0000-0000-0000-000000000002"), Lane)]), ReceiveKey),
         Case(McpCatalogExpectations.MessagesReceive, new ReceiveRequest(StableId, Lane), ReceiveKey),
@@ -101,6 +109,11 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.QueryGraphPath,
             new SqlGraphPathRequest(ContractVersion, new QueryRequest(Partition, GraphPathSql, AllowFullScan: true))),
         Read(McpCatalogExpectations.SeriesRead, new ReadSamplesRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch)),
+        Read(McpCatalogExpectations.SeriesLatest, McpSeriesRequestTestData.Latest()),
+        Read(McpCatalogExpectations.SeriesAggregate, McpSeriesRequestTestData.Aggregate()),
+        Read(McpCatalogExpectations.SeriesWindows, McpSeriesRequestTestData.Windows()),
+        Read(McpSeriesCatalogExpectations.Entries.Single(entry =>
+            entry.ReadKind == KeyLoad.Clustering.GrainReadKind.SampleChunkWindow).Name, McpSeriesRequestTestData.Chunk()),
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
         Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, GraphSearchSql, AllowFullScan: true))),
         Read(McpCatalogExpectations.QueryPartitions, PartitionQuery()),
@@ -113,6 +126,9 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.OutboxStatus, new GetOutboxStatusRequest(Partition)),
         Read(McpCatalogExpectations.ProjectionsRead, new ReadProjectionBatchRequest(Consumer)),
         Read(WaitForIndexProtocol.Tool, new WaitForIndexRequest(Partition, Resource, FieldPath, new CommitToken(StableId, Partition.AtomicPartitionId, WaitMinimumPosition))),
+        Read(WaitForAnnIndexProtocol.Tool, McpSearchRequestTestData.Wait()),
+        Read(KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All.Single(entry =>
+            entry.ReadKind == KeyLoad.Clustering.GrainReadKind.ApproximateSearch).Name, McpSearchRequestTestData.Search()),
         Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
         Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(1, new(Partition, Resource),
             Retriever: new(new(Resource, [Reference])))),

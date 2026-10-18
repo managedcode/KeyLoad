@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Azure;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.Server;
 
@@ -70,7 +71,7 @@ internal sealed class ClusterTelemetryResourceTests
     private static async Task VerifyNodeAsync(IDistributedApplicationBuilder builder,
         IResourceBuilder<ProjectResource> node, string root, bool configuredReceiver)
     {
-        var annotation = node.Resource.Annotations.OfType<OtlpExporterAnnotation>().Last();
+        var annotation = node.Resource.Annotations.OfType<OtlpExporterAnnotation>().Single();
         await Assert.That(annotation.RequiredProtocol).IsEqualTo(OtlpProtocol.Grpc);
         var environment = new Dictionary<string, object>(StringComparer.Ordinal);
         var context = new EnvironmentCallbackContext(builder.ExecutionContext, node.Resource, environment,
@@ -99,8 +100,17 @@ internal sealed class ClusterTelemetryResourceTests
         await Assert.That(node.Resource.Annotations.OfType<EndpointAnnotation>()
             .Single(endpoint => endpoint.Name == HttpEndpoint).IsProxied).IsFalse();
         await Assert.That(node.Resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.Server.csproj");
-        await Assert.That(builder.Resources.OfType<ContainerResource>().Select(resource => resource.Name).ToArray())
-            .IsEquivalentTo(new[] { "orleans-storage" });
+        var storage = builder.Resources.OfType<AzureStorageResource>().ToArray();
+        await Assert.That(storage.Select(resource => resource.Name)).IsEquivalentTo(new[] { "orleans-storage" });
+        await Assert.That(builder.Resources.OfType<ContainerResource>()).IsEmpty();
+        var emulator = storage.Single();
+        await Assert.That(emulator.Annotations.OfType<EmulatorResourceAnnotation>()).HasSingleItem();
+        var image = emulator.Annotations.OfType<ContainerImageAnnotation>().Single();
+        await Assert.That(image.Registry).IsEqualTo("mcr.microsoft.com");
+        await Assert.That(image.Image).IsEqualTo("azure-storage/azurite");
+        await Assert.That(string.IsNullOrWhiteSpace(image.Tag)).IsFalse();
+        await Assert.That(emulator.Annotations.OfType<ContainerLifetimeAnnotation>().Single().Lifetime)
+            .IsEqualTo(ContainerLifetime.Session);
         await Assert.That(Directory.Exists(Path.Combine(root, node.Resource.Name))).IsTrue();
     }
 

@@ -5,7 +5,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
-internal sealed class GenerationVisibilityWriteFlow
+internal sealed class GenerationVisibilityWriteFlow(TestDatabase creation)
 {
     internal const long VisibleRevision = 2;
     internal const long TombstoneRevision = 3;
@@ -17,7 +17,7 @@ internal sealed class GenerationVisibilityWriteFlow
     internal static async Task<GenerationVisibilityWriteFlow> RunAsync(TestDatabase db, QueryEngine queries,
         RowVisibilityCache cache, CancellationToken token)
     {
-        var flow = new GenerationVisibilityWriteFlow();
+        var flow = new GenerationVisibilityWriteFlow(db);
         using var negative = GenerationVisibilityAssertions.Hold(db, cache);
         await Assert.That(negative.Contains(TeamRowPolicyFlow.ForeignTeam)).IsFalse();
         await flow.ApplyAsync(db, new PutDocument(TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam,
@@ -45,10 +45,12 @@ internal sealed class GenerationVisibilityWriteFlow
     {
         var command = new CommandRequest(Guid.NewGuid(), db.Partition, [mutation]);
         var before = db.Database.EvaluationClock.GetUtcNow();
+        var expectedToken = db.NextCommitToken();
+        var previousPosition = db.Store.Position;
         var receipt = db.Submit(OperationKind.Batch, command, TeamRowPolicyFlow.Root, command.CommandId).Get<CommitReceipt>();
         var after = db.Database.EvaluationClock.GetUtcNow();
-        await GenerationVisibilityWriteAssertions.ReceiptAsync(db, command, receipt, kind, revision);
-        await GenerationVisibilityWriteAssertions.RecordAsync(db.Store, db.Partition, revision,
+        await GenerationVisibilityWriteAssertions.ReceiptAsync(db, command, receipt, expectedToken, previousPosition, kind, revision);
+        await GenerationVisibilityWriteAssertions.RecordAsync(db, db.Store, db.Partition, revision,
             revision == TombstoneRevision, revision == ResurrectedRevision ? TeamRowPolicyFlow.ForeignTeam : TeamRowPolicyFlow.Team, before, after);
         var outcome = db.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(db.Partition, TeamRowPolicyFlow.Root, command.CommandId)))!;
         original.Add((command, receipt, outcome));
@@ -75,6 +77,6 @@ internal sealed class GenerationVisibilityWriteFlow
         await ReplayAsync(database, store, token);
         var partition = original.First().Command.Partition;
         var queries = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
-        await GenerationVisibilityWriteAssertions.ColdRowsAsync(database, queries, store, partition, token);
+        await GenerationVisibilityWriteAssertions.ColdRowsAsync(creation, database, queries, store, partition, token);
     }
 }

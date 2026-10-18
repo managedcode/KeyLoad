@@ -19,7 +19,7 @@ internal static class SafeProjectorOperationRows
         {
             var reference = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First);
             var actual = owner.Database.GetDocument(SafeProjectorOperationProtocol.Reader, reference, cancellationToken: token);
-            await SafeProjectorOperationSeed.EqualAsync(actual, new DocumentResult(reference, revision, expectedJson, !raw, paths));
+            await SafeProjectorOperationSeed.EqualAsync(actual, new DocumentResult(owner.Source.ExpectedReference(reference), revision, expectedJson, !raw, paths));
         });
         await SelectionAsync(owner, SafeProjectorOperationRequests.StarSql, SafeProjectorOperationProtocol.Star,
             SafeProjectorOperationProtocol.Star, expectedJson, revision, raw, token);

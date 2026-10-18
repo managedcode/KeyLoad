@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.Search;
 using TUnit.Assertions.Enums;
@@ -14,6 +15,7 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
     private const long First = 1;
     private const long Absent = 0;
     private const int CommitAdvance = 1;
+    private const string RecordSeparator = ":";
 
     [Test]
     public async Task ForeignSessionReadKeepsExactOwnedProblemNoEffectThenLiteralHealthyReply()
@@ -47,10 +49,10 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
             await Assert.That(database.Store.Position).IsEqualTo(position);
             var next = database.Database.GetDocument(Root, reference, receipt.Token);
             await Assert.That(NativeSerialization.Serialize(next).SequenceEqual(NativeSerialization.Serialize(
-                new DocumentResult(reference, First, Json, false, [])))).IsTrue();
+                new DocumentResult(database.ExpectedReference(reference), First, Json, false, [])))).IsTrue();
         }
         var healthy = database.Database.GetDocument(Root, reference, receipt.Token);
-        var expected = new DocumentResult(reference, First, Json, false, []);
+        var expected = new DocumentResult(database.ExpectedReference(reference), First, Json, false, []);
         await Assert.That(NativeSerialization.Serialize(healthy).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         using var response = KeyLoad.Server.McpReplyOwner.Success(JsonDefaults.Serialize(healthy), Guid.NewGuid(),
             McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
@@ -68,15 +70,18 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         using var database = new TestDatabase();
         ConfiguredVectorProfileFlow.Seed(database);
         var rejectedCommand = ConfiguredVectorProfileFlow.Command(database, projection, wrongModel: true);
-        var model = ConfiguredVectorProfileFlow.ModelBytes(database, rejectedCommand);
+        var canonical = database.Database.LastApplied;
         var position = database.Store.Position;
+        var model = await RefusalModelAsync(database, rejectedCommand, canonical, position);
         var rejected = database.Submit(OperationKind.Batch, rejectedCommand, id: rejectedCommand.CommandId);
         await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(McpOwnedDiagnosticAssertions.VectorMismatch);
 
         await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Validation, rejected.Problem?.Detail!, McpOwnedDiagnosticAssertions.VectorMismatch);
-        await Assert.That(ConfiguredVectorProfileFlow.ModelBytes(database, rejectedCommand)).IsEquivalentTo(model, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
+        await Assert.That(await RefusalModelAsync(database, rejectedCommand, checked(canonical + CommitAdvance),
+                checked(position + CommitAdvance)))
+            .IsEquivalentTo(model, CollectionOrdering.Matching);
         var retained = QueueWholeFlowStorage.Bytes(database.Store);
         var replay = database.Submit(OperationKind.Batch, rejectedCommand, id: rejectedCommand.CommandId);
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(rejected))).IsTrue();
@@ -85,10 +90,20 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         var healthyCommand = ConfiguredVectorProfileFlow.Command(database, projection, wrongModel: false);
         var healthy = database.Submit(OperationKind.Batch, healthyCommand, id: healthyCommand.CommandId).Get<CommitReceipt>();
         await McpOwnedDiagnosticAssertions.VectorReceiptAsync(healthy, healthyCommand, projection);
-        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database.Partition, TestContext.Current!.Execution.CancellationToken);
+        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database, TestContext.Current!.Execution.CancellationToken);
         using var response = KeyLoad.Server.McpReplyOwner.Success(JsonDefaults.Serialize(healthy), Guid.NewGuid(),
             McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
         await Assert.That(JsonElement.DeepEquals(response.ToolResult().StructuredContent!.Value
             .GetProperty(McpOutputTestData.ResultField), JsonSerializer.SerializeToElement(healthy, JsonDefaults.Options))).IsTrue();
+    }
+
+    private static async Task<string[]> RefusalModelAsync(TestDatabase database, CommandRequest command,
+        long expectedCanonicalPosition, long expectedPhysicalPosition)
+    {
+        await Assert.That(database.Database.LastApplied).IsEqualTo(expectedCanonicalPosition);
+        await Assert.That(database.Store.Position).IsEqualTo(expectedPhysicalPosition);
+        var appliedRecord = Convert.ToHexString(KeySpace.AppliedBytes) + RecordSeparator;
+        return ConfiguredVectorProfileFlow.ModelBytes(database, command)
+            .Where(row => !row.StartsWith(appliedRecord, StringComparison.Ordinal)).ToArray();
     }
 }

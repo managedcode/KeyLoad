@@ -45,38 +45,40 @@ internal static class CatalogArrayPathFlow
         var resource = db.Configure(Collection, ResourceKind.Collection, fields: policies);
         var command = new CommandRequest(Guid.NewGuid(), db.Partition, [new PutDocument(Collection, Row, Original)]);
         var before = db.Store.Position;
+        var expectedToken = db.NextCommitToken();
         var receipt = db.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
-        await CatalogArrayPathAssertions.ReceiptAsync(db.Store, command, receipt, before, 1L, "putDocument");
+        await CatalogArrayPathAssertions.ReceiptAsync(db.Store, command, receipt, before, expectedToken, 1L, "putDocument");
         var outcome = CatalogArrayPathAssertions.Outcome(db.Store, command);
         var principal = new PrincipalRecord(Reader, "tenant", [new("database", Collection,
             Capability.DocumentsRead | Capability.Query | Capability.DocumentsWrite)], []);
         await ConfigureAsync(db, principal);
-        await CatalogArrayPathAssertions.CheckAsync(db.Database, db.Store, db.Partition, false, false, 1L, token);
+        await CatalogArrayPathAssertions.CheckAsync(db, db.Database, db.Store, db.Partition, false, false, 1L, token);
         await CatalogArrayPathAssertions.ReplayAsync(db.Database, db.Store, command, receipt, outcome, token);
         await ConfigureAsync(db, principal with
         {
             FieldGrants = [UseGrant],
             PolicyEpoch = 2L
         });
-        await CatalogArrayPathAssertions.CheckAsync(db.Database, db.Store, db.Partition, true, false, 1L, token);
+        await CatalogArrayPathAssertions.CheckAsync(db, db.Database, db.Store, db.Partition, true, false, 1L, token);
         await ConfigureAsync(db, principal with
         {
             FieldGrants = [UseGrant, ReadGrant],
             PolicyEpoch = 3L
         });
-        await CatalogArrayPathAssertions.CheckAsync(db.Database, db.Store, db.Partition, true, true, 1L, token);
+        await CatalogArrayPathAssertions.CheckAsync(db, db.Database, db.Store, db.Partition, true, true, 1L, token);
         var resourceKey = KeySpace.Resource(db.Partition.TenantId, db.Partition.DatabaseId, Collection);
         var catalog = db.Store.Read(view => view.ReadOwnedValue(resourceKey))!;
         var patch = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new PatchDocument(Collection, Row, [new("/status", PatchKind.Set, "\"closed\"")], 1L)]);
         before = db.Store.Position;
+        expectedToken = db.NextCommitToken();
         var patched = db.Submit(OperationKind.Batch, patch, id: patch.CommandId).Get<CommitReceipt>();
-        await CatalogArrayPathAssertions.ReceiptAsync(db.Store, patch, patched, before, 2L, "patchDocument");
+        await CatalogArrayPathAssertions.ReceiptAsync(db.Store, patch, patched, before, expectedToken, 2L, "patchDocument");
         await Assert.That(db.Store.Read(view => view.ReadOwnedValue(resourceKey))!.AsSpan().SequenceEqual(catalog)).IsTrue();
         await Assert.That(JsonDefaults.Serialize(db.Store.Read(view => view.GetRecord<ResourceDefinition>(resourceKey))).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(resource))).IsTrue();
         var patchOutcome = CatalogArrayPathAssertions.Outcome(db.Store, patch);
-        await CatalogArrayPathAssertions.CheckAsync(db.Database, db.Store, db.Partition, true, true, 2L, token);
+        await CatalogArrayPathAssertions.CheckAsync(db, db.Database, db.Store, db.Partition, true, true, 2L, token);
         await CatalogArrayPathAssertions.ReplayAsync(db.Database, db.Store, patch, patched, patchOutcome, token);
         await CatalogArrayPathAssertions.ReplayAsync(db.Database, db.Store, command, receipt, outcome, token);
         await CatalogArrayPathLifetime.ColdAsync(db, command, receipt, outcome, patch, patched, patchOutcome, token);

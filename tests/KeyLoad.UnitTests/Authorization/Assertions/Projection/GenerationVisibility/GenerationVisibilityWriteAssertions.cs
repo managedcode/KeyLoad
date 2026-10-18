@@ -17,14 +17,14 @@ internal static class GenerationVisibilityWriteAssertions
 
     internal static async Task RowsAsync(TestDatabase db, DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
         long rowRevision, string rowJson, bool visible, CancellationToken token)
-        => await ReadAsync(database, queries, store, db.Partition, rowRevision, rowJson, visible, token);
+        => await ReadAsync(db, database, queries, store, db.Partition, rowRevision, rowJson, visible, token);
 
-    internal static async Task ColdRowsAsync(DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
+    internal static async Task ColdRowsAsync(TestDatabase creation, DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
         PartitionRef partition, CancellationToken token)
-        => await ReadAsync(database, queries, store, partition, TeamRowPolicyFlow.HealthyRevision,
+        => await ReadAsync(creation, database, queries, store, partition, TeamRowPolicyFlow.HealthyRevision,
             TeamRowPolicyFlow.HealthyJson, false, token);
 
-    private static async Task ReadAsync(DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
+    private static async Task ReadAsync(TestDatabase creation, DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
         PartitionRef partition, long rowRevision, string rowJson, bool visible, CancellationToken token)
     {
         var image = TeamRowPolicyAssertions.Image(store);
@@ -49,7 +49,7 @@ internal static class GenerationVisibilityWriteAssertions
         await PageAsync(queries.ExecuteAst(TeamRowPolicyFlow.Reader, explanation,
             cancellationToken: token), [new(ExplainId, NoRevision, plan)], cut);
         var reference = new EntityRef(partition, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam);
-        DocumentResult? expectedPoint = visible ? new(reference, GenerationVisibilityWriteFlow.VisibleRevision,
+        DocumentResult? expectedPoint = visible ? new(creation.ExpectedReference(reference), GenerationVisibilityWriteFlow.VisibleRevision,
             TeamRowPolicyFlow.OriginalJson, false, []) : null;
         await Assert.That(JsonDefaults.Serialize(database.GetDocument(TeamRowPolicyFlow.Reader, reference,
             cancellationToken: token)).AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedPoint))).IsTrue();
@@ -64,26 +64,22 @@ internal static class GenerationVisibilityWriteAssertions
         await Assert.That(page.AccessPath).IsEqualTo(Scan);
     }
 
-    internal static async Task ReceiptAsync(TestDatabase db, CommandRequest command, CommitReceipt receipt, string kind, long revision)
+    internal static async Task ReceiptAsync(TestDatabase db, CommandRequest command, CommitReceipt receipt, CommitToken expectedToken, long previousPosition, string kind, long revision)
     {
-        await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(db.Store.Identity.Incarnation);
-        await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(db.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(db.Store.Position);
-
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
-        MutationReceipt[] expected = [new(kind, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam, revision)];
-        await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        CommitReceipt expected = new(command.CommandId, expectedToken,
+            [new(kind, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam, revision)], DurabilityProfile.ProcessDurable, 1);
+        await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(db.Store.Position).IsEqualTo(previousPosition + 1L);
         var outcome = db.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(db.Partition,
             TeamRowPolicyFlow.Root, command.CommandId)))!;
         await Assert.That(outcome.PolicyEpoch).IsEqualTo(OriginalRootEpoch);
         await Assert.That(outcome.Incarnation).IsEqualTo(db.Store.Identity.Incarnation);
     }
 
-    internal static async Task RecordAsync(ZoneTreeStore store, PartitionRef partition, long revision, bool deleted,
+    internal static async Task RecordAsync(TestDatabase creation, ZoneTreeStore store, PartitionRef partition, long revision, bool deleted,
         string team, DateTimeOffset before, DateTimeOffset after)
     {
-        var reference = new EntityRef(partition, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam);
+        var reference = creation.ExpectedReference(new(partition, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam));
         var record = store.Read(view => view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(reference)))!;
         await Assert.That(JsonDefaults.Serialize(record.Reference).AsSpan().SequenceEqual(JsonDefaults.Serialize(reference))).IsTrue();
         await Assert.That(record.Revision).IsEqualTo(revision);

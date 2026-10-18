@@ -1,4 +1,5 @@
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 using P = KeyLoad.UnitTests.Features.ClusterRouting.CommandObservedPolicyProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -29,7 +30,9 @@ internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable
     internal static async Task<CommandObservedPolicyRuntime> CreateAsync(ConnectionOperationObservation observation,
         CancellationToken token)
     {
-        var hosts = await RequestCqrsHostedCluster.CreateAsync(token, observer: observation).ConfigureAwait(false);
+        var hosts = await RequestCqrsHostedCluster.CreateAsync(token, observer: observation,
+            configureServices: (_, services, _) => services.AddSingleton<IIncomingGrainCallFilter>(observation))
+            .ConfigureAwait(false);
         var profile = new CommandObservedPolicyRuntime(hosts, observation);
         try
         {

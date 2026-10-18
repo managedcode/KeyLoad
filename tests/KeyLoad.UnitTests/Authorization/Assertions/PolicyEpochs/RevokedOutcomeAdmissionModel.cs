@@ -16,8 +16,8 @@ internal static class RevokedOutcomeAdmissionModel
         {
             events = [.. events, new(stream, 2, 2, new("healthy", "Created", "{\"event\":2}"), RevokedOutcomeAdmissionFixture.Epoch)];
         }
-        await RevokedOutcomeAdmissionValues.EqualAsync(fixture.Database.ReadStream(RevokedOutcomeAdmissionFixture.Worker, new ReadStreamRequest(stream), token), new StreamPage(stream, new(events.Length, 1, 1), [.. events], fixture.Store.Position,
-                false, null, fixture.Store.Position));
+        await RevokedOutcomeAdmissionValues.EqualAsync(fixture.Database.ReadStream(RevokedOutcomeAdmissionFixture.Worker, new ReadStreamRequest(stream), token), new StreamPage(stream, new(events.Length, 1, 1), [.. events], fixture.Database.LastApplied,
+                false, null, fixture.Database.LastApplied));
         var queue = new QueueLaneRef(fixture.Harness.Partition, RevokedOutcomeAdmissionFixture.Queue);
         await RevokedOutcomeAdmissionValues.EqualAsync(fixture.Database.InspectMessage(RevokedOutcomeAdmissionFixture.Worker, queue, "original"),
             new MessageInspection(new("original", MessageState.Ready, 0, 1, 1, null, null), "{\"work\":1}", "{}"));
@@ -35,14 +35,13 @@ internal static class RevokedOutcomeAdmissionModel
         {
             var command = commands[producer];
             var effects = RevokedOutcomeAdmissionValues.Effects(producer != 0);
-            var position = producer == 0 ? fixture.OriginalPosition : fixture.FreshPosition;
-            var commit = new CommitToken(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position);
+            var commit = producer == 0 ? fixture.OriginalToken : fixture.FreshToken;
             for (var index = 0; index < command.Mutations.Length; index++)
             {
                 sequence++;
                 var mutation = command.Mutations[index];
-                var after = mutation is PutDocument put ? new DocumentRecord(new(fixture.Harness.Partition,
-                    RevokedOutcomeAdmissionFixture.Documents, put.Id), 1, put.Json, new(), RevokedOutcomeAdmissionFixture.Epoch) : null;
+                var after = mutation is PutDocument put ? new DocumentRecord(fixture.Harness.ExpectedReference(new(fixture.Harness.Partition,
+                    RevokedOutcomeAdmissionFixture.Documents, put.Id)), 1, put.Json, new(), RevokedOutcomeAdmissionFixture.Epoch) : null;
                 var expected = new OutboxEntry(sequence, index, commit, RevokedOutcomeAdmissionFixture.Epoch, mutation, effects[index], After: after);
                 var raw = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition("outbox", fixture.Harness.Partition, sequence)))
                     ?? throw new InvalidOperationException("A literal producer outbox entry is missing.");

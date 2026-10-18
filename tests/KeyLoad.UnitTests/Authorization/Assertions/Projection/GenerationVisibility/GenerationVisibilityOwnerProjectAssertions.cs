@@ -9,7 +9,7 @@ internal static class GenerationVisibilityOwnerProjectAssertions
     private const string Sql = "SELECT * FROM \"visibility-owner-project\" ORDER BY id";
     private const string Scan = "bounded-full-scan";
 
-    internal static async Task ReadAsync(DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
+    internal static async Task ReadAsync(TestDatabase creation, DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
         PartitionRef partition, string[] visible, long ownRevision, long sharedRevision, CancellationToken token)
     {
         var image = TeamRowPolicyAssertions.Image(store);
@@ -24,11 +24,11 @@ internal static class GenerationVisibilityOwnerProjectAssertions
         await Assert.That(page.CutPosition).IsEqualTo(cut);
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo(Scan);
-        await PointsAsync(database, partition, visible, ownRevision, sharedRevision, token);
+        await PointsAsync(creation, database, partition, visible, ownRevision, sharedRevision, token);
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);
     }
 
-    private static async Task PointsAsync(DatabaseEngine database, PartitionRef partition, string[] visible,
+    private static async Task PointsAsync(TestDatabase creation, DatabaseEngine database, PartitionRef partition, string[] visible,
         long ownRevision, long sharedRevision, CancellationToken token)
     {
         foreach (var id in new[] { GenerationVisibilityOwnerProjectFlow.Own,
@@ -37,7 +37,7 @@ internal static class GenerationVisibilityOwnerProjectAssertions
             var reference = new EntityRef(partition, GenerationVisibilityOwnerProjectFlow.Collection, id);
             var actual = database.GetDocument(GenerationVisibilityOwnerProjectFlow.Reader, reference, cancellationToken: token);
             DocumentResult? expected = visible.Contains(id, StringComparer.Ordinal)
-                ? new(reference, id == GenerationVisibilityOwnerProjectFlow.Own ? ownRevision : sharedRevision,
+                ? new(creation.ExpectedReference(reference), id == GenerationVisibilityOwnerProjectFlow.Own ? ownRevision : sharedRevision,
                     id == GenerationVisibilityOwnerProjectFlow.Own ? GenerationVisibilityOwnerProjectFlow.OwnJson
                         : GenerationVisibilityOwnerProjectFlow.SharedJson, false, []) : null;
             await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
@@ -59,14 +59,10 @@ internal static class GenerationVisibilityOwnerProjectAssertions
     }
 
     internal static async Task ReceiptAsync(ZoneTreeStore store, CommandRequest command,
-        CommitReceipt receipt, MutationReceipt[] expected)
+        CommitReceipt receipt, CommitToken expectedToken, long previousPosition, MutationReceipt[] expected)
     {
-        await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
-        await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
-
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
-        await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        CommitReceipt literal = new(command.CommandId, expectedToken, [.. expected], DurabilityProfile.ProcessDurable, 1);
+        await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
+        await Assert.That(store.Position).IsEqualTo(previousPosition + 1L);
     }
 }

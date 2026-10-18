@@ -36,8 +36,8 @@ internal static class DeniedCommandRepairContinuation
     }
 
     internal static async Task OriginalReceiptAsync(TestDatabase fixture, CommitReceipt receipt,
-        Guid commandId, long previousPosition)
-        => await ReceiptAsync(fixture.Store, fixture.Partition, receipt, commandId, previousPosition, NextPosition);
+        Guid commandId, long previousPosition, CommitToken expectedToken)
+        => await ReceiptAsync(fixture.Store, receipt, commandId, previousPosition, NextPosition, expectedToken);
 
     internal static async Task RunAsync(TestDatabase fixture, PrincipalRecord writer,
         Command<DatabaseCommand> original, byte[] outcome, EntityRef expectedReference)
@@ -50,8 +50,9 @@ internal static class DeniedCommandRepairContinuation
         await OldDeniedAsync(fixture.Database, fixture.Store, fixture.Partition, original, outcome);
         var current = Fresh(fixture.Database, fixture.Partition, writer.Id, RepairedRevision, RepairedJson);
         var position = fixture.Store.Position;
+        var expectedToken = fixture.NextCommitToken();
         var result = fixture.Database.Apply(current);
-        await ReceiptAsync(fixture.Store, fixture.Partition, result.Get<CommitReceipt>(), current.CommandId, position, RepairedRevision);
+        await ReceiptAsync(fixture.Store, result.Get<CommitReceipt>(), current.CommandId, position, RepairedRevision, expectedToken);
         await DocumentAsync(fixture.Database, fixture.Partition, RepairedRevision, RepairedJson, expectedReference);
         await ReplayAsync(fixture.Database, fixture.Store, current, result);
         await OldDeniedAsync(fixture.Database, fixture.Store, fixture.Partition, original, outcome);
@@ -101,8 +102,9 @@ internal static class DeniedCommandRepairContinuation
     {
         var fresh = Fresh(database, partition, principal, ColdRevision, ColdJson);
         var position = store.Position;
+        var expectedToken = ExpectedCanonicalCommit.Next(database, partition);
         var result = database.Apply(fresh);
-        await ReceiptAsync(store, partition, result.Get<CommitReceipt>(), fresh.CommandId, position, ColdRevision);
+        await ReceiptAsync(store, result.Get<CommitReceipt>(), fresh.CommandId, position, ColdRevision, expectedToken);
         await DocumentAsync(database, partition, ColdRevision, ColdJson, expectedReference);
         await ReplayAsync(database, store, fresh, result);
     }
@@ -147,11 +149,12 @@ internal static class DeniedCommandRepairContinuation
         await UnchangedAsync(store, position, bytes);
     }
 
-    private static async Task ReceiptAsync(ZoneTreeStore store, PartitionRef partition,
-        CommitReceipt actual, Guid commandId, long previousPosition, long revision)
+    private static async Task ReceiptAsync(ZoneTreeStore store,
+        CommitReceipt actual, Guid commandId, long previousPosition, long revision, CommitToken expectedToken)
     {
-        var expected = new CommitReceipt(commandId, new(store.Identity.Incarnation, partition.AtomicPartitionId, previousPosition + NextPosition), [new("putDocument", Collection, Document, revision)], store.Identity.Durability, (store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
+        var expected = new CommitReceipt(commandId, expectedToken, [new("putDocument", Collection, Document, revision)], store.Identity.Durability, (store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(store.Position).IsEqualTo(previousPosition + NextPosition);
     }
 
     private static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition,

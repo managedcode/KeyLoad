@@ -14,9 +14,9 @@ internal static class InitialPrincipalEpochHealthy
             [new PutDocument(InitialPrincipalEpochFixture.Collection, "record", "{\"value\":7}", 1L)]);
         var operation = fixture.Operation(OperationKind.Batch, command, InitialPrincipalEpochFixture.Reader, id);
         var before = fixture.Harness.Store.Position;
+        var expectedToken = fixture.Harness.NextCommitToken();
         var actual = fixture.Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(id, new(fixture.Harness.Store.Identity.Incarnation,
-            fixture.Harness.Partition.AtomicPartitionId, before + 1L), [new("putDocument", InitialPrincipalEpochFixture.Collection, "record", 2L)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(id, expectedToken, [new("putDocument", InitialPrincipalEpochFixture.Collection, "record", 2L)], DurabilityProfile.ProcessDurable, 1);
         await InitialPrincipalEpochAssertions.EqualAsync(actual, expected);
         await Assert.That(actual.Mutations.Single().CompositionReferences).IsEmpty();
         await Assert.That(fixture.Harness.Store.Position).IsEqualTo(before + 1L);
@@ -39,7 +39,7 @@ internal static class InitialPrincipalEpochHealthy
             await Assert.That(database.Authenticate(InitialPrincipalEpochFixture.ReplacementSecret, database.EvaluationClock.GetUtcNow()))
                 .IsEqualTo(InitialPrincipalEpochFixture.Reader);
             var document = database.GetDocument(InitialPrincipalEpochFixture.Reader, fixture.Reference)!;
-            await InitialPrincipalEpochAssertions.EqualAsync(document, new DocumentResult(fixture.Reference, 2L, "{\"value\":7}", false, []));
+            await InitialPrincipalEpochAssertions.EqualAsync(document, new DocumentResult(fixture.Harness.ExpectedReference(fixture.Reference), 2L, "{\"value\":7}", false, []));
             var replay = database.ApplyEmbedded(state.Operation, token).Get<CommitReceipt>();
             await InitialPrincipalEpochAssertions.EqualAsync(replay, state.Receipt);
             await Assert.That(replay.Mutations.Single().CompositionReferences).IsEmpty();

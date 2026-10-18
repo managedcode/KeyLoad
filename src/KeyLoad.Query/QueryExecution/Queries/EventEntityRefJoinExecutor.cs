@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query.Features.QueryExecution;
@@ -59,6 +60,8 @@ internal static class EventEntityRefJoinExecutor
         {
             return;
         }
+        var lifetime = budget.CaptureResourceLifetimes(database, view, request.Partition, [target]).Lifetimes.Single();
+        reference = EntityReferenceLifetime.Bind(reference, lifetime);
         var right = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(reference));
         if (right is null)
         {

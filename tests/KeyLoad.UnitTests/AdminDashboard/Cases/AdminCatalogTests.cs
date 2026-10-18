@@ -85,12 +85,12 @@ internal sealed class AdminCatalogTests
     [Test]
     public async Task AcAd004RealCatalogFailsClosedWhenReadByteBudgetIsExhausted()
     {
-        using var db = new TestDatabase(new()
-        {
-            MaxQueryReadBytes = 1
-        });
+        using var db = new TestDatabase();
         db.Configure(First, ResourceKind.Collection);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => new AdminCatalogReader(db.Database).Read(Administrator,
+        var readOwner = TestDatabaseEngineFactory.Capture(
+            UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = 1 }), UnitExecutionOptions.BlobExecution(),
+            UnitExecutionOptions.NativeClaimsExecution(), null, db.Database.EvaluationClock)(db.Store);
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => new AdminCatalogReader(readOwner).Read(Administrator,
             new(db.Partition.TenantId, db.Partition.DatabaseId), CancellationToken.None));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }

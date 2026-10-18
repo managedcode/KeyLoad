@@ -7,6 +7,7 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private const string PartitionQuerySourceMetadataInvalid = "The query source metadata is invalid.";
+    private const string PartitionQueryReceivingIdentityChanged = "The partition query receiving identity changed.";
 
     internal T WithPartitionQueryLifetimeView<T>(string principalId, PartitionRef partition, string collection,
         ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata metadata,
@@ -28,6 +29,15 @@ public sealed partial class DatabaseEngine
         return Store.Read(view => ReadPartitionQueryFenceView(view, principalId, partition, collection, grant,
             (raw, principal, resource, digest) =>
             {
+                budget.Check();
+                RequireNativeBudget(NativeSerialization.Measure(principal));
+                RequireNativeBudget(NativeSerialization.Measure(metadata.Principal));
+                if (!NativeSerialization.Serialize(principal).AsSpan()
+                    .SequenceEqual(NativeSerialization.Serialize(metadata.Principal)))
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, PartitionQueryReceivingIdentityChanged);
+                }
+                budget.Check();
                 budget.CaptureAuthenticatedResourceLifetimes(this, budget.CreateView(raw, grant),
                     metadata.Coverage, [metadata.Definition]);
                 return read(raw, principal, resource, digest);

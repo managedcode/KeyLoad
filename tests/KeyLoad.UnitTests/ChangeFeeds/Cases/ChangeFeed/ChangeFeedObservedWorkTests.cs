@@ -20,9 +20,12 @@ internal sealed class ChangeFeedObservedWorkTests
         using var database = new TestDatabase(new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
         database.Configure(ChangeFeedLiteralOracle.Collection, ResourceKind.Collection);
         var committedAt = clock.GetUtcNow();
-        var receipt = database.Commit(new PutDocument(ChangeFeedLiteralOracle.Collection,
+        var commandId = Guid.NewGuid();
+        var receipt = database.Submit(OperationKind.Batch, new CommandRequest(commandId, database.Partition,
+            [new PutDocument(ChangeFeedLiteralOracle.Collection,
             ChangeFeedLiteralOracle.FirstId, ChangeFeedLiteralOracle.FirstJson),
-            new PutDocument(ChangeFeedLiteralOracle.Collection, ChangeFeedLiteralOracle.SecondId, ChangeFeedLiteralOracle.SecondJson));
+            new PutDocument(ChangeFeedLiteralOracle.Collection, ChangeFeedLiteralOracle.SecondId, ChangeFeedLiteralOracle.SecondJson)]),
+            id: commandId, time: committedAt).Get<CommitReceipt>();
         var request = new ReadChangeFeedRequest(database.Partition, ChangeFeedLiteralOracle.Collection);
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;

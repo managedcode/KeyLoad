@@ -15,7 +15,7 @@ internal static class CliBackupRestoreUnsafeDestinationTrial
     private const string ErrorCodeProperty = "errorCode";
     private const string DetailProperty = "detail";
     private const string ConflictCode = "Conflict";
-    private const string ExpectedPathDetail = "The native catalog backup destination is not clean.";
+    private const string ExpectedPathDetail = "The native backup destination is not a regular directory path.";
     private const string ChangedLink = "The original fixture-owned destination link changed before cleanup.";
     private const string RestoreStagingPrefix = ".keyload-restore-";
     private const int FailedExit = 1;

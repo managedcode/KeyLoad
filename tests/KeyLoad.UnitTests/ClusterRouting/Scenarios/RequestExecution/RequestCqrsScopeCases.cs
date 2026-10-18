@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using KeyLoad.Clustering;
 using ManagedCode.Orleans.Identity.Core.Constants;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -80,7 +81,8 @@ internal static class RequestCqrsScopeCases
                 await Assert.That(RequestContext.Keys.Contains(OrleansIdentityConstants.USER_CLAIMS,
                     StringComparer.Ordinal)).IsFalse();
                 await Assert.That(RequestContext.Get(GrainRequestStreamProtocol.ContextKey))
-                    .IsEqualTo(new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId));
+                    .IsEqualTo(new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId,
+                        fixture.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress));
                 var signed = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
                     NativeSerialization.Serialize(0));
                 var result = await fixture.Grains.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
@@ -132,7 +134,8 @@ internal static class RequestCqrsScopeCases
             await Assert.That(published.FindFirst(ClaimTypes.NameIdentifier)?.Value).IsEqualTo(principal.Id);
             await Assert.That(identity.HasClaim(ClaimTypes.Role, ProjectedRoleName)).IsFalse();
             await Assert.That(RequestContext.Get(GrainRequestStreamProtocol.ContextKey))
-                .IsEqualTo(new GrainRequestContextState(requestId, commandId, fixture.ConnectionId));
+                .IsEqualTo(new GrainRequestContextState(requestId, commandId, fixture.ConnectionId,
+                    fixture.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress));
             await Assert.That(ReferenceEquals(RequestContext.Get(UnrelatedKey), graphContext)).IsTrue();
         }
 

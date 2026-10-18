@@ -20,7 +20,7 @@ internal static class InitialPrincipalEpochLifecycle
             await Assert.That(database.Authenticate(InitialPrincipalEpochFixture.OriginalSecret, database.EvaluationClock.GetUtcNow()))
                 .IsEqualTo(InitialPrincipalEpochFixture.Reader);
             await InitialPrincipalEpochAssertions.EqualAsync(database.GetDocument(InitialPrincipalEpochFixture.Reader, fixture.Reference),
-                new DocumentResult(fixture.Reference, 1L, "{\"value\":0}", false, []));
+                new DocumentResult(fixture.Harness.ExpectedReference(fixture.Reference), 1L, "{\"value\":0}", false, []));
         });
         await PrincipalAsync(fixture, 2L, false, false, token);
         await InitialPrincipalEpochAssertions.ObserveAsync(store, () => InitialPrincipalEpochAssertions.RefuseAsync(() =>

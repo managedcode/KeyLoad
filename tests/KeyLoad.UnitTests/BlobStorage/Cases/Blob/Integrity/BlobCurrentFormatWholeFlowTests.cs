@@ -32,8 +32,8 @@ internal sealed class BlobCurrentFormatWholeFlowTests
         var readCut = database.Store.Position;
         var document = database.Database.GetDocument(BlobCurrentFormatFixture.Principal,
             new(database.Partition, BlobCurrentFormatFixture.Collection, BlobCurrentFormatFixture.DocumentId));
-        var expected = new DocumentResult(new(database.Partition, BlobCurrentFormatFixture.Collection,
-            BlobCurrentFormatFixture.DocumentId), BlobCurrentFormatFixture.OriginalRevision, BlobCurrentFormatFixture.DocumentJson, false, []);
+        var expected = new DocumentResult(database.ExpectedReference(new(database.Partition, BlobCurrentFormatFixture.Collection,
+            BlobCurrentFormatFixture.DocumentId)), BlobCurrentFormatFixture.OriginalRevision, BlobCurrentFormatFixture.DocumentJson, false, []);
         await Assert.That(JsonDefaults.Serialize(document).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(readCut);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(readImage, CollectionOrdering.Matching);

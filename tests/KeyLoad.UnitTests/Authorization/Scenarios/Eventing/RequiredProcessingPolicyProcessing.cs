@@ -10,12 +10,14 @@ internal static class RequiredProcessingPolicyProcessing
     {
         var request = new ReceiveRequest(Guid.NewGuid(), fixture.Lane, LeaseSeconds: fixture.Resource.QueuePolicy.MaxLeaseSeconds);
         var position = fixture.Harness.Store.Position + 1L;
+        var expectedToken = fixture.Harness.NextCommitToken();
         var result = fixture.Apply(OperationKind.Receive, request, request.RequestId, token: token).Get<ReceiveResult>();
         await Assert.That(result.Deliveries.Length).IsEqualTo(1);
         var actual = result.Deliveries[0];
         await RequiredProcessingPolicyAssertions.EqualAsync(new ReceiveResult(request.RequestId,
             [new(id, fixture.Payload, fixture.Headers, actual.Token, 1L, actual.LeaseUntil, 1, 1L)],
-            new(fixture.Harness.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position)), result);
+            expectedToken), result);
+        await Assert.That(fixture.Harness.Store.Position).IsEqualTo(position);
         await Assert.That(actual.Token).IsNotEmpty();
         var evaluatedAt = fixture.Harness.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
         await Assert.That(actual.LeaseUntil).IsEqualTo(evaluatedAt.AddSeconds(fixture.Resource.QueuePolicy.MaxLeaseSeconds));
@@ -28,9 +30,11 @@ internal static class RequiredProcessingPolicyProcessing
     {
         var operation = fixture.Operation(OperationKind.Processing, request, request.CommandId);
         var position = fixture.Harness.Store.Position + 1L;
+        var expectedToken = fixture.Harness.NextCommitToken();
         var actual = fixture.Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(request.CommandId, new(fixture.Harness.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position), [new("putDocument", RequiredProcessingPolicyFixture.Derived, document, 1L), new("Ack", RequiredProcessingPolicyFixture.Queue, document, 3L)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(request.CommandId, expectedToken, [new("putDocument", RequiredProcessingPolicyFixture.Derived, document, 1L), new("Ack", RequiredProcessingPolicyFixture.Queue, document, 3L)], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, actual);
+        await Assert.That(fixture.Harness.Store.Position).IsEqualTo(position);
         return (operation, expected, RequiredProcessingPolicyAssertions.Outcome(fixture.Harness.Store, fixture.Harness.Partition,
             RequiredProcessingPolicyFixture.Worker, request.CommandId));
     }

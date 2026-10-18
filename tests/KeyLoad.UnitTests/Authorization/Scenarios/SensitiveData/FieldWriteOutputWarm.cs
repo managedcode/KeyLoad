@@ -21,9 +21,10 @@ internal static class FieldWriteOutputWarm
         await ConfigureAsync(db, reader);
         state.Original = new(Guid.NewGuid(), db.Partition, [new PutDocument(P.Collection, P.Document, P.Original)]);
         var before = state.Store.Position;
+        var expectedToken = db.NextCommitToken();
         state.OriginalReceipt = state.Apply(state.Original, P.Root, token).Get<CommitReceipt>();
         await FieldWriteOutputAssertions.ReceiptAsync(state, state.Original, state.OriginalReceipt,
-            before, P.Put, P.OriginalRevision);
+            before, expectedToken, P.Put, P.OriginalRevision);
         state.Outcomes.Add(state.Original.CommandId, state.Outcome(state.Original, P.Root));
         await FieldWriteOutputAssertions.CurrentAsync(state, false, token);
         state.Denied = Patch(state, ancestor, P.OriginalRevision);
@@ -41,9 +42,10 @@ internal static class FieldWriteOutputWarm
         });
         state.Healthy = Patch(state, ancestor, P.OriginalRevision);
         before = state.Store.Position;
+        expectedToken = db.NextCommitToken();
         state.HealthyReceipt = state.Apply(state.Healthy, P.Writer, token).Get<CommitReceipt>();
         await FieldWriteOutputAssertions.ReceiptAsync(state, state.Healthy, state.HealthyReceipt,
-            before, P.Patch, P.CurrentRevision);
+            before, expectedToken, P.Patch, P.CurrentRevision);
         state.Outcomes.Add(state.Healthy.CommandId, state.Outcome(state.Healthy, P.Writer));
         state.ReaderDenied = Patch(state, ancestor, P.CurrentRevision);
         await FieldWriteOutputAssertions.FailureAsync(state.Apply(state.ReaderDenied, P.Reader, token), P.Denied);

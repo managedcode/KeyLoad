@@ -48,7 +48,7 @@ internal static class ProjectionConsumerIdentityAssertions
         { new(ProjectionConsumerIdentityFixture.Source, "a", "{\"n\":1}", 0L), new(ProjectionConsumerIdentityFixture.Source, "b", "{\"n\":2}", 0L) };
         var entries = mutations.Select((mutation, ordinal) => new OutboxEntry(ordinal + 1L, ordinal, state.SeedReceipt.Token, state.Time,
             mutation, new("putDocument", ProjectionConsumerIdentityFixture.Source, mutation.Id, 1L), null,
-            new(new(state.Partition, ProjectionConsumerIdentityFixture.Source, mutation.Id), 1L, mutation.Json, new RowAccess(), state.Time))).ToArray();
+            new(state.Creation.ExpectedReference(new(state.Partition, ProjectionConsumerIdentityFixture.Source, mutation.Id)), 1L, mutation.Json, new RowAccess(), state.Time))).ToArray();
         await ExactAsync(batch, new ProjectionBatch(new(state.Consumer, state.Definition, 0L, false), [.. entries], 2L, batch.Token, false));
     }
 
@@ -67,18 +67,19 @@ internal static class ProjectionConsumerIdentityAssertions
         await ExactAsync(receipt.Mutations, global::System.Collections.Immutable.ImmutableArray.CreateRange(expected));
     }
 
-    internal static async Task SourcesAsync(DatabaseEngine owner, PartitionRef partition)
+    internal static async Task SourcesAsync(DatabaseEngine owner, ProjectionConsumerIdentityState state)
     {
+        var partition = state.Partition;
         await ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root, new(partition, ProjectionConsumerIdentityFixture.Source, "a")),
-            new DocumentResult(new(partition, ProjectionConsumerIdentityFixture.Source, "a"), 1L, "{\"n\":1}", false, []));
+            new DocumentResult(state.Creation.ExpectedReference(new(partition, ProjectionConsumerIdentityFixture.Source, "a")), 1L, "{\"n\":1}", false, []));
         await ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root, new(partition, ProjectionConsumerIdentityFixture.Source, "b")),
-            new DocumentResult(new(partition, ProjectionConsumerIdentityFixture.Source, "b"), 1L, "{\"n\":2}", false, []));
+            new DocumentResult(state.Creation.ExpectedReference(new(partition, ProjectionConsumerIdentityFixture.Source, "b")), 1L, "{\"n\":2}", false, []));
     }
 
-    internal static async Task EffectAsync(DatabaseEngine owner, PartitionRef partition)
+    internal static async Task EffectAsync(DatabaseEngine owner, ProjectionConsumerIdentityState state)
         => await ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
-            new(partition, ProjectionConsumerIdentityFixture.Target, "effect")),
-            new DocumentResult(new(partition, ProjectionConsumerIdentityFixture.Target, "effect"), 1L, "{\"sourceCount\":2}", false, []));
+            new(state.Partition, ProjectionConsumerIdentityFixture.Target, "effect")),
+            new DocumentResult(state.Creation.ExpectedReference(new(state.Partition, ProjectionConsumerIdentityFixture.Target, "effect")), 1L, "{\"sourceCount\":2}", false, []));
 
     internal static async Task ExactAsync<T>(T actual, T expected)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

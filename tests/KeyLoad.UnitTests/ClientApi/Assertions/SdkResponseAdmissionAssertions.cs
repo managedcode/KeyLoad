@@ -21,7 +21,7 @@ internal static class SdkResponseAdmissionAssertions
         var reference = new EntityRef(database.Partition, Collection, Document);
         var mutation = new PutDocument(Collection, Document, SdkResponseAdmissionProtocol.Json, InitialRevision);
         var effect = new MutationReceipt(PutKind, Collection, Document, CommittedRevision);
-        var after = new DocumentRecord(reference, CommittedRevision, SdkResponseAdmissionProtocol.Json, new RowAccess(), DateTimeOffset.UnixEpoch);
+        var after = new DocumentRecord(database.ExpectedReference(reference), CommittedRevision, SdkResponseAdmissionProtocol.Json, new RowAccess(), DateTimeOffset.UnixEpoch);
         var expected = new OutboxEntry(FirstSequence, FirstOrdinal, owner.ExpectedToken,
             DateTimeOffset.UnixEpoch, mutation, effect, Before: null, After: after);
         var payload = snapshot.EntryBytes[FirstOrdinal];

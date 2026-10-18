@@ -7,14 +7,16 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>AC-MCP-002/003/005: canonical write identity and strict adapter arguments.</summary>
 internal sealed class McpCommandDecodeTests
 {
-    private const int CommandCount = 21;
+    private const int CommandCount = 24;
 
-    /// <summary>Exercises the twenty-one canonical command corpus DTOs with their original identities and complete public fields.</summary>
+    /// <summary>Exercises the twenty-four canonical command corpus DTOs with their original identities and complete public fields.</summary>
     [Test]
     public async Task AcMcp002EveryCommandPreservesItsCallerIdAndFullTypedPayload()
     {
         var cases = McpCanonicalTestData.Commands();
         await Assert.That(cases.Length).IsEqualTo(CommandCount);
+        await Assert.That(cases.Select(item => item.Name)).IsEquivalentTo(McpCommandCatalog.Entries
+            .Concat(McpSubscriptionCatalog.Entries).Concat(McpProjectionCatalog.Entries).Select(entry => entry.Name));
         foreach (var item in cases)
         {
             var arguments = item.Arguments();
@@ -52,7 +54,7 @@ internal sealed class McpCommandDecodeTests
         }
     }
 
-    /// <summary>The four header-identity operations require a valid outer GUID.</summary>
+    /// <summary>The six header-identity operations require a valid outer GUID.</summary>
     [Test]
     public async Task AcMcp003HeaderIdToolsRejectMissingAndNullOuterIdentity()
     {

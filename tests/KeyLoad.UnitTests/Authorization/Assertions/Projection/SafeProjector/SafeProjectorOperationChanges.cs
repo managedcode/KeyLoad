@@ -48,8 +48,8 @@ internal static class SafeProjectorOperationChanges
         SafeProjectorOperationState state, bool raw, SafeProjectorOperationCommand? patch,
         SafeProjectorOperationCommand? healthy)
     {
-        var source = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First);
-        var second = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second);
+        var source = owner.Source.ExpectedReference(new(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First));
+        var second = owner.Source.ExpectedReference(new(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second));
         var initial = Document(source, SafeProjectorOperationProtocol.InitialRevision,
             raw ? SafeProjectorOperationProtocol.InitialJson : SafeProjectorOperationProtocol.InitialSafe, raw);
         var rows = ImmutableArray.CreateBuilder<DocumentChange>();

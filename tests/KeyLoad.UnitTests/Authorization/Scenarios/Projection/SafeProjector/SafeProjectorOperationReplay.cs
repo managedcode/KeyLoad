@@ -22,7 +22,7 @@ internal static class SafeProjectorOperationReplay
             await SafeProjectorOperationImages.ObserveAsync(owner, async () =>
             {
                 var actual = owner.Database.Apply(command.Operation);
-                await ResultAsync(actual, command.Result);
+                await FreshAsync(actual, command, currentEpoch);
                 await EntryAsync(owner, command);
             });
             await SafeProjectorOperationImages.ObserveAsync(owner, async () =>

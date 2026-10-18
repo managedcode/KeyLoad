@@ -9,7 +9,7 @@ internal static class RestoreUnsafeDestinationFlow
 {
     private const string LinkName = "restore-link";
     private const string TargetName = "empty-link-target";
-    private const string InvalidTarget = "The native catalog backup destination is not clean.";
+    private const string InvalidTarget = "The native backup destination is not a regular directory path.";
 
     internal static async Task RunAsync(bool ancestorLink, CancellationToken token)
     {

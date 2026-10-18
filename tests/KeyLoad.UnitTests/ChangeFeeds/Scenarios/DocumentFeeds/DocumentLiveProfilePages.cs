@@ -25,9 +25,9 @@ internal static class DocumentLiveProfilePages
         var cursor = initial;
         var receipt = fixture.Commands[1].Receipt;
         LiveQueryChange[] changes =
-        [new(3L, receipt.Token, LiveQueryChangeKind.Upsert, fixture.Reference("a"), 2L, DocumentLiveProfileFixture.Row("a", 2L, 2)),
-         new(4L, receipt.Token, LiveQueryChangeKind.Upsert, fixture.Reference("b"), 1L, DocumentLiveProfileFixture.Row("b", 1L, 3)),
-         new(5L, receipt.Token, LiveQueryChangeKind.Remove, fixture.Reference("a"), 3L, null)];
+        [new(3L, receipt.Token, LiveQueryChangeKind.Upsert, fixture.Harness.ExpectedReference(fixture.Reference("a")), 2L, DocumentLiveProfileFixture.Row("a", 2L, 2)),
+         new(4L, receipt.Token, LiveQueryChangeKind.Upsert, fixture.Harness.ExpectedReference(fixture.Reference("b")), 1L, DocumentLiveProfileFixture.Row("b", 1L, 3)),
+         new(5L, receipt.Token, LiveQueryChangeKind.Remove, fixture.Harness.ExpectedReference(fixture.Reference("a")), 3L, null)];
         for (var index = 0; index < changes.Length; index++)
         {
             await DocumentLiveProfileReads.ObserveAsync(store, async () =>
@@ -60,7 +60,7 @@ internal static class DocumentLiveProfilePages
         {
             var page = queries.ReadLiveQuery(DocumentLiveProfileFixture.Reader, new(fixture.Query, cursor, Limit: 1), cancellationToken: token);
             await DocumentLiveProfileReads.EqualAsync(page, new LiveQueryPage([new(6L, fixture.Commands[2].Receipt.Token,
-                LiveQueryChangeKind.Upsert, fixture.Reference("c"), 1L, DocumentLiveProfileFixture.Row("c", 1L, 5))], page.Cursor, 6L, false, store.Position));
+                LiveQueryChangeKind.Upsert, fixture.Harness.ExpectedReference(fixture.Reference("c")), 1L, DocumentLiveProfileFixture.Row("c", 1L, 5))], page.Cursor, 6L, false, store.Position));
             await EmptyAsync(fixture, queries, store, page.Cursor, 6L, token);
         });
 }

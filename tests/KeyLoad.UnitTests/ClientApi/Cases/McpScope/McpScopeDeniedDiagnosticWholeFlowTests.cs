@@ -54,7 +54,7 @@ internal sealed class McpScopeDeniedDiagnosticWholeFlowTests
         var healthyState = QueueWholeFlowStorage.Bytes(database.Store);
         var healthyPosition = database.Store.Position;
         var healthy = database.Database.GetDocument(Reader, reference, receipt.Token);
-        var expected = new DocumentResult(reference, First, OriginalJson, false, []);
+        var expected = new DocumentResult(database.ExpectedReference(reference), First, OriginalJson, false, []);
         await Assert.That(NativeSerialization.Serialize(healthy).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(healthyState, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(healthyPosition);

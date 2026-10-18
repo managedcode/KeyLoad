@@ -33,7 +33,7 @@ internal static class TeamRowPolicyCold
                     TeamRowPolicyFlow.HealthyRevision, TeamRowPolicyFlow.HealthyJson, token);
                 await TeamRowPolicyAssertions.OldRefusedAsync(database, cold, original, originalOutcome, ErrorCode.PermissionDenied, token);
                 await TeamRowPolicyFlow.ReplayAsync(database, cold, current, receipt, currentOutcome, token);
-                await TeamGraphVisibilityAssertions.ReadAsync(database, cold, db.Partition, true, token);
+                await TeamGraphVisibilityAssertions.ReadAsync(db, database, cold, db.Partition, true, token);
                 await TeamRowPolicyAssertions.VisibleAsync(db, database, queries, cold,
                     TeamRowPolicyFlow.HealthyRevision, TeamRowPolicyFlow.HealthyJson, token);
             }

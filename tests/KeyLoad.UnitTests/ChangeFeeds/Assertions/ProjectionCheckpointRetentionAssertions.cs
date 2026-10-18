@@ -23,7 +23,7 @@ internal static class ProjectionCheckpointRetentionAssertions
         var purge = Assert.ThrowsExactly<KeyLoadException>(() => owner.ApplyEmbedded(state.Probe, token));
         await ErrorAsync(purge);
         await ProjectionConsumerIdentityAssertions.SameAsync(store, image, position);
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Source.Partition);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Source);
         await Assert.That(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(state.Source.Partition, ProjectionConsumerIdentityFixture.Target, Effect), cancellationToken: token)).IsNull();
     }
@@ -38,8 +38,8 @@ internal static class ProjectionCheckpointRetentionAssertions
     {
         await ProjectionConsumerIdentityAssertions.ExactAsync(owner.GetOutboxStatus(ProjectionConsumerIdentityFixture.Root, source.Partition),
             new OutboxStatus(new(3L, 4L, 0L, 0L), [new(source.Consumer, source.Definition, 3L, false)]));
-        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, source.Partition);
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, source.Partition);
+        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, source);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, source);
     }
 
     internal const string Effect = "effect";

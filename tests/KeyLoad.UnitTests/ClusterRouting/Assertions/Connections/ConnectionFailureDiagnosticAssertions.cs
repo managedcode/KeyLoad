@@ -21,7 +21,7 @@ internal static class ConnectionFailureDiagnosticAssertions
             StringComparison.Ordinal)).ToArray();
         await Assert.That(rows.Length).IsEqualTo(OneDiagnostic);
         var row = rows.Single();
-        await Assert.That(row).Contains(nameof(GrainFailureStage.CapabilityExecution));
+        await Assert.That(row).Contains(nameof(GrainFailureStage.EnvelopeVerification));
         await Assert.That(row).Contains(nameof(GrainFailureCategory.Unexpected));
         await Assert.That(row).Contains(nameof(ErrorCode.UnknownWriteOutcome));
         await Assert.That(row).Contains(StorageCause);

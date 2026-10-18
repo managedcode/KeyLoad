@@ -55,7 +55,7 @@ internal sealed class SafeProjectorOperationDatabase
     internal Result<object> Submit(Command<DatabaseCommand> operation)
     {
         CallerToken.ThrowIfCancellationRequested();
-        return Database.Apply(operation);
+        return Source.SubmitAtOriginalTime(Database, operation);
     }
 
     internal StoredOutcome ReadOutcome(Command<DatabaseCommand> operation)

@@ -11,7 +11,7 @@ internal static class BackupUnsafeDestinationTrial
     private const string LinkName = "backup-create-link";
     private const string EmptyTargetName = "backup-create-empty";
     private const string ChildName = "archive";
-    private const string InvalidTarget = "The native catalog backup destination is not clean.";
+    private const string InvalidTarget = "The native backup destination is not a regular directory path.";
 
     internal static async Task RunAsync(NativeBackupCutFixture fixture, bool ancestorLink,
         CancellationToken token)

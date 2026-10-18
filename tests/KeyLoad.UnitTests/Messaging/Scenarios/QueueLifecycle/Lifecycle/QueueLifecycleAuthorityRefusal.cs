@@ -35,7 +35,7 @@ internal static class QueueLifecycleAuthorityRefusal
             var operation = database.CreateCommand(OperationKind.Batch, id, QueueLifecycleTestProtocol.Administrator, state.Time, JsonSerializer.Serialize(command, JsonDefaults.Options));
             for (var repeat = 0; repeat < 2; repeat++)
             {
-                var refusal = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
+                var refusal = Assert.ThrowsExactly<KeyLoadException>(() => state.SubmitOriginal(database, operation));
                 await Assert.That(refusal.Code).IsEqualTo(ErrorCode.RecoveryRequired);
                 await Assert.That(refusal.Message).IsEqualTo("The queue lifecycle accounting is invalid.");
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, damaged, position, identity);
@@ -44,7 +44,7 @@ internal static class QueueLifecycleAuthorityRefusal
             }
             store.Commit((tx, _) => { tx.Put(key, original); return true; });
             await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(exact, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-            var repaired = database.Apply(operation);
+            var repaired = state.SubmitOriginal(database, operation);
             await Assert.That(Errors.Code(repaired.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(repaired.Problem?.Detail).IsEqualTo("The queue dead-letter sublimit is exhausted.");
 
@@ -52,7 +52,7 @@ internal static class QueueLifecycleAuthorityRefusal
             state.Failures.Add((operation, repaired));
             var receiptImage = QueueWholeFlowStorage.Bytes(store);
             var receiptPosition = store.Position;
-            await Assert.That(NativeSerialization.Serialize(database.Apply(operation)))
+            await Assert.That(NativeSerialization.Serialize(state.SubmitOriginal(database, operation)))
                 .IsEquivalentTo(NativeSerialization.Serialize(repaired), TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, receiptImage, receiptPosition, identity);
             await QueueLifecycleImage.SameAsync(store, state.Lane, queue);
@@ -78,7 +78,7 @@ internal static class QueueLifecycleAuthorityRefusal
         var command = new CommandRequest(id, state.Partition, [new ParkPendingQueueMessage(state.Lane.Queue,
             QueueLifecycleTestProtocol.Pending, QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One)]);
         var operation = database.CreateCommand(OperationKind.Batch, id, QueueLifecycleTestProtocol.Administrator, state.Time, JsonSerializer.Serialize(command, JsonDefaults.Options));
-        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
+        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => state.SubmitOriginal(database, operation));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(store.Position).IsEqualTo(before);
         await QueueLifecycleImage.SameAsync(store, state.Lane, refusal);

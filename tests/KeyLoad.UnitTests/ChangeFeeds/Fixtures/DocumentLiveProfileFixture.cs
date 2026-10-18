@@ -52,8 +52,9 @@ internal sealed class DocumentLiveProfileFixture : IDisposable
         var command = new CommandRequest(Guid.NewGuid(), Harness.Partition, [.. mutations]);
         var operation = Harness.Database.CreateCommand(OperationKind.Batch, command.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
         var before = Harness.Store.Position;
+        var expectedToken = Harness.NextCommitToken();
         var receipt = Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(command.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [.. effects], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, expectedToken, [.. effects], DurabilityProfile.ProcessDurable, 1);
         await DocumentLiveProfileReads.EqualAsync(receipt, expected);
         await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
         foreach (var effect in receipt.Mutations)

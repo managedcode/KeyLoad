@@ -21,7 +21,7 @@ internal static class ProjectionCheckpointRetentionFixture
         var refused = database.Database.ApplyEmbedded(pinned, token);
         await ProjectionCheckpointRetentionAssertions.PinnedAsync(refused);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(database.Database, source);
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(database.Database, source.Partition);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(database.Database, source);
         var probe = Purge(database.Database, source.Partition, 2L, 2);
         await Assert.That(probe.CommandId).IsNotEqualTo(pinned.CommandId);
         var state = NativeSerialization.Deserialize<ProjectionConsumerInfo>(source.Original)

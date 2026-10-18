@@ -49,14 +49,15 @@ internal sealed class NativeJournalPrincipalPolicyTests
         await Assert.That(storedCredentials).IsEmpty();
 
         var snapshotPath = Path.Combine(database.Directory, "authorization.snapshot");
-        database.Database.Store.CreateSnapshot(snapshotPath, expectedAppliedPosition: 0);
+        var originalAppliedPosition = database.Database.LastApplied;
+        database.Database.Store.CreateSnapshot(snapshotPath, expectedAppliedPosition: originalAppliedPosition);
         var replicaDirectory = Path.Combine(database.Directory, "replica");
         using var replica = new ZoneTreeStore(new ZoneTreeStoreOptions(replicaDirectory)
         {
             Incarnation = database.Store.Identity.Incarnation,
             SigningKey = database.Store.Identity.SigningKey
         }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        replica.InstallSnapshot(snapshotPath, expectedAppliedPosition: 0);
+        replica.InstallSnapshot(snapshotPath, expectedAppliedPosition: originalAppliedPosition);
         var replicatedPrincipal = replica.Read(view => view.GetRecord<PrincipalRecord>(
             KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
         await Assert.That(replicatedPrincipal).IsNotNull();

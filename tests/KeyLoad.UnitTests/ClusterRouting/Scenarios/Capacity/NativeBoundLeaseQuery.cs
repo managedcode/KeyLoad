@@ -24,7 +24,7 @@ internal static class NativeBoundLeaseQuery
                     K.Partition, [resource]);
                 var plan = PartitionQueryPlanFactory.Create(normalized, database.Store.Identity,
                     [K.Partition], database.Limits, engine.Execution).Leaves.Single();
-                return new PartitionQueryOwnedLeafRequestV2(new(plan, state.PhysicalOwner, principal.TenantId),
+                return new PartitionQueryOwnedLeafRequestV2(new(plan, state.PhysicalOwner, K.Partition.TenantId),
                     resource, coverage, principal);
             }, budget);
     }

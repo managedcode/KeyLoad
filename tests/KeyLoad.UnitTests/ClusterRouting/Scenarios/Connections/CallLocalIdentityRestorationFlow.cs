@@ -4,6 +4,8 @@ using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Authorization;
 using KeyLoad.UnitTests.Features.Messaging;
 using ManagedCode.Orleans.Identity.Core.Constants;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -101,7 +103,8 @@ internal static class CallLocalIdentityRestorationFlow
     {
         await Assert.That(reply.Error).IsNull();
         var id = ((PutDocument)command.Mutations.Single()).Id;
-        var expected = new CommitReceipt(command.CommandId, token, [new(PutKind, ConnectionNativeProtocol.Collection, id, 1)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, token, [new(PutKind, ConnectionNativeProtocol.Collection, id, 1)], DurabilityProfile.ProcessDurable,
+            scenario.Fixture.Source.Services.GetRequiredService<IOptions<NodeOptions>>().Value.ReplicaCount);
         await SafeProjectorOperationSeed.EqualAsync(ConnectionNativeAssertions.Value<CommitReceipt>(reply), expected);
         await SafeProjectorOperationSeed.EqualAsync(scenario.Stored(id),
             new DocumentResult(scenario.Reference(id), 1, json, false, []));

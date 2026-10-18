@@ -21,7 +21,9 @@ internal static class BlobCurrentFormatIdentities
     private const long SchedulerManageCapability = 1L << 37;
     private const long QueueCancelCapability = 1L << 38;
     private const long InboxWriteCapability = 1L << 39;
-    private const long AllCurrentCapabilities = (1L << 40) - 1;
+    private const long AnalyticsReadCapability = 1L << 40;
+    private const long AnalyticsWriteCapability = 1L << 41;
+    private const long AllCurrentCapabilities = (1L << 42) - 1;
     internal static async Task StableIdentitiesAsync()
     {
         await Assert.That(Numeric(ResourceKind.Collection)).IsEqualTo(ExistingCollectionResourceId);
@@ -39,6 +41,8 @@ internal static class BlobCurrentFormatIdentities
         await Assert.That(Numeric(Capability.SchedulerManage)).IsEqualTo(SchedulerManageCapability);
         await Assert.That(Numeric(Capability.QueueCancel)).IsEqualTo(QueueCancelCapability);
         await Assert.That(Numeric(Capability.InboxWrite)).IsEqualTo(InboxWriteCapability);
+        await Assert.That(Numeric(Capability.AnalyticsRead)).IsEqualTo(AnalyticsReadCapability);
+        await Assert.That(Numeric(Capability.AnalyticsWrite)).IsEqualTo(AnalyticsWriteCapability);
         await Assert.That(Numeric(Capability.All)).IsEqualTo(AllCurrentCapabilities);
         await Assert.That(Numeric(BlobUploadStatus.Active)).IsEqualTo(ActiveStatus);
         await Assert.That(Numeric(BlobUploadStatus.Complete)).IsEqualTo(CompleteStatus);

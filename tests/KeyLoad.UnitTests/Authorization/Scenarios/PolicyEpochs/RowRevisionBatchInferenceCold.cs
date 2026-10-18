@@ -35,7 +35,7 @@ internal static class RowRevisionBatchInferenceCold
                     await RowRevisionInferenceAssertions.ReplayAsync(database, store, item.Operation,
                         item.Result, item.Outcome, db.Partition, token);
                 }
-                await RowRevisionBatchInferenceAssertions.CurrentAsync(database, db.Partition, kind, token);
+                await RowRevisionBatchInferenceAssertions.CurrentAsync(db, database, db.Partition, kind, token);
                 await TeamRowPolicyAssertions.UnchangedAsync(store, image, position);
             }, failures);
             if (!lifetime.CloseCold(store, failures))

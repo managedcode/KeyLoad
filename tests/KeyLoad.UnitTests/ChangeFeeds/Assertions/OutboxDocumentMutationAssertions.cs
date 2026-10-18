@@ -15,7 +15,7 @@ internal static class OutboxDocumentMutationAssertions
         await ErrorAsync(() => owner.ReadChangeFeed(ProjectionConsumerIdentityFixture.Root,
             new(state.Partition, ProjectionConsumerIdentityFixture.Source), token));
         await ProjectionConsumerIdentityAssertions.SameAsync(store, image, position);
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Partition);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state);
         await Assert.That(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(state.Partition, ProjectionConsumerIdentityFixture.Target, "effect"), cancellationToken: token)).IsNull();
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, state.Seed, state.Seeded, token);

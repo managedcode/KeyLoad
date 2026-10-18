@@ -39,12 +39,14 @@ internal static class BlobOrphanReclaimContinuation
         await BlobWholeFlowAssertions.Unchanged(store, position + FaultAndRepairCommitCount, image);
         var healthy = new ReclaimBlobRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId,
             BlobReclaimWholeFlowFixture.SingleCount);
+        var healthyCut = (Token: ExpectedCanonicalCommit.Next(database, fixture.Blob.Partition), Position: store.Position);
         var result = BlobReclaimWholeFlow.Apply(database, OperationKind.ReclaimBlob, healthy, healthy.CommandId);
         var committed = result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobWholeFlowAssertions.Exact(committed.Value, new BlobReclaimResult(fixture.UploadId,
             BlobReclaimWholeFlowFixture.EmptyCount, BlobReclaimWholeFlowFixture.EmptyCount,
             BlobReclaimWholeFlowFixture.EmptyCount, true));
-        await BlobWholeFlowAssertions.Receipt(database, committed.Receipt, healthy.CommandId, fixture.Blob);
+        await BlobWholeFlowAssertions.Receipt(database, committed.Receipt, healthy.CommandId, fixture.Blob,
+            healthyCut.Token, healthyCut.Position);
         await BlobWholeFlowAssertions.Quotas(database, fixture.Blob, BlobReclaimWholeFlowFixture.EmptyCount,
             BlobReclaimWholeFlowFixture.EmptyCount, BlobReclaimWholeFlowFixture.EmptyCount);
         await BlobReclaimWholeFlow.Replay(database, store, OperationKind.ReclaimBlob, healthy, healthy.CommandId, result);

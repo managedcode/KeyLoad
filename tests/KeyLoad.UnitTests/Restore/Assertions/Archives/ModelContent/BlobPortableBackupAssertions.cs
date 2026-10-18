@@ -63,10 +63,12 @@ internal static class BlobPortableBackupAssertions
         token.ThrowIfCancellationRequested();
         var before = BackupPersistedPolicyAssertions.Capture(database.Store);
         var signed = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(source));
-        await Assert.That(signed.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(signed.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(signed.Message).IsEqualTo(BlobErrors.Fenced);
         var read = Assert.ThrowsExactly<KeyLoadException>(() => new BlobStorageOperations(database)
             .Metadata(BlobPortableBackupSeed.Root, new(metadata.Blob), token));
         await Assert.That(read.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(read.Message).IsEqualTo(BlobErrors.Fenced);
         await BackupPersistedPolicyAssertions.UnchangedAsync(database.Store, before);
     }
 }

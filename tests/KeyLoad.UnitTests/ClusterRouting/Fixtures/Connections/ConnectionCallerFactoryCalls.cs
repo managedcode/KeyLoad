@@ -42,7 +42,14 @@ internal sealed class ConnectionCallerFactoryCalls(NativeConnectionIdentityColli
     private Task<GrainOperationReply> CreateActual(PrincipalRecord principal, Guid requestId,
         CommandRequest command, CancellationToken token)
     {
-        var actual = state.Scenario.CommandAsync(principal, requestId, command, token);
+        var signed = state.Scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
+            command.CommandId, NativeSerialization.Serialize(command));
+        var expiry = state.Scenario.Fixture.Codec.Verify(signed).Envelope.ExpiresAt;
+        if (!state.OriginalExpiries.TryAdd(requestId, expiry))
+        {
+            throw new InvalidOperationException(P.Duplicate);
+        }
+        var actual = state.Scenario.InvokeAsync(principal, requestId, command.CommandId, signed, token);
         originals.Add(actual);
         return actual;
     }

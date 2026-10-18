@@ -43,11 +43,11 @@ internal static class RestoreIdentityOverrideAssertions
 
     internal static async Task ContentAsync(RestoreIdentityOverrideFixture fixture, DatabaseEngine database, bool healthy)
     {
-        await DocumentAsync(database, fixture.Partition, RestoreIdentityOverrideState.FirstId,
+        await DocumentAsync(database, fixture.Source, RestoreIdentityOverrideState.FirstId,
             RestoreIdentityOverrideState.FirstJson);
         if (healthy)
         {
-            await DocumentAsync(database, fixture.Partition, RestoreIdentityOverrideState.HealthyId,
+            await DocumentAsync(database, fixture.Source, RestoreIdentityOverrideState.HealthyId,
                 RestoreIdentityOverrideState.HealthyJson);
         }
         else
@@ -56,9 +56,10 @@ internal static class RestoreIdentityOverrideAssertions
         }
     }
 
-    private static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition, string id, string json)
+    private static async Task DocumentAsync(DatabaseEngine database, TestDatabase original, string id, string json)
     {
-        var expected = new DocumentResult(new(partition, RestoreIdentityOverrideState.Collection, id), 1L, json, false, []);
+        var reference = original.ExpectedReference(new(original.Partition, RestoreIdentityOverrideState.Collection, id));
+        var expected = new DocumentResult(reference, 1L, json, false, []);
         var actual = database.GetDocument(RestoreIdentityOverrideState.Principal, expected.Reference);
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));

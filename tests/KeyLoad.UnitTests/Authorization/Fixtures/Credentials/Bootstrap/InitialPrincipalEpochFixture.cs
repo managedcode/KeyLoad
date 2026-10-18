@@ -21,8 +21,9 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
         var command = new CommandRequest(Guid.NewGuid(), Harness.Partition, [new PutDocument(Collection, "record", "{\"value\":0}", 0L)]);
         Seed = Operation(OperationKind.Batch, command, id: command.CommandId);
         var before = Harness.Store.Position;
+        var expectedToken = Harness.NextCommitToken();
         SeedReceipt = Harness.Database.ApplyEmbedded(Seed, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(command.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [new("putDocument", Collection, "record", 1L)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, expectedToken, [new("putDocument", Collection, "record", 1L)], DurabilityProfile.ProcessDurable, 1);
         await InitialPrincipalEpochAssertions.EqualAsync(SeedReceipt, expected);
         await Assert.That(SeedReceipt.Mutations.Single().CompositionReferences).IsEmpty();
         await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);

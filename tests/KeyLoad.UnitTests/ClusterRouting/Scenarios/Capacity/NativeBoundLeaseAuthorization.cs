@@ -10,19 +10,19 @@ internal static class NativeBoundLeaseAuthorization
     {
         await Assert.That(original.Principal.ClusterAdministrator).IsTrue();
         await Assert.That(original.Principal.TenantId).IsNotEqualTo(K.Partition.TenantId);
-        await Assert.That(original.Original.Tenant).IsEqualTo(original.Principal.TenantId);
+        await Assert.That(original.Original.Tenant).IsEqualTo(K.Partition.TenantId);
         var changed = original with
         {
             Original = original.Original with
             {
-                Tenant = K.Partition.TenantId
+                Tenant = original.Principal.TenantId
             }
         };
-        await ReadRefusedAsync(state, operation, changed, ErrorCode.OwnershipLost,
-            "The partition query lifetime request is invalid.");
-        changed = changed with
+        await ReadRefusedAsync(state, operation, changed, ErrorCode.Validation,
+            "The partition query plan is invalid.");
+        changed = original with
         {
-            Principal = changed.Principal with
+            Principal = original.Principal with
             {
                 TenantId = K.Partition.TenantId
             }

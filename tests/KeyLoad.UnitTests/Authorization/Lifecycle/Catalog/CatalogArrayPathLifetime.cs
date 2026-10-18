@@ -44,7 +44,7 @@ internal static class CatalogArrayPathLifetime
                     await Assert.That(NativeSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
                 await ServerFailureObserver.ObserveAsync(() => ConserveAsync(cold, image, cut), failures);
                 var database = db.CreateConfiguredDatabase(cold);
-                await ServerFailureObserver.ObserveAsync(() => CatalogArrayPathAssertions.CheckAsync(database, cold,
+                await ServerFailureObserver.ObserveAsync(() => CatalogArrayPathAssertions.CheckAsync(db, database, cold,
                     db.Partition, true, true, 2L, token), failures);
                 await ServerFailureObserver.ObserveAsync(() => CatalogArrayPathAssertions.ReplayAsync(database, cold,
                     original, originalReceipt, originalOutcome, token), failures);

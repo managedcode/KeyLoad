@@ -26,8 +26,9 @@ internal sealed class CursorExpiryBoundaryTests
         var seed = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new PutDocument(Collection, FirstId, Json), new PutDocument(Collection, SecondId, Json)]);
         var seedCut = db.Store.Position;
+        var expectedToken = db.NextCommitToken();
         var seeded = db.Submit(OperationKind.Batch, seed, id: seed.CommandId);
-        await CursorExpiryBoundaryAssertions.ReceiptAsync(db, seed, seeded.Get<CommitReceipt>(), seedCut);
+        await CursorExpiryBoundaryAssertions.ReceiptAsync(db, seed, seeded.Get<CommitReceipt>(), seedCut, expectedToken);
         var principal = new PrincipalRecord(Reader, Tenant,
             [new(DatabaseScope, Collection, Capability.DocumentsRead | Capability.Query)], []);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();

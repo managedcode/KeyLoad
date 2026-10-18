@@ -12,10 +12,11 @@ internal static class FieldWriteOutputAssertions
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 
     internal static async Task ReceiptAsync(FieldWriteOutputState state, CommandRequest command,
-        CommitReceipt actual, long before, string kind, long revision)
+        CommitReceipt actual, long before, CommitToken expectedToken, string kind, long revision)
     {
-        CommitReceipt expected = new(command.CommandId, new(state.Store.Identity.Incarnation, state.Owner.Partition.AtomicPartitionId, before + P.NextPosition), [new(kind, P.Collection, P.Document, revision)], DurabilityProfile.ProcessDurable, 1);
+        CommitReceipt expected = new(command.CommandId, expectedToken, [new(kind, P.Collection, P.Document, revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(expected, actual);
+        await Assert.That(state.Store.Position).IsEqualTo(before + P.NextPosition);
         await Assert.That(actual.Mutations.All(mutation => mutation.CompositionReferences.IsEmpty)).IsTrue();
     }
 
@@ -25,8 +26,8 @@ internal static class FieldWriteOutputAssertions
         var position = state.Store.Position;
         var revision = updated ? P.CurrentRevision : P.OriginalRevision;
         var body = updated ? P.Updated : P.Original;
-        DocumentResult hidden = new(state.Reference, revision, P.Hidden, true, [P.Path]);
-        DocumentResult full = new(state.Reference, revision, body, false, []);
+        DocumentResult hidden = new(state.Owner.ExpectedReference(state.Reference), revision, P.Hidden, true, [P.Path]);
+        DocumentResult full = new(state.Owner.ExpectedReference(state.Reference), revision, body, false, []);
         await EqualAsync(hidden, state.Database.GetDocument(P.Writer, state.Reference, cancellationToken: token)!);
         await EqualAsync(full, state.Database.GetDocument(P.Reader, state.Reference, cancellationToken: token)!);
         await EqualAsync(full, state.Database.GetDocument(P.Root, state.Reference, cancellationToken: token)!);

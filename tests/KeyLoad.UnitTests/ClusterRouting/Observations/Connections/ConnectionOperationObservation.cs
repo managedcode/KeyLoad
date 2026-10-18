@@ -13,8 +13,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
 
     public async Task Invoke(IIncomingGrainCallContext context)
     {
-        if (context.Grain is ConnectionGrain connection
-            && context.MethodName == nameof(IConnectionGrain.ExecuteStreamAsync))
+        if (context.Grain is ConnectionGrain connection)
         {
             connections[connection.GetPrimaryKey()] = context.TargetContext;
         }
@@ -37,11 +36,43 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     {
         if (phase == GrainRequestPhase.RequestStarted)
         {
-            if (context.GrainInstance is not RequestWorkerGrain
-                || RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
-                || state.RequestId != identity.RequestId || state.CommandId != identity.CommandId
-                || !connections.TryGetValue(state.ConnectionId, out var connection)
-                || connection.GrainInstance is not ConnectionGrain owner || owner.GetPrimaryKey() != state.ConnectionId)
+            if (context.GrainInstance is not ConnectionGrain producer)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (state.RequestId != identity.RequestId)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (state.CommandId != identity.CommandId)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (!connections.TryGetValue(state.ConnectionId, out var connection))
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (connection.GrainInstance is not ConnectionGrain owner)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (owner.GetPrimaryKey() != state.ConnectionId)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (producer.GetPrimaryKey() != state.ConnectionId)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (connection.GrainId != context.GrainId)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            if (connection.ActivationId != context.ActivationId)
             {
                 throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
             }
@@ -86,8 +117,8 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     {
         if (operations.TryGetValue(identity.RequestId, out var observed))
         {
-            if (observed.Identity != identity || observed.WorkerContext.GrainId != context.GrainId
-                || observed.WorkerContext.ActivationId != context.ActivationId)
+            if (observed.Identity != identity || observed.ProducerContext.GrainId != context.GrainId
+                || observed.ProducerContext.ActivationId != context.ActivationId)
             {
                 throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
             }
@@ -116,7 +147,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         foreach (var observed in operations.OrderBy(static pair => pair.Key))
         {
             Console.WriteLine(FormattableString.Invariant(
-                $"ConnectionNative phase={phase} request={observed.Key:D} connection={observed.Value.GrainId} activation={observed.Value.ActivationId} worker={observed.Value.WorkerContext.GrainId} workerActivation={observed.Value.WorkerContext.ActivationId} producerDisposed={observed.Value.Disposed.Task.Status}"));
+                $"ConnectionNative phase={phase} request={observed.Key:D} connection={observed.Value.GrainId} activation={observed.Value.ActivationId} producer={observed.Value.ProducerContext.GrainId} producerActivation={observed.Value.ProducerContext.ActivationId} producerDisposed={observed.Value.Disposed.Task.Status}"));
         }
     }
 

@@ -4,7 +4,6 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsRoutingCases
 {
-    private const int EarlyFailedSequence = 1;
     private const int PostStartFailedSequence = 2;
     private const string WriterPrefix = "request-route-writer-";
     private const string ForgedPrefix = "request-route-forged-";
@@ -107,9 +106,8 @@ internal static class RequestCqrsRoutingCases
         var signed = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
             NativeSerialization.Serialize(command));
         var beforeMissing = fixture.Database.Store.Position;
-        var missing = await RequestCqrsNativeCommandStream.InvokeWithoutContextAsync(fixture, signed, requestId,
-            commandId, EarlyFailedSequence, ErrorCode.TokenInvalidated);
-        await Assert.That(missing.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await RequestCqrsNativeCommandStream.AssertPreStreamRefusalAsync(fixture, signed, null, requestId,
+            commandId, ErrorCode.TokenInvalidated);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(beforeMissing);
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition, writer.Id, commandId)).IsNull();
         await AssertDocumentMissingAsync(fixture, documentId);
@@ -122,9 +120,8 @@ internal static class RequestCqrsRoutingCases
         var forgedToken = fixture.Codec.CreateCommand(forgedRequest, writer.Id, OperationKind.Batch, forgedCommandId,
             NativeSerialization.Serialize(forgedCommand));
         var beforeForged = fixture.Database.Store.Position;
-        var rejected = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, forgedToken, forged,
-            forgedRequest, forgedCommandId, EarlyFailedSequence, expectedError: ErrorCode.Unauthenticated);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Unauthenticated);
+        await RequestCqrsNativeCommandStream.AssertPreStreamRefusalAsync(fixture, forgedToken, forged,
+            forgedRequest, forgedCommandId, ErrorCode.Unauthenticated);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(beforeForged);
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition, writer.Id, forgedCommandId)).IsNull();
         await AssertDocumentMissingAsync(fixture, forgedDocumentId);

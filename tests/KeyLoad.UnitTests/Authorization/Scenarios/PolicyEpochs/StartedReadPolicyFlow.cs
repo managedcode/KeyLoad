@@ -18,8 +18,9 @@ internal static class StartedReadPolicyFlow
             var writer = scenario.Principal();
             var reader = scenario.Principal();
             var command = scenario.Command(P.Document);
+            var expectedToken = ExpectedCanonicalCommit.Next(scenario.Fixture.Database.Database, command.Partition);
             var receipt = await scenario.CommandAsync(writer, Guid.NewGuid(), command, token);
-            await StartedReadPolicyAssertions.ReceiptAsync(scenario, command, receipt);
+            await StartedReadPolicyAssertions.ReceiptAsync(scenario, command, receipt, expectedToken);
             var outcome = scenario.Fixture.Database.Store.Read(view => view.ReadOwnedValue(
                 OutcomeStoreOracle.PartitionKey(command.Partition, writer.Id, command.CommandId)))!;
             await HeldAsync(scenario, writer, reader, command, receipt, outcome, variant, token);

@@ -49,7 +49,7 @@ internal sealed class ConfiguredVectorProfileTests
                 NativeSerialization.Serialize(expected[index]))).IsTrue();
         }
         var token = TestContext.Current!.Execution.CancellationToken;
-        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database.Partition, token);
+        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database, token);
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var replay = database.Submit(OperationKind.Batch, healthy, id: healthy.CommandId).Get<CommitReceipt>();
@@ -60,7 +60,7 @@ internal sealed class ConfiguredVectorProfileTests
         using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
         var owner = QueueWholeFlowStorage.Open(reopened);
-        await ConfiguredVectorProfileFlow.HealthyAsync(owner, database.Partition, token);
+        await ConfiguredVectorProfileFlow.HealthyAsync(owner, database, token);
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(reopened.Position).IsEqualTo(position);
         var restoredReceipt = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, healthy.CommandId, Root, default, JsonSerializer.Serialize(healthy, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
@@ -88,7 +88,7 @@ internal sealed class ConfiguredVectorProfileTests
         await Assert.That(NativeSerialization.Serialize(restored).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);
         database.Submit(OperationKind.Batch, healthy, principal: Root, id: healthy.CommandId).Get<CommitReceipt>();
-        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database.Partition, TestContext.Current!.Execution.CancellationToken);
+        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database, TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
     public async Task CurrentDeniedPrincipalCannotProbeConfiguredModelAndHealthyAuthorizedWriteFollows()
@@ -107,7 +107,7 @@ internal sealed class ConfiguredVectorProfileTests
         await Assert.That(ConfiguredVectorProfileFlow.ModelBytes(database, command, Reader)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);
         database.Submit(OperationKind.Batch, healthy, id: healthy.CommandId).Get<CommitReceipt>();
-        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database.Partition, TestContext.Current!.Execution.CancellationToken);
+        await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database, TestContext.Current!.Execution.CancellationToken);
     }
 
 }

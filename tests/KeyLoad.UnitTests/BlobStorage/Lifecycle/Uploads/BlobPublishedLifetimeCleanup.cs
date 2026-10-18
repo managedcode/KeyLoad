@@ -23,7 +23,8 @@ internal static class BlobPublishedLifetimeCleanup
             Deleted = true,
             UpdatedAt = deletedAt
         });
-        await BlobWholeFlowAssertions.Receipt(owner, deleted.Original.Get<BlobCommitResult<BlobMetadata>>().Receipt, deletion.CommandId, fixture.Blob);
+        await BlobWholeFlowAssertions.Receipt(owner, deleted.Original.Get<BlobCommitResult<BlobMetadata>>().Receipt,
+            deletion.CommandId, fixture.Blob, deleted.ExpectedToken, deleted.PreviousStorePosition);
         await BlobWholeFlowAssertions.Quotas(owner, fixture.Blob, 65_553, 1, 0);
         var state = owner.Store.Read(view => view.GetRecord<BlobState>(BlobRangeIntegrityOracle.Key("blob-state-v1", fixture)));
         var incarnation = store.Identity.Incarnation;
@@ -36,7 +37,8 @@ internal static class BlobPublishedLifetimeCleanup
         var reclaimed = BlobPublishedLifetimeOperations.Send(owner, OperationKind.ReclaimBlob, cleanup.CommandId, cleanup);
         var result = reclaimed.Original.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobWholeFlowAssertions.Exact(result.Value, new BlobReclaimResult(fixture.UploadId, 2, 0, 65_553, true));
-        await BlobWholeFlowAssertions.Receipt(owner, result.Receipt, cleanup.CommandId, fixture.Blob);
+        await BlobWholeFlowAssertions.Receipt(owner, result.Receipt, cleanup.CommandId, fixture.Blob,
+            reclaimed.ExpectedToken, reclaimed.PreviousStorePosition);
         await BlobWholeFlowAssertions.Quotas(owner, fixture.Blob, 0, 0, 0);
         await Assert.That(new BlobStorageOperations(owner).UploadInfo("root", new(fixture.Blob, fixture.UploadId))).IsNull();
         foreach (var prefix in new[] { "blob-part-v1", "blob-partmeta-v1" })

@@ -9,6 +9,7 @@ internal static class RequestCqrsNativeCommandStream
     private const int CompletedSequence = 2;
     private const int EarlyFailedSequence = 1;
     private const int PostStartFailedSequence = 2;
+    private const string MissingPreStreamRefusal = "The request stream was not refused before its first native chunk.";
 
     internal static Task<GrainOperationReply> InvokeAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
         Guid requestId, Guid commandId, CommandRequest command, Func<Task>? beforeFirstPull = null)
@@ -22,22 +23,34 @@ internal static class RequestCqrsNativeCommandStream
     internal static Task<GrainOperationReply> InvokeAsync(RequestCqrsHostedRuntimeFixture fixture, string signed,
         PrincipalRecord contextPrincipal, Guid requestId, Guid commandId, int terminalSequence,
         ErrorCode? expectedError = null, Func<Task>? beforeFirstPull = null)
-        => InvokeCoreAsync(fixture, signed, contextPrincipal, true, requestId, commandId, terminalSequence,
+        => InvokeCoreAsync(fixture, signed, contextPrincipal, requestId, commandId, terminalSequence,
             expectedError, beforeFirstPull);
 
-    internal static Task<GrainOperationReply> InvokeWithoutContextAsync(RequestCqrsHostedRuntimeFixture fixture,
-        string signed, Guid requestId, Guid commandId, int terminalSequence, ErrorCode expectedError)
-        => InvokeCoreAsync(fixture, signed, null, false, requestId, commandId, terminalSequence, expectedError);
+    internal static async Task AssertPreStreamRefusalAsync(RequestCqrsHostedRuntimeFixture fixture,
+        string signed, PrincipalRecord? contextPrincipal, Guid requestId, Guid commandId, ErrorCode expectedError)
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
+        using IDisposable context = contextPrincipal is null
+            ? RequestCqrsClientContext.Set(null, false, null, includeState: false)
+            : new GrainRequestIdentityScope(fixture.Services, contextPrincipal,
+                requestId, commandId, deadline.Token, connectionId: fixture.ConnectionId);
+        var actor = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
+        await using var iterator = actor.ExecuteStreamAsync(signed, deadline.Token)
+            .WithBatchSize(GrainRequestStreamProtocol.BatchSize).GetAsyncEnumerator(deadline.Token);
+        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
+        {
+            _ = await iterator.MoveNextAsync();
+        }) ?? throw new InvalidOperationException(MissingPreStreamRefusal);
+        await Assert.That(failure.Code).IsEqualTo(expectedError);
+    }
 
     private static async Task<GrainOperationReply> InvokeCoreAsync(RequestCqrsHostedRuntimeFixture fixture, string signed,
-        PrincipalRecord? contextPrincipal, bool publishContext, Guid requestId, Guid commandId, int terminalSequence,
+        PrincipalRecord contextPrincipal, Guid requestId, Guid commandId, int terminalSequence,
         ErrorCode? expectedError, Func<Task>? beforeFirstPull = null)
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
-        using IDisposable context = publishContext
-            ? new GrainRequestIdentityScope(fixture.Services, contextPrincipal,
-                requestId, commandId, deadline.Token, connectionId: fixture.ConnectionId)
-            : RequestCqrsClientContext.Set(null, false, null, includeState: false);
+        using var context = new GrainRequestIdentityScope(fixture.Services, contextPrincipal,
+            requestId, commandId, deadline.Token, connectionId: fixture.ConnectionId);
         var actor = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
         var stream = actor.ExecuteStreamAsync(signed, deadline.Token)
             .WithBatchSize(GrainRequestStreamProtocol.BatchSize);

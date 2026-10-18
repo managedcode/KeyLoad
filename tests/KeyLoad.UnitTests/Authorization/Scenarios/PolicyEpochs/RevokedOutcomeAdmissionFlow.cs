@@ -63,6 +63,7 @@ internal static class RevokedOutcomeAdmissionFlow
     {
         fixture.Fresh = fixture.Next();
         fixture.FreshPosition = fixture.Store.Position + 1;
+        fixture.FreshToken = ExpectedCanonicalCommit.Next(fixture.Database, fixture.Harness.Partition);
         fixture.FreshResult = fixture.Database.Apply(fixture.Operation(fixture.Fresh));
         fixture.FreshOutcome = fixture.ReadOutcome(fixture.Fresh.CommandId);
         await RevokedOutcomeAdmissionValues.ReceiptAsync(fixture, fixture.Fresh, fixture.FreshResult, fixture.FreshPosition, true);

@@ -1,5 +1,8 @@
 using KeyLoad.Clustering;
+using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Messaging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -19,13 +22,14 @@ internal static class ConnectionClosedCommandContinuation
         {
             var originalIdentity = scenario.Fixture.Database.Store.Identity;
             var expectedPosition = checked(scenario.Fixture.Database.ReadCanonicalCut().AppliedPosition + NextCommit);
+            var expectedCopies = scenario.Fixture.Source.Services.GetRequiredService<IOptions<NodeOptions>>().Value.ReplicaCount;
             var requestId = Guid.NewGuid();
             var created = await ConnectionAwaitedSettlementCalls.CommandForOwnerAsync(scenario, principal,
                 requestId, command, ownerId, token);
             await Assert.That(created.Error).IsNull();
             var receipt = ConnectionNativeAssertions.Value<CommitReceipt>(created);
             await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-            var expectedReceipt = new CommitReceipt(command.CommandId, new(originalIdentity.Incarnation, command.Partition.AtomicPartitionId, expectedPosition), [new("putDocument", ConnectionNativeProtocol.Collection, OriginalDocument, InitialRevision)], DurabilityProfile.ProcessDurable, 1);
+            var expectedReceipt = new CommitReceipt(command.CommandId, new(originalIdentity.Incarnation, command.Partition.AtomicPartitionId, expectedPosition), [new("putDocument", ConnectionNativeProtocol.Collection, OriginalDocument, InitialRevision)], DurabilityProfile.ProcessDurable, expectedCopies);
             await Assert.That(JsonDefaults.Serialize(receipt).SequenceEqual(JsonDefaults.Serialize(expectedReceipt))).IsTrue();
             await Assert.That(JsonDefaults.Serialize(receipt.Mutations).SequenceEqual(JsonDefaults.Serialize(
                 new MutationReceipt[] { new("putDocument", ConnectionNativeProtocol.Collection,

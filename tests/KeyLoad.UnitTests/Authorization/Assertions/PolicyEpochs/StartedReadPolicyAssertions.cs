@@ -1,9 +1,12 @@
 using System.Text;
 using KeyLoad.Clustering;
+using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.Messaging;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using P = KeyLoad.UnitTests.Features.Authorization.StartedReadPolicyProtocol;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -11,14 +14,15 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class StartedReadPolicyAssertions
 {
     internal static async Task ReceiptAsync(ConnectionNativeScenario scenario, CommandRequest command,
-        GrainOperationReply reply)
+        GrainOperationReply reply, CommitToken expectedToken)
     {
         await Assert.That(reply.Error).IsNull();
         var receipt = ConnectionNativeAssertions.Value<CommitReceipt>(reply);
-        var store = scenario.Fixture.Database.Store;
         var entry = scenario.Fixture.Database.ReadStoredOutcome(command.CommandId);
-        CommitReceipt expected = new(command.CommandId, new(store.Identity.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(P.Put, ConnectionNativeProtocol.Collection, P.Document, P.Revision)], DurabilityProfile.ProcessDurable, 1);
+        CommitReceipt expected = new(command.CommandId, expectedToken, [new(P.Put, ConnectionNativeProtocol.Collection, P.Document, P.Revision)], DurabilityProfile.ProcessDurable,
+            scenario.Fixture.Source.Services.GetRequiredService<IOptions<NodeOptions>>().Value.ReplicaCount);
         await EqualAsync(expected, receipt);
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(expectedToken.Position);
         await Assert.That(receipt.Token.Position).IsGreaterThan(P.EmptyPosition);
         await Assert.That(receipt.Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
     }

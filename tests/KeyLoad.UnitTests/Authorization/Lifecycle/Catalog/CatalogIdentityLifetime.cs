@@ -43,7 +43,7 @@ internal static class CatalogIdentityLifetime
                     await Assert.That(NativeSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
                 await ServerFailureObserver.ObserveAsync(() => ConserveAsync(cold, image, cut), failures);
                 var database = db.CreateConfiguredDatabase(cold);
-                await ServerFailureObserver.ObserveAsync(() => CatalogIdentityAssertions.HealthyAsync(database, cold,
+                await ServerFailureObserver.ObserveAsync(() => CatalogIdentityAssertions.HealthyAsync(db, database, cold,
                     db.Partition, true, true, 2L, token), failures);
                 await ServerFailureObserver.ObserveAsync(() => CatalogIdentityAssertions.ReplayAsync(database, cold,
                     seed, seedReceipt, seedOutcome, CatalogIdentityProtocol.Root, token), failures);

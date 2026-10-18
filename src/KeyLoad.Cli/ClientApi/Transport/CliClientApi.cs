@@ -9,7 +9,7 @@ namespace KeyLoad.Cli.Features.ClientApi;
 
 internal static class CliClientApi
 {
-    private const string MessagesBaseName = "KeyLoad.Cli.Features.ClientApi.CliClientMessages";
+    private const string MessagesBaseName = "KeyLoad.Cli.ClientApi.CliClientMessages";
     private const string HelpMessageKey = "Help";
     internal const string MissingCredentialMessageKey = "MissingCredential";
     private const string NodeUnavailableMessageKey = "NodeUnavailable";

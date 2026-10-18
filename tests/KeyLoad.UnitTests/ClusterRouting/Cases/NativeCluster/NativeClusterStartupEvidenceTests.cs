@@ -24,6 +24,7 @@ internal sealed class NativeClusterStartupEvidenceTests
         }
         catch (OperationCanceledException observed) { original = observed; }
         await Assert.That(original).IsNotNull();
+        await failed.DisposeAsync();
         await Assert.That(failed.IsDisposalJoined).IsTrue();
         await Assert.That(failed.OwnedDirectoryExists).IsFalse();
         await OperationFailureAsync();

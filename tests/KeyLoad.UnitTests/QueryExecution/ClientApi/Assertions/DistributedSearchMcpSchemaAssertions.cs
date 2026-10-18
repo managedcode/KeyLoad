@@ -101,12 +101,19 @@ internal static class DistributedSearchMcpSchemaAssertions
         await PrimitiveAsync(root, documentProperties.GetProperty(DistributedSearchMcpProtocol.Redacted), DistributedSearchMcpProtocol.Boolean);
         await ArrayAsync(root, documentProperties.GetProperty(DistributedSearchMcpProtocol.RedactedFields), McpSchemaInspector.String);
         var reference = Shape(root, document.GetProperty(McpSchemaInspector.Properties).GetProperty(DistributedSearchMcpProtocol.Reference));
-        string[] referenceFields = [DistributedSearchMcpProtocol.Partition, DistributedSearchMcpProtocol.Collection, DistributedSearchMcpProtocol.Id];
-        await ObjectAsync(reference, referenceFields, referenceFields);
+        string[] referenceFields = [DistributedSearchMcpProtocol.Partition, DistributedSearchMcpProtocol.Collection,
+            DistributedSearchMcpProtocol.Id, DistributedSearchMcpProtocol.Lifetime];
+        await ObjectAsync(reference, referenceFields,
+            [DistributedSearchMcpProtocol.Partition, DistributedSearchMcpProtocol.Collection, DistributedSearchMcpProtocol.Id]);
         var referenceProperties = reference.GetProperty(McpSchemaInspector.Properties);
         await PrimitiveAsync(root, referenceProperties.GetProperty(DistributedSearchMcpProtocol.Collection), McpSchemaInspector.String);
         await PrimitiveAsync(root, referenceProperties.GetProperty(DistributedSearchMcpProtocol.Id), McpSchemaInspector.String);
         await PartitionAsync(root, reference.GetProperty(McpSchemaInspector.Properties).GetProperty(DistributedSearchMcpProtocol.Partition));
+        var lifetime = referenceProperties.GetProperty(DistributedSearchMcpProtocol.Lifetime);
+        await Assert.That(McpSchemaInspector.HasType(lifetime, McpSchemaInspector.Null)).IsTrue();
+        await ObjectAsync(Shape(root, lifetime), [DistributedSearchMcpProtocol.Incarnation], [DistributedSearchMcpProtocol.Incarnation]);
+        await PrimitiveAsync(root, Shape(root, lifetime).GetProperty(McpSchemaInspector.Properties)
+            .GetProperty(DistributedSearchMcpProtocol.Incarnation), McpSchemaInspector.String);
     }
 
     private static async Task ExplanationAsync(JsonElement root, JsonElement schema)

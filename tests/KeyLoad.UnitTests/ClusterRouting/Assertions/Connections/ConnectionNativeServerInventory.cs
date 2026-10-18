@@ -14,16 +14,18 @@ internal sealed class ConnectionNativeServerInventory
     private readonly HashSet<SiloAddress> silos = [];
     private readonly ConcurrentDictionary<GrainId, byte> consumers = new();
     private readonly IGrainFactory grains;
+    private readonly GrainType connectionGrainType;
 
     internal ConnectionNativeServerInventory(RequestCqrsHostedCluster hosts,
         IGrainFactory grains, Guid consumer)
     {
         this.grains = grains;
+        connectionGrainType = ((GrainReference)grains.GetGrain<IConnectionGrain>(consumer)).GrainId.Type;
         foreach (var node in hosts.Nodes)
         {
             var id = ((GrainReference)grains.GetGrain<IConnectionGrain>(node.ConnectionId)).GrainId;
             var actual = node.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress;
-            if (!services.Add(id) || !silos.Add(actual))
+            if (id.Type != connectionGrainType || !services.Add(id) || !silos.Add(actual))
             {
                 throw new InvalidOperationException(InvalidInventory);
             }
@@ -38,7 +40,7 @@ internal sealed class ConnectionNativeServerInventory
     internal void RegisterConsumer(Guid id)
     {
         var grain = ((GrainReference)grains.GetGrain<IConnectionGrain>(id)).GrainId;
-        if (id == Guid.Empty || services.Contains(grain))
+        if (id == Guid.Empty || grain.Type != connectionGrainType || services.Contains(grain))
         {
             throw new InvalidOperationException(InvalidInventory);
         }
@@ -53,7 +55,7 @@ internal sealed class ConnectionNativeServerInventory
         var seen = new HashSet<GrainId>();
         var serviceCount = NoActivations;
         var total = NoActivations;
-        foreach (var row in all.Where(row => row.GrainId.Type == GrainType.Create(GrainRoutingProtocol.RequestAlias)))
+        foreach (var row in all.Where(row => row.GrainId.Type == connectionGrainType))
         {
             total++;
             if (!seen.Add(row.GrainId) || !silos.Contains(row.SiloAddress))

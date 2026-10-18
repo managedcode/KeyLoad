@@ -13,9 +13,11 @@ internal static class BlobReclaimHealthyContinuation
     {
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId,
             BlobReclaimWholeFlowFixture.Replacement.Length, BlobReclaimWholeFlowFixture.InitialRevision);
+        var beginCut = (Token: ExpectedCanonicalCommit.Next(database, fixture.Blob.Partition), Position: store.Position);
         var begun = BlobReclaimWholeFlow.Apply(database, OperationKind.BeginBlobUpload, begin, begin.CommandId)
             .Get<BlobCommitResult<BlobUploadInfo>>();
-        await BlobWholeFlowAssertions.Receipt(database, begun.Receipt, begin.CommandId, fixture.Blob);
+        await BlobWholeFlowAssertions.Receipt(database, begun.Receipt, begin.CommandId, fixture.Blob,
+            beginCut.Token, beginCut.Position);
         await BlobWholeFlowAssertions.Quotas(database, fixture.Blob, BlobReclaimWholeFlowFixture.Replacement.Length,
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.SingleCount);
         await RefusedOldLifetime(database, store, OperationKind.AbortBlobUpload, fixture.Abort, fixture.Abort.CommandId);
@@ -32,12 +34,14 @@ internal static class BlobReclaimHealthyContinuation
         await Assert.That(written.Value.IntegrityHash).IsEqualTo(chain);
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId, chain);
         var now = database.EvaluationClock.GetUtcNow();
+        var completeCut = (Token: ExpectedCanonicalCommit.Next(database, fixture.Blob.Partition), Position: store.Position);
         var result = QueueWholeFlowStorage.Apply(database, OperationKind.CompleteBlobUpload, complete, complete.CommandId, now);
         var published = result.Get<BlobCommitResult<BlobMetadata>>();
         var expected = new BlobMetadata(fixture.Blob, BlobReclaimWholeFlowFixture.PublishedRevision,
             fixture.UploadId, part.Bytes.Length, BlobReclaimWholeFlowFixture.SingleCount, chain, new RowAccess(), now);
         await BlobWholeFlowAssertions.Exact(published.Value, expected);
-        await BlobWholeFlowAssertions.Receipt(database, published.Receipt, complete.CommandId, fixture.Blob);
+        await BlobWholeFlowAssertions.Receipt(database, published.Receipt, complete.CommandId, fixture.Blob,
+            completeCut.Token, completeCut.Position);
         await BlobWholeFlowAssertions.Quotas(database, fixture.Blob, part.Bytes.Length,
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.EmptyCount);
         await BlobReclaimWholeFlow.Replay(database, store, OperationKind.CompleteBlobUpload, complete, complete.CommandId, result);

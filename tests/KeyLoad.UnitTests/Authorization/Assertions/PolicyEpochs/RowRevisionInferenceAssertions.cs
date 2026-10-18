@@ -21,6 +21,7 @@ internal static class RowRevisionInferenceAssertions
         string detail, CancellationToken token)
     {
         var before = TeamRowPolicyAssertions.Image(store);
+        var expectedApplied = checked(database.LastApplied + 1L);
         var beforeClock = store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))!;
         var outbox = JsonDefaults.Serialize(database.GetOutboxStatus(P.Root, command.Partition));
         var operation = RowRevisionInferenceRequests.Operation(database, command);
@@ -34,8 +35,10 @@ internal static class RowRevisionInferenceAssertions
         await Assert.That(stored.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(JsonDefaults.Serialize(stored.Result).AsSpan().SequenceEqual(JsonDefaults.Serialize(result))).IsTrue();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locatorKey))!.AsSpan().SequenceEqual(outcomeKey)).IsTrue();
-        string[] allowed = [Convert.ToHexString(outcomeKey), Convert.ToHexString(locatorKey), Convert.ToHexString(KeySpace.ClockBytes)];
+        string[] allowed = [Convert.ToHexString(outcomeKey), Convert.ToHexString(locatorKey), Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes)];
         await Assert.That(Filter(before, allowed).SequenceEqual(Filter(TeamRowPolicyAssertions.Image(store), allowed))).IsTrue();
+        await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
+            .AsSpan().SequenceEqual(NativeSerialization.Serialize(expectedApplied))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(database.GetOutboxStatus(P.Root, command.Partition)).AsSpan().SequenceEqual(outbox)).IsTrue();
         var afterClock = store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))!;
         await Assert.That(NativeSerialization.Deserialize<DateTimeOffset>(afterClock))
@@ -60,10 +63,10 @@ internal static class RowRevisionInferenceAssertions
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, position);
     }
 
-    internal static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition, string id,
+    internal static async Task DocumentAsync(TestDatabase creation, DatabaseEngine database, PartitionRef partition, string id,
         long revision, string json, CancellationToken token)
     {
-        DocumentResult expected = new(new(partition, P.Collection, id), revision, json, false, []);
+        DocumentResult expected = new(creation.ExpectedReference(new(partition, P.Collection, id)), revision, json, false, []);
         var actual = database.GetDocument(P.Root, expected.Reference, cancellationToken: token);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
@@ -72,21 +75,24 @@ internal static class RowRevisionInferenceAssertions
     {
         var command = RowRevisionInferenceRequests.Create(db.Partition, kind, P.Hidden, P.RepairRevision);
         var operation = RowRevisionInferenceRequests.Operation(db.Database, command);
+        var before = db.Store.Position;
+        var expectedToken = db.NextCommitToken();
         var actual = db.Database.ApplyEmbedded(operation, token);
         var receipt = actual.Get<CommitReceipt>();
-        CommitReceipt expected = new(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, db.Store.Position), [new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
+        CommitReceipt expected = new(command.CommandId, expectedToken, [new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(db.Store.Position).IsEqualTo(before + 1L);
         if (kind == P.Delete)
         {
             await Assert.That(db.Database.GetDocument(P.Root, new(db.Partition, P.Collection, P.Hidden), cancellationToken: token)).IsNull();
         }
         else
         {
-            await DocumentAsync(db.Database, db.Partition, P.Hidden, P.HealthyRevision, P.Changed, token);
+            await DocumentAsync(db, db.Database, db.Partition, P.Hidden, P.HealthyRevision, P.Changed, token);
         }
         var outcome = db.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(db.Partition, P.Reader, command.CommandId)))!;
         await ReplayAsync(db.Database, db.Store, operation, actual, outcome, db.Partition, token);
-        await DocumentAsync(db.Database, db.Partition, P.Own, P.OriginalRevision, P.Original, token);
+        await DocumentAsync(db, db.Database, db.Partition, P.Own, P.OriginalRevision, P.Original, token);
         await Assert.That(db.Database.GetDocument(P.Root, new(db.Partition, P.Collection, P.Tombstone), cancellationToken: token)).IsNull();
         return (operation, actual, outcome);
     }

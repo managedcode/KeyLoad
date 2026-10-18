@@ -7,20 +7,21 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class RowRevisionBatchInferenceAssertions
 {
-    internal static async Task HealthyAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        CommandRequest command, Result<object> actual, string kind, CancellationToken token)
+    internal static async Task HealthyAsync(TestDatabase creation, DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
+        CommandRequest command, Result<object> actual, CommitToken expectedToken, long previousStorePosition, string kind, CancellationToken token)
     {
         var receipt = actual.Get<CommitReceipt>();
-        CommitReceipt expected = new(command.CommandId, new(store.Identity.Incarnation, partition.AtomicPartitionId, store.Position), [new(P.PutReceipt, P.Collection, P.Own, P.RepairRevision),
+        CommitReceipt expected = new(command.CommandId, expectedToken, [new(P.PutReceipt, P.Collection, P.Own, P.RepairRevision),
                 new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await CurrentAsync(database, partition, kind, token);
+        await Assert.That(store.Position).IsEqualTo(previousStorePosition + 1L);
+        await CurrentAsync(creation, database, partition, kind, token);
     }
 
-    internal static async Task CurrentAsync(DatabaseEngine database, PartitionRef partition,
+    internal static async Task CurrentAsync(TestDatabase creation, DatabaseEngine database, PartitionRef partition,
         string kind, CancellationToken token)
     {
-        await RowRevisionInferenceAssertions.DocumentAsync(database, partition, P.Own,
+        await RowRevisionInferenceAssertions.DocumentAsync(creation, database, partition, P.Own,
             P.RepairRevision, P.Changed, token);
         if (kind == P.Delete)
         {
@@ -28,7 +29,7 @@ internal static class RowRevisionBatchInferenceAssertions
         }
         else
         {
-            await RowRevisionInferenceAssertions.DocumentAsync(database, partition, P.Hidden,
+            await RowRevisionInferenceAssertions.DocumentAsync(creation, database, partition, P.Hidden,
                 P.HealthyRevision, P.Changed, token);
         }
     }

@@ -78,14 +78,14 @@ internal static class ProjectionEmptyTailAssertions
             new OutboxStatus(new(tail, 1L, tail, total), [new(consumer, definition, checkpoint, false)]));
     }
 
-    internal static async Task DocumentsAsync(DatabaseEngine owner, PartitionRef partition, bool effect)
+    internal static async Task DocumentsAsync(DatabaseEngine owner, TestDatabase original, PartitionRef partition, bool effect)
     {
         await ExactAsync(owner.GetDocument(Root, new(partition, Source, "input")),
-            new DocumentResult(new(partition, Source, "input"), 1L, "{\"n\":1}", false, []));
+            new DocumentResult(original.ExpectedReference(new(partition, Source, "input")), 1L, "{\"n\":1}", false, []));
         if (effect)
         {
             await ExactAsync(owner.GetDocument(Root, new(partition, Target, "effect")),
-                new DocumentResult(new(partition, Target, "effect"), 1L, "{\"sourceCount\":1}", false, []));
+                new DocumentResult(original.ExpectedReference(new(partition, Target, "effect")), 1L, "{\"sourceCount\":1}", false, []));
         }
         else
         {

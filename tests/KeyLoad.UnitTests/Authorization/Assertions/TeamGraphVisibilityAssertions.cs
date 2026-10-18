@@ -27,15 +27,18 @@ internal static class TeamGraphVisibilityAssertions
             new UpsertEdge(Graph, BC, Vertex(db.Partition, B), Vertex(db.Partition, C), Label));
     }
 
-    internal static async Task ReadAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
+    internal static async Task ReadAsync(TestDatabase creation, DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
         bool teamVisible, CancellationToken token)
     {
         var image = TeamRowPolicyAssertions.Image(store);
         var cut = store.Position;
         var result = database.Traverse(TeamRowPolicyFlow.Reader, partition, Graph, Vertex(partition, A), cancellationToken: token);
-        EntityRef[] vertices = teamVisible ? [Vertex(partition, A), Vertex(partition, B), Vertex(partition, C)] : [Vertex(partition, A)];
-        EdgeRecord[] edges = teamVisible ? [new(AB, Vertex(partition, A), Vertex(partition, B), Label, EmptyJson, InitialRevision),
-            new(BC, Vertex(partition, B), Vertex(partition, C), Label, EmptyJson, InitialRevision)] : [];
+        var first = creation.ExpectedReference(Vertex(partition, A));
+        var second = creation.ExpectedReference(Vertex(partition, B));
+        var third = creation.ExpectedReference(Vertex(partition, C));
+        EntityRef[] vertices = teamVisible ? [first, second, third] : [first];
+        EdgeRecord[] edges = teamVisible ? [new(AB, first, second, Label, EmptyJson, InitialRevision),
+            new(BC, second, third, Label, EmptyJson, InitialRevision)] : [];
         await Assert.That(JsonDefaults.Serialize(result.Vertices).AsSpan().SequenceEqual(JsonDefaults.Serialize(vertices))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(result.Edges).AsSpan().SequenceEqual(JsonDefaults.Serialize(edges))).IsTrue();
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);

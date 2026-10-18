@@ -57,6 +57,6 @@ internal sealed class McpCommandConflictDiagnosticWholeFlowTests
         var reference = new EntityRef(database.Partition, Collection, Document);
         var actual = database.Database.GetDocument(Root, reference);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(
-            new DocumentResult(reference, Second, HealthyJson, false, [])))).IsTrue();
+            new DocumentResult(database.ExpectedReference(reference), Second, HealthyJson, false, [])))).IsTrue();
     }
 }

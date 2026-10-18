@@ -11,8 +11,8 @@ internal static class ProjectionPartitionIsolationAssertions
     {
         var image = ProjectionConsumerIdentityAssertions.Image(store);
         var cut = store.Position;
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.First.Partition);
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Second.Partition);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.First);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Second);
         await ProjectionConsumerIdentityAssertions.ExactAsync(owner.GetOutboxStatus(ProjectionConsumerIdentityFixture.Root, state.First.Partition),
             new OutboxStatus(new(2L, 3L, 0L, 0L), [new(state.First.Consumer, state.First.Definition, 0L, true)]));
         var healthy = state.HealthySourceReceipt is not null;
@@ -28,10 +28,10 @@ internal static class ProjectionPartitionIsolationAssertions
             new ProjectionBatch(new(state.Second.Consumer, state.Second.Definition, checkpoint, false), [], checkpoint, batch.Token, false));
         await Assert.That(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(state.First.Partition, ProjectionConsumerIdentityFixture.Target, "effect"), cancellationToken: token)).IsNull();
-        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state.Second.Partition);
-        await DocumentAsync(owner, state.Second.Partition, ProjectionConsumerIdentityFixture.Source,
+        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state.Second);
+        await DocumentAsync(state.Second.Creation, owner, state.Second.Partition, ProjectionConsumerIdentityFixture.Source,
             ProjectionPartitionIsolationFixture.HealthySource, healthy ? state.HealthySourceReceipt : null, token);
-        await DocumentAsync(owner, state.Second.Partition, ProjectionConsumerIdentityFixture.Target,
+        await DocumentAsync(state.Second.Creation, owner, state.Second.Partition, ProjectionConsumerIdentityFixture.Target,
             ProjectionPartitionIsolationFixture.HealthyEffect, healthy ? state.HealthyEffectReceipt : null, token);
         await ProjectionConsumerIdentityAssertions.SameAsync(store, image, cut);
         foreach (var item in state.Outcomes)
@@ -45,7 +45,7 @@ internal static class ProjectionPartitionIsolationAssertions
         => store.Read(view => (view.ReadOwnedValue(KeySpace.Partition(ProjectionPartitionIsolationFixture.EntrySpace, partition, sequence))
             ?? throw new InvalidOperationException(ProjectionConsumerIdentityFixture.MissingRow)).LongLength);
 
-    private static async Task DocumentAsync(DatabaseEngine owner, PartitionRef partition,
+    private static async Task DocumentAsync(TestDatabase creation, DatabaseEngine owner, PartitionRef partition,
         string collection, string id, CommitReceipt? receipt, CancellationToken token)
     {
         var reference = new EntityRef(partition, collection, id);
@@ -57,7 +57,7 @@ internal static class ProjectionPartitionIsolationAssertions
         else
         {
             await ProjectionConsumerIdentityAssertions.ExactAsync(actual,
-            new DocumentResult(reference, 1L, ProjectionPartitionIsolationFixture.HealthyJson, false, []));
+            new DocumentResult(creation.ExpectedReference(reference), 1L, ProjectionPartitionIsolationFixture.HealthyJson, false, []));
         }
     }
 

@@ -46,8 +46,9 @@ internal static class SeriesPortableBackupTrial
             .IsEquivalentTo(physical, CollectionOrdering.Matching);
         await SeriesPortableBackupAssertions.SourceOutcomesAsync(fixture, outcomes, originals);
         var restored = BackupPersistedPolicyAssertions.Capture(database.Store);
-        var fenced = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(originals[0].Operation));
-        await Assert.That(fenced.Code).IsEqualTo(ErrorCode.Corruption);
+        var fenced = database.Apply(originals[0].Operation);
+        await Assert.That(Errors.Code(fenced.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(fenced.Value).IsNull();
         await BackupPersistedPolicyAssertions.UnchangedAsync(database.Store, restored);
         await SeriesPortableBackupAssertions.VisibleAsync(database, fixture.Partition, false, token);
         var target = await ContinueAsync(fixture, database, token);

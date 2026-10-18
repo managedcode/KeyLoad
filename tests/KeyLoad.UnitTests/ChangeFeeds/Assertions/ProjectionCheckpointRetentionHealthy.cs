@@ -14,7 +14,7 @@ internal static class ProjectionCheckpointRetentionHealthy
     {
         var source = state.Original.Source;
         var receipt = state.Produced.Get<CommitReceipt>();
-        var reference = new EntityRef(source.Partition, ProjectionConsumerIdentityFixture.Source, ProjectionCheckpointRetentionAssertions.HealthySource);
+        var reference = source.Creation.ExpectedReference(new(source.Partition, ProjectionConsumerIdentityFixture.Source, ProjectionCheckpointRetentionAssertions.HealthySource));
         var mutation = new PutDocument(reference.Collection, reference.Id, ProjectionCheckpointRetentionAssertions.HealthyJson, 0L);
         var entry = new OutboxEntry(4L, 0, receipt.Token, source.Time, mutation,
             new MutationReceipt(PutKind, reference.Collection, reference.Id, 1L), null,
@@ -28,7 +28,7 @@ internal static class ProjectionCheckpointRetentionHealthy
             new OutboxStatus(new(4L, 4L, 1L, bytes.LongLength), [new(source.Consumer, source.Definition, 3L, false)]));
         await ProjectionConsumerIdentityAssertions.ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root, reference, receipt.Token, token),
             new DocumentResult(reference, 1L, ProjectionCheckpointRetentionAssertions.HealthyJson, false, []));
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, source.Partition);
-        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, source.Partition);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, source);
+        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, source);
     }
 }

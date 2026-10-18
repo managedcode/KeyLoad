@@ -7,7 +7,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
-internal sealed class GenerationVisibilityOwnerProjectFlow
+internal sealed class GenerationVisibilityOwnerProjectFlow(TestDatabase creation)
 {
     internal const string Collection = "visibility-owner-project";
     internal const string Reader = "visibility-owner-project-reader";
@@ -43,7 +43,7 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
     internal static async Task<GenerationVisibilityOwnerProjectFlow> RunAsync(TestDatabase db,
         QueryEngine queries, RowVisibilityCache cache, CancellationToken token)
     {
-        var flow = new GenerationVisibilityOwnerProjectFlow();
+        var flow = new GenerationVisibilityOwnerProjectFlow(db);
         db.Configure(Collection, ResourceKind.Collection);
         await flow.ApplyAsync(db, [new PutDocument(Collection, Own, OwnJson, Access: new(OwnerId: Reader)),
             new PutDocument(Collection, Shared, SharedJson, Access: new(ProjectId: Project)),
@@ -51,7 +51,7 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
             [new(PutKind, Collection, Own, Initial), new(PutKind, Collection, Shared, Initial),
                 new(PutKind, Collection, Hidden, Initial)], token);
         await GenerationVisibilityFlow.ConfigureAsync(db, Principal);
-        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
+        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db, db.Database, queries, db.Store, db.Partition,
             [Own, Shared], Initial, Initial, token);
         using var held = Hold(db, cache);
         await Assert.That(held.Contains(Own)).IsTrue();
@@ -67,7 +67,7 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
     {
         await ApplyAsync(db, [new PutDocument(Collection, Own, OwnJson, Initial,
             new(OwnerId: Foreign, ProjectId: Foreign))], [new(PutKind, Collection, Own, Changed)], token);
-        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
+        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db, db.Database, queries, db.Store, db.Partition,
             [Shared], Changed, Initial, token);
         await Assert.That(held.Contains(Own)).IsTrue();
         using var negative = Hold(db, cache);
@@ -77,7 +77,7 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
             Projects = [],
             PolicyEpoch = RemovedEpoch
         });
-        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
+        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db, db.Database, queries, db.Store, db.Partition,
             [], Changed, Initial, token);
         await Assert.That(held.Contains(Shared)).IsTrue();
         await GenerationVisibilityFlow.ConfigureAsync(db, Principal with
@@ -90,17 +90,17 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
         {
             PolicyEpoch = RepairedEpoch
         });
-        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
+        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db, db.Database, queries, db.Store, db.Partition,
             [Shared], Changed, Initial, token);
         using var positive = Hold(db, cache);
         await ApplyAsync(db, [new PutDocument(Collection, Own, OwnJson, Changed,
             new(OwnerId: Reader, ProjectId: Foreign))], [new(PutKind, Collection, Own, Restored)], token);
-        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
+        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db, db.Database, queries, db.Store, db.Partition,
             [Own, Shared], Restored, Initial, token);
         await Assert.That(negative.Contains(Own)).IsFalse();
         await ApplyAsync(db, [new PutDocument(Collection, Shared, SharedJson, Initial,
             new(OwnerId: Foreign, ProjectId: Foreign))], [new(PutKind, Collection, Shared, Changed)], token);
-        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
+        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db, db.Database, queries, db.Store, db.Partition,
             [Own], Restored, Changed, token);
         await Assert.That(positive.Contains(Shared)).IsTrue();
     }
@@ -116,8 +116,10 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
     {
         token.ThrowIfCancellationRequested();
         var command = new CommandRequest(Guid.NewGuid(), db.Partition, mutations);
+        var expectedToken = db.NextCommitToken();
+        var previousPosition = db.Store.Position;
         var receipt = db.Submit(OperationKind.Batch, command, TeamRowPolicyFlow.Root, command.CommandId).Get<CommitReceipt>();
-        await GenerationVisibilityOwnerProjectAssertions.ReceiptAsync(db.Store, command, receipt, expected);
+        await GenerationVisibilityOwnerProjectAssertions.ReceiptAsync(db.Store, command, receipt, expectedToken, previousPosition, expected);
         var outcome = db.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.PartitionOutcome(
             db.Partition, TeamRowPolicyFlow.Root, command.CommandId)))!;
         original.Add((command, receipt, outcome));
@@ -137,7 +139,7 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
         }
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);
         var queries = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
-        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(database, queries, store, original.First().Command.Partition,
+        await GenerationVisibilityOwnerProjectAssertions.ReadAsync(creation, database, queries, store, original.First().Command.Partition,
             [Own], Restored, Changed, token);
     }
 }

@@ -46,12 +46,12 @@ internal static class ProjectionConcurrentCommitAssertions
     internal static async Task DocumentsAsync(DatabaseEngine owner, ProjectionConsumerIdentityState source,
         bool winnerIsFirst, bool changed, CancellationToken token)
     {
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, source.Partition);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, source);
         var id = winnerIsFirst || !changed ? Effect : Alternative;
         var absent = id == Effect ? Alternative : Effect;
         await ProjectionConsumerIdentityAssertions.ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(source.Partition, ProjectionConsumerIdentityFixture.Target, id), cancellationToken: token),
-            new DocumentResult(new(source.Partition, ProjectionConsumerIdentityFixture.Target, id), 1L, Json, false, []));
+            new DocumentResult(source.Creation.ExpectedReference(new(source.Partition, ProjectionConsumerIdentityFixture.Target, id)), 1L, Json, false, []));
         await Assert.That(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(source.Partition, ProjectionConsumerIdentityFixture.Target, absent), cancellationToken: token)).IsNull();
     }

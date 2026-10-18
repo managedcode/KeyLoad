@@ -62,8 +62,9 @@ internal sealed class DeniedCommandReplayClockTests
         var request = new CommandRequest(id, fixture.Partition, [new PutDocument(Collection, Healthy, Json, 0)]);
         var original = fixture.Database.CreateCommand(OperationKind.Batch, id, Reader, fixture.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
         var originalPosition = fixture.Store.Position;
+        var expectedToken = fixture.NextCommitToken();
         var originalReceipt = fixture.Database.Apply(original).Get<CommitReceipt>();
-        await DeniedCommandRepairContinuation.OriginalReceiptAsync(fixture, originalReceipt, id, originalPosition);
+        await DeniedCommandRepairContinuation.OriginalReceiptAsync(fixture, originalReceipt, id, originalPosition, expectedToken);
         fixture.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(writer with
             {

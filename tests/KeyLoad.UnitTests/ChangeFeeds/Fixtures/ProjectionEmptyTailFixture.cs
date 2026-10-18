@@ -47,7 +47,7 @@ internal static class ProjectionEmptyTailFixture
         var rejected = Complete(database.Database, consumer, batch.Token, new PutDocument(ProjectionEmptyTailAssertions.Target, "effect", "{\"sourceCount\":1}", 0L));
         var rejection = await ProjectionEmptyTailAssertions.RejectEffectsAsync(database.Database, database.Store, database.Partition, rejected, token);
         await ProjectionEmptyTailAssertions.ConsumerAsync(database.Database, database.Store, consumer, definition, 0L, 1L);
-        await ProjectionEmptyTailAssertions.DocumentsAsync(database.Database, database.Partition, false);
+        await ProjectionEmptyTailAssertions.DocumentsAsync(database.Database, database, database.Partition, false);
         return await ContinueAsync(database, consumer, definition, empty, emptyResult, source, sourceResult, sourceReceipt, rejected, rejection, token);
     }
 
@@ -60,7 +60,7 @@ internal static class ProjectionEmptyTailFixture
         var mutation = new PutDocument(ProjectionEmptyTailAssertions.Source, "input", "{\"n\":1}", 0L);
         var entry = new OutboxEntry(1L, 0, sourceReceipt.Token, new DateTimeOffset(source.Timestamp), mutation,
             new MutationReceipt("putDocument", ProjectionEmptyTailAssertions.Source, "input", 1L), null,
-            new(new(database.Partition, ProjectionEmptyTailAssertions.Source, "input"), 1L, mutation.Json, new RowAccess(), new DateTimeOffset(source.Timestamp)));
+            new(database.ExpectedReference(new(database.Partition, ProjectionEmptyTailAssertions.Source, "input")), 1L, mutation.Json, new RowAccess(), new DateTimeOffset(source.Timestamp)));
         await ProjectionEmptyTailAssertions.ExactAsync(fresh,
             new ProjectionBatch(new(consumer, definition, 0L, false), [entry], 1L, fresh.Token, false));
         var complete = Complete(database.Database, consumer, fresh.Token, new PutDocument(ProjectionEmptyTailAssertions.Target, "effect", "{\"sourceCount\":1}", 0L));
@@ -74,8 +74,8 @@ internal static class ProjectionEmptyTailFixture
         var advancement = database.Database.ApplyEmbedded(filtered, token);
         await ProjectionEmptyTailAssertions.ResultAsync(filtered, advancement, 2L);
         await ProjectionEmptyTailAssertions.ConsumerAsync(database.Database, database.Store, consumer, definition, 2L, 2L);
-        await ProjectionEmptyTailAssertions.DocumentsAsync(database.Database, database.Partition, true);
-        return new(database.Partition, consumer, definition, empty, emptyResult, source, sourceResult, sourceReceipt,
+        await ProjectionEmptyTailAssertions.DocumentsAsync(database.Database, database, database.Partition, true);
+        return new(database, database.Partition, consumer, definition, empty, emptyResult, source, sourceResult, sourceReceipt,
             rejected, rejection, complete, completion, filtered, advancement, ProjectionEmptyTailAssertions.Image(database.Store), database.Store.Position);
     }
 }

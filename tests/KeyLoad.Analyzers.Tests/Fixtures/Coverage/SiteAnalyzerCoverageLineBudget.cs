@@ -12,11 +12,16 @@ internal static class SiteAnalyzerCoverageLineBudget
         var result = new Dictionary<string, int?>(StringComparer.Ordinal);
         var totalCovered = coveredLinePercent is null
             ? 0
-            : sources.Length * linesPerSource * coveredLinePercent.Value / SiteAnalyzerCoverageTokens.CoveragePercentageScale;
+            : sources.Sum(source => GetLineCount(source, linesPerSource)) * coveredLinePercent.Value / SiteAnalyzerCoverageTokens.CoveragePercentageScale;
         ProtectPipelineSource(sources, linesPerSource, coveredLinePercent, result, ref totalCovered);
         DistributeLines(sources, linesPerSource, coveredLinePercent, partialSource, partialCoveredLines, result, ref totalCovered);
         return result;
     }
+
+    internal static int GetLineCount(string source, int linesPerSource) =>
+        source == SiteAnalyzerCoverageTokens.ShortSourceRelativePath
+            ? Math.Min(linesPerSource, SiteAnalyzerCoverageTokens.ShortSourceLines)
+            : linesPerSource;
 
     private static void ProtectPipelineSource(
         string[] sources,
@@ -29,7 +34,7 @@ internal static class SiteAnalyzerCoverageLineBudget
         {
             return;
         }
-        var protectedLines = Math.Min(linesPerSource, totalCovered);
+        var protectedLines = Math.Min(GetLineCount(SiteAnalyzerCoverageTokens.CriticalPipelineSource, linesPerSource), totalCovered);
         result.Add(SiteAnalyzerCoverageTokens.CriticalPipelineSource, protectedLines);
         totalCovered -= protectedLines;
     }
@@ -49,9 +54,10 @@ internal static class SiteAnalyzerCoverageLineBudget
             {
                 continue;
             }
+            var sourceLines = GetLineCount(source, linesPerSource);
             if (coveredLinePercent is not null)
             {
-                var coveredHere = Math.Min(linesPerSource, totalCovered);
+                var coveredHere = Math.Min(sourceLines, totalCovered);
                 result.Add(source, coveredHere);
                 totalCovered -= coveredHere;
                 continue;
@@ -59,7 +65,7 @@ internal static class SiteAnalyzerCoverageLineBudget
 
             if (partialSource is not null)
             {
-                result.Add(source, source == partialSource ? partialCoveredLines : linesPerSource);
+                result.Add(source, source == partialSource ? partialCoveredLines : sourceLines);
                 continue;
             }
 

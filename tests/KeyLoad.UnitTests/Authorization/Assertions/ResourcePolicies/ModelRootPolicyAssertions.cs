@@ -32,7 +32,7 @@ internal static class ModelRootPolicyAssertions
                 var actual = database.ReadStream(ModelRootPolicyFixture.Reader,
                     new ReadStreamRequest(new(fixture.Harness.Partition, ModelRootPolicyFixture.Source, ModelRootPolicyFixture.StreamId)),
                     cancellationToken: token);
-                var expected = ModelRootPolicyGolden.Stream(fixture, store.Position, read);
+                var expected = ModelRootPolicyGolden.Stream(fixture, database.LastApplied, read);
                 await EqualAsync(actual with
                 {
                     Events = [.. actual.Events.Select(Normalize)]

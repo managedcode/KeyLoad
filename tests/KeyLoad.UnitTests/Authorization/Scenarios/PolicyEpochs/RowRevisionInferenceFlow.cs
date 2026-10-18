@@ -43,7 +43,7 @@ internal static class RowRevisionInferenceFlow
             var request = RowRevisionInferenceRequests.Create(db.Partition, kind, P.Hidden, revision);
             failures.Add(await RowRevisionInferenceAssertions.RefuseAsync(db.Database, db.Store, request,
                 ErrorCode.PermissionDenied, P.RowDenied, token));
-            await RowRevisionInferenceAssertions.DocumentAsync(db.Database, db.Partition, P.Hidden,
+            await RowRevisionInferenceAssertions.DocumentAsync(db, db.Database, db.Partition, P.Hidden,
                 P.OriginalRevision, P.Original, token);
             await Assert.That(db.Database.GetDocument(P.Reader, new(db.Partition, P.Collection, P.Hidden), cancellationToken: token)).IsNull();
         }
@@ -61,7 +61,7 @@ internal static class RowRevisionInferenceFlow
         }
         db.Commit(new PutDocument(P.Collection, P.Hidden, P.Original, P.OriginalRevision,
             new(OwnerId: P.Reader), ExplicitReplacement: true));
-        await RowRevisionInferenceAssertions.DocumentAsync(db.Database, db.Partition, P.Hidden,
+        await RowRevisionInferenceAssertions.DocumentAsync(db, db.Database, db.Partition, P.Hidden,
             P.RepairRevision, P.Original, token);
         failures.Add(await RowRevisionInferenceAssertions.HealthyAsync(db, kind, token));
         foreach (var item in failures)

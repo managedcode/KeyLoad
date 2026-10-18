@@ -25,6 +25,8 @@ internal sealed class SdkNativeProblemBoundaryScenario(ConnectionNativeScenario 
         get;
         private set;
     } = null!;
+    internal CommitToken? SeedToken { get; private set; }
+    internal CommitToken? HealthyToken { get; set; }
     internal CommandRequest Denied
     {
         get;
@@ -66,15 +68,17 @@ internal sealed class SdkNativeProblemBoundaryScenario(ConnectionNativeScenario 
         Seed = new(Guid.NewGuid(), db.Partition,
             [new PutDocument(Forbidden.Collection, P.Document, P.SeedJson, P.InitialRevision),
              new PutDocument(P.Allowed, P.Document, P.SeedJson, P.InitialRevision)]);
+        SeedToken = ExpectedCanonicalCommit.Next(db.Database, Seed.Partition);
         SeedReceipt = db.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
         Denied = native.Command(P.Document, P.AttackJson, P.FirstRevision);
         Healthy = new(Guid.NewGuid(), db.Partition,
             [new PutDocument(P.Allowed, P.Document, P.HealthyJson, P.FirstRevision)]);
         await SdkNativeProblemBoundaryAssertions.ReceiptAsync(this, Seed, SeedReceipt, root: true);
+        var beforeRefusal = SdkNativeProblemBoundaryAssertions.Capture(this);
         var refusal = await CommandAsync(Denied, token);
         await SdkNativeProblemBoundaryAssertions.RefusalAsync(refusal);
-        await SdkNativeProblemBoundaryAssertions.FailedOutcomeAsync(this);
-        await SdkNativeProblemBoundaryAssertions.CurrentAsync(this);
+        await SdkNativeProblemBoundaryAssertions.UncommittedRefusalAsync(this);
+        await SdkNativeProblemBoundaryAssertions.SameAsync(this, beforeRefusal);
     }
 
     private async Task ConfigureAllowedAsync()
@@ -102,7 +106,10 @@ internal sealed class SdkNativeProblemBoundaryScenario(ConnectionNativeScenario 
         var requestId = Guid.NewGuid();
         var original = tasks.Retain(native.CommandAsync(Principal, requestId, command, token));
         var reply = await tasks.CompleteAsync(original);
-        await native.Observation.Read(requestId).Disposed.Task.WaitAsync(token);
+        var observed = native.Observation.Read(requestId);
+        await Assert.That(observed.Identity.RequestId).IsEqualTo(requestId);
+        await Assert.That(observed.Identity.CommandId).IsEqualTo(command.CommandId);
+        await observed.Disposed.Task.WaitAsync(token);
         return reply;
     }
 

@@ -28,6 +28,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         {
             lock (gate)
             {
+                ObjectDisposedException.ThrowIf(disposed, this);
                 return retained.Count;
             }
         }
@@ -39,6 +40,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         {
             lock (gate)
             {
+                ObjectDisposedException.ThrowIf(disposed, this);
                 return retainedBytes;
             }
         }

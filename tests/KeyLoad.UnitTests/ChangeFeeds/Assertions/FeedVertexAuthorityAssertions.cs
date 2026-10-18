@@ -57,7 +57,7 @@ internal static class FeedVertexAuthorityAssertions
         var tail = 2L;
         if (state.UpdateReceipt is { } update)
         {
-            var reference = new EntityRef(state.Seed.Partition, FeedVertexAuthorityFixture.Collection, "b");
+            var reference = state.Creation.ExpectedReference(new(state.Seed.Partition, FeedVertexAuthorityFixture.Collection, "b"));
             changes.Add(new(3L, update.Token, state.CommittedAt, reference, 2L, false,
                 new(reference, 1L, "{\"n\":2}", false, []), new(reference, 2L, "{\"n\":22}", false, [])));
             tail = 3L;
@@ -92,7 +92,7 @@ internal static class FeedVertexAuthorityAssertions
     private static DocumentChange Change(FeedVertexAuthorityState state, long sequence, string id,
         string json, CommitReceipt receipt, DateTimeOffset time)
     {
-        var reference = new EntityRef(state.Seed.Partition, FeedVertexAuthorityFixture.Collection, id);
+        var reference = state.Creation.ExpectedReference(new(state.Seed.Partition, FeedVertexAuthorityFixture.Collection, id));
         return new(sequence, receipt.Token, time, reference, 1L, false, null, new(reference, 1L, json, false, []));
     }
 

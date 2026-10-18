@@ -18,6 +18,10 @@ internal static class SecondGenerationBackupAssertions
         [
             Convert.ToHexString(MetadataBackupFixture.StoredKeyBytes) + ":" + Convert.ToHexString(NativeSerialization.Serialize(CurrentValue)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+                ZoneTreePersistenceFormat.LastAppliedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+                ZoneTreePersistenceFormat.ClockKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
                 ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(true))
         ];
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal), CollectionOrdering.Matching);

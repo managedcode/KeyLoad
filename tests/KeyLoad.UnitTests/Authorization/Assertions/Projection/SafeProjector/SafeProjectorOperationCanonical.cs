@@ -27,8 +27,8 @@ internal static class SafeProjectorOperationCanonical
         var status = healthy is not null ? SafeProjectorOperationProtocol.HealthyStatus
             : patch is not null ? SafeProjectorOperationProtocol.UpdatedStatus : SafeProjectorOperationProtocol.InitialStatus;
         var epoch = healthy is not null ? HealthyEpoch : patch is not null ? UpdatedEpoch : InitialEpoch;
-        var first = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First);
-        var second = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second);
+        var first = owner.Source.ExpectedReference(new(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First));
+        var second = owner.Source.ExpectedReference(new(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second));
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<DocumentRecord>(KeySpace.Partition(
             Documents, owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First))),
             new DocumentRecord(first, revision, json, new RowAccess(), new DateTimeOffset(active.Operation.Timestamp)));

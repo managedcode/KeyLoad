@@ -16,7 +16,8 @@ internal static class InitialPrincipalEpochAssertions
             throw new InvalidOperationException("The complete principal lifecycle image exceeded its bound.");
         }
         return page.Records.Where(row => omitted is null || !row.Key.Span.SequenceEqual(omitted)
-                && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes))
+                && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes)
+                && !row.Key.Span.SequenceEqual(KeySpace.AppliedBytes))
             .Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
     internal static async Task ObserveAsync(ZoneTreeStore store, Func<Task> action)

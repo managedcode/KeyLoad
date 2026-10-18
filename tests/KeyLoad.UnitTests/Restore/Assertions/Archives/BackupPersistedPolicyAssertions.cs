@@ -61,7 +61,8 @@ internal static class BackupPersistedPolicyAssertions
             await SameAsync(rows, page.Rows.ToArray());
             await Assert.That(page.Cursor).IsNull();
             await Assert.That(page.CutPosition).IsEqualTo(database.LastApplied);
-            var reference = new EntityRef(fixture.Partition, BackupPersistedPolicySeed.Collection, BackupPersistedPolicySeed.DocumentId);
+            var reference = fixture.Source.ExpectedReference(new(fixture.Partition,
+                BackupPersistedPolicySeed.Collection, BackupPersistedPolicySeed.DocumentId));
             await SameAsync(new DocumentResult(reference, 1L, BackupPersistedPolicySeed.Json, false, []),
                 database.GetDocument(BackupPersistedPolicySeed.Reader, reference, cancellationToken: token));
         }

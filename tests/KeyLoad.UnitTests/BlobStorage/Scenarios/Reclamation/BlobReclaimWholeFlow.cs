@@ -34,13 +34,15 @@ internal static class BlobReclaimWholeFlow
             IntegrityHash = chain
         });
         var abort = new AbortBlobUploadRequest(Guid.NewGuid(), blob, upload);
+        var abortCut = (Token: database.NextCommitToken(blob.Partition), Position: database.Store.Position);
         var result = Apply(database.Database, OperationKind.AbortBlobUpload, abort, abort.CommandId);
         var aborted = result.Get<BlobCommitResult<BlobUploadInfo>>();
         await BlobWholeFlowAssertions.Exact(aborted.Value, second.Value with
         {
             Status = BlobUploadStatus.Aborted
         });
-        await BlobWholeFlowAssertions.Receipt(database.Database, aborted.Receipt, abort.CommandId, blob);
+        await BlobWholeFlowAssertions.Receipt(database.Database, aborted.Receipt, abort.CommandId, blob,
+            abortCut.Token, abortCut.Position);
         await BlobWholeFlowAssertions.Quotas(database.Database, blob, BlobReclaimWholeFlowFixture.StoredBytes,
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.EmptyCount);
         var fixture = new BlobReclaimWholeFlowFixture(blob, upload, abort, aborted.Value);
@@ -66,11 +68,13 @@ internal static class BlobReclaimWholeFlow
         DatabaseEngine database, ZoneTreeStore store, BlobReclaimWholeFlowFixture fixture)
     {
         var request = new ReclaimBlobRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId, BlobReclaimWholeFlowFixture.SingleCount);
+        var reclaimCut = (Token: ExpectedCanonicalCommit.Next(database, fixture.Blob.Partition), Position: store.Position);
         var result = Apply(database, OperationKind.ReclaimBlob, request, request.CommandId);
         var reclaimed = result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobWholeFlowAssertions.Exact(reclaimed.Value, new BlobReclaimResult(fixture.UploadId,
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.SingleCount, BlobLimits.RawPartBytes, false));
-        await BlobWholeFlowAssertions.Receipt(database, reclaimed.Receipt, request.CommandId, fixture.Blob);
+        await BlobWholeFlowAssertions.Receipt(database, reclaimed.Receipt, request.CommandId, fixture.Blob,
+            reclaimCut.Token, reclaimCut.Position);
         await BlobWholeFlowAssertions.Quotas(database, fixture.Blob, BlobLimits.RawPartBytes,
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.EmptyCount);
         await BlobWholeFlowAssertions.Parts(database, fixture, false, true);
@@ -95,11 +99,13 @@ internal static class BlobReclaimWholeFlow
     internal static async Task<ReclaimBlobRequest> Finish(DatabaseEngine database, ZoneTreeStore store, BlobReclaimWholeFlowFixture fixture)
     {
         var request = new ReclaimBlobRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId, BlobReclaimWholeFlowFixture.SingleCount);
+        var finalCut = (Token: ExpectedCanonicalCommit.Next(database, fixture.Blob.Partition), Position: store.Position);
         var result = Apply(database, OperationKind.ReclaimBlob, request, request.CommandId);
         var final = result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobWholeFlowAssertions.Exact(final.Value, new BlobReclaimResult(fixture.UploadId,
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.EmptyCount, BlobLimits.RawPartBytes, true));
-        await BlobWholeFlowAssertions.Receipt(database, final.Receipt, request.CommandId, fixture.Blob);
+        await BlobWholeFlowAssertions.Receipt(database, final.Receipt, request.CommandId, fixture.Blob,
+            finalCut.Token, finalCut.Position);
         await BlobWholeFlowAssertions.Quotas(database, fixture.Blob, BlobReclaimWholeFlowFixture.EmptyCount,
             BlobReclaimWholeFlowFixture.EmptyCount, BlobReclaimWholeFlowFixture.EmptyCount);
         await BlobWholeFlowAssertions.Parts(database, fixture, false, false);

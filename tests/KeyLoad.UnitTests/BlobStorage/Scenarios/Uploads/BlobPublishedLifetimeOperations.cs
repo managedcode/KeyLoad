@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
@@ -14,8 +15,12 @@ internal static class BlobPublishedLifetimeOperations
     {
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
         var operation = owner.CreateCommand(kind, id, "root", now ?? owner.EvaluationClock.GetUtcNow(), json);
+        var partition = CommandOutcomePartitionIdentity.Resolve(operation).Partition
+            ?? throw new InvalidOperationException("The original blob operation must target one atomic partition.");
+        var expectedToken = ExpectedCanonicalCommit.Next(owner, partition);
+        var previousStorePosition = owner.Store.Position;
         var result = owner.Apply(operation);
-        return new(kind, id, json, result, operation);
+        return new(kind, id, json, result, operation, expectedToken, previousStorePosition);
     }
 
     internal static Command<DatabaseCommand> Original(DatabaseEngine owner, BlobRangeRetainedOperation command)
@@ -58,22 +63,18 @@ internal static class BlobPublishedLifetimeOperations
             owner.Store.Identity.Incarnation.ToString("N"), blob.Partition.TenantId, blob.Partition.DatabaseId,
             blob.Partition.TransactionDomainId, blob.Partition.PartitionKey, blob.Resource, blob.Id,
             upload.ToString("N"), 0L, 65_536L)));
-        var json = JsonSerializer.Serialize(request, JsonDefaults.Options);
-        var beginOperation = owner.CreateCommand(OperationKind.BeginBlobUpload, request.CommandId, "root", now, json);
-        var begun = new BlobRangeRetainedOperation(OperationKind.BeginBlobUpload, request.CommandId, json,
-            owner.Apply(beginOperation), beginOperation);
+        var begun = Send(owner, OperationKind.BeginBlobUpload, request.CommandId, request, now);
         var expected = new BlobUploadInfo(blob, upload, 0, 2, 0, 0, now.AddSeconds(3_600), BlobUploadStatus.Active, hash);
         await BlobWholeFlowAssertions.Exact(begun.Original.Get<BlobCommitResult<BlobUploadInfo>>().Value, expected);
-        await BlobWholeFlowAssertions.Receipt(owner, begun.Original.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, request.CommandId, blob);
+        await BlobWholeFlowAssertions.Receipt(owner, begun.Original.Get<BlobCommitResult<BlobUploadInfo>>().Receipt,
+            request.CommandId, blob, begun.ExpectedToken, begun.PreviousStorePosition);
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
         var completedAt = owner.EvaluationClock.GetUtcNow();
-        var completedJson = JsonSerializer.Serialize(complete, JsonDefaults.Options);
-        var completeOperation = owner.CreateCommand(OperationKind.CompleteBlobUpload, complete.CommandId, "root", completedAt, completedJson);
-        var completed = new BlobRangeRetainedOperation(OperationKind.CompleteBlobUpload, complete.CommandId, completedJson,
-            owner.Apply(completeOperation), completeOperation);
+        var completed = Send(owner, OperationKind.CompleteBlobUpload, complete.CommandId, complete, completedAt);
         var metadata = new BlobMetadata(blob, 3, upload, 0, 0, hash, new RowAccess(), completedAt);
         await BlobWholeFlowAssertions.Exact(completed.Original.Get<BlobCommitResult<BlobMetadata>>().Value, metadata);
-        await BlobWholeFlowAssertions.Receipt(owner, completed.Original.Get<BlobCommitResult<BlobMetadata>>().Receipt, complete.CommandId, blob);
+        await BlobWholeFlowAssertions.Receipt(owner, completed.Original.Get<BlobCommitResult<BlobMetadata>>().Receipt,
+            complete.CommandId, blob, completed.ExpectedToken, completed.PreviousStorePosition);
         return new(metadata, expected, begun, completed);
     }
 }

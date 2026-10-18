@@ -23,6 +23,7 @@ internal sealed class TestDatabase : IDisposable
     private readonly TestDatabaseCloseState closeState = new();
     private readonly Func<ZoneTreeStore, DatabaseEngine> createDatabase;
     private readonly IOptions<DatabaseLimits> limits;
+    private readonly TestDatabaseOriginalResourceCommands originalResources = new();
 
     public string Directory { get; }
     public ZoneTreeStore Store { get; }
@@ -63,16 +64,37 @@ internal sealed class TestDatabase : IDisposable
     {
         var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal,
             time ?? default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
-        return time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
+        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var result = time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
+        originalResources.Observe(Database, operation, result, previousCanonical);
+        return result;
     }
 
     internal Result<object> SubmitIssued(Command<DatabaseCommand> operation)
-        => Database.ApplyEmbedded(Database.OwnCommand(operation), CancellationToken.None);
+    {
+        var original = Database.OwnCommand(operation);
+        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(Database, original);
+        var result = Database.ApplyEmbedded(original, CancellationToken.None);
+        originalResources.Observe(Database, original, result, previousCanonical);
+        return result;
+    }
+
+    internal Result<object> SubmitAtOriginalTime(DatabaseEngine owner, Command<DatabaseCommand> operation)
+    {
+        var original = owner.OwnCommand(operation);
+        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(owner, original);
+        var result = owner.Apply(original);
+        originalResources.Observe(owner, original, result, previousCanonical);
+        return result;
+    }
 
     internal Result<object> SubmitIssuedEmbedded(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         var verified = Database.OwnCommand(operation);
-        return Database.ApplyEmbedded(verified, cancellationToken);
+        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(Database, verified);
+        var result = Database.ApplyEmbedded(verified, cancellationToken);
+        originalResources.Observe(Database, verified, result, previousCanonical);
+        return result;
     }
 
     internal void JoinStorageReadCut(CancellationToken cancellationToken)
@@ -87,6 +109,14 @@ internal sealed class TestDatabase : IDisposable
 
     internal StoredOutcome ReadStoredOutcome(Guid commandId)
         => OutcomeStoreOracle.ReadStored(Database, commandId, CancellationToken.None);
+
+    internal EntityRef ExpectedReference(EntityRef literal) => originalResources.Reference(literal);
+
+    internal ResourceLifetimeV1 ExpectedLifetime(string resourceName)
+        => originalResources.Lifetime(Partition.TenantId, Partition.DatabaseId, resourceName);
+
+    internal CommitToken NextCommitToken(PartitionRef? partition = null)
+        => ExpectedCanonicalCommit.Next(Database, partition ?? Partition);
 
     internal StoredOutcome ReadStoredOutcome(Command<DatabaseCommand> command)
         => OutcomeStoreOracle.ReadStored(Store, command)

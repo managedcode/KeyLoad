@@ -53,11 +53,11 @@ internal static class CursorExpiryBoundaryAssertions
         return first.Cursor!;
     }
 
-    internal static async Task ReceiptAsync(TestDatabase db, CommandRequest command, CommitReceipt receipt, long seedCut)
+    internal static async Task ReceiptAsync(TestDatabase db, CommandRequest command, CommitReceipt receipt, long seedCut, CommitToken expectedToken)
     {
-        var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation,
-            db.Partition.AtomicPartitionId, seedCut + Revision), [new(PutKind, "orders", FirstId, Revision), new(PutKind, "orders", SecondId, Revision)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, expectedToken, [new(PutKind, "orders", FirstId, Revision), new(PutKind, "orders", SecondId, Revision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(db.Store.Position).IsEqualTo(seedCut + Revision);
     }
 
     private static QueryPage Read(QueryEngine queries, QueryRequest request, bool ast, CancellationToken token)

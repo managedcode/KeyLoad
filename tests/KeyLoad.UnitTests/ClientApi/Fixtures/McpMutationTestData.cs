@@ -6,6 +6,10 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class McpMutationTestData
 {
     private const string InsertKind = "insertTypedRow";
+    private const string AnalyticsUpsertKind = "upsertAnalyticsEvents";
+    private const string AnalyticsDeleteKind = "deleteAnalyticsEvents";
+    private const string AnalyticsDimension = "analytics-kind";
+    private const string AnalyticsMetric = "analytics-value";
     private const string RefreshRollupKind = "refreshSampleRollup";
     private const string DropRollupKind = "dropSampleRollup";
     private const string EventId = "mcp-event";
@@ -59,7 +63,7 @@ internal static class McpMutationTestData
     private const string DropChunkKind = "dropSampleChunkWindow";
     private const string AdvanceRepairKind = "advanceQueueTransferRepair";
     internal static readonly ImmutableArray<string> Discriminators =
-        [InsertKind, PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
+        [AnalyticsUpsertKind, AnalyticsDeleteKind, InsertKind, PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
          EnqueueKind, RedriveKind, CancelKind, ParkKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
          QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, RefreshRollupKind, DropRollupKind, StoreAggregateSnapshotKind,
          VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
@@ -68,6 +72,9 @@ internal static class McpMutationTestData
 
     internal static ImmutableArray<Mutation> Create() =>
     [
+        new UpsertAnalyticsEvents(McpCanonicalTestData.Resource, [AnalyticsEvent()],
+            ImmutableDictionary<string, long>.Empty.Add(EventId, NoLeaseVersion)),
+        new DeleteAnalyticsEvents(McpCanonicalTestData.Resource, ImmutableDictionary<string, long>.Empty.Add(EventId, Revision)),
         new InsertTypedRow(McpCanonicalTestData.Resource, McpCanonicalTestData.EmptyJson),
         new PutDocument(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, McpCanonicalTestData.EmptyJson),
         new PatchDocument(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
@@ -120,6 +127,11 @@ internal static class McpMutationTestData
     ];
 
     private static EventData Event() => new(EventId, EventType, McpCanonicalTestData.EmptyJson);
+
+    private static AnalyticsEventData AnalyticsEvent() => new(EventId, DateTimeOffset.UnixEpoch,
+        ImmutableDictionary<string, string>.Empty.Add(AnalyticsDimension, EventType),
+        ImmutableDictionary<string, double>.Empty.Add(AnalyticsMetric, Sample),
+        new(McpCanonicalTestData.Principal), [McpCanonicalTestData.Reference]);
 
     private static EntityRef ReverseDestination() => McpCanonicalTestData.Reference with
     {

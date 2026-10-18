@@ -79,10 +79,11 @@ internal static class SiteAnalyzerCoverageXmlBuilder
         {
             var sourceHasBranches = includeBranch && branchSourceCount > 0;
             var sourceBoundaryLine = source == boundaryLineSource ? boundaryLineNumber : null;
-            AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.ClassNameValue, lineHits, branchCovered, branchTotal, sourceHasBranches, linesPerSource, coveredLines[source], includeMethods, nativeBranchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
+            var sourceLines = SiteAnalyzerCoverageLineBudget.GetLineCount(source, linesPerSource);
+            AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.ClassNameValue, lineHits, branchCovered, branchTotal, sourceHasBranches, sourceLines, coveredLines[source], includeMethods, nativeBranchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
             if (includeDuplicateClass && source == SiteAnalyzerCoverageTokens.HashFileRelativePath)
             {
-                AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.DuplicateClassNameValue, SiteAnalyzerCoverageTokens.CounterZero, branchCovered, branchTotal, false, linesPerSource, coveredLines[source], includeMethods, nativeBranchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
+                AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.DuplicateClassNameValue, SiteAnalyzerCoverageTokens.CounterZero, branchCovered, branchTotal, false, sourceLines, coveredLines[source], includeMethods, nativeBranchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
             }
 
             if (sourceHasBranches)

@@ -72,15 +72,19 @@ internal static class AnalyticsCompositionOperations
     {
         var image = TeamRowPolicyAssertions.Image(owner.Store);
         var position = owner.Store.Position;
-        await ReceiptAsync(original.Receipt, owner.Database.Apply(original.Operation).Get<CommitReceipt>());
+        var raw = owner.Database.Apply(original.Operation);
         var fresh = owner.Submit(original.Operation);
         if (original.Operation.UserId! == P.Writer && original.CreatorEpoch != currentEpoch)
         {
-            await O.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, "The principal policy changed since this command was evaluated.")), fresh);
+            var expectedFailure = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, "The principal policy changed since this command was evaluated."));
+            await O.EqualAsync(expectedFailure, raw);
+            await O.EqualAsync(expectedFailure, fresh);
+            await Assert.That(raw.Value).IsNull();
             await Assert.That(fresh.Value).IsNull();
         }
         else
         {
+            await ReceiptAsync(original.Receipt, raw.Get<CommitReceipt>());
             await ReceiptAsync(original.Receipt, fresh.Get<CommitReceipt>());
         }
 

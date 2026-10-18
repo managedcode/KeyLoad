@@ -43,6 +43,7 @@ internal static class InitialPrincipalEpochFlow
         var store = fixture.Harness.Store;
         var outcome = InitialPrincipalEpochFixture.Outcome(operation);
         var image = InitialPrincipalEpochAssertions.Image(store, outcome);
+        var expectedApplied = checked(fixture.Harness.Database.LastApplied + 1L);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
@@ -54,6 +55,8 @@ internal static class InitialPrincipalEpochFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await Assert.That(InitialPrincipalEpochAssertions.Image(store, outcome).SequenceEqual(image)).IsTrue();
+            await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
+                .AsSpan().SequenceEqual(NativeSerialization.Serialize(expectedApplied))).IsTrue();
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(position + 1L), failures);
         await ServerFailureObserver.ObserveAsync(async () =>

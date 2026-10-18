@@ -33,8 +33,8 @@ internal static class ProjectionCancelledCommitFlow
         {
             var owner = database.CreateConfiguredDatabase(cold);
             await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, continued.Position);
-            await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state.Partition);
-            await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Partition);
+            await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state);
+            await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state);
             var batch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(state.Consumer));
             await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
                 new ProjectionBatch(new(state.Consumer, state.Definition, 3L, false), [], 3L, batch.Token, false));
@@ -62,7 +62,7 @@ internal static class ProjectionCancelledCommitFlow
             new MutationReceipt("putDocument", ProjectionConsumerIdentityFixture.Target, "effect", 1L));
         await Assert.That(result.AlreadyProcessed).IsFalse();
         await Assert.That(result.Checkpoint).IsEqualTo(2L);
-        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state.Partition);
+        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state);
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, cold, state.Complete, completed, token);
         var filteredBatch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(state.Consumer));
         await ProjectionConsumerIdentityAssertions.ExactAsync(filteredBatch,

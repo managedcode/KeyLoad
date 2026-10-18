@@ -31,18 +31,20 @@ internal static class RowRevisionBatchInferenceFlow
             var command = Command(db, kind, revision);
             originals.Add(await RowRevisionInferenceAssertions.RefuseAsync(db.Database, db.Store, command,
                 ErrorCode.PermissionDenied, P.RowDenied, token));
-            await RowRevisionInferenceAssertions.DocumentAsync(db.Database, db.Partition, P.Own,
+            await RowRevisionInferenceAssertions.DocumentAsync(db, db.Database, db.Partition, P.Own,
                 P.OriginalRevision, P.Original, token);
-            await RowRevisionInferenceAssertions.DocumentAsync(db.Database, db.Partition, P.Hidden,
+            await RowRevisionInferenceAssertions.DocumentAsync(db, db.Database, db.Partition, P.Hidden,
                 P.OriginalRevision, P.Original, token);
         }
         db.Commit(new PutDocument(P.Collection, P.Hidden, P.Original, P.OriginalRevision,
             new(OwnerId: P.Reader), ExplicitReplacement: true));
         var healthy = Command(db, kind, P.RepairRevision);
         var operation = RowRevisionInferenceRequests.Operation(db.Database, healthy);
+        var expectedToken = db.NextCommitToken();
+        var previousStorePosition = db.Store.Position;
         var actual = db.Database.ApplyEmbedded(operation, token);
-        await RowRevisionBatchInferenceAssertions.HealthyAsync(db.Database, db.Store, db.Partition,
-            healthy, actual, kind, token);
+        await RowRevisionBatchInferenceAssertions.HealthyAsync(db, db.Database, db.Store, db.Partition,
+            healthy, actual, expectedToken, previousStorePosition, kind, token);
         var outcome = db.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(db.Partition, P.Reader, healthy.CommandId)))!;
         originals.Add((operation, actual, outcome));
         foreach (var item in originals)

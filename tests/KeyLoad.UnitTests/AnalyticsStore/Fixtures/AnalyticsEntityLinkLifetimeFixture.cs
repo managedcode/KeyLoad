@@ -84,7 +84,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
             await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
             await Assert.That(owner.Store.Position).IsEqualTo(position + 2);
             await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
+            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((journal.AppliedPosition, journal.StorePosition + 2));
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

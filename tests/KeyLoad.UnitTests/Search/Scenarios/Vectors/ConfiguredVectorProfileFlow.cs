@@ -97,24 +97,25 @@ internal static class ConfiguredVectorProfileFlow
             && !record.Key.Span.SequenceEqual(KeySpace.ClockBytes)).Select(record => Convert.ToHexString(record.Key.Span)
                 + ":" + Convert.ToHexString(record.Value.Span)).ToArray();
     });
-    internal static async Task HealthyAsync(DatabaseEngine owner, PartitionRef partition, CancellationToken token)
+    internal static async Task HealthyAsync(DatabaseEngine owner, TestDatabase provenance, CancellationToken token)
     {
+        var partition = provenance.Partition;
         var rows = await new SearchEngine(owner, UnitExecutionOptions.QueryExecution()).SearchAsync(Root,
             new(partition, Collection, VectorField: Field, Vector: [1, 0], Space: Space), token);
         await Assert.That(rows.Select(row => row.Document.Reference.Id)).IsEquivalentTo(new[] { Rival, Target }, CollectionOrdering.Matching);
         await Assert.That(rows.Select(row => row.Score)).IsEquivalentTo(new[] { FirstRank, SecondRank }, CollectionOrdering.Matching);
         var target = rows.Single(row => row.Document.Reference.Id == Target).Document;
         await Assert.That(JsonDefaults.Serialize(target).SequenceEqual(JsonDefaults.Serialize(
-            new DocumentResult(new(partition, Collection, Target), UpdatedRevision, UpdatedJson, false, [])))).IsTrue();
+            new DocumentResult(provenance.ExpectedReference(new(partition, Collection, Target)), UpdatedRevision, UpdatedJson, false, [])))).IsTrue();
         var vector = owner.Store.Read(view => view.GetRecord<VectorRecord>(
             KeySpace.Partition(VectorKeySpace, partition, Collection, Field, Target)));
         var expectedVector = new VectorRecord(Target, Field, Space, [0, 1], UpdatedRevision);
         await Assert.That(NativeSerialization.Serialize(vector!).SequenceEqual(NativeSerialization.Serialize(expectedVector))).IsTrue();
         var rival = rows.Single(row => row.Document.Reference.Id == Rival).Document;
         await Assert.That(JsonDefaults.Serialize(rival).SequenceEqual(JsonDefaults.Serialize(
-            new DocumentResult(new(partition, Collection, Rival), InitialRevision, OriginalJson, false, [])))).IsTrue();
+            new DocumentResult(provenance.ExpectedReference(new(partition, Collection, Rival)), InitialRevision, OriginalJson, false, [])))).IsTrue();
         var source = owner.GetDocument(Root, new(partition, Collection, Source), cancellationToken: token);
         await Assert.That(JsonDefaults.Serialize(source).SequenceEqual(JsonDefaults.Serialize(
-            new DocumentResult(new(partition, Collection, Source), InitialRevision, OriginalJson, false, [])))).IsTrue();
+            new DocumentResult(provenance.ExpectedReference(new(partition, Collection, Source)), InitialRevision, OriginalJson, false, [])))).IsTrue();
     }
 }

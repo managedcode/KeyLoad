@@ -7,9 +7,9 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class McpOwnedDiagnosticAssertions
 {
     internal const string ForeignIncarnation = "The document session token belongs to another incarnation.";
-    internal const string OutOfScope = "The document session token belongs to another atomic partition or placement.";
+    internal const string OutOfScope = "The document session token belongs to another atomic partition.";
     internal const string InvalidPosition = "The document session token position must be positive.";
-    internal const string FuturePosition = "The document session token is beyond the current quorum-applied cut.";
+    internal const string FuturePosition = "The document session token is beyond the current committed storage cut.";
     internal const string VectorMismatch = "The declared vector profile does not match the configured field.";
     internal const string Generic = "The database operation could not be completed.";
     internal const string PrivateCanary = "private-diagnostic-canary";

@@ -42,5 +42,9 @@ public sealed partial class DatabaseEngine
         {
             _ = Resource(view, consumer.Partition, resource);
         }
+        if (definition.AnnMaintenance is { } maintenance)
+        {
+            _ = Resource(view, consumer.Partition, maintenance.Collection, ResourceKind.Collection);
+        }
     }
 }

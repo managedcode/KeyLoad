@@ -32,6 +32,7 @@ internal static class SdkNativeProblemBoundaryStages
         await SdkNativeProblemBoundaryAssertions.EqualAsync(new DocumentReadResult(
             new(state.Allowed, P.FirstRevision, P.SeedJson, false, [])), read.Value!);
         await SdkNativeProblemBoundaryAssertions.SameAsync(state, original);
+        state.HealthyToken = ExpectedCanonicalCommit.Next(state.Native.Fixture.Database.Database, state.Healthy.Partition);
         var committed = await tasks.CompleteAsync(tasks.Retain(healthy.CommitAsync(state.Healthy, token)));
         await Assert.That(committed.IsSuccess).IsTrue();
         state.HealthyReceipt = committed.Value ?? throw new InvalidOperationException(P.Failure);

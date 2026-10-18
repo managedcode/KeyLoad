@@ -101,7 +101,7 @@ internal static class SdkResponseAdmissionFlow
         var healthy = new KeyLoadClient(server.Client, Credential, UnitClientOptions.Execution());
         var read = await healthy.GetAsync(reference);
         await Assert.That(read.IsSuccess).IsTrue();
-        var expected = new DocumentReadResult(new(reference, CommittedRevision, SdkResponseAdmissionProtocol.Json, false, []));
+        var expected = new DocumentReadResult(new(database.ExpectedReference(reference), CommittedRevision, SdkResponseAdmissionProtocol.Json, false, []));
         await Assert.That(JsonDefaults.Serialize(read.Value).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await UnchangedAsync(database, outbox);
     }
@@ -123,7 +123,7 @@ internal static class SdkResponseAdmissionFlow
     private static async Task CurrentAsync(TestDatabase database)
     {
         var reference = new EntityRef(database.Partition, Collection, Document);
-        var expected = new DocumentResult(reference, CommittedRevision, SdkResponseAdmissionProtocol.Json, false, []);
+        var expected = new DocumentResult(database.ExpectedReference(reference), CommittedRevision, SdkResponseAdmissionProtocol.Json, false, []);
         await Assert.That(JsonDefaults.Serialize(database.Database.GetDocument(Root, reference))
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }

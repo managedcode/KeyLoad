@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 
@@ -19,7 +20,7 @@ internal static class BlobRangeIntegrityOperations
         var initialHash = BlobRangeIntegrityOracle.Initial(database.Store.Identity.Incarnation, blob, upload);
         var begun = Send(database.Database, OperationKind.BeginBlobUpload, begin, begin.CommandId, beganAt);
         await BlobWholeFlowAssertions.Receipt(database.Database, begun.Original.Get<BlobCommitResult<BlobUploadInfo>>().Receipt,
-            begin.CommandId, blob);
+            begin.CommandId, blob, begun.ExpectedToken, begun.PreviousStorePosition);
         var expected = new BlobUploadInfo(blob, upload, BlobRangeIntegrityFixture.PayloadBytes,
             BlobRangeIntegrityFixture.InitialRevision, BlobRangeIntegrityFixture.EmptyCount, BlobRangeIntegrityFixture.EmptyCount,
             beganAt.AddSeconds(BlobRangeIntegrityFixture.DefaultUploadTtlSeconds), BlobUploadStatus.Active, initialHash);
@@ -49,7 +50,7 @@ internal static class BlobRangeIntegrityOperations
         var publishedAt = database.Database.EvaluationClock.GetUtcNow();
         var publication = Send(database.Database, OperationKind.CompleteBlobUpload, complete, complete.CommandId, publishedAt);
         await BlobWholeFlowAssertions.Receipt(database.Database, publication.Original.Get<BlobCommitResult<BlobMetadata>>().Receipt,
-            complete.CommandId, blob);
+            complete.CommandId, blob, publication.ExpectedToken, publication.PreviousStorePosition);
         var metadata = new BlobMetadata(blob, BlobRangeIntegrityFixture.Revision, upload,
             BlobRangeIntegrityFixture.PayloadBytes, BlobRangeIntegrityFixture.Parts, hash, new RowAccess(), publishedAt);
         await BlobWholeFlowAssertions.Exact(publication.Original.Get<BlobCommitResult<BlobMetadata>>().Value, metadata);
@@ -65,7 +66,7 @@ internal static class BlobRangeIntegrityOperations
         var request = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, ordinal, bytes, BlobRangeIntegrityOracle.Hash(bytes.Span));
         var command = Send(database, OperationKind.WriteBlobPart, request, request.CommandId, database.EvaluationClock.GetUtcNow());
         await BlobWholeFlowAssertions.Receipt(database, command.Original.Get<BlobCommitResult<BlobUploadInfo>>().Receipt,
-            request.CommandId, blob);
+            request.CommandId, blob, command.ExpectedToken, command.PreviousStorePosition);
         return command;
     }
 
@@ -74,7 +75,11 @@ internal static class BlobRangeIntegrityOperations
     {
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
         var operation = database.CreateCommand(kind, command, BlobRangeIntegrityFixture.Principal, now, json);
+        var partition = CommandOutcomePartitionIdentity.Resolve(operation).Partition
+            ?? throw new InvalidOperationException("The original blob operation must target one atomic partition.");
+        var expectedToken = ExpectedCanonicalCommit.Next(database, partition);
+        var previousStorePosition = database.Store.Position;
         var result = database.Apply(operation);
-        return new(kind, command, json, result, operation);
+        return new(kind, command, json, result, operation, expectedToken, previousStorePosition);
     }
 }

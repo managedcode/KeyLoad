@@ -97,7 +97,7 @@ internal static class GenerationVisibilityFlow
             PolicyEpoch = RemovedEpoch
         });
         await TeamRowPolicyAssertions.HiddenAsync(db, db.Database, queries, db.Store, token);
-        await TeamGraphVisibilityAssertions.ReadAsync(db.Database, db.Store, db.Partition, false, token);
+        await TeamGraphVisibilityAssertions.ReadAsync(db, db.Database, db.Store, db.Partition, false, token);
         await Assert.That(held.Contains(TeamRowPolicyFlow.Row)).IsTrue();
         await TeamRowPolicyAssertions.OldRefusedAsync(db.Database, db.Store, original, outcome, ErrorCode.PermissionDenied, token);
         await ConfigureAsync(db, Principal with

@@ -29,7 +29,7 @@ internal static class OutboxHeadAuthorityFlow
         await OutboxHeadAuthorityAssertions.ReplayAsync(database.Database, database.Store, state.QuotaWrite, state.QuotaFailure, token);
         OutboxHeadAuthorityFixture.Damage(database, state, fault);
         await OutboxHeadAuthorityAssertions.RefuseAsync(database.Database, database.Store, state, fault, token);
-        await OutboxHeadAuthorityAssertions.DocumentsAsync(database.Database, state.Partition, false);
+        await OutboxHeadAuthorityAssertions.DocumentsAsync(database.Database, state, false);
         var image = OutboxHeadAuthorityAssertions.Image(database.Store);
         var position = database.Store.Position;
         database.Store.Dispose();
@@ -38,7 +38,7 @@ internal static class OutboxHeadAuthorityFlow
         {
             var owner = database.CreateConfiguredDatabase(cold);
             await OutboxHeadAuthorityAssertions.SameAsync(cold, continued.Image, continued.Position);
-            await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state.Partition, true);
+            await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state, true);
             var entry = cold.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxHeadAuthorityFixture.EntrySpace, state.Partition, 3L)))
                 ?? throw new InvalidOperationException(OutboxHeadAuthorityFixture.MissingRow);
             await OutboxHeadAuthorityAssertions.ExactAsync(owner.GetOutboxStatus(OutboxHeadAuthorityFixture.Root, state.Partition).Head,
@@ -66,7 +66,7 @@ internal static class OutboxHeadAuthorityFlow
             new OutboxHead(2L, 1L, 2L, state.StoredBytes));
         var purged = owner.ApplyEmbedded(state.Purge, token);
         await OutboxHeadAuthorityAssertions.ExactAsync(purged.Get<OutboxHead>(), new OutboxHead(2L, 3L, 0L, 0L));
-        await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state.Partition, false);
+        await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state, false);
         await Assert.That(cold.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxHeadAuthorityFixture.EntrySpace, state.Partition, 1L)))).IsNull();
         await Assert.That(cold.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxHeadAuthorityFixture.EntrySpace, state.Partition, 2L)))).IsNull();
         await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.QuotaWrite, state.QuotaFailure, token);
@@ -75,7 +75,7 @@ internal static class OutboxHeadAuthorityFlow
         var result = owner.ApplyEmbedded(healthy, token);
         var receipt = result.Get<CommitReceipt>();
         await OutboxHeadAuthorityAssertions.ReceiptAsync(healthy, receipt, new MutationReceipt("putDocument", OutboxHeadAuthorityFixture.Collection, "c", 1L));
-        await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state.Partition, true);
+        await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state, true);
         await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, healthy, result, token);
         return new(healthy, receipt, result, purged, OutboxHeadAuthorityAssertions.Image(cold), cold.Position);
     }

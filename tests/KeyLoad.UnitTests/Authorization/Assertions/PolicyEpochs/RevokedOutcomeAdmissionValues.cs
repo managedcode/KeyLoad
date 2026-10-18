@@ -16,8 +16,11 @@ internal static class RevokedOutcomeAdmissionValues
     internal static async Task ReceiptAsync(RevokedOutcomeAdmissionFixture fixture, CommandRequest command,
         Result<object> result, long position, bool fresh)
     {
+        await Assert.That(result.Problem).IsNull();
+        await Assert.That(result.IsSuccess).IsTrue();
         var effects = Effects(fresh);
-        await EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position), [.. effects], DurabilityProfile.ProcessDurable, 1));
+        await EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, fresh ? fixture.FreshToken : fixture.OriginalToken, [.. effects], DurabilityProfile.ProcessDurable, 1));
+        await Assert.That(fixture.Store.Position).IsEqualTo(position);
         foreach (var effect in result.Get<CommitReceipt>().Mutations)
         {
             await Assert.That(effect.CompositionReferences).IsEmpty();

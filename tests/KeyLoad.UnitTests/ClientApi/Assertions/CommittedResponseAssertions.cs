@@ -1,5 +1,8 @@
+using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.Messaging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -7,7 +10,8 @@ internal static class CommittedResponseAssertions
 {
     internal static CommitReceipt Expected(ConnectionNativeScenario scenario, CommandRequest command, long position, long revision)
         => new(command.CommandId, new(scenario.Fixture.Database.Store.Identity.Incarnation,
-            command.Partition.AtomicPartitionId, position), [new(CommittedResponseProtocol.MutationKind, ConnectionNativeProtocol.Collection, CommittedResponseProtocol.Document, revision)], DurabilityProfile.ProcessDurable, 1);
+            command.Partition.AtomicPartitionId, position), [new(CommittedResponseProtocol.MutationKind, ConnectionNativeProtocol.Collection, CommittedResponseProtocol.Document, revision)], DurabilityProfile.ProcessDurable,
+            scenario.Fixture.Source.Services.GetRequiredService<IOptions<NodeOptions>>().Value.ReplicaCount);
 
     internal static async Task ReceiptAsync(CommitReceipt? actual, CommitReceipt expected)
     {

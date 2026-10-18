@@ -11,18 +11,20 @@ internal static class BackupIndexedDocumentDedupAssertions
     private const string LabelSuffix = "'";
     private const string IndexedAccessPrefix = "index:";
 
-    internal static async Task AssertPreRestoreContent(DatabaseEngine database, PartitionRef partition)
+    internal static async Task AssertPreRestoreContent(DatabaseEngine database, TestDatabase original)
     {
-        await AssertBaselineContent(database, partition);
+        var partition = original.Partition;
+        await AssertBaselineContent(database, original);
         await AssertIndexed(database, partition, BackupIndexedDocumentDedupFixture.AmberLabel, []);
         await AssertIndexed(database, partition, BackupIndexedDocumentDedupFixture.GoldLabel, []);
     }
 
-    private static async Task AssertBaselineContent(DatabaseEngine database, PartitionRef partition)
+    private static async Task AssertBaselineContent(DatabaseEngine database, TestDatabase original)
     {
-        await AssertDocument(database, partition, BackupIndexedDocumentDedupFixture.FirstId,
+        var partition = original.Partition;
+        await AssertDocument(database, original, BackupIndexedDocumentDedupFixture.FirstId,
             BackupIndexedDocumentDedupFixture.ReplacedJson, BackupIndexedDocumentDedupFixture.SecondRevision);
-        await AssertDocument(database, partition, BackupIndexedDocumentDedupFixture.SecondId,
+        await AssertDocument(database, original, BackupIndexedDocumentDedupFixture.SecondId,
             BackupIndexedDocumentDedupFixture.SecondJson, BackupIndexedDocumentDedupFixture.FirstRevision);
         await AssertMissing(database, partition, BackupIndexedDocumentDedupFixture.DeletedId);
         await AssertMissing(database, partition, BackupIndexedDocumentDedupFixture.TransientId);
@@ -32,21 +34,22 @@ internal static class BackupIndexedDocumentDedupAssertions
         await AssertIndexed(database, partition, BackupIndexedDocumentDedupFixture.JadeLabel, []);
     }
 
-    internal static async Task AssertFinalContent(DatabaseEngine database, PartitionRef partition)
+    internal static async Task AssertFinalContent(DatabaseEngine database, TestDatabase original)
     {
-        await AssertBaselineContent(database, partition);
-        await AssertDocument(database, partition, BackupIndexedDocumentDedupFixture.RestoredId,
+        var partition = original.Partition;
+        await AssertBaselineContent(database, original);
+        await AssertDocument(database, original, BackupIndexedDocumentDedupFixture.RestoredId,
             BackupIndexedDocumentDedupFixture.RestoredJson, BackupIndexedDocumentDedupFixture.FirstRevision);
-        await AssertDocument(database, partition, BackupIndexedDocumentDedupFixture.HealthyId,
+        await AssertDocument(database, original, BackupIndexedDocumentDedupFixture.HealthyId,
             BackupIndexedDocumentDedupFixture.HealthyJson, BackupIndexedDocumentDedupFixture.FirstRevision);
         await AssertIndexed(database, partition, BackupIndexedDocumentDedupFixture.AmberLabel, [BackupIndexedDocumentDedupFixture.RestoredId]);
         await AssertIndexed(database, partition, BackupIndexedDocumentDedupFixture.GoldLabel, [BackupIndexedDocumentDedupFixture.HealthyId]);
     }
 
-    internal static async Task AssertDocument(DatabaseEngine database, PartitionRef partition,
+    internal static async Task AssertDocument(DatabaseEngine database, TestDatabase original,
         string id, string json, long revision)
     {
-        var reference = new EntityRef(partition, BackupIndexedDocumentDedupFixture.Collection, id);
+        var reference = original.ExpectedReference(new(original.Partition, BackupIndexedDocumentDedupFixture.Collection, id));
         var document = database.GetDocument(RootPrincipal, reference);
         await Assert.That(document).IsNotNull();
         await Assert.That(document!.Reference).IsEqualTo(reference);

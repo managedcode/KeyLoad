@@ -20,6 +20,8 @@ internal static class DistributedSearchMcpProtocol
     internal const string Complete = "complete";
     internal const string Document = "document";
     internal const string Reference = "reference";
+    internal const string Lifetime = "lifetime";
+    internal const string Incarnation = "incarnation";
     internal const string Score = "score";
     internal const string Explanation = "explanation";
     internal const string Contributions = "contributions";

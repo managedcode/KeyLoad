@@ -53,7 +53,7 @@ internal static class OutboxHeadAuthorityFixture
         await Assert.That(database.Database.GetDocument(Root, new(database.Partition, Collection, "c"), cancellationToken: token)).IsNull();
         var purgeId = Guid.NewGuid();
         var purge = Operation(database.Database, OperationKind.PurgeOutbox, purgeId, new PurgeOutboxRequest(purgeId, database.Partition, 2L));
-        return new(database.Partition, seed, receipt, seedResult, quota, failure, purge, key, original, first.LongLength + second.LongLength, first.LongLength);
+        return new(database, database.Partition, seed, receipt, seedResult, quota, failure, purge, key, original, first.LongLength + second.LongLength, first.LongLength);
     }
 
     internal static void Damage(TestDatabase database, OutboxHeadAuthorityState state, int fault)

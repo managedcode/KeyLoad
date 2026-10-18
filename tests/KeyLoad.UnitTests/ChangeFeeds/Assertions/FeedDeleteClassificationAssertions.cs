@@ -37,7 +37,7 @@ internal static class FeedDeleteClassificationAssertions
         var source = state.Source;
         var before = FeedVertexAuthorityAssertions.Image(store);
         var cut = store.Position;
-        var reference = new EntityRef(source.Seed.Partition, FeedVertexAuthorityFixture.Collection, FeedDeleteClassificationFixture.Id);
+        var reference = source.Creation.ExpectedReference(new(source.Seed.Partition, FeedVertexAuthorityFixture.Collection, FeedDeleteClassificationFixture.Id));
         var update = source.UpdateReceipt ?? throw new InvalidOperationException(FeedDeleteClassificationFixture.MissingEntry);
         var changes = new List<DocumentChange>
         {
@@ -83,7 +83,7 @@ internal static class FeedDeleteClassificationAssertions
 
     private static DocumentChange Initial(FeedVertexAuthorityState source, long sequence, string id, string json)
     {
-        var reference = new EntityRef(source.Seed.Partition, FeedVertexAuthorityFixture.Collection, id);
+        var reference = source.Creation.ExpectedReference(new(source.Seed.Partition, FeedVertexAuthorityFixture.Collection, id));
         return new(sequence, source.Receipt.Token, source.CommittedAt, reference, 1L, false, null,
             new(reference, 1L, json, false, []));
     }

@@ -145,11 +145,11 @@ internal static class SiteAnalyzerCoverageThresholdOracle
         var coveredLines = new Dictionary<string, int>(StringComparer.Ordinal);
         if (moduleCoveredLinePercent is not null)
         {
-            var totalCovered = executableSources.Length * SiteAnalyzerCoverageTokens.LinesPerSource * moduleCoveredLinePercent.Value /
+            var totalCovered = executableSources.Sum(GetSourceLineCount) * moduleCoveredLinePercent.Value /
                 SiteAnalyzerCoverageTokens.CoveragePercentageScale;
             if (executableSources.Contains(SiteAnalyzerCoverageTokens.CriticalPipelineSource, StringComparer.Ordinal))
             {
-                var protectedLines = Math.Min(SiteAnalyzerCoverageTokens.LinesPerSource, totalCovered);
+                var protectedLines = Math.Min(GetSourceLineCount(SiteAnalyzerCoverageTokens.CriticalPipelineSource), totalCovered);
                 coveredLines.Add(SiteAnalyzerCoverageTokens.CriticalPipelineSource, protectedLines);
                 totalCovered -= protectedLines;
             }
@@ -161,7 +161,7 @@ internal static class SiteAnalyzerCoverageThresholdOracle
                     continue;
                 }
 
-                var coveredHere = Math.Min(SiteAnalyzerCoverageTokens.LinesPerSource, totalCovered);
+                var coveredHere = Math.Min(GetSourceLineCount(source), totalCovered);
                 coveredLines.Add(source, coveredHere);
                 totalCovered -= coveredHere;
             }
@@ -169,7 +169,7 @@ internal static class SiteAnalyzerCoverageThresholdOracle
 
         return Pipelines.Select(pipeline => pipeline.Sources.Sum(source => (long)(
             moduleCoveredLinePercent is null
-                ? SiteAnalyzerCoverageTokens.LinesPerSource
+                ? GetSourceLineCount(source)
                 : coveredLines[source]))).ToArray();
     }
 
@@ -186,8 +186,13 @@ internal static class SiteAnalyzerCoverageThresholdOracle
             .ToArray();
     }
 
+    private static int GetSourceLineCount(string source) =>
+        source == SiteAnalyzerCoverageTokens.ShortSourceRelativePath
+            ? SiteAnalyzerCoverageTokens.ShortSourceLines
+            : SiteAnalyzerCoverageTokens.LinesPerSource;
+
     private sealed record CoveragePipeline(string Diagnostic, string[] Sources)
     {
-        internal long LineCount => Sources.Length * SiteAnalyzerCoverageTokens.LinesPerSource;
+        internal long LineCount => Sources.Sum(GetSourceLineCount);
     }
 }

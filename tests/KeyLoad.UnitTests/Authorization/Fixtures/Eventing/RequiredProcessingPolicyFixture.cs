@@ -28,7 +28,7 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
         => Harness.Database.CreateCommand(kind, id, principal, Harness.Database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options));
     internal Result<object> Apply(OperationKind kind, object request, Guid id, string principal = Worker, CancellationToken token = default)
-        => Harness.Database.ApplyEmbedded(Operation(kind, request, id, principal), token);
+        => Harness.SubmitIssuedEmbedded(Operation(kind, request, id, principal), token);
     internal async Task InitializeAsync(CancellationToken token)
     {
         var policy = new SensitiveFieldPolicy("/secret", "private", Before);
@@ -78,9 +78,11 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
         var request = new CommandRequest(Guid.NewGuid(), Harness.Partition, [new EnqueueMessage(Queue, id, Payload, Headers)]);
         var operation = Operation(OperationKind.Batch, request, request.CommandId, "root");
         var position = Harness.Store.Position + 1L;
+        var expectedToken = Harness.NextCommitToken();
         var receipt = Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(request.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, position), [new("enqueue", Queue, id, 1L)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(request.CommandId, expectedToken, [new("enqueue", Queue, id, 1L)], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, receipt);
+        await Assert.That(Harness.Store.Position).IsEqualTo(position);
         Producers.Add((operation, expected, RequiredProcessingPolicyAssertions.Outcome(Harness.Store, Harness.Partition, "root", request.CommandId)));
     }
     public void Dispose() => Harness.Dispose();

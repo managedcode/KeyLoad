@@ -75,6 +75,10 @@ internal static class CurrentArchiveCancellationHealthy
             Convert.ToHexString(KeyCodec.Encode(HealthyKey)) + ":" +
                 Convert.ToHexString(NativeSerialization.Serialize(HealthyValue)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+                ZoneTreePersistenceFormat.LastAppliedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+                ZoneTreePersistenceFormat.ClockKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
                 ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(true))
         ];
         await ServerFailureObserver.ObserveAsync(async () =>

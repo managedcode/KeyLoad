@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed record ConnectionObservedOperation(GrainRequestProbeIdentity Identity,
-    IGrainContext ConnectionContext, IGrainContext WorkerContext, GrainRequestContextState ConnectionIdentity,
+    IGrainContext ConnectionContext, IGrainContext ProducerContext, GrainRequestContextState ConnectionIdentity,
     NativeRequestWorkOwner WorkOwner)
 {
     internal GrainId GrainId => ConnectionContext.GrainId;

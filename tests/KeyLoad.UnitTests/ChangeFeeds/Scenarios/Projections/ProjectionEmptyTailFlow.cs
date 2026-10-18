@@ -31,7 +31,7 @@ internal static class ProjectionEmptyTailFlow
         await Assert.That(ProjectionEmptyTailAssertions.Image(store))
             .IsEquivalentTo(state.Image, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(state.Position);
-        await ProjectionEmptyTailAssertions.DocumentsAsync(owner, state.Partition, true);
+        await ProjectionEmptyTailAssertions.DocumentsAsync(owner, state.Creation, state.Partition, true);
         await ProjectionEmptyTailAssertions.ConsumerAsync(owner, store, state.Consumer, state.Definition, 2L, 2L);
         var current = owner.ReadProjectionBatch(ProjectionEmptyTailAssertions.Root, new(state.Consumer));
         await ProjectionEmptyTailAssertions.ExactAsync(current,

@@ -64,7 +64,7 @@ internal static class TeamRowPolicyAssertions
         var reference = new EntityRef(db.Partition, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.Row);
         var document = database.GetDocument(TeamRowPolicyFlow.Reader, reference, cancellationToken: token);
         DocumentResult? pointExpected = expected.Length == FirstMembershipIndex ? null
-            : new(reference, expected[FirstMembershipIndex].Revision, expected[FirstMembershipIndex].Json, false, []);
+            : new(db.ExpectedReference(reference), expected[FirstMembershipIndex].Revision, expected[FirstMembershipIndex].Json, false, []);
         await Assert.That(JsonDefaults.Serialize(document).AsSpan().SequenceEqual(JsonDefaults.Serialize(pointExpected))).IsTrue();
         await UnchangedAsync(store, image, cut);
     }

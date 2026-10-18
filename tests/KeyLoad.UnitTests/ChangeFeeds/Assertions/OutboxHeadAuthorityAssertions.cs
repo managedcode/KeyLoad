@@ -50,16 +50,17 @@ internal static class OutboxHeadAuthorityAssertions
         await ExactAsync(receipt.Mutations, global::System.Collections.Immutable.ImmutableArray.CreateRange(expected));
     }
 
-    internal static async Task DocumentsAsync(DatabaseEngine owner, PartitionRef partition, bool continued)
+    internal static async Task DocumentsAsync(DatabaseEngine owner, OutboxHeadAuthorityState state, bool continued)
     {
+        var partition = state.Partition;
         await ExactAsync(owner.GetDocument(OutboxHeadAuthorityFixture.Root, new(partition, OutboxHeadAuthorityFixture.Collection, "a")),
-            new DocumentResult(new(partition, OutboxHeadAuthorityFixture.Collection, "a"), 1L, "{\"n\":1}", false, []));
+            new DocumentResult(state.Creation.ExpectedReference(new(partition, OutboxHeadAuthorityFixture.Collection, "a")), 1L, "{\"n\":1}", false, []));
         await ExactAsync(owner.GetDocument(OutboxHeadAuthorityFixture.Root, new(partition, OutboxHeadAuthorityFixture.Collection, "b")),
-            new DocumentResult(new(partition, OutboxHeadAuthorityFixture.Collection, "b"), 1L, "{\"n\":2}", false, []));
+            new DocumentResult(state.Creation.ExpectedReference(new(partition, OutboxHeadAuthorityFixture.Collection, "b")), 1L, "{\"n\":2}", false, []));
         if (continued)
         {
             await ExactAsync(owner.GetDocument(OutboxHeadAuthorityFixture.Root, new(partition, OutboxHeadAuthorityFixture.Collection, "c")),
-                new DocumentResult(new(partition, OutboxHeadAuthorityFixture.Collection, "c"), 1L, "{\"n\":3}", false, []));
+                new DocumentResult(state.Creation.ExpectedReference(new(partition, OutboxHeadAuthorityFixture.Collection, "c")), 1L, "{\"n\":3}", false, []));
         }
         else
         {

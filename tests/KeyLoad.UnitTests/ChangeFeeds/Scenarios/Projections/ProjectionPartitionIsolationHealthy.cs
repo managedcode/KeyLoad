@@ -24,7 +24,7 @@ internal static class ProjectionPartitionIsolationHealthy
         var batch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(source.Consumer));
         var entry = new OutboxEntry(4L, 0, receipt.Token, source.Time, mutation,
             new(ProjectionPartitionIsolationFixture.PutKind, mutation.Collection, mutation.Id, 1L), null,
-            new(new(source.Partition, mutation.Collection, mutation.Id), 1L, mutation.Json, new RowAccess(), source.Time));
+            new(source.Creation.ExpectedReference(new(source.Partition, mutation.Collection, mutation.Id)), 1L, mutation.Json, new RowAccess(), source.Time));
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(source.Consumer, source.Definition, 3L, false), [entry], 4L, batch.Token, false));
         var effectId = Guid.NewGuid();

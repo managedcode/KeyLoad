@@ -22,8 +22,9 @@ internal sealed class BlobStorageRejectedCommandTests
         var blob = BlobStorageTestSupport.Blob(db, BlobId);
         var uploadId = Guid.NewGuid();
         var beginId = Guid.NewGuid();
+        var beginCut = (Token: db.NextCommitToken(blob.Partition), Position: db.Store.Position);
         var begun = BlobStorageTestSupport.Begin(db, blob, uploadId, ValidBytes.Length, RevisionZero, beginId);
-        await BlobWholeFlowAssertions.Receipt(db.Database, begun.Receipt, beginId, blob);
+        await BlobWholeFlowAssertions.Receipt(db.Database, begun.Receipt, beginId, blob, beginCut.Token, beginCut.Position);
         var beforeInvalid = BlobRejectedCommandColdFlow.DomainImage(db.Database, blob, uploadId);
         var invalidId = Guid.NewGuid();
 
@@ -35,8 +36,9 @@ internal sealed class BlobStorageRejectedCommandTests
         await Assert.That(afterInvalidHash.NextOrdinal).IsEqualTo(PartOrdinal);
 
         var writeId = Guid.NewGuid();
+        var writeCut = (Token: db.NextCommitToken(blob.Partition), Position: db.Store.Position);
         var written = BlobStorageTestSupport.Write(db, blob, uploadId, PartOrdinal, ValidBytes, writeId);
-        await BlobWholeFlowAssertions.Receipt(db.Database, written.Receipt, writeId, blob);
+        await BlobWholeFlowAssertions.Receipt(db.Database, written.Receipt, writeId, blob, writeCut.Token, writeCut.Position);
         var beforeDuplicate = BlobRejectedCommandColdFlow.DomainImage(db.Database, blob, uploadId);
         var changedId = Guid.NewGuid();
         var changedHash = BlobIntegrity.PartHash(ChangedBytes);
@@ -56,12 +58,14 @@ internal sealed class BlobStorageRejectedCommandTests
         var chain = BlobIntegrity.InitialHash(db.Store.Identity.Incarnation, blob, uploadId, ValidBytes.Length);
         chain = BlobIntegrity.NextHash(chain, PartOrdinal, ValidBytes.Length, BlobIntegrity.PartHash(ValidBytes));
         var completeId = Guid.NewGuid();
+        var completeCut = (Token: db.NextCommitToken(blob.Partition), Position: db.Store.Position);
         var committed = BlobStorageTestSupport.Complete(db, blob, uploadId, chain, completeId);
         var published = committed.Value;
         var read = operations.Read(PrincipalId, new(blob, published.Revision, 0, ValidBytes.Length));
         await Assert.That(read.Bytes.Span.SequenceEqual(ValidBytes)).IsTrue();
         await Assert.That(published.Revision).IsEqualTo(1L);
-        await BlobWholeFlowAssertions.Receipt(db.Database, committed.Receipt, completeId, blob);
+        await BlobWholeFlowAssertions.Receipt(db.Database, committed.Receipt, completeId, blob,
+            completeCut.Token, completeCut.Position);
         await BlobRejectedCommandColdFlow.Run(db, blob, uploadId, begun, written, published, ValidBytes,
         [
             BlobRejectedCommandColdFlow.Retain(invalidId, OperationKind.WriteBlobPart,

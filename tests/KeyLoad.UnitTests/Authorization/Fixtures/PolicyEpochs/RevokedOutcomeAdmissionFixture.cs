@@ -17,6 +17,8 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
     internal ZoneTreeStore Store { get; set; } = null!;
     internal DatabaseEngine Database { get; set; } = null!;
     internal CommandRequest Original { get; private set; } = null!;
+    internal CommitToken OriginalToken { get; private set; } = null!;
+    internal CommitToken FreshToken { get; set; } = null!;
     private Result<object>? originalResult;
     internal Result<object> OriginalResult
     {
@@ -56,6 +58,7 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
              new AppendEvents(Events, "stream", [new("original", "Created", "{\"event\":1}")], ExpectedStreamRevision.NoStream),
              new EnqueueMessage(Queue, "original", "{\"work\":1}")]);
         OriginalPosition = Store.Position + 1;
+        OriginalToken = ExpectedCanonicalCommit.Next(Database, Harness.Partition);
         OriginalResult = Database.Apply(Operation(Original));
         OriginalOutcome = ReadOutcome(Original.CommandId);
         OriginalLocator = Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(Harness.Partition, Worker, Original.CommandId)))

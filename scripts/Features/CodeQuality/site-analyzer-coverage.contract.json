@@ -227,7 +227,7 @@
     },
     {
       "path": "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeMeasurement.cs",
-      "classification": "declaration-only"
+      "classification": "executable"
     },
     {
       "path": "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermPermissions.cs",
@@ -386,6 +386,7 @@
       "sources": [
         "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/AggregateTypeCodeLineCountAnalyzer.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeLineAccumulator.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeMeasurement.cs",
         "analyzers/KeyLoad.Analyzers/Validation/AggregateTypeLimitException.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/NumericCodeLineCounter.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/NumericQualityRuleDescriptors.cs"

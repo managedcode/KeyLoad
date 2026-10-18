@@ -117,6 +117,8 @@ internal static class OutcomeStoreOracle
         => operation.Value!.Kind switch
         {
             OperationKind.ConfigureResource => IsNonNull<ConfigureResourceRequest>(operation),
+            OperationKind.CreateTable => IsNonNull<CreateTableRequest>(operation),
+            OperationKind.DropTable => IsNonNull<DropTableRequest>(operation),
             OperationKind.ConfigurePrincipal => IsNonNull<ConfigurePrincipalRequest>(operation),
             OperationKind.ConfigureApiKey => IsNonNull<ConfigureApiKeyRequest>(operation),
             OperationKind.SetDispatch => IsBoolean(operation.Value!.Input),

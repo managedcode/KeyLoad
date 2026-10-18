@@ -36,8 +36,8 @@ internal static class SafeProjectorOperationOutbox
     private static OutboxEntry[] Expected(SafeProjectorOperationDatabase owner, SafeProjectorOperationState state,
         SafeProjectorOperationCommand? patch, SafeProjectorOperationCommand? healthy)
     {
-        var firstRef = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First);
-        var secondRef = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second);
+        var firstRef = owner.Source.ExpectedReference(new(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First));
+        var secondRef = owner.Source.ExpectedReference(new(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second));
         var first = new DocumentRecord(firstRef, SafeProjectorOperationProtocol.InitialRevision,
             SafeProjectorOperationProtocol.InitialJson, new RowAccess(), new DateTimeOffset(state.Seed.Operation.Timestamp));
         var second = new DocumentRecord(secondRef, SafeProjectorOperationProtocol.InitialRevision,

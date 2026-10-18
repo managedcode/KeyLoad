@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class CatalogArrayPathAssertions
 {
-    internal static async Task CheckAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
+    internal static async Task CheckAsync(TestDatabase creation, DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
         bool use, bool read, long revision, CancellationToken token)
     {
         var queries = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
@@ -19,7 +19,7 @@ internal static class CatalogArrayPathAssertions
         {
             var reference = new EntityRef(partition, CatalogArrayPathFlow.Collection, CatalogArrayPathFlow.Row);
             var actual = database.GetDocument(CatalogArrayPathFlow.Reader, reference, cancellationToken: token);
-            var document = new DocumentResult(reference, revision, expectedJson, true, omitted);
+            var document = new DocumentResult(creation.ExpectedReference(reference), revision, expectedJson, true, omitted);
             if (actual is null)
             {
                 throw new InvalidOperationException("The catalog document must remain readable.");
@@ -75,9 +75,9 @@ internal static class CatalogArrayPathAssertions
         });
 
     internal static async Task ReceiptAsync(ZoneTreeStore store, CommandRequest command, CommitReceipt actual,
-        long before, long revision, string kind)
+        long before, CommitToken expectedToken, long revision, string kind)
     {
-        var expected = new CommitReceipt(command.CommandId, new(store.Identity.Incarnation, command.Partition.AtomicPartitionId, before + 1L), [new(kind, CatalogArrayPathFlow.Collection, CatalogArrayPathFlow.Row, revision)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, expectedToken, [new(kind, CatalogArrayPathFlow.Collection, CatalogArrayPathFlow.Row, revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(actual, expected);
         await Assert.That(store.Position).IsEqualTo(before + 1L);
     }

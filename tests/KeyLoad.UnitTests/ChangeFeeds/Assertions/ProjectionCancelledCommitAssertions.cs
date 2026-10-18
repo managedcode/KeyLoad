@@ -20,7 +20,7 @@ internal static class ProjectionCancelledCommitAssertions
         await Assert.That(partial).IsNull();
         await ProjectionConsumerIdentityAssertions.SameAsync(store, image, position);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(owner, state);
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Partition);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state);
         await Assert.That(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(state.Partition, ProjectionConsumerIdentityFixture.Target, "effect"), cancellationToken: token)).IsNull();
         await ProjectionConsumerIdentityAssertions.SameAsync(store, image, position);
@@ -39,11 +39,11 @@ internal static class ProjectionCancelledCommitAssertions
             new MutationReceipt("putDocument", ProjectionConsumerIdentityFixture.Source, "c", 1L));
         await ProjectionConsumerIdentityAssertions.ExactAsync(owner.GetDocument(ProjectionConsumerIdentityFixture.Root,
             new(state.Partition, ProjectionConsumerIdentityFixture.Source, "c"), receipt.Token, token),
-            new DocumentResult(new(state.Partition, ProjectionConsumerIdentityFixture.Source, "c"), 1L, "{\"n\":3}", false, []));
+            new DocumentResult(state.Creation.ExpectedReference(new(state.Partition, ProjectionConsumerIdentityFixture.Source, "c")), 1L, "{\"n\":3}", false, []));
         var batch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(state.Consumer));
         var entry = new OutboxEntry(4L, 0, receipt.Token, FeedAuthorityClock.Epoch, mutation,
             new("putDocument", ProjectionConsumerIdentityFixture.Source, "c", 1L), null,
-            new(new(state.Partition, ProjectionConsumerIdentityFixture.Source, "c"), 1L, mutation.Json, new RowAccess(), FeedAuthorityClock.Epoch));
+            new(state.Creation.ExpectedReference(new(state.Partition, ProjectionConsumerIdentityFixture.Source, "c")), 1L, mutation.Json, new RowAccess(), FeedAuthorityClock.Epoch));
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(state.Consumer, state.Definition, 3L, false), [entry], 4L, batch.Token, false));
         var advanceId = Guid.NewGuid();
@@ -59,7 +59,7 @@ internal static class ProjectionCancelledCommitAssertions
             new ProjectionBatch(new(state.Consumer, state.Definition, 4L, false), [], 4L, empty.Token, false));
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, source, original, token);
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, advance, advanced, token);
-        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state.Partition);
-        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state.Partition);
+        await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state);
+        await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state);
     }
 }

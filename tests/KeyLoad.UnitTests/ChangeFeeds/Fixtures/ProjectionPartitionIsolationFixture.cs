@@ -55,7 +55,7 @@ internal static class ProjectionPartitionIsolationFixture
         var key = KeySpace.Partition(ProjectionConsumerIdentityFixture.ConsumerSpace, partition, consumer.Name);
         var original = database.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException(ProjectionConsumerIdentityFixture.MissingRow);
-        return new(partition, consumer, first.Definition, configure, configured, seed, seeded, receipt,
+        return new(database, partition, consumer, first.Definition, configure, configured, seed, seeded, receipt,
             first.Time, batch, complete, again, key, original);
     }
 

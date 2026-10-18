@@ -40,13 +40,16 @@ internal static class BlobCurrentFormatOperations
         await Assert.That(written.Value.IntegrityHash).IsEqualTo(integrity);
         var request = new CompleteBlobUploadRequest(id, blob, upload, integrity);
         var now = database.Database.EvaluationClock.GetUtcNow();
+        var expectedToken = database.NextCommitToken(blob.Partition);
+        var previousStorePosition = database.Store.Position;
         var result = database.Submit(OperationKind.CompleteBlobUpload, request, id: id, time: now).Get<BlobCommitResult<BlobMetadata>>();
         var expected = new BlobMetadata(blob, BlobCurrentFormatFixture.OriginalRevision, upload, BlobCurrentFormatFixture.Bytes.Length,
             BlobCurrentFormatFixture.PartCount, integrity, new RowAccess(), now);
         await Assert.That(NativeSerialization.Serialize(result.Value).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await Assert.That(result.Receipt.CommandId).IsEqualTo(id);
         await Assert.That(result.Receipt.Token.AtomicPartitionId).IsEqualTo(blob.Partition.AtomicPartitionId);
-        await Assert.That(result.Receipt.Token.Position).IsEqualTo(database.Store.Position);
+        await Assert.That(result.Receipt.Token).IsEqualTo(expectedToken);
+        await Assert.That(database.Store.Position).IsEqualTo(checked(previousStorePosition + 1L));
         await Assert.That(result.Receipt.Mutations).IsEmpty();
         await Assert.That(result.Receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
         return (request, result, expected);

@@ -37,7 +37,7 @@ internal static class GenerationVisibilityAssertions
         await Assert.That(page.CutPosition).IsEqualTo(cut);
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo(Scan);
-        await TeamGraphVisibilityAssertions.ReadAsync(database, store, db.Partition, true, token);
+        await TeamGraphVisibilityAssertions.ReadAsync(db, database, store, db.Partition, true, token);
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);
     }
 }

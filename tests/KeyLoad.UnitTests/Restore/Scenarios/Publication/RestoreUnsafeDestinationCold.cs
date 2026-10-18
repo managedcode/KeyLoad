@@ -54,6 +54,10 @@ internal static class RestoreUnsafeDestinationCold
         var expected = new List<string>
         {
             Row(MetadataBackupFixture.StoredKeyBytes, NativeSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
+            Row(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey),
+                NativeSerialization.Serialize(1L)),
+            Row(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.ClockKey),
+                NativeSerialization.Serialize(1L)),
             Row(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.DispatchPausedKey),
                 NativeSerialization.Serialize(true))
         };

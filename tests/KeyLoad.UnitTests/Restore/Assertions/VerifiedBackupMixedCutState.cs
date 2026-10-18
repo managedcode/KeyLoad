@@ -24,7 +24,8 @@ internal static class VerifiedBackupMixedCutState
         await Assert.That(JsonSerializer.Serialize(other, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(expectedOther, JsonDefaults.Options));
         var document = database.GetDocument(EventingArtifactFixture.Principal,
             new(fixture.Source.Partition, EventingArtifactFixture.Documents, EventingArtifactFixture.DocumentId));
-        await Assert.That(document!.Reference).IsEqualTo(new EntityRef(fixture.Source.Partition, EventingArtifactFixture.Documents, EventingArtifactFixture.DocumentId));
+        await Assert.That(document!.Reference).IsEqualTo(fixture.Source.ExpectedReference(
+            new(fixture.Source.Partition, EventingArtifactFixture.Documents, EventingArtifactFixture.DocumentId)));
         await Assert.That(document.Redacted).IsFalse();
         await Assert.That(document.RedactedFields).IsEmpty();
         await Assert.That(document.Revision).IsEqualTo(1L);
@@ -43,8 +44,8 @@ internal static class VerifiedBackupMixedCutState
             return;
         }
         await Assert.That(second).IsNotNull();
-        await Assert.That(second!.Reference).IsEqualTo(new EntityRef(fixture.Source.Partition,
-            EventingArtifactFixture.Documents, VerifiedBackupCutPair.DocumentId));
+        await Assert.That(second!.Reference).IsEqualTo(fixture.Source.ExpectedReference(new(fixture.Source.Partition,
+            EventingArtifactFixture.Documents, VerifiedBackupCutPair.DocumentId)));
         await Assert.That(second.Revision).IsEqualTo(1L);
         await Assert.That(second.Redacted).IsFalse();
         await Assert.That(second.RedactedFields).IsEmpty();

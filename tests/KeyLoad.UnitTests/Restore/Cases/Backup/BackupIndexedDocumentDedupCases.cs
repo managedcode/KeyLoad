@@ -24,7 +24,7 @@ internal sealed class BackupIndexedDocumentDedupCases
     {
         using var fixture = new BackupIndexedDocumentDedupFixture();
         var firstOperation = await SeedAndMutate(fixture);
-        await BackupIndexedDocumentDedupAssertions.AssertPreRestoreContent(fixture.Source.Database, fixture.Partition);
+        await BackupIndexedDocumentDedupAssertions.AssertPreRestoreContent(fixture.Source.Database, fixture.Source);
         var sourceIdentity = fixture.Source.Store.Identity;
         var sourceCut = fixture.CreateBackup();
         var manifest = await MetadataTestFiles.ReadManifestAsync(fixture.BackupDirectory);
@@ -41,7 +41,7 @@ internal sealed class BackupIndexedDocumentDedupCases
             fixture.Partition, SeedCommandId, originalOutcome);
         await AssertPreRestoreReplayFence(fixture, database, firstOperation, sourceCut + AuthorityResetCommits,
             originalOutcome);
-        await BackupIndexedDocumentDedupAssertions.AssertPreRestoreContent(database, fixture.Partition);
+        await BackupIndexedDocumentDedupAssertions.AssertPreRestoreContent(database, fixture.Source);
         await ReplayPostRestoreAndWriteHealthy(fixture, database);
         var finalPosition = fixture.TargetStore.Position;
         var finalOutcomes = BackupIndexedDocumentDedupAssertions.CaptureCurrentOutcomes(fixture.TargetStore,
@@ -49,7 +49,7 @@ internal sealed class BackupIndexedDocumentDedupCases
         fixture.CloseRestored();
         var reopened = fixture.OpenRestored();
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(finalPosition);
-        await BackupIndexedDocumentDedupAssertions.AssertFinalContent(reopened, fixture.Partition);
+        await BackupIndexedDocumentDedupAssertions.AssertFinalContent(reopened, fixture.Source);
         await BackupIndexedDocumentDedupAssertions.AssertCurrentOutcomes(reopened.Store, fixture.Partition, finalOutcomes);
         await BackupIndexedDocumentDedupAssertions.AssertArchiveUnchanged(fixture.BackupDirectory, archive);
         await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourceCut);
