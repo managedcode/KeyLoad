@@ -86,5 +86,6 @@ internal static class RequestCqrsAnnResultAssertions
 
     private static RankedDocument Row(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         string id, string json, long revision, double score)
-        => new(new(new(fixture.Database.Partition, request.Collection, id), revision, json, false, []), score);
+        => new(new(fixture.Database.Reference(RequestCqrsAnnTestData.CollectionCreation, request.Collection, id),
+            revision, json, false, []), score);
 }

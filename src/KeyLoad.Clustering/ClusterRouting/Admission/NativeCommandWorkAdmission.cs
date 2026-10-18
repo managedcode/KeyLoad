@@ -6,19 +6,19 @@ namespace KeyLoad.Clustering;
 /// <summary>Reuses Core admission at the actual command owner without another physical catalog.</summary>
 internal static class NativeCommandWorkAdmission
 {
-    internal static void Bind(DatabaseEngine database, DecodedGrainRequest request, PrincipalRecord principal,
+    internal static Command<DatabaseCommand>? Bind(DatabaseEngine database, DecodedGrainRequest request, PrincipalRecord principal,
         TimeProvider clock, NativeCapabilityWorkLifetime? work, Command<DatabaseCommand>? originalIntent = null)
     {
         if (work is null)
         {
-            return; // Direct component execution has no hosted resource-lifetime binding.
+            return null; // Direct component execution has no hosted resource-lifetime binding.
         }
         var kind = request.Envelope.CommandKind
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         if (kind == OperationKind.DropTable || DatabaseEngine.IsResourceFreeCommandWork(kind))
         {
             work.Bind([]); // Dropping a resource cannot retain its closing lifetime.
-            return;
+            return null;
         }
         var operation = originalIntent ?? (CarriesVerifiedOperation(kind)
             ? database.OwnCommand(GrainNativePayload.Read<Command<DatabaseCommand>>(request.Payload))
@@ -28,6 +28,7 @@ internal static class NativeCommandWorkAdmission
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         database.ValidateResourceEffectSubmission(operation, clock.GetUtcNow(), work);
+        return operation;
     }
 
     internal static NativeCommandWorkProofV1 Capture(DecodedGrainRequest request,

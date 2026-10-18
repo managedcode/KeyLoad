@@ -49,7 +49,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         token.ThrowIfCancellationRequested();
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
         var original = Issue(fixture.Database, OperationKind.Delivery, ack, ack.CommandId);
-        var expected = AppliedOutcomeDefinitiveRefusalAssertions.NextToken(fixture.Database, fixture.Store, lane.Partition);
+        var expected = ExpectedCanonicalCommit.Next(fixture.Database, lane.Partition);
         var committed = fixture.Database.Apply(original);
         await AppliedOutcomeDefinitiveRefusalAssertions.ReceiptAsync(committed, ack.CommandId, expected, Message);
         var changed = Issue(fixture.Database, OperationKind.Delivery, ack with
@@ -72,7 +72,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
         await AppliedOutcomeDefinitiveRefusalAssertions.CurrentAsync(db, cold, lane, false);
         await AppliedOutcomeDefinitiveRefusalAssertions.ConflictAsync(db, cold, original, changed, committed);
-        await HealthyAsync(db, cold, lane, token);
+        await HealthyAsync(db, lane, token);
         await AppliedOutcomeDefinitiveRefusalAssertions.CurrentAsync(db, cold, lane, true);
         await AppliedOutcomeDefinitiveRefusalAssertions.ConflictAsync(db, cold, original, changed, committed);
         await FinalColdAsync(fixture.Directory, cold, lane, original, changed, committed, token);
@@ -93,7 +93,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         await AppliedOutcomeDefinitiveRefusalAssertions.ConflictAsync(db, cold, original, changed, committed);
     }
 
-    private static async Task HealthyAsync(DatabaseEngine db, ZoneTreeStore store, QueueLaneRef lane, CancellationToken token)
+    private static async Task HealthyAsync(DatabaseEngine db, QueueLaneRef lane, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: 1);
@@ -105,7 +105,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
         var issued = Issue(db, OperationKind.Delivery, ack, ack.CommandId);
-        var expected = AppliedOutcomeDefinitiveRefusalAssertions.NextToken(db, store, lane.Partition);
+        var expected = ExpectedCanonicalCommit.Next(db, lane.Partition);
         var committed = db.Apply(issued);
         await AppliedOutcomeDefinitiveRefusalAssertions.ReceiptAsync(committed, ack.CommandId, expected, Healthy);
         await NativeReplayResultAssertions.Same<CommitReceipt>(db.ResolveAppliedSubmissionOutcome(issued), committed);

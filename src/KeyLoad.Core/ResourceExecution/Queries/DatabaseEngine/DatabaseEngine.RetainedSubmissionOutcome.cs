@@ -33,7 +33,7 @@ public sealed partial class DatabaseEngine
             var view = work is null ? raw : work.CreateView(raw);
             try
             {
-                return ReadValidatedSubmissionOutcome(view, normalized, allowStoredDocumentDenial: true);
+                return ReadValidatedSubmissionOutcome(view, normalized);
             }
             catch (KeyLoadException missing) when (missing.Code == ErrorCode.RecoveryRequired
                 && string.Equals(missing.Message, MissingDurableOutcomeMessage, StringComparison.Ordinal))

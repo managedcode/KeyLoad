@@ -17,8 +17,8 @@ internal static class NativeCredentialStatusStages
             NativeCredentialStatusStep.OriginalBoolean, token);
         await Assert.That(unknown.IsFailed).IsTrue();
         await NativeCredentialStatusAssertions.ProblemAsync(unknown.Problem, ErrorCode.UnknownWriteOutcome, P.UnknownDetail);
-        var expected = await NativeCredentialStatusOutcome.RequireAsync(state, state.OriginalId, state.Administrator, state.Original, next, denied: false);
-        await NativeCredentialStatusDelta.RequireAsync(state, before, state.OriginalId, state.Administrator, state.Original, expected, denied: false);
+        var expected = await NativeCredentialStatusOutcome.RequireAsync(state, state.OriginalId, state.Administrator, state.Original, next);
+        await NativeCredentialStatusDelta.RequireAsync(state, before, state.OriginalId, state.Administrator, state.Original, expected);
         await NativeCredentialStatusAssertions.CurrentAsync(state, original: true, healthy: false);
         var first = NativeCredentialStatusAssertions.Capture(state);
         var replay = await CompleteAsync(state, endpoint, admin.ConfigureApiKeyAsync(state.OriginalId, state.Original, token),
@@ -33,21 +33,20 @@ internal static class NativeCredentialStatusStages
         NativeCredentialStatusEndpoint endpoint, KeyLoadClient admin, KeyLoadClient ordinary, CancellationToken token)
     {
         var before = NativeCredentialStatusAssertions.Capture(state);
-        var next = checked(before.Cut.AppliedPosition + P.First);
+        await NativeCredentialStatusAssertions.AbsentDeniedOutcomeAsync(state);
         var denied = await CompleteAsync(state, endpoint, ordinary.ConfigureApiKeyAsync(state.DeniedId, state.Denied, token),
             NativeCredentialStatusStep.OrdinaryDenied, token);
         await Assert.That(denied.IsFailed).IsTrue();
         await NativeCredentialStatusAssertions.ProblemAsync(denied.Problem, ErrorCode.PermissionDenied, P.DeniedDetail);
-        var expected = await NativeCredentialStatusOutcome.RequireAsync(state, state.DeniedId, state.Ordinary, state.Denied, next, denied: true);
-        await NativeCredentialStatusDelta.RequireAsync(state, before, state.DeniedId, state.Ordinary, state.Denied, expected, denied: true);
-        await NativeCredentialStatusAssertions.CurrentAsync(state, original: true, healthy: false);
+        await NativeCredentialStatusAssertions.UnchangedAsync(state, before, healthy: false);
+        await NativeCredentialStatusAssertions.AbsentDeniedOutcomeAsync(state);
         before = NativeCredentialStatusAssertions.Capture(state);
-        next = checked(before.Cut.AppliedPosition + P.First);
+        var next = checked(before.Cut.AppliedPosition + P.First);
         var healthy = await CompleteAsync(state, endpoint, admin.ConfigureApiKeyAsync(state.HealthyId, state.Healthy, token),
             NativeCredentialStatusStep.Healthy, token);
         await SuccessAsync(healthy);
-        expected = await NativeCredentialStatusOutcome.RequireAsync(state, state.HealthyId, state.Administrator, state.Healthy, next, denied: false);
-        await NativeCredentialStatusDelta.RequireAsync(state, before, state.HealthyId, state.Administrator, state.Healthy, expected, denied: false);
+        var expected = await NativeCredentialStatusOutcome.RequireAsync(state, state.HealthyId, state.Administrator, state.Healthy, next);
+        await NativeCredentialStatusDelta.RequireAsync(state, before, state.HealthyId, state.Administrator, state.Healthy, expected);
         await NativeCredentialStatusAssertions.CurrentAsync(state, original: true, healthy: true);
         var current = NativeCredentialStatusAssertions.Capture(state);
         await SuccessAsync(await CompleteAsync(state, endpoint, admin.ConfigureApiKeyAsync(state.HealthyId, state.Healthy, token),

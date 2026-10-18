@@ -91,12 +91,6 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
         await Assert.That(result.Value).IsNull();
     }
 
-    internal static CommitToken NextToken(DatabaseEngine db, ZoneTreeStore store, PartitionRef partition)
-    {
-        var placement = db.ReadAtomicPartitionPlacement("root", partition);
-        return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + 1));
-    }
-
     internal static async Task ReceiptAsync(Result<object> result, Guid id, CommitToken token, string message)
     {
         var expected = new CommitReceipt(id, token, [new("Ack", AppliedOutcomeDefinitiveRefusalFlow.Queue, message, 3L)], DurabilityProfile.ProcessDurable, 1);

@@ -17,7 +17,7 @@ public sealed partial class DatabaseEngine
         return Store.Read(raw =>
         {
             var view = work.CreateView(raw);
-            var result = ReadValidatedSubmissionOutcome(view, normalized, allowStoredDocumentDenial: true);
+            var result = ReadValidatedSubmissionOutcome(view, normalized);
             ObserveConfiguredResourceOutcome(view, normalized, result, work);
             work.CheckResult(result.Value ?? result);
             work.Check();

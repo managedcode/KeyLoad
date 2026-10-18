@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -34,8 +35,16 @@ internal static class RequiredProcessingPolicyFlow
                     successful.Receipt, successful.Outcome, fixture.Harness.Partition, token);
                 await fixture.PrincipalAsync(2L, true, token);
                 var revoked = fixture.Processing(Guid.NewGuid(), first, "first");
-                await RequiredProcessingPolicyRefusal.FreshAsync(fixture, fixture.Operation(OperationKind.Processing, revoked, revoked.CommandId),
-                    ErrorCode.Unauthenticated, RequiredProcessingPolicyFixture.Unavailable, token);
+                var revokedOperation = fixture.Operation(OperationKind.Processing, revoked, revoked.CommandId);
+                await RequiredProcessingPolicyAssertions.ObserveAsync(fixture.Harness.Store, async () =>
+                {
+                    await RequiredProcessingPolicyAssertions.FailureAsync(fixture.Harness.Database.ApplyEmbedded(revokedOperation, token),
+                        ErrorCode.Unauthenticated, RequiredProcessingPolicyFixture.Unavailable);
+                    await Assert.That(fixture.Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
+                        fixture.Harness.Partition, revokedOperation.UserId!, revoked.CommandId)))).IsNull();
+                    await Assert.That(fixture.Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+                        fixture.Harness.Partition, revokedOperation.UserId!, revoked.CommandId)))).IsNull();
+                });
                 await fixture.PrincipalAsync(3L, false, token);
                 await RequiredProcessingPolicyRefusal.ExistingAsync(fixture.Harness.Database, fixture.Harness.Store, fixture.Harness.Partition,
                     successful.Operation, successful.Outcome, ErrorCode.PermissionDenied, RequiredProcessingPolicyFixture.EpochChanged, token);

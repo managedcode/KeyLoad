@@ -40,18 +40,20 @@ internal static class NativeCredentialStatusAssertions
     internal static NativeCredentialStatusCut Capture(NativeCredentialStatusState state)
     {
         var database = state.Scenario.Fixture.Database;
-        var hashes = database.Store.Read(view =>
+        var rows = database.Store.Read(view =>
         {
             var page = view.Scan([], database.Database.Limits.MaxScanRecords);
             if (page.HasMore)
             {
                 throw new InvalidOperationException(P.Failure);
             }
-            return page.Records.ToDictionary(row => Hash(row.Key.Span), row => Hash(row.Value.Span), StringComparer.Ordinal);
+            return page.Records.Select(row => new KeyValuePair<byte[], byte[]>(row.Key.ToArray(), row.Value.ToArray())).ToArray();
         });
+        var hashes = rows.ToDictionary(row => Hash(row.Key), row => Hash(row.Value), StringComparer.Ordinal);
         var clock = database.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
             view.ReadOwnedValue(KeySpace.ClockBytes) ?? throw new InvalidOperationException(P.Failure)));
-        return new(hashes, database.Store.Position, database.ReadCanonicalCut(), clock);
+        return new(hashes, rows, database.Store.Position, database.ReadCanonicalCut(), clock,
+            NativeSerialization.Serialize(database.Store.Identity));
     }
 
     internal static async Task UnchangedAsync(NativeCredentialStatusState state, NativeCredentialStatusCut original,
@@ -60,8 +62,26 @@ internal static class NativeCredentialStatusAssertions
         await CurrentAsync(state, original: true, healthy);
         var actual = Capture(state);
         await RequireRowsAsync(original.RowHashes, actual.RowHashes);
+        await Assert.That(actual.Rows.Length == original.Rows.Length && actual.Rows.Zip(original.Rows).All(pair =>
+            pair.First.Key.AsSpan().SequenceEqual(pair.Second.Key)
+            && pair.First.Value.AsSpan().SequenceEqual(pair.Second.Value))).IsTrue();
         await Assert.That(actual.Position).IsEqualTo(original.Position);
         await Assert.That(actual.Cut).IsEqualTo(original.Cut);
+        await Assert.That(actual.Clock).IsEqualTo(original.Clock);
+        await Assert.That(actual.Identity.AsSpan().SequenceEqual(original.Identity)).IsTrue();
+    }
+
+    internal static async Task AbsentDeniedOutcomeAsync(NativeCredentialStatusState state)
+    {
+        var database = state.Scenario.Fixture.Database;
+        var principal = state.Ordinary.Id;
+        var id = state.DeniedId;
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.GlobalKey(principal, id)))).IsNull();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.UnknownKey(principal, id)))).IsNull();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
+            OutcomeStoreOracle.PartitionKey(database.Partition, principal, id)))).IsNull();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
+            KeySpace.OutcomeLocatorV2(database.Partition, principal, id)))).IsNull();
     }
 
     internal static async Task RequireRowsAsync(IReadOnlyDictionary<string, string> expected,

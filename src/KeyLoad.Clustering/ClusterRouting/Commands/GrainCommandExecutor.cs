@@ -49,7 +49,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             await NativeCommandCapabilityAuthorization.ObserveAndValidateAsync(database, clock, settings,
                 codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
-            NativeCommandWorkAdmission.Bind(database, request, principal, clock, work);
+            var original = NativeCommandWorkAdmission.Bind(database, request, principal, clock, work);
             var result = await SubmitCommandAsync(kind, request, principal, operationToken).ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
@@ -64,6 +64,15 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             };
             await NativeCommandResultWorkBinding.BindBeforePublicationAsync(database, coordinator, clock,
                 request, reply, work, operationToken).ConfigureAwait(true);
+            if (original is not null && kind is OperationKind.Receive or OperationKind.ReceiveSubscription)
+            {
+                var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, operationToken);
+                budget.ConstrainLifetime(request.Envelope.ExpiresAt);
+                budget.AttachResourceLifetimeBinding(work);
+                result = database.ResolveAppliedSubmissionOutcome(original, budget);
+                var current = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
+                return current.Error is null ? current with { WorkProof = reply.WorkProof } : current;
+            }
             return reply;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))

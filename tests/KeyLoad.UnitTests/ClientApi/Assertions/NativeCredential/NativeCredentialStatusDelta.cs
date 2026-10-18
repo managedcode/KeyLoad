@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class NativeCredentialStatusDelta
 {
     internal static async Task RequireAsync(NativeCredentialStatusState state, NativeCredentialStatusCut before,
-        Guid id, PrincipalRecord principal, ApiKeyRecord credential, StoredOutcome expectedOutcome, bool denied)
+        Guid id, PrincipalRecord principal, ApiKeyRecord credential, StoredOutcome expectedOutcome)
     {
         var database = state.Scenario.Fixture.Database;
         var entry = database.ReadStoredOutcome(id);
@@ -16,10 +16,7 @@ internal static class NativeCredentialStatusDelta
         Put(rows, KeySpace.AppliedBytes, NativeSerialization.Serialize(entry.CanonicalSequence));
         Put(rows, KeySpace.ClockBytes, NativeSerialization.Serialize(
             new DateTimeOffset(operation.Timestamp) >= before.Clock ? new DateTimeOffset(operation.Timestamp) : before.Clock));
-        if (!denied)
-        {
-            Put(rows, KeySpace.ApiKey(credential.Id), NativeSerialization.Serialize(credential));
-        }
+        Put(rows, KeySpace.ApiKey(credential.Id), NativeSerialization.Serialize(credential));
         var actual = NativeCredentialStatusAssertions.Capture(state);
         await NativeCredentialStatusAssertions.RequireRowsAsync(rows, actual.RowHashes);
         await Assert.That(actual.Cut.AppliedPosition).IsEqualTo(checked(before.Cut.AppliedPosition + P.First));

@@ -8,6 +8,8 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class CommandObservedPolicyAssertions
 {
+    private const string ExpectedStoredHeadersJson = "{\"secret\":\"private-header\",\"trace\":\"visible\"}";
+
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonElement.DeepEquals(Project(expected), Project(actual))).IsTrue();
 
@@ -50,7 +52,7 @@ internal static class CommandObservedPolicyAssertions
         _ = fixture.Database.Database.OwnCommand(operation);
         await EqualAsync(request, NativeSerialization.Deserialize<ReceiveRequest>((operation).Value!.Input.Span));
         var expected = new ReceiveResult(request.RequestId,
-            [new(messageId, P.Payload, P.Headers, delivery.Token, P.Initial,
+            [new(messageId, P.Payload, ExpectedStoredHeadersJson, delivery.Token, P.Initial,
                 new DateTimeOffset(operation.Timestamp).AddSeconds(scenario.Resource.QueuePolicy.MaxLeaseSeconds),
                 P.One, P.Initial)],
             new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId,

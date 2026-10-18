@@ -11,7 +11,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class NativeCredentialStatusOutcome
 {
     internal static async Task<StoredOutcome> RequireAsync(NativeCredentialStatusState state, Guid id, PrincipalRecord principal,
-        ApiKeyRecord credential, long expectedIndex, bool denied)
+        ApiKeyRecord credential, long expectedIndex)
     {
         var database = state.Scenario.Fixture.Database;
         var entry = database.ReadStoredOutcome(id);
@@ -27,9 +27,10 @@ internal static class NativeCredentialStatusOutcome
         var fingerprint = DatabaseCommandFingerprint.Compute(id, OperationKind.ConfigureApiKey, principal.Id, payload);
         await Assert.That(entry.Fingerprint).IsEqualTo(fingerprint);
         await Assert.That(operation.Value!.Fingerprint).IsEqualTo(fingerprint);
-        var result = denied ? Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, P.DeniedDetail))
-            : Result<object>.Succeed(true);
-        var expected = new StoredOutcome(fingerprint, database.Store.Identity.Incarnation, principal.PolicyEpoch, result, operation)
+        var result = Result<object>.Succeed(true);
+        var expectedOperation = database.Database.OwnCommand(operation);
+        expectedOperation.Value = expectedOperation.Value! with { Fingerprint = fingerprint };
+        var expected = new StoredOutcome(fingerprint, database.Store.Identity.Incarnation, principal.PolicyEpoch, result, expectedOperation)
         {
             ScopeKind = CommandOutcomeScopeKind.Global,
             CanonicalSequence = expectedIndex

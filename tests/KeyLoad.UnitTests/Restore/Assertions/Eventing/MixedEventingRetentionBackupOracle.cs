@@ -57,8 +57,8 @@ internal static class MixedEventingRetentionBackupOracle
             database.GetSubscription(EventingArtifactFixture.Principal, fixture.Other));
         var document = database.GetDocument(EventingArtifactFixture.Principal,
             new(fixture.Source.Partition, EventingArtifactFixture.Documents, EventingArtifactFixture.DocumentId));
-        await Assert.That(document!.Reference).IsEqualTo(new EntityRef(fixture.Source.Partition,
-            EventingArtifactFixture.Documents, EventingArtifactFixture.DocumentId));
+        await Assert.That(document!.Reference).IsEqualTo(fixture.Source.ExpectedReference(new(fixture.Source.Partition,
+            EventingArtifactFixture.Documents, EventingArtifactFixture.DocumentId)));
         await Assert.That(document.Revision).IsEqualTo(1L);
         await Assert.That(document.Json).IsEqualTo(EventingArtifactFixture.Json);
         await Assert.That(document.Redacted).IsFalse();

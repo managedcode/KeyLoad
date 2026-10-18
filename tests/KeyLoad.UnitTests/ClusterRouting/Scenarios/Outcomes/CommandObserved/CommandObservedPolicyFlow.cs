@@ -91,13 +91,11 @@ internal static class CommandObservedPolicyFlow
             await CommandObservedPolicyAssertions.UnchangedAsync(scenario, request.RequestId, async () =>
             {
                 gate.Release.TrySetResult();
-                var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
-                {
-                    _ = await original;
-                });
+                var refused = await original;
                 observed = true;
-                await Assert.That((refused ?? throw new InvalidOperationException(nameof(refused))).Code).IsEqualTo(ErrorCode.PermissionDenied);
-                await Assert.That(refused.Message).IsEqualTo(P.Refusal);
+                await Assert.That(refused.Error).IsEqualTo(ErrorCode.PermissionDenied);
+                await Assert.That(refused.SafeDetail).IsEqualTo(P.Refusal);
+                await Assert.That(refused.Payload.IsEmpty).IsTrue();
             }, token);
             await scenario.PolicyAsync(repaired: true, token);
             await RepairedAsync(scenario, request, initial, token);

@@ -2,6 +2,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.Messaging;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
@@ -83,8 +84,12 @@ internal sealed class EventingArtifactFixture
         Target?.Dispose();
     }
     internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T value, Guid id, string principal = Principal)
-        => (Target is null ? Source.Database : Database).CreateCommand(kind, id, principal, Time,
+    {
+        var database = Target is null ? Source.Database : Database;
+        var committed = QueueWholeFlowStorage.Clock(Target ?? Source.Store);
+        return database.CreateCommand(kind, id, principal, Time < committed ? committed : Time,
             JsonSerializer.Serialize(value, JsonDefaults.Options));
+    }
     internal Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T value, Guid id, string principal = Principal)
         => SubmitIssued(database, Operation(kind, value, id, principal), explicitTime: true);
 

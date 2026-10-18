@@ -1,5 +1,9 @@
+using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 
@@ -7,6 +11,7 @@ namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
 {
+    private const string MissingCreation = "The original successful resource creation command is absent or invalid.";
     internal DatabaseEngine Database => owner.Database;
     internal string Directory => owner.DirectoryPath;
     internal ZoneTreeStore Store => (ZoneTreeStore)Database.Store;
@@ -35,7 +40,8 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
     }
 
     internal ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null,
-        IndexDefinition[]? indexes = null, SensitiveFieldPolicy[]? fields = null, QueuePolicy? queuePolicy = null)
+        IndexDefinition[]? indexes = null, SensitiveFieldPolicy[]? fields = null, QueuePolicy? queuePolicy = null,
+        Guid? id = null)
     {
         var resource = new ResourceDefinition(name, kind, domain ?? Partition.TransactionDomainId)
         {
@@ -45,7 +51,34 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
         };
         return Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, resource),
-            RequestCqrsHostedProfile.Root, null, null, TestContext.Current!.Execution.CancellationToken).Get<ResourceDefinition>();
+            RequestCqrsHostedProfile.Root, id, null, TestContext.Current!.Execution.CancellationToken).Get<ResourceDefinition>();
+    }
+
+    internal EntityRef Reference(Guid creation, string collection, string id)
+    {
+        var expected = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
+            new(collection, ResourceKind.Collection, Partition.TransactionDomainId));
+        var retained = Store.Read(view => view.GetRecord<StoredOutcome>(
+            OutcomeStoreOracle.GlobalKey(RequestCqrsHostedProfile.Root, creation)))
+            ?? throw new InvalidOperationException(MissingCreation);
+        var original = retained.PreparedCommand ?? throw new InvalidOperationException(MissingCreation);
+        var payload = original.Value ?? throw new InvalidOperationException(MissingCreation);
+        var fingerprint = DatabaseCommandFingerprint.Compute(creation, OperationKind.ConfigureResource,
+            RequestCqrsHostedProfile.Root, JsonSerializer.Serialize(expected, JsonDefaults.Options));
+        var body = NativeSerialization.Deserialize<ConfigureResourceRequest>(payload.Input.Span);
+        if (!retained.Result.IsSuccess || original.CommandId != creation || payload.Kind != OperationKind.ConfigureResource
+            || original.UserId != RequestCqrsHostedProfile.Root || payload.Fingerprint != fingerprint
+            || retained.Fingerprint != fingerprint
+            || !JsonDefaults.Serialize(body).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
+        {
+            throw new InvalidOperationException(MissingCreation);
+        }
+        var lifetime = ResourceLifetimeIdentity.Create(original, expected.TenantId,
+            expected.DatabaseId, expected.Definition);
+        return new(Partition, expected.Definition.Name, id)
+        {
+            Lifetime = new(lifetime.Incarnation.Value)
+        };
     }
 
     internal CommitReceipt Commit(params Mutation[] mutations)

@@ -30,6 +30,7 @@ internal static class RequestCqrsAnnTestData
     internal const double FirstScore = 1d / 61d;
     internal const double SecondScore = 1d / 62d;
     internal const string Consumer = "cqrs-ann-consumer";
+    internal static readonly Guid CollectionCreation = Guid.NewGuid();
     internal static readonly VectorSpace Space = new("cqrs-ann-space", 3, DistanceMetric.Cosine, "cqrs-ann-model", "v1");
     internal static readonly float[] Query = [1, 0, 0];
     internal static readonly AnnMaintenancePhase[] Phases = [AnnMaintenancePhase.Configure, AnnMaintenancePhase.Capture,
@@ -39,7 +40,7 @@ internal static class RequestCqrsAnnTestData
     internal static async Task<AnnMaintenanceRequest> SeedAsync(RequestCqrsHostedRuntimeFixture fixture, CancellationToken token)
     {
         var database = fixture.Database;
-        database.Configure(Collection, ResourceKind.Collection);
+        database.Configure(Collection, ResourceKind.Collection, id: CollectionCreation);
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, database.Partition,
             [new PutDocument(Collection, First, FirstJson), new PutVector(Collection, First, Field, [1, 0, 0], Space, OriginalRevision),

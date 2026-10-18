@@ -41,18 +41,20 @@ public sealed partial class DatabaseEngine
                 return operation;
             }
         }
+        if (!TryAuthorizeQueueRetry(view, operation, out var principal, preserveBudgetFailure) || principal is null)
+        {
+            return operation;
+        }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
         var selection = CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
         if (selection.Outcome is { } outcome)
         {
-            ValidateRetainedQueueRetryAdmission(view, operation, selection, outcome, preserveBudgetFailure);
+            ValidateRetainedQueueRetryAdmission(view, principal, operation, selection, outcome);
             return operation;
         }
         List<QueueRetryInput> inputs;
         try
         {
-            var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
-            _ = AuthorizeOperation(view, principal, operation);
             inputs = ReadQueueRetryInputs(view, principal, operation);
         }
         catch (KeyLoadException failure) when (failure.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported

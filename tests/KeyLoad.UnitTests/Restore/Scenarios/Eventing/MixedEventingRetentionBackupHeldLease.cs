@@ -9,7 +9,18 @@ internal static class MixedEventingRetentionBackupHeldLease
     {
         token.ThrowIfCancellationRequested();
         var store = fixture.Target!;
-        var deadline = state.Queue.Time.AddSeconds(QueueLifecycleTestProtocol.LeaseSeconds);
+        var issued = state.Queue.Successes.Single(item => item.Operation.Value!.Kind == OperationKind.Receive
+            && item.Result.Get<ReceiveResult>().Deliveries.Any(delivery => delivery.Id == QueueLifecycleTestProtocol.Held));
+        var original = fixture.Source.ReadStoredOutcome(issued.Operation.CommandId).PreparedCommand;
+        await Assert.That(original.CommandId).IsEqualTo(issued.Operation.CommandId);
+        await Assert.That(original.UserId!).IsEqualTo(QueueLifecycleTestProtocol.Administrator);
+        await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.Receive);
+        await Assert.That(original.Value.Fingerprint).IsEqualTo(issued.Operation.Value!.Fingerprint);
+        _ = fixture.Source.Database.OwnCommand(original);
+        await MixedEventingRetentionBackupTopic.EqualAsync(new ReceiveRequest(issued.Operation.CommandId,
+                state.Queue.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds),
+            NativeSerialization.Deserialize<ReceiveRequest>(original.Value.Input.Span));
+        var deadline = new DateTimeOffset(original.Timestamp).AddSeconds(QueueLifecycleTestProtocol.LeaseSeconds);
         var held = fixture.Database.InspectMessage(QueueLifecycleTestProtocol.Administrator,
             state.Queue.Lane, QueueLifecycleTestProtocol.Held)!;
         await Assert.That(held.Metadata.State).IsEqualTo(MessageState.Leased);

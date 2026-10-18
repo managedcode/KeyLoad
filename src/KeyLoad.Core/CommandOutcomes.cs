@@ -38,47 +38,19 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(operation);
         var normalized = OwnCommand(operation);
-        return Store.Read(view => ReadValidatedSubmissionOutcome(view, normalized, allowStoredDocumentDenial: true));
+        return Store.Read(view => ReadValidatedSubmissionOutcome(view, normalized));
     }
 
     private Result<object> ReadValidatedSubmissionOutcome(IKeyValueView view, Command<DatabaseCommand> operation,
-        bool allowStoredDocumentDenial = false, CommandOutcomeSelection? verifiedSelection = null)
+        CommandOutcomeSelection? verifiedSelection = null)
     {
         var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
-        KeyLoadException? denied = null;
-        try
-        {
-            AuthorizeOperation(view, principal, operation);
-        }
-        catch (KeyLoadException refusal) when (allowStoredDocumentDenial && refusal.Code == ErrorCode.PermissionDenied)
-        {
-            if (ReadOrdinaryDocumentSubmission(operation) is null)
-            {
-                throw;
-            }
-            denied = refusal;
-        }
+        AuthorizeOperation(view, principal, operation);
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
         var selection = verifiedSelection ?? CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
-        var outcome = selection.Outcome;
-        if (outcome is null)
-        {
-            if (denied is not null)
-            {
-                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw();
-            }
-            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
-        }
+        var outcome = selection.Outcome
+            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
         ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome, verifiedSelection.HasValue);
-        if (denied is not null && (Errors.Code(outcome.Result.Problem) != denied.Code
-            || !string.Equals(outcome.Result.Problem?.Detail, denied.Message, StringComparison.Ordinal)
-            || outcome.Result.Value is not null
-            || outcome.BlobAuthority is not null || outcome.CompositionAuthority is not null
-            || outcome.OnlineTextAuthority is not null || outcome.RemoteTransferFailureAuthority is not null
-            ))
-        {
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw();
-        }
         ValidateCachedResult(view, principal, EvaluateCommand(operation, Clock.GetUtcNow()), outcome);
         return outcome.Result;
     }

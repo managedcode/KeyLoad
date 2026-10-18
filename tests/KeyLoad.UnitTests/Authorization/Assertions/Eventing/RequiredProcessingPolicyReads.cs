@@ -35,7 +35,7 @@ internal static class RequiredProcessingPolicyReads
         {
             foreach (var (id, sequence) in new[] { ("first", 1L), ("next", 2L) })
             {
-                await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(fixture.Reference(id), 1L,
+                await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(fixture.Harness.ExpectedReference(fixture.Reference(id)), 1L,
                     RequiredProcessingPolicyFixture.EffectJson(id), false, []), database.GetDocument("root", fixture.Reference(id), cancellationToken: token));
                 await RequiredProcessingPolicyAssertions.EqualAsync(new MessageInspection(new(id, MessageState.Acked, 1, 3L, sequence,
                     null, null, null, 1L, null, 1L), null, null), database.InspectMessage("root", fixture.Lane, id));
