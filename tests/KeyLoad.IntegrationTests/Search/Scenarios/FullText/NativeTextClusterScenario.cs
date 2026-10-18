@@ -22,7 +22,7 @@ internal sealed record NativeTextClusterScenario(PartitionRef Partition, Resourc
     internal const string ThirdId = "c";
     internal const string OwnerA = "owner-a";
     internal const string OwnerB = "owner-b";
-    internal const string FailureScenario = "native-text-leader-loss";
+    internal const string FailureScenario = "native-text-silo-restart";
     internal const int FirstRevision = 1;
     internal const int UpdatedRevision = 2;
     internal const int MaxFusionConstant = 60;

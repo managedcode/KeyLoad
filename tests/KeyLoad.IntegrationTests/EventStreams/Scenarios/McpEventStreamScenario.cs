@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
-/// <summary>Creates a real scoped StreamSet and stable typed append for CLUSTER caller parity.</summary>
+/// <summary>Creates a real scoped StreamSet and stable typed append for Orleans caller parity.</summary>
 /// <param name="Partition">The unique configured tenant partition.</param>
 internal sealed record McpEventStreamScenario(PartitionRef Partition)
 {
@@ -49,8 +49,8 @@ internal sealed record McpEventStreamScenario(PartitionRef Partition)
     internal StreamRef Stream => new(Partition, McpEventStreamTokens.StreamSet,
         McpEventStreamTokens.StreamId, McpEventStreamTokens.StreamGeneration);
 
-    /// <summary>Creates the resource using the public SDK against the initialized CLUSTER cluster.</summary>
-    /// <param name="fixture">The actual Docker/Aspire CLUSTER application.</param>
+    /// <summary>Creates the resource using the public SDK against the initialized Orleans cluster.</summary>
+    /// <param name="fixture">The actual Docker/Aspire Orleans application.</param>
     /// <param name="cancellationToken">The bounded external caller lifetime.</param>
     /// <returns>The configured real stream scenario.</returns>
     internal static async Task<McpEventStreamScenario> CreateAsync(ClusterFixture fixture,

@@ -45,7 +45,7 @@ internal static class CatalogArchiveRetryFlow
             await CatalogArchiveRetryAssertions.ReplayAsync(fixture, operation, image, position);
             await Assert.That(await CatalogArchiveRetryAssertions.FilesAsync(backup, token))
                 .IsEquivalentTo(files, CollectionOrdering.Matching);
-        }, nativeAdmission: true).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     internal static NativeCatalogBackupCapture Capture(EventingArtifactFixture fixture,

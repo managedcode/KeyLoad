@@ -1,7 +1,7 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.DatabaseComposition;
 using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -18,13 +18,13 @@ public sealed partial class DatabaseEngine
 
     private ImmutableArray<MutationReceipt> ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations,
         DateTimeOffset now, long position, bool allowOutboxProgressReserve = false, CommitToken? commitToken = null,
-        ReplicatedOperation? operation = null, bool preparingComposition = false, ReadExecutionBudget? compositionBudget = null)
+        Command<DatabaseCommand>? operation = null, bool preparingComposition = false, ReadExecutionBudget? compositionBudget = null)
     {
         var token = commitToken ?? Token(tx, partition, position);
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
         TopicPurgeReadBudget? purgeBudget = null;
         var originalPayload = preparingComposition
-            ? NativeSerialization.Deserialize<NativeCommandPayload>(operation!.NativePayload.Span) : null;
+            ? operation!.Value! : null;
         List<QueueRetryDecision>? previewChoices = preparingComposition ? [] : null;
         foreach (var (mutation, derived) in ExpandCommandMutations(tx, principal, partition, mutations, now, compositionBudget))
         {
@@ -116,7 +116,7 @@ public sealed partial class DatabaseEngine
     }
 
     private MutationReceipt ApplyNonDocumentMutation(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, TopicPurgeReadBudget? purgeBudget, ReplicatedOperation? operation) => mutation switch
+        PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, TopicPurgeReadBudget? purgeBudget, Command<DatabaseCommand>? operation) => mutation switch
         {
             UpsertAnalyticsEvents analytics => ApplyAnalyticsUpsert(tx, principal, partition, analytics, now),
             DeleteAnalyticsEvents analytics => ApplyAnalyticsDelete(tx, principal, partition, analytics, now),
@@ -148,7 +148,7 @@ public sealed partial class DatabaseEngine
                 this, tx, principal, partition, rollup),
             StoreAggregateSnapshot snapshot => SaveAggregateSnapshot(tx, principal, partition, snapshot),
             PutVector vector => Upsert(tx, principal, partition, vector),
-            CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now, position),
+            CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now),
             AcceptQueueTransfer transfer => ApplyAcceptQueueTransfer(tx, principal, partition, transfer, now, position),
             CompleteQueueTransfer transfer => ApplyCompleteQueueTransfer(tx, principal, partition, transfer),
             AdvanceQueueTransferAttempt transfer => ApplyAdvanceQueueTransferAttempt(tx, principal, partition, transfer),

@@ -27,7 +27,7 @@ persisted principal/resource metadata inside one node-local budgeted read cut.
 No receive, sweep, lease, ACK or event append occurs. Queue dead-letter records
 additionally require DeadLettersRead before body access. Generic UPDATE of these
 sources remains UnsupportedCapability. The existing unique request/read grains,
-majority-committed read and actual SDK/MCP adapters carry the complete request unchanged.
+canonical-cut read and actual SDK/MCP adapters carry the complete request unchanged.
 
 Event row JSON: eventId, eventType, schemaVersion, revision, eventSequence,
 recordedAt, payload (JSON object) and headers (JSON object). QueryRow.EntityId is

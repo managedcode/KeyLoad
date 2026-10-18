@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -32,7 +34,7 @@ internal static class ResourceIncarnationQueueFlow
         await ResourceIncarnationAssertions.EqualAsync(message, fixture.Database.InspectMessage("root", lane, "warm")!);
         var receive = new ReceiveRequest(Guid.NewGuid(), lane);
         var blocked = Apply(fixture.Database, OperationKind.Receive, receive, receive.RequestId);
-        await Assert.That(blocked.Error).IsEqualTo(ErrorCode.DispatchPaused);
+        await Assert.That(Errors.Code(blocked.Problem)).IsEqualTo(ErrorCode.DispatchPaused);
         await ResourceIncarnationAssertions.EqualAsync(message, fixture.Database.InspectMessage("root", lane, "warm")!);
         var resume = Control(fixture.Database, lane, 2, false);
         var resumed = fixture.Database.Apply(resume);
@@ -43,18 +45,18 @@ internal static class ResourceIncarnationQueueFlow
         await ResourceIncarnationAssertions.EqualAsync(current, resumed.Get<ResourceDefinition>());
         await PreserveAsync(fixture.Store, lane, lifetime);
         var acked = await CompleteAsync(fixture.Database, lane, "warm", 1);
-        var replays = new List<(ReplicatedOperation Command, OperationResult Result)> { (create, created), (pause, paused), (resume, resumed) };
+        var replays = new List<(Command<DatabaseCommand> Command, Result<object> Result)> { (create, created), (pause, paused), (resume, resumed) };
         await ReplayAsync(fixture.Database, fixture.Store, replays);
         await ResourceIncarnationAssertions.EqualAsync(acked, fixture.Database.InspectMessage("root", lane, "warm")!);
         await ResourceIncarnationQueueCold.RunAsync(fixture, current, lifetime, acked, replays, token);
     }
 
-    private static ReplicatedOperation Control(DatabaseEngine database, QueueLaneRef lane, long version, bool paused)
+    private static Command<DatabaseCommand> Control(DatabaseEngine database, QueueLaneRef lane, long version, bool paused)
         => new(Guid.NewGuid(), OperationKind.SetQueueDispatch, "root", database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new QueueDispatchControlRequest(lane.Partition.TenantId, lane.Partition.DatabaseId,
                 lane.Queue, version, paused), JsonDefaults.Options));
 
-    private static async Task CorruptionAsync(TestDatabase fixture, ReplicatedOperation pause, byte[] lifetime)
+    private static async Task CorruptionAsync(TestDatabase fixture, Command<DatabaseCommand> pause, byte[] lifetime)
     {
         var key = ResourceIncarnationLiteral.LifetimeKey(fixture.Partition, Queue);
         fixture.Store.Commit((tx, _) => { tx.Delete(key); return true; });
@@ -106,7 +108,7 @@ internal static class ResourceIncarnationQueueFlow
                 global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        List<(ReplicatedOperation Command, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Command, Result<object> Result)> originals)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -117,8 +119,8 @@ internal static class ResourceIncarnationQueueFlow
         await ResourceIncarnationAssertions.UnchangedAsync(store, image, position);
     }
 
-    private static OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
-        => database.Apply(new(id, kind, "root", database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
+    private static Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
+        => database.Apply(database.CreateCommand(kind, id, "root", database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
 
     private static async Task ReceiptAsync(CommitReceipt receipt, Guid id, QueueLaneRef lane, MutationReceipt expected)
     {

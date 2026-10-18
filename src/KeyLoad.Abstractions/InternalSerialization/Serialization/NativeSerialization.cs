@@ -73,11 +73,23 @@ public static class NativeSerialization
     internal static T Deserialize<T>(ReadOnlySpan<byte> value, SerializerSession session)
         => Deserialize<T>(value, session, NativeValidationProfile.Strict);
 
+    internal static object Deserialize(ReadOnlySpan<byte> value, Type expectedType, NativeValidationProfile profile)
+    {
+        ArgumentNullException.ThrowIfNull(expectedType);
+        var context = NativeSerializerProviders.Get(expectedType);
+        using var session = context.Sessions.GetSession();
+        return DeserializeOwned(value, session, expectedType, exactRoot: true, profile);
+    }
+
     private static T Deserialize<T>(ReadOnlySpan<byte> value, SerializerSession session, NativeValidationProfile profile)
+        => (T)DeserializeOwned(value, session, typeof(T), profile == NativeValidationProfile.PublicInputElements, profile);
+
+    private static object DeserializeOwned(ReadOnlySpan<byte> value, SerializerSession session, Type expectedType,
+        bool exactRoot, NativeValidationProfile profile)
     {
         try
         {
-            NativePayloadSyntax.Validate(value, session, typeof(T), profile == NativeValidationProfile.PublicInputElements);
+            NativePayloadSyntax.Validate(value, session, expectedType, exactRoot);
             session.Reset();
             var reader = Reader.Create(value, session);
             var field = reader.ReadFieldHeader();
@@ -91,8 +103,8 @@ public static class NativeSerialization
             {
                 throw Errors.Fail(ErrorCode.FormatUnsupported, NativePayloadVersion.UnsupportedVersion);
             }
-            if (payload.Value is not T result
-                || profile == NativeValidationProfile.PublicInputElements && result.GetType() != typeof(T))
+            if (payload.Value is not { } result || !expectedType.IsInstanceOfType(result)
+                || exactRoot && result.GetType() != expectedType)
             {
                 throw Errors.Fail(ErrorCode.Corruption, NativePayloadVersion.InvalidPayload);
             }

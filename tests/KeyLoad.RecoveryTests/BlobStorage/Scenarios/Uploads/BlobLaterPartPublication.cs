@@ -6,14 +6,14 @@ namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 internal static class BlobLaterPartPublication
 {
     internal static async Task<BlobPriorPublicationState> PublishAsync(DatabaseEngine owner, BlobRef blob,
-        Guid upload, byte[] identity, byte[] catalog, byte[] principal)
+        Guid upload, byte[] identity, byte[] principal)
     {
         var bytes = BlobLaterPartOracle.Payload();
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, upload, 65_553, 0);
         var begun = BlobPriorPublicationCommands.Send(owner, OperationKind.BeginBlobUpload, begin.CommandId, begin);
         var initial = BlobLaterPartOracle.Initial(owner.Store.Identity.Incarnation, blob, upload);
         var info = new BlobUploadInfo(blob, upload, 65_553, 0, 0, 0,
-            begun.Operation.EvaluatedAt.AddSeconds(3_600), BlobUploadStatus.Active, initial);
+            new DateTimeOffset(begun.Operation.Timestamp).AddSeconds(3_600), BlobUploadStatus.Active, initial);
         await BlobPriorPublicationImage.ExactAsync(begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Value, info);
         await BlobPriorPublicationImage.ReceiptAsync(owner, begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, begin.CommandId, blob);
         var commands = new List<BlobPriorPublicationCommand> { begun };
@@ -37,13 +37,13 @@ internal static class BlobLaterPartPublication
         var request = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
         var completed = BlobPriorPublicationCommands.Send(owner, OperationKind.CompleteBlobUpload, request.CommandId, request);
         commands.Add(completed);
-        var metadata = new BlobMetadata(blob, 1, upload, 65_553, 2, hash, new RowAccess(), completed.Operation.EvaluatedAt);
+        var metadata = new BlobMetadata(blob, 1, upload, 65_553, 2, hash, new RowAccess(), new DateTimeOffset(completed.Operation.Timestamp));
         await BlobPriorPublicationImage.ExactAsync(completed.Result.Get<BlobCommitResult<BlobMetadata>>().Value, metadata);
         await BlobPriorPublicationImage.ReceiptAsync(owner, completed.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, request.CommandId, blob);
         var incarnation = owner.Store.Identity.Incarnation;
         var state = new BlobState(1, incarnation, incarnation, begin.CommandId, "root", blob, upload, new RowAccess(),
             65_553, 0, info.ExpiresAt, 2, 65_553, hash, BlobUploadStatus.Complete, 0, 0);
-        var result = new BlobPriorPublicationState(blob, upload, bytes, metadata, state, commands.ToArray(), identity, catalog, principal);
+        var result = new BlobPriorPublicationState(blob, upload, bytes, metadata, state, commands.ToArray(), identity, principal);
         await BlobLaterPartAssertions.PublishedAsync(owner, result);
         return result;
     }

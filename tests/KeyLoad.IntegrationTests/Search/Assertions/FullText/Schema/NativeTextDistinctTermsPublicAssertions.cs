@@ -21,7 +21,6 @@ internal static class NativeTextDistinctTermsPublicAssertions
         {
             await Assert.That(result.AppliedToken.Incarnation).IsEqualTo(minimum.Incarnation);
             await Assert.That(result.AppliedToken.AtomicPartitionId).IsEqualTo(minimum.AtomicPartitionId);
-            await Assert.That(result.AppliedToken.OwnershipEpoch).IsEqualTo(minimum.OwnershipEpoch);
             await Assert.That(result.AppliedToken.Position).IsGreaterThanOrEqualTo(minimum.Position);
             await Assert.That(result.SchemaVersion).IsEqualTo(scenario.Resource.SchemaVersion);
         }

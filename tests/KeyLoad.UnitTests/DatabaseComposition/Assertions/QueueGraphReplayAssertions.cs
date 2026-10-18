@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -21,7 +22,7 @@ internal static class QueueGraphReplayAssertions
                 global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await Assert.That(store.Position).IsEqualTo(position);
             var outcome = engine.ResolveOutcome(operation);
-            var expected = new OperationResult(null, ErrorCode.Corruption, state.Source.FailureDetail);
+            var expected = Result<object>.Fail(Errors.Problem(ErrorCode.Corruption, state.Source.FailureDetail));
             await Assert.That(NativeSerialization.Serialize(outcome).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
             await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before,
@@ -66,13 +67,10 @@ internal static class QueueGraphReplayAssertions
     internal static async Task ContinueAsync(QueueGraphReplayState state, DatabaseEngine engine, ZoneTreeStore store)
     {
         var receipt = engine.Apply(state.Next).Get<CommitReceipt>();
-        var expected = new CommitReceipt(state.Next.Id,
-            new(store.Identity.Incarnation, state.Source.Fixture.Partition.AtomicPartitionId,
-                store.Position, state.Source.SeedReceipt.Token.OwnershipEpoch),
-            [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation, 1),
+        var expected = new CommitReceipt(state.Next.Id, new(store.Identity.Incarnation, state.Source.Fixture.Partition.AtomicPartitionId,
+                store.Position), [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation, 1),
                 new("enqueue", QueueGraphIdentityState.Queue, QueueGraphReplayState.NextPrefix +
-                    QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)],
-            state.Source.SeedReceipt.Durability);
+                    QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)], state.Source.SeedReceipt.Durability, (state.Source.SeedReceipt.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(receipt.Mutations[0].CompositionReferences).IsEmpty();
         await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.Source.BoundFrom, state.Source.BoundTo])).IsTrue();
@@ -83,11 +81,9 @@ internal static class QueueGraphReplayAssertions
     internal static async Task ReverseReceiptAsync(QueueGraphIdentityState source, ZoneTreeStore store,
         Guid id, CommitReceipt actual)
     {
-        var expected = new CommitReceipt(id,
-            new(store.Identity.Incarnation, source.Fixture.Partition.AtomicPartitionId,
-                store.Position, source.SeedReceipt.Token.OwnershipEpoch),
-            [new("enqueue", QueueGraphIdentityState.Queue, QueueGraphReplayState.ReversePrefix +
-                QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)], source.SeedReceipt.Durability);
+        var expected = new CommitReceipt(id, new(store.Identity.Incarnation, source.Fixture.Partition.AtomicPartitionId,
+                store.Position), [new("enqueue", QueueGraphIdentityState.Queue, QueueGraphReplayState.ReversePrefix +
+                QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)], source.SeedReceipt.Durability, (source.SeedReceipt.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(actual.Mutations[0].CompositionReferences.SequenceEqual([source.BoundFrom, source.BoundTo])).IsTrue();
     }

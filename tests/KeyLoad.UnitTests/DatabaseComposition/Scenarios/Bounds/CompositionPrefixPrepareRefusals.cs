@@ -12,10 +12,10 @@ internal static class CompositionPrefixPrepareRefusals
         var before = CompositionPrefixPrepareAssertions.ModelImage(owner);
         var charged = command.Work.ReadBytes;
         var result = owner.Submit(command.Original);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.RevisionConflict);
-        await Assert.That(result.SafeDetail).IsEqualTo("The expected revision does not match.");
-        await Assert.That(result.NativeValue).IsNull();
-        await Assert.That(result.Json).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
+        await Assert.That(result.Value).IsNull();
+        
         command = command with
         {
             Error = ErrorCode.RevisionConflict,
@@ -42,14 +42,14 @@ internal static class CompositionPrefixPrepareRefusals
                     [new(D.Enqueue, D.Queue, id, D.FirstRevision)]);
             }
             var principal = new PrincipalRecord(D.Reader, owner.Source.Partition.TenantId, [], []);
-            var configured = owner.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
+            var configured = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
                 owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
             await CompositionPrefixPrepareAssertions.EqualAsync(principal, owner.Submit(configured).Get<PrincipalRecord>());
             var denied = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()], D.Reader);
             var image = CompositionPrefixPrepareAssertions.ModelImage(owner);
             var outcome = owner.Submit(denied.Original);
-            await Assert.That(outcome.Error).IsEqualTo(ErrorCode.PermissionDenied);
-            await Assert.That(outcome.SafeDetail).IsEqualTo("The principal cannot perform this operation in this scope.");
+            await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+            await Assert.That(outcome.Problem?.Detail).IsEqualTo("The principal cannot perform this operation in this scope.");
             denied = denied with
             {
                 Error = ErrorCode.PermissionDenied,
@@ -58,8 +58,8 @@ internal static class CompositionPrefixPrepareRefusals
             owner.Commands.Add(denied);
             var bounded = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()]);
             var overflow = owner.Submit(bounded.Original);
-            await Assert.That(overflow.Error).IsEqualTo(ErrorCode.BudgetExceeded);
-            await Assert.That(overflow.SafeDetail).IsEqualTo(D.SourceOverflow);
+            await Assert.That(Errors.Code(overflow.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+            await Assert.That(overflow.Problem?.Detail).IsEqualTo(D.SourceOverflow);
             owner.Commands.Add(bounded with
             {
                 Error = ErrorCode.BudgetExceeded,

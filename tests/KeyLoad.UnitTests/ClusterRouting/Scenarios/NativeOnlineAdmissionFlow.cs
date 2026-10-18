@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class NativeOnlineAdmissionFlow
 {
-    internal static async Task GrammarAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task GrammarAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var id = Guid.NewGuid();
         var request = NativeProgressAdmissionSupport.Online(fixture);
@@ -25,7 +25,7 @@ internal static class NativeOnlineAdmissionFlow
             frames[NativeProgressAdmissionSupport.First], CancellationToken.None), ErrorCode.OwnershipLost);
     }
 
-    internal static async Task CancelledAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task CancelledAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var id = Guid.NewGuid();
         var frames = await NativeOnlineTextProgressFrames.CreateAsync(id, NativeOnlineTextProgressFrames.Grammar);

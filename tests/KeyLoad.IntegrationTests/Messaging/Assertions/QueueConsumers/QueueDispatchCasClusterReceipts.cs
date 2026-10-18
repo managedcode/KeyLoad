@@ -10,7 +10,8 @@ internal static class QueueDispatchCasClusterReceipts
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(lane.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(EmptyPosition);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         MutationReceipt[] expected = [new(QueueDispatchCasClusterProtocol.EnqueueKind, lane.Queue,
             QueueDispatchCasClusterProtocol.Message, InitialRevision)];
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations.ToArray()).AsSpan()

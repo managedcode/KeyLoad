@@ -9,13 +9,13 @@ internal static class NativeCredentialStatusDelta
         Guid id, PrincipalRecord principal, ApiKeyRecord credential, StoredOutcome expectedOutcome, bool denied)
     {
         var database = state.Scenario.Fixture.Database;
-        var entry = database.ReadRetainedEntry(id);
-        var operation = entry.Operation ?? throw new InvalidOperationException(P.Failure);
+        var entry = database.ReadStoredOutcome(id);
+        var operation = entry.PreparedCommand ?? throw new InvalidOperationException(P.Failure);
         var rows = before.RowHashes.ToDictionary(row => row.Key, row => row.Value, StringComparer.Ordinal);
         Put(rows, OutcomeStoreOracle.GlobalKey(principal.Id, id), NativeSerialization.Serialize(expectedOutcome));
-        Put(rows, KeySpace.AppliedBytes, NativeSerialization.Serialize(entry.Index));
+        Put(rows, KeySpace.AppliedBytes, NativeSerialization.Serialize(entry.CanonicalSequence));
         Put(rows, KeySpace.ClockBytes, NativeSerialization.Serialize(
-            operation.EvaluatedAt >= before.Clock ? operation.EvaluatedAt : before.Clock));
+            new DateTimeOffset(operation.Timestamp) >= before.Clock ? new DateTimeOffset(operation.Timestamp) : before.Clock));
         if (!denied)
         {
             Put(rows, KeySpace.ApiKey(credential.Id), NativeSerialization.Serialize(credential));

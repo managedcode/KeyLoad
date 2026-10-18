@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 
@@ -77,8 +78,8 @@ internal sealed class BlobHeadStateAuthorizationTests
         var deniedDelete = Apply(database, OperationKind.DeleteBlob, AliceId, deleteId,
             new DeleteBlobRequest(deleteId, blob, CurrentRevision));
         await Assert.That(deniedBegin.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(deniedComplete.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(deniedDelete.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedComplete.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedDelete.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
     }
 
     private static async Task AssertCurrentVersionCannotBeReclaimed(TestDatabase database,
@@ -154,7 +155,7 @@ internal sealed class BlobHeadStateAuthorizationTests
             .Get<BlobCommitResult<BlobMetadata>>().Value;
     }
 
-    private static OperationResult Begin(TestDatabase database, string principal, BlobRef blob,
+    private static Result<object> Begin(TestDatabase database, string principal, BlobRef blob,
         Guid uploadId, long length, long expectedRevision, RowAccess access, Guid commandId) =>
         Apply(database, OperationKind.BeginBlobUpload, principal, commandId,
             new BeginBlobUploadRequest(commandId, blob, uploadId, length, expectedRevision, access));
@@ -168,12 +169,12 @@ internal sealed class BlobHeadStateAuthorizationTests
             .Get<BlobCommitResult<BlobUploadInfo>>();
     }
 
-    private static OperationResult Reclaim(TestDatabase database, string principal,
+    private static Result<object> Reclaim(TestDatabase database, string principal,
         BlobRef blob, Guid uploadId, Guid commandId) =>
         Apply(database, OperationKind.ReclaimBlob, principal, commandId,
             new ReclaimBlobRequest(commandId, blob, uploadId, ReclaimPartLimit));
 
-    private static OperationResult Apply<T>(TestDatabase database, OperationKind kind,
+    private static Result<object> Apply<T>(TestDatabase database, OperationKind kind,
         string principal, Guid commandId, T payload) =>
         database.Submit(kind, payload, principal, commandId);
 

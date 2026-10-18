@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -8,12 +9,12 @@ internal static class QueueDeliveryVersionExhaustionAssertions
 {
     private const string Detail = "The queue delivery state version is exhausted.";
 
-    internal static async Task FailureAsync(OperationResult result)
+    internal static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(result.SafeDetail).IsEqualTo(Detail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(Detail);
+        
+        await Assert.That(result.Value).IsNull();
     }
 
     internal static async Task LeasedAsync(DatabaseEngine database, ZoneTreeStore store,
@@ -53,7 +54,7 @@ internal static class QueueDeliveryVersionExhaustionAssertions
             data.Lane.Partition, data.Lane.Queue, state.Delivery.LeaseUntil, data.Body.Id)))).IsNull();
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, DeliveryCommand command, string id, long revision)
+    internal static async Task ReceiptAsync(Result<object> result, DeliveryCommand command, string id, long revision)
     {
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);

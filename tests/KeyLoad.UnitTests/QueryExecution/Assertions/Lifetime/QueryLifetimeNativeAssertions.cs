@@ -1,5 +1,4 @@
 using KeyLoad.Query.Features.QueryExecution;
-using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -9,9 +8,9 @@ internal static class QueryLifetimeNativeAssertions
     {
         flow.Fixture.RequireOriginalResourceBindings();
         var expected = new PartitionQueryCandidateV1(QueryLifetimeNativeProtocol.Version,
-            flow.Fixture.ExpectedDestinationReference, new(RemoteDocumentNativeFixture.DocumentId,
-                RemoteDocumentNativeFixture.First, RemoteDocumentNativeFixture.ProjectedJson, true,
-                [RemoteDocumentNativeFixture.Secret]), []);
+            flow.Fixture.ExpectedDestinationReference, new(QueryNativeFixture.DocumentId,
+                QueryNativeFixture.First, QueryNativeFixture.ProjectedJson, true,
+                [QueryNativeFixture.Secret]), []);
         var result = flow.Query();
         await Assert.That(result.Candidates.Length).IsEqualTo(QueryLifetimeNativeProtocol.Limit);
         await Assert.That(JsonDefaults.Serialize(result.Candidates.Single()).AsSpan()
@@ -25,17 +24,17 @@ internal static class QueryLifetimeNativeAssertions
 
     internal static async Task UnchangedAsync(QueryLifetimeNativeFlow flow, Func<Task> operation)
     {
-        var source = RemoteDocumentNativeAssertions.Image(flow.Fixture.Source);
-        var target = RemoteDocumentNativeAssertions.Image(flow.Fixture.Destination);
+        var source = QueryNativeFixtureAssertions.Image(flow.Fixture.Source);
+        var target = QueryNativeFixtureAssertions.Image(flow.Fixture.Destination);
         var sourcePosition = flow.Fixture.Source.Store.Position;
         var targetPosition = flow.Fixture.Destination.Store.Position;
         await operation().ConfigureAwait(false);
-        await RemotePartitionQueryNativeAssertions.StateAsync(flow.Fixture, source, target, sourcePosition, targetPosition);
+        await QueryNativeFixtureAssertions.StateAsync(flow.Fixture, source, target, sourcePosition, targetPosition);
     }
 
     internal static async Task ColdReplayAsync(QueryLifetimeNativeFlow flow)
     {
-        await RemoteDocumentNativeAssertions.ReceiptAsync(flow.Fixture);
+        await QueryNativeFixtureAssertions.ReceiptAsync(flow.Fixture);
         var receipt = NativeSerialization.Serialize(flow.Fixture.Receipt);
         await UnchangedAsync(flow, async () =>
         {
@@ -45,12 +44,12 @@ internal static class QueryLifetimeNativeAssertions
         });
         for (var index = QueryLifetimeNativeProtocol.NoRows; index < QueryLifetimeNativeProtocol.ColdCount; index++)
         {
-            var source = RemoteDocumentNativeAssertions.Image(flow.Fixture.Source);
-            var target = RemoteDocumentNativeAssertions.Image(flow.Fixture.Destination);
-            flow.Fixture.Source.Reopen();
-            flow.Fixture.Destination.Reopen();
-            await Assert.That(RemoteDocumentNativeAssertions.Image(flow.Fixture.Source).SequenceEqual(source)).IsTrue();
-            await Assert.That(RemoteDocumentNativeAssertions.Image(flow.Fixture.Destination).SequenceEqual(target)).IsTrue();
+            var source = QueryNativeFixtureAssertions.Image(flow.Fixture.Source);
+            var target = QueryNativeFixtureAssertions.Image(flow.Fixture.Destination);
+            await flow.Fixture.Source.ReopenAsync();
+            await flow.Fixture.Destination.ReopenAsync();
+            await Assert.That(QueryNativeFixtureAssertions.Image(flow.Fixture.Source).SequenceEqual(source)).IsTrue();
+            await Assert.That(QueryNativeFixtureAssertions.Image(flow.Fixture.Destination).SequenceEqual(target)).IsTrue();
             await UnchangedAsync(flow, async () =>
             {
                 var replay = flow.Fixture.Destination.Database.Apply(flow.Fixture.Write).Get<CommitReceipt>();

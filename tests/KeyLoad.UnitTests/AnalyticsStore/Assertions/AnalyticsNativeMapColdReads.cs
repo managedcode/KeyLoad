@@ -19,7 +19,7 @@ internal static class AnalyticsNativeMapColdReads
                 row.Timestamp, row.Dimensions, row.Metrics, null, [], 1)).ToImmutableArray(), false, null);
             var page = owner.Database.ReadAnalyticsEvents(D.Root, D.Read(owner.Source), token);
             await PublicRoundTripAsync(expected, page);
-            var aggregate = await N.QueryAsync(owner.Database, D.Query(owner.Source), token);
+            var aggregate = N.Query(owner.Database, D.Query(owner.Source), token);
             await PublicRoundTripAsync(new AnalyticsAggregateResult(
                 [D.Row(D.Alpha, 2, 6, 3, 2, 4), D.Row(D.Beta, 1, 8, 8, 8, 8)], 3), aggregate);
         });
@@ -44,7 +44,7 @@ internal static class AnalyticsNativeMapColdReads
             await Assert.That(readFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(published).IsNull();
             await VerifyAsync(owner, events, token);
-            await N.RefusedAsync(() => N.QueryAsync(owner.Database, D.Query(owner.Source), token, resultBytes: 1));
+            await N.RefusedAsync(() => N.Query(owner.Database, D.Query(owner.Source), token, resultBytes: 1));
             await VerifyAsync(owner, events, token);
             using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
             await cancelled.CancelAsync();
@@ -53,8 +53,8 @@ internal static class AnalyticsNativeMapColdReads
             await Assert.That(cancelledFailure.CancellationToken).IsEqualTo(cancelled.Token);
             await Assert.That(published).IsNull();
             AnalyticsAggregateResult? cancelledAggregate = null;
-            var aggregateFailure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
-                cancelledAggregate = await N.QueryAsync(owner.Database, D.Query(owner.Source), cancelled.Token));
+            var aggregateFailure = Assert.ThrowsExactly<OperationCanceledException>(() =>
+                cancelledAggregate = N.Query(owner.Database, D.Query(owner.Source), cancelled.Token));
             ArgumentNullException.ThrowIfNull(aggregateFailure);
             await Assert.That(aggregateFailure.CancellationToken).IsEqualTo(cancelled.Token);
             await Assert.That(cancelledAggregate).IsNull();
@@ -81,14 +81,14 @@ internal static class AnalyticsNativeMapColdReads
         var image = TeamRowPolicyAssertions.Image(owner.Store);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.JournalCut();
+        var journal = owner.ReadCanonicalCut();
         var outbox = owner.Database.GetOutboxStatus(D.Root, owner.Source.Partition);
         await read();
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+        await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
         await O.EqualAsync(outbox, owner.Database.GetOutboxStatus(D.Root, owner.Source.Partition));
     }
 }

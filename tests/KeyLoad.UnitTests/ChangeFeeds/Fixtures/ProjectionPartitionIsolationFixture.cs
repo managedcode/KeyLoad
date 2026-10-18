@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -73,7 +74,7 @@ internal static class ProjectionPartitionIsolationFixture
         => store.Read(view => keys.Select(key => Convert.ToHexString(key) + ":" +
             Convert.ToHexString(view.ReadOwnedValue(key) ?? throw new InvalidOperationException(ProjectionConsumerIdentityFixture.MissingRow))).ToArray());
 
-    internal static ReplicatedOperation Purge(PartitionRef partition, long through)
+    internal static Command<DatabaseCommand> Purge(PartitionRef partition, long through)
     {
         var id = Guid.NewGuid();
         return ProjectionConsumerIdentityFixture.Operation(OperationKind.PurgeOutbox, id, new PurgeOutboxRequest(id, partition, through));

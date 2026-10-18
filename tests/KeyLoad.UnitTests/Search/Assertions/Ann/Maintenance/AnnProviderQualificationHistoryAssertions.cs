@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -8,18 +10,15 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class AnnProviderQualificationHistoryAssertions
 {
     internal static async Task SaveAsync<T>(AnnProviderQualificationOwner owner, AnnProviderQualificationState state,
-        ReplicatedOperation issued, OperationResult result, T expected) where T : class
+        Command<DatabaseCommand> issued, Result<object> result, T expected) where T : class
     {
-        await NativeReplayResultAssertions.Same<T>(result, new(null)
-        {
-            NativeValue = expected
-        });
-        var entry = owner.Native.ReadRetainedEntry(issued.Id);
-        var operation = entry.Operation ?? throw new InvalidOperationException(MissingOriginal);
-        var global = operation.Kind == OperationKind.ConfigureResource;
-        var key = global ? KeySpace.GlobalOutcome(Root, operation.Id)
-            : KeySpace.PartitionOutcome(owner.Source.Partition, Root, operation.Id);
-        var locatorKey = KeySpace.OutcomeLocatorV2(owner.Source.Partition, Root, operation.Id);
+        await NativeReplayResultAssertions.Same<T>(result, Result<object>.Succeed(expected));
+        var entry = owner.ReadStoredOutcome(issued.CommandId);
+        var operation = entry.PreparedCommand ?? throw new InvalidOperationException(MissingOriginal);
+        var global = operation.Value!.Kind == OperationKind.ConfigureResource;
+        var key = global ? KeySpace.GlobalOutcome(Root, operation.CommandId)
+            : KeySpace.PartitionOutcome(owner.Source.Partition, Root, operation.CommandId);
+        var locatorKey = KeySpace.OutcomeLocatorV2(owner.Source.Partition, Root, operation.CommandId);
         var outcome = Required(owner, key);
         var locator = owner.Store.Read(view => view.ReadOwnedValue(locatorKey));
         await LocatorAsync(locator, global ? null : key);
@@ -29,7 +28,7 @@ internal static class AnnProviderQualificationHistoryAssertions
         await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);
         await Assert.That(stored.Partition).IsEqualTo(global ? null : owner.Source.Partition);
         await NativeReplayResultAssertions.Same<T>(stored.Result, result);
-        state.History.Add(new(operation, result, entry.Index, entry.Term, operation.NativePayload.ToArray(),
+        state.History.Add(new(operation, result, entry.CanonicalSequence, operation.Value!.Input.ToArray(),
             key, outcome, locatorKey, locator));
     }
 
@@ -40,7 +39,7 @@ internal static class AnnProviderQualificationHistoryAssertions
         {
             token.ThrowIfCancellationRequested();
             var image = AnnProviderQualificationImages.Capture(owner);
-            await ResultAsync(owner.Native.Submit(history.Operation, explicitTime: true, token), history.Result);
+            await ResultAsync(owner.Submit(history.Operation, explicitTime: true, token), history.Result);
             await AnnProviderQualificationImages.SameAsync(owner, image);
             await RowsAsync(owner, history);
             await ResultAsync(owner.Database.ResolveOutcome(history.Operation), history.Result);
@@ -49,9 +48,9 @@ internal static class AnnProviderQualificationHistoryAssertions
         }
     }
 
-    private static async Task ResultAsync(OperationResult actual, OperationResult expected)
+    private static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        if (expected.NativeValue is ResourceDefinition)
+        if (expected.Value is ResourceDefinition)
         {
             await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, expected);
         }
@@ -65,16 +64,15 @@ internal static class AnnProviderQualificationHistoryAssertions
     {
         await Assert.That(Required(owner, history.OutcomeKey).AsSpan().SequenceEqual(history.OutcomeBytes)).IsTrue();
         await LocatorAsync(owner.Store.Read(view => view.ReadOwnedValue(history.LocatorKey)), history.LocatorBytes);
-        var entry = owner.Native.ReadRetainedEntry(history.Operation);
-        await Assert.That(entry.Index).IsEqualTo(history.Index);
-        await Assert.That(entry.Term).IsEqualTo(history.Term);
-        var operation = entry.Operation ?? throw new InvalidOperationException(MissingOriginal);
-        await Assert.That(operation.Id).IsEqualTo(history.Operation.Id);
-        await Assert.That(operation.Kind).IsEqualTo(history.Operation.Kind);
-        await Assert.That(operation.PrincipalId).IsEqualTo(history.Operation.PrincipalId);
-        await Assert.That(operation.EvaluatedAt).IsEqualTo(history.Operation.EvaluatedAt);
-        await Assert.That(operation.PayloadJson).IsEqualTo(history.Operation.PayloadJson);
-        await Assert.That(operation.NativePayload.Span.SequenceEqual(history.Payload)).IsTrue();
+        var entry = owner.ReadStoredOutcome(history.Operation);
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(history.Sequence);
+        var operation = entry.PreparedCommand ?? throw new InvalidOperationException(MissingOriginal);
+        await Assert.That(operation.CommandId).IsEqualTo(history.Operation.CommandId);
+        await Assert.That(operation.Value!.Kind).IsEqualTo(history.Operation.Value!.Kind);
+        await Assert.That(operation.UserId!).IsEqualTo(history.Operation.UserId!);
+        await Assert.That(new DateTimeOffset(operation.Timestamp)).IsEqualTo(new DateTimeOffset(history.Operation.Timestamp));
+        await Assert.That(operation.Value!.Fingerprint).IsEqualTo(history.Operation.Value!.Fingerprint);
+        await Assert.That(operation.Value!.Input.Span.SequenceEqual(history.Payload)).IsTrue();
     }
 
     private static async Task LocatorAsync(byte[]? actual, byte[]? expected)

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -18,12 +19,12 @@ internal sealed class ChunkSelectedIntegrityFixture : IDisposable
     }
     internal PartitionRef Partition => original.Partition;
     internal Guid WindowId { get; } = Guid.NewGuid();
-    internal List<(ReplicatedOperation Operation, CommitReceipt Receipt)> Successes { get; } = [];
-    internal ReplicatedOperation Seal
+    internal List<(Command<DatabaseCommand> Operation, CommitReceipt Receipt)> Successes { get; } = [];
+    internal Command<DatabaseCommand> Seal
     {
         get;
     }
-    internal ReplicatedOperation Merge
+    internal Command<DatabaseCommand> Merge
     {
         get;
     }
@@ -61,14 +62,14 @@ internal sealed class ChunkSelectedIntegrityFixture : IDisposable
         }
     }
 
-    internal ReplicatedOperation Operation(Mutation mutation)
+    internal Command<DatabaseCommand> Operation(Mutation mutation)
     {
         var id = Guid.NewGuid();
         return new(id, OperationKind.Batch, SampleChunkCanonicalFixture.Principal, Owner.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new CommandRequest(id, Partition, [mutation]), JsonDefaults.Options));
     }
 
-    internal CommitReceipt Apply(ReplicatedOperation operation)
+    internal CommitReceipt Apply(Command<DatabaseCommand> operation)
     {
         var result = Owner.Apply(operation).Get<CommitReceipt>();
         Successes.Add((operation, result));

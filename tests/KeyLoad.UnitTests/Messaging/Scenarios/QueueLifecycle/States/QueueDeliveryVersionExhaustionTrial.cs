@@ -54,7 +54,7 @@ internal static class QueueDeliveryVersionExhaustionTrial
             return true;
         });
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var claim = fixture.Database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, time));
+        var claim = fixture.Database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, time));
         var claimed = fixture.Database.Apply(claim);
         var page = claimed.Get<ReceiveResult>();
         await Assert.That(page.RequestId).IsEqualTo(request.RequestId);
@@ -71,7 +71,7 @@ internal static class QueueDeliveryVersionExhaustionTrial
             StateVersion = long.MaxValue
         };
         var command = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, action);
-        var operation = fixture.Database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command,
+        var operation = fixture.Database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command,
             command.CommandId, time.AddSeconds(1)));
         var body = new MessageBody(message.MessageId, message.PayloadJson, message.HeadersJson, message.OrderingKey, JsonData.Fingerprint(message));
         var state = new QueueDeliveryVersionExhaustionState(new(lane, time, producer, produced, key, row, maximum, body, operation),

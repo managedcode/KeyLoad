@@ -67,7 +67,7 @@ internal sealed class RelationalRowTests
         ];
         foreach (var json in invalid)
         {
-            await Assert.That(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, json)).Error)
+            await Assert.That(Errors.Code(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, json)).Problem))
                 .IsEqualTo(ErrorCode.Validation);
         }
         await Assert.That(database.Database.GetDocument(RelationalTestData.Root,
@@ -88,7 +88,7 @@ internal sealed class RelationalRowTests
         ];
         foreach (var patch in invalid)
         {
-            await Assert.That(RelationalTestData.Submit(database, new PatchDocument(RelationalTestData.Table, RelationalTestData.First, [patch], 1)).Error)
+            await Assert.That(Errors.Code(RelationalTestData.Submit(database, new PatchDocument(RelationalTestData.Table, RelationalTestData.First, [patch], 1)).Problem))
                 .IsEqualTo(ErrorCode.Validation);
         }
         database.Commit(new PatchDocument(RelationalTestData.Table, RelationalTestData.First,
@@ -109,7 +109,7 @@ internal sealed class RelationalRowTests
         using var database = new TestDatabase();
         RelationalTestData.Configure(database);
         var json = Replace(Replace(RelationalTestData.Row(), RelationalTestData.Count, integer), RelationalTestData.Amount, number);
-        await Assert.That(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, json)).Error).IsNull();
+        await Assert.That(Errors.Code(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, json)).Problem)).IsNull();
     }
 
     private static string Replace(string row, string column, string value)

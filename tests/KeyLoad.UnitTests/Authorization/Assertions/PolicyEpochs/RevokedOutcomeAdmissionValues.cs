@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -13,11 +14,10 @@ internal static class RevokedOutcomeAdmissionValues
         => await Assert.That(System.Text.Json.JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));
     internal static async Task ReceiptAsync(RevokedOutcomeAdmissionFixture fixture, CommandRequest command,
-        OperationResult result, long position, bool fresh)
+        Result<object> result, long position, bool fresh)
     {
         var effects = Effects(fresh);
-        await EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId,
-            new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position, 1), [.. effects], DurabilityProfile.ProcessDurable));
+        await EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position), [.. effects], DurabilityProfile.ProcessDurable, 1));
         foreach (var effect in result.Get<CommitReceipt>().Mutations)
         {
             await Assert.That(effect.CompositionReferences).IsEmpty();
@@ -58,8 +58,8 @@ internal static class RevokedOutcomeAdmissionValues
         for (var attempt = 0; attempt < 2; attempt++)
         {
             var actual = fixture.Database.Apply(RevokedOutcomeAdmissionFixture.Operation(fixture.Original));
-            await EqualAsync(actual, new OperationResult(null, code, detail));
-            await Assert.That(actual.NativeValue).IsNull();
+            await EqualAsync(actual, Result<object>.Fail(Errors.Problem(code, detail)));
+            await Assert.That(actual.Value).IsNull();
             await OriginalAsync(fixture);
         }
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,12 +8,12 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueClaimVersionExhaustionAssertions
 {
-    internal static async Task FailureAsync(OperationResult result)
+    internal static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(result.SafeDetail).IsEqualTo(QueueClaimVersionExhaustionProtocol.Detail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(QueueClaimVersionExhaustionProtocol.Detail);
+        
+        await Assert.That(result.Value).IsNull();
     }
 
     internal static async Task ReadyAsync(DatabaseEngine database, ZoneTreeStore store, QueueClaimVersionExhaustionState state)
@@ -31,9 +32,9 @@ internal static class QueueClaimVersionExhaustionAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        QueueClaimVersionExhaustionState state, OperationResult original)
+        QueueClaimVersionExhaustionState state, Result<object> original)
     {
-        var key = KeySpace.PartitionOutcome(state.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, state.Operation.Id);
+        var key = KeySpace.PartitionOutcome(state.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, state.Operation.CommandId);
         var retained = store.Read(view => view.ReadOwnedValue(key))!;
         var stored = NativeSerialization.Deserialize<StoredOutcome>(retained);
         await EqualAsync(stored.Result, original);

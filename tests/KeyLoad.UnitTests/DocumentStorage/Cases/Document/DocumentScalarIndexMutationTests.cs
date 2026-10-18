@@ -47,7 +47,7 @@ internal sealed class DocumentScalarIndexMutationTests
         var conflict = DocumentCrudFixture.Submit(database,
             new PatchDocument(Collection, OtherDocumentId, [new(LabelPath, PatchKind.Set, "\"safe\"")], 1),
             new PatchDocument(Collection, ThirdDocumentId, [new(LabelPath, PatchKind.Set, "\"safe\"")], 1));
-        await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, OtherDocumentId))).IsEqualTo(beforeSecond);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,

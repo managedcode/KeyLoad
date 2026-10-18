@@ -95,9 +95,9 @@ internal static class QueueDeadLetterSelectedContinuation
     internal static async Task ColdEffectsAsync(DatabaseEngine database, ZoneTreeStore store,
         IEnumerable<QueueDeadLetterSelectedSaved> history)
     {
-        foreach (var saved in history.Where(saved => saved.Operation.Kind == OperationKind.Processing))
+        foreach (var saved in history.Where(saved => saved.Operation.Value!.Kind == OperationKind.Processing))
         {
-            var processing = JsonSerializer.Deserialize<ProcessingRequest>(saved.Operation.PayloadJson, JsonDefaults.Options)!;
+            var processing = NativeSerialization.Deserialize<ProcessingRequest>(saved.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)!;
             var id = ((PutDocument)processing.Effects[QueueDeadLetterSelectedProtocol.Zero]).Id;
             await EffectsAsync(database, store, processing, id, saved.Result.Get<CommitReceipt>());
         }

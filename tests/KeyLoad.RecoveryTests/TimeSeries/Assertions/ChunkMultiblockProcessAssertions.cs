@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.CrashHost;
 
@@ -86,10 +87,8 @@ internal static class ChunkMultiblockProcessAssertions
     private static async Task ReceiptAsync(string bytes, ChunkMultiblockCrashSnapshot authority,
         Guid command, long position, string kind, long revision)
     {
-        var expected = new CommitReceipt(command,
-            new(authority.StorageIncarnation, SampleChunkCrashContract.Partition.AtomicPartitionId, position, OwnershipEpoch),
-            [new(kind, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, revision)], authority.StorageDurability);
-        var actual = NativeSerialization.Deserialize<OperationResult>(Convert.FromHexString(bytes)).Get<CommitReceipt>();
+        var expected = new CommitReceipt(command, new(authority.StorageIncarnation, SampleChunkCrashContract.Partition.AtomicPartitionId, position), [new(kind, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, revision)], authority.StorageDurability, (authority.StorageDurability == DurabilityProfile.Buffered ? 0 : 1));
+        var actual = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(bytes)).Get<CommitReceipt>();
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
     }

@@ -18,9 +18,9 @@ internal static class RemoteTransferRepairColdContinuation
         var complete = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete),
             fixture.SourcePartition, [new CompleteQueueTransfer(fixture.SourceQueue, transfer.TransferId, proof.ReceiptToken)]);
         var failed = RemoteTransferRepairColdNative.Apply(fixture, complete);
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(failed.Json).IsNull();
-        await Assert.That(failed.NativeValue).IsNull();
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        
+        await Assert.That(failed.Value).IsNull();
         var completeBytes = RemoteTransferRepairColdNative.Outcome(fixture, complete.CommandId, fixture.SourcePartition);
         await RemoteTransferRepairColdAdvance.DeniedWithoutWitnessAsync(fixture, hint, original.IntentToken,
             QueueTransferRepairStage.Complete, proof.ReceiptToken);
@@ -30,10 +30,10 @@ internal static class RemoteTransferRepairColdContinuation
         RemoteTransferRepairColdFailure? refused = null;
         if (ceiling == RemoteTransferRepairColdProtocol.ExhaustedCeiling)
         {
-            await Assert.That(advance.Result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(advance.Result.SafeDetail).IsEqualTo(RemoteTransferRepairProtocol.Capacity);
-            await Assert.That(advance.Result.Json).IsNull();
-            await Assert.That(advance.Result.NativeValue).IsNull();
+            await Assert.That(Errors.Code(advance.Result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(advance.Result.Problem?.Detail).IsEqualTo(RemoteTransferRepairProtocol.Capacity);
+            
+            await Assert.That(advance.Result.Value).IsNull();
             refused = new(advance.Command, advance.Result,
                 RemoteTransferRepairColdNative.Outcome(fixture, advance.Command.CommandId, fixture.SourcePartition));
             await Assert.That(RemoteTransferRepairColdNative.State(fixture, transfer.TransferId).CompleteGeneration)

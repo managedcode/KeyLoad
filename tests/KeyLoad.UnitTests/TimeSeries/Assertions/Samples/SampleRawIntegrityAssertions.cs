@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
@@ -32,7 +33,7 @@ internal static class SampleRawIntegrityAssertions
         await Assert.That(actual.Image).IsEqualTo(cut.Image);
     }
 
-    internal static async Task RefuseAsync(SampleRawIntegrityFixture fixture, ReplicatedOperation expiry)
+    internal static async Task RefuseAsync(SampleRawIntegrityFixture fixture, Command<DatabaseCommand> expiry)
     {
         await RefuseOneAsync(fixture, () => SampleRawIntegrityScenario.ReadRange(fixture, final: false));
         await RefuseOneAsync(fixture, () => fixture.Owner.ReadLatestSample(SampleAggregateTestData.RootPrincipal,
@@ -52,7 +53,7 @@ internal static class SampleRawIntegrityAssertions
         await UnchangedAsync(fixture.Store, cut);
     }
 
-    internal static async Task ReplayAsync(SampleRawIntegrityFixture fixture, ReplicatedOperation operation,
+    internal static async Task ReplayAsync(SampleRawIntegrityFixture fixture, Command<DatabaseCommand> operation,
         CommitReceipt original)
     {
         var cut = Capture(fixture.Store);
@@ -62,9 +63,9 @@ internal static class SampleRawIntegrityAssertions
     }
 
     internal static async Task ExpiryReceiptAsync(SampleRawIntegrityFixture fixture, CommitReceipt receipt,
-        ReplicatedOperation operation)
+        Command<DatabaseCommand> operation)
     {
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Store.Position);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(OneMutation);

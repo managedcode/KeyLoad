@@ -58,16 +58,16 @@ internal static class SqlCompositionParameterAssertions
     internal static async Task OutboxAsync(SqlCompositionParameterFixture fixture)
     {
         var seed = fixture.Seed;
-        var command = JsonDefaults.Deserialize<CommandRequest>(seed.Seed.PayloadJson);
+        var command = NativeSerialization.Deserialize<CommandRequest>(seed.Seed.Value!.Input.Span);
         var expected = new List<OutboxEntry>
         {
-            new(1L, 0, seed.SeedReceipt.Token, seed.Seed.EvaluatedAt, command.Mutations[0], seed.SeedReceipt.Mutations[0], null, seed.First),
-            new(2L, 1, seed.SeedReceipt.Token, seed.Seed.EvaluatedAt, command.Mutations[1], seed.SeedReceipt.Mutations[1], null, seed.Second),
-            new(3L, 2, seed.SeedReceipt.Token, seed.Seed.EvaluatedAt, command.Mutations[2], seed.SeedReceipt.Mutations[2])
+            new(1L, 0, seed.SeedReceipt.Token, new DateTimeOffset(seed.Seed.Timestamp), command.Mutations[0], seed.SeedReceipt.Mutations[0], null, seed.First),
+            new(2L, 1, seed.SeedReceipt.Token, new DateTimeOffset(seed.Seed.Timestamp), command.Mutations[1], seed.SeedReceipt.Mutations[1], null, seed.Second),
+            new(3L, 2, seed.SeedReceipt.Token, new DateTimeOffset(seed.Seed.Timestamp), command.Mutations[2], seed.SeedReceipt.Mutations[2])
         };
         foreach (var original in fixture.Originals)
         {
-            expected.Add(new(expected.Count + 1L, 0, original.Expected.Token, original.Operation.EvaluatedAt,
+            expected.Add(new(expected.Count + 1L, 0, original.Expected.Token, new DateTimeOffset(original.Operation.Timestamp),
                 original.Effect, original.Expected.Mutations[0]));
         }
         var page = fixture.Store.Read(view => view.Scan(KeySpace.Partition("outbox", fixture.Source.Partition),

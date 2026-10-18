@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -66,8 +68,8 @@ internal static class QueueEnqueueSequenceWholeFlow
         await QueueStoredCapacityReceipts.FailureAsync(restored, second, fixture.Partition, healthy.Operation, healthy.Result);
     }
 
-    private static async Task<(ReplicatedOperation Operation, OperationResult Result)> ContinueAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane, byte[] key,
-        ReplicatedOperation original, OperationResult result, bool strict, bool scheduledSuccess, CancellationToken token)
+    private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> ContinueAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane, byte[] key,
+        Command<DatabaseCommand> original, Result<object> result, bool strict, bool scheduledSuccess, CancellationToken token)
     {
         var before = store.Read(view => view.GetRecord<QueueCounters>(key))!;
         store.Commit((tx, _) =>

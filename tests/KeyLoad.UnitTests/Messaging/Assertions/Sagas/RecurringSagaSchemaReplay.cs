@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -41,12 +42,12 @@ internal static class RecurringSagaSchemaReplay
     internal static async Task StoredAsync(SafeProjectorOperationDatabase owner, SafeProjectorOperationCommand command)
     {
         await SafeProjectorOperationHistoryImages.UnchangedAsync(owner, command);
-        var global = command.Operation.Kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;
-        var key = global ? KeySpace.GlobalOutcome(command.Operation.PrincipalId, command.Operation.Id)
-            : KeySpace.PartitionOutcome(owner.Source.Partition, command.Operation.PrincipalId, command.Operation.Id);
+        var global = command.Operation.Value!.Kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;
+        var key = global ? KeySpace.GlobalOutcome(command.Operation.UserId!, command.Operation.CommandId)
+            : KeySpace.PartitionOutcome(owner.Source.Partition, command.Operation.UserId!, command.Operation.CommandId);
         var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))
             ?? throw new InvalidOperationException(MissingStored);
-        await Assert.That(stored.Fingerprint).IsEqualTo(NativeOperationFingerprint.Compute(command.Operation));
+        await Assert.That(stored.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Operation));
         await Assert.That(stored.PolicyEpoch).IsEqualTo(command.CreatorEpoch);
         await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);
@@ -63,15 +64,15 @@ internal static class RecurringSagaSchemaReplay
     {
         var entry = owner.Entry(command.Operation);
         await SafeProjectorOperationSeed.EqualAsync(entry, command.Entry);
-        var operation = entry.Operation ?? throw new InvalidOperationException(MissingOperation);
-        await Assert.That(operation.NativePayload.IsEmpty).IsFalse();
-        await Assert.That(operation.NativePayload.Span.SequenceEqual(command.Operation.NativePayload.Span)).IsTrue();
+        var operation = entry.PreparedCommand ?? throw new InvalidOperationException(MissingOperation);
+        await Assert.That(operation.Value!.Input.IsEmpty).IsFalse();
+        await Assert.That(operation.Value!.Input.Span.SequenceEqual(command.Operation.Value!.Input.Span)).IsTrue();
         await SafeProjectorOperationHistoryImages.UnchangedAsync(owner, command);
     }
 
-    private static async Task ResultAsync(OperationResult actual, OperationResult expected)
+    private static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        switch (expected.NativeValue)
+        switch (expected.Value)
         {
             case CommitReceipt:
                 await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);

@@ -18,11 +18,7 @@ internal static class RequestCqrsAnnAssertions
     internal static async Task ReceiptAsync(RequestCqrsHostedDatabase database, CommandRequest command,
         CommitReceipt receipt, long position, MutationReceipt[] mutations)
     {
-        var placement = database.Database.ReadAtomicPartitionPlacement(RequestCqrsAnnTestData.Principal,
-            database.Partition);
-        var expected = new CommitReceipt(command.CommandId,
-            new(database.Store.Identity.Incarnation, database.Partition.AtomicPartitionId, position, placement.PlacementEpoch),
-            [.. mutations], database.Database.Durability);
+        var expected = new CommitReceipt(command.CommandId, new(database.Store.Identity.Incarnation, database.Partition.AtomicPartitionId, position), [.. mutations], database.Database.Durability, (database.Database.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await EqualAsync(expected, receipt);
     }
 

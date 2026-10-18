@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -21,7 +22,7 @@ internal static class BlobCompleteCommitCutAssertions
     private const long TotalBytes = 65_557;
 
     internal static async Task PublishedAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof,
-        ReplicatedOperation selected, bool committed, bool healthy = false)
+        Command<DatabaseCommand> selected, bool committed, bool healthy = false)
     {
         var blob = BlobCommitCutProtocol.Blob;
         var oldBytes = BlobCompleteCommitCutOracle.OriginalBytes();
@@ -31,7 +32,7 @@ internal static class BlobCompleteCommitCutAssertions
         var prior = new BlobMetadata(blob, 1, BlobCommitCutProtocol.OriginalUpload, OriginalLength, 1,
             oldHash, new RowAccess(), BlobCompleteCommitCutOracle.PriorComplete(proof).EvaluatedAt);
         var current = new BlobMetadata(blob, 2, BlobCommitCutProtocol.NewUpload, newBytes.Length, 2,
-            newHash, new RowAccess(), selected.EvaluatedAt);
+            newHash, new RowAccess(), new DateTimeOffset(selected.Timestamp));
         var expected = committed ? current : prior;
         var operations = new BlobStorageOperations(owner);
         await BlobCompleteCommitCutOracle.ExactAsync(operations.Metadata(BlobCommitCutProtocol.Principal, new(blob)), expected);
@@ -107,7 +108,7 @@ internal static class BlobCompleteCommitCutAssertions
         await BlobCompleteCommitCutOracle.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobQuota>(KeyCodec.Encode(GlobalSpace))), expected);
     }
 
-    internal static async Task DeniedAsync(DatabaseEngine owner, ReplicatedOperation selected)
+    internal static async Task DeniedAsync(DatabaseEngine owner, Command<DatabaseCommand> selected)
     {
         var store = (ZoneTreeStore)owner.Store;
         var image = BlobCommitCutNativeProof.Image(store);
@@ -115,11 +116,11 @@ internal static class BlobCompleteCommitCutAssertions
         var operations = new BlobStorageOperations(owner);
         var metadata = Assert.ThrowsExactly<KeyLoadException>(() => operations.Metadata(BlobCommitCutProtocol.DeniedPrincipal, new(BlobCommitCutProtocol.Blob)));
         var range = Assert.ThrowsExactly<KeyLoadException>(() => operations.Read(BlobCommitCutProtocol.DeniedPrincipal, new(BlobCommitCutProtocol.Blob, 2, 0, 4)));
-        var denied = owner.CreateNativeOperation(selected.Kind, selected.Id, BlobCommitCutProtocol.DeniedPrincipal,
-            selected.EvaluatedAt, NativeSerialization.Serialize(NativeCommandPayload.Read<CompleteBlobUploadRequest>(selected)));
+        var denied = owner.CreateCommand(selected.Value!.Kind, selected.CommandId, BlobCommitCutProtocol.DeniedPrincipal,
+            new DateTimeOffset(selected.Timestamp), NativeSerialization.Serialize(NativeSerialization.Deserialize<CompleteBlobUploadRequest>((selected).Value!.Input.Span)));
         var outcome = owner.ResolveOutcome(denied);
-        await Assert.That(outcome.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(outcome.Json).IsNull();
+        await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        
         await Assert.That(metadata.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(range.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(BlobCommitCutNativeProof.Image(store)).IsEqualTo(image);

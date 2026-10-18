@@ -4,15 +4,14 @@ using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 /// <summary>Uses two original real ZoneTree owners; this is target-execution evidence, not an CLUSTER transport.</summary>
-internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixture, bool sourceNarrower)
+internal sealed class QueryLifetimeNativeFlow(QueryNativeFixture fixture, bool sourceNarrower)
 {
-    internal RemoteDocumentNativeFixture Fixture => fixture;
+    internal QueryNativeFixture Fixture => fixture;
     private long sourceEpoch = QueryLifetimeNativeProtocol.SourceEpoch;
     private long targetEpoch = QueryLifetimeNativeProtocol.TargetEpoch;
 
@@ -38,20 +37,20 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
     {
         var owner = sourceNarrower ? fixture.Source : fixture.Destination;
         var current = owner.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
-            RemoteDocumentNativeFixture.Tenant, RemoteDocumentNativeFixture.Partition.DatabaseId,
-            RemoteDocumentNativeFixture.Collection))) ?? throw new InvalidOperationException(QueryLifetimeNativeProtocol.MissingFailure);
+            QueryNativeFixture.Tenant, QueryNativeFixture.Partition.DatabaseId,
+            QueryNativeFixture.Collection))) ?? throw new InvalidOperationException(QueryLifetimeNativeProtocol.MissingFailure);
         var changed = current with
         {
             SchemaVersion = current.SchemaVersion + QueryLifetimeNativeProtocol.NextEpoch,
-            FieldPolicies = [new(RemoteDocumentNativeFixture.Secret, RemoteDocumentNativeFixture.Classification,
+            FieldPolicies = [new(QueryNativeFixture.Secret, QueryNativeFixture.Classification,
                 SchemaReadGrant: hidden ? QueryLifetimeNativeProtocol.SchemaGrant : null)]
         };
-        var request = new ConfigureResourceRequest(RemoteDocumentNativeFixture.Tenant,
-            RemoteDocumentNativeFixture.Partition.DatabaseId, changed)
+        var request = new ConfigureResourceRequest(QueryNativeFixture.Tenant,
+            QueryNativeFixture.Partition.DatabaseId, changed)
         {
             ExpectedSchemaVersion = current.SchemaVersion
         };
-        _ = owner.Database.Apply(RemoteDocumentNativeFixture.Operation(owner, OperationKind.ConfigureResource,
+        _ = owner.Database.Apply(QueryNativeFixture.Operation(owner, OperationKind.ConfigureResource,
             Guid.NewGuid(), request)).Get<ResourceDefinition>();
     }
 
@@ -61,22 +60,22 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, CancellationToken.None);
         var grant = work.CreateReadGrant(database.Limits.MaxQueryReadBytes / QueryLifetimeNativeProtocol.GrantDivisor,
             database.Limits.MaxScanRecords / QueryLifetimeNativeProtocol.GrantDivisor);
-        return database.WithPartitionQueryFenceView<PartitionQueryLifetimeMetadata>(RemoteDocumentNativeFixture.Reader,
-            RemoteDocumentNativeFixture.Partition, RemoteDocumentNativeFixture.Collection, grant,
+        return database.WithPartitionQueryFenceView<PartitionQueryLifetimeMetadata>(QueryNativeFixture.Reader,
+            QueryNativeFixture.Partition, QueryNativeFixture.Collection, grant,
             (view, principal, resource, _) => new(resource,
                 PartitionControlLifetimeCoverage.Capture(work.CreateView(view, grant),
-                    RemoteDocumentNativeFixture.Partition, [resource], database.Limits.MaxBatchBytes), principal));
+                    QueryNativeFixture.Partition, [resource], database.Limits.MaxBatchBytes), principal));
     }
 
     internal ResourceLifetimeCoverageV1 CreateOtherLifetime()
     {
         var definition = new ResourceDefinition(QueryLifetimeNativeProtocol.OtherResource, ResourceKind.Collection,
-            RemoteDocumentNativeFixture.Partition.TransactionDomainId);
-        _ = fixture.Source.Database.Apply(RemoteDocumentNativeFixture.Operation(fixture.Source,
-            OperationKind.ConfigureResource, Guid.NewGuid(), new ConfigureResourceRequest(RemoteDocumentNativeFixture.Tenant,
-                RemoteDocumentNativeFixture.Partition.DatabaseId, definition))).Get<ResourceDefinition>();
+            QueryNativeFixture.Partition.TransactionDomainId);
+        _ = fixture.Source.Database.Apply(QueryNativeFixture.Operation(fixture.Source,
+            OperationKind.ConfigureResource, Guid.NewGuid(), new ConfigureResourceRequest(QueryNativeFixture.Tenant,
+                QueryNativeFixture.Partition.DatabaseId, definition))).Get<ResourceDefinition>();
         return fixture.Source.Store.Read(view => PartitionControlLifetimeCoverage.Capture(view,
-            RemoteDocumentNativeFixture.Partition, [definition], fixture.Source.Database.Limits.MaxBatchBytes));
+            QueryNativeFixture.Partition, [definition], fixture.Source.Database.Limits.MaxBatchBytes));
     }
 
     internal PartitionQueryLeafResultV1 Query(string path = QueryLifetimeNativeProtocol.Star,
@@ -85,33 +84,33 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
         var metadata = captured ?? Capture();
         var database = fixture.Destination.Database;
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
-        var request = new AstQueryRequest(RemoteDocumentNativeFixture.Partition,
-            new(RemoteDocumentNativeFixture.Collection, null, [new(path, QueryLifetimeNativeProtocol.SecretAlias)],
+        var request = new AstQueryRequest(QueryNativeFixture.Partition,
+            new(QueryNativeFixture.Collection, null, [new(path, QueryLifetimeNativeProtocol.SecretAlias)],
                 filter, [], QueryLifetimeNativeProtocol.Limit), AllowFullScan: true);
         var normalized = QueryValidation.Normalize(request, database.Limits, engine.Execution);
         var plan = PartitionQueryPlanFactory.Create(normalized, database.Store.Identity,
             [request.Partition], database.Limits, engine.Execution).Leaves.Single();
         var input = new PartitionQueryOwnedLeafRequestV2(new(plan,
-            PhysicalOwnerDirectoryWholeFlow.Destination.Owner, RemoteDocumentNativeFixture.Tenant),
+            fixture.DestinationOwner, QueryNativeFixture.Tenant),
             metadata.Definition, metadata.Coverage, metadata.Principal);
         var roundTrip = nativeRoundTrip
             ? NativeSerialization.Deserialize<PartitionQueryOwnedLeafRequestV2>(NativeSerialization.Serialize(input)) : input;
-        return PartitionQueryLifetimeLeafExecution.Execute(engine, RemoteDocumentNativeFixture.Reader, roundTrip,
-            PhysicalOwnerDirectoryWholeFlow.Destination.Owner, database.EvaluationClock,
+        return PartitionQueryLifetimeLeafExecution.Execute(engine, QueryNativeFixture.Reader, roundTrip,
+            fixture.DestinationOwner, database.EvaluationClock,
             database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), CancellationToken.None);
     }
 
     internal DistributedSearchLeafResultV1 Statistics(PartitionQueryLifetimeMetadata? captured = null,
-        string field = RemoteDocumentNativeFixture.Title, string text = QueryLifetimeNativeProtocol.Text,
+        string field = QueryNativeFixture.Title, string text = QueryLifetimeNativeProtocol.Text,
         bool nativeRoundTrip = true)
     {
         var metadata = captured ?? Capture();
         var database = fixture.Destination.Database;
         var original = new DistributedSearchOwnedLeafV1(QueryLifetimeNativeProtocol.Version,
-            DistributedSearchPhase.Statistics, new(RemoteDocumentNativeFixture.Partition,
-                RemoteDocumentNativeFixture.Collection, TextField: field,
+            DistributedSearchPhase.Statistics, new(QueryNativeFixture.Partition,
+                QueryNativeFixture.Collection, TextField: field,
                 Text: text, Limit: QueryLifetimeNativeProtocol.Limit),
-            PhysicalOwnerDirectoryWholeFlow.Destination.Owner, RemoteDocumentNativeFixture.Tenant,
+            fixture.DestinationOwner, QueryNativeFixture.Tenant,
             database.Limits.MaxQueryReadBytes / QueryLifetimeNativeProtocol.GrantDivisor,
             database.Limits.MaxScanRecords / QueryLifetimeNativeProtocol.GrantDivisor,
             QueryResultBudgetPolicy.Resolve(database.Limits, UnitExecutionOptions.QueryExecution().Value)
@@ -119,22 +118,22 @@ internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixtur
         var input = new DistributedSearchOwnedLeafV2(original, metadata.Definition, metadata.Coverage, metadata.Principal);
         var roundTrip = nativeRoundTrip
             ? NativeSerialization.Deserialize<DistributedSearchOwnedLeafV2>(NativeSerialization.Serialize(input)) : input;
-        return DistributedSearchOwnedLeafExecution.ExecuteV2(database, RemoteDocumentNativeFixture.Reader,
-            roundTrip, PhysicalOwnerDirectoryWholeFlow.Destination.Owner, UnitExecutionOptions.QueryExecution(),
+        return DistributedSearchOwnedLeafExecution.ExecuteV2(database, QueryNativeFixture.Reader,
+            roundTrip, fixture.DestinationOwner, UnitExecutionOptions.QueryExecution(),
             database.EvaluationClock, database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds),
             CancellationToken.None);
     }
 
-    private static void Principal(PhysicalShardCatalogFixture owner, long epoch, bool narrow, bool restrictedRows)
+    private static void Principal(DocumentPatchAtomicityOwner owner, long epoch, bool narrow, bool restrictedRows)
     {
-        var principal = new PrincipalRecord(RemoteDocumentNativeFixture.Reader, RemoteDocumentNativeFixture.Tenant,
-            [new(RemoteDocumentNativeFixture.Partition.DatabaseId, RemoteDocumentNativeFixture.Collection,
+        var principal = new PrincipalRecord(QueryNativeFixture.Reader, QueryNativeFixture.Tenant,
+            [new(QueryNativeFixture.Partition.DatabaseId, QueryNativeFixture.Collection,
                 Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)], narrow ? [] : [QueryLifetimeNativeProtocol.Star])
         {
             PolicyEpoch = epoch,
             RestrictRows = restrictedRows
         };
-        _ = owner.Database.Apply(RemoteDocumentNativeFixture.Operation(owner, OperationKind.ConfigurePrincipal,
+        _ = owner.Database.Apply(QueryNativeFixture.Operation(owner, OperationKind.ConfigurePrincipal,
             Guid.NewGuid(), new ConfigurePrincipalRequest(principal))).Get<PrincipalRecord>();
     }
 }

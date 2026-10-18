@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -27,7 +28,7 @@ internal static class ResourceIncarnationLiteral
             new("value", RelationalColumnType.WholeNumber), new("secret", RelationalColumnType.Text)]) : null
     };
 
-    internal static ReplicatedOperation Creation(TestDatabase fixture, bool sql, CancellationToken token)
+    internal static Command<DatabaseCommand> Creation(TestDatabase fixture, bool sql, CancellationToken token)
     {
         var issued = fixture.Database.EvaluationClock.GetUtcNow();
         if (!sql)
@@ -37,10 +38,10 @@ internal static class ResourceIncarnationLiteral
         var limits = UnitExecutionOptions.DatabaseLimits();
         var decoded = SqlOperationCompiler.Compile(new(fixture.Partition, Sql, CommandId: OriginalId), limits,
             limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
-        return fixture.Database.CreateNativeOperation(OperationKind.CreateTable, decoded.CommandId, "root", issued, decoded.Payload);
+        return fixture.Database.CreateCommand(OperationKind.CreateTable, decoded.CommandId, "root", issued, decoded.Payload);
     }
 
-    internal static ReplicatedOperation Configure(PartitionRef partition, ResourceDefinition definition, long? expected = null)
+    internal static Command<DatabaseCommand> Configure(PartitionRef partition, ResourceDefinition definition, long? expected = null)
         => new(Guid.NewGuid(), OperationKind.ConfigureResource, "root", TimeProvider.System.GetUtcNow(),
             JsonSerializer.Serialize(new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition)
             {

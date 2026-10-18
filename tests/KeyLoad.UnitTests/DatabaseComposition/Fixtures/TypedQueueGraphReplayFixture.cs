@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class TypedQueueGraphReplayFixture
@@ -78,15 +79,12 @@ internal static class TypedQueueGraphReplayFixture
         }
     }
 
-    private static async Task SeedReceiptAsync(TestDatabase db, ReplicatedOperation operation, CommitReceipt actual)
+    private static async Task SeedReceiptAsync(TestDatabase db, Command<DatabaseCommand> operation, CommitReceipt actual)
     {
-        var expected = new CommitReceipt(operation.Id,
-            new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-                db.Store.Position, actual.Token.OwnershipEpoch),
-            [new("putDocument", FromCollection, First, FirstRevision),
+        var expected = new CommitReceipt(operation.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
+                db.Store.Position), [new("putDocument", FromCollection, First, FirstRevision),
              new("putDocument", ToCollection, Second, FirstRevision),
-             new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, FirstRevision)],
-            actual.Durability);
+             new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, FirstRevision)], actual.Durability, (actual.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }

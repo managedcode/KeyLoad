@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.Messaging.RemoteTransferCapacityAuthorityProtocol;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -47,7 +48,7 @@ internal static class RemoteTransferCapacityAuthorityWholeFlow
 
     private static async Task ContinueAsync(RemoteTransferDatabase fixture, bool source,
         List<RemoteTransferCapacityAuthorityCompleted> completed, RemoteTransferCapacityAuthorityTransfer pending,
-        CommandRequest fresh, (CommandRequest Request, OperationResult Result) reconciliation, CancellationToken token)
+        CommandRequest fresh, (CommandRequest Request, Result<object> Result) reconciliation, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (source)

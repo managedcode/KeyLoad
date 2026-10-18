@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
@@ -28,8 +29,8 @@ internal sealed class NativePublicCommandTransportTests
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.SafeDetail).IsEqualTo(NativePublicNormalizationFixture.Detail(shape));
         var stored = NativePublicNormalizationFixture.Stored(database, operation);
-        await Assert.That(stored.Result.Error).IsEqualTo(result.Error);
-        await Assert.That(stored.Result.SafeDetail).IsEqualTo(result.SafeDetail);
+        await Assert.That(Errors.Code(stored.Result.Problem)).IsEqualTo(result.Error);
+        await Assert.That(stored.Result.Problem?.Detail).IsEqualTo(result.SafeDetail);
         var retry = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.PrincipalId,
             operation.Kind, operation.Id, decoded.Payload));
         await Assert.That(retry.Envelope.RequestId).IsNotEqualTo(request.Envelope.RequestId);
@@ -38,20 +39,20 @@ internal sealed class NativePublicCommandTransportTests
         await Assert.That(NativePublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
     }
 
-    private static McpDecodedOperation Decode(TestDatabase database, ReplicatedOperation operation)
+    private static McpDecodedOperation Decode(TestDatabase database, Command<DatabaseCommand> operation)
     {
         using var document = JsonDocument.Parse(operation.PayloadJson);
         var arguments = new Dictionary<string, JsonElement>
         {
             [McpCatalogProtocol.Request] = document.RootElement.Clone()
         };
-        if (operation.Kind == OperationKind.Batch)
+        if (operation.Value!.Kind == OperationKind.Batch)
         {
-            return McpArgumentDecoder.Command<CommandRequest>(arguments, operation.Kind, value => value.CommandId,
+            return McpArgumentDecoder.Command<CommandRequest>(arguments, operation.Value!.Kind, value => value.CommandId,
                 database.Database.Limits.MaxBatchBytes);
         }
-        arguments[McpCatalogProtocol.CommandId] = JsonSerializer.SerializeToElement(operation.Id, JsonDefaults.Options);
-        return McpArgumentDecoder.HeaderCommand<ConfigurePrincipalRequest>(arguments, operation.Kind,
+        arguments[McpCatalogProtocol.CommandId] = JsonSerializer.SerializeToElement(operation.CommandId, JsonDefaults.Options);
+        return McpArgumentDecoder.HeaderCommand<ConfigurePrincipalRequest>(arguments, operation.Value!.Kind,
             database.Database.Limits.MaxBatchBytes);
     }
 }

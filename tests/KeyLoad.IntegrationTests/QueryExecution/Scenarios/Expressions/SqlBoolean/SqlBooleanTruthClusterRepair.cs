@@ -47,7 +47,7 @@ internal static class SqlBooleanTruthClusterRepair
             var actual = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await writer.Sdk.CommitAsync(command, token));
             var expected = replay ?? new CommitReceipt(command.CommandId, actual.Token,
                 [new MutationReceipt(SqlBooleanTruthClusterState.PutKind, SqlNullOrderingClusterProtocol.Collection,
-                    SqlBooleanTruthClusterState.Low, revision)], DurabilityProfile.QuorumProcessDurable);
+                    SqlBooleanTruthClusterState.Low, revision)], DurabilityProfile.ProcessDurable, 3);
             await SqlClusterProtocol.EqualAsync(expected, actual);
             await global::TUnit.Assertions.Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
             await global::TUnit.Assertions.Assert.That(actual.Token.Position).IsGreaterThan(default(long));

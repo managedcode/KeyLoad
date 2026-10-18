@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.Messaging;
@@ -26,7 +27,7 @@ public sealed partial class DatabaseEngine
         return (int)Math.Min(cap, policy.RetryMaxMilliseconds);
     }
 
-    private int ChooseQueueRetryDelay(ReplicatedOperation original, QueueLaneRef lane, QueuePolicy policy,
+    private int ChooseQueueRetryDelay(Command<DatabaseCommand> original, QueueLaneRef lane, QueuePolicy policy,
         MessageMetadata metadata)
     {
         var cap = QueueRetryCap(policy, metadata.Attempts);
@@ -38,12 +39,12 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.InvalidDecision);
         }
-        var seed = NativeSerialization.Serialize(new QueueRetrySeed(original.Id, lane, metadata.Id,
+        var seed = NativeSerialization.Serialize(new QueueRetrySeed(original.CommandId, lane, metadata.Id,
             metadata.DeliveryGeneration, metadata.Attempts, metadata.StateVersion));
         RequireNativeBudget(seed.Length);
         Span<byte> digest = stackalloc byte[QueueRetryProtocol.DigestBytes];
         _ = HMACSHA256.HashData(Store.Identity.SigningKey.Span, seed, digest);
-        var sample = BinaryPrimitives.ReadUInt64BigEndian(digest);
-        return checked(QueueRetryProtocol.Positive + (int)(sample % (ulong)cap));
+        var draw = BinaryPrimitives.ReadUInt64BigEndian(digest);
+        return checked(QueueRetryProtocol.Positive + (int)(draw % (ulong)cap));
     }
 }

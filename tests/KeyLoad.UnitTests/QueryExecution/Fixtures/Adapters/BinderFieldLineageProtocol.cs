@@ -10,7 +10,6 @@ internal static class BinderFieldLineageProtocol
     internal const int PredicateShape = 1;
     internal const int SortShape = 2;
     internal const long InitialEpoch = 1;
-    internal const long InitialOwnershipEpoch = 1;
     internal const long OriginalRevision = 1;
     internal const string Collection = "orders";
     internal const string DocumentId = "o1";

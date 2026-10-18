@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.Clustering;
@@ -8,37 +10,49 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     private IDatabaseCommitGrain Owner => grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(database.Store.Identity.Incarnation));
 
     /// <inheritdoc />
-    public Task<OperationResult> SubmitAsync(OperationKind kind, Guid id, string principalId, string payloadJson,
+    public Task<Result<object>> SubmitAsync(OperationKind kind, Guid id, string principalId, string payloadJson,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return SubmitOperationAsync(database.NormalizeOperation(new(id, kind, principalId, default, payloadJson)), cancellationToken);
+        return SubmitOperationAsync(database.CreateCommand(kind, id, principalId,
+            database.EvaluationClock.GetUtcNow(), payloadJson), cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
+    public Task<Result<object>> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
         ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        return SubmitOperationAsync(database.CreateNativeOperation(kind, id, principalId, default, payload), cancellationToken);
+        var evaluatedAt = database.EvaluationClock.GetUtcNow();
+        var operation = sourcePlanningBudget is null
+            ? database.CreateCommand(kind, id, principalId, evaluatedAt, payload)
+            : database.CreateCommand(kind, id, principalId, evaluatedAt, payload, sourcePlanningBudget);
+        return SubmitOperationAsync(operation, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken,
+    public Task<Result<object>> SubmitVerifiedAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken,
         ReadExecutionBudget? sourcePlanningBudget = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        return SubmitOperationAsync(database.VerifyOperationAuthority(operation), cancellationToken);
+        return SubmitOperationAsync(database.OwnCommand(operation), cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task ReadBarrierAsync(CancellationToken cancellationToken = default)
-        => _ = await Owner.ReadCutAsync(cancellationToken).ConfigureAwait(false);
+    {
+        var cut = await Owner.ReadCutAsync(cancellationToken).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (database.Store.Identity.Incarnation != cut.Incarnation || database.LastApplied < cut.Position)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.RecoveryRequired);
+        }
+    }
 
-    private Task<OperationResult> SubmitOperationAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    private Task<Result<object>> SubmitOperationAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return database.IsSiloLocalOperation(operation)

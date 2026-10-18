@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Globalization;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -23,8 +24,8 @@ internal static class RecurringScheduleRecoveryAssertions
         await AssertStableRetryAsync(database, store, operation, receipt, seedTail);
     }
 
-    private static async Task<ReplicatedOperation> ReadOperationAsync(string root, CancellationToken cancellationToken)
-        => JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+    private static async Task<Command<DatabaseCommand>> ReadOperationAsync(string root, CancellationToken cancellationToken)
+        => JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, RecurringScheduleCrashScenario.OperationFile), cancellationToken));
 
     private static async Task<long> ReadSeedTailAsync(string root, CancellationToken cancellationToken)
@@ -37,17 +38,17 @@ internal static class RecurringScheduleRecoveryAssertions
             Guid.Parse(RecurringScheduleCrashScenario.ScheduleIdText))!;
 
     private static async Task AssertSeedAndLoggedDueAsync(RecurringScheduleInspection inspection,
-        ReplicatedOperation operation)
+        Command<DatabaseCommand> operation)
     {
         await Assert.That(inspection.Revision).IsEqualTo(1L);
         await Assert.That(inspection.Generation).IsEqualTo(RecurringScheduleCrashScenario.Generation);
         await Assert.That(inspection.Cancelled).IsFalse();
-        await Assert.That(operation.EvaluatedAt).IsGreaterThanOrEqualTo(inspection.Definition.FirstDueAt);
-        await Assert.That(inspection.Definition.FirstDueAt.AddDays(1)).IsGreaterThan(operation.EvaluatedAt);
+        await Assert.That(new DateTimeOffset(operation.Timestamp)).IsGreaterThanOrEqualTo(inspection.Definition.FirstDueAt);
+        await Assert.That(inspection.Definition.FirstDueAt.AddDays(1)).IsGreaterThan(new DateTimeOffset(operation.Timestamp));
     }
 
     private static async Task<CommitReceipt?> AssertAtomicCutAsync(ZoneTreeStore store, DatabaseEngine database,
-        ReplicatedOperation operation, long seedTail, RecurringScheduleInspection inspection, CommitStage stage)
+        Command<DatabaseCommand> operation, long seedTail, RecurringScheduleInspection inspection, CommitStage stage)
     {
         var lane = new QueueLaneRef(RecurringScheduleCrashScenario.Partition, RecurringScheduleCrashScenario.Queue);
         var message = database.InspectMessage(CrashFixtureValues.Principal, lane,
@@ -80,7 +81,7 @@ internal static class RecurringScheduleRecoveryAssertions
         return outcome;
     }
 
-    private static CommitReceipt Retry(DatabaseEngine database, ReplicatedOperation operation)
+    private static CommitReceipt Retry(DatabaseEngine database, Command<DatabaseCommand> operation)
         => database.Apply(operation).Get<CommitReceipt>();
 
     private static async Task AssertReceiptAsync(CommitReceipt receipt, CommitReceipt? recoveredOutcome,
@@ -113,7 +114,7 @@ internal static class RecurringScheduleRecoveryAssertions
     }
 
     private static async Task AssertStableRetryAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, CommitReceipt first, long seedTail)
+        Command<DatabaseCommand> operation, CommitReceipt first, long seedTail)
     {
         var repeated = database.Apply(operation).Get<CommitReceipt>();
         var resolved = database.ResolveOutcome(operation).Get<CommitReceipt>();

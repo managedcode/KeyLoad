@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -9,7 +10,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
 {
     internal const string PositiveQueue = "inspect-positive-retained";
 
-    internal static async Task<(CommandRequest Producer, OperationResult Result)> SeedPositiveAsync(DatabaseEngine owner,
+    internal static async Task<(CommandRequest Producer, Result<object> Result)> SeedPositiveAsync(DatabaseEngine owner,
         ZoneTreeStore store, QueueLeaseAuthorityState state)
     {
         var producer = new CommandRequest(Guid.NewGuid(), state.Lane.Partition, [
@@ -24,7 +25,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
     }
 
     internal static async Task PositiveAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLeaseAuthorityState state,
-        (CommandRequest Producer, OperationResult Result) positive)
+        (CommandRequest Producer, Result<object> Result) positive)
     {
         var before = QueuePendingAuthorityHistory.Capture(store);
         var lane = new QueueLaneRef(state.Lane.Partition, PositiveQueue);
@@ -100,7 +101,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLeaseAuthorityState state,
-        OperationResult processed)
+        Result<object> processed)
     {
         var before = QueuePendingAuthorityHistory.Capture(store);
         foreach (var (operation, result) in new[] { (state.Original, processed), (state.Claim, state.Claimed) })
@@ -111,9 +112,9 @@ internal static class QueueLiveInspectionAuthorityAssertions
             var replay = owner.Apply(operation);
             if (operation.Kind == OperationKind.Receive)
             {
-                await Assert.That(replay.Error).IsEqualTo(ErrorCode.StaleLease);
-                await Assert.That(replay.Json).IsNull();
-                await Assert.That(replay.NativeValue).IsNull();
+                await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
+                
+                await Assert.That(replay.Value).IsNull();
             }
             else
             {
@@ -129,7 +130,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
     }
 
     internal static async Task PositiveRefuseAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLeaseAuthorityState state,
-        (CommandRequest Producer, OperationResult Result) positive, string target, QueuePendingAuthorityCut damaged)
+        (CommandRequest Producer, Result<object> Result) positive, string target, QueuePendingAuthorityCut damaged)
     {
         await Assert.That(Outcome(store, state, state.Original.Id)).IsNull();
         var lane = new QueueLaneRef(state.Lane.Partition, PositiveQueue);

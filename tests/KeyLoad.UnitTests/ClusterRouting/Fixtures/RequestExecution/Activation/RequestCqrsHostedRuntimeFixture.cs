@@ -18,6 +18,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private const string NotInitialized = "The production CQRS host is not initialized.";
     private const string Unjoined = "The production CQRS host has not joined its storage borrowers.";
     private const int OnePort = 1;
+    private const int NoFailures = 0;
     private readonly Lock lifecycle = new();
     private readonly RequestCqrsHostedProfile profile;
     private readonly TestClusterPortAllocator ports = new();
@@ -28,10 +29,11 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
 
     internal RequestCqrsHostedRuntimeFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
         IGrainRequestPhaseObserver? observer = null, IGrainRequestPurposeObserver? purposeObserver = null,
-        bool nativeTextMaintenance = false, bool nativeAnnMaintenance = false, DatabaseLimits? limits = null)
+        bool nativeTextMaintenance = false, bool nativeAnnMaintenance = false, DatabaseLimits? limits = null,
+        RequestCqrsHostedClusterNode? clusterNode = null)
     {
         profile = new(clock ?? TimeProvider.System, UnitRoutingOptions.Routing(routing), observer, purposeObserver,
-            nativeTextMaintenance, nativeAnnMaintenance, limits);
+            nativeTextMaintenance, nativeAnnMaintenance, limits, clusterNode);
     }
 
     internal IGrainFactory Grains => Services.GetRequiredService<IGrainFactory>();
@@ -46,6 +48,8 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     internal NativeTextIncrementalMaintenanceService? NativeMaintenance => profile.NativeText ? Local.TextMaintenance : null;
     internal NativeAnnMaintenanceService? NativeAnnMaintenance => profile.NativeAnn ? Local.AnnMaintenance : null;
     internal RequestCqrsHostedDatabase Database { get; private set; } = null!;
+    internal bool IsDisposalJoined => disposal?.IsCompletedSuccessfully == true;
+    internal bool OwnedDirectoryExists => Directory.Exists(directory);
 
     public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
 
@@ -55,9 +59,10 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         try
         {
-            var (siloPort, _) = ports.AllocateConsecutivePortPairs(OnePort);
+            var siloPort = profile.ClusterNode?.SiloPort ?? ports.AllocateConsecutivePortPairs(OnePort).Item1;
+            var primary = profile.ClusterNode?.PrimaryEndpoint ?? new IPEndPoint(IPAddress.Loopback, siloPort);
             application = await ServerConfiguration.BuildAsync(profile.Arguments(directory, siloPort),
-                localhostClustering: new(new IPEndPoint(IPAddress.Loopback, siloPort)),
+                localhostClustering: new(primary),
                 phaseObserver: profile.Observer, purposeObserver: profile.PurposeObserver,
                 configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
             node = Services.GetRequiredService<OrleansNode>();
@@ -90,7 +95,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         {
             await CloseApplicationAsync(application, failures).ConfigureAwait(false);
         }
-        if (failures.Count == 0)
+        if (failures.Count == NoFailures)
         {
             ServerFailureObserver.Observe(ports.Dispose, failures);
             if (Directory.Exists(directory))

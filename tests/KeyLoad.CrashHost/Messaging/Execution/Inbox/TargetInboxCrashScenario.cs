@@ -24,7 +24,7 @@ internal static class TargetInboxCrashScenario
             [new PutDocument(TargetInboxCrashProtocol.Collection, TargetInboxCrashProtocol.Effect, TargetInboxCrashProtocol.Payload,
                 TargetInboxCrashProtocol.EmptyRevision),
              new EnqueueMessage(TargetInboxCrashProtocol.Output, TargetInboxCrashProtocol.Message, TargetInboxCrashProtocol.Payload)]);
-        var operation = CrashDatabase.Operation(OperationKind.CommitInbox, request, request.CommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.CommitInbox, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, TargetInboxCrashProtocol.OperationFile), JsonDefaults.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, TargetInboxCrashProtocol.DeliveryFile), JsonDefaults.Serialize(delivery));
         boundary.Position = store.Position + TargetInboxCrashProtocol.PositionStep;

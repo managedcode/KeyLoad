@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -71,7 +72,7 @@ internal sealed class DatabaseCompositionReplayTests
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.NotFound);
         await Assert.That(db.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(Principal))!.PolicyEpoch))
             .IsEqualTo(epoch);
-        await Assert.That(db.Database.ResolveOutcome(operation).Error).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(db.Database.ResolveOutcome(operation).Problem)).IsEqualTo(ErrorCode.NotFound);
     }
 
     [Test]
@@ -99,8 +100,7 @@ internal sealed class DatabaseCompositionReplayTests
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, db.Partition,
             [new QueueToGraph(Graph, Queue, Prefix), new DeleteEdge(Graph, Prefix + Message)]);
-        var operation = new ReplicatedOperation(id, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = db.Database.CreateCommand(OperationKind.Batch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
 
         var first = db.Database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(first.Mutations.Length).IsEqualTo(2);
@@ -119,8 +119,7 @@ internal sealed class DatabaseCompositionReplayTests
         var request = new CommandRequest(id, db.Partition,
             [new EnqueueMessage(Queue, Prefix + "plain", "{}"),
                 new GraphToQueueMutation(Queue, Graph, Vertex(db, First), Prefix)]);
-        var operation = new ReplicatedOperation(id, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = db.Database.CreateCommand(OperationKind.Batch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
 
         var receipt = db.Database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(receipt.Mutations.Length).IsEqualTo(2);
@@ -144,7 +143,7 @@ internal sealed class DatabaseCompositionReplayTests
         var request = new ProcessingRequest(id, new(db.Partition, Queue), "invalid-lease", "handler", 1,
             [new QueueToGraph(Graph, Queue, Prefix)]);
         var rejected = db.Submit(OperationKind.Processing, request, id: id);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
     }
 
     [Test]
@@ -167,8 +166,7 @@ internal sealed class DatabaseCompositionReplayTests
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, db.Partition,
             [new GraphToQueueMutation(Queue, Graph, Vertex(db, First), Prefix)]);
-        var operation = new ReplicatedOperation(id, OperationKind.Batch, Principal, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = db.Database.CreateCommand(OperationKind.Batch, id, Principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
 
         var first = db.Database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(first.Mutations).IsEmpty();
@@ -187,8 +185,7 @@ internal sealed class DatabaseCompositionReplayTests
             var commandId = Guid.NewGuid();
             var request = new CommandRequest(commandId, db.Partition,
                 [new GraphToQueueMutation(Queue, Graph, Vertex(db, First), Prefix)]);
-            var operation = new ReplicatedOperation(commandId, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(),
-                JsonSerializer.Serialize(request, JsonDefaults.Options));
+            var operation = db.Database.CreateCommand(OperationKind.Batch, commandId, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
             var original = db.Database.Apply(operation).Get<CommitReceipt>();
             db.Store.Dispose();
             using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 
@@ -40,8 +41,7 @@ internal static class SqlBetweenAuthorityContinuation
             PolicyEpoch = epoch
         };
         var request = new ConfigurePrincipalRequest(principal);
-        var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigurePrincipal,
-            SqlBetweenTestData.Root, database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), SqlBetweenTestData.Root, database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
         var configured = database.ApplyEmbedded(operation, cancellationToken: default).Get<PrincipalRecord>();
         await Assert.That(JsonDefaults.Serialize(configured).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
     }

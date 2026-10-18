@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
-/// <summary>AC-SERIES-010: fixed windows are dense, UTC anchored and bounded on real CLUSTER.</summary>
+/// <summary>AC-SERIES-010: fixed windows are dense, UTC anchored and bounded on real Orleans.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class TimeSeriesClusterWindowTests(ClusterFixture fixture)

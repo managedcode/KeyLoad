@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -18,12 +19,11 @@ internal sealed class ResourceProtocolFailureTests
     public async Task AcRoc003NullResourceProtocolPersistsValidationWithoutPartialCatalogEffects(string payload)
     {
         using var database = new TestDatabase();
-        var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, RootPrincipal,
-            TimeProvider.System.GetUtcNow(), payload);
+        var operation = database.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(), payload);
 
         var failure = database.Database.Apply(operation);
 
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsEqualTo(failure);
         var absent = database.Store.Read(view => view.GetRecord<ResourceDefinition>(
             KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, CollectionName)));
@@ -35,13 +35,12 @@ internal sealed class ResourceProtocolFailureTests
     public async Task AcRoc003InvalidResourceFailureReplayRetainsItsOriginalOutcomeAndFingerprint()
     {
         using var database = new TestDatabase();
-        var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, RootPrincipal,
-            TimeProvider.System.GetUtcNow(), NullDefinition);
+        var operation = database.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(), NullDefinition);
         var original = database.Database.Apply(operation, replicationIndex: 7);
         var replay = database.Database.Apply(operation, replicationIndex: 8);
 
         await Assert.That(replay).IsEqualTo(original);
-        await Assert.That(replay.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(database.Database.LastApplied).IsEqualTo(8);
         await Assert.That(database.Database.ResolveOutcome(operation)).IsEqualTo(original);
     }

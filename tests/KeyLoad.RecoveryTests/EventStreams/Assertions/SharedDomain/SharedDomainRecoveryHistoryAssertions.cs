@@ -17,13 +17,13 @@ internal static class SharedDomainRecoveryHistoryAssertions
             var position = store.Position;
             var outcome = OutcomeStoreOracle.Read(store, entry.Operation) ?? throw new InvalidOperationException(MissingNative);
             await SharedDomainRecoveryValues.ResultAsync(outcome, entry.Result);
-            if (entry.Operation.Kind == OperationKind.Receive)
+            if (entry.Operation.Value!.Kind == OperationKind.Receive)
             {
                 var refused = database.ResolveOutcome(entry.Operation);
-                await Assert.That(refused.Error).IsEqualTo(ErrorCode.StaleLease);
-                await Assert.That(refused.SafeDetail).IsEqualTo(Stale);
-                await Assert.That(refused.Json).IsNull();
-                await Assert.That(refused.NativeValue).IsNull();
+                await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
+                await Assert.That(refused.Problem?.Detail).IsEqualTo(Stale);
+                
+                await Assert.That(refused.Value).IsNull();
             }
             else
             {

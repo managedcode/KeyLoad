@@ -15,9 +15,9 @@ internal static class SqlTypedInsertResourcePolicy
         await ConfigureAsync(fixture, denied, original.SchemaVersion);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
-        await Assert.That(SqlTypedInsertLiteral.Apply(fixture.Database, state.Created.Command, state.Created.At).Error)
+        await Assert.That(Errors.Code(SqlTypedInsertLiteral.Apply(fixture.Database, state.Created.Command, state.Created.At).Problem))
             .IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(SqlTypedInsertLiteral.Apply(fixture.Database, state.Failed.Command, state.Failed.At).Error)
+        await Assert.That(Errors.Code(SqlTypedInsertLiteral.Apply(fixture.Database, state.Failed.Command, state.Failed.At).Problem))
             .IsEqualTo(ErrorCode.PermissionDenied);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await BytesAsync(fixture, state);

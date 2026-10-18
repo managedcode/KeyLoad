@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
@@ -15,11 +17,11 @@ internal static class SubscriptionProcessingRecoveryContinuation
             .Concat(suffix).ToArray());
 
     internal static async Task RunAsync(DatabaseEngine db, ZoneTreeStore store, string path,
-        ReplicatedOperation original, SubscriptionProcessingResult first, CancellationToken token)
+        Command<DatabaseCommand> original, SubscriptionProcessingResult first, CancellationToken token)
     {
         var group = SubscriptionCrashScenario.Subscription;
         await ReplayAsync(db, store, original, first, token);
-        var request = JsonDefaults.Deserialize<SubscriptionProcessingRequest>(System.Text.Encoding.UTF8.GetBytes(original.PayloadJson));
+        var request = NativeSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var retry = request with
         {
             CommandId = Guid.NewGuid()
@@ -34,7 +36,7 @@ internal static class SubscriptionProcessingRecoveryContinuation
         await ReplayAsync(db, store, original, first, token);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
-        var outcomeKey = KeySpace.PartitionOutcome(group.Source.Partition, CrashFixtureValues.Principal, original.Id);
+        var outcomeKey = KeySpace.PartitionOutcome(group.Source.Partition, CrashFixtureValues.Principal, original.CommandId);
         var inboxKey = Key("subscription-inbox", group, 1L, CrashFixtureValues.Handler, 1L);
         var outcome = store.Read(view => view.ReadOwnedValue(outcomeKey))!;
         var inbox = store.Read(view => view.ReadOwnedValue(inboxKey))!;
@@ -55,9 +57,9 @@ internal static class SubscriptionProcessingRecoveryContinuation
     }
 
     private static async Task ReplayAsync(DatabaseEngine db, ZoneTreeStore store,
-        ReplicatedOperation original, SubscriptionProcessingResult expected, CancellationToken token)
+        Command<DatabaseCommand> original, SubscriptionProcessingResult expected, CancellationToken token)
     {
-        var key = KeySpace.PartitionOutcome(SubscriptionCrashScenario.Partition, CrashFixtureValues.Principal, original.Id);
+        var key = KeySpace.PartitionOutcome(SubscriptionCrashScenario.Partition, CrashFixtureValues.Principal, original.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original native processing receipt is absent.");
         var inboxKey = Key("subscription-inbox", SubscriptionCrashScenario.Subscription, 1L, CrashFixtureValues.Handler, 1L);
@@ -113,6 +115,6 @@ internal static class SubscriptionProcessingRecoveryContinuation
         }
     }
 
-    private static OperationResult Submit<T>(DatabaseEngine db, OperationKind kind, T request, Guid id)
-        => db.Apply(new(id, kind, CrashFixtureValues.Principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
+    private static Result<object> Submit<T>(DatabaseEngine db, OperationKind kind, T request, Guid id)
+        => db.Apply(db.CreateCommand(kind, id, CrashFixtureValues.Principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
 }

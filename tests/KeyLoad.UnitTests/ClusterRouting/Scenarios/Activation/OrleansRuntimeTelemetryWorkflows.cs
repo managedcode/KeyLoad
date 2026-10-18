@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class OrleansRuntimeTelemetryWorkflows
 {
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var callerActivity = Activity.Current;
         await using var telemetry = await OrleansRuntimeTelemetryFixture.StartAsync();
@@ -49,7 +49,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
     }
 
     private static async Task<OrleansRuntimeTelemetrySentinelObservation> WriteWithSentinelAsync(
-        RequestCqrsClusterFixture fixture, OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal,
+        RequestCqrsHostedRuntimeFixture fixture, OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal,
         OrleansRuntimeTelemetryMutation mutation)
     {
         var ambientActivity = Activity.Current;
@@ -77,7 +77,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         return observation;
     }
 
-    private static async Task<OrleansTelemetryOperationParent[]> ReadRealDocumentAsync(RequestCqrsClusterFixture fixture,
+    private static async Task<OrleansTelemetryOperationParent[]> ReadRealDocumentAsync(RequestCqrsHostedRuntimeFixture fixture,
         OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal)
     {
         var documentId = NewDocumentId();
@@ -109,7 +109,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
     }
 
     private static async Task<(GrainOperationReply Reply, OrleansTelemetryOperationParent Parent)> WriteWithParentAsync(
-        RequestCqrsClusterFixture fixture, OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal,
+        RequestCqrsHostedRuntimeFixture fixture, OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal,
         string? documentId = null)
     {
         var ambientActivity = Activity.Current;
@@ -134,7 +134,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         return (reply, operationParent);
     }
 
-    private static async Task FailRevokedWriteAsync(RequestCqrsClusterFixture fixture, PrincipalRecord principal)
+    private static async Task FailRevokedWriteAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal)
     {
         var documentId = NewDocumentId();
         var requestId = Guid.NewGuid();
@@ -153,13 +153,13 @@ internal static class OrleansRuntimeTelemetryWorkflows
         await AssertDocumentMissingAsync(fixture, documentId);
     }
 
-    private static async Task<GrainOperationReply> ReadAsync(RequestCqrsClusterFixture fixture,
+    private static async Task<GrainOperationReply> ReadAsync(RequestCqrsHostedRuntimeFixture fixture,
         PrincipalRecord principal, Guid requestId, string signed)
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
-        using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+        using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             requestId, Guid.Empty, deadline.Token, connectionId: fixture.ConnectionId);
-        var request = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
+        var request = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
         var stream = request.ExecuteStreamAsync(signed, deadline.Token).WithBatchSize(GrainRequestStreamProtocol.BatchSize);
         await using var iterator = stream.GetAsyncEnumerator(deadline.Token);
         if (!await iterator.MoveNextAsync())
@@ -181,7 +181,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         return terminal.Final?.Value ?? throw new InvalidOperationException("The native read has no terminal reply.");
     }
 
-    private static PrincipalRecord PersistPrincipal(RequestCqrsClusterFixture fixture, string suffix)
+    private static PrincipalRecord PersistPrincipal(RequestCqrsHostedRuntimeFixture fixture, string suffix)
     {
         var id = OrleansRuntimeTelemetryTokens.SubjectPrefix + suffix + Guid.NewGuid().ToString("N");
         var record = new PrincipalRecord(id, fixture.Database.Partition.TenantId,
@@ -190,7 +190,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
             .Get<PrincipalRecord>();
     }
 
-    private static string SignWrite(RequestCqrsClusterFixture fixture, PrincipalRecord principal,
+    private static string SignWrite(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
         Guid requestId, Guid commandId, string documentId)
     {
         var command = new CommandRequest(commandId, fixture.Database.Partition,
@@ -202,14 +202,14 @@ internal static class OrleansRuntimeTelemetryWorkflows
     private static string NewDocumentId()
         => OrleansRuntimeTelemetryTokens.DocumentPrefix + Guid.NewGuid().ToString("N");
 
-    private static async Task AssertDocumentRevisionAsync(RequestCqrsClusterFixture fixture, string documentId, long revision)
+    private static async Task AssertDocumentRevisionAsync(RequestCqrsHostedRuntimeFixture fixture, string documentId, long revision)
     {
         var document = fixture.Database.Database.GetDocument("root",
             new EntityRef(fixture.Database.Partition, OrleansRuntimeTelemetryTokens.Collection, documentId));
         await Assert.That(document?.Revision).IsEqualTo(revision);
     }
 
-    private static async Task AssertDocumentMissingAsync(RequestCqrsClusterFixture fixture, string documentId)
+    private static async Task AssertDocumentMissingAsync(RequestCqrsHostedRuntimeFixture fixture, string documentId)
     {
         var document = fixture.Database.Database.GetDocument("root",
             new EntityRef(fixture.Database.Partition, OrleansRuntimeTelemetryTokens.Collection, documentId));

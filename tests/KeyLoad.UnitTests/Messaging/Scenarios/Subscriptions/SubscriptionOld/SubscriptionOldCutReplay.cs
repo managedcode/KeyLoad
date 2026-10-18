@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -41,15 +42,9 @@ internal static class SubscriptionOldCutReplay
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task SameProcessingAsync(OperationResult actual, OperationResult expected)
+    private static async Task SameProcessingAsync(Result<object> actual, Result<object> expected)
     {
         await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(actual, expected);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(new(null)
-        {
-            NativeValue = actual.Get<SubscriptionProcessingResult>().Receipt
-        }, new(null)
-        {
-            NativeValue = expected.Get<SubscriptionProcessingResult>().Receipt
-        });
+        await NativeReplayResultAssertions.Same<CommitReceipt>(Result<object>.Succeed(actual.Get<SubscriptionProcessingResult>().Receipt), Result<object>.Succeed(expected.Get<SubscriptionProcessingResult>().Receipt));
     }
 }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -35,9 +36,9 @@ internal static class SubscriptionCheckpointAuthorityAssertions
                 group, definition, 1, 1, checkpoint, issued, tail, false, null)))).IsTrue();
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, SubscriptionDeliveryCommand command, long position)
+    internal static async Task ReceiptAsync(Result<object> result, SubscriptionDeliveryCommand command, long position)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[]
@@ -68,7 +69,7 @@ internal static class SubscriptionCheckpointAuthorityAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine db, ZoneTreeStore store,
-        SubscriptionDeliveryCommand command, OperationResult original, CancellationToken token)
+        SubscriptionDeliveryCommand command, Result<object> original, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -82,7 +83,7 @@ internal static class SubscriptionCheckpointAuthorityAssertions
     }
 
     internal static async Task SettledClaimAsync(DatabaseEngine db, ZoneTreeStore store,
-        ReceiveSubscriptionRequest request, OperationResult original, CancellationToken token)
+        ReceiveSubscriptionRequest request, Result<object> original, CancellationToken token)
     {
         var key = KeySpace.PartitionOutcome(request.Subscription.Source.Partition, "root", request.RequestId);
         var saved = store.Read(view => view.ReadOwnedValue(key))
@@ -120,11 +121,11 @@ internal static class SubscriptionCheckpointAuthorityAssertions
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }
 
-    private static async Task RefusalAsync(OperationResult result)
+    private static async Task RefusalAsync(Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(result.SafeDetail).IsEqualTo("The subscription delivery lease is stale.");
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The subscription delivery lease is stale.");
+        
+        await Assert.That(result.Value).IsNull();
     }
 }

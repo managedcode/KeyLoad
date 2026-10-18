@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
@@ -5,8 +7,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private OperationResult ExecuteOnlineTextPublication(IAtomicTransaction transaction,
-        PrincipalRecord principal, ReplicatedOperation operation)
+    private Result<object> ExecuteOnlineTextPublication(IAtomicTransaction transaction,
+        PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         var command = Payload<OnlineTextPublicationPhaseCommand>(operation);
         RequireEnvelopeId(operation, command.Request.CommandId);
@@ -24,8 +26,8 @@ public sealed partial class DatabaseEngine
         return Result(command.Result);
     }
 
-    private static OnlineTextOutcomeAuthority? CaptureOnlineTextOutcomeAuthority(ReplicatedOperation operation)
-        => operation.Kind == OperationKind.OnlineTextPublicationPhase
-            ? OnlineTextPublicationValidation.Authority(operation.PrincipalId,
+    private static OnlineTextOutcomeAuthority? CaptureOnlineTextOutcomeAuthority(Command<DatabaseCommand> operation)
+        => operation.Value!.Kind == OperationKind.OnlineTextPublicationPhase
+            ? OnlineTextPublicationValidation.Authority(operation.UserId!,
                 Payload<OnlineTextPublicationPhaseCommand>(operation)) : null;
 }

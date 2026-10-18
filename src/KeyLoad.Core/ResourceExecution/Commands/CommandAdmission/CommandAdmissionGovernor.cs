@@ -1,4 +1,4 @@
-using System.Text;
+using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
@@ -7,6 +7,7 @@ namespace KeyLoad.Core;
 public sealed class CommandAdmissionGovernor
 {
     private const long Utf16RetainedCharacterWidth = 2L;
+    private const int NoRetainedJsonCharacters = 0;
     private const int AdjacentElementOffset = 1;
 
     private readonly Lock gate = new();
@@ -100,15 +101,15 @@ public sealed class CommandAdmissionGovernor
         int payloadCharacters, CancellationToken cancellationToken = default)
         => Reserve(IsControl(kind), principal, payloadBytes, payloadCharacters, cancellationToken);
 
-    internal CommandAdmissionLease Reserve(ReplicatedOperation operation, PrincipalRecord principal, int payloadBytes,
+    internal CommandAdmissionLease Reserve(Command<DatabaseCommand> operation, PrincipalRecord principal, int payloadBytes,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        var control = operation.Kind == OperationKind.RuntimeJournal
+        var control = operation.Value!.Kind == OperationKind.RuntimeJournal
             ? RuntimeJournalBootstrapAdmission.IsControl(operation,
-                Encoding.UTF8.GetByteCount(operation.PayloadJson), maxControlPayloadBytes)
-            : IsControl(operation.Kind);
-        return Reserve(control, principal, payloadBytes, operation.PayloadJson.Length, cancellationToken);
+                operation.Value.Input.Length, maxControlPayloadBytes)
+            : IsControl(operation.Value!.Kind);
+        return Reserve(control, principal, payloadBytes, NoRetainedJsonCharacters, cancellationToken);
     }
 
     private CommandAdmissionLease Reserve(bool control, PrincipalRecord principal, int payloadBytes,

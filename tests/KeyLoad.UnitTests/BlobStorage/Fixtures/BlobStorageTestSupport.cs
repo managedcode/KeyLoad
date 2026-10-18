@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 
 /// <summary>Builds canonical blob requests against the real ZoneTree-backed test database.</summary>
@@ -62,7 +63,7 @@ internal static class BlobStorageTestSupport
     /// <param name="ordinal">Sets the requested part ordinal.</param>
     /// <param name="bytes">Provides the part bytes.</param>
     /// <returns>The underlying committed operation result.</returns>
-    public static OperationResult WriteResult(TestDatabase database, BlobRef blob,
+    public static Result<object> WriteResult(TestDatabase database, BlobRef blob,
         Guid uploadId, int ordinal, ReadOnlyMemory<byte> bytes)
     {
         var id = Guid.NewGuid();
@@ -92,7 +93,7 @@ internal static class BlobStorageTestSupport
     /// <param name="uploadId">Identifies the upload state.</param>
     /// <param name="integrityHash">Provides the caller's expected final chain hash.</param>
     /// <returns>The underlying committed operation result.</returns>
-    public static OperationResult CompleteResult(TestDatabase database, BlobRef blob,
+    public static Result<object> CompleteResult(TestDatabase database, BlobRef blob,
         Guid uploadId, string integrityHash)
     {
         var id = Guid.NewGuid();

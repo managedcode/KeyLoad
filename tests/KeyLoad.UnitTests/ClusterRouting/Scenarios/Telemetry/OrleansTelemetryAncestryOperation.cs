@@ -1,10 +1,11 @@
+using KeyLoad.Core;
 using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class OrleansTelemetryAncestryOperation
 {
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture, PrincipalRecord principal,
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
         string documentId, List<string> documents)
     {
         var commandId = Guid.NewGuid();
@@ -18,16 +19,14 @@ internal static class OrleansTelemetryAncestryOperation
         await Assert.That(reply.Error).IsNull();
         var receipt = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as CommitReceipt
             ?? throw new InvalidOperationException(OrleansTelemetryAncestryProtocol.MissingReceipt);
-        var entry = fixture.Database.ReadRetainedEntry(commandId);
-        var expected = new CommitReceipt(commandId,
-            new(placement.Incarnation, fixture.Database.Partition.AtomicPartitionId, entry.Index, placement.PlacementEpoch),
-            [new(OrleansTelemetryAncestryProtocol.PutKind, OrleansTelemetryAncestryProtocol.Collection,
-                documentId, OrleansTelemetryAncestryProtocol.FirstRevision)], fixture.Database.Store.Identity.Durability);
+        var entry = fixture.Database.ReadStoredOutcome(commandId);
+        var expected = new CommitReceipt(commandId, new(placement.Incarnation, fixture.Database.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(OrleansTelemetryAncestryProtocol.PutKind, OrleansTelemetryAncestryProtocol.Collection,
+                documentId, OrleansTelemetryAncestryProtocol.FirstRevision)], fixture.Database.Store.Identity.Durability, (fixture.Database.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await EqualAsync(expected, receipt);
         documents.Add(documentId);
         await CurrentAsync(fixture, principal, documents, commandId, expected);
         var cut = fixture.Database.Store.Position;
-        var journal = fixture.Database.ReadJournalCut();
+        var journal = fixture.Database.ReadCanonicalCut();
         var replay = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, principal,
             Guid.NewGuid(), commandId, command);
         await Assert.That(replay.Error).IsNull();
@@ -36,10 +35,10 @@ internal static class OrleansTelemetryAncestryOperation
         await EqualAsync(expected, replayReceipt);
         await CurrentAsync(fixture, principal, documents, commandId, expected);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
-        await Assert.That(fixture.Database.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(fixture.Database.ReadCanonicalCut()).IsEqualTo(journal);
     }
 
-    private static async Task CurrentAsync(RequestCqrsClusterFixture fixture, PrincipalRecord principal,
+    private static async Task CurrentAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
         List<string> documents, Guid commandId, CommitReceipt expected)
     {
         foreach (var id in documents)

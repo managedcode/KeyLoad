@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -25,7 +27,7 @@ internal static class SeriesPortableBackupTrial
         var source = BackupPersistedPolicyAssertions.Capture(fixture.Source.Store);
         var physical = SeriesPortableBackupAssertions.PhysicalRows(fixture.Source.Database, fixture.Partition);
         var outcomes = originals.Select(original => BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
-            fixture.Partition, SeriesPortableBackupSeed.Root, original.Operation.Id)).ToArray();
+            fixture.Partition, SeriesPortableBackupSeed.Root, original.Operation.CommandId)).ToArray();
         await SeriesPortableBackupAssertions.ReplayAsync(fixture.Source.Database, originals, token);
         await Assert.That(fixture.CreateBackup()).IsEqualTo(source.Position);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
@@ -54,7 +56,7 @@ internal static class SeriesPortableBackupTrial
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
     }
 
-    private static async Task<(ReplicatedOperation Operation, OperationResult Result)[]> ContinueAsync(
+    private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)[]> ContinueAsync(
         BackupIndexedDocumentDedupFixture fixture, DatabaseEngine database, CancellationToken token)
     {
         var physical = SeriesPortableBackupAssertions.PhysicalRows(database, fixture.Partition);
@@ -62,7 +64,7 @@ internal static class SeriesPortableBackupTrial
             new AppendSamples(SeriesPortableBackupSeed.Set, SeriesPortableBackupSeed.Series,
                 [SeriesPortableBackupSeed.Data(6, 4, 6), SeriesPortableBackupSeed.Data(7, 1, 7)]));
         var refusal = database.ApplyEmbedded(refused, token);
-        await Assert.That(refusal.Error).IsEqualTo(ErrorCode.HistoryUnavailable);
+        await Assert.That(Errors.Code(refusal.Problem)).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(SeriesPortableBackupAssertions.PhysicalRows(database, fixture.Partition))
             .IsEquivalentTo(physical, CollectionOrdering.Matching);
         await SeriesPortableBackupAssertions.VisibleAsync(database, fixture.Partition, false, token);
@@ -81,8 +83,8 @@ internal static class SeriesPortableBackupTrial
     }
 
     private static async Task ColdAsync(BackupIndexedDocumentDedupFixture fixture, DatabaseEngine database,
-        (ReplicatedOperation Operation, OperationResult Result)[] source, byte[][] sourceOutcomes,
-        (ReplicatedOperation Operation, OperationResult Result)[] target, CancellationToken token)
+        (Command<DatabaseCommand> Operation, Result<object> Result)[] source, byte[][] sourceOutcomes,
+        (Command<DatabaseCommand> Operation, Result<object> Result)[] target, CancellationToken token)
     {
         await SeriesPortableBackupAssertions.ReplayAsync(database, target, token);
         var identity = database.Store.Identity;

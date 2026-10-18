@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -6,7 +7,7 @@ internal static class RemoteTransferAttemptColdContinuation
 {
     internal static async Task RunAsync(RemoteTransferDatabase fixture, CreateQueueTransfer transfer,
         QueueTransferInspection original, RemoteTransferCoordinationHint hint, CommandRequest firstAccept,
-        OperationResult failed, byte[] failureBytes, CommandRequest advance, CommitReceipt advanced,
+        Result<object> failed, byte[] failureBytes, CommandRequest advance, CommitReceipt advanced,
         RemoteTransferAcceptFailureClaims claims)
     {
         fixture.Reopen();

@@ -14,7 +14,8 @@ internal static class RequiredProcessingPolicyClusterValues
         await Assert.That(actual.CommandId).IsEqualTo(command);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(state.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(mutations, actual.Mutations.ToArray());
     }
     internal static MessageInspection Expected(RequiredProcessingPolicyClusterState state, string id, int phase, bool projected)

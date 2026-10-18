@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -43,7 +44,7 @@ internal sealed class AtomicPartitionScopeLifecycleState(PartitionRef left, Stor
     {
         get;
     } = new string?[2];
-    internal List<(CommandRequest Request, OperationResult Result)> Originals
+    internal List<(CommandRequest Request, Result<object> Result)> Originals
     {
         get;
     } = [];

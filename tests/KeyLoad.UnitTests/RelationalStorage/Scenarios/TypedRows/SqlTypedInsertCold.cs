@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -42,7 +43,7 @@ internal static class SqlTypedInsertCold
     }
     private static async Task RetainedAsync(PartitionRef partition, ZoneTreeStore store, DatabaseEngine database, SqlTypedInsertState state)
     {
-        var fenced = new OperationResult(null, ErrorCode.PermissionDenied, SqlTypedInsertLiteral.EpochChanged);
+        var fenced = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, SqlTypedInsertLiteral.EpochChanged));
         await SqlTypedInsertAssertions.SameAsync(fenced, SqlTypedInsertLiteral.Apply(database, state.Created.Command, state.Created.At));
         await SqlTypedInsertAssertions.SameAsync(fenced, SqlTypedInsertLiteral.Apply(database, state.Failed.Command, state.Failed.At));
         await SqlTypedInsertAssertions.SameAsync(state.Created.Bytes,

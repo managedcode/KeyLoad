@@ -27,7 +27,7 @@ internal static class PackedAnnNeighborSelection
     {
         if (metric == DistanceMetric.DotProduct)
         {
-            return PackedAnnNeighborOrdering.SelectSimple(source, nodes, candidateCount, maximum, scratch, budget);
+            return PackedAnnNeighborOrdering.SelectByRank(source, nodes, candidateCount, maximum, scratch, budget);
         }
         var selected = EmptyElementCount;
         for (var index = FirstElementIndex; index < candidateCount && selected < maximum; index++)

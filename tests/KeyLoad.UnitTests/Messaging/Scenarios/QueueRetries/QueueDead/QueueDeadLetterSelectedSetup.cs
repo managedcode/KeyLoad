@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -87,7 +89,7 @@ internal static class QueueDeadLetterSelectedSetup
             return true;
         });
 
-    internal static ReplicatedOperation Lifecycle(QueueLaneRef lane, string target, QueueDeadLetterSelectedOperation kind, DateTimeOffset time)
+    internal static Command<DatabaseCommand> Lifecycle(QueueLaneRef lane, string target, QueueDeadLetterSelectedOperation kind, DateTimeOffset time)
     {
         var id = Guid.NewGuid();
         Mutation mutation = kind == QueueDeadLetterSelectedOperation.Redrive
@@ -96,14 +98,14 @@ internal static class QueueDeadLetterSelectedSetup
         return Create(OperationKind.Batch, new CommandRequest(id, lane.Partition, [mutation]), id, time);
     }
 
-    internal static OperationResult Execute(DatabaseEngine database, List<QueueDeadLetterSelectedSaved> history, ReplicatedOperation operation)
+    internal static Result<object> Execute(DatabaseEngine database, List<QueueDeadLetterSelectedSaved> history, Command<DatabaseCommand> operation)
     {
         var result = database.Apply(operation);
         history.Add(new(operation, result));
         return result;
     }
 
-    internal static ReplicatedOperation Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)
+    internal static Command<DatabaseCommand> Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)
         => new(id, kind, QueueDeadLetterSelectedProtocol.Administrator, time, JsonSerializer.Serialize(value, JsonDefaults.Options));
     internal static byte[] Key(QueueLaneRef lane, string space, params object?[] suffix)
         => KeySpace.Partition(space, lane.Partition, [lane.Queue, .. suffix]);

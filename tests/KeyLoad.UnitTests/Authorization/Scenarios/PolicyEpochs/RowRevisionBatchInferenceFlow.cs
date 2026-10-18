@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
@@ -23,7 +25,7 @@ internal static class RowRevisionBatchInferenceFlow
     private static async Task RunCoreAsync(TestDatabase db, string kind, RowRevisionInferenceLifetime lifetime, CancellationToken token)
     {
         Seed(db);
-        var originals = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Outcome)>();
+        var originals = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome)>();
         foreach (var revision in new[] { P.WrongRevision, P.OriginalRevision, P.RepairRevision })
         {
             var command = Command(db, kind, revision);

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -38,14 +39,14 @@ internal static class QueueDeadlineCapacityCold
             token.ThrowIfCancellationRequested();
             await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.Read(store, operation)))
                 .IsEquivalentTo(NativeSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
-            if (result.NativeValue is CommitReceipt receipt)
+            if (result.Value is CommitReceipt receipt)
             {
                 await QueueDeadlineCapacityOperations.ReceiptAsync(database.Apply(operation), receipt);
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
                 await QueueDeadlineCapacityOperations.ReceiptAsync(database.ResolveOutcome(operation), receipt);
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
             }
-            if (result.NativeValue is ReceiveResult received)
+            if (result.Value is ReceiveResult received)
             {
                 if (received.Deliveries.IsEmpty)
                 {
@@ -55,9 +56,9 @@ internal static class QueueDeadlineCapacityCold
                 }
                 else
                 {
-                    await Assert.That(database.Apply(operation)).IsEqualTo(new OperationResult(null, ErrorCode.StaleLease, StaleClaimDetail));
+                    await Assert.That(database.Apply(operation)).IsEqualTo(Result<object>.Fail(Errors.Problem(ErrorCode.StaleLease, StaleClaimDetail)));
                     await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
-                    await Assert.That(database.ResolveOutcome(operation)).IsEqualTo(new OperationResult(null, ErrorCode.StaleLease, StaleClaimDetail));
+                    await Assert.That(database.ResolveOutcome(operation)).IsEqualTo(Result<object>.Fail(Errors.Problem(ErrorCode.StaleLease, StaleClaimDetail)));
                 }
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
                 await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.Read(store, operation)))

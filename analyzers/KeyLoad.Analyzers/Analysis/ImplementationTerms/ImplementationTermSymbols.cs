@@ -32,9 +32,11 @@ internal static class ImplementationTermSymbols
         ImplementationTermCatalog.NativeNamespace(symbol.ContainingNamespace?.ToDisplayString() ?? string.Empty);
 
     internal static bool HasPath(ISymbol? symbol, string segment) => symbol is not null &&
-        (symbol.DeclaringSyntaxReferences.Any(reference => PathContains(reference.SyntaxTree.FilePath, segment)) ||
-         symbol.ContainingType is { DeclaringSyntaxReferences.Length: > 0 } owner &&
-         owner.DeclaringSyntaxReferences.All(reference => PathContains(reference.SyntaxTree.FilePath, segment)));
+        (symbol is INamedTypeSymbol { DeclaringSyntaxReferences.Length: > 0 } type
+            ? type.DeclaringSyntaxReferences.All(reference => PathContains(reference.SyntaxTree.FilePath, segment))
+            : symbol.DeclaringSyntaxReferences.Any(reference => PathContains(reference.SyntaxTree.FilePath, segment)) ||
+              symbol.ContainingType is { DeclaringSyntaxReferences.Length: > 0 } owner &&
+              owner.DeclaringSyntaxReferences.All(reference => PathContains(reference.SyntaxTree.FilePath, segment)));
 
     internal static bool PathContains(string path, string segment) =>
         path.Replace('\\', '/').Contains(segment, StringComparison.Ordinal);
@@ -67,7 +69,14 @@ internal static class ImplementationTermSymbols
 
     internal static bool TimeSeries(ISymbol? symbol, Compilation compilation)
     {
-        if (HasPath(symbol, ImplementationTermCatalog.TimeSeriesPath) ||
+        if (symbol is IFieldSymbol { Name: "SeriesRead" or "SeriesAppend", ContainingType: { } capability } &&
+            capability.ToDisplayString() == "KeyLoad.Capability" &&
+            capability.ContainingAssembly.Name == ImplementationTermCatalog.DataAssembly ||
+            symbol is IFieldSymbol { IsConst: true, Type.SpecialType: SpecialType.System_String, ContainingType: { } family } &&
+            family.ToDisplayString() == ImplementationTermCatalog.DataRecordFamiliesType &&
+            family.ContainingAssembly.Name == ImplementationTermCatalog.DataCoreAssembly &&
+            Array.Exists(ImplementationTermCatalog.DataRecordFamilyFields, name => name == symbol.Name) ||
+            HasPath(symbol, ImplementationTermCatalog.TimeSeriesPath) ||
             HasPath(ValueType(symbol), ImplementationTermCatalog.TimeSeriesPath) ||
             symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.SampleFieldsType ||
             symbol?.ToDisplayString() == ImplementationTermCatalog.SampleFieldsType)

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.CrashHost;
 using KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -9,13 +10,13 @@ internal static class BlobRetiredPartBytesTrial
     {
         using var store = BlobPriorPublicationTrial.Open(root);
         var owner = QueueLifecycleRecoveryAssertions.Open(store);
-        var queueOperation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var queueOperation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueLifecycleCrashProtocol.OperationFile), token));
         await Assert.That(OutcomeStoreOracle.Read(store, queueOperation)).IsNull();
         await QueueLifecycleRecoveryImage.AssertAsync(owner, store, committed: false);
         await BlobRetiredPartAssertions.HealthyAsync(owner, seed);
         var request = new ReclaimBlobRequest(Guid.NewGuid(), seed.Publication.Blob, seed.Publication.Upload, 1);
-        var original = CrashDatabase.Operation(OperationKind.ReclaimBlob, request, request.CommandId);
+        var original = CrashDatabase.Operation(owner, OperationKind.ReclaimBlob, request, request.CommandId);
         var image = BlobPriorPublicationImage.Capture(store);
         var position = store.Position;
         var row = BlobRetiredPartBytesDamage.Apply(store, seed.Publication, fault);
@@ -33,7 +34,7 @@ internal static class BlobRetiredPartBytesTrial
         await BlobRetiredPartAssertions.HealthyAsync(reopened, seed);
         var reclaimed = await BlobRetiredPartReclaim.CompleteAsync(reopened, seed, original);
         var current = await BlobPriorPublicationCommands.PublishAsync(reopened, seed.Publication.Blob,
-            seed.Publication.Upload, [9, 10, 11, 12], 2, seed.Publication.Identity, seed.Publication.Catalog, seed.Publication.Principal);
+            seed.Publication.Upload, [9, 10, 11, 12], 2, seed.Publication.Identity, seed.Publication.Principal);
         await BlobRetiredPartReclaim.FinalAsync(reopened, cold, seed, current, reclaimed);
         await QueueLifecycleRecoveryImage.AssertAsync(reopened, cold, committed: false);
         image = BlobPriorPublicationImage.Capture(cold);

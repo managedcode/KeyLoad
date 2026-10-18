@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 
@@ -18,9 +19,9 @@ internal static class AnalyticsExpectedResourceCreation
 
     internal static ResourceLifetimeV1 Lifetime(TestDatabase fixture, Guid commandId)
     {
-        var original = fixture.ReadRetainedEntry(commandId).Operation
+        var original = fixture.ReadStoredOutcome(commandId).PreparedCommand
             ?? throw new InvalidOperationException("The original analytics fixture resource creation is missing.");
-        var request = NativeCommandPayload.Read<ConfigureResourceRequest>(original);
+        var request = NativeSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span);
         return ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
     }
 

@@ -12,7 +12,7 @@ internal static class QueueViewLeaseIsolationClaims
         state.Claim = await QueueViewLeaseIsolationOperations.SendAsync(state, OperationKind.Receive, request,
             request.RequestId, operation => new ReceiveResult(request.RequestId,
                 [new(First, FirstPayload, FirstHeaders, state.Owner.Database.Sign(claims), Initial,
-                    operation.EvaluatedAt.AddSeconds(LeaseSeconds), One, Initial)], expectedToken));
+                    new DateTimeOffset(operation.Timestamp).AddSeconds(LeaseSeconds), One, Initial)], expectedToken));
         await Assert.That(JsonDefaults.Serialize(state.Owner.Database.Verify<DeliveryClaims>(state.Delivery.Token))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(claims))).IsTrue();
         state.CurrentDeadline = state.Delivery.LeaseUntil;

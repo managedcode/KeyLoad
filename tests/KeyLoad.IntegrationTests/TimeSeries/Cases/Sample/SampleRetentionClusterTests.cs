@@ -5,7 +5,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
-/// <summary>Logged retention remains visible and retry safe through actual CLUSTER SDK and MCP.</summary>
+/// <summary>Logged retention remains visible and retry safe through actual Orleans SDK and MCP.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class SampleRetentionClusterTests(ClusterFixture fixture)

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
@@ -18,7 +19,7 @@ internal static class SubscriptionWindowBudgetAssertions
     private const string Exceeded = "The subscription window authority read budget is exceeded.";
 
     internal static async Task RefuseAsync(ZoneTreeStore store, SubscriptionRef group, ReceiveSubscriptionRequest request,
-        OperationResult original, SubscriptionWindowBudgetFault fault, CancellationToken token)
+        Result<object> original, SubscriptionWindowBudgetFault fault, CancellationToken token)
     {
         var limits = fault == SubscriptionWindowBudgetFault.AggregateRecords
             ? new DatabaseLimits { MaxScanRecords = PointReadsPlusOneWindowRow }
@@ -32,10 +33,10 @@ internal static class SubscriptionWindowBudgetAssertions
             token.ThrowIfCancellationRequested();
             var denied = SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription,
                 request, request.RequestId, token);
-            await Assert.That(denied.Error).IsEqualTo(ErrorCode.BudgetExceeded);
-            await Assert.That(denied.SafeDetail).IsEqualTo(Exceeded);
-            await Assert.That(denied.Json).IsNull();
-            await Assert.That(denied.NativeValue).IsNull();
+            await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+            await Assert.That(denied.Problem?.Detail).IsEqualTo(Exceeded);
+            
+            await Assert.That(denied.Value).IsNull();
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
             var retained = OutcomeStoreOracle.ReadPartition(store, group.Source.Partition, Subject, request.RequestId)
                 ?? throw new InvalidOperationException(MissingOutcome);

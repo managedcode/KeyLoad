@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.Search;
@@ -19,7 +20,7 @@ public sealed partial class DatabaseEngine
         var outcome = CommandOutcomeKeyResolver.Select(view, principal.Id, acknowledged.Receipt.CommandId, scope).Outcome
             ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         if (outcome.Incarnation != Store.Identity.Incarnation || outcome.PolicyEpoch != principal.PolicyEpoch
-            || outcome.Result.Error is not null)
+            || Errors.Code(outcome.Result.Problem) is not null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority);
         }
@@ -32,9 +33,9 @@ public sealed partial class DatabaseEngine
             }
             var payload = NativeSerialization.Serialize(intent);
             RequireNativeBudget(payload.Length);
-            var identity = new ReplicatedOperation(intent.CommandId, OperationKind.CommitProjectionBatch,
-                principal.Id, EvaluationClock.GetUtcNow(), Identity<CommitProjectionBatchRequest>(payload));
-            if (outcome.Fingerprint != CommandFingerprint(identity))
+            var fingerprint = DatabaseCommandFingerprint.Compute(intent.CommandId, OperationKind.CommitProjectionBatch,
+                principal.Id, Identity<CommitProjectionBatchRequest>(payload));
+            if (outcome.Fingerprint != fingerprint)
             {
                 throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.ChangedOriginal);
             }

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -40,7 +42,7 @@ internal sealed class AtomicTriadStagedFixture : IDisposable
         get;
         set;
     }
-    internal List<(ReplicatedOperation Operation, OperationResult Result, byte[] Bytes)> Originals
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Bytes)> Originals
     {
         get;
     } = [];
@@ -49,7 +51,7 @@ internal sealed class AtomicTriadStagedFixture : IDisposable
         get;
         set;
     }
-    internal List<(ReplicatedOperation Operation, OperationResult Result)> Produced
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result)> Produced
     {
         get;
     } = [];
@@ -63,13 +65,13 @@ internal sealed class AtomicTriadStagedFixture : IDisposable
         SetPolicy(AtomicTriadStagedProtocol.InitialEpoch, true);
         Failed = AtomicTriadStagedRecipe.Command(Partition, true);
     }
-    internal ReplicatedOperation Operation(CommandRequest command)
-        => Owner.CreateNativeOperation(OperationKind.Batch, command.CommandId, AtomicTriadStagedProtocol.Producer,
+    internal Command<DatabaseCommand> Operation(CommandRequest command)
+        => Owner.CreateCommand(OperationKind.Batch, command.CommandId, AtomicTriadStagedProtocol.Producer,
             default, NativeSerialization.Serialize(command));
     internal PrincipalRecord SetPolicy(long epoch, bool publish)
     {
         var expected = AtomicTriadStagedRecipe.Principal(Partition, epoch, publish);
-        var operation = Owner.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), AtomicTriadStagedProtocol.Root,
+        var operation = Owner.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), AtomicTriadStagedProtocol.Root,
             default, NativeSerialization.Serialize(new ConfigurePrincipalRequest(expected)));
         return Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken).Get<PrincipalRecord>();
     }

@@ -43,7 +43,7 @@ internal static class SubscriptionFilterCrashScenario
         var pause = Guid.NewGuid();
         CrashDatabase.Submit(db, OperationKind.SetSubscriptionPaused,
             new SetSubscriptionPausedRequest(pause, Subscription, OriginalGeneration, true), pause).Get<SubscriptionInfo>();
-        var operation = CrashDatabase.Operation(OperationKind.ConfigureSubscription,
+        var operation = CrashDatabase.Operation(db, OperationKind.ConfigureSubscription,
             new ConfigureSubscriptionRequest(CommandId, Subscription, definition with
             {
                 EventTypes = [ReplacementType]

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -29,8 +30,7 @@ internal static class MetamorphicReferenceLifetime
     internal static Task ReplayAsync(MetamorphicReferenceFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
         => ObserveAsync(store, async () =>
         {
-            var operation = new ReplicatedOperation(fixture.Seed.CommandId, OperationKind.Batch, "root", default,
-                System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
+            var operation = database.CreateCommand(OperationKind.Batch, fixture.Seed.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
             var actual = database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
             await MetamorphicReferenceAssertions.EqualAsync(actual, fixture.Receipt);
             await MetamorphicReferenceFixture.NativeReceiptAsync(actual);

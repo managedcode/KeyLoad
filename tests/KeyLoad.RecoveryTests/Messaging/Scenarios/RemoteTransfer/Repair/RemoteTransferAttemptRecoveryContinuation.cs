@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.CrashHost;
@@ -20,12 +21,12 @@ internal static class RemoteTransferAttemptRecoveryContinuation
         await Assert.That(hint.AcceptGeneration).IsEqualTo(RemoteTransferAttemptCrashProtocol.AdvancedGeneration);
         var accept = new CommandRequest(RemoteTransferAttemptIdentity.AcceptId(hint, hint.AcceptGeneration),
             destination.Partition, [new AcceptQueueTransfer(destination, original.IntentToken)]);
-        var accepted = database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, accept, accept.CommandId), token).Get<CommitReceipt>();
+        var accepted = database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, accept, accept.CommandId), token).Get<CommitReceipt>();
         var proof = database.InspectQueueTransferReceipt(CrashFixtureValues.Principal, destination, source, mutation.TransferId, token)!;
         await Assert.That(accepted.Token).IsEqualTo(proof.TargetCommit);
         var complete = new CommandRequest(RemoteTransferCoordinationIdentity.CommandId(hint, RemoteTransferCoordinationProtocol.CompleteStage),
             source.Partition, [new CompleteQueueTransfer(source, mutation.TransferId, proof.ReceiptToken)]);
-        var completed = database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, complete, complete.CommandId), token).Get<CommitReceipt>();
+        var completed = database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, complete, complete.CommandId), token).Get<CommitReceipt>();
         var delivered = database.InspectQueueTransfer(CrashFixtureValues.Principal, source, mutation.TransferId, token)!;
         await EqualAsync(delivered, original with
         {
@@ -41,14 +42,14 @@ internal static class RemoteTransferAttemptRecoveryContinuation
         return new(accept, accepted, complete, completed, delivered, proof, message);
     }
 
-    internal static async Task ColdAsync(string root, ReplicatedOperation operation, CommitReceipt advanced,
+    internal static async Task ColdAsync(string root, Command<DatabaseCommand> operation, CommitReceipt advanced,
         CommandRequest failedAccept, byte[] failedBytes, RemoteTransferAttemptRecovered result, CancellationToken token)
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = RemoteTransferAttemptRecoveryDatabase.Open(store);
         await EqualAsync(database.ApplyEmbedded(operation, token).Get<CommitReceipt>(), advanced);
-        await EqualAsync(database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, result.Accept, result.Accept.CommandId), token).Get<CommitReceipt>(), result.Accepted);
-        await EqualAsync(database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, result.Complete, result.Complete.CommandId), token).Get<CommitReceipt>(), result.Completed);
+        await EqualAsync(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, result.Accept, result.Accept.CommandId), token).Get<CommitReceipt>(), result.Accepted);
+        await EqualAsync(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, result.Complete, result.Complete.CommandId), token).Get<CommitReceipt>(), result.Completed);
         await EqualAsync(database.InspectQueueTransfer(CrashFixtureValues.Principal, RemoteTransferAttemptCrashScenario.Source,
             result.Proof.TransferId, token), result.Delivered);
         await EqualAsync(database.InspectQueueTransferReceipt(CrashFixtureValues.Principal, RemoteTransferAttemptCrashScenario.Destination,
@@ -61,7 +62,7 @@ internal static class RemoteTransferAttemptRecoveryContinuation
     private static async Task FailureAsync(ZoneTreeStore store, DatabaseEngine database, CommandRequest request,
         byte[] original, CancellationToken token)
     {
-        await Assert.That(database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, request, request.CommandId), token).Error)
+        await Assert.That(Errors.Code(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId), token).Problem))
             .IsEqualTo(ErrorCode.ResourceExhausted);
         var bytes = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(request.Partition,
             CrashFixtureValues.Principal, request.CommandId)))!;

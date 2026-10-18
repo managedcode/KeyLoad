@@ -1,55 +1,42 @@
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using ManagedCode.Communication.Commands;
+using KeyLoad.Core;
+using KeyLoad.UnitTests.Features.Messaging;
+using A = KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionAuthorityColdAssertions;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
 internal static class DocumentSessionAuthorityContinuation
 {
-    private const string WrongOwner = "The receiving document owner is not the admitted physical shard.";
-    private const string PutKind = "putDocument";
-    private static readonly Guid FreshId = Guid.Parse("1a7075d5-26b4-4f88-b227-b8036f60f844");
-
-    internal static async Task RunAsync(RemoteDocumentNativeFixture fixture)
+    internal static async Task RunAsync(DocumentPatchAtomicityOwner fixture,
+        Command<DatabaseCommand> original, CommitReceipt first)
     {
-        var image = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-        var position = fixture.Destination.Store.Position;
-        OwnedDocumentReadResultV1? value = null;
-        var foreign = Assert.ThrowsExactly<KeyLoadException>(() => value = DocumentSessionAuthorityColdAssertions.Read(
-            fixture, fixture.Receipt.Token, owner: PhysicalOwnerDirectoryWholeFlow.Control.Owner));
-        await Assert.That(foreign.Code).IsEqualTo(ErrorCode.OwnershipLost);
-        await Assert.That(foreign.Message).IsEqualTo(WrongOwner);
-        await Assert.That(value).IsNull();
+        var image = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var position = fixture.Store.Position;
+        var foreign = Assert.ThrowsExactly<KeyLoadException>(() => A.Read(fixture,
+            first.Token with { AtomicPartitionId = "foreign-atomic-partition" }));
+        await Assert.That(foreign.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var cancelled = Assert.ThrowsExactly<OperationCanceledException>(() => value =
-            DocumentSessionAuthorityColdAssertions.Read(fixture, fixture.Receipt.Token, token: cancellation.Token));
+        var cancelled = Assert.ThrowsExactly<OperationCanceledException>(() =>
+            A.Read(fixture, first.Token, cancellation.Token));
         await Assert.That(cancelled.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(value).IsNull();
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
-        var request = new CommandRequest(FreshId, RemoteDocumentNativeFixture.Partition,
-            [new PutDocument(RemoteDocumentNativeFixture.Collection, RemoteDocumentNativeFixture.DocumentId,
-                RemoteDocumentNativeFixture.OriginalJson, RemoteDocumentNativeFixture.First, ExplicitReplacement: true)]);
-        var operation = RemoteDocumentNativeFixture.Operation(fixture.Destination, OperationKind.Batch, FreshId, request);
-        var result = fixture.Destination.Database.Apply(operation, RemoteDocumentNativeFixture.Second);
-        var receipt = new CommitReceipt(FreshId, fixture.Receipt.Token with
-        {
-            Position = RemoteDocumentNativeFixture.Second
-        },
-            [new(PutKind, RemoteDocumentNativeFixture.Collection, RemoteDocumentNativeFixture.DocumentId,
-                RemoteDocumentNativeFixture.Second)], DurabilityProfile.ProcessDurable);
-        await Assert.That(NativeSerialization.Serialize(result).SequenceEqual(
-            NativeSerialization.Serialize(new OperationResult(null) { NativeValue = receipt }))).IsTrue();
-        await DocumentSessionAuthorityColdAssertions.ReplayAsync(fixture, operation, receipt);
-        image = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-        position = fixture.Destination.Store.Position;
-        fixture.Destination.Reopen();
-        await DocumentSessionAuthorityColdAssertions.LiteralAsync(fixture, fixture.Receipt.Token,
-            RemoteDocumentNativeFixture.Second, position);
-        await DocumentSessionAuthorityColdAssertions.LiteralAsync(fixture, receipt.Token,
-            RemoteDocumentNativeFixture.Second, position);
-        await DocumentSessionAuthorityColdAssertions.ReplayAsync(fixture, fixture.Write, fixture.Receipt);
-        await DocumentSessionAuthorityColdAssertions.ReplayAsync(fixture, operation, receipt);
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
+        await A.UnchangedAsync(fixture, image, position);
+        var id = Guid.NewGuid();
+        var next = checked(fixture.Database.LastApplied + 1);
+        var request = new CommandRequest(id, fixture.Source.Partition,
+            [new PutDocument(A.Collection, A.Id, A.Json, 1, ExplicitReplacement: true)]);
+        var operation = fixture.Database.CreateCommand(OperationKind.Batch, id, A.Root,
+            fixture.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        var expected = new CommitReceipt(id, new(fixture.Store.Identity.Incarnation,
+            fixture.Source.Partition.AtomicPartitionId, next), [new("putDocument", A.Collection, A.Id, 2)],
+            DurabilityProfile.ProcessDurable, 1);
+        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(expected),
+            NativeSerialization.Serialize(fixture.Submit(operation).Get<CommitReceipt>()));
+        await A.ReplayAsync(fixture, operation, expected);
+        await fixture.ReopenAsync();
+        await A.LiteralAsync(fixture, first.Token, 2);
+        await A.LiteralAsync(fixture, expected.Token, 2);
+        await A.ReplayAsync(fixture, original, first);
+        await A.ReplayAsync(fixture, operation, expected);
     }
 }

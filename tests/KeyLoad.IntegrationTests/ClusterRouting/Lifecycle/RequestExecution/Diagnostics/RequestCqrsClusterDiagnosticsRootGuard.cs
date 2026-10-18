@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
-/// <summary>Allows private CLUSTER-root deletion only after every owner and cleanup stage settled.</summary>
+/// <summary>Allows private Orleans-root deletion only after every owner and cleanup stage settled.</summary>
 internal static class RequestCqrsClusterDiagnosticsRootGuard
 {
     internal static bool CanDelete(bool owned, string? root, bool diagnosticsSettled,

@@ -55,7 +55,7 @@ internal sealed class AnnProjectionPinAuthorityTests
         var configure = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(configureId, attemptedConsumer,
                 new(1, [AnnProjectionPinTestSupport.Collection], [AnnProjectionPinTestSupport.VectorMutation]), 0), principal, configureId);
-        await Assert.That(configure.Error).IsEqualTo(expected);
+        await Assert.That(Errors.Code(configure.Problem)).IsEqualTo(expected);
         await Assert.That(AnnProjectionPinTestSupport.ReadFailure(database, consumer, principal)).IsEqualTo(expected);
 
         var commit = AnnProjectionPinTestSupport.CommitEmpty(database, consumer, batch,

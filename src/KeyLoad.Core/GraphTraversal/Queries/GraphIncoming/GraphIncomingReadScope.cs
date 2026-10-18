@@ -25,7 +25,7 @@ internal static class GraphIncomingReadScope
         return principal;
     }
 
-    internal static ResourceDefinition ReadGraphResource(DatabaseEngine database, IKeyValueView view,
+    internal static ResourceDefinition ReadGraphResource(IKeyValueView view,
         ReadExecutionBudgetReadGrant grant, PartitionRef partition, string graph, ReadExecutionBudget budget)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
@@ -44,11 +44,11 @@ internal static class GraphIncomingReadScope
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceKindConflict);
         }
-        database.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
+        DatabaseEngine.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
         return resource;
     }
 
-    internal static ResourceDefinition ReadCollection(DatabaseEngine database, IKeyValueView view,
+    internal static ResourceDefinition ReadCollection(IKeyValueView view,
         ReadExecutionBudgetReadGrant grant, PartitionRef partition, string collection, ReadExecutionBudget budget)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
@@ -67,7 +67,7 @@ internal static class GraphIncomingReadScope
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceKindConflict);
         }
-        database.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
+        DatabaseEngine.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
         return resource;
     }
 

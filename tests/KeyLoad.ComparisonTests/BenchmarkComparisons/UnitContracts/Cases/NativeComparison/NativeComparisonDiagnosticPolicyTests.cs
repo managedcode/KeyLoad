@@ -47,7 +47,7 @@ internal sealed class NativeComparisonDiagnosticPolicyTests
     }
 
     [Test]
-    public async Task NativeFactoryRejectsCapsThatCannotHoldTheirImmutableFallback()
+    public async Task NativeFactoryRejectsCapsThatCannotHoldTheirImmutableFailureProjection()
     {
         const int BelowMinimum = 1;
         var redis = Create(settings => settings.RedisReplicaMaximumCharacters = RedisReplicaDiagnostics.Overflow.Length - BelowMinimum);

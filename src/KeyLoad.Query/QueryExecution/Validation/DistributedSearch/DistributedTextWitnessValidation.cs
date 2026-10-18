@@ -19,7 +19,7 @@ internal static class DistributedTextWitnessValidation
         ArgumentNullException.ThrowIfNull(grant);
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
-        var placement = DatabaseEngine.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition, grant);
+        var placement = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition, grant);
         PartitionQueryPlacementValidation.Validate(placement, partition, witness.Owner);
         var identity = database.Store.Identity;
         if (witness.Partition != partition || witness.NodeId != identity.NodeId

@@ -6,9 +6,7 @@ namespace KeyLoad;
 public enum AnnPageMode
 {
     /// <summary>The eligible native set was completely ranked by actual exact work.</summary>
-    Exact,
+    Exact = 0,
     /// <summary>The native graph supplied bounded approximate candidates.</summary>
-    Approximate,
-    /// <summary>Insufficient native candidates caused actual charged complete exact work.</summary>
-    ExactFallback
+    Approximate = 1
 }

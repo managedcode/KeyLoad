@@ -75,7 +75,7 @@ internal static class QueueExpiredDlqAssertions
         {
             await Assert.That(actual.SafeDetail).IsEqualTo(ExpiredDetail);
         }
-        await Assert.That(actual.NativeValue).IsNull();
+        await Assert.That(actual.Value).IsNull();
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
     }
 
@@ -105,7 +105,7 @@ internal static class QueueExpiredDlqAssertions
     internal static async Task CancelAsync(DatabaseEngine database, QueueLifecycleTestState state, string id)
     {
         var original = state.Batch(database, new CancelQueueMessage(state.Lane.Queue, id, 3L, 1L)).Get<CommitReceipt>();
-        await Assert.That(original.CommandId).IsEqualTo(state.Successes.Last().Operation.Id);
+        await Assert.That(original.CommandId).IsEqualTo(state.Successes.Last().Operation.CommandId);
         await Assert.That(original.Mutations).IsEquivalentTo(
             new[] { new MutationReceipt("cancelQueueMessage", state.Lane.Queue, id, 4L) }, CollectionOrdering.Matching);
     }

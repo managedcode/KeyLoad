@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 namespace KeyLoad;
 
 /// <summary>Reports the actual canonical database sequence and original stored command result.</summary>
@@ -6,7 +7,7 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 public sealed record StorageOperationResult(
     [property: Orleans.Id(StorageOperationResult.SequenceField)] long Sequence,
-    [property: Orleans.Id(StorageOperationResult.ResultField)] OperationResult Result)
+    [property: Orleans.Id(StorageOperationResult.ResultField)] Result<object> Result)
 {
     internal const int SequenceField = 0;
     internal const int ResultField = 1;

@@ -198,7 +198,7 @@
           <li><span class="step-no" aria-hidden="true">01</span><div><h3>The agent calls a tool</h3><p>An MCP tool call or SDK command arrives with a credential the database verifies against its own stored policy.</p></div></li>
           <li><span class="step-no" aria-hidden="true">02</span><div><h3>The connection grain takes it</h3><p>Each connected client has its own Orleans grain. It calls the partition grains and ZoneTree on this node or on other nodes.</p></div></li>
           <li><span class="step-no" aria-hidden="true">03</span><div><h3>The partition commits atomically</h3><p>The document, its event and the follow-up job are written together, or none of them are.</p></div></li>
-          <li><span class="step-no" aria-hidden="true">04</span><div><h3>Copies on several nodes</h3><p>Orleans carries the write to the ZoneTree of each replica node. A majority of copies persists it before the call returns.</p></div></li>
+          <li><span class="step-no" aria-hidden="true">04</span><div><h3>Copies on several nodes</h3><p>Orleans carries the write to the ZoneTree of each replica node. Every configured copy persists it before the call returns.</p></div></li>
         </ol>
         <div class="terminal kl-graphite">
           <article class="code-card"><header><span class="code-tag">MCP</span>Agent · SQL read over MCP</header><pre><code><span class="tok-key">tool</span>  keyload_query_execute

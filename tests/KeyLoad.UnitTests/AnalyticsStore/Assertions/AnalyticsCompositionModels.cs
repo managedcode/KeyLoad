@@ -22,7 +22,7 @@ internal static class AnalyticsCompositionModels
             owner.Database.GetDocument(D.Root, new(partition, D.AnchorCollection, D.AnchorId), cancellationToken: owner.CallerToken));
         foreach (var commit in commits)
         {
-            var request = KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(commit.Operation);
+            var request = NativeSerialization.Deserialize<CommandRequest>((commit.Operation).Value!.Input.Span);
             var id = ((PutDocument)request.Mutations[0]).Id;
             var reference = new EntityRef(partition, D.AnchorCollection, id);
             var expectedReference = AnalyticsExpectedResourceCreation.Bind(anchorLifetime, reference);
@@ -35,10 +35,10 @@ internal static class AnalyticsCompositionModels
             var page = owner.Database.ReadStream(D.Root, stream, cancellationToken: owner.CallerToken);
             var sequence = commits.ToList().IndexOf(commit) + 1;
             await O.EqualAsync(new StreamPage(stream, new(1, 1, 1),
-                [new(stream, 1, sequence, new(id, P.Created, P.EmptyJson), (owner.Entry(commit.Operation).Operation ?? throw new InvalidOperationException("The retained test operation is missing.")).EvaluatedAt)],
+                [new(stream, 1, sequence, new(id, P.Created, P.EmptyJson), new DateTimeOffset(commit.Operation.Timestamp))],
                 owner.Store.Position, false, null, owner.Store.Position), page);
         }
-        var expected = commits.Select(commit => ((PutDocument)KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(commit.Operation).Mutations[0]).Id)
+        var expected = commits.Select(commit => ((PutDocument)NativeSerialization.Deserialize<CommandRequest>((commit.Operation).Value!.Input.Span).Mutations[0]).Id)
             .Order(StringComparer.Ordinal).Select(id => D.Event(owner.Source, id, D.Alpha, 7)).ToArray();
         var records = expected.Select(value => new AnalyticsEventRecord(value.Id, value.Timestamp, value.Dimensions,
             value.Metrics, value.RowAccess, [.. value.Links.Select(link => AnalyticsExpectedResourceCreation.Bind(anchorLifetime, link))], 1)).ToImmutableArray();

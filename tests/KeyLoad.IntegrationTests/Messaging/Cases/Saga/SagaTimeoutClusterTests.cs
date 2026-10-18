@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Proves the explicit atomic due-time transition through real public CLUSTER callers.</summary>
+/// <summary>Proves the explicit atomic due-time transition through real public Orleans callers.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class SagaTimeoutClusterTests(ClusterFixture fixture)

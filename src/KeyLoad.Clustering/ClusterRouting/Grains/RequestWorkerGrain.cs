@@ -124,11 +124,6 @@ internal sealed class RequestWorkerGrain(GrainRequestCodec codec, ILogger<Reques
 
             writer.CancellationToken.ThrowIfCancellationRequested();
             GrainOperationReply reply;
-            var controlledReply = await TryExecuteControlledAsync(request, writer, purpose.WorkBinding).ConfigureAwait(true);
-            if (controlledReply is not null)
-            {
-                return GrainReplyFactory.StreamResult(controlledReply, options);
-            }
             if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex)
             {
                 reply = await NativeConnectionParentExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
@@ -160,21 +155,4 @@ internal sealed class RequestWorkerGrain(GrainRequestCodec codec, ILogger<Reques
         }
     }
 
-    private async ValueTask<GrainOperationReply?> TryExecuteControlledAsync(DecodedGrainRequest request,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
-    {
-        ArgumentNullException.ThrowIfNull(binding);
-        if (request.Envelope.CommandKind != OperationKind.Batch)
-        {
-            return null;
-        }
-        var controlled = services.GetService<IControlledDocumentCommandRouter>();
-        if (controlled is null)
-        {
-            return null;
-        }
-        var original = await controlled.TryExecuteAsync(request.Envelope, request.Payload, binding,
-            writer.CancellationToken).ConfigureAwait(true);
-        return original is null ? null : GrainReplyFactory.Operation(original, options, writer.CancellationToken);
-    }
 }

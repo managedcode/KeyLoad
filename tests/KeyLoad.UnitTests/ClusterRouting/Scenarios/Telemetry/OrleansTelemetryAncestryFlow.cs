@@ -8,7 +8,7 @@ internal static class OrleansTelemetryAncestryFlow
     internal static async Task RunAsync()
     {
         var failures = new List<Exception>();
-        RequestCqrsClusterFixture? fixture = null;
+        RequestCqrsHostedRuntimeFixture? fixture = null;
         OrleansRuntimeTelemetryFixture? telemetry = null;
         await ServerFailureObserver.ObserveAsync(() =>
         {
@@ -34,10 +34,10 @@ internal static class OrleansTelemetryAncestryFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static Task InitializeAsync(RequestCqrsClusterFixture fixture)
+    private static Task InitializeAsync(RequestCqrsHostedRuntimeFixture fixture)
         => fixture.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
 
-    private static async Task ExecuteAsync(RequestCqrsClusterFixture fixture,
+    private static async Task ExecuteAsync(RequestCqrsHostedRuntimeFixture fixture,
         OrleansRuntimeTelemetryFixture telemetry)
     {
         await Assert.That(telemetry.Options.MaximumParentLinks)
@@ -61,7 +61,7 @@ internal static class OrleansTelemetryAncestryFlow
             OrleansTelemetryAncestryProtocol.NoLocalParents, expectedRecorded: true);
     }
 
-    private static async Task PhaseAsync(RequestCqrsClusterFixture fixture,
+    private static async Task PhaseAsync(RequestCqrsHostedRuntimeFixture fixture,
         OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, List<string> documents,
         string documentId, int localParents, bool expectedRecorded)
     {
@@ -74,7 +74,7 @@ internal static class OrleansTelemetryAncestryFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RunOwnedPhaseAsync(RequestCqrsClusterFixture fixture,
+    private static async Task RunOwnedPhaseAsync(RequestCqrsHostedRuntimeFixture fixture,
         OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, List<string> documents,
         string documentId, int localParents, bool expectedRecorded, List<Exception> failures)
     {

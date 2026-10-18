@@ -16,16 +16,16 @@ internal static class RequestCqrsIdentityCases
     private const int SubjectCharacters = SubjectUtf8Limit / 2;
     private const string TwoByteSubjectCharacter = "é";
 
-    internal static async Task AcCrs006ActualClientAndSiloConvertersCarryPersistedPrincipalAndRequestState(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs006ActualClientAndSiloConvertersCarryPersistedPrincipalAndRequestState(RequestCqrsHostedRuntimeFixture fixture)
     {
         var subject = new string(TwoByteSubjectCharacter[0], SubjectCharacters);
         PersistPrincipal(fixture, subject);
         var requestId = Guid.NewGuid();
         var state = new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId);
         var principal = GrainIdentityContext.CreatePrincipal(subject);
-        var clientPrincipalSerializer = fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<ClaimsPrincipal>>();
-        var clientStateSerializer = fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<GrainRequestContextState>>();
-        var clientChunkSerializer = fixture.Cluster.ServiceProvider.GetRequiredService<
+        var clientPrincipalSerializer = fixture.Services.GetRequiredService<Serializer<ClaimsPrincipal>>();
+        var clientStateSerializer = fixture.Services.GetRequiredService<Serializer<GrainRequestContextState>>();
+        var clientChunkSerializer = fixture.Services.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var principalBytes = clientPrincipalSerializer.SerializeToArray(principal);
         var stateBytes = clientStateSerializer.SerializeToArray(state);
@@ -63,7 +63,7 @@ internal static class RequestCqrsIdentityCases
         await Assert.That(observed.CapabilityCalls).IsEqualTo(priorCalls + 1);
     }
 
-    internal static async Task AcCrs006AbsentPrincipalIsAcceptedOnlyForSignedAuthentication(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs006AbsentPrincipalIsAcceptedOnlyForSignedAuthentication(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var state = new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId);
@@ -76,7 +76,7 @@ internal static class RequestCqrsIdentityCases
         await Assert.That(result.PrincipalBytes).IsEqualTo(0L);
     }
 
-    internal static async Task AcCrs006PresentNullPrincipalEntryIsNotAnonymousAuthentication(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs006PresentNullPrincipalEntryIsNotAnonymousAuthentication(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var token = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
@@ -90,7 +90,7 @@ internal static class RequestCqrsIdentityCases
         await Assert.That(result.CapabilityCalls).IsEqualTo(priorCalls);
     }
 
-    internal static async Task AcCrs006InvalidNativeContextIsDeniedBeforeCapability(RequestCqrsClusterFixture fixture, RequestCqrsInvalidContext invalid)
+    internal static async Task AcCrs006InvalidNativeContextIsDeniedBeforeCapability(RequestCqrsHostedRuntimeFixture fixture, RequestCqrsInvalidContext invalid)
     {
         var requestId = Guid.NewGuid();
         var subject = "native-context-subject-" + Guid.NewGuid().ToString("N");
@@ -107,7 +107,7 @@ internal static class RequestCqrsIdentityCases
         await Assert.That(result.CapabilityCalls).IsEqualTo(priorCalls);
     }
 
-    internal static async Task AcCrs006SignedRequestKeyAndForgedAuthenticationPrincipalAreDeniedBeforeCapability(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs006SignedRequestKeyAndForgedAuthenticationPrincipalAreDeniedBeforeCapability(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var subject = "native-signed-subject-" + Guid.NewGuid().ToString("N");
@@ -136,20 +136,20 @@ internal static class RequestCqrsIdentityCases
         await Assert.That(rejected.CapabilityCalls).IsEqualTo(priorCalls);
     }
 
-    private static void PersistPrincipal(RequestCqrsClusterFixture fixture, string subject)
+    private static void PersistPrincipal(RequestCqrsHostedRuntimeFixture fixture, string subject)
     {
         var record = new PrincipalRecord(subject, fixture.Database.Partition.TenantId, [], []);
         fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(record))
             .Get<PrincipalRecord>();
     }
 
-    private static string SignedRead(RequestCqrsClusterFixture fixture, Guid requestId, string subject)
+    private static string SignedRead(RequestCqrsHostedRuntimeFixture fixture, Guid requestId, string subject)
         => fixture.Codec.CreateRead(requestId, subject, GrainReadKind.QueryCapabilities, NativeSerialization.Serialize(0));
 
-    private static IRequestCqrsIdentityProbeGrain ProbeGrain(RequestCqrsClusterFixture fixture, Guid requestId)
-        => fixture.Cluster.Client.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId);
+    private static IRequestCqrsIdentityProbeGrain ProbeGrain(RequestCqrsHostedRuntimeFixture fixture, Guid requestId)
+        => fixture.Grains.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId);
 
-    private static Task<RequestCqrsProbeResult> Probe(RequestCqrsClusterFixture fixture, Guid requestId, string token)
+    private static Task<RequestCqrsProbeResult> Probe(RequestCqrsHostedRuntimeFixture fixture, Guid requestId, string token)
         => ProbeGrain(fixture, requestId).ValidateAsync(token, requestId);
 
     private static GrainRequestContextState? StateFor(RequestCqrsInvalidContext invalid, Guid requestId, Guid connectionId)

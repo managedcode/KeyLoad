@@ -69,17 +69,17 @@ internal static class SearchWaitAuthorityTrial
             await SearchWaitAuthorityState.HealthyAsync(database, search, request, cancellationToken);
         }, cancellationToken);
 
-    private static async Task RunAsync(Func<ReplicaAppliedPositionWaitFixture, SearchEngine, WaitForIndexRequest, Task> operation,
+    private static async Task RunAsync(Func<CanonicalReadCutFixture, SearchEngine, WaitForIndexRequest, Task> operation,
         CancellationToken cancellationToken)
     {
-        ReplicaAppliedPositionWaitFixture? fixture = null;
+        CanonicalReadCutFixture? fixture = null;
         NativeTextProjection? projection = null;
         var failures = new List<Exception>();
         try
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                fixture = new ReplicaAppliedPositionWaitFixture();
+                fixture = new CanonicalReadCutFixture();
                 var database = fixture.Canonical;
                 database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
                 var receipt = await NativeTextWaitSeed.CommitAsync(fixture, cancellationToken);
@@ -98,7 +98,7 @@ internal static class SearchWaitAuthorityTrial
             }
             if (fixture is not null)
             {
-                await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures);
+                ServerFailureObserver.Observe(fixture.Dispose, failures);
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);

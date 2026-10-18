@@ -44,7 +44,7 @@ internal static class DatabaseCompositionCrashScenario
         var request = new CommandRequest(CommandId, Partition,
             [new QueueToGraph(Graph, SourceQueue, EdgePrefix),
                 new GraphToQueueMutation(TargetQueue, Graph, Vertex(First), MessagePrefix)]);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, request, CommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, CommandFile), JsonDefaults.Serialize(operation));
         await File.WriteAllTextAsync(Path.Combine(directory, SeedOutboxTailFile),
             tail.ToString(CultureInfo.InvariantCulture));

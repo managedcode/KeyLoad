@@ -45,7 +45,7 @@ internal static class NativeContractCases
         NativeContractFamily.TimeSeries => new SampleRecord(Id, new(Id, At, 1), 1, Json),
         NativeContractFamily.Vector => new VectorRecord(Id, Field, new(Id, 2, DistanceMetric.Cosine, Model, Version), [1, 2], 1),
         NativeContractFamily.Blob => new BlobMetadata(new(Partition, Resource, Id), 1, Guid.NewGuid(), 2, 1, Id, new(), At),
-        NativeContractFamily.Outbox => new OutboxEntry(1, 0, new(Guid.NewGuid(), Partition.AtomicPartitionId, 1, 1), At, Mutations[0], new(Field, Resource, Id, 1)),
+        NativeContractFamily.Outbox => new OutboxEntry(1, 0, new(Guid.NewGuid(), Partition.AtomicPartitionId, 1), At, Mutations[0], new(Field, Resource, Id, 1)),
         NativeContractFamily.Relational => new RelationalSchema(Id, [new(Id, RelationalColumnType.Text)]),
         NativeContractFamily.Query => new AstQueryRequest(Partition, new(Resource, null, [new(Field, Field)], new Comparison(new FieldOperand(Field), Id, new ParameterOperand(Field)), [], 1)),
         _ => throw new ArgumentOutOfRangeException(nameof(family))

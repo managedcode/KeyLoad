@@ -82,9 +82,9 @@ internal static class RemoteTransferRepairArithmeticFlow
         var denied = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept),
             fixture.DestinationPartition, [new AcceptQueueTransfer(fixture.DestinationQueue, intent.IntentToken)]);
         var failure = RemoteTransferRepairColdNative.Apply(fixture, denied);
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(failure.Json).IsNull();
-        await Assert.That(failure.NativeValue).IsNull();
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        
+        await Assert.That(failure.Value).IsNull();
         var deniedBytes = RemoteTransferRepairColdNative.Outcome(fixture, denied.CommandId, fixture.DestinationPartition);
         await RemoteTransferRepairColdAdvance.DeniedWithoutWitnessAsync(fixture, hint, intent.IntentToken, QueueTransferRepairStage.Accept, null);
         RemoteTransferRepairColdNative.Policy(fixture, fixture.DestinationQueue, allow: true);

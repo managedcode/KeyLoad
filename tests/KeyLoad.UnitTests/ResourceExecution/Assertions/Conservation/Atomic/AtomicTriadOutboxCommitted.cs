@@ -17,7 +17,7 @@ internal static class AtomicTriadOutboxCommitted
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialOwnershipEpoch);
+
         await Assert.That(receipt.Durability).IsEqualTo(engine.Durability);
         var expectedReceipts = AtomicTriadOutboxFixture.Receipts(command);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(expectedReceipts.Length);

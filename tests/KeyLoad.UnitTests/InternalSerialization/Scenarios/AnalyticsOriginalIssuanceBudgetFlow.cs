@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.UnitTests.Features.Authorization;
@@ -78,8 +79,8 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
     private static async Task RefuseAsync(SafeProjectorOperationDatabase owner, CommandRequest request,
         ReadExecutionBudget work, AnalyticsIdentityBudgetFault fault, CancellationToken token)
     {
-        ReplicatedOperation? issued = null;
-        Action issue = () => issued = owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, D.Root,
+        Command<DatabaseCommand>? issued = null;
+        Action issue = () => issued = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
         if (fault == AnalyticsIdentityBudgetFault.IdentityOutput)
         {
@@ -88,7 +89,7 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
 
         if (fault == AnalyticsIdentityBudgetFault.MissingOriginalWork)
         {
-            issue = () => issued = owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, D.Root,
+            issue = () => issued = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
                 owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         }
 
@@ -110,12 +111,10 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
     {
         var request = D.Request(owner.Source, Guid.NewGuid(), false, true);
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
-        var issued = owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, D.Root,
+        var issued = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
         await A.OrderAsync(issued, false);
-        var expected = new CommitReceipt(request.CommandId, owner.NextToken(),
-            [new("putDocument", D.Collection, D.Document, 1), new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, 1)],
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(request.CommandId, owner.NextToken(), [new("putDocument", D.Collection, D.Document, 1), new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, 1)], DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(expected, owner.Submit(issued).Get<CommitReceipt>());
         await A.RowsAsync(owner, false, reference, token);
     }

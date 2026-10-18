@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -9,7 +10,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueLeaseAuthorityPostimage
 {
     internal static async Task RequireAsync(DatabaseEngine database, ZoneTreeStore store,
-        QueueLeaseAuthorityState state, OperationResult result, bool healthySettled = false)
+        QueueLeaseAuthorityState state, Result<object> result, bool healthySettled = false)
     {
         var metadata = Expected(state);
         var retained = state.Kind is QueueLeaseAuthorityOperation.Renew or QueueLeaseAuthorityOperation.Nack;
@@ -45,7 +46,7 @@ internal static class QueueLeaseAuthorityPostimage
             healthySettled ? QueueLeaseAuthorityProtocol.Two : QueueLeaseAuthorityProtocol.One));
     }
 
-    private static async Task ProcessingAsync(DatabaseEngine database, QueueLeaseAuthorityState state, OperationResult result)
+    private static async Task ProcessingAsync(DatabaseEngine database, QueueLeaseAuthorityState state, Result<object> result)
     {
         if (state.Kind != QueueLeaseAuthorityOperation.Processing)
         {

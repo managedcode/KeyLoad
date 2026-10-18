@@ -5,8 +5,6 @@ internal static class RequestCqrsClusterProtocol
     internal const string Node1 = "node1";
     internal const string Node2 = "node2";
     internal const string Node3 = "node3";
-    internal const string CohortEnabled = "--KeyLoadTests:ProtocolCohort:Enabled=true";
-    internal const string VoterPrefix = "--KeyLoadTests:ProtocolCohort:Voters:";
     internal const string DataRootPrefix = "--KeyLoad:DataRoot=";
     internal const string Ephemeral = "--KeyLoad:Ephemeral=true";
     internal const string AdminCollection = "cluster-routing-c1";
@@ -21,10 +19,9 @@ internal static class RequestCqrsClusterProtocol
     internal const int ReadyReplyMaximumBytes = 128;
     internal const int ReadyReplyPropertyCount = 2;
     internal const string ReadyReplyStatusProperty = "status";
-    internal const string ReadyReplyVotersProperty = "voters";
+    internal const string ReadyReplyReplicaCountProperty = "replicaCount";
     internal const string ReadyReplyExpectedStatus = "ready";
     internal const int NodeCount = 3;
-    internal const int CurrentMajority = 2;
     internal const int ApplicationProtocolVersion = 6;
     internal const int PeerEnvelopeVersion = 3;
     internal const int RequestCount = 20;

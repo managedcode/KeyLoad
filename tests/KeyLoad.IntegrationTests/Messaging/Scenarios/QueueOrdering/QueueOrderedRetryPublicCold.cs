@@ -29,7 +29,7 @@ internal static class QueueOrderedRetryPublicCold
             await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
             await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
             await Assert.That(after.ReadGeneration).IsGreaterThanOrEqualTo(before.ReadGeneration);
-            await Assert.That(after.Applied).IsGreaterThanOrEqualTo(before.Applied);
+            await Assert.That(after.Position).IsGreaterThanOrEqualTo(before.Position);
             await QueueOrderedRetryPublicTerminal.RunAsync(callers, state, healthy: !healthy, token);
             await QueueLifecyclePublicRoutes.ReplayAsync(callers, state.Caller, token);
             if (healthy)

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class NativeTextBm25EligibilityPolicy
 {
     private const string Use = "captured.corpus.use";
-    internal static async Task RunAsync(Bm25OriginalPhaseRecoveryFlow flow, ReplicatedOperation original)
+    internal static async Task RunAsync(Bm25OriginalPhaseRecoveryFlow flow, Command<DatabaseCommand> original)
     {
         var owner = flow.Owner;
         var tail = owner.Database.GetOutboxStatus("root", owner.Source.Partition).Head.Tail;
@@ -23,7 +24,7 @@ internal static class NativeTextBm25EligibilityPolicy
         {
             ExpectedSchemaVersion = resource.SchemaVersion
         };
-        var configuration = owner.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), "root",
+        var configuration = owner.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), "root",
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var changed = owner.Submit(configuration).Get<ResourceDefinition>();
         await Assert.That(changed.SchemaVersion).IsEqualTo(resource.SchemaVersion + 1);
@@ -42,10 +43,10 @@ internal static class NativeTextBm25EligibilityPolicy
         await Assert.That(owner.Database.GetOutboxStatus("root", owner.Source.Partition).Head.Tail).IsEqualTo(tail);
         await NativeTextBm25EligibilityPages.RequireAsync(flow, false, true, true);
         await Bm25ColdInvalidationAssertions.PhaseDeniedAsync(flow, original);
-        var fresh = flow.Capture(original.Id);
+        var fresh = flow.Capture(original.CommandId);
         var result = flow.Publish(fresh);
         await Assert.That(result.Error).IsNull();
-        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(fresh);
+        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(3L);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(2);
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(5L);

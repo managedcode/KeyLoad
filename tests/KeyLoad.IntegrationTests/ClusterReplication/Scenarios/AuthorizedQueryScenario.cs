@@ -41,7 +41,7 @@ internal static class AuthorizedQueryScenario
                 FieldPolicies = [new("/secret", "pii")]
             });
         var configureId = Guid.NewGuid();
-        Success(await RetryDuringElectionAsync(() => administrator.ConfigureResourceAsync(configureId, definition,
+        Success(await RetryDuringSiloRecoveryAsync(() => administrator.ConfigureResourceAsync(configureId, definition,
             cancellationToken), cancellationToken));
         var command = new CommandRequest(Guid.NewGuid(), partition,
         [
@@ -49,7 +49,7 @@ internal static class AuthorizedQueryScenario
             new PutDocument(Collection, "b", SerializeOrder(2, "open"), 0),
             new PutDocument(Collection, "c", SerializeOrder(3, "closed"), 0)
         ]);
-        Success(await RetryDuringElectionAsync(() => administrator.CommitAsync(command, cancellationToken), cancellationToken));
+        Success(await RetryDuringSiloRecoveryAsync(() => administrator.CommitAsync(command, cancellationToken), cancellationToken));
     }
 
     private static async Task<KeyLoadClient> CreateReaderAsync(KeyLoadClient administrator, ClusterFixture fixture,
@@ -58,13 +58,13 @@ internal static class AuthorizedQueryScenario
         var principal = new PrincipalRecord("query-reader", "integration",
             [new("database", Collection, Capability.DocumentsRead | Capability.Query | Capability.ChangesRead)], []);
         var principalCommand = Guid.NewGuid();
-        Success(await RetryDuringElectionAsync(() => administrator.ConfigurePrincipalAsync(principalCommand, principal,
+        Success(await RetryDuringSiloRecoveryAsync(() => administrator.ConfigurePrincipalAsync(principalCommand, principal,
             cancellationToken), cancellationToken));
         var secret = "query-reader." + Guid.NewGuid().ToString("N");
         var digest = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
         var credential = new ApiKeyRecord("query-reader", principal.Id, digest);
         var keyCommand = Guid.NewGuid();
-        Success(await RetryDuringElectionAsync(() => administrator.ConfigureApiKeyAsync(keyCommand, credential,
+        Success(await RetryDuringSiloRecoveryAsync(() => administrator.ConfigureApiKeyAsync(keyCommand, credential,
             cancellationToken), cancellationToken));
         return fixture.Client("node2", secret);
     }

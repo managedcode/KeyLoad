@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 internal static class McpUnauthorizedProbe
 {
     /// <summary>Checks native HTTP 401, absence of any operation GUID and the canonical safe Problem.</summary>
-    /// <param name="fixture">The actual CLUSTER application.</param>
+    /// <param name="fixture">The actual Orleans application.</param>
     /// <param name="node">The native Aspire endpoint resource.</param>
     /// <param name="key">The rejected credential or absent bearer.</param>
     /// <param name="cancellationToken">The external bounded caller token.</param>

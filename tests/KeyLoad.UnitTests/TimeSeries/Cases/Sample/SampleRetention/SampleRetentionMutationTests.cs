@@ -71,8 +71,8 @@ internal sealed class SampleRetentionMutationTests
         var deniedStatus = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadSampleRetention("series-manager",
             new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)));
 
-        await Assert.That(accepted.Error).IsNull();
-        await Assert.That(forbidden.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(accepted.Problem)).IsNull();
+        await Assert.That(Errors.Code(forbidden.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(status.Before).IsEqualTo(cutoff);
         await Assert.That(deniedStatus.Code).IsEqualTo(ErrorCode.PermissionDenied);
     }
@@ -121,7 +121,7 @@ internal sealed class SampleRetentionMutationTests
         await Assert.That(actual.Token.Incarnation).IsEqualTo(expected.Token.Incarnation);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(expected.Token.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsEqualTo(expected.Token.Position);
-        await Assert.That(actual.Token.OwnershipEpoch).IsEqualTo(expected.Token.OwnershipEpoch);
+
         await Assert.That(actual.Durability).IsEqualTo(expected.Durability);
         await Assert.That(actual.Mutations.Length).IsEqualTo(expected.Mutations.Length);
         for (var index = 0; index < expected.Mutations.Length; index++)

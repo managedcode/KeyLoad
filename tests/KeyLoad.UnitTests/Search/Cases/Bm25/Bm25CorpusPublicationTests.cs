@@ -46,7 +46,7 @@ internal sealed class Bm25CorpusPublicationTests
             var denied = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateVerifiedBm25CorpusPublication(
                 Bm25CorpusPublicationFlow.Root, phase, flow.Database.CreateReadWork(Bm25CorpusPublicationFlow.Token)));
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
-            await Assert.That(flow.Database.SubmitIssued(original).Error).IsEqualTo(ErrorCode.PermissionDenied);
+            await Assert.That(Errors.Code(flow.Database.SubmitIssued(original).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
             var searchDenied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => flow.SearchAsync());
             await Assert.That(searchDenied!.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
@@ -59,7 +59,7 @@ internal sealed class Bm25CorpusPublicationTests
             var old = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateVerifiedBm25CorpusPublication(
                 Bm25CorpusPublicationFlow.Root, phase, flow.Database.CreateReadWork(Bm25CorpusPublicationFlow.Token)));
             await Assert.That(old.Code).IsEqualTo(ErrorCode.PermissionDenied);
-            await Assert.That(flow.Database.SubmitIssued(original).Error).IsEqualTo(ErrorCode.PermissionDenied);
+            await Assert.That(Errors.Code(flow.Database.SubmitIssued(original).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
             await repairedBefore.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
             var healthy = flow.Capture(Guid.NewGuid(), original.Id);
             flow.Publish(healthy);

@@ -20,7 +20,7 @@ internal static class SqlTypedInsertControls
         await BoundAsync(fixture, new DatabaseLimits { MaxDocumentBytes = ShortRowBytes }, SqlTypedInsertLiteral.Repair, token);
         await CancelAsync(fixture, token);
         var changed = SqlTypedInsertLiteral.Compile(fixture.Partition, state.Created.Command.CommandId, SqlTypedInsertLiteral.Repair, token);
-        await Assert.That(SqlTypedInsertLiteral.Apply(fixture.Database, changed, state.Created.At).Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(SqlTypedInsertLiteral.Apply(fixture.Database, changed, state.Created.At).Problem)).IsEqualTo(ErrorCode.Conflict);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Created);
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: false);

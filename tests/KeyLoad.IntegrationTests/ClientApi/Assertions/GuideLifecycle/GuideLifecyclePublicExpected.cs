@@ -11,7 +11,7 @@ internal static class GuideLifecyclePublicExpected
     internal const string Markdown = """
         # KeyLoad agent quickstart
 
-        KeyLoad is a unified database for AI agents and is currently a development preview. It brings documents, tables, graphs, vectors and search, files, queues, events, and time series together while the product and its compatibility gates continue to develop. Do not assume full SQL-client or protocol conformance, production readiness, or an operation that has not been listed and qualified.
+        KeyLoad is a unified database for AI agents and is currently a development preview. It brings documents, tables, graphs, vectors and search, files, queues, events, and time series together while implementation and qualification continue. Do not assume full SQL-client or protocol conformance, production readiness, or an operation that has not been listed and qualified.
 
         ## Discover and invoke an operation
 

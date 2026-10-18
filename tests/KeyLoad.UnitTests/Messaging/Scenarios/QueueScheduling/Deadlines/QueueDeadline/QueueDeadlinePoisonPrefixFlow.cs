@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
@@ -79,7 +81,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
     }
 
     private static async Task FinalColdAsync(ZoneTreeStore first, string directory, QueueLaneRef lane,
-        DateTimeOffset due, bool leased, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes,
+        DateTimeOffset due, bool leased, List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes,
         byte[] identity, CancellationToken token)
     {
         var complete = QueueWholeFlowStorage.Bytes(first);
@@ -109,11 +111,11 @@ internal static class QueueDeadlinePoisonPrefixFlow
         return deferred;
     }
 
-    private static async Task<List<(ReplicatedOperation Operation, OperationResult Result)>> AdvanceOthersAsync(
+    private static async Task<List<(Command<DatabaseCommand> Operation, Result<object> Result)>> AdvanceOthersAsync(
         DatabaseEngine database, ZoneTreeStore store, QueueDeadlineCursor? cursor, QueueLaneRef lane,
         DateTimeOffset due, string target, CancellationToken token)
     {
-        var outcomes = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var outcomes = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         for (var pageIndex = QueueDeadlinePoisonPrefixProtocol.Initial; pageIndex < MaximumPages; pageIndex++)
         {
             token.ThrowIfCancellationRequested();
@@ -135,17 +137,13 @@ internal static class QueueDeadlinePoisonPrefixFlow
             foreach (var hint in page.Jobs)
             {
                 var command = new CommandRequest(Guid.NewGuid(), lane.Partition, [hint.Mutation]);
-                var operation = database.PrepareQueueRetryOperation(database.NormalizeOperation(new(command.CommandId,
-                    OperationKind.Batch, QueueDeadlineNativeProtocol.Worker, due,
-                    System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
+                var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, QueueDeadlineNativeProtocol.Worker, due, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
                 var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
                 var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
-                    lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First), placement.PlacementEpoch),
-                    [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)],
-                    DurabilityProfile.ProcessDurable);
+                    lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First)), [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
                 var result = database.Apply(operation);
-                await Assert.That(result.Error).IsNull();
-                await Assert.That(result.Json).IsNull();
+                await Assert.That(Errors.Code(result.Problem)).IsNull();
+                
                 await Assert.That(NativeSerialization.Serialize(result.Get<CommitReceipt>()).SequenceEqual(
                     NativeSerialization.Serialize(expected))).IsTrue();
                 outcomes.Add((operation, result));
@@ -160,7 +158,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
     }
 
     private static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, CancellationToken token)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;

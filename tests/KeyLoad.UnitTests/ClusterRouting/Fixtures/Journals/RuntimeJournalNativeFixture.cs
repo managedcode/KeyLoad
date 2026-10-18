@@ -157,7 +157,7 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         var principal = Database.Store.Read(view => Database.Database.Principal(view, "root", TimeProvider.System.GetUtcNow()));
         var services = SiloServices;
         var startup = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(), Codec,
-            Database.Database, services.GetRequiredService<Func<ICommitCoordinator>>()(), services, TimeProvider.System,
+            services, TimeProvider.System,
             UnitRoutingOptions.Routing());
         await startup.BootstrapAsync(principal, Guid.NewGuid(), cancellationToken).ConfigureAwait(false);
     }

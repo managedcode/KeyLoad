@@ -59,7 +59,7 @@ internal static class FunctionalGateColdWorkloadAuthorization
         var command = new CommandRequest(Guid.NewGuid(), reference.Partition,
             [new PutDocument(reference.Collection, reference.Id, original.Json, 0)]);
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
-        await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, reference.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(context, receipt, command.CommandId, reference.Partition,
             [new("putDocument", reference.Collection, reference.Id, 1)]);
         await SqlClusterProtocol.EqualAsync(receipt, await context.McpAsync<CommitReceipt>(context.Writer,
             McpCallerTools.DocumentsCommit, command, token));

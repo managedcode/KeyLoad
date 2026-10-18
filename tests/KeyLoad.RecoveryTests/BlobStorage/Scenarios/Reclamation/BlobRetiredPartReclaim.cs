@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,12 +8,12 @@ namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 internal static class BlobRetiredPartReclaim
 {
     internal static async Task<BlobPriorPublicationCommand> CompleteAsync(DatabaseEngine owner, BlobRetiredPartState seed,
-        ReplicatedOperation original)
+        Command<DatabaseCommand> original)
     {
         var reclaimed = new BlobPriorPublicationCommand(original, owner.Apply(original));
         var result = reclaimed.Result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobPriorPublicationImage.ExactAsync(result.Value, new BlobReclaimResult(seed.Publication.Upload, 1, 0, 4, true));
-        await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, original.Id, seed.Publication.Blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, original.CommandId, seed.Publication.Blob);
         await BlobPriorPublicationAssertions.QuotasAsync(owner, seed.Publication, 0, 0);
         foreach (var family in new[] { "blob-state-v1", "blob-part-v1", "blob-partmeta-v1" })
         {

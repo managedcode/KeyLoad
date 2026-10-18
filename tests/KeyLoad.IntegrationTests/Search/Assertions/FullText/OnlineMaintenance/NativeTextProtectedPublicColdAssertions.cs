@@ -23,7 +23,6 @@ internal static class NativeTextProtectedPublicColdAssertions
             await Assert.That(result.SchemaVersion).IsEqualTo(state.Scenario.Resource.SchemaVersion);
             await Assert.That(result.AppliedToken.Incarnation).IsEqualTo(state.Deleted.Token.Incarnation);
             await Assert.That(result.AppliedToken.AtomicPartitionId).IsEqualTo(state.Deleted.Token.AtomicPartitionId);
-            await Assert.That(result.AppliedToken.OwnershipEpoch).IsEqualTo(state.Deleted.Token.OwnershipEpoch);
             await Assert.That(result.AppliedToken.Position).IsGreaterThanOrEqualTo(state.Deleted.Token.Position);
         }
         var reference = new EntityRef(state.Scenario.Partition, NativeTextClusterScenario.Collection,

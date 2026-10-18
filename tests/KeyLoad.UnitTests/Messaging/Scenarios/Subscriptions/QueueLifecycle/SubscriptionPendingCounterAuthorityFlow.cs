@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -62,8 +63,8 @@ internal static class SubscriptionPendingCounterAuthorityFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, SubscriptionRef group, ReceiveSubscriptionResult received,
-        SubscriptionDeliveryCommand nack, OperationResult nacked, ReceiveSubscriptionRequest fresh,
-        ReceiveSubscriptionRequest emptyRequest, OperationResult empty, DateTimeOffset due,
+        SubscriptionDeliveryCommand nack, Result<object> nacked, ReceiveSubscriptionRequest fresh,
+        ReceiveSubscriptionRequest emptyRequest, Result<object> empty, DateTimeOffset due,
         byte[] key, byte[] saved, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -89,10 +90,10 @@ internal static class SubscriptionPendingCounterAuthorityFlow
         var stablePosition = cold.Position;
         var stale = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription,
             originalRequest, originalRequest.RequestId, due);
-        await Assert.That(stale.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(stale.SafeDetail).IsEqualTo(StaleDetail);
-        await Assert.That(stale.Json).IsNull();
-        await Assert.That(stale.NativeValue).IsNull();
+        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(stale.Problem?.Detail).IsEqualTo(StaleDetail);
+        
+        await Assert.That(stale.Value).IsNull();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, stable, stablePosition, identity);
         await SubscriptionPendingCounterAuthorityContinuation.RunAsync(db, cold, fixture.Directory,
             group, received, fresh, due,

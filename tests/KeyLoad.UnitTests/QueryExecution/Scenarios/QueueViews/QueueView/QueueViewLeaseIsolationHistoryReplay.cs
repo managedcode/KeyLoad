@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using static KeyLoad.UnitTests.Features.QueryExecution.QueueViewLeaseIsolationProtocol;
 
@@ -13,7 +14,8 @@ internal static class QueueViewLeaseIsolationHistoryReplay
             var operation = QueueViewLeaseIsolationOperations.Original(sample);
             await QueueViewLeaseIsolationReads.ObserveAsync(state, async () =>
                 await QueueViewLeaseIsolationResults.SameAsync(
-                    state.Owner.Database.Apply(operation, sample.Entry.Index), sample.Result));
+                    state.Owner.Database.ApplyStorageOperation(operation, sample.Entry.CanonicalSequence,
+                        state.Token).Result, sample.Result));
             await CurrentAsync(state, sample, () => state.Owner.Submit(operation));
             await CurrentAsync(state, sample, () => state.Owner.Database.ResolveOutcome(operation));
             await OriginalAsync(state, sample);
@@ -21,7 +23,7 @@ internal static class QueueViewLeaseIsolationHistoryReplay
     }
 
     private static Task CurrentAsync(QueueViewLeaseIsolationState state, QueueViewLeaseIsolationHistory sample,
-        Func<OperationResult> operation)
+        Func<Result<object>> operation)
         => QueueViewLeaseIsolationReads.ObserveAsync(state, async () =>
         {
             var actual = operation();
@@ -39,14 +41,14 @@ internal static class QueueViewLeaseIsolationHistoryReplay
     {
         await QueueViewLeaseIsolationOperations.BytesAsync(state.Owner.Store.Read(view => view.ReadOwnedValue(sample.OutcomeKey)), sample.Outcome);
         await QueueViewLeaseIsolationOperations.BytesAsync(state.Owner.Store.Read(view => view.ReadOwnedValue(sample.LocatorKey)), sample.Locator);
-        var entry = state.Owner.Entry(sample.Operation.Id);
-        await Assert.That(entry.Index == sample.Entry.Index && entry.Term == sample.Entry.Term).IsTrue();
+        var entry = state.Owner.Entry(sample.Operation.CommandId);
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(sample.Entry.CanonicalSequence);
         var expected = QueueViewLeaseIsolationOperations.Original(sample);
-        var actual = entry.Operation ?? throw new InvalidOperationException(Absent);
-        await Assert.That(actual.Id == expected.Id && actual.Kind == expected.Kind
-            && actual.PrincipalId == expected.PrincipalId && actual.EvaluatedAt == expected.EvaluatedAt
-            && actual.PayloadJson == expected.PayloadJson).IsTrue();
-        await Assert.That(actual.NativePayload.Span.SequenceEqual(expected.NativePayload.Span)).IsTrue();
+        var actual = entry.PreparedCommand;
+        await Assert.That(actual.CommandId == expected.CommandId && actual.Value!.Kind == expected.Value!.Kind
+            && actual.UserId == expected.UserId && actual.Timestamp == expected.Timestamp).IsTrue();
+        await Assert.That(actual.Value!.Input.Span.SequenceEqual(expected.Value!.Input.Span)).IsTrue();
+        await Assert.That(actual.Value.Fingerprint).IsEqualTo(expected.Value.Fingerprint);
         var stored = NativeSerialization.Deserialize<StoredOutcome>(sample.Outcome);
         await QueueViewLeaseIsolationResults.SameAsync(stored.Result, sample.Result);
     }

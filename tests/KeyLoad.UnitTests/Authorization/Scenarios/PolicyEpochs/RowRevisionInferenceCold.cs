@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Server;
 using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
 
@@ -6,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class RowRevisionInferenceCold
 {
     internal static async Task RunAsync(TestDatabase db,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Outcome)> originals, RowRevisionInferenceLifetime lifetime, CancellationToken token)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome)> originals, RowRevisionInferenceLifetime lifetime, CancellationToken token)
     {
         var identity = db.Store.Identity;
         var image = TeamRowPolicyAssertions.Image(db.Store);

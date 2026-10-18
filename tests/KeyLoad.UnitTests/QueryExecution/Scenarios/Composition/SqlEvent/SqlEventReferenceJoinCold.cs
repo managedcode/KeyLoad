@@ -41,11 +41,9 @@ internal static class SqlEventReferenceJoinCold
                         SqlEventReferenceJoinFixture.Request(database.Partition)), position, repaired: true);
                     await SqlEventReferenceJoinAssertions.PageAsync(engine.Execute(SqlEventReferenceJoinFixture.Reader,
                         SqlEventReferenceJoinFixture.Request(database.Partition)), position, restricted: true, repaired: true);
-                    var replay = owner.ApplyEmbedded(new(seed.CommandId, OperationKind.Batch, "root", default,
-                        JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
+                    var replay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, "root", default, JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
                     await Assert.That(JsonDefaults.Serialize(replay)).IsEquivalentTo(JsonDefaults.Serialize(original), CollectionOrdering.Matching);
-                    var repairReplay = owner.ApplyEmbedded(new(repair.CommandId, OperationKind.Batch, "root", default,
-                        JsonSerializer.Serialize(repair, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
+                    var repairReplay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, repair.CommandId, "root", default, JsonSerializer.Serialize(repair, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
                     await Assert.That(JsonDefaults.Serialize(repairReplay)).IsEquivalentTo(JsonDefaults.Serialize(repaired), CollectionOrdering.Matching);
                     var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
                         SqlEventReferenceJoinFixture.Request(database.Partition, SqlEventReferenceJoinFixture.InvalidStreamSet)));

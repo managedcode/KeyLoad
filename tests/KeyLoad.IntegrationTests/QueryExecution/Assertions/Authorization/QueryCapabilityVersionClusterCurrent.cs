@@ -50,7 +50,8 @@ internal static class QueryCapabilityVersionClusterCurrent
         await Assert.That(receipt.CommandId).IsEqualTo(state.Seed.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(new MutationReceipt[]
             { new("putDocument", QueryCapabilityVersionClusterRequests.Collection, "a", 1L), new("putDocument", QueryCapabilityVersionClusterRequests.Collection, "b", 1L),
               new("putDocument", QueryCapabilityVersionClusterRequests.Collection, "c", 1L), new("putDocument", QueryCapabilityVersionClusterRequests.Collection, "d", 1L) }, receipt.Mutations.ToArray());

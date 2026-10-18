@@ -11,7 +11,7 @@ internal static class RequestCqrsFatalSettlementCases
     private const string CleanupCanary = "fatal-settlement-cleanup-canary";
 
     internal static async Task AcCrs003FatalCreateFailureSettlesActivationAndKeepsFatalPrecedence(
-        RequestCqrsClusterFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
     {
         await AssertNativeFatalAsync(fatal);
         var observation = new RequestCqrsFatalObservation();
@@ -31,7 +31,7 @@ internal static class RequestCqrsFatalSettlementCases
     }
 
     internal static async Task AcCrs003NativePullFatalNeverBecomesFailedAndJoinsProducer(
-        RequestCqrsClusterFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
     {
         await AssertNativeFatalAsync(fatal);
         var observation = new RequestCqrsFatalObservation();
@@ -50,7 +50,7 @@ internal static class RequestCqrsFatalSettlementCases
     }
 
     internal static async Task AcCrs003NativeDisposalFatalSettlesBeforeActivation(
-        RequestCqrsClusterFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
     {
         await AssertNativeFatalAsync(fatal);
         await AssertDisposalFatalAsync(fixture, fatal, new IOException(CleanupCanary));
@@ -59,7 +59,7 @@ internal static class RequestCqrsFatalSettlementCases
     }
 
     internal static async Task AcCrs003ActivationFatalAndOrdinaryCleanupFaultsRemainObservable(
-        RequestCqrsClusterFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
     {
         await AssertNativeFatalAsync(fatal);
         var observation = new RequestCqrsFatalObservation();
@@ -77,7 +77,7 @@ internal static class RequestCqrsFatalSettlementCases
     }
 
     private static async Task AssertPrimaryFatalWinsAsync(
-        RequestCqrsClusterFixture fixture, RequestCqrsFatalCase primaryFatal)
+        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase primaryFatal)
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
@@ -94,7 +94,7 @@ internal static class RequestCqrsFatalSettlementCases
     }
 
     private static async Task AssertDisposalFatalAsync(
-        RequestCqrsClusterFixture fixture, RequestCqrsFatalCase fatal, Exception activationFailure)
+        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal, Exception activationFailure)
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
@@ -111,7 +111,7 @@ internal static class RequestCqrsFatalSettlementCases
         await AssertHealthyFollowingStreamAsync(fixture);
     }
 
-    internal static async Task AssertFatalActivationWinsOverOrdinaryPrimaryAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task AssertFatalActivationWinsOverOrdinaryPrimaryAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
@@ -128,7 +128,7 @@ internal static class RequestCqrsFatalSettlementCases
         await AssertHealthyFollowingStreamAsync(fixture);
     }
 
-    internal static async Task AssertOrdinaryCleanupFailuresRemainObservable(RequestCqrsClusterFixture fixture)
+    internal static async Task AssertOrdinaryCleanupFailuresRemainObservable(RequestCqrsHostedRuntimeFixture fixture)
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
@@ -181,11 +181,11 @@ internal static class RequestCqrsFatalSettlementCases
     }
 
     private static Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ChunkSerializer(
-        RequestCqrsClusterFixture fixture)
-        => fixture.Cluster.ServiceProvider.GetRequiredService<
+        RequestCqrsHostedRuntimeFixture fixture)
+        => fixture.Services.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
 
-    private static async Task AssertHealthyFollowingStreamAsync(RequestCqrsClusterFixture fixture)
+    private static async Task AssertHealthyFollowingStreamAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var observation = new RequestCqrsFatalObservation();

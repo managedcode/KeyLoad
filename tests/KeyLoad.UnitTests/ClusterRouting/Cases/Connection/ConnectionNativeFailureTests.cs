@@ -17,7 +17,7 @@ internal sealed class ConnectionNativeFailureTests
             await scenario.InitializeAsync(token);
             var principal = scenario.Principal();
             using var diagnostics = new EventSourceLogCapture();
-            var beforeFailure = scenario.Fixture.Database.ReadJournalCut();
+            var beforeFailure = scenario.Fixture.Database.ReadCanonicalCut();
             var beforeFailurePosition = scenario.Fixture.Database.Store.Position;
             var failedId = Guid.NewGuid();
             scenario.Observation.Hold(failedId, fail: true);
@@ -25,7 +25,7 @@ internal sealed class ConnectionNativeFailureTests
             var failed = await scenario.CommandAsync(principal, failedId, failedCommand, token);
             await Assert.That(failed.Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
             await ConnectionFailureDiagnosticAssertions.FailedAsync(scenario, failedId, failed, diagnostics, token);
-            await Assert.That(scenario.Fixture.Database.ReadJournalCut()).IsEqualTo(beforeFailure);
+            await Assert.That(scenario.Fixture.Database.ReadCanonicalCut()).IsEqualTo(beforeFailure);
             await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(beforeFailurePosition);
             await ConnectionNativeAssertions.MissingOutcomeAsync(scenario, principal, failedCommand, "ordinary-failure");
             var revoked = principal with

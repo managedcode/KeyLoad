@@ -36,7 +36,7 @@ internal static class RevokedOutcomeAdmissionModel
             var command = commands[producer];
             var effects = RevokedOutcomeAdmissionValues.Effects(producer != 0);
             var position = producer == 0 ? fixture.OriginalPosition : fixture.FreshPosition;
-            var commit = new CommitToken(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position, 1);
+            var commit = new CommitToken(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position);
             for (var index = 0; index < command.Mutations.Length; index++)
             {
                 sequence++;

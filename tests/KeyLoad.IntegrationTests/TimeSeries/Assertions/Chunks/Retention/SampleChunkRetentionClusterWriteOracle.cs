@@ -13,8 +13,8 @@ internal static class SampleChunkRetentionClusterWriteOracle
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, request, token).ConfigureAwait(false))).Value
             : await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(request, token).ConfigureAwait(false));
         var expected = new CommitReceipt(request.CommandId, new(actual.Token.Incarnation, request.Partition.AtomicPartitionId,
-            actual.Token.Position, actual.Token.OwnershipEpoch),
-            [.. mutations], DurabilityProfile.QuorumProcessDurable);
+            actual.Token.Position),
+            [.. mutations], DurabilityProfile.ProcessDurable, 3);
         await SampleChunkRetentionClusterReadOracle.EqualAsync(actual, expected);
         await ReplayAsync(sdk, mcp, request, actual, token);
         return actual;

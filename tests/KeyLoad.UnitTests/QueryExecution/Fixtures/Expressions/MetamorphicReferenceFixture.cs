@@ -28,9 +28,7 @@ internal sealed class MetamorphicReferenceFixture(int seed) : IDisposable
             [.. Rows.Select(row => (Mutation)new PutDocument(MetamorphicReferenceData.Collection, row.Id, row.Json))]);
         var before = Harness.Store.Position;
         Receipt = Harness.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
-        var expected = new CommitReceipt(Seed.CommandId,
-            new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L, 1L),
-            [.. Rows.Select(row => new MutationReceipt("putDocument", MetamorphicReferenceData.Collection, row.Id, 1L))], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [.. Rows.Select(row => new MutationReceipt("putDocument", MetamorphicReferenceData.Collection, row.Id, 1L))], DurabilityProfile.ProcessDurable, 1);
         await MetamorphicReferenceAssertions.EqualAsync(Receipt, expected);
         await NativeReceiptAsync(Receipt);
         await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);

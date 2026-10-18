@@ -35,7 +35,7 @@ internal static class AtomicTriadStagedClusterWarm
         state.HealthyCommitted = result.IsSuccess && result.Value is not null;
         var receipt = await McpCallerAssertions.SdkSuccessAsync(result);
         state.Receipt = new(state.Healthy.CommandId, new(receipt.Token.Incarnation, state.Partition.AtomicPartitionId,
-            receipt.Token.Position, receipt.Token.OwnershipEpoch), AtomicTriadStagedClusterRecipe.Receipts, DurabilityProfile.QuorumProcessDurable);
+            receipt.Token.Position), AtomicTriadStagedClusterRecipe.Receipts, DurabilityProfile.ProcessDurable, 3);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(receipt.Token.Position > 0L).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(() => QueueProducerClusterAssertions.EqualAsync(receipt, state.Receipt), failures);

@@ -26,7 +26,7 @@ internal static class TargetInboxNativeAssertions
         ErrorCode expected, CancellationToken token, string principal = TargetInboxUnitProtocol.Root)
     {
         var before = Image(store, request.Source.Partition, request.Target.Partition);
-        await Assert.That(TargetInboxNativeSetup.Apply(database, request, token, principal).Error).IsEqualTo(expected);
+        await Assert.That(Errors.Code(TargetInboxNativeSetup.Apply(database, request, token, principal).Problem)).IsEqualTo(expected);
         await Assert.That(Image(store, request.Source.Partition, request.Target.Partition)).IsEquivalentTo(before, CollectionOrdering.Matching);
     }
 

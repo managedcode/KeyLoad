@@ -17,8 +17,7 @@ internal sealed class SdkResponseAdmissionOwner(TestDatabase database, bool cont
         get;
     } = CreateExpectedToken(database);
 
-    internal CommitReceipt Expected => new(Command.CommandId, ExpectedToken,
-        [new(PutKind, Collection, Document, CommittedRevision)], DurabilityProfile.ProcessDurable);
+    internal CommitReceipt Expected => new(Command.CommandId, ExpectedToken, [new(PutKind, Collection, Document, CommittedRevision)], DurabilityProfile.ProcessDurable, 1);
 
     internal CommitReceipt? Original
     {
@@ -42,7 +41,7 @@ internal sealed class SdkResponseAdmissionOwner(TestDatabase database, bool cont
     {
         var placement = database.Database.ReadAtomicPartitionPlacement(Root, database.Partition);
         return new(placement.Incarnation, database.Partition.AtomicPartitionId,
-            checked(database.Store.Position + NextCommit), placement.PlacementEpoch);
+            checked(database.Store.Position + NextCommit));
     }
 
     private async Task HandleCoreAsync(HttpContext context)

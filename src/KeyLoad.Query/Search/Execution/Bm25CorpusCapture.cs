@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using Microsoft.Extensions.Options;
@@ -6,7 +7,7 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class Bm25CorpusCapture
 {
-    internal static ReplicatedOperation Create(DatabaseEngine database, string administratorId,
+    internal static Command<DatabaseCommand> Create(DatabaseEngine database, string administratorId,
         string subjectId, SearchRequest request, Guid commandId, Guid? expectedGeneration,
         DateTimeOffset originalExpiry, ReadExecutionBudget work, IOptions<QueryExecutionOptions> options)
     {

@@ -35,7 +35,6 @@ internal sealed class DocumentSessionReadTests
         [
             receipt.Token with { Incarnation = Guid.NewGuid() },
             receipt.Token with { AtomicPartitionId = Guid.NewGuid().ToString() },
-            receipt.Token with { OwnershipEpoch = receipt.Token.OwnershipEpoch + First },
             receipt.Token with { Position = Invalid },
             receipt.Token with { Position = Second }
         ];
@@ -169,8 +168,7 @@ internal sealed class DocumentSessionReadTests
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, db.Partition, [new PutDocument(Collection, DocumentId, json, revision, ExplicitReplacement: revision > Invalid)]);
-        return db.Database.Apply(new(id, OperationKind.Batch, Root, db.Database.EvaluationClock.GetUtcNow(),
-            JsonSerializer.Serialize(command, JsonDefaults.Options)), applied).Get<CommitReceipt>();
+        return db.Database.Apply(db.Database.CreateCommand(OperationKind.Batch, id, Root, db.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)), applied).Get<CommitReceipt>();
     }
 
     private static (string Key, string Value)[] Snapshot(TestDatabase db) => db.Store.Read(view =>

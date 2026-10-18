@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
@@ -27,7 +28,7 @@ internal static class SampleMetadataIntegrityAssertions
         await Assert.That(actual.Image).IsEqualTo(cut.Image);
     }
     internal static async Task Refuse(SampleMetadataIntegrityFixture fixture, SampleMetadataIntegrityFault fault,
-        ReplicatedOperation refresh, ReplicatedOperation expiry)
+        Command<DatabaseCommand> refresh, Command<DatabaseCommand> expiry)
     {
         var code = SampleMetadataIntegrityScenario.Code(fault);
         await Failure(fixture, () => SampleMetadataIntegrityScenario.Bucket(fixture), code);
@@ -50,7 +51,7 @@ internal static class SampleMetadataIntegrityAssertions
         await Assert.That(failure.Code).IsEqualTo(code);
         await Unchanged(fixture, cut);
     }
-    internal static async Task Replay(SampleMetadataIntegrityFixture fixture, ReplicatedOperation operation,
+    internal static async Task Replay(SampleMetadataIntegrityFixture fixture, Command<DatabaseCommand> operation,
         CommitReceipt receipt)
     {
         var cut = Capture(fixture.Store);

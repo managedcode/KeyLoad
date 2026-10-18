@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -29,10 +30,9 @@ internal sealed class NativeLocalChildLifetimeSession
 
     internal NativeLocalChildLifetimeOperation Initialize(NativeLocalChildLifetimeSeeded state, CancellationToken token)
     {
-        var database = state.Leader.Journal.Database;
+        var database = state.Leader.Database.Database;
         Owner = new(UnitRoutingOptions.Routing());
         Owner.BindPhysicalOwner(state.PhysicalOwner);
-        Owner.AttachResourceLifetimeWorkFence(database, state.Leader.Journal.Log.State.LastIndex);
         Ledger = new(database.OperationLimitsOptions);
         Parent = Owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.RequestProducer);
         Parent.AttachResultRetention(Ledger);
@@ -51,7 +51,7 @@ internal sealed class NativeLocalChildLifetimeSession
         NativeLocalChildLifetimeSeeded state, NativeLocalChildLifetimeInput input)
     {
         var reservation = operation.Parent.ReserveLocalChild(input.Verified,
-            state.PhysicalOwner, state.Leader.Discovery.Read());
+            state.PhysicalOwner, state.Leader.Services.GetRequiredService<SiloStorageIdentityProvider>().Read());
         Reservations.Add(reservation);
         return reservation;
     }

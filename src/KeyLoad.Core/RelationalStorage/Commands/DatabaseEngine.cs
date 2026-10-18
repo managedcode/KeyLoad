@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -8,7 +10,7 @@ public sealed partial class DatabaseEngine
     private const string TableCreationInvalid = "The canonical table definition is invalid.";
     private const string TableCreationExists = "The table resource already exists.";
 
-    private OperationResult ExecuteCreateTable(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private static Result<object> ExecuteCreateTable(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = Payload<CreateTableRequest>(operation);
         if (request is null || request.Definition is null
@@ -27,7 +29,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Conflict, TableCreationExists);
         }
-        _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition, Limits);
+        _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);
     }

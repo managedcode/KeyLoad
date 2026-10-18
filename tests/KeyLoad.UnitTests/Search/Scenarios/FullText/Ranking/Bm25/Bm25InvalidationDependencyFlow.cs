@@ -63,17 +63,17 @@ internal static class Bm25InvalidationDependencyFlow
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition, [mutation]);
         var original = database.Submit(OperationKind.Batch, request, id: id).Get<CommitReceipt>();
-        var entry = database.ReadRetainedEntry(id);
+        var entry = database.ReadStoredOutcome(id);
         var stored = OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Root, id)!.Get<CommitReceipt>();
         var beforeReplay = Image(database);
-        var journal = database.ReadJournalCut();
+        var journal = database.ReadCanonicalCut();
         var replay = database.Submit(OperationKind.Batch, request, id: id).Get<CommitReceipt>();
-        await Assert.That(entry.Operation!.Id).IsEqualTo(id);
+        await Assert.That(entry.PreparedCommand!.CommandId).IsEqualTo(id);
         await Assert.That(original.CommandId).IsEqualTo(id);
         await Assert.That(JsonDefaults.Serialize(stored))
             .IsEquivalentTo(JsonDefaults.Serialize(original), CollectionOrdering.Matching);
         await SameImageAsync(beforeReplay, Image(database));
-        await Assert.That(database.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(database.ReadCanonicalCut()).IsEqualTo(journal);
         await Assert.That(JsonDefaults.Serialize(replay))
             .IsEquivalentTo(JsonDefaults.Serialize(original), CollectionOrdering.Matching);
         await Assert.That(database.Database.GetOutboxStatus(Root, database.Partition).Head.Tail)
@@ -140,13 +140,13 @@ internal static class Bm25InvalidationDependencyFlow
     private static async Task DeniedAsync(TestDatabase database, SearchEngine search)
     {
         var before = Image(database);
-        var journal = database.ReadJournalCut();
+        var journal = database.ReadCanonicalCut();
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             search.SearchAsync(Reader, new(database.Partition, Collection, Text, Term),
                 TestContext.Current!.Execution.CancellationToken));
         await Assert.That(failure!.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await SameImageAsync(before, Image(database));
-        await Assert.That(database.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(database.ReadCanonicalCut()).IsEqualTo(journal);
     }
 
     private static async Task SameImageAsync(

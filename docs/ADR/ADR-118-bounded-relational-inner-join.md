@@ -90,7 +90,7 @@ Unit, real ZoneTree:
 Real cluster, existing AppHost-owned fixture:
 - configure both typed schemas and seed cross-table rows with authenticated SDK command operations; query through KeyLoadClient.QueryAsync and official MCP keyload_query_execute (and unified SQL MCP adapter if existing wrapper is the intended target) with dialect 2; assert same complete page, row JSON, pair identities, access path and cuts after the seed commit.
 - use a persisted principal with left-only and then missing join-key field use; SDK and official MCP receive safe PermissionDenied, no source values leak, all seeded state stays unchanged, then admin reruns and gets exact expected result.
-- concurrently commit an atomic generation/reference update on one request while cluster reads execute; only whole old or whole new joined generation is allowed. Assert normal majority acknowledgement via the existing fixture; no new topology or durability claim.
+- concurrently commit an atomic generation/reference update on one request while cluster reads execute; only whole old or whole new joined generation is allowed. Assert normal acknowledgement from every configured copy via the existing fixture; no new topology or durability claim.
 - cancellation and work/byte-limit rejection are visible as typed safe errors, settled through the existing SDK/MCP path, and followed by a successful admin read. Actual recovery/reopen flow stays with the existing process-recovery/AppHost fixture; do not claim a test fixture rebuild is a process restart.
 
 The exact additive request/result shape is frozen before scoped source work. This stage leaves the parent relational/full SQL requirements open.

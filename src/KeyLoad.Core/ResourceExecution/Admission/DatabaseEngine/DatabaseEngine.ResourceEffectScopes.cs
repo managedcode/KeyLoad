@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
@@ -8,13 +9,13 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private void ObserveAdditionalResourceEffects(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation)
+        Command<DatabaseCommand> operation)
     {
-        if (BlobStorageOperations.Handles(operation.Kind))
+        if (BlobStorageOperations.Handles(operation.Value!.Kind))
         {
             return;
         }
-        switch (operation.Kind)
+        switch (operation.Value!.Kind)
         {
             case OperationKind.Batch:
                 return;
@@ -38,7 +39,7 @@ public sealed partial class DatabaseEngine
                 return;
             default:
                 if (ObserveCatalogResourceEffect(view, operation) || ObserveProjectionResourceEffects(view, principal, operation)
-                    || IsResourceFreeNativeOperation(operation.Kind))
+                    || IsResourceFreeNativeOperation(operation.Value!.Kind))
                 {
                     return;
                 }

@@ -82,7 +82,7 @@ internal sealed class DocumentMutationImageReadTests
         var receipt = db.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         var delta = Delta(db, before);
         var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-            db.Store.Position, 1), [new(kind, Collection, DocumentId, revision)], db.Store.Identity.Durability);
+            db.Store.Position), [new(kind, Collection, DocumentId, revision)], db.Store.Identity.Durability, (db.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
 
         await Assert.That(NativeSerialization.Serialize(receipt).SequenceEqual(
             NativeSerialization.Serialize(expected))).IsTrue();

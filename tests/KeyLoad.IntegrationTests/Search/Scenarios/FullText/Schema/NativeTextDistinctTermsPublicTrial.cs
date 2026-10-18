@@ -46,7 +46,8 @@ internal static class NativeTextDistinctTermsPublicTrial
     {
         var result = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token));
         await Assert.That(result.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(result.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(result.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(result.PersistedCopies).IsEqualTo(3);
         await Assert.That(result.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         return new(command, result);
     }

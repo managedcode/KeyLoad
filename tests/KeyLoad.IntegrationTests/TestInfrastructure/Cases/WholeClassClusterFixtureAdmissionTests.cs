@@ -13,7 +13,7 @@ internal sealed class WholeClassClusterFixtureAdmissionTests
     private const string Enabled = "--KeyLoadTests:LocalClusterImage:Enabled=true";
     private const string UnknownFilter = "/*/*/UnknownReleaseCase/*";
     private const string Whitespace = " ";
-    private const string Invalid = "The local CLUSTER image selection is invalid.";
+    private const string Invalid = "The local Orleans image selection is invalid.";
 
     [Test]
     [Arguments(0)]

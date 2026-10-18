@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage;
@@ -72,8 +74,8 @@ internal static class BackupPersistedPolicyAssertions
         await UnchangedAsync(database.Store, cut);
     }
 
-    internal static async Task ReplayAsync(DatabaseEngine database, ReplicatedOperation operation,
-        OperationResult original, CancellationToken token)
+    internal static async Task ReplayAsync(DatabaseEngine database, Command<DatabaseCommand> operation,
+        Result<object> original, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var cut = Capture(database.Store);
@@ -87,7 +89,7 @@ internal static class BackupPersistedPolicyAssertions
         await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
         var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, partition));
         await SameAsync(new CommitToken(owner.Incarnation, partition.AtomicPartitionId,
-            database.Store.Position, owner.PlacementEpoch), receipt.Token);
+            database.Store.Position), receipt.Token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
     }

@@ -40,13 +40,10 @@ internal sealed class CommandObservedPolicyScenario(bool header)
         var command = new CommandRequest(id, partition,
             [new EnqueueMessage(P.Queue, P.First, P.Payload, P.Headers),
                 new EnqueueMessage(P.Queue, P.Second, P.Payload, P.Headers)]);
-        var index = checked(Fixture.Database.ReadJournalCut().LastIndex + P.Step);
+        var index = checked(Fixture.Database.ReadCanonicalCut().AppliedPosition + P.Step);
         var actual = CommandObservedPolicyAssertions.Value<CommitReceipt>(await Fixture.Database.SubmitAsync(
             OperationKind.Batch, command, token, id: id));
-        var expected = new CommitReceipt(id,
-            new(Fixture.Database.Store.Identity.Incarnation, partition.AtomicPartitionId, index, P.Initial),
-            [new(P.EnqueueKind, P.Queue, P.First, P.Initial), new(P.EnqueueKind, P.Queue, P.Second, P.Initial)],
-            DurabilityProfile.QuorumProcessDurable);
+        var expected = new CommitReceipt(id, new(Fixture.Database.Store.Identity.Incarnation, partition.AtomicPartitionId, index), [new(P.EnqueueKind, P.Queue, P.First, P.Initial), new(P.EnqueueKind, P.Queue, P.Second, P.Initial)], DurabilityProfile.ProcessDurable, 1);
         await CommandObservedPolicyAssertions.EqualAsync(expected, actual);
     }
 

@@ -35,14 +35,14 @@ internal static class ConnectionFailureDiagnosticAssertions
     internal static async Task ReplayAsync(ConnectionNativeScenario scenario, PrincipalRecord principal,
         Guid originalRequestId, CommandRequest command, GrainOperationReply original, CancellationToken token)
     {
-        var before = scenario.Fixture.Database.ReadJournalCut();
+        var before = scenario.Fixture.Database.ReadCanonicalCut();
         var position = scenario.Fixture.Database.Store.Position;
         var replayId = Guid.NewGuid();
         var replay = await scenario.CommandAsync(principal, replayId, command, token);
         await Assert.That(replay.Error).IsNull();
         await Assert.That(replay.SafeDetail).IsEqualTo(original.SafeDetail);
         await Assert.That(replay.Payload.Span.SequenceEqual(original.Payload.Span)).IsTrue();
-        await Assert.That(scenario.Fixture.Database.ReadJournalCut()).IsEqualTo(before);
+        await Assert.That(scenario.Fixture.Database.ReadCanonicalCut()).IsEqualTo(before);
         await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(position);
         await ConnectionNativeAssertions.StoredAsync(scenario, "healthy-after-revocation",
             FirstRevision, ConnectionNativeProtocol.FirstJson);

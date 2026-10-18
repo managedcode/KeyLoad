@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
@@ -17,23 +19,17 @@ internal static class LocalInboxProcessingHealthyContinuation
     private const string EmptyHeaders = "{}";
     private const long MissingDocumentRevision = 0L;
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result)> RunAsync(DatabaseEngine database,
-        ZoneTreeStore store, ReplicatedOperation original, List<(ReplicatedOperation, OperationResult)> history, (byte[] Key, byte[] Value)[] originalRows)
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> RunAsync(DatabaseEngine database,
+        ZoneTreeStore store, Command<DatabaseCommand> original, List<(Command<DatabaseCommand>, Result<object>)> history, (byte[] Key, byte[] Value)[] originalRows)
     {
         var receive = new ReceiveRequest(Guid.NewGuid(), LocalInboxProcessingCrashContract.OutputLane);
-        var receiveOperation = original with
-        {
-            Id = receive.RequestId,
-            Kind = OperationKind.Receive,
-            EvaluatedAt = database.EvaluationClock.GetUtcNow(),
-            PayloadJson = JsonSerializer.Serialize(receive, JsonDefaults.Options)
-        };
+        var receiveOperation = database.CreateCommand(OperationKind.Receive, receive.RequestId, original.UserId!, database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(receive, JsonDefaults.Options));
         var receiveToken = NextToken(database, store);
         var claims = new DeliveryClaims(receive.Lane, LocalInboxProcessingCrashContract.Message,
-            original.PrincipalId, OriginalLeaseVersion, LocalInboxProcessingCrashContract.Generation, receiveToken.Incarnation);
+            original.UserId!, OriginalLeaseVersion, LocalInboxProcessingCrashContract.Generation, receiveToken.Incarnation);
         var expected = new ReceiveResult(receive.RequestId,
             [new(LocalInboxProcessingCrashContract.Message, LocalInboxProcessingCrashContract.Payload, EmptyHeaders,
-                database.Sign(claims), OriginalLeaseVersion, receiveOperation.EvaluatedAt.AddSeconds(receive.LeaseSeconds),
+                database.Sign(claims), OriginalLeaseVersion, new DateTimeOffset(receiveOperation.Timestamp).AddSeconds(receive.LeaseSeconds),
                 InitialAttempt, LocalInboxProcessingCrashContract.Generation)], receiveToken);
         var received = database.Apply(receiveOperation);
         await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
@@ -43,17 +39,14 @@ internal static class LocalInboxProcessingHealthyContinuation
         var healthy = new ProcessingRequest(Guid.NewGuid(), LocalInboxProcessingCrashContract.OutputLane, delivery.Token,
             LocalInboxProcessingCrashContract.Handler, LocalInboxProcessingCrashContract.Generation,
             [new PutDocument(LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Healthy, LocalInboxProcessingCrashContract.Payload, MissingDocumentRevision)]);
-        var healthyOperation = LocalInboxProcessingRecoveryContinuation.Operation(original, healthy) with
-        {
-            EvaluatedAt = database.EvaluationClock.GetUtcNow()
-        };
+        var healthyOperation = LocalInboxProcessingRecoveryContinuation.Operation(database, original, healthy);
+        healthyOperation.Timestamp = database.EvaluationClock.GetUtcNow().UtcDateTime;
         var healthyToken = NextToken(database, store);
         var completed = database.Apply(healthyOperation);
         await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
-        await LocalInboxProcessingRecoveryImage.ExactAsync(completed.Get<CommitReceipt>(), new CommitReceipt(healthy.CommandId,
-            healthyToken, [new(DocumentKind, LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Healthy, HealthyDocumentRevision),
+        await LocalInboxProcessingRecoveryImage.ExactAsync(completed.Get<CommitReceipt>(), new CommitReceipt(healthy.CommandId, healthyToken, [new(DocumentKind, LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Healthy, HealthyDocumentRevision),
                 new(AckKind, LocalInboxProcessingCrashContract.Output, LocalInboxProcessingCrashContract.Message,
-                    LocalInboxProcessingCrashContract.FinalVersion)], DurabilityProfile.ProcessDurable));
+                    LocalInboxProcessingCrashContract.FinalVersion)], DurabilityProfile.ProcessDurable, 1));
         foreach (var mutation in completed.Get<CommitReceipt>().Mutations)
         {
             await Assert.That(mutation.CompositionReferences).IsEmpty();
@@ -68,7 +61,7 @@ internal static class LocalInboxProcessingHealthyContinuation
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
             LocalInboxProcessingCrashContract.Partition);
         return new(placement.Incarnation, LocalInboxProcessingCrashContract.Partition.AtomicPartitionId,
-            checked(store.Position + NextCommitPosition), placement.PlacementEpoch);
+            checked(store.Position + NextCommitPosition));
     }
 
 }

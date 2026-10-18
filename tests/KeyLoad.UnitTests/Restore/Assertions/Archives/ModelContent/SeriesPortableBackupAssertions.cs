@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 using TUnit.Assertions.Enums;
@@ -22,14 +24,14 @@ internal static class SeriesPortableBackupAssertions
         });
 
     internal static async Task ReceiptAsync(DatabaseEngine database, PartitionRef partition,
-        ReplicatedOperation operation, OperationResult result)
+        Command<DatabaseCommand> operation, Result<object> result)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, partition));
         await BackupPersistedPolicyAssertions.SameAsync(new CommitToken(owner.Incarnation,
-            partition.AtomicPartitionId, database.Store.Position, owner.PlacementEpoch), receipt.Token);
+            partition.AtomicPartitionId, database.Store.Position), receipt.Token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
@@ -120,7 +122,7 @@ internal static class SeriesPortableBackupAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database,
-        (ReplicatedOperation Operation, OperationResult Result)[] operations, CancellationToken token)
+        (Command<DatabaseCommand> Operation, Result<object> Result)[] operations, CancellationToken token)
     {
         foreach (var original in operations)
         {
@@ -129,12 +131,12 @@ internal static class SeriesPortableBackupAssertions
     }
 
     internal static async Task SourceOutcomesAsync(BackupIndexedDocumentDedupFixture fixture, byte[][] originals,
-        (ReplicatedOperation Operation, OperationResult Result)[] operations)
+        (Command<DatabaseCommand> Operation, Result<object> Result)[] operations)
     {
         for (var index = 0; index < operations.Length; index++)
         {
             await Assert.That(BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.TargetStore,
-                fixture.Partition, SeriesPortableBackupSeed.Root, operations[index].Operation.Id))
+                fixture.Partition, SeriesPortableBackupSeed.Root, operations[index].Operation.CommandId))
                 .IsEquivalentTo(originals[index], CollectionOrdering.Matching);
         }
     }

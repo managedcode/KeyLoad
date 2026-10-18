@@ -26,7 +26,7 @@ internal static class TopicRetentionAssertions
             KeySpace.Partition("topic-head", fixture.Owner.Partition, "topic")));
         var initialPosition = fixture.Store.Position;
         var failed = fixture.Submit(command, principal);
-        await Assert.That(failed.Error).IsEqualTo(expected);
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(expected);
         await Assert.That(fixture.Store.Position).IsEqualTo(initialPosition + 1);
         var cut = fixture.Store.Position;
         var all = QueueWholeFlowStorage.Bytes(fixture.Store);

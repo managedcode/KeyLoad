@@ -31,7 +31,8 @@ internal static class BlobRowCreatorPublicReplay
         await Assert.That(publication.Begun.Receipt.CommandId).IsEqualTo(publication.Begin.CommandId);
         await Assert.That(publication.Written.Receipt.CommandId).IsEqualTo(publication.Part.CommandId);
         await Assert.That(publication.Completed.Receipt.CommandId).IsEqualTo(publication.Complete.CommandId);
-        await Assert.That(publication.Completed.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(publication.Completed.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(publication.Completed.Receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(publication.Completed.Receipt.Token.AtomicPartitionId).IsEqualTo(publication.Begin.Blob.Partition.AtomicPartitionId);
     }
 }

@@ -53,8 +53,8 @@ internal static class QueueDeadLetterSelectedRetainedInbox
             await Assert.That(page.HasMore).IsFalse();
             await Assert.That(page.Records).IsEmpty();
         }
-        var saved = state.History.Single(saved => saved.Operation.Kind == OperationKind.Processing);
-        var processing = JsonSerializer.Deserialize<ProcessingRequest>(saved.Operation.PayloadJson, JsonDefaults.Options)!;
+        var saved = state.History.Single(saved => saved.Operation.Value!.Kind == OperationKind.Processing);
+        var processing = NativeSerialization.Deserialize<ProcessingRequest>(saved.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)!;
         await QueueDeadLetterSelectedContinuation.EffectsAsync(database, store, processing,
             QueueDeadLetterSelectedProtocol.HistoryMessage, saved.Result.Get<CommitReceipt>());
     }

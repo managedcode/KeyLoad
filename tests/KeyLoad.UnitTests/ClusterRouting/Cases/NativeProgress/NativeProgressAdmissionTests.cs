@@ -1,7 +1,7 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource]
-internal sealed class NativeProgressAdmissionTests(RequestCqrsClusterFixture fixture)
+[RequestCqrsHostedDataSource]
+internal sealed class NativeProgressAdmissionTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]
     public Task SignedOnlineFreshZeroReplayAndPartialTerminalKeepStrictNativeAdmission()

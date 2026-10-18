@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
@@ -5,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class NativeDropHeldPersistObservation
 {
-    internal static async Task<ReplicatedOperation> JoinExpiredAsync(NativeDropPageAttemptState state,
+    internal static async Task<Command<DatabaseCommand>> JoinExpiredAsync(NativeDropPageAttemptState state,
         Task pending, NativeDropCommandPhaseGate held, ResourceRetirementAttemptV1 attempt)
     {
         var expected = new NativeDropExpectedOriginal(pending);

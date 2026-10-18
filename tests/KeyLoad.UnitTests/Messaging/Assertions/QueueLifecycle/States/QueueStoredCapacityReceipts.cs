@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -12,16 +14,13 @@ internal static class QueueStoredCapacityReceipts
     {
         var placement = owner.ReadAtomicPartitionPlacement(QueueEnqueueColdProtocol.Root, partition);
         await Assert.That(placement.Partition).IsEqualTo(partition);
-        return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + QueueEnqueueAuthorityProtocol.First), placement.PlacementEpoch);
+        return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + QueueEnqueueAuthorityProtocol.First));
     }
 
-    internal static async Task ReceiptAsync(OperationResult actual, Guid id, CommitToken token, ImmutableArray<MutationReceipt> mutations)
-        => await NativeReplayResultAssertions.Same<CommitReceipt>(actual, new(null)
-        {
-            NativeValue = new CommitReceipt(id, token, mutations, DurabilityProfile.ProcessDurable)
-        });
+    internal static async Task ReceiptAsync(Result<object> actual, Guid id, CommitToken token, ImmutableArray<MutationReceipt> mutations)
+        => await NativeReplayResultAssertions.Same<CommitReceipt>(actual, Result<object>.Succeed(new CommitReceipt(id, token, mutations, DurabilityProfile.ProcessDurable, 1)));
 
-    internal static async Task<Delivery> ClaimAsync(DatabaseEngine owner, OperationResult actual,
+    internal static async Task<Delivery> ClaimAsync(DatabaseEngine owner, Result<object> actual,
         QueueStoredCapacityState state, PartitionRef partition, CommitToken token)
     {
         var delivery = await Assert.That(actual.Get<ReceiveResult>().Deliveries).HasSingleItem();
@@ -30,10 +29,7 @@ internal static class QueueStoredCapacityReceipts
         var expected = new Delivery(QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.ReadyJson,
             QueueEnqueueColdProtocol.Headers, delivery.Token, QueueEnqueueAuthorityProtocol.First,
             state.Receive.EvaluatedAt.AddSeconds(request.LeaseSeconds), QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(actual, new(null)
-        {
-            NativeValue = new ReceiveResult(state.Receive.Id, [expected], token)
-        });
+        await NativeReplayResultAssertions.Same<ReceiveResult>(actual, Result<object>.Succeed(new ReceiveResult(state.Receive.Id, [expected], token)));
         await Assert.That(delivery.Token).IsNotEqualTo(string.Empty);
         await Assert.That(owner.Verify<DeliveryClaims>(delivery.Token)).IsEqualTo(
             new DeliveryClaims(lane, QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.Root, QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First, token.Incarnation));
@@ -41,9 +37,9 @@ internal static class QueueStoredCapacityReceipts
     }
 
     internal static async Task FailureAsync(DatabaseEngine owner, ZoneTreeStore store, PartitionRef partition,
-        ReplicatedOperation operation, OperationResult original)
+        Command<DatabaseCommand> operation, Result<object> original)
     {
-        var key = KeySpace.PartitionOutcome(partition, QueueEnqueueColdProtocol.Root, operation.Id);
+        var key = KeySpace.PartitionOutcome(partition, QueueEnqueueColdProtocol.Root, operation.CommandId);
         var retained = store.Read(view => view.ReadOwnedValue(key))!;
         await QueueClaimVersionExhaustionAssertions.EqualAsync(NativeSerialization.Deserialize<StoredOutcome>(retained).Result, original);
         var image = QueueWholeFlowStorage.Bytes(store);

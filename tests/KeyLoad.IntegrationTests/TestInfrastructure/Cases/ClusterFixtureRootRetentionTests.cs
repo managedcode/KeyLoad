@@ -4,7 +4,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.IntegrationTests.Features.TestInfrastructure;
 
-/// <summary>Actual local root-release policy and native store ownership; no injected Aspire stop or CLUSTER proof.</summary>
+/// <summary>Actual local root-release policy and native store ownership; no injected Aspire stop or Orleans proof.</summary>
 internal sealed class ClusterFixtureRootRetentionTests
 {
     private const string RootPrefix = "keyload-fixture-root-retention-";

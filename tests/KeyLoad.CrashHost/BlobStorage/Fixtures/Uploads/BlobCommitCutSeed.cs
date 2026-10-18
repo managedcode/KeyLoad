@@ -48,7 +48,6 @@ internal static class BlobCommitCutSeed
             identity.Incarnation,
             identity.ReadGeneration,
             store.Position,
-            Catalog = NativeSerialization.Serialize(database.ReadPhysicalShardCatalog(BlobCommitCutProtocol.Principal)),
             PrincipalBytes = store.Read(view => view.ReadOwnedValue(KeySpace.Principal(BlobCommitCutProtocol.Principal))),
             DeniedPrincipalBytes = store.Read(view => view.ReadOwnedValue(KeySpace.Principal(BlobCommitCutProtocol.DeniedPrincipal))),
             Operations = operations.ToArray(),
@@ -89,10 +88,10 @@ internal static class BlobCommitCutSeed
     private static void Submit<T>(DatabaseEngine database, OperationKind kind, Guid id, T request,
         List<byte[]> operations, List<byte[]> results)
     {
-        var operation = database.CreateNativeOperation(kind, id, BlobCommitCutProtocol.Principal,
+        var operation = database.CreateCommand(kind, id, BlobCommitCutProtocol.Principal,
             database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var result = database.Apply(operation);
-        if (result.Error is not null)
+        if (Errors.Code(result.Problem) is not null)
         {
             throw new InvalidOperationException(SeedRejected);
         }

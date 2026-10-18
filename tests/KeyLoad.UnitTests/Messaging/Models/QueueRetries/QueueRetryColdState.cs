@@ -1,14 +1,15 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed record QueueRetryColdState(QueueLaneRef Lane, DateTimeOffset Start, CommandRequest Enqueue,
-    OperationResult Enqueued, ReceiveRequest FirstClaim, OperationResult Claimed, Delivery FirstDelivery)
+    Result<object> Enqueued, ReceiveRequest FirstClaim, Result<object> Claimed, Delivery FirstDelivery)
 {
-    internal List<(DeliveryCommand Command, OperationResult Result)> Completed { get; } = [];
-    internal (CommandRequest Command, OperationResult Result)? Healthy
+    internal List<(DeliveryCommand Command, Result<object> Result)> Completed { get; } = [];
+    internal (CommandRequest Command, Result<object> Result)? Healthy
     {
         get; set;
     }
-    internal (CommandRequest Command, OperationResult Result)? Rejected
+    internal (CommandRequest Command, Result<object> Result)? Rejected
     {
         get; set;
     }

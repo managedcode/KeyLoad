@@ -13,7 +13,7 @@ internal static class RequestCqrsScopeFlowCases
     private const string PersistedPrefix = "scope-flow-subject-";
 
     internal static async Task AcCrs006ConcurrentPersistedScopesStayIsolatedThroughNativeCalls(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         var first = PersistPrincipal(fixture, PersistedPrefix + Guid.NewGuid().ToString("N"));
         var second = PersistPrincipal(fixture, PersistedPrefix + Guid.NewGuid().ToString("N"));
@@ -40,7 +40,7 @@ internal static class RequestCqrsScopeFlowCases
     }
 
     internal static async Task AcCrs006PersistedScopeLivesThroughActualConsumerDisposal(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         var principal = PersistPrincipal(fixture, PersistedPrefix + Guid.NewGuid().ToString("N"));
         var requestId = Guid.NewGuid();
@@ -50,14 +50,14 @@ internal static class RequestCqrsScopeFlowCases
         try
         {
             var producerSawScope = false;
-            using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+            using (new GrainRequestIdentityScope(fixture.Services, principal,
                 requestId, commandId, CancellationToken.None, connectionId: fixture.ConnectionId))
             {
                 var reply = await GrainRequestStreamConsumer.DrainAsync(
                     token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                         writer => CompleteWhileScopedAsync(writer, requestId, commandId, principal.Id,
                             () => producerSawScope = true, fixture.ConnectionId), token),
-                    fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<
+                    fixture.Services.GetRequiredService<Serializer<
                         CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                     requestId, TimeProvider.System, fixture.RoutingOptions, CancellationToken.None);
                 await Assert.That(reply.Payload.IsEmpty).IsFalse();
@@ -75,7 +75,7 @@ internal static class RequestCqrsScopeFlowCases
         }
     }
 
-    private static PrincipalRecord PersistPrincipal(RequestCqrsClusterFixture fixture, string subject)
+    private static PrincipalRecord PersistPrincipal(RequestCqrsHostedRuntimeFixture fixture, string subject)
     {
         var record = new PrincipalRecord(subject, fixture.Database.Partition.TenantId,
             [new ScopeGrant(fixture.Database.Partition.DatabaseId, "*", Capability.All)], ["*"]);
@@ -84,19 +84,19 @@ internal static class RequestCqrsScopeFlowCases
     }
 
     private static async Task<(RequestCqrsProbeResult Result, Guid CommandId)> ValidateConcurrentAsync(
-        RequestCqrsClusterFixture fixture, PrincipalRecord principal, TaskCompletionSource bothReady, Action arrive)
+        RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal, TaskCompletionSource bothReady, Action arrive)
     {
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         try
         {
-            using var scope = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+            using var scope = new GrainRequestIdentityScope(fixture.Services, principal,
                 requestId, commandId, CancellationToken.None, connectionId: fixture.ConnectionId);
             arrive();
             await bothReady.Task;
             var token = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.ConfigureResource, commandId,
                 NativeSerialization.Serialize(0));
-            var result = await fixture.Cluster.Client.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
+            var result = await fixture.Grains.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
                 .ValidateAsync(token, requestId);
             await Assert.That(result.Accepted).IsTrue();
             await Assert.That(result.Subject).IsEqualTo(principal.Id);

@@ -91,7 +91,7 @@ internal sealed class AdmissionClusterTests
                 var status = await client.StatusAsync(timeout.Token);
                 await Assert.That(status.IsSuccess).IsTrue();
                 await Assert.That(status.Value!.RoutingReady).IsTrue();
-                await Assert.That(status.Value.Voters).IsEqualTo(3);
+                await Assert.That(status.Value.SiloCount).IsEqualTo(3);
             }
         }
         finally { await fixture.DisposeAsync(); }

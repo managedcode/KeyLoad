@@ -1,6 +1,6 @@
-using System.Security.Cryptography;
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -13,15 +13,12 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
     private const string MissingOwner = "The original BM25 native owner is not open.";
     private readonly StoreIdentity originalIdentity;
     private bool originalJoined;
-    private Guid originalReplicaId;
     private ZoneTreeStore? coldStore;
     private DatabaseEngine? coldDatabase;
-    private TestDatabaseReplicaAdmission? coldAdmission;
     internal TestDatabase Source
     {
         get;
     }
-    private string ReplicaDirectory => Source.Directory + TestDatabaseReplicaDirectory.Suffix;
 
     private Bm25OriginalPhaseRecoveryOwner()
     {
@@ -57,18 +54,17 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal OperationResult Submit(ReplicatedOperation operation)
+    internal Result<object> Submit(Command<DatabaseCommand> operation)
         => originalJoined
-            ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).Submit(operation, explicitTime: true)
+            ? Database.Apply(operation)
             : Source.SubmitIssued(operation);
 
-    internal ReplicaEntry Entry(Guid commandId) => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadRetainedEntry(commandId)
-        : Source.ReadRetainedEntry(commandId);
+    internal StoredOutcome Entry(Guid commandId) => originalJoined
+        ? OutcomeStoreOracle.ReadStored(Database, commandId, CancellationToken.None)
+        : Source.ReadStoredOutcome(commandId);
 
-    internal (long LastIndex, long CommittedIndex, long Term) JournalCut() => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadJournalCut()
-        : Source.ReadJournalCut();
+    internal (long AppliedPosition, long StorePosition) ReadCut()
+        => Store.Read(_ => (Database.LastApplied, Store.Position));
 
     internal void Reopen(DatabaseLimits? configuredLimits = null)
     {
@@ -86,18 +82,11 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             }
         }
         Join();
-        var replica = ReadReplicaIdentity();
-        if (originalReplicaId == Guid.Empty || replica.NodeId != originalReplicaId)
-        {
-            throw new InvalidOperationException("The cold replica is not its original owned native identity.");
-        }
         coldStore = ZoneTreeExistingStore.Open(new(Source.Directory)
         {
             Incarnation = originalIdentity.Incarnation
         }, originalIdentity.NodeId, Source.StorageExecution);
         coldDatabase = CreateColdDatabase(coldStore, configuredLimits);
-        coldAdmission = Source.CreateTargetAdmission(coldDatabase, coldStore,
-            Source.Directory, ReplicaDirectory, replica.NodeId);
     }
 
     private DatabaseEngine CreateColdDatabase(ZoneTreeStore store, DatabaseLimits? configuredLimits)
@@ -106,26 +95,9 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         {
             return Source.CreateConfiguredDatabase(store);
         }
-        var owner = store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)?.DefaultShard)
-            ?? throw new InvalidOperationException("The original committed native catalog owner is missing.");
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(configuredLimits),
             UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, Source.Database.EvaluationClock);
-        return create(store, owner);
-    }
-
-    internal void BindReplicaIdentity() => originalReplicaId = ReadReplicaIdentity().NodeId;
-
-    private StoreIdentity ReadReplicaIdentity()
-    {
-        var limits = Source.StorageExecution.Value;
-        var replica = ZoneTreeIdentityFile.Read(Path.Combine(ReplicaDirectory, ZoneTreePersistenceFormat.IdentityFileName),
-            limits.MaximumIdentityFileBytes, limits.StreamBufferBytes);
-        if (replica.NodeId == originalIdentity.NodeId || replica.Incarnation != originalIdentity.Incarnation
-            || !CryptographicOperations.FixedTimeEquals(replica.SigningKey.Span, originalIdentity.SigningKey.Span))
-        {
-            throw new InvalidOperationException("The original native replica identity is not the canonical owner's distinct replica.");
-        }
-        return replica;
+        return create(store);
     }
 
     private void Join()
@@ -136,16 +108,10 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             Source.JoinOwnedResources();
             return;
         }
-        var admission = coldAdmission;
         var store = coldStore;
-        coldAdmission = null;
         coldStore = null;
         coldDatabase = null;
         var failures = new List<Exception>();
-        if (admission is not null)
-        {
-            ServerFailureObserver.Observe(admission.Dispose, failures);
-        }
         if (store is not null)
         {
             ServerFailureObserver.Observe(store.Dispose, failures);
@@ -156,7 +122,6 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
     private void DeleteJoinedDirectories()
     {
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => Directory.Delete(ReplicaDirectory, true), failures);
         ServerFailureObserver.Observe(() => Directory.Delete(Source.Directory, true), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

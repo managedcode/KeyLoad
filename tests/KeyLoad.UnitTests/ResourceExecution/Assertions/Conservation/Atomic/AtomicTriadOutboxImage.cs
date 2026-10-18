@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -51,7 +53,7 @@ internal static class AtomicTriadOutboxImage
     }
 
     internal static async Task ReplayAsync(DatabaseEngine engine, ZoneTreeStore store,
-        ReplicatedOperation operation, OperationResult original, CancellationToken token)
+        Command<DatabaseCommand> operation, Result<object> original, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;

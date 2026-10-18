@@ -71,7 +71,7 @@ internal static class QueueExpiredDlqOperations
             new CancelQueueMessage(operations.Lane.Queue, QueueLifecycleTestProtocol.Parked, 3L, 1L),
             new PutDocument(QueueLifecycleTestProtocol.Collection, Witness, "{\"knowledge\":\"must not commit\"}", ExpectedRevision: 0L));
         await Assert.That(actual.Error).IsEqualTo(ErrorCode.RevisionConflict);
-        await Assert.That(actual.NativeValue).IsNull();
+        await Assert.That(actual.Value).IsNull();
         await QueueLifecycleImage.SameAsync(store, operations.Lane, before);
         await Assert.That(JsonSerializer.Serialize(database.GetDocument(QueueLifecycleTestProtocol.Administrator,
             new(operations.Partition, QueueLifecycleTestProtocol.Collection, Witness)), JsonDefaults.Options)).IsEqualTo(witness);

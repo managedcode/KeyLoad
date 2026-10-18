@@ -3,8 +3,6 @@ using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.ClusterRouting;
-using KeyLoad.UnitTests.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -20,8 +18,8 @@ internal sealed class QueryLifetimeNativePhaseRoundTrips(QueryLifetimeNativeFlow
         flow.Fixture.Destination.Database.EvaluationClock, CancellationToken.None);
     private readonly DateTimeOffset expiry = flow.Fixture.Destination.Database.EvaluationClock.GetUtcNow()
         + TimeSpan.FromSeconds(flow.Fixture.Destination.Database.Limits.QueryDeadlineSeconds);
-    private readonly SearchRequest search = new(RemoteDocumentNativeFixture.Partition,
-        RemoteDocumentNativeFixture.Collection, TextField: RemoteDocumentNativeFixture.Title,
+    private readonly SearchRequest search = new(QueryNativeFixture.Partition,
+        QueryNativeFixture.Collection, TextField: QueryNativeFixture.Title,
         Text: QueryLifetimeNativeProtocol.Text, Limit: QueryLifetimeNativeProtocol.Limit);
 
     internal static Task VerifyAsync(QueryLifetimeNativeFlow flow)
@@ -42,8 +40,8 @@ internal sealed class QueryLifetimeNativePhaseRoundTrips(QueryLifetimeNativeFlow
         await Assert.That(selected.Length).IsEqualTo(QueryLifetimeNativeProtocol.Limit);
         var projected = await ExecuteAsync(DistributedSearchPhase.Projection, witness, selected: selected);
         var hit = projected.Projection!.Hits.Single();
-        var expected = new DocumentResult(RemoteDocumentNativeFixture.Reference, RemoteDocumentNativeFixture.First,
-            RemoteDocumentNativeFixture.ProjectedJson, true, [RemoteDocumentNativeFixture.Secret]);
+        var expected = new DocumentResult(flow.Fixture.ExpectedDestinationReference, QueryNativeFixture.First,
+            QueryNativeFixture.ProjectedJson, true, [QueryNativeFixture.Secret]);
         await Assert.That(NativeSerialization.Serialize(hit.Document).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await Assert.That(hit.Score).IsEqualTo(SingleTextScore);
@@ -61,7 +59,7 @@ internal sealed class QueryLifetimeNativePhaseRoundTrips(QueryLifetimeNativeFlow
             witness is null ? [] : [witness], statistics, scope, windows, selected, budget).Single();
         await Assert.That(work.Selected.IsDefault).IsFalse();
         var original = new DistributedSearchOwnedLeafV1(QueryLifetimeNativeProtocol.Version, phase, work.Search,
-            PhysicalOwnerDirectoryWholeFlow.Destination.Owner, RemoteDocumentNativeFixture.Tenant,
+            flow.Fixture.DestinationOwner, QueryNativeFixture.Tenant,
             database.Limits.MaxQueryReadBytes / QueryLifetimeNativeProtocol.GrantDivisor,
             database.Limits.MaxScanRecords / QueryLifetimeNativeProtocol.GrantDivisor,
             work.MaxResultBytes, work.Witness, work.Statistics, work.Scope, work.SourceWindowId, work.Selected);
@@ -81,13 +79,13 @@ internal sealed class QueryLifetimeNativePhaseRoundTrips(QueryLifetimeNativeFlow
             await Assert.That(actual.Original.Selected.IsEmpty).IsTrue();
             var nonempty = original with
             {
-                Selected = [new(RemoteDocumentNativeFixture.Reference, RemoteDocumentNativeFixture.First, SingleTextScore)]
+                Selected = [new(QueryNativeFixture.Reference, QueryNativeFixture.First, SingleTextScore)]
             };
             var invalid = NativeSerialization.Deserialize<DistributedSearchOwnedLeafV1>(NativeSerialization.Serialize(nonempty));
             await QueryLifetimeNativeAssertions.RefusedAsync(() => DistributedSearchOwnedLeafValidation.Require(
                 invalid, database.Limits, options.Value, budget), ErrorCode.Corruption);
         }
-        return DistributedSearchOwnedLeafExecution.ExecuteV2(database, RemoteDocumentNativeFixture.Reader, actual,
-            PhysicalOwnerDirectoryWholeFlow.Destination.Owner, options, database.EvaluationClock, expiry, CancellationToken.None);
+        return DistributedSearchOwnedLeafExecution.ExecuteV2(database, QueryNativeFixture.Reader, actual,
+            flow.Fixture.DestinationOwner, options, database.EvaluationClock, expiry, CancellationToken.None);
     }
 }

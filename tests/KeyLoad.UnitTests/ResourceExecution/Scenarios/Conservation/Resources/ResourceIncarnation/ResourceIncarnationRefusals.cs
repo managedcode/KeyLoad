@@ -11,7 +11,7 @@ internal static class ResourceIncarnationRefusals
             SchemaVersion = 3
         }, 1);
         var failure = fixture.Database.Apply(stale);
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         state.Outcomes.Add((stale, failure));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);
         await ResourceIncarnationAssertions.RowAsync(fixture.Database, fixture.Partition, 2);
@@ -22,7 +22,7 @@ internal static class ResourceIncarnationRefusals
             NativePayload = default
         };
         var conflict = fixture.Database.Apply(collision);
-        await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(ResourceIncarnationLiteral.LifetimeKey(
             fixture.Partition, "identity-collision")))).IsNull();
         var duplicate = state.Original with
@@ -31,7 +31,7 @@ internal static class ResourceIncarnationRefusals
             NativePayload = default
         };
         var duplicateResult = fixture.Database.ApplyEmbedded(duplicate, token);
-        await Assert.That(duplicateResult.Error).IsEqualTo(state.Original.Kind == OperationKind.CreateTable
+        await Assert.That(Errors.Code(duplicateResult.Problem)).IsEqualTo(state.Original.Kind == OperationKind.CreateTable
             ? ErrorCode.Conflict : ErrorCode.UnsupportedCapability);
         state.Outcomes.Add((duplicate, duplicateResult));
         await PrincipalAsync(fixture, state, token);
@@ -69,7 +69,7 @@ internal static class ResourceIncarnationRefusals
             NativePayload = default
         };
         var result = fixture.Database.ApplyEmbedded(original, token);
-        await Assert.That(result.Error).IsEqualTo(state.Original.Kind == OperationKind.CreateTable
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(state.Original.Kind == OperationKind.CreateTable
             ? ErrorCode.Conflict : ErrorCode.UnsupportedCapability);
         state.Outcomes.Add((original, result));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);

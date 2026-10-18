@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
-/// <summary>Explicit rollups traverse actual CLUSTER request grains through SDK, official MCP and Q1 CALL.</summary>
+/// <summary>Explicit rollups traverse actual Orleans request grains through SDK, official MCP and Q1 CALL.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class SampleRollupClusterTests(ClusterFixture fixture)

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.DocumentStorage;
@@ -11,50 +13,46 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class CompositionReverseFinalImageAssertions
 {
-    internal static async Task RefusalAsync(OperationResult actual)
+    internal static async Task RefusalAsync(Result<object> actual)
     {
-        await A.EqualAsync(new OperationResult(null, ErrorCode.NotFound, D.Unavailable), actual);
-        await Assert.That(actual.NativeValue).IsNull();
-        await Assert.That(actual.Json).IsNull();
+        await A.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.NotFound, D.Unavailable)), actual);
+        await Assert.That(actual.Value).IsNull();
+        
     }
 
     internal static async Task StateAsync(SafeProjectorOperationDatabase owner, CompositionReverseFinalImageState state)
     {
         await OutcomeAsync(owner, state.Original, state.Receipt, state.Bound);
-        var retained = owner.Entry(state.Original).Operation!;
+        var retained = owner.Entry(state.Original).PreparedCommand!;
         await Assert.That(NativeSerialization.Serialize(retained).SequenceEqual(NativeSerialization.Serialize(state.Original))).IsTrue();
-        await Assert.That(retained.Id).IsEqualTo(state.Request.CommandId);
-        await Assert.That(retained.Kind).IsEqualTo(OperationKind.Batch);
-        await Assert.That(retained.PrincipalId).IsEqualTo(D.Root);
-        await Assert.That(retained.PayloadJson).IsEqualTo(state.Original.PayloadJson);
-        await Assert.That(retained.NativePayload.Span.SequenceEqual(state.Original.NativePayload.Span)).IsTrue();
-        await Assert.That(NativeOperationFingerprint.Compute(retained)).IsEqualTo(NativeOperationFingerprint.Compute(state.Original));
-        var native = NativeSerialization.Deserialize<NativeCommandPayload>(retained.NativePayload.Span);
-        await A.EqualAsync(state.Request, NativeSerialization.Deserialize<CommandRequest>(native.Value.Span));
+        await Assert.That(retained.CommandId).IsEqualTo(state.Request.CommandId);
+        await Assert.That(retained.Value!.Kind).IsEqualTo(OperationKind.Batch);
+        await Assert.That(retained.UserId!).IsEqualTo(D.Root);
+        await Assert.That(retained.Value!.Input.Span.SequenceEqual(state.Original.Value!.Input.Span)).IsTrue();
+        await Assert.That(DatabaseCommandFingerprint.Compute(retained)).IsEqualTo(DatabaseCommandFingerprint.Compute(state.Original));
+        await A.EqualAsync(state.Request, NativeSerialization.Deserialize<CommandRequest>(retained.Value!.Input.Span));
         await OutcomeAsync(owner, state.Seed, state.SeedReceipt, null);
         await Assert.That(owner.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
-            view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(state.Original.EvaluatedAt);
+            view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(state.Original.Timestamp));
         await ModelsAsync(owner, state);
     }
 
-    private static async Task OutcomeAsync(SafeProjectorOperationDatabase owner, ReplicatedOperation operation,
+    private static async Task OutcomeAsync(SafeProjectorOperationDatabase owner, Command<DatabaseCommand> operation,
         CommitReceipt receipt, EntityRef? start)
     {
         var actual = OutcomeStoreOracle.ReadStored(owner.Store, operation)
             ?? throw new InvalidOperationException("The original composition outcome is absent.");
-        await Assert.That(actual.Fingerprint).IsEqualTo(NativeOperationFingerprint.Compute(operation));
+        await Assert.That(actual.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(operation));
         await Assert.That(actual.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(1);
         await Assert.That(actual.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(actual.Partition).IsEqualTo(owner.Source.Partition);
         await Assert.That(actual.BlobAuthority).IsNull();
         await Assert.That(actual.OnlineTextAuthority).IsNull();
-        await Assert.That(actual.RemoteTransferFailureAuthority).IsNull();
-        await Assert.That(actual.RemoteTransferAuthority).IsNull();
-        await Assert.That(actual.Result.Json).IsNull();
-        await Assert.That(actual.Result.Error).IsNull();
-        await Assert.That(actual.Result.SafeDetail).IsNull();
-        await Assert.That(actual.Result.NativeValue).IsTypeOf<CommitReceipt>();
+        
+        await Assert.That(Errors.Code(actual.Result.Problem)).IsNull();
+        await Assert.That(actual.Result.Problem?.Detail).IsNull();
+        await Assert.That(actual.Result.Value).IsTypeOf<CommitReceipt>();
         await A.ReceiptAsync(receipt, actual.Result.Get<CommitReceipt>());
         if (start is null)
         {
@@ -71,13 +69,13 @@ internal static class CompositionReverseFinalImageAssertions
 
     private static async Task ModelsAsync(SafeProjectorOperationDatabase owner, CompositionReverseFinalImageState state)
     {
-        var before = new DocumentRecord(state.Bound, 1, D.Json, new(), state.Seed.EvaluatedAt);
+        var before = new DocumentRecord(state.Bound, 1, D.Json, new(), new DateTimeOffset(state.Seed.Timestamp));
         var tombstone = before with
         {
             Revision = 2,
             Json = "{}",
             Deleted = true,
-            UpdatedAt = state.Original.EvaluatedAt
+            UpdatedAt = new DateTimeOffset(state.Original.Timestamp)
         };
         await A.EqualAsync(tombstone, owner.Store.Read(view => view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(state.Bound))));
         var partition = owner.Source.Partition;
@@ -92,9 +90,9 @@ internal static class CompositionReverseFinalImageAssertions
         await Assert.That(outbox.HasMore).IsFalse();
         await Assert.That(outbox.Records.Length).IsEqualTo(2);
         var rows = outbox.Records.Select(row => NativeSerialization.Deserialize<OutboxEntry>(row.Value.Span)).ToArray();
-        await A.EqualAsync(new OutboxEntry(1, 0, state.SeedReceipt.Token, state.Seed.EvaluatedAt,
+        await A.EqualAsync(new OutboxEntry(1, 0, state.SeedReceipt.Token, new DateTimeOffset(state.Seed.Timestamp),
             new PutDocument(D.Collection, D.Id, D.Json, 0), state.SeedReceipt.Mutations.Single(), null, before), rows[0]);
-        await A.EqualAsync(new OutboxEntry(2, 0, state.Receipt.Token, state.Original.EvaluatedAt,
+        await A.EqualAsync(new OutboxEntry(2, 0, state.Receipt.Token, new DateTimeOffset(state.Original.Timestamp),
             new DeleteDocument(D.Collection, D.Id, 1), state.Receipt.Mutations.Single(), before, tombstone), rows[1]);
         foreach (var entry in rows)
         {

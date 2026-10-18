@@ -13,7 +13,7 @@ internal static class FunctionalGateRelationalMutations
         var request = new SqlOperationRequest(ctx.Partition, P.Insert, FunctionalGateRelationalRows.InsertParameters(ctx, id),
             CommandId: commandId);
         var receipt = await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(ctx, ctx.Writer, request, token);
-        await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, commandId, ctx.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(ctx, receipt, commandId, ctx.Partition,
             [new(P.PutKind, P.Parent, id, P.Initial)]);
         await SqlClusterProtocol.EqualAsync(receipt,
             await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(ctx, ctx.Writer, request, token));
@@ -24,7 +24,7 @@ internal static class FunctionalGateRelationalMutations
             new PutDocument(P.Independent, id, FunctionalGateRelationalRows.Independent(id), P.Absent)
         ]);
         var actual = await ctx.McpAsync<CommitReceipt>(ctx.Writer, McpCallerTools.DocumentsCommit, children, token);
-        await FunctionalGateRelationalAssertions.ReceiptAsync(actual, children.CommandId, ctx.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(ctx, actual, children.CommandId, ctx.Partition,
             [new(P.PutKind, P.Child, id, P.Initial), new(P.PutKind, P.Independent, id, P.Initial)]);
     }
 
@@ -36,7 +36,7 @@ internal static class FunctionalGateRelationalMutations
             new PatchDocument(P.Child, id, [new(P.ParentPath, PatchKind.Set, JsonSerializer.Serialize(id))], P.Initial)
         ]);
         var actual = await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(command, token));
-        await FunctionalGateRelationalAssertions.ReceiptAsync(actual, command.CommandId, ctx.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(ctx, actual, command.CommandId, ctx.Partition,
             [new(P.PatchKindName, P.Parent, id, P.Updated), new(P.PatchKindName, P.Child, id, P.Updated)]);
     }
 
@@ -49,7 +49,7 @@ internal static class FunctionalGateRelationalMutations
         ]);
         var actual = await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(ctx, ctx.Writer,
             FunctionalGateRelationalCalls.Commit(command), token);
-        await FunctionalGateRelationalAssertions.ReceiptAsync(actual, command.CommandId, ctx.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(ctx, actual, command.CommandId, ctx.Partition,
             [new(P.PatchKindName, P.Child, id, P.Unlinked), new(P.PatchKindName, P.Independent, id, P.Updated)]);
         var selected = await FunctionalGateRelationalCalls.SqlMcpAsync<QueryPage>(ctx, ctx.Reader,
             FunctionalGateRelationalCalls.Query(ctx, P.IndependentSelection, id), token);
@@ -65,7 +65,7 @@ internal static class FunctionalGateRelationalMutations
         ]);
         var actual = await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(ctx, ctx.Writer,
             FunctionalGateRelationalCalls.Commit(command), token);
-        await FunctionalGateRelationalAssertions.ReceiptAsync(actual, command.CommandId, ctx.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(ctx, actual, command.CommandId, ctx.Partition,
             [new(P.DeleteKind, P.Parent, id, P.Unlinked), new(P.DeleteKind, P.Child, id, P.DeletedChild),
                 new(P.DeleteKind, P.Independent, id, P.Unlinked)]);
     }

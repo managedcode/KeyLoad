@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -35,7 +36,7 @@ internal static class BinderFieldLineageAuthority
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialOwnershipEpoch);
+
         await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Store.Position);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await BinderFieldLineagePages.EqualAsync<MutationReceipt[]>([new(PutDocumentKind, Collection, DocumentId, OriginalRevision)],
@@ -50,8 +51,7 @@ internal static class BinderFieldLineageAuthority
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var original = new ReplicatedOperation(command.CommandId, OperationKind.Batch, Root, default,
-                JsonSerializer.Serialize(command, JsonDefaults.Options));
+            var original = database.CreateCommand(OperationKind.Batch, command.CommandId, Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
             await BinderFieldLineagePages.EqualAsync(receipt,
                 database.ApplyEmbedded(original, cancellationToken: token).Get<CommitReceipt>());
         }, failures);

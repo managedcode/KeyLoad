@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -20,7 +21,7 @@ internal static class CompositeSparseUniqueAssertions
     private const int MaximumRecords = 64;
     private static readonly string[] DomainFamilies = ["document", "index", "unique", "document-epoch", "outbox", "outbox-head"];
 
-    internal static OperationResult Submit(TestDatabase db, params Mutation[] mutations)
+    internal static Result<object> Submit(TestDatabase db, params Mutation[] mutations)
         => DocumentCrudFixture.Submit(db, Principal, mutations);
 
     internal static async Task DocumentAsync(TestDatabase db, string id, string? json, long revision)
@@ -43,7 +44,7 @@ internal static class CompositeSparseUniqueAssertions
     {
         var before = CaptureDomain(db);
         var result = Submit(db, new PutDocument(Collection, id, json, 0));
-        await Assert.That(result.Error).IsEqualTo(included ? ErrorCode.Conflict : (ErrorCode?)null);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(included ? ErrorCode.Conflict : (ErrorCode?)null);
         if (included)
         {
             await Assert.That(CaptureDomain(db).AsSpan().SequenceEqual(before)).IsTrue();

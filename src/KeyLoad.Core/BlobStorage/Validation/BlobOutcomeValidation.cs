@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -5,18 +7,18 @@ namespace KeyLoad.Core.Features.BlobStorage;
 internal sealed class BlobOutcomeValidation(DatabaseEngine database)
 {
     private BlobRecordReader Reader => new(database.Store.Identity.Incarnation);
-    internal BlobOutcomeAuthority? Capture(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    internal BlobOutcomeAuthority? Capture(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
-        if (operation.Kind == OperationKind.BeginBlobUpload)
+        if (operation.Value!.Kind == OperationKind.BeginBlobUpload)
         {
-            return new(BlobKeys.FormatVersion, operation.Id, principal.Id);
+            return new(BlobKeys.FormatVersion, operation.CommandId, principal.Id);
         }
         var scope = BlobCommandScope.From(operation);
         var state = scope.UploadId is { } upload ? Reader.State(view, scope.Blob, upload) : null;
         return state is null ? null : new(BlobKeys.FormatVersion, state.BeginCommandId, state.CreatorPrincipalId);
     }
 
-    internal void Validate(IKeyValueView view, ReplicatedOperation operation, OperationResult result, BlobOutcomeAuthority? authority)
+    internal void Validate(IKeyValueView view, Command<DatabaseCommand> operation, Result<object> result, BlobOutcomeAuthority? authority)
     {
         if (authority is not null)
         {
@@ -26,7 +28,7 @@ internal sealed class BlobOutcomeValidation(DatabaseEngine database)
                 throw BlobErrors.Corruption();
             }
         }
-        if (result.Error is not null || operation.Kind == OperationKind.DeleteBlob)
+        if (Errors.Code(result.Problem) is not null || operation.Value!.Kind == OperationKind.DeleteBlob)
         {
             return;
         }
@@ -38,7 +40,7 @@ internal sealed class BlobOutcomeValidation(DatabaseEngine database)
         {
             throw BlobErrors.Corruption();
         }
-        if (state is null && operation.Kind == OperationKind.ReclaimBlob
+        if (state is null && operation.Value!.Kind == OperationKind.ReclaimBlob
             && result.Get<BlobCommitResult<BlobReclaimResult>>().Value.Complete)
         {
             return;
@@ -49,7 +51,7 @@ internal sealed class BlobOutcomeValidation(DatabaseEngine database)
         }
         if (authority is null)
         {
-            if (operation.Kind == OperationKind.ReclaimBlob)
+            if (operation.Value!.Kind == OperationKind.ReclaimBlob)
             {
                 throw BlobErrors.Token();
             }

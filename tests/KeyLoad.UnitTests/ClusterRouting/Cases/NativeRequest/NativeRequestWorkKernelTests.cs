@@ -1,7 +1,7 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource]
-internal sealed class NativeRequestWorkKernelTests(RequestCqrsClusterFixture fixture)
+[RequestCqrsHostedDataSource]
+internal sealed class NativeRequestWorkKernelTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]
     public Task AcCrsWork001LazyStreamDoesNotAcquireProducerWork()

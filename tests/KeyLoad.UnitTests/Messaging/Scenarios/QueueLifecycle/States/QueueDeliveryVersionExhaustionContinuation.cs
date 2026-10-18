@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueDeliveryVersionExhaustionContinuation
 {
     internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore store, string root,
-        QueueDeliveryVersionExhaustionState state, OperationResult failed, DeliveryAction action, byte[] identity, CancellationToken token)
+        QueueDeliveryVersionExhaustionState state, Result<object> failed, DeliveryAction action, byte[] identity, CancellationToken token)
     {
         var data = state.Data;
         await QueueDeliveryVersionExhaustionAssertions.LeasedAsync(database, store, state, data.DamagedMetadata);
@@ -19,10 +21,10 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         });
         await QueueDeliveryVersionExhaustionAssertions.LeasedAsync(database, store, state, state.RepairedMetadata);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, data, failed);
-        var receipts = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         var command = new DeliveryCommand(Guid.NewGuid(), data.Lane, state.Delivery.Token, action);
-        var operation = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command,
-            command.CommandId, data.Operation.EvaluatedAt));
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command,
+            command.CommandId, new DateTimeOffset(data.Operation.Timestamp)));
         var result = database.Apply(operation);
         await QueueDeliveryVersionExhaustionAssertions.ReceiptAsync(result, command, data.Body.Id, 3);
         receipts.Add((operation, result));
@@ -43,10 +45,10 @@ internal static class QueueDeliveryVersionExhaustionContinuation
     }
 
     private static async Task<MessageMetadata> SettleOriginalAsync(DatabaseEngine database, ZoneTreeStore store, QueueDeliveryVersionExhaustionState state,
-        DeliveryAction action, List<(ReplicatedOperation Operation, OperationResult Result)> receipts)
+        DeliveryAction action, List<(Command<DatabaseCommand> Operation, Result<object> Result)> receipts)
     {
         var data = state.Data;
-        var at = data.Operation.EvaluatedAt;
+        var at = new DateTimeOffset(data.Operation.Timestamp);
         var version = 3L;
         var delivery = state.Delivery;
         if (action == DeliveryAction.Renew)
@@ -77,7 +79,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         if (action != DeliveryAction.Ack)
         {
             var command = new DeliveryCommand(Guid.NewGuid(), data.Lane, delivery.Token, DeliveryAction.Ack);
-            var operation = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command, command.CommandId, at));
+            var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, command, command.CommandId, at));
             var result = database.Apply(operation);
             version++;
             await QueueDeliveryVersionExhaustionAssertions.ReceiptAsync(result, command, data.Body.Id, version);
@@ -88,21 +90,21 @@ internal static class QueueDeliveryVersionExhaustionContinuation
     }
 
     private static async Task HealthyAsync(DatabaseEngine database, QueueDeliveryVersionExhaustionState state, long sequence,
-        List<(ReplicatedOperation Operation, OperationResult Result)> receipts)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> receipts)
     {
         const string id = "healthy";
         const string payload = "{\"work\":2}";
         const string headers = "{\"kind\":\"healthy\"}";
         var data = state.Data;
-        var at = data.Operation.EvaluatedAt.AddSeconds(2);
+        var at = new DateTimeOffset(data.Operation.Timestamp).AddSeconds(2);
         var request = new CommandRequest(Guid.NewGuid(), data.Lane.Partition, [new EnqueueMessage(data.Lane.Queue, id, payload, headers)]);
-        var operation = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Batch, request, request.CommandId, at));
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Batch, request, request.CommandId, at));
         var created = database.Apply(operation);
         created.Get<CommitReceipt>();
         receipts.Add((operation, created));
         var delivery = await ClaimAsync(database, data.Lane, id, payload, headers, at, 1);
         var ack = new DeliveryCommand(Guid.NewGuid(), data.Lane, delivery.Token, DeliveryAction.Ack);
-        var completion = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, ack, ack.CommandId, at));
+        var completion = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, ack, ack.CommandId, at));
         var result = database.Apply(completion);
         await QueueDeliveryVersionExhaustionAssertions.ReceiptAsync(result, ack, id, 3);
         receipts.Add((completion, result));
@@ -114,7 +116,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         string payload, string headers, DateTimeOffset at, int attempt)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var operation = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, at));
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, at));
         var result = database.Apply(operation);
         var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await QueueClaimVersionExhaustionAssertions.EqualAsync(delivery, new Delivery(id, payload, headers, delivery.Token,
@@ -129,7 +131,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
     }
 
     private static async Task ReplayColdAsync(DatabaseEngine database, ZoneTreeStore store, QueueDeliveryVersionExhaustionState state,
-        OperationResult failed, MessageMetadata terminal, List<(ReplicatedOperation Operation, OperationResult Result)> receipts)
+        Result<object> failed, MessageMetadata terminal, List<(Command<DatabaseCommand> Operation, Result<object> Result)> receipts)
     {
         foreach (var pair in receipts)
         {
@@ -139,9 +141,9 @@ internal static class QueueDeliveryVersionExhaustionContinuation
             state.Data.Producer, state.Data.Producer.CommandId, state.Data.Time), state.Data.Produced);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state.Data, failed);
         var stale = database.Apply(state.Claim);
-        await Assert.That(stale.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(stale.NativeValue).IsNull();
-        await Assert.That(stale.Json).IsNull();
+        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(stale.Value).IsNull();
+        
         var original = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Data.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, state.Claim.Id)))!;
         await QueueClaimVersionExhaustionAssertions.EqualAsync(original.Result, state.Claimed);

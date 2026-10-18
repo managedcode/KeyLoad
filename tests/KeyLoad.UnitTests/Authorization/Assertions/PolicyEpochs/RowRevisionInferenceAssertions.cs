@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
@@ -6,15 +8,15 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class RowRevisionInferenceAssertions
 {
-    internal static async Task ResultAsync(OperationResult actual, ErrorCode code, string detail)
+    internal static async Task ResultAsync(Result<object> actual, ErrorCode code, string detail)
     {
-        await Assert.That(actual.Json).IsNull();
-        await Assert.That(actual.NativeValue).IsNull();
-        await Assert.That(actual.Error).IsEqualTo(code);
-        await Assert.That(actual.SafeDetail).IsEqualTo(detail);
+        
+        await Assert.That(actual.Value).IsNull();
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(code);
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(detail);
     }
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result, byte[] Outcome)> RefuseAsync(
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome)> RefuseAsync(
         DatabaseEngine database, ZoneTreeStore store, CommandRequest command, ErrorCode code,
         string detail, CancellationToken token)
     {
@@ -46,14 +48,14 @@ internal static class RowRevisionInferenceAssertions
         => rows.Where(row => !allowed.Any(key => row.StartsWith(key + P.Separator, StringComparison.Ordinal))).ToArray();
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, OperationResult expected, byte[] outcome, PartitionRef partition,
+        Command<DatabaseCommand> operation, Result<object> expected, byte[] outcome, PartitionRef partition,
         CancellationToken token)
     {
         var image = TeamRowPolicyAssertions.Image(store);
         var position = store.Position;
         var actual = database.ApplyEmbedded(operation, token);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        var retained = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(partition, P.Reader, operation.Id)))!;
+        var retained = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(partition, P.Reader, operation.CommandId)))!;
         await Assert.That(retained.AsSpan().SequenceEqual(outcome)).IsTrue();
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, position);
     }
@@ -66,16 +68,13 @@ internal static class RowRevisionInferenceAssertions
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result, byte[] Outcome)> HealthyAsync(TestDatabase db, string kind, CancellationToken token)
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome)> HealthyAsync(TestDatabase db, string kind, CancellationToken token)
     {
         var command = RowRevisionInferenceRequests.Create(db.Partition, kind, P.Hidden, P.RepairRevision);
         var operation = RowRevisionInferenceRequests.Operation(command);
         var actual = db.Database.ApplyEmbedded(operation, token);
         var receipt = actual.Get<CommitReceipt>();
-        CommitReceipt expected = new(command.CommandId,
-            new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, db.Store.Position, P.OriginalRevision),
-            [new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)],
-            DurabilityProfile.ProcessDurable);
+        CommitReceipt expected = new(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, db.Store.Position), [new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         if (kind == P.Delete)
         {

@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
@@ -6,7 +8,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private static OperationResult ExecuteQueueDispatchControl(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private static Result<object> ExecuteQueueDispatchControl(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = Payload<QueueDispatchControlRequest>(operation);
         JsonData.Identifier(request.TenantId);

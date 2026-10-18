@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 
-/// <summary>AC-AD-009/AC-AD-010: the redesigned console views render real CLUSTER observations in a real browser.</summary>
+/// <summary>AC-AD-009/AC-AD-010: the redesigned console views render real Orleans observations in a real browser.</summary>
 internal static class AdminBrowserViewAssertions
 {
     private const string SelectView = "document.querySelector('button[data-view=VIEW]').click();true";

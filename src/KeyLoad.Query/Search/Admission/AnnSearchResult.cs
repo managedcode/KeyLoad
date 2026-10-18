@@ -15,8 +15,4 @@ internal sealed record AnnSearchResult(AnnCandidate[] Candidates, AnnSearchMode 
     {
         get; init;
     }
-    internal long FallbackDistanceEvaluations
-    {
-        get; init;
-    }
 }

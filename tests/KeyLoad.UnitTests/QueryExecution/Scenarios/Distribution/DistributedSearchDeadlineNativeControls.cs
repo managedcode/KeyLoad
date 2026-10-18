@@ -1,6 +1,5 @@
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.DocumentStorage;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -10,13 +9,13 @@ internal static class DistributedSearchDeadlineNativeControls
     private const string Missing = "The original native distributed refusal is unavailable.";
     private const string DeadlineDetail = "The read execution deadline is exceeded.";
 
-    internal static async Task RequireAsync(RemoteDocumentNativeFixture fixture)
+    internal static async Task RequireAsync(QueryNativeFixture fixture)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var flow = new RemotePartitionQueryNativeFlow(fixture);
+        var flow = new QueryNativePartitionFlow(fixture);
         flow.Seed();
-        var source = RemoteDocumentNativeAssertions.Image(fixture.Source);
-        var destination = RemoteDocumentNativeAssertions.Image(fixture.Destination);
+        var source = QueryNativeFixtureAssertions.Image(fixture.Source);
+        var destination = QueryNativeFixtureAssertions.Image(fixture.Destination);
         var sourcePosition = fixture.Source.Store.Position;
         var destinationPosition = fixture.Destination.Store.Position;
         PartitionQueryPageV1? page = null;
@@ -38,19 +37,19 @@ internal static class DistributedSearchDeadlineNativeControls
             NullLogger.Instance, caller.Token);
         await Assert.That(cancelled.Code).IsEqualTo(ErrorCode.Cancelled);
         await DecisionsAsync(cancelled, denied, caller.Token, token).ConfigureAwait(false);
-        await RemotePartitionQueryNativeAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
+        await QueryNativeFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
         flow.GrantDestination();
-        source = RemoteDocumentNativeAssertions.Image(fixture.Source);
-        destination = RemoteDocumentNativeAssertions.Image(fixture.Destination);
+        source = QueryNativeFixtureAssertions.Image(fixture.Source);
+        destination = QueryNativeFixtureAssertions.Image(fixture.Destination);
         sourcePosition = fixture.Source.Store.Position;
         destinationPosition = fixture.Destination.Store.Position;
-        await RemotePartitionQueryNativeAssertions.PageAsync(await flow.ExecuteAsync(token), fixture);
-        await RemotePartitionQueryNativeAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
-        fixture.Source.Reopen();
-        fixture.Destination.Reopen();
-        var cold = new RemotePartitionQueryNativeFlow(fixture);
-        await RemotePartitionQueryNativeAssertions.PageAsync(await cold.ExecuteAsync(token), fixture);
-        await RemotePartitionQueryNativeAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
+        await QueryNativeFixtureAssertions.PageAsync(await flow.ExecuteAsync(token), fixture);
+        await QueryNativeFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
+        await fixture.Source.ReopenAsync();
+        await fixture.Destination.ReopenAsync();
+        var cold = new QueryNativePartitionFlow(fixture);
+        await QueryNativeFixtureAssertions.PageAsync(await cold.ExecuteAsync(token), fixture);
+        await QueryNativeFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
     }
 
     private static async Task DecisionsAsync(KeyLoadException cancelled, Exception denied,

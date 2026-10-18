@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
@@ -6,7 +7,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal ReplicatedOperation CreateVerifiedBm25CorpusPublication(string administratorId,
+    internal Command<DatabaseCommand> CreateVerifiedBm25CorpusPublication(string administratorId,
         Bm25CorpusPublicationPhaseCommand phase, ReadExecutionBudget work)
     {
         ArgumentNullException.ThrowIfNull(phase);
@@ -25,9 +26,9 @@ public sealed partial class DatabaseEngine
             work.ChargeBytes(NativeSerialization.Measure(phase));
             var payload = NativeSerialization.Serialize(phase);
             RequireNativeBudget(payload.Length);
-            return IssueNativeOperation(new(phase.CommandId, OperationKind.Bm25CorpusPublicationPhase,
-                administrator.Id, evaluatedAt, Identity<Bm25CorpusPublicationPhaseCommand>(payload)),
-                new NativeCommandPayload(payload));
+            return CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId,
+                administrator.Id, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(phase.CommandId,
+                    OperationKind.Bm25CorpusPublicationPhase, administrator.Id, Identity<Bm25CorpusPublicationPhaseCommand>(payload)), work);
         });
     }
 
@@ -53,10 +54,10 @@ public sealed partial class DatabaseEngine
     }
 
     private void AuthorizeBm25CorpusPublication(IKeyValueView view, PrincipalRecord administrator,
-        ReplicatedOperation operation)
+        Command<DatabaseCommand> operation)
     {
         var phase = Payload<Bm25CorpusPublicationPhaseCommand>(operation);
         RequireEnvelopeId(operation, phase.CommandId);
-        RequireBm25Subject(view, administrator, phase, operation.EvaluatedAt);
+        RequireBm25Subject(view, administrator, phase, operation.Timestamp);
     }
 }

@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Proves both CLUSTER callers fail closed for persisted right-side scope and join-key-use denial.</summary>
+/// <summary>Proves both Orleans callers fail closed for persisted right-side scope and join-key-use denial.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterJoinAuthorizationTests(ClusterFixture fixture)

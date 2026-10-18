@@ -6,7 +6,7 @@ internal sealed class LocalImageProcessLifecycleTests
 {
     private const string Tag = "local-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     private const string Receipt = "TestResults/cluster/local-images/image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json";
-    private const string OverflowMessage = "Local CLUSTER image verifier output exceeded its bound.";
+    private const string OverflowMessage = "Local Orleans image verifier output exceeded its bound.";
 
     [Test]
     public async Task VerifierStopsActualNodeProcessWhenBoundedReaderOverflowsBeforeExit()

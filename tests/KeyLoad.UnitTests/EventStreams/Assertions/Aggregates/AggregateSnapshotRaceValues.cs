@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -15,13 +16,10 @@ internal static class AggregateSnapshotRaceValues
         => await Assert.That(System.Text.Json.JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));
     internal static async Task ReceiptAsync(AggregateSnapshotRaceFixture fixture, CommandRequest command,
-        OperationResult result, long position, long version)
+        Result<object> result, long position, long version)
     {
         var actual = result.Get<CommitReceipt>();
-        await EqualAsync(actual, new CommitReceipt(command.CommandId,
-            new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position, 1),
-            [new("storeAggregateSnapshot", AggregateSnapshotRaceFixture.StreamSet, AggregateSnapshotRaceFixture.StreamId, version)],
-            DurabilityProfile.ProcessDurable));
+        await EqualAsync(actual, new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position), [new("storeAggregateSnapshot", AggregateSnapshotRaceFixture.StreamSet, AggregateSnapshotRaceFixture.StreamId, version)], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(actual.Mutations.Single().CompositionReferences).IsEmpty();
     }
     internal static async Task ConservedAsync(AggregateSnapshotRaceFixture fixture, string[] image,
@@ -42,15 +40,13 @@ internal static class AggregateSnapshotRaceValues
         foreach (var original in fixture.Outcomes)
         {
             var raw = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
-                fixture.Harness.Partition, AggregateSnapshotRaceFixture.Worker, original.Operation.Id)));
+                fixture.Harness.Partition, AggregateSnapshotRaceFixture.Worker, original.Operation.CommandId)));
             await Assert.That(raw is not null && raw.AsSpan().SequenceEqual(original.Raw)).IsTrue();
         }
     }
     private static async Task SeedAsync(AggregateSnapshotRaceFixture fixture)
     {
-        var expected = new CommitReceipt(fixture.SeedOperation.Id,
-            new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, fixture.SeedPosition, 1),
-            [new("appendEvents", AggregateSnapshotRaceFixture.StreamSet, AggregateSnapshotRaceFixture.StreamId, 3)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(fixture.SeedOperation.Id, new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, fixture.SeedPosition), [new("appendEvents", AggregateSnapshotRaceFixture.StreamSet, AggregateSnapshotRaceFixture.StreamId, 3)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(fixture.SeedResult.Get<CommitReceipt>(), expected);
         await Assert.That(fixture.SeedResult.Get<CommitReceipt>().Mutations.Single().CompositionReferences).IsEmpty();
         await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.SeedOperation), fixture.SeedResult);
@@ -68,19 +64,19 @@ internal static class AggregateSnapshotRaceValues
                 var actual = fixture.Database.Apply(original.Operation);
                 if (fenced)
                 {
-                    await EqualAsync(actual.Error, ErrorCode.PermissionDenied);
-                    await Assert.That(actual.SafeDetail).IsEqualTo(rawInputDenied ? CompleteReplayInputDenied : ChangedPrincipalPolicyDenied);
-                    await Assert.That(actual.Json).IsNull();
-                    await Assert.That(actual.NativeValue).IsNull();
+                    await EqualAsync(Errors.Code(actual.Problem), ErrorCode.PermissionDenied);
+                    await Assert.That(actual.Problem?.Detail).IsEqualTo(rawInputDenied ? CompleteReplayInputDenied : ChangedPrincipalPolicyDenied);
+                    
+                    await Assert.That(actual.Value).IsNull();
                 }
-                else if (original.Result.Error is null)
+                else if (Errors.Code(original.Result.Problem) is null)
                 {
                     await NativeReplayResultAssertions.Same<CommitReceipt>(actual, original.Result);
                 }
                 else
                 {
                     await EqualAsync(actual, original.Result);
-                    await Assert.That(actual.NativeValue).IsNull();
+                    await Assert.That(actual.Value).IsNull();
                 }
             }, failures);
         }

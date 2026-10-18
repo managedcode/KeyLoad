@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -6,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal static class StreamRecordKeyAuthorityCold
 {
-    internal static async Task RunAsync(EventAppendWholeFlowFixture fixture, CommandRequest seed, OperationResult original, CommandRequest healthy, OperationResult healthyResult,
+    internal static async Task RunAsync(EventAppendWholeFlowFixture fixture, CommandRequest seed, Result<object> original, CommandRequest healthy, Result<object> healthyResult,
         StreamPage forward, StreamPage backward, CancellationToken token)
     {
         var position = fixture.Database.Store.Position;

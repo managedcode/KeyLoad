@@ -26,7 +26,7 @@ internal static class QueueDeadlineCrashScenario
             [new AdvanceQueueDeadline(QueueDeadlineCrashProtocol.Queue, QueueDeadlineCrashProtocol.Message,
                 MessageState.Ready, QueueDeadlineCrashProtocol.First, QueueDeadlineCrashProtocol.Initial,
                 expiry, QueueDeadlineKind.ExpireMessage)]);
-        var operation = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Batch, request, request.CommandId));
+        var operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueDeadlineCrashProtocol.OperationFile), JsonDefaults.Serialize(operation));
         boundary.Position = store.Position + QueueDeadlineCrashProtocol.First;
         boundary.Armed = true;

@@ -10,7 +10,7 @@ AC-RANGE-REV-001..003; ADR-004/005/010/014/035/036/041/050.
 Add typed read-only latest, whole-range statistics and dense fixed-window
 statistics over the canonical persisted samples. Keep the existing inclusive
 ReadSamples operation unchanged. Every new public request runs in the caller's connection
-grain; silo-local ZoneTree storage and the existing majority-acknowledgement and
+grain; silo-local ZoneTree storage and the existing required-copy acknowledgement and
 consistent-cut behavior remain the owners of records and reads.
 
 Use the published centrally pinned ManagedCode.TimeSeries 10.0.3 inside Core as

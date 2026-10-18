@@ -1,4 +1,4 @@
-using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
+using P = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

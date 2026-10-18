@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.UnitTests.Features.Messaging;
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
 
@@ -12,7 +13,7 @@ internal static class SqlTypedInsertPrincipalPolicy
         };
         await ConfigureAsync(fixture, denied);
         var refused = SqlTypedInsertHot.Execute(fixture, SqlTypedInsertLiteral.Repair, token);
-        await Assert.That(refused.Result.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(refused.Result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
         await FenceAsync(fixture, state, SqlTypedInsertLiteral.ScopeDenied);
@@ -26,7 +27,7 @@ internal static class SqlTypedInsertPrincipalPolicy
         image = QueueWholeFlowStorage.Bytes(fixture.Store);
         cut = fixture.Store.Position;
         await FenceAsync(fixture, state);
-        await SqlTypedInsertAssertions.SameAsync(new OperationResult(null, ErrorCode.PermissionDenied, SqlTypedInsertLiteral.EpochChanged),
+        await SqlTypedInsertAssertions.SameAsync(Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, SqlTypedInsertLiteral.EpochChanged)),
             SqlTypedInsertLiteral.Apply(fixture.Database, refused.Command, refused.At));
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         var healthy = SqlTypedInsertHot.Execute(fixture, SqlTypedInsertLiteral.Repair, token);
@@ -44,7 +45,7 @@ internal static class SqlTypedInsertPrincipalPolicy
     internal static async Task FenceAsync(TestDatabase fixture, SqlTypedInsertState state,
         string safeDetail = SqlTypedInsertLiteral.EpochChanged)
     {
-        var expected = new OperationResult(null, ErrorCode.PermissionDenied, safeDetail);
+        var expected = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, safeDetail));
         await SqlTypedInsertAssertions.SameAsync(expected, SqlTypedInsertLiteral.Apply(fixture.Database, state.Created.Command, state.Created.At));
         await SqlTypedInsertAssertions.SameAsync(expected, SqlTypedInsertLiteral.Apply(fixture.Database, state.Failed.Command, state.Failed.At));
     }

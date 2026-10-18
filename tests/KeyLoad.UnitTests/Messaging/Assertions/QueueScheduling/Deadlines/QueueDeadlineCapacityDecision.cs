@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
@@ -7,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueDeadlineCapacityDecision
 {
-    internal static async Task<MessageMetadata> ExpectedAsync(QueueDeadlineCapacityState state, ReplicatedOperation operation)
+    internal static async Task<MessageMetadata> ExpectedAsync(QueueDeadlineCapacityState state, Command<DatabaseCommand> operation)
     {
         var original = state.Original;
         if (state.Kind == QueueDeadlineKind.ExpireMessage || state.Fault == QueueDeadlineCapacityFault.ExpiryBeforeDeadLetterMaxPark)
@@ -37,7 +38,7 @@ internal static class QueueDeadlineCapacityDecision
         }
         if (state.Jitter)
         {
-            var wrapper = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+            var wrapper = operation.Value!;
             var choice = NativeSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span).Items.Single();
             await Assert.That(choice.Lane).IsEqualTo(state.Lane);
             await Assert.That(choice.MessageId).IsEqualTo(original.Id);

@@ -15,7 +15,7 @@ internal static class NativeConnectionIdentityCollisionAssertions
         var database = state.Scenario.Fixture.Database;
         return new(QueueWholeFlowStorage.Bytes(database.Store).Select(row =>
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(row)))).ToArray(),
-            database.Store.Position, database.ReadJournalCut());
+            database.Store.Position, database.ReadCanonicalCut());
     }
 
     internal static async Task HeldAsync(NativeConnectionIdentityCollisionState state,

@@ -26,8 +26,7 @@ internal static class QueueDeadlineCapacityHealthy
         var request = new CommandRequest(Guid.NewGuid(), state.Lane.Partition, [input]);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Batch, request.CommandId,
             request, Root, time);
-        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane),
-            [new(EnqueueReceipt, Queue, HealthyMessage, InitialStateVersion)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane), [new(EnqueueReceipt, Queue, HealthyMessage, InitialStateVersion)], DurabilityProfile.ProcessDurable, 1);
         var result = database.Apply(operation);
         await QueueDeadlineCapacityOperations.ReceiptAsync(result, expected);
         state.Outcomes.Add((operation, result));
@@ -65,8 +64,7 @@ internal static class QueueDeadlineCapacityHealthy
     {
         token.ThrowIfCancellationRequested();
         var request = new DeliveryCommand(Guid.NewGuid(), state.Lane, claim.Token, DeliveryAction.Ack);
-        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane),
-            [new(AckReceipt, Queue, metadata.Id, metadata.StateVersion + StateVersionStep)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane), [new(AckReceipt, Queue, metadata.Id, metadata.StateVersion + StateVersionStep)], DurabilityProfile.ProcessDurable, 1);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Delivery, request.CommandId, request, Root, time);
         var result = database.Apply(operation);
         await QueueDeadlineCapacityOperations.ReceiptAsync(result, expected);

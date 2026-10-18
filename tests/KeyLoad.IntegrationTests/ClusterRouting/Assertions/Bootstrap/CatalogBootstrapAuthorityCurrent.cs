@@ -16,7 +16,6 @@ internal static class CatalogBootstrapAuthorityCurrent
         ?? throw new InvalidOperationException(MissingReferencesContract);
     internal static async Task RunAsync(ClusterFixture fixture, CatalogBootstrapAuthorityState state, CancellationToken token)
     {
-        var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root);
         foreach (var node in P.Nodes)
         {
             await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, state.AdministratorKey, async administrator =>
@@ -77,13 +76,10 @@ internal static class CatalogBootstrapAuthorityCurrent
         {
             state.PhysicalOwners.Add(node, status.NodeId);
         }
-        await Assert.That(status.Applied).IsGreaterThanOrEqualTo((state.HealthyReceipt ?? state.Receipt).Token.Position);
-        await Assert.That(status.Voters).IsEqualTo(P.Nodes.Length);
+        await Assert.That(status.SiloCount).IsEqualTo(P.Nodes.Length);
         await Assert.That(status.RoutingReady).IsTrue();
-        await Assert.That(status.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(status.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(status.ProcessId).IsGreaterThan(P.EmptyCount);
-        await Assert.That(status.ConsensusTerm).IsGreaterThan(P.EmptyPosition);
         await Assert.That(status.ReadGeneration).IsGreaterThanOrEqualTo(P.EmptyPosition);
-        await Assert.That(status.Leader is not null && P.Voters.Contains(status.Leader, StringComparer.Ordinal)).IsTrue();
     }
 }

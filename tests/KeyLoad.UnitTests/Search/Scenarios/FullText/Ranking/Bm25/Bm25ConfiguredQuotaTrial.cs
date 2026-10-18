@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -50,10 +52,10 @@ internal static class Bm25ConfiguredQuotaTrial
         await RequireReplacementAsync(flow, originals[0], capacity, true);
     }
 
-    private static async Task RequireReplacementAsync(Bm25ConfiguredQuotaFlow flow, ReplicatedOperation original, long capacity, bool wasFull)
+    private static async Task RequireReplacementAsync(Bm25ConfiguredQuotaFlow flow, Command<DatabaseCommand> original, long capacity, bool wasFull)
     {
         var beforeBytes = Bm25ConfiguredQuotaBytes.Retained(flow.Database);
-        var reducing = flow.Capture(0, original.Id, "needle");
+        var reducing = flow.Capture(0, original.CommandId, "needle");
         await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, reducing, flow.Publish(reducing));
         await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database) < beforeBytes).IsTrue();
         var healthy = flow.Capture(0, reducing.Id);
@@ -64,10 +66,10 @@ internal static class Bm25ConfiguredQuotaTrial
             await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database)).IsEqualTo(capacity);
         }
         var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
-        var entry = NativeSerialization.Serialize(flow.Database.ReadRetainedEntry(healthy.Id));
+        var entry = NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.Id));
         var replay = flow.Database.Database.CreateVerifiedBm25CorpusPublication("root", Bm25ConfiguredQuotaFlow.Phase(healthy), flow.Database.CreateReadWork(Bm25ConfiguredQuotaFlow.Token));
         await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, flow.Publish(replay));
         await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(entry, NativeSerialization.Serialize(flow.Database.ReadRetainedEntry(healthy.Id)));
+        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(entry, NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.Id)));
     }
 }

@@ -65,8 +65,7 @@ internal static class ModelHeadAuthorityOperations
     internal static Task ReplayAsync(ModelHeadAuthorityFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
         => GraphLabelUseOperations.ObserveAsync(store, async () =>
         {
-            var actual = database.ApplyEmbedded(new(fixture.Seed.CommandId, OperationKind.Batch, "root", default,
-                System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options)), token).Get<CommitReceipt>();
+            var actual = database.ApplyEmbedded(database.CreateCommand(OperationKind.Batch, fixture.Seed.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options)), token).Get<CommitReceipt>();
             await EqualAsync(actual, fixture.Receipt);
             foreach (var effect in actual.Mutations)
             {

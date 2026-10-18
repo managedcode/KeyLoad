@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -17,7 +18,7 @@ internal sealed class SampleMetadataIntegrityFixture : IDisposable
         get; private set;
     }
     internal PartitionRef Partition => original.Partition;
-    internal ReplicatedOperation SeedOperation
+    internal Command<DatabaseCommand> SeedOperation
     {
         get;
     }
@@ -25,7 +26,7 @@ internal sealed class SampleMetadataIntegrityFixture : IDisposable
     {
         get;
     }
-    internal ReplicatedOperation BucketOperation
+    internal Command<DatabaseCommand> BucketOperation
     {
         get;
     }
@@ -61,7 +62,7 @@ internal sealed class SampleMetadataIntegrityFixture : IDisposable
         }
     }
 
-    internal ReplicatedOperation Operation(Mutation mutation)
+    internal Command<DatabaseCommand> Operation(Mutation mutation)
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, Partition, [mutation]);
@@ -69,7 +70,7 @@ internal sealed class SampleMetadataIntegrityFixture : IDisposable
             Owner.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options));
     }
 
-    internal CommitReceipt Apply(ReplicatedOperation operation) => Owner.Apply(operation).Get<CommitReceipt>();
+    internal CommitReceipt Apply(Command<DatabaseCommand> operation) => Owner.Apply(operation).Get<CommitReceipt>();
 
     internal void Reopen()
     {

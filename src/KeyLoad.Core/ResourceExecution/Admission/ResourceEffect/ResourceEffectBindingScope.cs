@@ -60,7 +60,7 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
             .ThenBy(value => value.Incarnation.Value, StringComparer.Ordinal).ToImmutableArray();
 
     // Composition source selection runs at its original business point after the clock gate.
-    // Every originally signed lifetime is nevertheless checked in the current cut before that gate.
+    // Every originally admitted lifetime is nevertheless checked in the current cut before that gate.
     internal void ActivateOriginalBindings(IKeyValueView view, ResourceEffectAdmissionV1 value,
         Action<ResourceLifetimeV1> authorizeUnobservedCollection)
     {
@@ -101,14 +101,11 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
         }
     }
 
-    internal void Activate(IKeyValueView view, ResourceEffectAdmissionV1 value)
+    internal void Activate(ResourceEffectAdmissionV1 value)
     {
         if (!NativeSerialization.Serialize(Capture()).AsSpan().SequenceEqual(NativeSerialization.Serialize(value.Bindings)))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
-        }
-        foreach (var lifetime in value.Bindings)
-        {
         }
         admitted = value;
     }

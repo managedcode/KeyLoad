@@ -40,8 +40,8 @@ internal static class TimeSeriesChunkQualificationClusterSetup
         state.Originals.Add((command, actual));
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(command.CommandId,
-            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch), mutations,
-            DurabilityProfile.QuorumProcessDurable), actual);
+            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position), mutations,
+            DurabilityProfile.ProcessDurable, 3), actual);
     }
     internal static async Task PolicyAsync(RequestCqrsClusterCallers root, TimeSeriesChunkQualificationClusterState state,
         long epoch, bool allow, bool use, CancellationToken token)

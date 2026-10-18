@@ -68,8 +68,8 @@ internal static class SampleChunkPartialRetentionFlow
         };
         var failure = fixture.Apply(fixture.Operation(new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, [changed], SampleChunkCanonicalFixture.Tags)));
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(failure.Json).IsNull();
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
+        
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: true);
         var cut = SampleRawIntegrityAssertions.Capture(fixture.Store);
         using var cancellation = new CancellationTokenSource();

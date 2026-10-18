@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Server;
@@ -96,15 +97,15 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
         {
             var command = new CommandRequest(Guid.NewGuid(), NativeDropRuntimeProtocol.Partition,
                 [new PutDocument(AnchorCollection, RollbackWitness, Attributes), mutation]);
-            var operation = profile.Source.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
+            var operation = profile.Source.Database.CreateCommand(OperationKind.Batch, command.CommandId,
                 PartitionStoreProtocol.AdministratorId, profile.Source.Clock.GetUtcNow(), NativeSerialization.Serialize(command));
-            var verified = profile.Source.Database.VerifyOperationAuthority(operation);
+            var verified = profile.Source.Database.OwnCommand(operation);
             await RefuseWriteAsync(profile, verified, token);
             await RefuseWriteAsync(profile, verified, token);
         }
     }
 
-    private static async Task RefuseWriteAsync(NativeDropRuntimeProfile profile, ReplicatedOperation verified,
+    private static async Task RefuseWriteAsync(NativeDropRuntimeProfile profile, Command<DatabaseCommand> verified,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();

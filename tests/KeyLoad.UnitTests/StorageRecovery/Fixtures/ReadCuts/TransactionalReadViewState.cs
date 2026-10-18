@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -34,9 +35,9 @@ internal sealed class TransactionalReadViewState : IDisposable
     {
         get; set;
     }
-    internal ReplicatedOperation Writer { get; set; } = null!;
+    internal Command<DatabaseCommand> Writer { get; set; } = null!;
     internal CommitReceipt WriterReceipt { get; set; } = null!;
-    internal ReplicatedOperation Healthy { get; set; } = null!;
+    internal Command<DatabaseCommand> Healthy { get; set; } = null!;
     internal CommitReceipt HealthyReceipt { get; set; } = null!;
     internal byte[] WriterOutcome { get; set; } = [];
     internal byte[] HealthyOutcome { get; set; } = [];

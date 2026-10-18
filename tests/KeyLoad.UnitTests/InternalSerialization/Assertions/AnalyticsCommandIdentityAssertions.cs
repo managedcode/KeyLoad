@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -21,7 +22,7 @@ internal static class AnalyticsCommandIdentityAssertions
     private const string DimensionsKey = "dimensions";
     private const string MetricsKey = "metrics";
 
-    internal static async Task OrderAsync(ReplicatedOperation operation, bool delete)
+    internal static async Task OrderAsync(Command<DatabaseCommand> operation, bool delete)
     {
         using var document = JsonDocument.Parse(operation.PayloadJson);
         var mutations = document.RootElement.GetProperty(MutationsKey);
@@ -108,17 +109,17 @@ internal static class AnalyticsCommandIdentityAssertions
 
     private static async Task OldIdentityAsync<T>(DatabaseEngine database, OperationKind kind, Guid id, T request)
     {
-        var operation = database.CreateNativeOperation(kind, id, D.Root, database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        var operation = database.CreateCommand(kind, id, D.Root, database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
-        var charged = database.CreateNativeOperation(kind, id, D.Root, operation.EvaluatedAt, NativeSerialization.Serialize(request), work);
+        var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), NativeSerialization.Serialize(request), work);
         await Assert.That(charged.PayloadJson).IsEqualTo(operation.PayloadJson);
         await Assert.That(operation.PayloadJson).IsEqualTo(JsonSerializer.Serialize(request, JsonDefaults.Options));
-        await Assert.That(NativeOperationFingerprint.Compute(operation)).IsEqualTo(JsonData.Fingerprint(new
+        await Assert.That(DatabaseCommandFingerprint.Compute(operation)).IsEqualTo(JsonData.Fingerprint(new
         {
-            operation.Id,
-            operation.Kind,
-            operation.PrincipalId,
+            operation.CommandId,
+            operation.Value!.Kind,
+            operation.UserId!,
             operation.PayloadJson
         }));
     }

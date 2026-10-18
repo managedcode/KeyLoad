@@ -17,17 +17,13 @@ internal static class EventAppendCrashScenario
         Configure(database, EventAppendCrashContract.Documents, ResourceKind.Collection, CollectionCommand);
         Configure(database, EventAppendCrashContract.Streams, ResourceKind.StreamSet, StreamCommand);
         Configure(database, EventAppendCrashContract.Queue, ResourceKind.WorkQueue, QueueCommand);
-        var operation = CrashDatabase.Operation(OperationKind.Batch,
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch,
             EventAppendCrashContract.ProducerCommand(EventAppendCrashContract.CommandId,
                 EventAppendCrashContract.Producer, EventAppendCrashContract.SeedStreamRevision), EventAppendCrashContract.CommandId);
         var seed = new CommandRequest(EventAppendCrashContract.SeedCommandId, EventAppendCrashContract.Partition,
             [new AppendEvents(EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId,
                 [EventAppendCrashContract.Event(EventAppendCrashContract.SeedId)], ExpectedStreamRevision.NoStream)]);
-        database.Apply(CrashDatabase.Operation(OperationKind.Batch, seed, seed.CommandId)
-            with
-        {
-            EvaluatedAt = operation.EvaluatedAt
-        }).Get<CommitReceipt>();
+        database.Apply(database.CreateCommand(OperationKind.Batch, seed.CommandId, CrashFixtureValues.Principal, new DateTimeOffset(operation.Timestamp), NativeSerialization.Serialize(seed))).Get<CommitReceipt>();
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.OperationFile, operation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedPositionFile, store.Position);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedTailFile,

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 
@@ -34,7 +35,7 @@ internal static class SampleChunkEarlyCrashState
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        var operation = NativeSerialization.Deserialize<ReplicatedOperation>(
+        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(
             await File.ReadAllBytesAsync(path).ConfigureAwait(false));
         var before = SampleChunkCrashState.Complete(database);
         var position = database.Store.Position;

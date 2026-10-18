@@ -27,7 +27,7 @@ internal static class QueueWorkerClusterByteSetup
         var producer = new CommandRequest(Guid.NewGuid(), partition,
             [.. QueueWorkerClusterProtocol.Messages.Select(id => new EnqueueMessage(lane.Queue, id,
                 QueueWorkerClusterByteProtocol.Payload, QueueWorkerClusterProtocol.Headers))]);
-        var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root);
+        var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
         var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(producer, token));
         var native = new QueueWorkerClusterSeed(lane, identity, producer, receipt, Convert.FromBase64String(profile.SigningKey));

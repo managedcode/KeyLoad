@@ -27,8 +27,6 @@ public sealed partial class SearchEngine
         this.textProjection = textProjection;
     }
 
-    private const string UnsafeSynchronousSearch = "Await SearchAsync when native text search runs on a scheduler or synchronization context.";
-
     /// <summary>Returns exact fused ranks with selected documents projected by persisted policy.</summary>
     /// <param name="principalId">Persisted principal identity.</param>
     /// <param name="request">Search fields, query and result limit.</param>
@@ -37,11 +35,6 @@ public sealed partial class SearchEngine
     public RankedDocument[] Search(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        if (request.Text is not null && textProjection is not null
-            && (TaskScheduler.Current != TaskScheduler.Default || SynchronizationContext.Current is not null))
-        {
-            throw new InvalidOperationException(UnsafeSynchronousSearch);
-        }
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
@@ -49,19 +42,19 @@ public sealed partial class SearchEngine
         return SearchCore(principalId, request, budget);
     }
 
-    /// <summary>Awaits exact search and native projection settlement without blocking the caller's execution context.</summary>
+    /// <summary>Runs exact search in the calling Orleans worker and returns the joined native result.</summary>
     /// <param name="principalId">Persisted principal identity.</param>
     /// <param name="request">Search fields, query and result limit.</param>
     /// <param name="cancellationToken">Caller cancellation for admission and the complete worker.</param>
     /// <returns>Ranked and authorized documents after complete lease settlement.</returns>
-    public async Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
+    public Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => SearchCore(principalId, request, budget), cancellationToken).ConfigureAwait(false);
+        return Task.FromResult(SearchCore(principalId, request, budget));
     }
 
     /// <summary>Executes graph scope, retrieval and expansion inside one authorized search cut.</summary>
@@ -69,15 +62,15 @@ public sealed partial class SearchEngine
     /// <param name="request">Versioned search and graph operators.</param>
     /// <param name="cancellationToken">Caller cancellation for admission and the complete worker.</param>
     /// <returns>Exact fused hits and optional separately projected graph context.</returns>
-    public async Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
+    public Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
-        return await GraphSearchAsync(principalId, request, budget, cancellationToken).ConfigureAwait(false);
+        return GraphSearchAsync(principalId, request, budget, cancellationToken);
     }
 
-    internal async Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
+    internal Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
         ReadExecutionBudget budget, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -85,8 +78,7 @@ public sealed partial class SearchEngine
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => GraphSearchExecutor.Execute(database, textProjection, principalId, request, budget, execution),
-            cancellationToken).ConfigureAwait(false);
+        return Task.FromResult(GraphSearchExecutor.Execute(database, textProjection, principalId, request, budget, execution));
     }
 
     private RankedDocument[] SearchCore(string principalId, SearchRequest request, ReadExecutionBudget budget)

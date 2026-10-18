@@ -83,7 +83,7 @@ internal sealed class PartitionQueryMcpContractTests
         PartitionQueryMcpTestData.Seed(fixture, request, McpCanonicalTestData.Entity);
         var position = fixture.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution())
-            .QueryPartitions("root", request, PartitionQueryPublicTestSupport.ExpectedOwner));
+            .QueryPartitions("root", request, PartitionQueryMcpTestData.Owner(fixture.Database)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability).Because(failure.Message);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         var allowed = item with
@@ -107,7 +107,7 @@ internal sealed class PartitionQueryMcpContractTests
             new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with
             {
                 Version = 2
-            }, PartitionQueryPublicTestSupport.ExpectedOwner));
+            }, PartitionQueryMcpTestData.Owner(fixture.Database)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.ReadCalls).IsEqualTo(0);
         await Assert.That(fixture.Position).IsEqualTo(position);
@@ -123,7 +123,7 @@ internal sealed class PartitionQueryMcpContractTests
             new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with
             {
                 AstVersion = 3
-            }, PartitionQueryPublicTestSupport.ExpectedOwner));
+            }, PartitionQueryMcpTestData.Owner(fixture.Database)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(fixture.ReadCalls).IsEqualTo(0);
         await Assert.That(fixture.Position).IsEqualTo(position);

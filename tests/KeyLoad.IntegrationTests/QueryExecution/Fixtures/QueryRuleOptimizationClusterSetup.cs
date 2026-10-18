@@ -27,9 +27,9 @@ internal static class QueryRuleOptimizationClusterSetup
             var revision = originals.Count == 0 ? SeedRevision : UpdateRevision;
             await Assert.That(actual.Token.Position).IsGreaterThan(0L);
             var expected = new CommitReceipt(command.CommandId,
-                new(actual.Token.Incarnation, partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
+                new(actual.Token.Incarnation, partition.AtomicPartitionId, actual.Token.Position),
                 [.. command.Mutations.Cast<PutDocument>().Select(row => new MutationReceipt("putDocument", row.Resource, row.Id, revision))],
-                DurabilityProfile.QuorumProcessDurable);
+                DurabilityProfile.ProcessDurable, 3);
             await SqlClusterProtocol.EqualAsync(expected, actual);
             originals.Add((command, actual));
         }

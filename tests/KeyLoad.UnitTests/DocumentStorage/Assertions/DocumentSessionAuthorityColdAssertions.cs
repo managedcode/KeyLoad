@@ -1,47 +1,55 @@
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using ManagedCode.Communication.Commands;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Storage;
+using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
 internal static class DocumentSessionAuthorityColdAssertions
 {
-    internal static OwnedDocumentReadResultV1 Read(RemoteDocumentNativeFixture fixture, CommitToken minimum,
-        PhysicalShardRecord? owner = null, CancellationToken token = default)
-        => fixture.Destination.Database.ReadOwnedDocument(RemoteDocumentNativeFixture.Reader,
-            RemoteDocumentNativeFixture.Tenant, new(RemoteDocumentNativeFixture.Reference, minimum),
-            owner ?? PhysicalOwnerDirectoryWholeFlow.Destination.Owner, token);
+    internal const string Root = "root";
+    internal const string Collection = "canonical-session-documents";
+    internal const string Id = "session-document";
+    internal const string Json = "{\"value\":\"canonical-session\"}";
 
-    internal static async Task UnchangedAsync(RemoteDocumentNativeFixture fixture,
-        string[] sourceImage, long sourcePosition, string[] image, long position)
+    internal static EntityRef Reference(DocumentPatchAtomicityOwner fixture)
     {
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(sourceImage, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourcePosition);
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
+        var partition = fixture.Source.Partition;
+        return fixture.Store.Read(view =>
+        {
+            var resource = fixture.Database.Resource(view, partition, Collection);
+            var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+                Collection, resource) ?? throw new InvalidOperationException(Collection);
+            return new EntityRef(partition, Collection, Id) { Lifetime = new(lifetime.Incarnation.Value) };
+        });
     }
 
-    internal static async Task ReplayAsync(RemoteDocumentNativeFixture fixture, ReplicatedOperation operation,
+    internal static DocumentResult? Read(DocumentPatchAtomicityOwner fixture, CommitToken minimum,
+        CancellationToken token = default)
+        => fixture.Database.GetDocument(Root, Reference(fixture), minimum, cancellationToken: token);
+
+    internal static async Task UnchangedAsync(DocumentPatchAtomicityOwner fixture, string[] image, long position)
+    {
+        await Assert.That(fixture.Store.Position).IsEqualTo(position);
+        await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+    }
+
+    internal static async Task ReplayAsync(DocumentPatchAtomicityOwner fixture, Command<DatabaseCommand> operation,
         CommitReceipt receipt)
     {
-        var image = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-        var position = fixture.Destination.Store.Position;
-        var expected = NativeSerialization.Serialize(new OperationResult(null) { NativeValue = receipt });
-        await Assert.That(NativeSerialization.Serialize(fixture.Destination.Database.Apply(operation)).SequenceEqual(expected)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(fixture.Destination.Database.ResolveOutcome(operation)).SequenceEqual(expected)).IsTrue();
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(fixture.Destination.Store.Position).IsEqualTo(position);
+        var image = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var cut = fixture.ReadCut();
+        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(receipt),
+            NativeSerialization.Serialize(fixture.Submit(operation).Get<CommitReceipt>()));
+        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(receipt),
+            NativeSerialization.Serialize(fixture.Database.ResolveOutcome(operation).Get<CommitReceipt>()));
+        await UnchangedAsync(fixture, image, cut.StorePosition);
+        await Assert.That(fixture.ReadCut()).IsEqualTo(cut);
     }
 
-    internal static async Task LiteralAsync(RemoteDocumentNativeFixture fixture, CommitToken token, long revision,
-        long position)
-    {
-        var owner = PhysicalOwnerDirectoryWholeFlow.Destination.Owner;
-        var actual = Read(fixture, token);
-        var expected = new OwnedDocumentReadResultV1(new(RemoteDocumentNativeFixture.Reference, revision,
-            RemoteDocumentNativeFixture.ProjectedJson, true, [RemoteDocumentNativeFixture.Secret]),
-            fixture.Destination.Store.Identity.NodeId, owner.Incarnation, RemoteDocumentNativeFixture.Empty,
-            new(RemoteDocumentNativeFixture.Version, RemoteDocumentNativeFixture.Partition, owner.PhysicalShardId,
-                owner.Incarnation, owner.VoterIds, owner.PlacementEpoch, RemoteDocumentNativeFixture.Empty,
-                RemoteDocumentNativeFixture.Empty, true), RemoteDocumentNativeFixture.Second, revision, position);
-        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-    }
+    internal static async Task LiteralAsync(DocumentPatchAtomicityOwner fixture, CommitToken token, long revision)
+        => await DocumentPatchAtomicityAssertions.BytesAsync(
+            NativeSerialization.Serialize(new DocumentResult(Reference(fixture), revision, Json, false, [])),
+            NativeSerialization.Serialize(Read(fixture, token)));
 }

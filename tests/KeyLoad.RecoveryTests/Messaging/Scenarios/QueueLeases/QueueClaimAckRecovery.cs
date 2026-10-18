@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
@@ -12,7 +14,7 @@ internal static class QueueClaimAckRecovery
         token.ThrowIfCancellationRequested();
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
-        var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.OperationFile), token));
         var original = ack ? NativeSerialization.Deserialize<Delivery>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.DeliveryFile), token)) : null;
@@ -35,13 +37,13 @@ internal static class QueueClaimAckRecovery
             operation, ack, recovered.Result, recovered.Delivery, token);
     }
 
-    private static async Task<(OperationResult Result, Delivery? Delivery)> RecoveredCutAsync(DatabaseEngine database,
-        ZoneTreeStore store, ReplicatedOperation operation, CommitStage stage, bool ack, Delivery? original,
+    private static async Task<(Result<object> Result, Delivery? Delivery)> RecoveredCutAsync(DatabaseEngine database,
+        ZoneTreeStore store, Command<DatabaseCommand> operation, CommitStage stage, bool ack, Delivery? original,
         CommitToken target, string[] baseline, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var outcome = OutcomeStoreOracle.ReadPartition(store, QueueClaimAckCrashProtocol.Partition,
-            CrashFixtureValues.Principal, operation.Id);
+            CrashFixtureValues.Principal, operation.CommandId);
         await Assert.That(store.Position).IsEqualTo(outcome is null
             ? target.Position - QueueClaimAckCrashProtocol.AdjacentPosition : target.Position);
         if (outcome is null)
@@ -68,12 +70,12 @@ internal static class QueueClaimAckRecovery
         }
         if (ack)
         {
-            await ReceiptAsync(result.Get<CommitReceipt>(), operation.Id, QueueClaimAckCrashProtocol.Message, target);
+            await ReceiptAsync(result.Get<CommitReceipt>(), operation.CommandId, QueueClaimAckCrashProtocol.Message, target);
         }
         else
         {
-            await QueueClaimAckRecoveryAssertions.DeliveryAsync(database, result.Get<ReceiveResult>(), operation.Id,
-                operation.EvaluatedAt, QueueClaimAckCrashProtocol.Message, target);
+            await QueueClaimAckRecoveryAssertions.DeliveryAsync(database, result.Get<ReceiveResult>(), operation.CommandId,
+                new DateTimeOffset(operation.Timestamp), QueueClaimAckCrashProtocol.Message, target);
             delivery = result.Get<ReceiveResult>().Deliveries.Single();
         }
         await QueueClaimAckRecoveryAssertions.ImageAsync(database, QueueClaimAckCrashProtocol.Message,
@@ -91,8 +93,8 @@ internal static class QueueClaimAckRecovery
         return committed ? MessageState.Leased : MessageState.Ready;
     }
 
-    internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, ReplicatedOperation operation,
-        OperationResult result, CancellationToken token)
+    internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> operation,
+        Result<object> result, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var image = QueueClaimAckRecoveryAssertions.Capture(store);
@@ -105,8 +107,7 @@ internal static class QueueClaimAckRecovery
 
     internal static async Task ReceiptAsync(CommitReceipt result, Guid id, string message, CommitToken expectedToken)
     {
-        await QueueClaimAckRecoveryAssertions.EqualAsync(result, new CommitReceipt(id, expectedToken,
-            [new("Ack", QueueClaimAckCrashProtocol.Queue, message, 3)], DurabilityProfile.ProcessDurable));
+        await QueueClaimAckRecoveryAssertions.EqualAsync(result, new CommitReceipt(id, expectedToken, [new("Ack", QueueClaimAckCrashProtocol.Queue, message, 3)], DurabilityProfile.ProcessDurable, 1));
     }
 
     internal static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store)
@@ -114,32 +115,29 @@ internal static class QueueClaimAckRecovery
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
             QueueClaimAckCrashProtocol.Partition);
         return new(placement.Incarnation, QueueClaimAckCrashProtocol.Partition.AtomicPartitionId,
-            checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition), placement.PlacementEpoch);
+            checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition));
     }
 
-    private static async Task AssertOriginalAsync(DatabaseEngine database, ReplicatedOperation operation,
+    private static async Task AssertOriginalAsync(DatabaseEngine database, Command<DatabaseCommand> operation,
         CommitToken target, bool ack, Delivery? delivery)
     {
-        await Assert.That(operation.Id).IsEqualTo(QueueClaimAckCrashProtocol.OperationId);
-        await Assert.That(operation.PrincipalId).IsEqualTo(CrashFixtureValues.Principal);
-        await Assert.That(operation.Kind).IsEqualTo(ack ? OperationKind.Delivery : OperationKind.Receive);
-        await QueueClaimAckRecoveryAssertions.EqualAsync(database.NormalizeOperation(operation), operation);
+        await Assert.That(operation.CommandId).IsEqualTo(QueueClaimAckCrashProtocol.OperationId);
+        await Assert.That(operation.UserId!).IsEqualTo(CrashFixtureValues.Principal);
+        await Assert.That(operation.Value!.Kind).IsEqualTo(ack ? OperationKind.Delivery : OperationKind.Receive);
+        await QueueClaimAckRecoveryAssertions.EqualAsync(database.OwnCommand(operation), operation);
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
             QueueClaimAckCrashProtocol.Partition);
         await Assert.That(target.Incarnation).IsEqualTo(placement.Incarnation);
-        await Assert.That(target.OwnershipEpoch).IsEqualTo(placement.PlacementEpoch);
         await Assert.That(target.AtomicPartitionId).IsEqualTo(QueueClaimAckCrashProtocol.Partition.AtomicPartitionId);
         await Assert.That(target.Position).IsGreaterThan(0L);
         if (ack)
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(JsonDefaults.Deserialize<DeliveryCommand>(
-                System.Text.Encoding.UTF8.GetBytes(operation.PayloadJson)),
-                new DeliveryCommand(operation.Id, QueueClaimAckCrashProtocol.Lane, delivery!.Token, DeliveryAction.Ack));
+            await QueueClaimAckRecoveryAssertions.EqualAsync(NativeSerialization.Deserialize<DeliveryCommand>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements),
+                new DeliveryCommand(operation.CommandId, QueueClaimAckCrashProtocol.Lane, delivery!.Token, DeliveryAction.Ack));
         }
         else
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(JsonDefaults.Deserialize<ReceiveRequest>(
-                System.Text.Encoding.UTF8.GetBytes(operation.PayloadJson)), new ReceiveRequest(operation.Id,
+            await QueueClaimAckRecoveryAssertions.EqualAsync(NativeSerialization.Deserialize<ReceiveRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements), new ReceiveRequest(operation.CommandId,
                 QueueClaimAckCrashProtocol.Lane, MaxMessages: 1, LeaseSeconds: QueueClaimAckCrashProtocol.LeaseSeconds));
         }
     }

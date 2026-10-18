@@ -18,7 +18,7 @@ internal static class FunctionalGateColdDropReplay
             {
                 var actual = await FunctionalGateDropCalls.InvokeAsync(context, table.ParentId,
                     table.Request, route, token);
-                await FunctionalGateDropAssertions.ResultAsync(table.ParentId, table.Request, actual);
+                await FunctionalGateDropAssertions.ResultAsync(context, table.ParentId, table.Request, actual);
                 await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(
                     table.OriginalDrop, actual);
                 await FunctionalGateColdDropAssertions.AllAsync(context, state, token);

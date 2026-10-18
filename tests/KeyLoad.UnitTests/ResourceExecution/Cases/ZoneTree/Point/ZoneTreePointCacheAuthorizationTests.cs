@@ -76,8 +76,8 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
     private static void Submit<T>(DatabaseEngine database, OperationKind kind, T payload, string principal)
     {
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
-        var result = database.Apply(new(Guid.NewGuid(), kind, principal, BeforeExpiry, json));
-        if (result.Error is not null)
+        var result = database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principal, BeforeExpiry, json));
+        if (Errors.Code(result.Problem) is not null)
         {
             throw new InvalidOperationException("The persisted authorization update was rejected.");
         }

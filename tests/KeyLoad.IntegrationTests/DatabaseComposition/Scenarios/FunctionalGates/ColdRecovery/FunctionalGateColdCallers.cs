@@ -17,6 +17,6 @@ internal static class FunctionalGateColdCallers
                             WriterPrincipalId = state.Writer.Principal.Id,
                             ReaderPrincipalId = state.Reader.Principal.Id,
                             MutableDocumentCollection = FunctionalGateColdProtocol.Resource("docs", 1),
-                            VoterCount = fixture.NodeNames.Length
+                            ReplicaCount = fixture.ReplicaCount
                         }), token), token), token), token);
 }

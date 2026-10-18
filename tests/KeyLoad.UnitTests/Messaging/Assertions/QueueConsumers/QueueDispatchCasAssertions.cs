@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -16,11 +17,11 @@ internal static class QueueDispatchCasAssertions
         await Assert.That(fixture.Collection()!.SequenceEqual(fixture.OriginalCollection)).IsTrue();
     }
 
-    internal static async Task SuccessAsync(OperationResult result, ResourceDefinition expected)
+    internal static async Task SuccessAsync(Result<object> result, ResourceDefinition expected)
         => await Assert.That(NativeSerialization.Serialize(result.Get<ResourceDefinition>())
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
 
-    internal static async Task FailureAsync(QueueDispatchCasFixture fixture, OperationResult result,
+    internal static async Task FailureAsync(QueueDispatchCasFixture fixture, Result<object> result,
         ErrorCode code, bool paused, long version)
     {
         await Assert.That(QueueDispatchCasFixture.Failure(result).Code).IsEqualTo(code);

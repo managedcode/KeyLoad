@@ -1,6 +1,6 @@
 # NativeFullTextProjection within Search
 
-Decision: [ADR-078](../../ADR/ADR-078-native-full-text-projection.md). ZoneTree.FullTextSearch is the selected full-text provider (ADR-071). This document specifies native candidate generation, distinct from the broader online index management of [OnlineGenerationLifetime](OnlineGenerationLifetime.md) and the event-driven projection lineage of [EventProjectionLineage](EventProjectionLineage.md). The native index is a disposable node-local derived index owned by the silo-local ZoneTree owner; canonical documents, the persisted projection consumer and persisted authorization remain the authority, and a write is acknowledged after a majority of the copies confirm it.
+Decision: [ADR-078](../../ADR/ADR-078-native-full-text-projection.md). ZoneTree.FullTextSearch is the selected full-text provider (ADR-071). This document specifies native candidate generation, distinct from the broader online index management of [OnlineGenerationLifetime](OnlineGenerationLifetime.md) and the event-driven projection lineage of [EventProjectionLineage](EventProjectionLineage.md). The native index is a disposable node-local derived index owned by the silo-local ZoneTree owner; canonical documents, the persisted projection consumer and persisted authorization remain the authority, and a write is acknowledged after every configured copy confirms it.
 
 |Requirement|Acceptance and automated evidence|
 |---|---|

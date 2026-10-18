@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -61,7 +62,7 @@ internal static class BlobOrphanReclaimContinuation
 
     internal static async Task Cold(TestDatabase database, ZoneTreeStore store, BlobReclaimWholeFlowFixture fixture,
         ReclaimBlobRequest first, ReclaimBlobRequest final,
-        (CompleteBlobUploadRequest Request, OperationResult Result, BlobMetadata Metadata) published)
+        (CompleteBlobUploadRequest Request, Result<object> Result, BlobMetadata Metadata) published)
     {
         var position = store.Position;
         var image = QueueWholeFlowStorage.Bytes(store);
@@ -95,8 +96,8 @@ internal static class BlobOrphanReclaimContinuation
         var position = store.Position;
         var image = QueueWholeFlowStorage.Bytes(store);
         var result = BlobReclaimWholeFlow.Apply(database, kind, request, command);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(result.SafeDetail).IsEqualTo(BlobErrors.Lifetime);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(BlobErrors.Lifetime);
         await BlobWholeFlowAssertions.Unchanged(store, position, image);
     }
 

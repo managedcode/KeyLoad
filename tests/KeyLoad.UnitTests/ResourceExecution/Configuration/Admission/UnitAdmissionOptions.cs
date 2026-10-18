@@ -6,12 +6,6 @@ namespace KeyLoad.UnitTests;
 /// <summary>Explicit validated native options for admission and cache policy regression fixtures.</summary>
 internal static class UnitAdmissionOptions
 {
-    internal static IOptions<CommandInboxExecutionOptions> Inbox(CommandInboxExecutionOptions? configured = null)
-    {
-        var value = configured ?? new CommandInboxExecutionOptions();
-        value.Validate();
-        return Options.Create(value);
-    }
 
     internal static IOptions<CommandAdmissionLimits> Command(CommandAdmissionLimits? configured = null)
     {

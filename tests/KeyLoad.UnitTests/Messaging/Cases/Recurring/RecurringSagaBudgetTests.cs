@@ -30,7 +30,7 @@ internal sealed class RecurringSagaBudgetTests
         var sagaId = Guid.NewGuid();
         var result = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new CompareExchangeSaga(fixture.Queue, sagaId, 0, SagaPhase.Waiting, EmptyJson)]));
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, scheduleId)!.Revision).IsEqualTo(2);
         await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal,
@@ -56,7 +56,7 @@ internal sealed class RecurringSagaBudgetTests
         var sagaId = Guid.NewGuid();
         var result = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new CompareExchangeSaga(fixture.Queue, sagaId, 0, SagaPhase.Waiting, largeJson)]));
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, scheduleId)).IsNotNull();
         await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal,

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using A = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityAssertions;
@@ -29,8 +30,7 @@ internal static class AnalyticsCommandIdentityFlow
             var first = Issue(owner, request);
             await A.OrderAsync(first, delete);
             var expected = new CommitReceipt(id, owner.NextToken(), [new("putDocument", D.Collection, D.Document, 1),
-                new(delete ? AnalyticsStoreProtocol.DeleteKind : AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, delete ? 2 : 1)],
-                DurabilityProfile.ProcessDurable);
+                new(delete ? AnalyticsStoreProtocol.DeleteKind : AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, delete ? 2 : 1)], DurabilityProfile.ProcessDurable, 1);
             await A.ReceiptAsync(expected, owner.Submit(first).Get<CommitReceipt>());
             await A.RowsAsync(owner, delete, expectedReference, token);
             await RetryAsync(owner, id, delete, first.PayloadJson, expected, expectedReference, token);
@@ -42,8 +42,7 @@ internal static class AnalyticsCommandIdentityFlow
     {
         var id = Guid.NewGuid();
         var seed = new CommandRequest(id, owner.Source.Partition, [D.Analytics(false, false)]);
-        var expected = new CommitReceipt(id, owner.NextToken(),
-            [new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, 1)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, owner.NextToken(), [new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, 1)], DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(expected, owner.Submit(Issue(owner, seed)).Get<CommitReceipt>());
     }
 
@@ -60,18 +59,18 @@ internal static class AnalyticsCommandIdentityFlow
             var changed = Issue(owner, D.Request(owner.Source, id, delete, true, changed: true));
             await Assert.That(changed.PayloadJson == originalIdentity).IsFalse();
             var refused = owner.Submit(changed);
-            await Assert.That(refused.Error).IsEqualTo(ErrorCode.Conflict);
-            await Assert.That(refused.SafeDetail).IsEqualTo("The command ID was already used with different content.");
-            await Assert.That(refused.Json).IsNull();
-            await Assert.That(refused.NativeValue).IsNull();
+            await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.Conflict);
+            await Assert.That(refused.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
+            
+            await Assert.That(refused.Value).IsNull();
             await A.RowsAsync(owner, delete, expectedReference, token);
         });
     }
 
-    private static ReplicatedOperation Issue(SafeProjectorOperationDatabase owner, CommandRequest request)
+    private static Command<DatabaseCommand> Issue(SafeProjectorOperationDatabase owner, CommandRequest request)
     {
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, owner.CallerToken);
-        return owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, D.Root,
+        return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
     }
 }

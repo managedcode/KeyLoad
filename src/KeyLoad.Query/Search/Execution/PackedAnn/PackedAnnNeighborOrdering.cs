@@ -8,7 +8,7 @@ internal static class PackedAnnNeighborOrdering
     private const int FirstOrdinal = 1;
     private const int AdjacentElementOffset = 1;
 
-    internal static int SelectSimple(int source, int[] nodes, int candidateCount, int maximum,
+    internal static int SelectByRank(int source, int[] nodes, int candidateCount, int maximum,
         PackedAnnBuildScratch scratch, AnnWorkBudget budget)
     {
         var selected = EmptyElementCount;

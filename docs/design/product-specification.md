@@ -52,12 +52,12 @@ membership, transport, placement or movement mechanism of its own.
 - **Copies.** The writer finds the target silos through native Orleans membership
   (`IClusterMembershipService` / `IManagementGrain`) and sends the write through
   ordinary Orleans calls to the ZoneTree owner Grain Services on
-  `KeyLoad:ReplicaCount` silos. The write is acknowledged after a majority of
-  those copies confirm durable local apply. `ReplicaCount` is positive, defaults
+  `KeyLoad:ReplicaCount` silos. The write is acknowledged after every configured
+  copy confirms persisted apply. `ReplicaCount` is positive, defaults
   to 3 and is not larger than `KeyLoad:SiloCount`
-  ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). A copy that was
-  offline catches up by reading committed records from another copy through
-  Orleans calls.
+  ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). An unfinished original command can complete on
+  a missing copy through a stable-ID retry; unrelated gaps require explicit
+  recovery and general empty-copy restoration remains unqualified.
 - **Request flow.** Public API (HTTP / .NET SDK / MCP / SQL) -> connection grain
   -> partition grains -> ZoneTree owner on the same node or on other nodes
   through Orleans -> results are gathered -> returned.
@@ -159,7 +159,7 @@ partition command order             planner, bounded fan-out,
                  │
    ZoneTree owner (Grain Service) on every silo
    own files, WAL/journals, file locks, ordered apply
-   ReplicaCount copies; ACK after majority durable apply
+   ReplicaCount copies; ACK after persisted apply on every configured copy
                  │
        ZoneTree storage
         documents + events + queue state
@@ -278,7 +278,7 @@ The safe baseline for bounded scans: a shared read/apply gate, transactions comp
 
 ### Durability profiles
 
-`Buffered`: an explicit mode for disposable/development workloads that risks losing the latest acknowledged changes. `LocalDurable`: ACK after the established persistence barrier; protection depends on healthy persistent storage. `QuorumDurable`: a write is acknowledged after durable local apply on a majority of the `ReplicaCount` copies.
+`Buffered` permits loss of acknowledged work and reports zero persisted copies. `ProcessDurable` describes the local process-recovery barrier. `LocalDurable` requires separate filesystem/device flush and fault evidence before it can be advertised. `CommitReceipt.PersistedCopies` independently records the actual acknowledged copies; a profile name never implies extra copies.
 
 The profile is set per database/partition group. Silently weakening guarantees for individual requests is forbidden. The public name Durable is allowed only after the full path is verified: data WAL, transaction log, metadata/manifest, flush ordering and recovery on the specific storage contract.
 
@@ -286,11 +286,11 @@ The profile is set per database/partition group. Silently weakening guarantees f
 
 ### Copies through Orleans
 
-Only ordinary Orleans calls copy data. A partition grain applies its partition's commands in a defined order, finds the target silos through native Orleans membership (`IClusterMembershipService` / `IManagementGrain`) and sends every command to the ZoneTree owner Grain Services on `KeyLoad:ReplicaCount` silos. A write is acknowledged after durable local apply on a majority of these copies; for `ReplicaCount=3` that is two copies, and `ReplicaCount=1` gives no copy fault tolerance ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)).
+Only ordinary Orleans calls copy data. A partition grain applies its partition's commands in a defined order, finds the target silos through native Orleans membership (`IClusterMembershipService` / `IManagementGrain`) and sends every command to the ZoneTree owner Grain Services on `KeyLoad:ReplicaCount` silos. A write is acknowledged after durable local apply on every configured copy; for `ReplicaCount=3` all three must confirm, and `ReplicaCount=1` gives no copy fault tolerance ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)).
 
-A command has a `CommandId`, `SchemaVersion`, canonical input and an explicitly assigned timestamp/ID. State-dependent CAS and unique checks run deterministically in apply order, so every copy gets the same result. A business-operation rejection is a stored result of a committed command.
+A native `ManagedCode.Communication.Command<DatabaseCommand>` has one stable `CommandId`, server-bound `UserId`, UTC `Timestamp` and generated canonical input. State-dependent CAS and unique checks run deterministically in apply order, so every copy gets the same result. A business-operation rejection is a stored result of a committed command.
 
-A copy confirms a write only after its ZoneTree owner's required persistence barrier. One flush on one node is not enough for `QuorumDurable`. Without confirmation from a majority of copies the write is not acknowledged; a client timeout means an unknown outcome, which is checked or retried with the same CommandId.
+A copy confirms a write only after its ZoneTree owner's required persistence barrier. One flush on one node is not enough for `LocalDurable`. Without confirmation from every configured copy the write is not acknowledged; a client timeout means an unknown outcome, which is checked or retried with the same CommandId.
 
 ### Activations and files
 
@@ -298,7 +298,7 @@ Orleans placement, the distributed grain directory and activation migration/repa
 
 ### Recovery and catch-up
 
-The apply position is written atomically with all changes of the command. After a restart the ZoneTree owner recovers storage, completes recovery actions for uncommitted local transactions, and checks the apply position and schema version. Until recovery completes, the node serves no normal reads or writes. A copy that was unavailable catches up by reading committed records from another copy through Orleans calls.
+The apply position is written atomically with all changes of the command. After a restart the ZoneTree owner recovers storage, completes recovery actions for uncommitted local transactions, and checks the apply position and schema version. Until recovery completes, the node serves no normal reads or writes. Retrying the retained original command may complete one interrupted application on a missing copy. Unrelated prefix gaps explicitly return RecoveryRequired; general empty-copy restoration is not qualified.
 
 ANN/FTS projections can speed up startup; canonical records allow them to be rebuilt. Outbox retention accounts for all projection consumers and active rebuild jobs.
 
@@ -972,7 +972,7 @@ For time series, an affinity of `(tenant, seriesGroup, timeWindow)` can be decla
 
 `KeyLoad:SiloCount` sets the number of Orleans silos; `KeyLoad:ReplicaCount` sets the number of data copies of each partition (positive, no larger than SiloCount, default 3). Both are read at startup; there is no live resizing ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). Scaling means adding silos; Orleans performs placement, directory and activation migration.
 
-A write is acknowledged after durable local apply on a majority of copies (see Section 6). Deployment policy checks for fully independent fault domains.
+A write is acknowledged after durable local apply on every configured copy (see Section 6). Deployment policy checks for fully independent fault domains.
 
 ### 28.5. Read scaling and fan-out
 
@@ -1233,7 +1233,7 @@ Microtests measure allocation and operator CPU. End-to-end tests use both closed
 
 Warm-up, JIT, cache warming, checkpoint/compaction states and restart recovery are documented. Steady-state comparisons repeat runs with the same seed and with several different seeds. Confidence intervals or a variability report accompany medians; a single best run is not a result.
 
-For scale-out, 1/3/6 nodes are compared with fixed total resources and replication factors. PostgreSQL partitioning on one server is not called distributed sharding. A distributed PostgreSQL arm requires an explicitly selected and qualified sharding stack; without one, single-node PG remains a single-node baseline.
+Scale comparisons use the approved one-node and three-node topologies with equivalent total resources and explicit persisted-copy acknowledgements. PostgreSQL partitioning on one server is not called distributed sharding. A distributed PostgreSQL arm requires an explicitly selected and qualified sharding stack; without one, single-node PG remains a single-node baseline.
 
 ### 32.5. "Worth continuing" criterion
 
@@ -1297,7 +1297,7 @@ Native silo lifecycle stages and `IHostedService` components have a defined star
 
 ### 36.1. Questions that remain qualification gates
 
-ZoneTree transactional range view and durable flush contract; durable apply on a majority of copies through Orleans calls under fault injection; managed HNSW persistence/concurrency; BM25 and tokenizer quality of the text provider; cost of security-domain statistics; the optimal number of ZoneTree instances per node; the configured failure model for distributed graph scope.
+ZoneTree transactional range view and durable flush contract; durable apply on every configured copy through Orleans calls under fault injection; managed HNSW persistence/concurrency; BM25 and tokenizer quality of the text provider; cost of security-domain statistics; the optimal number of ZoneTree instances per node; the configured failure model for distributed graph scope.
 
 Answering these questions requires targeted prototypes and actual measurements.
 
@@ -1727,7 +1727,7 @@ For an offline backup, all of these records belong to the same closed storage cu
 
 ### 44.4. Restart, failover and restore of an older cut
 
-After a normal restart, the server restores committed queue state and checkpoints before any new claims. Unfinished leases go through deterministic deadline/ownership evaluation. After a node loss, delivery and ACK continue through the available majority of copies; duplicates remain allowed behavior of the at-least-once profile.
+After a normal restart, the server restores committed queue state and checkpoints before any new claims. Unfinished leases go through deterministic deadline/ownership evaluation. After a node loss, available copies may serve already committed data; new claims and ACKs require every configured copy. Duplicates remain allowed behavior of the at-least-once profile.
 
 Restoring an older backup starts with **delivery paused** and a new ClusterIncarnation. Old delivery tokens/cursors are invalidated. MessageIds/InputIds are kept for reconciliation, and restored leases are marked for controlled re-evaluation before resume. The user reviews the redelivery risk for messages successfully processed after the backup cut and explicitly resumes dispatch.
 

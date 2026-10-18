@@ -12,8 +12,8 @@ internal static class EventAppendClusterAssertions
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(EventAppendClusterProtocol.InitialRevision);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(EventAppendClusterProtocol.InitialRevision);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations.SequenceEqual(new[] { new MutationReceipt(EventAppendClusterProtocol.AppendKind,
             McpEventStreamTokens.StreamSet, McpEventStreamTokens.StreamId, revision) })).IsTrue();
     }
@@ -57,7 +57,7 @@ internal static class EventAppendClusterAssertions
     {
         await Assert.That(later.Token.Incarnation).IsEqualTo(original.Token.Incarnation);
         await Assert.That(later.Token.AtomicPartitionId).IsEqualTo(original.Token.AtomicPartitionId);
-        await Assert.That(later.Token.OwnershipEpoch).IsEqualTo(original.Token.OwnershipEpoch);
+        await Assert.That(later.PersistedCopies).IsEqualTo(3);
         await Assert.That(later.Token.Position).IsGreaterThan(original.Token.Position);
     }
 

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
@@ -28,7 +29,7 @@ internal sealed class RuntimeJournalFixture : IDisposable
     internal RuntimeJournalMutationResult Submit(RuntimeJournalMutation mutation, string principal = JournalPrincipal)
         => database.Submit(OperationKind.RuntimeJournal, mutation, principal).Get<RuntimeJournalMutationResult>();
 
-    internal OperationResult SubmitOperation<T>(OperationKind kind, T payload, string principal = RootPrincipal)
+    internal Result<object> SubmitOperation<T>(OperationKind kind, T payload, string principal = RootPrincipal)
         => database.Submit(kind, payload, principal);
 
     internal RuntimeJournalSnapshot Create(string name, string instance, Dictionary<string, string>? properties = null)

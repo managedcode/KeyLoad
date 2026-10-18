@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
@@ -49,12 +50,11 @@ internal static class BlobReclaimWholeFlow
         return fixture;
     }
 
-    internal static OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
-        => database.ApplyEmbedded(new(id, kind, BlobReclaimWholeFlowFixture.Principal, default,
-            JsonSerializer.Serialize(payload, JsonDefaults.Options)), cancellationToken: default);
+    internal static Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
+        => database.ApplyEmbedded(database.CreateCommand(kind, id, BlobReclaimWholeFlowFixture.Principal, default, JsonSerializer.Serialize(payload, JsonDefaults.Options)), cancellationToken: default);
 
     internal static async Task Replay<T>(DatabaseEngine database, ZoneTreeStore store,
-        OperationKind kind, T request, Guid id, OperationResult original)
+        OperationKind kind, T request, Guid id, Result<object> original)
     {
         var position = store.Position;
         var image = QueueWholeFlowStorage.Bytes(store);
@@ -62,7 +62,7 @@ internal static class BlobReclaimWholeFlow
         await BlobWholeFlowAssertions.Unchanged(store, position, image);
     }
 
-    internal static async Task<(ReclaimBlobRequest Request, OperationResult Result)> First(
+    internal static async Task<(ReclaimBlobRequest Request, Result<object> Result)> First(
         DatabaseEngine database, ZoneTreeStore store, BlobReclaimWholeFlowFixture fixture)
     {
         var request = new ReclaimBlobRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId, BlobReclaimWholeFlowFixture.SingleCount);

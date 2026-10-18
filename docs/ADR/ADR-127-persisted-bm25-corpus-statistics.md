@@ -8,7 +8,7 @@ KeyLoad retains one replaceable exact-Terms statistics head per full partition/c
 
 Use the original generated four-field DistributedTextStatisticsV1 and exact tokenizer/scorer. Relocate the pure internal type mechanically to Core's Search Contracts, preserving namespace, alias and IDs; Query already consumes Core and receives its existing friend access. Do not add a duplicate type, scorer or Core-to-Query cycle. Public SDK/MCP/SQL contracts remain unchanged.
 
-Only a server-verified private native Orleans maintenance publication may write the head. Generic client commands, envelopes and public MCP descriptors reject phase45. Fresh persisted administrator and target-subject corpus permissions, exact source dependencies and expected-generation CAS are verified before first effects. Existing ordered node-local commit/apply ownership and majority acknowledgement remain authoritative.
+Only a server-verified private native Orleans maintenance publication may write the head. Generic client commands, envelopes and public MCP descriptors reject phase45. Fresh persisted administrator and target-subject corpus permissions, exact source dependencies and expected-generation CAS are verified before first effects. Existing ordered node-local commit/apply ownership and acknowledgement from every configured copy remain authoritative.
 
 Search reads the head within its original scoped view. Exact current Terms/policy/schema/resource digest/outbox/store incarnation admit unchanged scoring. Missing, unsupported, malformed or stale optimization data uses the same complete exact canonical calculation without writes. This does not change engine selection, current read-cut authority or authorization.
 

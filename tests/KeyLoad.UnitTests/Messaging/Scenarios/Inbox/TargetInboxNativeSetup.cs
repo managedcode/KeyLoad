@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -35,8 +36,7 @@ internal static class TargetInboxNativeSetup
         return (source, target, delivery, request);
     }
 
-    internal static OperationResult Apply(DatabaseEngine database, CommitInboxRequest request, CancellationToken token,
+    internal static Result<object> Apply(DatabaseEngine database, CommitInboxRequest request, CancellationToken token,
         string principal = TargetInboxUnitProtocol.Root)
-        => database.ApplyEmbedded(new(request.CommandId, OperationKind.CommitInbox, principal, default,
-            System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options)), token);
+        => database.ApplyEmbedded(database.CreateCommand(OperationKind.CommitInbox, request.CommandId, principal, default, System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options)), token);
 }

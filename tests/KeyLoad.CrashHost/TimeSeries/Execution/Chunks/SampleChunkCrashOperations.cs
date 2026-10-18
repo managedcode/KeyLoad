@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.CrashHost;
@@ -35,8 +36,8 @@ internal static class SampleChunkCrashOperations
         : new SealSampleChunkWindow(SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
             SampleChunkCrashContract.WindowId, SampleChunkCrashContract.AppendedRevision);
 
-    internal static OperationResult Commit(DatabaseEngine database, Guid id, Mutation mutation)
-        => database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch,
+    internal static Result<object> Commit(DatabaseEngine database, Guid id, Mutation mutation)
+        => database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch,
             new CommandRequest(id, SampleChunkCrashContract.Partition, [mutation]), id), cancellationToken: default);
 
     internal static CommitReceipt OriginalAcknowledged(DatabaseEngine database)

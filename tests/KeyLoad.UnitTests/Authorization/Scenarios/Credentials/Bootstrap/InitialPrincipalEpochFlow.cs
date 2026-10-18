@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -36,7 +38,7 @@ internal static class InitialPrincipalEpochFlow
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task RefusalAsync(InitialPrincipalEpochFixture fixture, ReplicatedOperation operation, CancellationToken token)
+    private static async Task RefusalAsync(InitialPrincipalEpochFixture fixture, Command<DatabaseCommand> operation, CancellationToken token)
     {
         var store = fixture.Harness.Store;
         var outcome = InitialPrincipalEpochFixture.Outcome(operation);
@@ -47,7 +49,7 @@ internal static class InitialPrincipalEpochFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await InitialPrincipalEpochAssertions.FailureAsync(fixture.Harness.Database.ApplyEmbedded(operation, token),
-                new OperationResult(null, ErrorCode.Validation, InitialPrincipalEpochFixture.InvalidDetail));
+                Result<object>.Fail(Errors.Problem(ErrorCode.Validation, InitialPrincipalEpochFixture.InvalidDetail)));
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -63,9 +65,9 @@ internal static class InitialPrincipalEpochFlow
         ServerFailureObserver.ThrowIfAny(failures);
         await InitialPrincipalEpochAssertions.ObserveAsync(store, async () =>
             await InitialPrincipalEpochAssertions.FailureAsync(fixture.Harness.Database.ApplyEmbedded(operation, token),
-                new OperationResult(null, ErrorCode.Validation, InitialPrincipalEpochFixture.InvalidDetail)));
+                Result<object>.Fail(Errors.Problem(ErrorCode.Validation, InitialPrincipalEpochFixture.InvalidDetail))));
     }
-    private static Task CancelledAsync(InitialPrincipalEpochFixture fixture, ReplicatedOperation operation)
+    private static Task CancelledAsync(InitialPrincipalEpochFixture fixture, Command<DatabaseCommand> operation)
         => InitialPrincipalEpochAssertions.ObserveAsync(fixture.Harness.Store, async () =>
         {
             var failures = new List<Exception>();

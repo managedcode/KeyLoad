@@ -36,9 +36,8 @@ internal static class NativeRuntimeJournalRegistration
     {
         var codec = new Lazy<GrainRequestCodec>(provider.GetRequiredService<GrainRequestCodec>);
         var database = new Lazy<DatabaseEngine>(provider.GetRequiredService<DatabaseEngine>);
-        var coordinator = new Lazy<Func<ICommitCoordinator>>(provider.GetRequiredService<Func<ICommitCoordinator>>);
         return new RuntimeJournalClient(provider.GetRequiredService<IGrainFactory>(),
-            () => codec.Value, () => database.Value, () => coordinator.Value(), provider,
+            () => codec.Value, () => database.Value, provider,
             provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),

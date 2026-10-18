@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -36,12 +37,10 @@ internal static class QueueEnqueueColdTrial
         await RefusalsAsync(database, fixture.Partition, command, image, token);
         var lane = new QueueLaneRef(fixture.Partition, QueueEnqueueColdProtocol.Queue);
         var claimId = Guid.NewGuid();
-        var delivery = database.ApplyEmbedded(new(claimId, OperationKind.Receive, QueueEnqueueColdProtocol.Root, default,
-            JsonSerializer.Serialize(new ReceiveRequest(claimId, lane), JsonDefaults.Options)), token).Get<ReceiveResult>().Deliveries.Single();
+        var delivery = database.ApplyEmbedded(database.CreateCommand(OperationKind.Receive, claimId, QueueEnqueueColdProtocol.Root, default, JsonSerializer.Serialize(new ReceiveRequest(claimId, lane), JsonDefaults.Options)), token).Get<ReceiveResult>().Deliveries.Single();
         await Assert.That(delivery.Id).IsEqualTo(QueueEnqueueColdProtocol.Ready);
         var ackId = Guid.NewGuid();
-        database.ApplyEmbedded(new(ackId, OperationKind.Delivery, QueueEnqueueColdProtocol.Root, default,
-            JsonSerializer.Serialize(new DeliveryCommand(ackId, lane, delivery.Token, DeliveryAction.Ack), JsonDefaults.Options)), token).Get<CommitReceipt>();
+        database.ApplyEmbedded(database.CreateCommand(OperationKind.Delivery, ackId, QueueEnqueueColdProtocol.Root, default, JsonSerializer.Serialize(new DeliveryCommand(ackId, lane, delivery.Token, DeliveryAction.Ack), JsonDefaults.Options)), token).Get<CommitReceipt>();
         ConfigurePublisher(database, fixture.Partition, Capability.QueueInspect | Capability.QueuePublish, token,
             QueueEnqueueColdProtocol.RestoredEpoch);
         var healthy = new CommandRequest(Guid.NewGuid(), fixture.Partition,
@@ -68,7 +67,7 @@ internal static class QueueEnqueueColdTrial
             Mutations = [new EnqueueMessage(QueueEnqueueColdProtocol.Queue,
             QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.HealthyJson)]
         };
-        await Assert.That(Apply(database, changed, QueueEnqueueColdProtocol.Root, token).Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(Apply(database, changed, QueueEnqueueColdProtocol.Root, token).Problem)).IsEqualTo(ErrorCode.Conflict);
         var duplicate = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument, QueueEnqueueColdProtocol.HealthyJson),
                 new EnqueueMessage(QueueEnqueueColdProtocol.Queue, QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.HealthyJson)]);
@@ -89,9 +88,8 @@ internal static class QueueEnqueueColdTrial
             ErrorCode.PermissionDenied, image, token);
     }
 
-    internal static OperationResult Apply(DatabaseEngine database, CommandRequest command,
-        string principal, CancellationToken token) => database.ApplyEmbedded(new(command.CommandId,
-            OperationKind.Batch, principal, default, JsonSerializer.Serialize(command, JsonDefaults.Options)), token);
+    internal static Result<object> Apply(DatabaseEngine database, CommandRequest command,
+        string principal, CancellationToken token) => database.ApplyEmbedded(database.CreateCommand(OperationKind.Batch, command.CommandId, principal, default, JsonSerializer.Serialize(command, JsonDefaults.Options)), token);
 
     private static void ConfigurePublisher(DatabaseEngine database, PartitionRef partition,
         Capability capabilities, CancellationToken token, long epoch = QueueEnqueueColdProtocol.InitialPolicyEpoch)
@@ -102,8 +100,7 @@ internal static class QueueEnqueueColdTrial
         {
             PolicyEpoch = epoch
         };
-        database.ApplyEmbedded(new(id, OperationKind.ConfigurePrincipal, QueueEnqueueColdProtocol.Root, default,
-            JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal), JsonDefaults.Options)), token).Get<PrincipalRecord>();
+        database.ApplyEmbedded(database.CreateCommand(OperationKind.ConfigurePrincipal, id, QueueEnqueueColdProtocol.Root, default, JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal), JsonDefaults.Options)), token).Get<PrincipalRecord>();
     }
 
     private static CommandRequest Original(PartitionRef partition, DateTimeOffset scheduledAt)

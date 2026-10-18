@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -126,7 +128,7 @@ internal sealed class BlobRestoreNormalizationTests
         var result = Apply(database, OperationKind.BeginBlobUpload, commandId, request);
         var current = operations.UploadInfo(PrincipalId, new(nextBlob, uploadId));
 
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(current!.Status).IsEqualTo(BlobUploadStatus.Active);
         operations.NormalizeRestoredStore();
         await Assert.That(operations.UploadInfo(PrincipalId, new(nextBlob, uploadId))!.Status)
@@ -152,15 +154,14 @@ internal sealed class BlobRestoreNormalizationTests
         var oldPartRequest = new WriteBlobPartRequest(backup.ActivePartCommandId, backup.ActiveBlob,
             backup.ActiveUploadId, ActivePartOrdinal, backup.AcceptedPart, BlobIntegrity.PartHash(backup.AcceptedPart));
         var payload = JsonSerializer.Serialize(oldPartRequest, JsonDefaults.Options);
-        var operation = new ReplicatedOperation(backup.ActivePartCommandId, OperationKind.WriteBlobPart,
-            PrincipalId, TimeProvider.System.GetUtcNow(), payload);
+        var operation = database.CreateCommand(OperationKind.WriteBlobPart, backup.ActivePartCommandId, PrincipalId, TimeProvider.System.GetUtcNow(), payload);
         var failure = database.Apply(operation);
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
 
         var oldBeginRequest = new BeginBlobUploadRequest(backup.ActiveBeginCommandId,
             backup.ActiveBlob, backup.ActiveUploadId, AcceptedPartLength + 1L, 0);
         var oldBegin = Apply(database, OperationKind.BeginBlobUpload, backup.ActiveBeginCommandId, oldBeginRequest);
-        await Assert.That(oldBegin.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(oldBegin.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 
     private static void ConfigureBoundedBlobResource(TestDatabase database)
@@ -190,10 +191,10 @@ internal sealed class BlobRestoreNormalizationTests
         return BlobIntegrity.NextHash(chain, 0, bytes.Length, BlobIntegrity.PartHash(bytes));
     }
 
-    private static OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, Guid commandId, T payload)
+    private static Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, Guid commandId, T payload)
     {
         var serialized = JsonSerializer.Serialize(payload, JsonDefaults.Options);
-        return database.Apply(new(commandId, kind, PrincipalId, TimeProvider.System.GetUtcNow(), serialized));
+        return database.Apply(database.CreateCommand(kind, commandId, PrincipalId, TimeProvider.System.GetUtcNow(), serialized));
     }
 
     private sealed record BlobRestoreBackup(string BackupDirectory, Guid SourceIncarnation, Guid TargetIncarnation,

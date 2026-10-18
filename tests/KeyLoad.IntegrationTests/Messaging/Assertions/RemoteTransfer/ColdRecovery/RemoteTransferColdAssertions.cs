@@ -60,7 +60,8 @@ internal static class RemoteTransferColdAssertions
         QueueLaneRef lane, Guid transferId, string kind, long revision)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations).HasSingleItem();
         await SqlClusterProtocol.EqualAsync(new MutationReceipt(kind, lane.Queue,
             transferId.ToString(RemoteTransferColdProtocol.TransferIdFormat), revision), receipt.Mutations.Single());

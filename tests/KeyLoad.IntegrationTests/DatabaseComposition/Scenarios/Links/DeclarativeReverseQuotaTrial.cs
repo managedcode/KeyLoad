@@ -90,7 +90,7 @@ internal static class DeclarativeReverseQuotaTrial
     internal static async Task ReceiptAsync(CommandRequest command, CommitReceipt receipt, string kind, long version)
     {
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(command.CommandId, receipt.Token,
-            [new(kind, DeclarativeReverseQuotaFlow.Target, HolderId, version)], DurabilityProfile.QuorumProcessDurable), receipt);
+            [new(kind, DeclarativeReverseQuotaFlow.Target, HolderId, version)], DurabilityProfile.ProcessDurable, 3), receipt);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
     }
 

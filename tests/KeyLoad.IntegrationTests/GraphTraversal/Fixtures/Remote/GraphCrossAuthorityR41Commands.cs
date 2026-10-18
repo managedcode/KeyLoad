@@ -46,7 +46,8 @@ internal static class GraphCrossAuthorityR41Commands
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(mutations, receipt.Mutations.ToArray());
         state.Originals.Add((command, receipt));
     }

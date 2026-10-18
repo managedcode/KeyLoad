@@ -4,8 +4,8 @@ using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
-/// <summary>Original public OCC/dedup/fresh authorization acceptance through actual Aspire CLUSTER.</summary>
-/// <param name="fixture">The existing real CLUSTER resources and discovered public endpoints.</param>
+/// <summary>Original public OCC/dedup/fresh authorization acceptance through actual Aspire Orleans.</summary>
+/// <param name="fixture">The existing real Orleans resources and discovered public endpoints.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class EventAppendClusterWholeFlowTests(ClusterFixture fixture)

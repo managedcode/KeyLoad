@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -11,11 +13,11 @@ internal static class SampleChunkCorrectionBoundCold
     private const int ColdOwners = 2;
 
     internal static async Task RunAsync(SampleChunkCanonicalFixture fixture, Guid refusedId,
-        Mutation overflow, OperationResult refused, long revision, ImmutableArray<SampleRecord> rows,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        Mutation overflow, Result<object> refused, long revision, ImmutableArray<SampleRecord> rows,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         var refusedCommand = new CommandRequest(refusedId, fixture.Owner.Partition, [overflow]);
-        var refusedOperation = new ReplicatedOperation(refusedId, OperationKind.Batch,
+        var refusedOperation = fixture.Owner.Database.CreateCommand(OperationKind.Batch, refusedId,
             SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(refusedCommand, JsonDefaults.Options));
         originals.Add((refusedOperation, refused));
         var failures = new List<Exception>();
@@ -35,7 +37,7 @@ internal static class SampleChunkCorrectionBoundCold
     }
 
     private static async Task ColdAsync(SampleChunkCanonicalFixture fixture, long revision,
-        ImmutableArray<SampleRecord> rows, List<(ReplicatedOperation Operation, OperationResult Result)> originals,
+        ImmutableArray<SampleRecord> rows, List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals,
         string image, long position, byte[] identity)
     {
         var failures = new List<Exception>();
@@ -56,7 +58,7 @@ internal static class SampleChunkCorrectionBoundCold
 
     private static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store,
         SampleChunkCanonicalFixture fixture, long revision, ImmutableArray<SampleRecord> rows,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         await SampleChunkCorrectionBoundColdAssertions.RowsAsync(database, store, fixture, revision, rows);
         foreach (var original in originals)

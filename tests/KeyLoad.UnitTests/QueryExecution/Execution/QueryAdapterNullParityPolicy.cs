@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class QueryAdapterNullParityPolicy
 {
     internal static async Task RequireAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        int epoch, List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        int epoch, List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         await SetAsync(database, partition, epoch, false, originals);
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
@@ -31,7 +32,7 @@ internal static class QueryAdapterNullParityPolicy
         await QueryAdapterNullParityPages.HealthyAsync(engine, store, partition, QueryAdapterNullParityProtocol.Reader);
     }
     private static async Task SetAsync(DatabaseEngine database, PartitionRef partition, int epoch, bool allow,
-        List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         var expected = new PrincipalRecord(QueryAdapterNullParityProtocol.Reader, partition.TenantId,
             allow ? [new(partition.DatabaseId, QueryAdapterNullParityProtocol.Collection,

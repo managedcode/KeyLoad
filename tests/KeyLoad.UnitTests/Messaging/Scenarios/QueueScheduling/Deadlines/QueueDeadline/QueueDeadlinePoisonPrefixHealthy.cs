@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -7,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueDeadlinePoisonPrefixHealthy
 {
     internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore store, string directory, QueueLaneRef lane,
-        DateTimeOffset due, bool leased, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes,
+        DateTimeOffset due, bool leased, List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -31,15 +33,11 @@ internal static class QueueDeadlinePoisonPrefixHealthy
             token.ThrowIfCancellationRequested();
             var metadata = rows.Single(value => value.Id == delivery.Id);
             var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
-            var expected = new CommitReceipt(ack.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, lane),
-                [new(QueueDeadlinePoisonPrefixProtocol.AckReceipt, lane.Queue, metadata.Id, metadata.StateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable);
+            var expected = new CommitReceipt(ack.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, lane), [new(QueueDeadlinePoisonPrefixProtocol.AckReceipt, lane.Queue, metadata.Id, metadata.StateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
             var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Delivery, ack.CommandId,
                 ack, QueueDeadlineNativeProtocol.Worker, due);
             var result = database.Apply(operation);
-            await NativeReplayResultAssertions.Same<CommitReceipt>(result, new(null)
-            {
-                NativeValue = expected
-            });
+            await NativeReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
             outcomes.Add((operation, result));
             rows = rows.Select(value => value.Id == metadata.Id ? value with
             {
@@ -54,7 +52,7 @@ internal static class QueueDeadlinePoisonPrefixHealthy
     }
 
     private static async Task FinalColdAsync(ZoneTreeStore store, string directory, QueueLaneRef lane, DateTimeOffset due,
-        MessageMetadata[] rows, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, CancellationToken token)
+        MessageMetadata[] rows, List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -5,9 +6,9 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private static bool RequiresCompositionEffectCapture(ReplicatedOperation operation)
+    private static bool RequiresCompositionEffectCapture(Command<DatabaseCommand> operation)
     {
-        if (operation.Kind == OperationKind.Batch)
+        if (operation.Value!.Kind == OperationKind.Batch)
         {
             var batch = Payload<CommandRequest>(operation);
             return !batch.Mutations.IsDefault && batch.Mutations.Any(static mutation
@@ -17,7 +18,7 @@ public sealed partial class DatabaseEngine
     }
 
     private static void RequireCompleteCompositionEffects(IAtomicTransaction transaction,
-        ReplicatedOperation? operation, bool preparingComposition)
+        Command<DatabaseCommand>? operation, bool preparingComposition)
     {
         if (preparingComposition || operation is null || !RequiresCompositionEffectCapture(operation))
         {
@@ -30,7 +31,7 @@ public sealed partial class DatabaseEngine
         completion.RequireCompleteResourceEffects();
     }
 
-    private void RequireCompositionEndpointPolicy(PrincipalRecord principal, ReplicatedOperation operation,
+    private void RequireCompositionEndpointPolicy(PrincipalRecord principal, Command<DatabaseCommand> operation,
         ResourceLifetimeV1 lifetime)
     {
         var partition = Payload<CommandRequest>(operation).Partition;
@@ -43,14 +44,14 @@ public sealed partial class DatabaseEngine
     }
 
     private void ObserveCompositionPrefix(ResourceEffectPreparationTransaction transaction,
-        PrincipalRecord principal, ReplicatedOperation operation, long position, bool preserveBudgetFailure)
+        PrincipalRecord principal, Command<DatabaseCommand> operation, long position, bool preserveBudgetFailure)
     {
         var batch = Payload<CommandRequest>(operation);
         try
         {
             // This is the real provider's discard-only child. The ordinary ordered handlers see
             // every earlier staged effect; no source selection or receipt is retained for real apply.
-            _ = ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt,
+            _ = ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.Timestamp,
                 position, operation: operation, preparingComposition: true, compositionBudget: transaction.Work);
         }
         catch (KeyLoadException error) when (error.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported

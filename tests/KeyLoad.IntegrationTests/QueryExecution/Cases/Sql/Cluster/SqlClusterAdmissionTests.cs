@@ -1,0 +1,131 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.ClientApi;
+
+namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+
+/// <summary>AC-AISQL-007: an insufficient real SQL DATA byte budget leaves direct control progress available.</summary>
+[NotInParallel]
+internal sealed class SqlClusterAdmissionTests
+{
+    private const long DataBytes = 536_870_912;
+    private const long HeavyReadBytes = 1_073_741_824;
+    private const string DispatchRoute = "/v1/admin/dispatch?paused=false";
+    private const string CommandIdHeader = "X-KeyLoad-Command-Id";
+    private const string TenantPrefix = "sql-admission-";
+    private const string Database = "agentdb";
+    private const string Domain = "agent";
+    private const int SiloCount = 3;
+    private const int NoControlCommands = 0;
+    private const string AdmissionDrainTimeout = "HTTP control admission did not drain within the bounded observation window.";
+    private static readonly TimeSpan AdmissionDrainDeadline = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan AdmissionPollInterval = TimeSpan.FromMilliseconds(50);
+
+    [Test]
+    public async Task AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsClusterHealthy()
+    {
+        var fixture = new ClusterFixture(new HttpAdmissionLimits
+        {
+            MaxReservedBytes = DataBytes,
+            HeavyReadReservedBytes = HeavyReadBytes
+        });
+        try
+        {
+            await fixture.InitializeAsync();
+            using var deadline = McpCallerDeadline.Create();
+            var partition = new PartitionRef(TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
+                Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
+            foreach (var node in new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 })
+            {
+                await VerifyNodeAsync(fixture, node, partition, deadline.Token);
+            }
+        }
+        finally { await fixture.DisposeAsync(); }
+    }
+
+    private static async Task VerifyNodeAsync(ClusterFixture fixture, string node, PartitionRef partition,
+        CancellationToken cancellationToken)
+    {
+        using var http = McpCallerHttp.Create(fixture, node);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
+        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, cancellationToken);
+        await VerifySdkRejectionAsync(http, sdk, fixture.AdminKey, partition, cancellationToken);
+        await VerifyOfficialRejectionAsync(mcp, partition, cancellationToken);
+        await VerifyHealthyAsync(sdk, cancellationToken);
+    }
+
+    private static async Task VerifySdkRejectionAsync(HttpClient http, KeyLoadClient sdk, string administratorKey,
+        PartitionRef partition, CancellationToken cancellationToken)
+    {
+        var commandId = Guid.NewGuid();
+        var sql = SqlClusterProtocol.Call(partition, McpCallerTools.AdminDispatch, true, commandId);
+        var rejected = await sdk.ExecuteSqlAsync(sql, cancellationToken);
+        await Assert.That(rejected.IsSuccess).IsFalse();
+        await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.ResourceExhausted));
+        using var control = new HttpRequestMessage(HttpMethod.Post, DispatchRoute);
+        control.Headers.Authorization = new AuthenticationHeaderValue(McpCallerProtocol.BearerScheme, administratorKey);
+        control.Headers.Add(CommandIdHeader, commandId.ToString());
+        using var completed = await http.SendAsync(control, cancellationToken);
+        completed.EnsureSuccessStatusCode();
+        await Assert.That(await completed.Content.ReadFromJsonAsync<bool>(JsonDefaults.Options, cancellationToken)).IsTrue();
+    }
+
+    private static async Task VerifyOfficialRejectionAsync(McpOfficialClient mcp, PartitionRef partition,
+        CancellationToken cancellationToken)
+    {
+        var commandId = Guid.NewGuid();
+        var sql = SqlClusterProtocol.Call(partition, McpCallerTools.AdminDispatch, true, commandId);
+        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken),
+            ErrorCode.ResourceExhausted, dispatched: false);
+        var arguments = McpOfficialClient.Arguments(false);
+        arguments.Add(McpCallerProtocol.CommandId, commandId);
+        var completed = await McpCallerAssertions.SuccessAsync<bool>(await mcp.Client.InvokeKeyLoadToolAsync(
+            McpCallerTools.AdminDispatch, arguments, cancellationToken: cancellationToken));
+        await Assert.That(completed.Value).IsTrue();
+    }
+
+    private static async Task VerifyHealthyAsync(KeyLoadClient sdk, CancellationToken cancellationToken)
+    {
+        var admission = await WaitForControlCommandsDrainedAsync(sdk, cancellationToken);
+        await Assert.That(admission.Http!.Limits.MaxReservedBytes).IsEqualTo(DataBytes);
+        await Assert.That(admission.Http.Limits.HeavyReadReservedBytes).IsEqualTo(HeavyReadBytes);
+        await Assert.That(admission.Http.Node.ControlCommands).IsEqualTo(NoControlCommands);
+        await Assert.That(admission.Http.VerifiedScopes.ControlCommands).IsEqualTo(NoControlCommands);
+        var status = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(cancellationToken));
+        await Assert.That(status.RoutingReady).IsTrue();
+        await Assert.That(status.SiloCount).IsEqualTo(SiloCount);
+    }
+
+    private static async Task<NodeAdmissionStatus> WaitForControlCommandsDrainedAsync(KeyLoadClient sdk,
+        CancellationToken cancellationToken)
+    {
+        using var deadlineTimeout = new CancellationTokenSource(AdmissionDrainDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
+        var started = TimeProvider.System.GetTimestamp();
+        while (true)
+        {
+            deadline.Token.ThrowIfCancellationRequested();
+            ThrowIfAdmissionDrainExpired(started);
+            var admission = await McpCallerAssertions.SdkSuccessAsync(await sdk.AdmissionStatusAsync(deadline.Token));
+            deadline.Token.ThrowIfCancellationRequested();
+            ThrowIfAdmissionDrainExpired(started);
+            var http = admission.Http!;
+            if (http.Node.ControlCommands == NoControlCommands
+                && http.VerifiedScopes.ControlCommands == NoControlCommands)
+            {
+                return admission;
+            }
+
+            await Task.Delay(AdmissionPollInterval, TimeProvider.System, deadline.Token);
+        }
+    }
+
+    private static void ThrowIfAdmissionDrainExpired(long started)
+    {
+        if (TimeProvider.System.GetElapsedTime(started) >= AdmissionDrainDeadline)
+        {
+            throw new TimeoutException(AdmissionDrainTimeout);
+        }
+    }
+}

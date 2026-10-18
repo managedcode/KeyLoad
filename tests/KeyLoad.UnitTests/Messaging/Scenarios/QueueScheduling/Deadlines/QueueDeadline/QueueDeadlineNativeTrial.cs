@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -61,7 +63,7 @@ internal static class QueueDeadlineNativeTrial
             produced, due, kind, receiveSweep, identity, token);
     }
 
-    private static ReplicatedOperation DueBodyOperation(DatabaseEngine database, QueueLaneRef lane,
+    private static Command<DatabaseCommand> DueBodyOperation(DatabaseEngine database, QueueLaneRef lane,
         MessageMetadata metadata, DateTimeOffset due, QueueDeadlineKind kind, bool receiveSweep)
     {
         var id = Guid.NewGuid();
@@ -70,12 +72,12 @@ internal static class QueueDeadlineNativeTrial
         var json = receiveSweep
             ? System.Text.Json.JsonSerializer.Serialize(new ReceiveRequest(id, lane), JsonDefaults.Options)
             : System.Text.Json.JsonSerializer.Serialize(new CommandRequest(id, lane.Partition, [deadline]), JsonDefaults.Options);
-        return database.PrepareQueueRetryOperation(database.NormalizeOperation(
-            new(id, receiveSweep ? OperationKind.Receive : OperationKind.Batch, "root", due, json)));
+        return database.PrepareQueueRetryOperation(database.OwnCommand(
+            database.CreateCommand(receiveSweep ? OperationKind.Receive : OperationKind.Batch, id, "root", due, json)));
     }
 
     private static async Task RefuseDueBodyAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, string[] image, long position, byte[] identity)
+        Command<DatabaseCommand> operation, string[] image, long position, byte[] identity)
     {
         for (var repeat = 0; repeat < 2; repeat++)
         {
@@ -87,7 +89,7 @@ internal static class QueueDeadlineNativeTrial
     }
 
     private static async Task CompleteDueBodyAsync(DatabaseEngine database, ZoneTreeStore store, string directory,
-        QueueLaneRef lane, ReplicatedOperation operation, CommandRequest producer, OperationResult produced,
+        QueueLaneRef lane, Command<DatabaseCommand> operation, CommandRequest producer, Result<object> produced,
         DateTimeOffset due, QueueDeadlineKind kind, bool receiveSweep, byte[] identity, CancellationToken token)
     {
         var result = database.Apply(operation);

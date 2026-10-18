@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -6,9 +7,9 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private MutationReceipt ApplyQueueDeadline(IAtomicTransaction tx, PartitionRef partition,
-        AdvanceQueueDeadline request, DateTimeOffset now, ReplicatedOperation? operation)
+        AdvanceQueueDeadline request, DateTimeOffset now, Command<DatabaseCommand>? operation)
     {
-        if (operation is null || operation.Kind != OperationKind.Batch || operation.EvaluatedAt != now)
+        if (operation is null || operation.Value!.Kind != OperationKind.Batch || operation.Timestamp != now)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, QueueDeadlineProtocol.BatchRequired);
         }

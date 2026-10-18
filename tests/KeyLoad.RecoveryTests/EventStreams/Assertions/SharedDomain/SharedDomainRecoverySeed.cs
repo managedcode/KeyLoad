@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.EventStreams;
 using KeyLoad.Storage;
@@ -49,36 +51,34 @@ internal static class SharedDomainRecoverySeed
         return history;
     }
 
-    private static async Task ReceiveAsync(DatabaseEngine database, ReplicatedOperation operation, OperationResult result,
+    private static async Task ReceiveAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> result,
         SharedDomainScope scope, long position)
     {
-        await Assert.That(operation.Kind).IsEqualTo(OperationKind.Receive);
+        await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Receive);
         var received = result.Get<ReceiveResult>();
-        await Assert.That(received.RequestId).IsEqualTo(operation.Id);
+        await Assert.That(received.RequestId).IsEqualTo(operation.CommandId);
         await Assert.That(received.Token).IsEqualTo(new CommitToken(database.Store.Identity.Incarnation,
-            scope.Partition.AtomicPartitionId, position, Generation));
+            scope.Partition.AtomicPartitionId, position));
         var actual = await Assert.That(received.Deliveries).HasSingleItem();
         await SharedDomainRecoveryValues.EqualAsync(actual, new Delivery(Item, scope.Payload, Headers, actual.Token,
-            FirstRevision, operation.EvaluatedAt.AddSeconds(OriginalLeaseSeconds), checked((int)FirstRevision), Generation));
+            FirstRevision, new DateTimeOffset(operation.Timestamp).AddSeconds(OriginalLeaseSeconds), checked((int)FirstRevision), Generation));
         await SharedDomainRecoveryValues.EqualAsync(database.Verify<DeliveryClaims>(actual.Token),
             new DeliveryClaims(new(scope.Partition, scope.Queue!), Item, Writer, FirstRevision, Generation, database.Store.Identity.Incarnation));
     }
 
-    private static async Task AckAsync(ReplicatedOperation operation, OperationResult result, SharedDomainScope scope, long position, Guid incarnation)
+    private static async Task AckAsync(Command<DatabaseCommand> operation, Result<object> result, SharedDomainScope scope, long position, Guid incarnation)
     {
-        await Assert.That(operation.Kind).IsEqualTo(OperationKind.Delivery);
-        await Assert.That(result.Error).IsNull();
-        await Assert.That(result.SafeDetail).IsNull();
-        await Assert.That(result.Json).IsNull();
-        await SharedDomainRecoveryValues.ReceiptValueAsync(result.Get<CommitReceipt>(), new CommitReceipt(operation.Id,
-            new(incarnation, scope.Partition.AtomicPartitionId, position, Generation),
-            [new(nameof(DeliveryAction.Ack), scope.Queue!, Item, AckVersion)], DurabilityProfile.ProcessDurable));
+        await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Delivery);
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(result.Problem?.Detail).IsNull();
+        
+        await SharedDomainRecoveryValues.ReceiptValueAsync(result.Get<CommitReceipt>(), new CommitReceipt(operation.CommandId, new(incarnation, scope.Partition.AtomicPartitionId, position), [new(nameof(DeliveryAction.Ack), scope.Queue!, Item, AckVersion)], DurabilityProfile.ProcessDurable, 1));
     }
 
-    internal static SharedDomainRecoveryHistory Capture(IAtomicStore store, ReplicatedOperation operation, OperationResult result, PartitionRef partition)
+    internal static SharedDomainRecoveryHistory Capture(IAtomicStore store, Command<DatabaseCommand> operation, Result<object> result, PartitionRef partition)
     {
-        var key = KeySpace.PartitionOutcome(partition, Writer, operation.Id);
-        var locator = KeySpace.OutcomeLocatorV2(partition, Writer, operation.Id);
+        var key = KeySpace.PartitionOutcome(partition, Writer, operation.CommandId);
+        var locator = KeySpace.OutcomeLocatorV2(partition, Writer, operation.CommandId);
         return new(operation, result, partition, key, Required(store, key), locator, Required(store, locator));
     }
 

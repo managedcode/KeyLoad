@@ -15,7 +15,7 @@ internal static class ChunkMultiblockClusterReceipt
             : await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
         await PositiveAsync(actual);
         var expected = new CommitReceipt(command.CommandId, new(actual.Token.Incarnation, command.Partition.AtomicPartitionId,
-            actual.Token.Position, actual.Token.OwnershipEpoch), [mutation], DurabilityProfile.QuorumProcessDurable);
+            actual.Token.Position), [mutation], DurabilityProfile.ProcessDurable, 3);
         await SampleChunkRetentionClusterReadOracle.EqualAsync(actual, expected);
         return actual;
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Storage;
 
@@ -5,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private void ValidateRetainedQueueRetryAdmission(IKeyValueView view, ReplicatedOperation operation,
+    private void ValidateRetainedQueueRetryAdmission(IKeyValueView view, Command<DatabaseCommand> operation,
         CommandOutcomeSelection selection, StoredOutcome outcome, bool preserveBudgetFailure = false)
     {
         if (outcome.Incarnation != Store.Identity.Incarnation

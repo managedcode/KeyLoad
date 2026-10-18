@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Owns unique real work queues in two actual CLUSTER atomic partitions.</summary>
+/// <summary>Owns unique real work queues in two actual Orleans atomic partitions.</summary>
 internal sealed record MessagingClusterScenario(PartitionRef SourcePartition, PartitionRef DestinationPartition)
 {
     internal const string SourceQueueName = "source-jobs";

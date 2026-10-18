@@ -12,7 +12,7 @@ internal static class QueueViewLeaseIsolationDelivery
             [new(RenewKind, Queue, First, Renewed)]);
         var history = await QueueViewLeaseIsolationOperations.SendAsync(state, OperationKind.Delivery,
             request, request.CommandId, expected);
-        state.CurrentDeadline = history.Operation.EvaluatedAt.AddSeconds(LeaseSeconds);
+        state.CurrentDeadline = new DateTimeOffset(history.Operation.Timestamp).AddSeconds(LeaseSeconds);
         state.Version = Renewed;
         await Assert.That(state.CurrentDeadline).IsGreaterThan(state.Delivery.LeaseUntil);
         await QueueViewLeaseIsolationMessages.RequireAsync(state);

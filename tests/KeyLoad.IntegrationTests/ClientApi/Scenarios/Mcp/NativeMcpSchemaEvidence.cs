@@ -23,7 +23,7 @@ internal static class NativeMcpSchemaEvidence
         "ModelContextProtocol.Client.McpClient.DiscoverKeyLoadToolAsync.Tool.InputSchema";
     private const string OutputCaptureSource =
         "ModelContextProtocol.Client.McpClient.DiscoverKeyLoadToolAsync.Tool.OutputSchema";
-    private const string CaptureContext = "Aspire-owned Docker CLUSTER official MCP C# SDK client, node1";
+    private const string CaptureContext = "Aspire-owned Docker Orleans official MCP C# SDK client, node1";
     private static readonly JsonSerializerOptions SidecarOptions = new(JsonSerializerDefaults.Web);
 
     internal static async Task RetainGraphShortestPathAsync(Tool tool, CancellationToken token)

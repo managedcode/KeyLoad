@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal static class EventAppendSequenceAuthorityAssertions
 {
     internal static async Task ReceiptAsync(EventAppendWholeFlowFixture fixture, CommandRequest command,
-        OperationResult result, long revision)
+        Result<object> result, long revision)
     {
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
@@ -39,7 +40,7 @@ internal static class EventAppendSequenceAuthorityAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, CommandRequest command,
-        OperationResult original, DateTimeOffset now)
+        Result<object> original, DateTimeOffset now)
     {
         var position = store.Position;
         var before = QueueWholeFlowStorage.Bytes(store);

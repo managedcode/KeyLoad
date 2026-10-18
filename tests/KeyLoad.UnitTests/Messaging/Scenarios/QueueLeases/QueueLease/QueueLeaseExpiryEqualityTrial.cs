@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -59,7 +60,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         await Assert.That(original.LeaseVersion).IsEqualTo(1L);
         await Assert.That(original.Attempt).IsEqualTo(1);
         var image = QueueOrderedRetryImage.Capture(fixture.Store, lane);
-        var denied = new List<(DeliveryCommand Command, OperationResult Result)>();
+        var denied = new List<(DeliveryCommand Command, Result<object> Result)>();
         foreach (var action in new[] { DeliveryAction.Ack, DeliveryAction.Renew })
         {
             var command = new DeliveryCommand(Guid.NewGuid(), lane, original.Token, action);
@@ -78,7 +79,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         {
             var replay = Apply(database, command, state.Boundary);
             await QueueLeaseExpiryEqualityAssertions.RefusalAsync(replay, ErrorCode.LeaseExpired);
-            await Assert.That(replay.SafeDetail).IsEqualTo(result.SafeDetail);
+            await Assert.That(replay.Problem?.Detail).IsEqualTo(result.SafeDetail);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
         }
         var claim = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, state.Claim,
@@ -87,7 +88,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
     }
 
-    private static async Task<(DeliveryCommand Command, OperationResult Result)> ReclaimAsync(
+    private static async Task<(DeliveryCommand Command, Result<object> Result)> ReclaimAsync(
         DatabaseEngine database, ZoneTreeStore store, QueueLeaseExpiryEqualityState state)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane);
@@ -112,7 +113,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         return (ack, acked);
     }
 
-    private static async Task<(CommandRequest Producer, OperationResult Produced, DeliveryCommand Ack, OperationResult Receipt)>
+    private static async Task<(CommandRequest Producer, Result<object> Produced, DeliveryCommand Ack, Result<object> Receipt)>
         HealthyAsync(DatabaseEngine database, QueueLeaseExpiryEqualityState state)
     {
         var producer = new CommandRequest(Guid.NewGuid(), state.Lane.Partition,
@@ -133,8 +134,8 @@ internal static class QueueLeaseExpiryEqualityTrial
 
     private static ZoneTreeStore Open(string root) => new(new(root), UnitExecutionOptions.StorageExecution(),
         UnitExecutionOptions.PointCacheExecution());
-    private static OperationResult Apply(DatabaseEngine database, DeliveryCommand command, DateTimeOffset time)
+    private static Result<object> Apply(DatabaseEngine database, DeliveryCommand command, DateTimeOffset time)
         => QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, command, command.CommandId, time);
-    private static OperationResult Batch(DatabaseEngine database, CommandRequest command, DateTimeOffset time)
+    private static Result<object> Batch(DatabaseEngine database, CommandRequest command, DateTimeOffset time)
         => QueueWholeFlowStorage.Apply(database, OperationKind.Batch, command, command.CommandId, time);
 }

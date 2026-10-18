@@ -21,8 +21,7 @@ internal sealed class NativeOperationCoordinatorTests
         var payload = NativeSerialization.Serialize(request);
         var first = await coordinator.SubmitNativeAsync(OperationKind.Batch, id, RootPrincipal, payload);
         var replay = await coordinator.SubmitNativeAsync(OperationKind.Batch, id, RootPrincipal, payload);
-        await Assert.That(first.Json).IsNull();
-        await Assert.That(first.NativeValue).IsTypeOf<CommitReceipt>();
+        await Assert.That(first.Value).IsTypeOf<CommitReceipt>();
         await Assert.That(replay.Get<CommitReceipt>().Token).IsEqualTo(first.Get<CommitReceipt>().Token);
         await Assert.That(replay.Get<CommitReceipt>().CommandId).IsEqualTo(id);
         await Assert.That(database.Database.GetDocument(RootPrincipal, new(database.Partition, Collection, Entity))!.Revision)
@@ -42,18 +41,18 @@ internal sealed class NativeOperationCoordinatorTests
     }
 
     [Test]
-    public async Task NativeOperationRetainsFrozenPublicIdentityAndOpaqueJson()
+    public async Task NativeCommandRetainsExactInputAndOpaqueUserJson()
     {
         using var database = new TestDatabase();
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition, [new PutDocument(Collection, Entity, Json)]);
-        var operation = database.Database.CreateNativeOperation(OperationKind.Batch, id, RootPrincipal, Time,
+        var operation = database.Database.CreateCommand(OperationKind.Batch, id, RootPrincipal, Time,
             NativeSerialization.Serialize(request));
-        await Assert.That(operation.PayloadJson).IsEqualTo(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(request)));
-        await Assert.That(operation.NativePayload.IsEmpty).IsFalse();
-        var wrapper = NativeSerialization.Deserialize<KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload>(
-            operation.NativePayload.Span);
-        var restored = NativeSerialization.Deserialize<CommandRequest>(wrapper.Value.Span);
+        await Assert.That(operation.CommandId).IsEqualTo(id);
+        await Assert.That(operation.UserId).IsEqualTo(RootPrincipal);
+        await Assert.That(operation.Timestamp).IsEqualTo(Time.UtcDateTime);
+        await Assert.That(operation.Value!.Input.Span.SequenceEqual(NativeSerialization.Serialize(request))).IsTrue();
+        var restored = NativeSerialization.Deserialize<CommandRequest>(operation.Value.Input.Span);
         await Assert.That(((PutDocument)restored.Mutations[0]).Json).IsEqualTo(Json);
     }
 }

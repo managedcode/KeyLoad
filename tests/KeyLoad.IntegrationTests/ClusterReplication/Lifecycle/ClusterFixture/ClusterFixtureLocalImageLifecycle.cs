@@ -5,10 +5,9 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureLocalImageLifecycle
 {
-    private const string ShutdownFailure = "Owned local CLUSTER image cleanup requires joined node shutdown.";
+    private const string ShutdownFailure = "Owned local Orleans image cleanup requires joined node shutdown.";
     private const string NodeOwnerLock = "node.owner.lock";
     private const string DatabaseDirectory = "database";
-    private const string ReplicaDirectory = "replica";
     private const string StoreOwnerLock = "owner.lock";
     internal static readonly string[] ExpectedNames = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber,
         ClusterFixtureProtocol.NodeCount).Select(ClusterFixtureProtocol.NodeName).ToArray();
@@ -35,9 +34,8 @@ internal static class ClusterFixtureLocalImageLifecycle
     {
         foreach (var node in ExpectedNames)
         {
-            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(root, node, NodeOwnerLock));
-            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(root, node, DatabaseDirectory, StoreOwnerLock));
-            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(root, node, ReplicaDirectory, StoreOwnerLock));
+            StorageOwnershipFiles.AssertExclusive(Path.Combine(root, node, NodeOwnerLock));
+            StorageOwnershipFiles.AssertExclusive(Path.Combine(root, node, DatabaseDirectory, StoreOwnerLock));
         }
     }
 }

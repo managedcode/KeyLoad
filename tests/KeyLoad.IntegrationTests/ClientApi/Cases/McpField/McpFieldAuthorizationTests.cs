@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.Authorization;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCP-002/007 and AC-DSTORE-003: both real adapters enforce the same persisted sensitive-field policy.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire CLUSTER application.</param>
+/// <param name="fixture">The initialized actual Docker/Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpFieldAuthorizationTests(ClusterFixture fixture)

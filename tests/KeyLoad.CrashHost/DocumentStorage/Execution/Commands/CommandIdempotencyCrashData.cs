@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -18,7 +19,7 @@ internal static class CommandIdempotencyCrashData
         Configure(database, QueueCommand, CommandIdempotencyCrashContract.Queue, ResourceKind.WorkQueue);
     }
 
-    internal static ReplicatedOperation CreateOperation()
+    internal static Command<DatabaseCommand> CreateOperation(DatabaseEngine database)
     {
         const int ExpectedRevisionEmptyCount = 0;
 
@@ -29,25 +30,23 @@ internal static class CommandIdempotencyCrashData
                 [new(CommandIdempotencyCrashContract.EventId, CommandIdempotencyCrashContract.EventType, CommandIdempotencyCrashContract.EventPayloadJson)], ExpectedStreamRevision.NoStream),
             new EnqueueMessage(CommandIdempotencyCrashContract.Queue, CommandIdempotencyCrashContract.MessageId, CommandIdempotencyCrashContract.QueuePayloadJson)
         ]);
-        return CrashDatabase.Operation(OperationKind.Batch, command, CommandIdempotencyCrashContract.CommandId);
+        return CrashDatabase.Operation(database, OperationKind.Batch, command, CommandIdempotencyCrashContract.CommandId);
     }
 
-    internal static ReplicatedOperation CreateChangedOperation(ReplicatedOperation operation)
+    internal static Command<DatabaseCommand> CreateChangedOperation(DatabaseEngine database, Command<DatabaseCommand> operation)
     {
         const int IndexEmptyCount = 0;
         const int ExpectedRevisionEmptyCount = 0;
 
-        var command = JsonDefaults.Deserialize<CommandRequest>(Encoding.UTF8.GetBytes(operation.PayloadJson));
+        var command = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var changed = command.Mutations.SetItem(IndexEmptyCount,
             new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.ChangedDocumentJson, ExpectedRevisionEmptyCount));
         var payload = JsonSerializer.Serialize(command with
         {
             Mutations = changed
         }, JsonDefaults.Options);
-        return operation with
-        {
-            PayloadJson = payload
-        };
+        return database.CreateCommand(operation.Value!.Kind, operation.CommandId, operation.UserId!,
+            new DateTimeOffset(operation.Timestamp), payload);
     }
 
     internal static CommitReceipt CreateFollowUp(DatabaseEngine database)
@@ -86,12 +85,12 @@ internal static class CommandIdempotencyCrashData
         return NativeSerialization.Deserialize<T>(await File.ReadAllBytesAsync(path, cancellationToken));
     }
 
-    internal static EntityRef ExpectedDocumentReference(string id)
+    internal static EntityRef ExpectedDocumentReference(DatabaseEngine database, string id)
     {
         var partition = CommandIdempotencyCrashContract.Partition;
         var request = Configuration(CommandIdempotencyCrashContract.Collection, ResourceKind.Collection);
         // The frozen Configure GUID/body determine creation identity; its fingerprint excludes evaluation time.
-        var original = CrashDatabase.Operation(OperationKind.ConfigureResource, request, Guid.Parse(CollectionCommand));
+        var original = CrashDatabase.Operation(database, OperationKind.ConfigureResource, request, Guid.Parse(CollectionCommand));
         var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, request.Definition);
         return new(partition, CommandIdempotencyCrashContract.Collection, id)
         {

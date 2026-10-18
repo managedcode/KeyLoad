@@ -56,7 +56,7 @@ internal static class NativeCoverageTUnitSession
                 deadline.Token).ConfigureAwait(false);
             if (exit != 0)
             {
-                throw new InvalidOperationException("Original CLUSTER coverage image preparation failed.");
+                throw new InvalidOperationException("Original Orleans coverage image preparation failed.");
             }
             foreach (var (key, value) in configuration.EnvironmentVariables)
             {

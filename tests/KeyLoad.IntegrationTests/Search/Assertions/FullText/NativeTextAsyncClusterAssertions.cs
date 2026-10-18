@@ -6,7 +6,6 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class NativeTextAsyncClusterAssertions
 {
     private const int ReplicaCount = 3;
-    private const string MissingLeader = "The CLUSTER cluster did not report one shared leader.";
 
     internal static async Task AssertSearchAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         SearchRequest request, (string Id, double Score)[] expected, bool verifyRedaction,
@@ -44,17 +43,16 @@ internal static class NativeTextAsyncClusterAssertions
         var statuses = await Task.WhenAll(results.Select(result => McpCallerAssertions.SdkSuccessAsync(result)));
         await Assert.That(statuses.Length).IsEqualTo(ReplicaCount);
         await Assert.That(statuses.All(status => status.RoutingReady)).IsTrue();
-        await Assert.That(statuses.All(status => status.Voters == ReplicaCount)).IsTrue();
-        var leader = statuses[0].Leader ?? throw new InvalidOperationException(MissingLeader);
-        await Assert.That(statuses.All(status => string.Equals(status.Leader, leader,
-            StringComparison.Ordinal))).IsTrue();
+        await Assert.That(statuses.All(status => status.SiloCount == ReplicaCount)).IsTrue();
+        await Assert.That(statuses.All(status => status.ReplicaCount == ReplicaCount)).IsTrue();
+        await Assert.That(statuses.Select(status => status.NodeId).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(ReplicaCount);
         var official = await McpCallerAssertions.SuccessAsync<NodeStatus>(await officialAdministrator.Client
             .InvokeKeyLoadToolAsync(McpCallerTools.AdminStatus, cancellationToken: cancellationToken));
         await Assert.That(official.Value.NodeId).IsEqualTo(statuses[0].NodeId);
         await Assert.That(official.Value.Incarnation).IsEqualTo(statuses[0].Incarnation);
         await Assert.That(official.Value.ProcessId).IsEqualTo(statuses[0].ProcessId);
         await Assert.That(official.Value.RoutingReady).IsTrue();
-        await Assert.That(official.Value.Voters).IsEqualTo(ReplicaCount);
-        await Assert.That(official.Value.Leader).IsEqualTo(leader);
+        await Assert.That(official.Value.SiloCount).IsEqualTo(ReplicaCount);
+        await Assert.That(official.Value.ReplicaCount).IsEqualTo(ReplicaCount);
     }
 }

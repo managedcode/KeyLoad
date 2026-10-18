@@ -54,8 +54,7 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
     }
 
     internal RuntimeJournalMutationResult Submit(RuntimeJournalMutation mutation, string principal = "keyload-internal-runtime-journal")
-        => Database.Apply(new(Guid.NewGuid(), OperationKind.RuntimeJournal, principal, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(mutation, JsonDefaults.Options))).Get<RuntimeJournalMutationResult>();
+        => Database.Apply(Database.CreateCommand(OperationKind.RuntimeJournal, Guid.NewGuid(), principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(mutation, JsonDefaults.Options))).Get<RuntimeJournalMutationResult>();
 
     internal void Reopen()
     {

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -35,7 +36,7 @@ internal sealed class QueueAdmissionCancellationWholeFlowTests
         using var canceled = new CancellationTokenSource();
         await canceled.CancelAsync();
         var coordinator = new EmbeddedCoordinator(fixture.Database);
-        OperationResult? partial = null;
+        Result<object>? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
             partial = await coordinator.SubmitAsync(kind, id, "root", payload, canceled.Token));
         await Assert.That(failure).IsNotNull();
@@ -59,7 +60,7 @@ internal sealed class QueueAdmissionCancellationWholeFlowTests
     }
 
     private static async Task AssertHealthyAsync(TestDatabase fixture, QueueLaneRef lane,
-        OperationKind kind, OperationResult healthy)
+        OperationKind kind, Result<object> healthy)
     {
         if (kind == OperationKind.Receive)
         {

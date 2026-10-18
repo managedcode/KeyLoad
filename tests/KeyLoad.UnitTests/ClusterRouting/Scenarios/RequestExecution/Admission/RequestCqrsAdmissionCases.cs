@@ -11,7 +11,7 @@ internal static class RequestCqrsAdmissionCases
     private const int SmallPayloadBytes = 1;
     private const string ClosedFailureDetail = "The operation was rejected safely.";
 
-    internal static async Task AcCrs004AdmissionAcceptsOnlyTheTwoDefinedTerminalShapes(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs004AdmissionAcceptsOnlyTheTwoDefinedTerminalShapes(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var serializer = ChunkSerializer(fixture);
@@ -36,7 +36,7 @@ internal static class RequestCqrsAdmissionCases
         await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.OwnershipLost);
     }
 
-    internal static async Task AcCrs004MalformedNativeChunkIsRejectedBeforeAdmission(RequestCqrsClusterFixture fixture, RequestCqrsInvalidChunk invalid)
+    internal static async Task AcCrs004MalformedNativeChunkIsRejectedBeforeAdmission(RequestCqrsHostedRuntimeFixture fixture, RequestCqrsInvalidChunk invalid)
     {
         var requestId = Guid.NewGuid();
         var serializer = ChunkSerializer(fixture);
@@ -52,7 +52,7 @@ internal static class RequestCqrsAdmissionCases
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);
     }
 
-    internal static async Task AcCrs004MissingTerminalAndCancellationCannotLookLikeCompletion(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs004MissingTerminalAndCancellationCannotLookLikeCompletion(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var admission = new NativeCqrsStreamAdmission(ChunkSerializer(fixture), requestId, fixture.RoutingOptions);
@@ -67,7 +67,7 @@ internal static class RequestCqrsAdmissionCases
         await Assert.That(((OperationCanceledException)cancellation!).CancellationToken).IsEqualTo(cancelled.Token);
     }
 
-    internal static async Task AcCrs004CompletedReplyPayloadRemainsInsideItsExistingRawReplyBound(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs004CompletedReplyPayloadRemainsInsideItsExistingRawReplyBound(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var admission = new NativeCqrsStreamAdmission(ChunkSerializer(fixture), requestId, fixture.RoutingOptions);
@@ -79,8 +79,8 @@ internal static class RequestCqrsAdmissionCases
     }
 
     private static Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ChunkSerializer(
-        RequestCqrsClusterFixture fixture)
-        => fixture.Cluster.ServiceProvider.GetRequiredService<
+        RequestCqrsHostedRuntimeFixture fixture)
+        => fixture.Services.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
 
     private static CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> FailedChunk(ErrorCode code,

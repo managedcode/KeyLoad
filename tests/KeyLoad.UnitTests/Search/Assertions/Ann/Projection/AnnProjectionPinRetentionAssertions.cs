@@ -74,7 +74,7 @@ internal static class AnnProjectionPinRetentionAssertions
             new ConfigureProjectionConsumerRequest(commandId, consumer,
                 new(2, [AnnProjectionPinTestSupport.Collection], [AnnProjectionPinTestSupport.VectorMutation]), sourceTail),
             id: commandId);
-        await Assert.That(changed.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changed.Problem)).IsEqualTo(ErrorCode.Conflict);
         var state = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, consumer.Partition).Consumers.Single();
         await Assert.That(state.Released).IsTrue();
     }

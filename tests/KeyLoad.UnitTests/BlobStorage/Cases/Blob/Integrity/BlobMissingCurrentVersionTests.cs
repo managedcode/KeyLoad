@@ -73,9 +73,7 @@ internal sealed class BlobMissingCurrentVersionTests
     private static async Task AssertRejectedCommand(TestDatabase database, BlobRef blob, Guid missingUploadId,
         Guid newUploadId, BlobStateSnapshot before, OperationKind kind, Guid commandId, object request)
     {
-        var exception = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Apply(new(commandId,
-            kind, PrincipalId, TimeProvider.System.GetUtcNow().AddSeconds(FutureCommandClockSeconds),
-            JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options))));
+        var exception = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Apply(database.Database.CreateCommand(kind, commandId, PrincipalId, TimeProvider.System.GetUtcNow().AddSeconds(FutureCommandClockSeconds), JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options))));
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(Read(database, OutcomeStoreOracle.PartitionKey(blob.Partition, PrincipalId, commandId))).IsNull();

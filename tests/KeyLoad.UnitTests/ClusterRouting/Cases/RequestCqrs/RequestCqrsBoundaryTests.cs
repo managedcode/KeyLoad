@@ -1,8 +1,8 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource]
+[RequestCqrsHostedDataSource]
 [NotInParallel(KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsFixtureScheduling.SharedSession)]
-internal sealed class RequestCqrsBoundaryTests(RequestCqrsClusterFixture fixture)
+internal sealed class RequestCqrsBoundaryTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]
     public Task AcCrs006ActualClientAndSiloConvertersCarryPersistedPrincipalAndRequestState()

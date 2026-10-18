@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
@@ -45,9 +46,9 @@ internal static class FullPartitionOutcomeIdentityAssertions
             .SequenceEqual(receiptBytes)).IsTrue();
     }
 
-    internal static async Task AssertReceiptAsync(OperationResult result, byte[] expected)
+    internal static async Task AssertReceiptAsync(Result<object> result, byte[] expected)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(NativeSerialization.Serialize(result.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(expected)).IsTrue();
     }

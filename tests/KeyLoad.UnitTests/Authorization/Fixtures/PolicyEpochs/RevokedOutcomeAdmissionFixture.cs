@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -16,14 +18,14 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
     internal ZoneTreeStore Store { get; set; } = null!;
     internal DatabaseEngine Database { get; set; } = null!;
     internal CommandRequest Original { get; private set; } = null!;
-    internal OperationResult OriginalResult { get; private set; } = null!;
+    internal Result<object> OriginalResult { get; private set; } = null!;
     internal byte[] OriginalOutcome { get; private set; } = [];
     internal byte[] OriginalLocator { get; private set; } = [];
     internal CommandRequest? Fresh
     {
         get; set;
     }
-    internal OperationResult? FreshResult
+    internal Result<object>? FreshResult
     {
         get; set;
     }
@@ -65,7 +67,7 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
         };
         Harness.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
     }
-    internal static ReplicatedOperation Operation(CommandRequest command)
+    internal static Command<DatabaseCommand> Operation(CommandRequest command)
         => new(command.CommandId, OperationKind.Batch, Worker, Epoch, JsonSerializer.Serialize(command, JsonDefaults.Options));
     internal CommandRequest Next() => new(Guid.NewGuid(), Harness.Partition,
         [new PutDocument(Documents, "c", "{\"value\":3}", 0),

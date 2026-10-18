@@ -31,18 +31,18 @@ internal sealed class JsonTextQueueReplayTests
         var replay = db.Submit(OperationKind.Receive, request, id: id, time: now);
         var deliveries = original.Get<ReceiveResult>().Deliveries;
         var changedSpelling = JsonSerializer.Serialize(request, JsonDefaults.Options) + RawSpellingSuffix;
-        var conflict = db.Database.Apply(new(id, OperationKind.Receive, RootPrincipal, now, changedSpelling));
+        var conflict = db.Database.Apply(db.Database.CreateCommand(OperationKind.Receive, id, RootPrincipal, now, changedSpelling));
 
         await Assert.That(deliveries.Length).IsEqualTo(MultiDeliveryCount);
         await Assert.That(deliveries[0].Id).IsEqualTo(FirstMessageId);
         await Assert.That(deliveries[1].Id).IsEqualTo(SecondMessageId);
         await NativeReplayResultAssertions.Same<ReceiveResult>(replay, original);
-        await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
 
         var ack = Guid.NewGuid();
         db.Submit(OperationKind.Delivery, new DeliveryCommand(ack, lane, deliveries[0].Token, DeliveryAction.Ack),
             id: ack, time: now).Get<CommitReceipt>();
-        await Assert.That(db.Submit(OperationKind.Receive, request, id: id, time: now).Error)
+        await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, request, id: id, time: now).Problem))
             .IsEqualTo(ErrorCode.StaleLease);
     }
 
@@ -70,8 +70,8 @@ internal sealed class JsonTextQueueReplayTests
                 PolicyEpoch = 2
             }), time: now.AddSeconds(1))
             .Get<PrincipalRecord>();
-        await Assert.That(db.Submit(OperationKind.Receive, request, principal: WorkerPrincipal,
-            id: id, time: now.AddSeconds(1)).Error).IsEqualTo(ErrorCode.Unauthenticated);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, request, principal: WorkerPrincipal,
+            id: id, time: now.AddSeconds(1)).Problem)).IsEqualTo(ErrorCode.Unauthenticated);
     }
 
     [Test]

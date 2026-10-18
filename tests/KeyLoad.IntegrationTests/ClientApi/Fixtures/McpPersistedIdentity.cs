@@ -17,7 +17,7 @@ internal sealed record McpPersistedIdentity(PrincipalRecord Principal, ApiKeyRec
     private const string Separator = ".";
 
     /// <summary>Creates the actual scoped principal and key through the real HTTP SDK.</summary>
-    /// <param name="fixture">The actual CLUSTER application.</param>
+    /// <param name="fixture">The actual Orleans application.</param>
     /// <param name="partition">The sole tenant, database and resource domain allowed to this identity.</param>
     /// <param name="capabilities">Persisted server-granted operations.</param>
     /// <param name="cancellationToken">The bounded setup lifetime.</param>
@@ -27,7 +27,7 @@ internal sealed record McpPersistedIdentity(PrincipalRecord Principal, ApiKeyRec
         => CreateAsync(fixture, partition, McpDocumentProtocol.Collection, capabilities, cancellationToken);
 
     /// <summary>Creates a persisted principal and key scoped to the requested real database resource.</summary>
-    /// <param name="fixture">The actual CLUSTER application.</param>
+    /// <param name="fixture">The actual Orleans application.</param>
     /// <param name="partition">The tenant, database and atomic partition used by the scenario.</param>
     /// <param name="resourceName">The sole resource receiving the persisted grants.</param>
     /// <param name="capabilities">Persisted server-granted operations.</param>

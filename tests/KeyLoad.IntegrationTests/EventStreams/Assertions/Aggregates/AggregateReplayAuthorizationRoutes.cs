@@ -52,7 +52,8 @@ internal static class AggregateReplayAuthorizationRoutes
                 SourceRevision = previous.SourceRevision, StateJson = previous.StateJson }]
         };
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token));
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Token.Position).IsGreaterThan(original.Receipt.Token.Position);
         await SqlClusterProtocol.EqualAsync(new MutationReceipt(SnapshotMutation, previous.Stream.StreamSet,
             previous.Stream.StreamId, previous.SnapshotVersion + SnapshotVersionStep), receipt.Mutations.Single());

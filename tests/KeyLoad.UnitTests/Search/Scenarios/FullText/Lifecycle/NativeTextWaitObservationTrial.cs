@@ -13,7 +13,7 @@ internal static class NativeTextWaitObservationTrial
         var failures = new List<Exception>();
         try
         {
-            await using var fixture = new ReplicaAppliedPositionWaitFixture();
+            using var fixture = new CanonicalReadCutFixture();
             await ExecuteAsync(fixture, future, failures, token);
         }
         catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
@@ -27,7 +27,7 @@ internal static class NativeTextWaitObservationTrial
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ExecuteAsync(ReplicaAppliedPositionWaitFixture fixture, bool? future,
+    private static async Task ExecuteAsync(CanonicalReadCutFixture fixture, bool? future,
         List<Exception> failures, CancellationToken token)
     {
         NativeTextProjection? projection = null;

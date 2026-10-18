@@ -8,7 +8,6 @@ internal sealed class NativeAnnWaitAuthorityTests
     private const int WrongAtomicCase = 1;
     private const int FutureCase = 2;
     private const int ZeroCase = 3;
-    private const int WrongEpochCase = 4;
     private const string WrongAtomic = "different-atomic-partition";
 
     [Test]
@@ -16,7 +15,6 @@ internal sealed class NativeAnnWaitAuthorityTests
     [Arguments(WrongAtomicCase)]
     [Arguments(FutureCase)]
     [Arguments(ZeroCase)]
-    [Arguments(WrongEpochCase)]
     public Task RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy(int defect)
         => NativeAnnWaitWholeFlow.RunAsync(async (fixture, runtime, pin, receipt) =>
         {
@@ -28,7 +26,6 @@ internal sealed class NativeAnnWaitAuthorityTests
                 WrongAtomicCase => receipt.Token with { AtomicPartitionId = WrongAtomic },
                 FutureCase => receipt.Token with { Position = receipt.Token.Position + NextPosition },
                 ZeroCase => receipt.Token with { Position = ZeroPosition },
-                WrongEpochCase => receipt.Token with { OwnershipEpoch = receipt.Token.OwnershipEpoch + NextPosition },
                 _ => throw new ArgumentOutOfRangeException(nameof(defect))
             };
             var image = NativeAnnMaintenanceTestData.Snapshot(database);

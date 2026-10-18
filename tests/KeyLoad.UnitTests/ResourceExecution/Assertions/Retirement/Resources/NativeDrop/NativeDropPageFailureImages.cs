@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
@@ -7,11 +8,11 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 /// <summary>Allows only the actual native failed-outcome/clock/applied rows, conserving every other canonical byte.</summary>
 internal static class NativeDropPageFailureImages
 {
-    internal static async Task RequireAsync(NativeDropPageAttemptState state, ReplicatedOperation original,
+    internal static async Task RequireAsync(NativeDropPageAttemptState state, Command<DatabaseCommand> original,
         NativeDropPageRecoveryImage[] before, ErrorCode expected)
     {
         var after = await NativeDropPageRecoveryImages.CaptureAsync(state.Profile, state.Context.Token).ConfigureAwait(false);
-        var outcomeKey = KeySpace.GlobalOutcome(original.PrincipalId, original.Id);
+        var outcomeKey = KeySpace.GlobalOutcome(original.UserId!, original.CommandId);
         var allowed = new HashSet<string>(StringComparer.Ordinal)
         {
             Convert.ToHexString(outcomeKey), Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes)
@@ -26,10 +27,10 @@ internal static class NativeDropPageFailureImages
             if (receiver)
             {
                 var outcome = node.Store.Read(view => view.GetRecord<StoredOutcome>(outcomeKey));
-                await Assert.That(outcome!.Result.Error).IsEqualTo(expected);
-                await Assert.That(outcome.Fingerprint).IsEqualTo(NativeOperationFingerprint.Compute(original));
-                await Assert.That(outcome.Result.NativeValue).IsNull();
-                await Assert.That(outcome.Result.Json).IsNull();
+                await Assert.That(Errors.Code(outcome!.Result.Problem)).IsEqualTo(expected);
+                await Assert.That(outcome.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(original));
+                await Assert.That(outcome.Result.Value).IsNull();
+                
                 await Assert.That(after[index].LastIndex).IsEqualTo(before[index].LastIndex + NativeDropRuntimeProtocol.FirstPage);
                 await Assert.That(after[index].CommittedIndex).IsEqualTo(after[index].LastIndex);
             }

@@ -15,7 +15,8 @@ internal static class CrossTenantClusterHealthyFlow
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(receipt.Mutations[0]).IsEqualTo(new MutationReceipt("putDocument", McpDocumentProtocol.Collection, McpDocumentProtocol.Entity, 2));
         var replay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token));

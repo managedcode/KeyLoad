@@ -21,7 +21,7 @@ internal static class SchemaVisibleProjectionClusterReplay
         await NativeSubmissionColdAssertions.ReceiptAsync(receipt,
             new CommitReceipt(command.CommandId, receipt.Token,
                 [new(S.PatchKind, history.State.Collection, S.First, S.UpdatedRevision)],
-                DurabilityProfile.QuorumProcessDurable));
+                DurabilityProfile.ProcessDurable, 3));
         await SafeProjectorOperationClusterImages.CaptureAsync(root, history, token);
         await AllAsync(root, reader, history, P.FinalEpoch, token);
     }

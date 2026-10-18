@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -60,8 +61,8 @@ internal static class ProjectionPartitionIsolationAssertions
         }
     }
 
-    internal static async Task FailureAsync(OperationResult result, ErrorCode code, string detail)
-        => await ProjectionConsumerIdentityAssertions.ExactAsync(result, new OperationResult(null, code, detail));
+    internal static async Task FailureAsync(Result<object> result, ErrorCode code, string detail)
+        => await ProjectionConsumerIdentityAssertions.ExactAsync(result, Result<object>.Fail(Errors.Problem(code, detail)));
 
     internal static async Task OriginalBytesAsync(ZoneTreeStore store, byte[][] keys, string[] expected)
         => await ProjectionConsumerIdentityAssertions.ExactAsync(ProjectionPartitionIsolationFixture.SelectedBytes(store, keys), expected);

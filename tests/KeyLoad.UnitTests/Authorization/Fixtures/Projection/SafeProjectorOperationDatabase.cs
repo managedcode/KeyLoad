@@ -1,4 +1,5 @@
-using System.Security.Cryptography;
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -8,23 +9,13 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal sealed class SafeProjectorOperationDatabase
 {
-    private const string MissingOwner = "The original safe projector native owner is not open.";
-    private const string WrongReplica = "The safe projector replica identity differs from its original owner.";
+    private const string MissingOwner = "The original safe projector storage owner is not open.";
     private readonly StoreIdentity canonicalIdentity;
-    private StoreIdentity? replicaIdentity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
     private DatabaseEngine? coldDatabase;
-    private TestDatabaseReplicaAdmission? coldAdmission;
-    private readonly string replicaDirectory;
-    internal CancellationToken CallerToken
-    {
-        get;
-    }
-    internal TestDatabase Source
-    {
-        get;
-    }
+    internal CancellationToken CallerToken { get; }
+    internal TestDatabase Source { get; }
     internal ZoneTreeStore Store => originalJoined ? coldStore ?? throw new InvalidOperationException(MissingOwner) : Source.Store;
     internal DatabaseEngine Database => originalJoined ? coldDatabase ?? throw new InvalidOperationException(MissingOwner) : Source.Database;
 
@@ -32,7 +23,6 @@ internal sealed class SafeProjectorOperationDatabase
     {
         CallerToken = callerToken;
         callerToken.ThrowIfCancellationRequested();
-        replicaDirectory = directory + TestDatabaseReplicaDirectory.Suffix;
         Source = new(directory: directory);
         canonicalIdentity = Source.Store.Identity;
     }
@@ -46,76 +36,47 @@ internal sealed class SafeProjectorOperationDatabase
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             owner = new(directory, callerToken);
-            owner.replicaIdentity = owner.ReadReplicaIdentity();
             await operation(owner);
         }, failures);
         if (owner is not null)
         {
             ServerFailureObserver.Observe(owner.Join, failures);
         }
-        if (failures.Count == 0)
+        if (failures.Count == 0 && Directory.Exists(directory))
         {
-            ServerFailureObserver.Observe(() => Delete(directory + TestDatabaseReplicaDirectory.Suffix), failures);
-            ServerFailureObserver.Observe(() => Delete(directory), failures);
+            ServerFailureObserver.Observe(() => Directory.Delete(directory, recursive: true), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal OperationResult Submit(ReplicatedOperation operation)
+    internal Result<object> Submit(Command<DatabaseCommand> operation)
     {
         CallerToken.ThrowIfCancellationRequested();
-        return originalJoined
-            ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).Submit(operation, explicitTime: true, cancellationToken: CallerToken)
-            : Source.SubmitIssued(operation);
+        return Database.Apply(operation);
     }
 
-    internal ReplicaEntry Entry(ReplicatedOperation operation) => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadRetainedEntry(operation)
-        : Source.ReadRetainedEntry(operation);
+    internal StoredOutcome ReadOutcome(Command<DatabaseCommand> operation)
+        => OutcomeStoreOracle.ReadStored(Store, operation) ?? throw new InvalidOperationException(MissingOwner);
 
-    internal (long LastIndex, long CommittedIndex, long Term) JournalCut() => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadJournalCut() : Source.ReadJournalCut();
+    internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
+        => Store.Read(_ => (Database.LastApplied, Store.Position));
 
     internal CommitToken NextToken()
-    {
-        var placement = Database.ReadAtomicPartitionPlacement(SafeProjectorOperationProtocol.Root,
-            Source.Partition);
-        return new(placement.Incarnation, Source.Partition.AtomicPartitionId,
-            checked(JournalCut().LastIndex + SafeProjectorOperationProtocol.NextJournalIndex), placement.PlacementEpoch);
-    }
+        => new(Store.Identity.Incarnation, Source.Partition.AtomicPartitionId,
+            checked(Database.LastApplied + SafeProjectorOperationProtocol.NextJournalIndex));
 
     internal async Task ReopenAsync()
     {
         CallerToken.ThrowIfCancellationRequested();
         Join();
-        var expectedReplica = replicaIdentity ?? throw new InvalidOperationException(MissingOwner);
-        await IdentityAsync(ReadReplicaIdentity(), expectedReplica);
         coldStore = ZoneTreeExistingStore.Open(new(Source.Directory)
         {
             Incarnation = canonicalIdentity.Incarnation
         }, canonicalIdentity.NodeId, Source.StorageExecution);
-        await IdentityAsync(coldStore.Identity, canonicalIdentity);
+        await Assert.That(NativeSerialization.Serialize(coldStore.Identity).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(canonicalIdentity))).IsTrue();
         coldDatabase = Source.CreateConfiguredDatabase(coldStore);
-        coldAdmission = Source.CreateTargetAdmission(coldDatabase, coldStore,
-            Source.Directory, replicaDirectory, expectedReplica.NodeId);
     }
-
-    private StoreIdentity ReadReplicaIdentity()
-    {
-        var limits = Source.StorageExecution.Value;
-        var value = ZoneTreeIdentityFile.Read(Path.Combine(replicaDirectory, ZoneTreePersistenceFormat.IdentityFileName),
-            limits.MaximumIdentityFileBytes, limits.StreamBufferBytes);
-        if (value.NodeId == canonicalIdentity.NodeId || value.Incarnation != canonicalIdentity.Incarnation
-            || !CryptographicOperations.FixedTimeEquals(value.SigningKey.Span, canonicalIdentity.SigningKey.Span))
-        {
-            throw new InvalidOperationException(WrongReplica);
-        }
-        return value;
-    }
-
-    private static async Task IdentityAsync(StoreIdentity actual, StoreIdentity expected)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
 
     private void Join()
     {
@@ -125,28 +86,9 @@ internal sealed class SafeProjectorOperationDatabase
             Source.JoinOwnedResources();
             return;
         }
-        var admission = coldAdmission;
         var store = coldStore;
-        coldAdmission = null;
         coldStore = null;
         coldDatabase = null;
-        var failures = new List<Exception>();
-        if (admission is not null)
-        {
-            ServerFailureObserver.Observe(admission.Dispose, failures);
-        }
-        if (store is not null)
-        {
-            ServerFailureObserver.Observe(store.Dispose, failures);
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
-
-    private static void Delete(string path)
-    {
-        if (Directory.Exists(path))
-        {
-            Directory.Delete(path, true);
-        }
+        store?.Dispose();
     }
 }

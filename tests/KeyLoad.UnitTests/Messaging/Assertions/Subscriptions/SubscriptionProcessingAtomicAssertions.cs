@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -22,30 +24,30 @@ internal static class SubscriptionProcessingAtomicAssertions
             ?? throw new InvalidOperationException("The original processing outcome is absent.");
 
     internal static async Task RollbackAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReplicatedOperation operation, OperationResult failure, string[] before, long position)
+        Command<DatabaseCommand> operation, Result<object> failure, string[] before, long position)
     {
         await FailureAsync(failure);
         await OwnOutcomeOnlyAsync(store, group, operation, before, position);
         await Assert.That(db.GetDocument("root", new(group.Source.Partition, "orders", "first"))).IsNull();
         await Assert.That(db.GetDocument("root", new(group.Source.Partition, "orders", "second"))).IsNull();
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
-        await FailureAsync(NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.Id)).Result);
+        await FailureAsync(NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.CommandId)).Result);
     }
 
     internal static async Task OwnOutcomeOnlyAsync(ZoneTreeStore store, SubscriptionRef group,
-        ReplicatedOperation operation, string[] before, long position)
+        Command<DatabaseCommand> operation, string[] before, long position)
     {
-        await Assert.That(DomainImage(store, group, operation.Id)).IsEquivalentTo(before, CollectionOrdering.Matching);
+        await Assert.That(DomainImage(store, group, operation.CommandId)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(operation.EvaluatedAt);
-        var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.Id);
+        await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(new DateTimeOffset(operation.Timestamp));
+        var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.CommandId);
         var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
-            group.Source.Partition, "root", operation.Id)));
+            group.Source.Partition, "root", operation.CommandId)));
         await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(key)).IsTrue();
     }
 
     internal static async Task FailureReplayAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReplicatedOperation operation, OperationResult original, byte[] saved)
+        Command<DatabaseCommand> operation, Result<object> original, byte[] saved)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -57,23 +59,23 @@ internal static class SubscriptionProcessingAtomicAssertions
             await FailureAsync(replay);
             await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(original, JsonDefaults.Options));
-            await Assert.That(OutcomeBytes(store, group, operation.Id).AsSpan().SequenceEqual(saved)).IsTrue();
+            await Assert.That(OutcomeBytes(store, group, operation.CommandId).AsSpan().SequenceEqual(saved)).IsTrue();
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
         }
     }
 
-    private static async Task FailureAsync(OperationResult result)
+    private static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.RevisionConflict);
-        await Assert.That(result.SafeDetail).IsEqualTo("The expected revision does not match.");
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
+        
+        await Assert.That(result.Value).IsNull();
     }
 
     internal static async Task SuccessAsync(DatabaseEngine db, SubscriptionRef group,
-        SubscriptionProcessingRequest request, OperationResult result)
+        SubscriptionProcessingRequest request, Result<object> result)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var processing = result.Get<SubscriptionProcessingResult>();
         await Assert.That(processing.AlreadyProcessed).IsFalse();
         await Assert.That(processing.OriginalEffectsToken).IsEqualTo(processing.Receipt.Token);
@@ -97,15 +99,15 @@ internal static class SubscriptionProcessingAtomicAssertions
     }
 
     internal static async Task SuccessReplayAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReplicatedOperation operation, OperationResult original, byte[] saved)
+        Command<DatabaseCommand> operation, Result<object> original, byte[] saved)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(db.Apply(operation), original);
         await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(
-            NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.Id)).Result, original);
-        await Assert.That(OutcomeBytes(store, group, operation.Id).AsSpan().SequenceEqual(saved)).IsTrue();
+            NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.CommandId)).Result, original);
+        await Assert.That(OutcomeBytes(store, group, operation.CommandId).AsSpan().SequenceEqual(saved)).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
     }
 }

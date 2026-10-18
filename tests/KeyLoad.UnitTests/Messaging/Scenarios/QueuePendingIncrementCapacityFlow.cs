@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -31,7 +32,7 @@ internal static class QueuePendingIncrementCapacityFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueLifecycleTestState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, OperationResult failed,
+        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         string[] original, long originalPosition, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -57,7 +58,7 @@ internal static class QueuePendingIncrementCapacityFlow
     }
 
     private static async Task FinalAsync(ZoneTreeStore store, string directory, QueueLifecycleTestState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, OperationResult failed,
+        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(store);

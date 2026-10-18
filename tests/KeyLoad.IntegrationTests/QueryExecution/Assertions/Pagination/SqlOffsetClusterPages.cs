@@ -74,7 +74,7 @@ internal static class SqlOffsetClusterPages
                 : official
                     ? (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, sql, token))).Value
                     : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(sql, token));
-            // The original signed cursor binds logical snapshot continuation; physical-owner correlation remains a separate CLUSTER gate.
+            // The original signed cursor binds logical snapshot continuation; physical-owner correlation remains a separate Orleans gate.
             cut ??= page.CutPosition;
             await Assert.That(page.CutPosition).IsEqualTo(cut.Value);
             if (final)

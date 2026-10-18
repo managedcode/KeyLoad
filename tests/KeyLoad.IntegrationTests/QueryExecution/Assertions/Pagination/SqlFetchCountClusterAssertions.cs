@@ -28,7 +28,7 @@ internal static class SqlFetchCountClusterAssertions
         var expected = new CommitReceipt(original.CommandId, actual.Token,
             [.. SqlFetchCountClusterState.Rows.Select(row => new MutationReceipt(PutKind,
                 SqlFetchCountClusterProtocol.Collection, row.Id, SqlFetchCountClusterProtocol.SeedRevision))],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         await global::TUnit.Assertions.Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(original.Partition.AtomicPartitionId);
         await global::TUnit.Assertions.Assert.That(actual.Token.Position).IsGreaterThan(default(long));

@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.Search;
 using TUnit.Assertions.Enums;
 
@@ -6,14 +8,14 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class Bm25PrivateAdmissionAssertions
 {
     internal static async Task RequirePublicationAsync(TestDatabase database,
-        Bm25CorpusPublicationPhaseCommand phase, OperationResult result, PrincipalRecord subject, long totalLength)
+        Bm25CorpusPublicationPhaseCommand phase, Result<object> result, PrincipalRecord subject, long totalLength)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(phase.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.ReadRetainedEntry(phase.CommandId).Index);
+        await Assert.That(receipt.Token.Position).IsEqualTo(database.ReadStoredOutcome(phase.CommandId).CanonicalSequence);
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();
         await Assert.That(phase.Current.Generation).IsEqualTo(phase.CommandId);
@@ -27,6 +29,6 @@ internal static class Bm25PrivateAdmissionAssertions
             ?? throw new InvalidOperationException("The actual private corpus publication is missing.");
         await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(phase.Current), stored);
         await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(
-            database.ReadRetainedEntry(phase.CommandId).Operation!));
+            database.ReadStoredOutcome(phase.CommandId).PreparedCommand!));
     }
 }

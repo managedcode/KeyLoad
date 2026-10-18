@@ -42,8 +42,7 @@ internal static class EventQueueStateEnvelopeSubscriptionContinuation
         var claim = sample.GroupClaim ?? throw new InvalidOperationException(MissingClaim);
         var id = Guid.NewGuid();
         var request = new SubscriptionDeliveryCommand(id, fixture.Subscription, claim.Deliveries.Single().Token, DeliveryAction.Ack);
-        var expected = new CommitReceipt(id, NextToken(fixture),
-            [new(nameof(DeliveryAction.Ack), Topic, FirstPositionIdentity, FirstLeaseVersion)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, NextToken(fixture), [new(nameof(DeliveryAction.Ack), Topic, FirstPositionIdentity, FirstLeaseVersion)], DurabilityProfile.ProcessDurable, 1);
         _ = await SubmitAsync(fixture, sample, OperationKind.SubscriptionDelivery, id, request, fixture.At, expected);
         EventQueueStateEnvelopeQueueContinuation.ConsumeReceive(sample, claim.RequestId);
     }

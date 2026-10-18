@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using TUnit.Assertions.Enums;
@@ -44,7 +45,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         }
     }
 
-    internal OperationResult Submit(CommandRequest command)
+    internal Result<object> Submit(CommandRequest command)
         => Database.Submit(OperationKind.Batch, command, id: command.CommandId, time: Now);
 
     internal CommandRequest Producer(string identity, ExpectedStreamRevision expected,
@@ -102,7 +103,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         await Assert.That(message.Metadata.Attempts).IsEqualTo(0);
     }
 
-    internal async Task AssertFailedReplayAsync(CommandRequest command, OperationResult original)
+    internal async Task AssertFailedReplayAsync(CommandRequest command, Result<object> original)
     {
         var position = Database.Store.Position;
         var before = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(Database.Store);
@@ -110,10 +111,10 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         await Assert.That(NativeSerialization.Serialize(retry))
             .IsEquivalentTo(NativeSerialization.Serialize(original), CollectionOrdering.Matching);
         await Assert.That(retry.Json).IsEqualTo(original.Json);
-        await Assert.That(retry.Error).IsEqualTo(original.Error);
-        await Assert.That(retry.SafeDetail).IsEqualTo(original.SafeDetail);
-        await Assert.That(retry.NativeValue).IsNull();
-        await Assert.That(original.NativeValue).IsNull();
+        await Assert.That(Errors.Code(retry.Problem)).IsEqualTo(Errors.Code(original.Problem));
+        await Assert.That(retry.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
+        await Assert.That(retry.Value).IsNull();
+        await Assert.That(original.Value).IsNull();
         await Assert.That(Database.Store.Position).IsEqualTo(position);
         await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(Database.Store))
             .IsEquivalentTo(before, CollectionOrdering.Matching);

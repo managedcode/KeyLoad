@@ -34,8 +34,7 @@ internal static class SqlLexicalAdmissionFlow
                 SqlLexicalAdmissionFixture.LiteralSql(healthy)), SqlLexicalAdmissionFixture.Kind, position);
             await SqlJoinSourceBindingAssertions.PageAsync(engine.ExecuteAst(SqlJoinSourceBindingFixture.Root,
                 SqlLexicalAdmissionFixture.LiteralAst(ast)), SqlLexicalAdmissionFixture.Kind, position);
-            var replay = owner.ApplyEmbedded(new(command.CommandId, global::KeyLoad.OperationKind.Batch, SqlJoinSourceBindingFixture.Root,
-                default, global::System.Text.Json.JsonSerializer.Serialize(command, global::KeyLoad.JsonDefaults.Options)),
+            var replay = owner.ApplyEmbedded(owner.CreateCommand(global::KeyLoad.OperationKind.Batch, command.CommandId, SqlJoinSourceBindingFixture.Root, default, global::System.Text.Json.JsonSerializer.Serialize(command, global::KeyLoad.JsonDefaults.Options)),
                 cancellationToken: default).Get<global::KeyLoad.CommitReceipt>();
             await Assert.That(global::KeyLoad.JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(global::KeyLoad.JsonDefaults.Serialize(receipt))).IsTrue();
             await SqlJoinSourceBindingFlow.UnchangedAsync(store, before, position, identity);

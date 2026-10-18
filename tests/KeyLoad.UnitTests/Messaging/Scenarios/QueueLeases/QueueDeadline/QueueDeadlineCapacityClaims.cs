@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
@@ -32,13 +33,7 @@ internal static class QueueDeadlineCapacityClaims
 
     internal static async Task RequireAsync(DatabaseEngine database, ReceiveResult actual, ReceiveResult expected, QueueLaneRef lane)
     {
-        await NativeReplayResultAssertions.Same<ReceiveResult>(new(null)
-        {
-            NativeValue = actual
-        }, new(null)
-        {
-            NativeValue = expected
-        });
+        await NativeReplayResultAssertions.Same<ReceiveResult>(Result<object>.Succeed(actual), Result<object>.Succeed(expected));
         foreach (var delivery in expected.Deliveries)
         {
             await Assert.That(database.Verify<DeliveryClaims>(delivery.Token)).IsEqualTo(new DeliveryClaims(lane,

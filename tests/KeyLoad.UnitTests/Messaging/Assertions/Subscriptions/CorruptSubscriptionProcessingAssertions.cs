@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -5,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class CorruptSubscriptionProcessingAssertions
 {
     internal static async Task RefuseAndRestoreAsync(TestDatabase fixture, SubscriptionRef group,
-        ReplicatedOperation operation, SubscriptionDeliveryAuthorityFault fault)
+        Command<DatabaseCommand> operation, SubscriptionDeliveryAuthorityFault fault)
     {
         var key = SubscriptionCheckpointAuthorityFlow.WindowKey(group, 1);
         var original = fixture.Store.Read(view => view.ReadOwnedValue(key))
@@ -26,7 +27,7 @@ internal static class CorruptSubscriptionProcessingAssertions
             await Assert.That(failure.Message).IsEqualTo("The subscription delivery window is inconsistent.");
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(fixture.Store, bytes, position, identity);
             await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(
-                KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.Id)))).IsNull();
+                KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.CommandId)))).IsNull();
         }
         fixture.Store.Commit((tx, _) =>
         {

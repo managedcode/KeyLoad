@@ -15,7 +15,7 @@ internal static class PostgresClusterBackpressureProtocol
     internal const char PayloadCharacter = 'x';
     internal const string IdPrefix = "delivery-";
     internal const byte Password = (byte)'p';
-    internal const byte SimpleQuery = (byte)'Q';
+    internal const byte QueryMessage = (byte)'Q';
     internal const byte DataRow = (byte)'D';
     internal const byte Description = (byte)'T';
     internal const byte Backend = (byte)'K';

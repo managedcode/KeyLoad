@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core.Features.InternalSerialization;
 using P = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeProtocol;
@@ -11,9 +13,9 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
     internal TestDatabase Database { get; } = new();
     internal ResourceDefinition Resource { get; private set; } = null!;
     internal PrincipalRecord Worker { get; private set; } = null!;
-    internal ReplicatedOperation OriginalIntent { get; private set; } = null!;
+    internal Command<DatabaseCommand> OriginalIntent { get; private set; } = null!;
     internal byte[] OriginalIntentBytes { get; private set; } = null!;
-    internal OperationResult Result { get; private set; } = null!;
+    internal Result<object> Result { get; private set; } = null!;
     internal QueueLaneRef Lane => new(Database.Partition, P.Queue);
     private bool header;
 
@@ -60,29 +62,25 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
         var command = new CommandRequest(Guid.NewGuid(), Database.Partition,
             [new EnqueueMessage(P.Queue, P.First, P.Payload, P.Headers),
                 new EnqueueMessage(P.Queue, P.Second, P.Payload, P.Headers)]);
-        var original = Database.Database.NormalizeOperation(new(command.CommandId, OperationKind.Batch, P.Root,
-            Database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
+        var original = Database.Database.OwnCommand(Database.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Root, Database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
         var originalBytes = NativeSerialization.Serialize(original);
-        var input = NativeCommandPayload.Read<CommandRequest>(original);
+        var input = NativeSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
         await Assert.That(JsonSerializer.Serialize(input, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(command, JsonDefaults.Options));
-        var index = checked(Database.ReadJournalCut().LastIndex + P.Step);
+        var index = checked(Database.ReadCanonicalCut().AppliedPosition + P.Step);
         var produced = Database.SubmitIssuedEmbedded(original, token).Get<CommitReceipt>();
         await Assert.That(NativeSerialization.Serialize(original).SequenceEqual(originalBytes)).IsTrue();
-        await BudgetedQueueReceiveOutcomeAssertions.EqualAsync(new CommitReceipt(command.CommandId,
-            new(Database.Store.Identity.Incarnation, Database.Partition.AtomicPartitionId, index, P.Initial),
-            [new(P.EnqueueKind, input.Mutations[FirstMutationIndex].Resource, P.First, P.Initial),
-                new(P.EnqueueKind, input.Mutations[SecondMutationIndex].Resource, P.Second, P.Initial)],
-            DurabilityProfile.ProcessDurable), produced);
+        await BudgetedQueueReceiveOutcomeAssertions.EqualAsync(new CommitReceipt(command.CommandId, new(Database.Store.Identity.Incarnation, Database.Partition.AtomicPartitionId, index), [new(P.EnqueueKind, input.Mutations[FirstMutationIndex].Resource, P.First, P.Initial),
+                new(P.EnqueueKind, input.Mutations[SecondMutationIndex].Resource, P.Second, P.Initial)], DurabilityProfile.ProcessDurable, 1), produced);
         (OriginalIntent, Result, OriginalIntentBytes) = Receive();
         await BudgetedQueueReceiveOutcomeAssertions.ReceiveAsync(this, OriginalIntent, Result, P.First);
     }
 
-    internal (ReplicatedOperation Operation, OperationResult Result, byte[] SignedIntentBytes) Receive()
+    internal (Command<DatabaseCommand> Operation, Result<object> Result, byte[] SignedIntentBytes) Receive()
     {
         var request = new ReceiveRequest(Guid.NewGuid(), Lane, MaxMessages: P.OneMessage,
             LeaseSeconds: Resource.QueuePolicy.MaxLeaseSeconds);
-        var operation = Database.Database.CreateNativeOperation(OperationKind.Receive, request.RequestId, P.Worker,
+        var operation = Database.Database.CreateCommand(OperationKind.Receive, request.RequestId, P.Worker,
             Database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var signedIntent = NativeSerialization.Serialize(operation);
         var result = Database.SubmitIssued(operation);

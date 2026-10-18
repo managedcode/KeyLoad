@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -36,8 +37,7 @@ internal static class QueueOrderedRetryRestoreAuthority
         var request = new CommandRequest(id, state.Partition,
             [new CancelQueueMessage(state.Lane.Queue, QueueOrderedRetryProtocol.Second, secondVersion, QueueOrderedRetryProtocol.One),
              new RedriveQueueMessage(state.Lane.Queue, QueueOrderedRetryProtocol.First, QueueOrderedRetryProtocol.Six, QueueOrderedRetryProtocol.One)]);
-        var operation = database.NormalizeOperation(new(id, OperationKind.Batch, state.Principal, state.Time,
-            JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        var operation = database.OwnCommand(database.CreateCommand(OperationKind.Batch, id, state.Principal, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
         var key = KeySpace.PartitionOutcome(state.Partition, state.Principal, id);
         var rejectedBytes = database.Store.Read(view => view.ReadOwnedValue(key))
@@ -50,13 +50,10 @@ internal static class QueueOrderedRetryRestoreAuthority
         state.HistoricalOutcomes.Add(id, rejectedBytes);
         await ConfigureAsync(database, state, Expected(state, QueueOrderedRetryProtocol.Three));
         await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
-        foreach (var prior in original.Outcomes.Where(item => item.Operation.Kind == OperationKind.Batch && item.Result.Error is null))
+        foreach (var prior in original.Outcomes.Where(item => item.Operation.Value!.Kind == OperationKind.Batch && Errors.Code(item.Result.Problem) is null))
         {
             await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image);
-            var current = database.NormalizeOperation(prior.Operation with
-            {
-                NativePayload = ReadOnlyMemory<byte>.Empty
-            });
+            var current = database.OwnCommand(database.CreateCommand(prior.Operation.Value!.Kind, prior.Operation.CommandId, prior.Operation.UserId!, new DateTimeOffset(prior.Operation.Timestamp), ReadOnlyMemory<byte>.Empty));
             await RefusedAsync(database, state, current, image, ErrorCode.TokenInvalidated);
         }
         await RequireAsync(database, state);
@@ -90,8 +87,7 @@ internal static class QueueOrderedRetryRestoreAuthority
     private static async Task ConfigureAsync(DatabaseEngine database, QueueOrderedRetryState state, PrincipalRecord principal)
     {
         var request = new ConfigurePrincipalRequest(principal);
-        var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal,
-            QueueOrderedRetryProtocol.Root, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        var operation = database.OwnCommand(database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), QueueOrderedRetryProtocol.Root, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         var result = database.Apply(operation);
         await Assert.That(NativeSerialization.Serialize(result.Get<PrincipalRecord>())).IsEquivalentTo(
             NativeSerialization.Serialize(principal), CollectionOrdering.Matching);
@@ -102,15 +98,15 @@ internal static class QueueOrderedRetryRestoreAuthority
     }
 
     private static async Task RefusedAsync(DatabaseEngine database, QueueOrderedRetryState state,
-        ReplicatedOperation operation, string[] image, ErrorCode expected)
+        Command<DatabaseCommand> operation, string[] image, ErrorCode expected)
     {
-        var key = KeySpace.PartitionOutcome(state.Partition, state.Principal, operation.Id);
+        var key = KeySpace.PartitionOutcome(state.Partition, state.Principal, operation.CommandId);
         var before = database.Store.Position;
         var prior = database.Store.Read(view => view.ReadOwnedValue(key));
         var result = database.Apply(operation);
-        await Assert.That(result.Error).IsEqualTo(expected);
-        await Assert.That(result.NativeValue).IsNull();
-        await Assert.That(result.Json).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+        await Assert.That(result.Value).IsNull();
+        
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
         if (prior is null)
         {
@@ -125,7 +121,7 @@ internal static class QueueOrderedRetryRestoreAuthority
     }
 
     private static async Task OriginalAuthorityRefusedAsync(DatabaseEngine database, QueueOrderedRetryState state,
-        ReplicatedOperation operation, string[] image)
+        Command<DatabaseCommand> operation, string[] image)
     {
         var before = database.Store.Position;
         var apply = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
@@ -147,17 +143,17 @@ internal static class QueueOrderedRetryRestoreAuthority
             throw new InvalidOperationException(HistoricalBound);
         }
         remaining -= state.RestoredResourceBytes.Length;
-        foreach (var item in original.Outcomes.Where(item => item.Result.Error is null
-            && item.Operation.Kind is OperationKind.Batch or OperationKind.Receive or OperationKind.Delivery))
+        foreach (var item in original.Outcomes.Where(item => Errors.Code(item.Result.Problem) is null
+            && item.Operation.Value!.Kind is OperationKind.Batch or OperationKind.Receive or OperationKind.Delivery))
         {
-            var bytes = database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, state.Principal, item.Operation.Id)))
+            var bytes = database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, state.Principal, item.Operation.CommandId)))
                 ?? throw new InvalidOperationException(HistoricalMissing);
             if (bytes.Length > remaining)
             {
                 throw new InvalidOperationException(HistoricalBound);
             }
             remaining -= bytes.Length;
-            state.HistoricalOutcomes.Add(item.Operation.Id, bytes);
+            state.HistoricalOutcomes.Add(item.Operation.CommandId, bytes);
         }
     }
 }

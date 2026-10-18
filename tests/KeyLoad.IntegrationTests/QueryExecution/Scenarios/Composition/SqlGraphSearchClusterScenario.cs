@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-/// <summary>Builds the frozen Q1.Search.v1 statement from a real graph CLUSTER scenario.</summary>
+/// <summary>Builds the frozen Q1.Search.v1 statement from a real graph Orleans scenario.</summary>
 internal static class SqlGraphSearchClusterScenario
 {
     internal const string QuerySearchTool = "keyload_query_search";

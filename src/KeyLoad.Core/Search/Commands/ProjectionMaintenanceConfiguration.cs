@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
@@ -16,7 +17,7 @@ public sealed partial class DatabaseEngine
     ];
 
     private ProjectionMaintenanceAuthority? CaptureProjectionMaintenanceAuthority(
-        global::KeyLoad.Storage.IAtomicTransaction transaction, ConfigureProjectionConsumerRequest request, ReplicatedOperation operation)
+        global::KeyLoad.Storage.IAtomicTransaction transaction, ConfigureProjectionConsumerRequest request, Command<DatabaseCommand> operation)
     {
         RequireInitialMaintenanceReservation(transaction, request, operation);
         if (request.Definition.AnnMaintenance is not { } profile)
@@ -24,7 +25,7 @@ public sealed partial class DatabaseEngine
             return null;
         }
         RequireProjectionMaintenanceProfile(request.Definition, profile);
-        var principal = Principal(transaction, operation.PrincipalId, operation.EvaluatedAt);
+        var principal = Principal(transaction, operation.UserId!, Clock.GetUtcNow());
         RequireProjectionAdministrator(principal);
         Authorization.Require(principal, request.Consumer.Partition, profile.Collection, Capability.VectorSearch);
         var resource = Resource(transaction, request.Consumer.Partition, profile.Collection, ResourceKind.Collection);
@@ -34,7 +35,7 @@ public sealed partial class DatabaseEngine
     }
 
     private void RequireInitialMaintenanceReservation(global::KeyLoad.Storage.IKeyValueView view,
-        ConfigureProjectionConsumerRequest configure, ReplicatedOperation operation)
+        ConfigureProjectionConsumerRequest configure, Command<DatabaseCommand> operation)
     {
         if (configure.InitialAnnMaintenance is not { } original)
         {
@@ -48,7 +49,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidMaintenanceProfile);
         }
-        var principal = Principal(view, operation.PrincipalId, operation.EvaluatedAt);
+        var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
         Features.Search.AnnProjectionPinValidation.RequireOwner(this, view, principal,
             configure.Consumer.Partition, original);
         if (NativeSerialization.Measure(original) > Limits.MaxBatchBytes)

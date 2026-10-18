@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -54,9 +55,9 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, SubscriptionRef group, ReceiveSubscriptionResult claim,
-        ReceiveSubscriptionRequest request, OperationResult failed, ReceiveSubscriptionRequest byteRequest,
+        ReceiveSubscriptionRequest request, Result<object> failed, ReceiveSubscriptionRequest byteRequest,
         DateTimeOffset due, byte[] key, byte[] saved, SubscriptionDeliveryCommand nack,
-        OperationResult nacked, CancellationToken token)
+        Result<object> nacked, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;

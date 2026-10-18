@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
@@ -34,8 +35,8 @@ internal static class ResourceLifetimeCatalog
     }
 
     /// <summary>Stages a new server-derived lifetime; the caller stages its definition in this same transaction.</summary>
-    internal static ResourceLifetimeV1 Create(IAtomicTransaction transaction, ReplicatedOperation original,
-        string tenantId, string databaseId, ResourceDefinition definition, DatabaseLimits limits)
+    internal static ResourceLifetimeV1 Create(IAtomicTransaction transaction, Command<DatabaseCommand> original,
+        string tenantId, string databaseId, ResourceDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(transaction);
         ArgumentNullException.ThrowIfNull(definition);

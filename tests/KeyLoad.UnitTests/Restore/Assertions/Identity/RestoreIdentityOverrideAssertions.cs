@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -22,16 +23,16 @@ internal static class RestoreIdentityOverrideAssertions
             .IsEquivalentTo(state.SourceImage, CollectionOrdering.Matching);
     }
 
-    internal static async Task<OperationResult> FenceAsync(RestoreIdentityOverrideFixture fixture,
+    internal static async Task<Result<object>> FenceAsync(RestoreIdentityOverrideFixture fixture,
         RestoreIdentityOverrideState state, DatabaseEngine database, ZoneTreeStore store)
     {
         var before = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var refused = database.Apply(state.Seed);
-        await Assert.That(refused.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(refused.NativeValue).IsNull();
-        await Assert.That(refused.Json).IsNull();
-        await Assert.That(refused.SafeDetail).IsNotNull();
+        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(refused.Value).IsNull();
+        
+        await Assert.That(refused.Problem?.Detail).IsNotNull();
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store))
             .IsEquivalentTo(before, CollectionOrdering.Matching);
@@ -63,9 +64,9 @@ internal static class RestoreIdentityOverrideAssertions
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, Guid id, string documentId)
+    internal static async Task ReceiptAsync(Result<object> result, Guid id, string documentId)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         var expected = new MutationReceipt(RestoreIdentityOverrideState.PutDocumentKind, RestoreIdentityOverrideState.Collection, documentId, 1L);

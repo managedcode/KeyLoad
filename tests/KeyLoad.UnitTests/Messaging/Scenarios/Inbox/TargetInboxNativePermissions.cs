@@ -13,8 +13,7 @@ internal static class TargetInboxNativePermissions
              new(partition.DatabaseId, TargetInboxUnitProtocol.Collection, Capability.DocumentsWrite),
              new(partition.DatabaseId, TargetInboxUnitProtocol.Events, Capability.EventsAppend),
              new(partition.DatabaseId, TargetInboxUnitProtocol.Output, Capability.QueuePublish)], []);
-        _ = database.ApplyEmbedded(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, TargetInboxUnitProtocol.Root, default,
-            System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(worker), JsonDefaults.Options)), token).Get<PrincipalRecord>();
+        _ = database.ApplyEmbedded(database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), TargetInboxUnitProtocol.Root, default, System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(worker), JsonDefaults.Options)), token).Get<PrincipalRecord>();
         var duplicate = request with
         {
             CommandId = Guid.NewGuid()
@@ -28,8 +27,7 @@ internal static class TargetInboxNativePermissions
             Grants =
             [new(partition.DatabaseId, request.Target.Queue, Capability.InboxWrite)]
         };
-        _ = database.ApplyEmbedded(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, TargetInboxUnitProtocol.Root, default,
-            System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(demoted), JsonDefaults.Options)), token).Get<PrincipalRecord>();
+        _ = database.ApplyEmbedded(database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), TargetInboxUnitProtocol.Root, default, System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(demoted), JsonDefaults.Options)), token).Get<PrincipalRecord>();
         await TargetInboxNativeAssertions.RefusedAsync(database, store, request with
         {
             CommandId = Guid.NewGuid()
@@ -39,8 +37,7 @@ internal static class TargetInboxNativePermissions
         {
             PolicyEpoch = TargetInboxUnitProtocol.RestoredEpoch
         };
-        _ = database.ApplyEmbedded(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, TargetInboxUnitProtocol.Root, default,
-            System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(restored), JsonDefaults.Options)), token).Get<PrincipalRecord>();
+        _ = database.ApplyEmbedded(database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), TargetInboxUnitProtocol.Root, default, System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(restored), JsonDefaults.Options)), token).Get<PrincipalRecord>();
         await TargetInboxNativeAssertions.RefusedAsync(database, store, duplicate, ErrorCode.PermissionDenied, token, worker.Id);
         var current = TargetInboxNativeSetup.Apply(database, request with
         {

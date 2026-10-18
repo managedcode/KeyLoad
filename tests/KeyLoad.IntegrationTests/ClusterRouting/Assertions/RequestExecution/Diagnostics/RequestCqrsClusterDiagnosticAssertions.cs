@@ -21,7 +21,7 @@ internal static class RequestCqrsClusterDiagnosticAssertions
         await Assert.That(snapshot.CleanupCompletion.Drain.TokenCanceledAtStart).IsFalse();
         await Assert.That(snapshot.CleanupCompletion.Drain.Returned).IsTrue();
         await Assert.That(snapshot.CleanupCompletion.Drain.OriginalJoined).IsTrue();
-        await Assert.That(snapshot.CleanupCompletion.Drain.FallbackEntered).IsFalse();
+        await Assert.That(snapshot.CleanupCompletion.Drain.ForcedCancellationEntered).IsFalse();
     }
 
     internal static async Task AssertReturnedCallAsync(RequestCqrsCompletionCallSnapshot call)

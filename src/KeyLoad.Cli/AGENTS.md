@@ -6,7 +6,7 @@
 - Entry point: `Program.cs`; project definition: `KeyLoad.Cli.csproj`.
 - CLI workflows belong under their canonical `<SliceName>/` paths and matching feature specs. Keep `Program.cs` as composition/dispatch only.
 - The CLI is an untrusted client: it cannot supply trusted roles or bypass persisted database credentials and authorization policies. It does not own server persistence or replication.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Use the installed formatting and semantic C# tools for CLI changes; keep distributed execution in the server's Orleans integration.
 - Preserve centrally pinned packages and net10.0/C# 14. Never put credentials in source, logs, sample arguments or committed configuration.
 
 ## Boundaries and protected risks

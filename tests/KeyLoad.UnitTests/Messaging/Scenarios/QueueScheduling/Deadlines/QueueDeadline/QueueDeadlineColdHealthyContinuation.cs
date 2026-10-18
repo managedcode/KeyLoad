@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueDeadlineColdHealthyContinuation
 {
     internal static async Task RunAsync(ZoneTreeStore store, string directory, QueueLaneRef lane,
-        DeliveryCommand ack, OperationResult acked, CommandRequest producer, OperationResult produced,
+        DeliveryCommand ack, Result<object> acked, CommandRequest producer, Result<object> produced,
         MessageInspection terminal, DateTimeOffset due, byte[] identity, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);

@@ -19,6 +19,10 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
         {
             return true;
         }
+        if (ImplementationSourceIdentity.Allows(term, node, model, cancellationToken))
+        {
+            return true;
+        }
         var owner = node.AncestorsAndSelf().OfType<MemberDeclarationSyntax>().FirstOrDefault();
         var ownerSymbol = ImplementationTermSymbols.Resolve(model, owner, cancellationToken);
         if (IsVocabulary(ownerSymbol))
@@ -42,7 +46,11 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
     private static bool IsVocabulary(ISymbol? symbol) =>
         symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.RuleVocabularyType &&
         (symbol is IFieldSymbol { IsConst: true } ||
-         symbol is IFieldSymbol { IsStatic: true, Name: nameof(ImplementationTermCatalog.DataContractTypes) or nameof(ImplementationTermCatalog.MeasurementTypes) } ||
+         symbol is IFieldSymbol
+         {
+             IsStatic: true, Name: nameof(ImplementationTermCatalog.DataContractTypes) or
+             nameof(ImplementationTermCatalog.DataRecordFamilyFields) or nameof(ImplementationTermCatalog.MeasurementTypes)
+         } ||
          symbol is IMethodSymbol { Name: nameof(ImplementationTermCatalog.Read) or "Classify" or "Compound" });
 
     private static bool NativeMovement(string text) =>

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -8,8 +9,8 @@ internal static class ProjectionCheckpointRetentionAssertions
     internal const string CorruptionDetail = "The committed projection checkpoint is outside its retained outbox range.";
     private const string PinnedDetail = "A projection consumer or rebuild pins the requested outbox history.";
 
-    internal static async Task PinnedAsync(OperationResult result)
-        => await ProjectionConsumerIdentityAssertions.ExactAsync(result, new OperationResult(null, ErrorCode.Conflict, PinnedDetail));
+    internal static async Task PinnedAsync(Result<object> result)
+        => await ProjectionConsumerIdentityAssertions.ExactAsync(result, Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, PinnedDetail)));
 
     internal static async Task CorruptAsync(DatabaseEngine owner, ZoneTreeStore store,
         ProjectionCheckpointRetentionState state, CancellationToken token)

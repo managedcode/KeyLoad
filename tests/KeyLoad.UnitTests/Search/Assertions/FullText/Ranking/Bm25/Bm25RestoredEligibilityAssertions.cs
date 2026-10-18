@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
@@ -50,24 +51,24 @@ internal static class Bm25RestoredEligibilityAssertions
     }
 
     internal static async Task ReplayAsync(EventingArtifactFixture fixture, bool source,
-        ReplicatedOperation operation, CommitReceipt receipt, CancellationToken token)
+        Command<DatabaseCommand> operation, CommitReceipt receipt, CancellationToken token)
     {
         var store = source ? fixture.Source.Store : fixture.Target!;
         var database = source ? fixture.Source.Database : fixture.Database;
-        var before = Cut(store, database, source ? fixture.Source.ReadJournalCut() : fixture.ReadTargetJournalCut(), token);
-        var retained = source ? fixture.Source.ReadRetainedEntry(operation.Id).Operation!
-            : fixture.ReadTargetIssuedOperation(operation.Id);
-        await Assert.That(retained.NativePayload.Span.SequenceEqual(operation.NativePayload.Span)).IsTrue();
+        var before = Cut(store, database, source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetJournalCut(), token);
+        var retained = source ? fixture.Source.ReadStoredOutcome(operation.CommandId).PreparedCommand!
+            : fixture.ReadTargetIssuedOperation(operation.CommandId);
+        await Assert.That(retained.NativePayload.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
         await Assert.That(retained.PayloadJson).IsEqualTo(operation.PayloadJson);
-        await Assert.That(operation.NativePayload.IsEmpty).IsFalse();
+        await Assert.That(operation.Value!.Input.IsEmpty).IsFalse();
         await Assert.That(NativeSerialization.Serialize(retained).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(operation))).IsTrue();
         var actual = fixture.SubmitIssued(database, operation, cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         var stored = OutcomeStoreOracle.ReadPartition(store, fixture.Source.Partition,
-            Bm25PortableFamilyBackupSeed.Root, operation.Id)!.Get<CommitReceipt>();
+            Bm25PortableFamilyBackupSeed.Root, operation.CommandId)!.Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(stored).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await SameAsync(before, Cut(store, database,
-            source ? fixture.Source.ReadJournalCut() : fixture.ReadTargetJournalCut(), token));
+            source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetJournalCut(), token));
     }
 }

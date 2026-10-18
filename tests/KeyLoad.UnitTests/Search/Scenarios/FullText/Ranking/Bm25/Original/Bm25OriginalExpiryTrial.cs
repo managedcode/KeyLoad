@@ -13,8 +13,8 @@ internal static class Bm25OriginalExpiryTrial
         var success = flow.Publish(admitted);
         await flow.RequireHealthyAsync(admitted, success);
         var admittedEntry = NativeSerialization.Serialize(owner.Entry(admitted.Id));
-        var firstPhase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(admitted);
-        var secondPhase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(unadmitted);
+        var firstPhase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((admitted).Value!.Input.Span);
+        var secondPhase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((unadmitted).Value!.Input.Span);
         var clock = owner.Database.EvaluationClock;
         var expiry = firstPhase.OriginalExpiry > secondPhase.OriginalExpiry
             ? firstPhase.OriginalExpiry : secondPhase.OriginalExpiry;

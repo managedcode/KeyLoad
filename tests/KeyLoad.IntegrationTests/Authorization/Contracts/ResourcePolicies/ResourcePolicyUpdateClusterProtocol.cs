@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-/// <summary>Stable values for the persisted resource-policy CLUSTER scenario.</summary>
+/// <summary>Stable values for the persisted resource-policy Orleans scenario.</summary>
 internal static class ResourcePolicyUpdateClusterProtocol
 {
     internal const string Collection = "resource-policy-cluster-documents";

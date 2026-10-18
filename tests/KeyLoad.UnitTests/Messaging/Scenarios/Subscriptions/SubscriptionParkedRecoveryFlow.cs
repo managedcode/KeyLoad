@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -24,9 +26,9 @@ internal static class SubscriptionParkedRecoveryFlow
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(
             new long[] { 1, 2, 3 }, CollectionOrdering.Matching);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(firstOperation), firstResult);
-        var claims = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>
+        var claims = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (firstOperation, firstResult, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, first.RequestId)) };
-        var receipts = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>();
+        var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>();
         foreach (var delivery in deliveries.Skip(1))
         {
             await AckAsync(fixture.Database, fixture.Store, group, delivery, time.AddMilliseconds(500), receipts);
@@ -69,10 +71,10 @@ internal static class SubscriptionParkedRecoveryFlow
     }
 
     private static async Task RecoverAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
-        SubscriptionRef group, SubscriptionPolicy policy, ReplicatedOperation park, OperationResult parked,
+        SubscriptionRef group, SubscriptionPolicy policy, Command<DatabaseCommand> park, Result<object> parked,
         byte[] history, System.Collections.Immutable.ImmutableArray<SubscriptionDelivery> oldDeliveries,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> receipts,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> claims,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> receipts,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> claims,
         DateTimeOffset time, string[] source, CancellationToken token)
     {
         var seek = new SeekSubscriptionRequest(Guid.NewGuid(), group, 1, SubscriptionStart.FromBeginning);
@@ -120,9 +122,9 @@ internal static class SubscriptionParkedRecoveryFlow
     }
 
     private static async Task ColdAsync(ZoneTreeStore store, string directory, SubscriptionRef group,
-        SubscriptionPolicy policy, ReplicatedOperation park, OperationResult parked, byte[] history,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> receipts,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> claims,
+        SubscriptionPolicy policy, Command<DatabaseCommand> park, Result<object> parked, byte[] history,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> receipts,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> claims,
         string[] source, DateTimeOffset time, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
@@ -167,7 +169,7 @@ internal static class SubscriptionParkedRecoveryFlow
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
-        var receipts = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>();
+        var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>();
         await AckAsync(db, store, group, delivery, time.AddMilliseconds(500), receipts);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, policy, 2, 4, 4, 4, false, null);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(store, group);
@@ -181,7 +183,7 @@ internal static class SubscriptionParkedRecoveryFlow
 
     private static async Task AckAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
         SubscriptionDelivery delivery, DateTimeOffset time,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> receipts)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> receipts)
     {
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
         var operation = Create(OperationKind.SubscriptionDelivery, ack, ack.CommandId, time);
@@ -190,7 +192,7 @@ internal static class SubscriptionParkedRecoveryFlow
         receipts.Add((operation, original, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, ack.CommandId)));
     }
 
-    private static ReplicatedOperation Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
+    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
         => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }
 

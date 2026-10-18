@@ -101,10 +101,8 @@ public enum GrainReadKind
     AnnMaintenance,
     /// <summary>Executes one signed protected native text maintenance stage on its exact owner.</summary>
     TextMaintenance,
-    /// <summary>Read a receiving-only document with its private physical cut witness.</summary>
-    OwnedDocument,
     /// <summary>Server-only individually admitted native partition-query leaf.</summary>
-    PartitionQueryLeaf,
+    PartitionQueryLeaf = 51,
     /// <summary>Reads one provisioned vector-only native ANN generation under current policy.</summary>
     ApproximateSearch,
     /// <summary>Requires an actual provisioned native ANN generation to cover an acknowledged minimum prefix.</summary>
@@ -121,8 +119,6 @@ public enum GrainReadKind
     QueueTransferCoordination = 72,
     /// <summary>Privately observes one authenticated native ANN root or its exact publication.</summary>
     AnnProjectionObservation = 73,
-    /// <summary>Privately reads an owned document under exact authenticated D1 coverage.</summary>
-    OwnedDocumentV2 = 85,
     /// <summary>Privately executes a partition query leaf under mandatory exact metadata and principal proof.</summary>
     PartitionQueryLeafV2 = 88,
     /// <summary>Privately executes one distributed search phase under mandatory exact metadata and principal proof.</summary>

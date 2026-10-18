@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Checks caller cancellation and a healthy joined read through actual CLUSTER clients.</summary>
+/// <summary>Checks caller cancellation and a healthy joined read through actual Orleans clients.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterJoinCancellationTests(ClusterFixture fixture)

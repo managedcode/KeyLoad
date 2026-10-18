@@ -53,21 +53,21 @@ internal static class SafeProjectorOperationChanges
         var initial = Document(source, SafeProjectorOperationProtocol.InitialRevision,
             raw ? SafeProjectorOperationProtocol.InitialJson : SafeProjectorOperationProtocol.InitialSafe, raw);
         var rows = ImmutableArray.CreateBuilder<DocumentChange>();
-        rows.Add(new(FirstSequence, state.Seed.ExpectedToken, state.Seed.Operation.EvaluatedAt, source,
+        rows.Add(new(FirstSequence, state.Seed.ExpectedToken, new DateTimeOffset(state.Seed.Operation.Timestamp), source,
             SafeProjectorOperationProtocol.InitialRevision, false, null, initial));
-        rows.Add(new(SecondSequence, state.Seed.ExpectedToken, state.Seed.Operation.EvaluatedAt, second,
+        rows.Add(new(SecondSequence, state.Seed.ExpectedToken, new DateTimeOffset(state.Seed.Operation.Timestamp), second,
             SafeProjectorOperationProtocol.InitialRevision, false, null,
             Document(second, SafeProjectorOperationProtocol.InitialRevision, SafeProjectorOperationProtocol.SecondJson, raw)));
         var updated = Document(source, SafeProjectorOperationProtocol.UpdatedRevision,
             raw ? SafeProjectorOperationProtocol.UpdatedJson : SafeProjectorOperationProtocol.UpdatedSafe, raw);
         if (patch is not null)
         {
-            rows.Add(new(PublicPatchSequence, patch.ExpectedToken, patch.Operation.EvaluatedAt, source,
+            rows.Add(new(PublicPatchSequence, patch.ExpectedToken, new DateTimeOffset(patch.Operation.Timestamp), source,
                 SafeProjectorOperationProtocol.UpdatedRevision, false, initial, updated));
         }
         if (healthy is not null)
         {
-            rows.Add(new(HealthyPatchSequence, healthy.ExpectedToken, healthy.Operation.EvaluatedAt, source,
+            rows.Add(new(HealthyPatchSequence, healthy.ExpectedToken, new DateTimeOffset(healthy.Operation.Timestamp), source,
                 SafeProjectorOperationProtocol.HealthyRevision, false, updated,
                 Document(source, SafeProjectorOperationProtocol.HealthyRevision,
                     raw ? SafeProjectorOperationProtocol.HealthyJson : SafeProjectorOperationProtocol.HealthySafe, raw)));

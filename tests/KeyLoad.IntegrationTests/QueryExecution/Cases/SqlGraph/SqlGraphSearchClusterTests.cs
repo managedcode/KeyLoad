@@ -5,7 +5,7 @@ using KeyLoad.IntegrationTests.Features.Search;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-/// <summary>AC-GSEARCH-006: Q1 SQL graph search matches the public graph-search result across CLUSTER.</summary>
+/// <summary>AC-GSEARCH-006: Q1 SQL graph search matches the public graph-search result across Orleans.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class SqlGraphSearchClusterTests(ClusterFixture fixture)

@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -15,12 +14,12 @@ internal static class DistributedSearchHybridNativeFlow
     private const string ScoreProfile = "distributed-canonical-v1";
     private const int IndependentOwners = 2;
 
-    internal static RankedDocument[] Execute(RemoteDocumentNativeFixture fixture, CancellationToken token)
+    internal static RankedDocument[] Execute(QueryNativeFixture fixture, CancellationToken token)
     {
-        var sourceRequest = DistributedSearchHybridNativeSeed.Request(RemotePartitionQueryNativeFlow.Local);
-        var destinationRequest = DistributedSearchHybridNativeSeed.Request(RemoteDocumentNativeFixture.Partition);
-        var source = Capture(fixture.Source, sourceRequest, PhysicalOwnerDirectoryWholeFlow.Control.Owner, token);
-        var destination = Capture(fixture.Destination, destinationRequest, PhysicalOwnerDirectoryWholeFlow.Destination.Owner, token);
+        var sourceRequest = DistributedSearchHybridNativeSeed.Request(QueryNativePartitionFlow.Local);
+        var destinationRequest = DistributedSearchHybridNativeSeed.Request(QueryNativeFixture.Partition);
+        var source = Capture(fixture.Source, sourceRequest, fixture.SourceOwner, token);
+        var destination = Capture(fixture.Destination, destinationRequest, fixture.DestinationOwner, token);
         var budget = Budget(fixture.Source, token);
         var digest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(sourceRequest)));
         var epoch = DistributedSearchStatisticsEpoch.Create(digest, [destination, source], UnitExecutionOptions.QueryExecution(), budget);
@@ -38,40 +37,40 @@ internal static class DistributedSearchHybridNativeFlow
             .Single(hit => hit.Document.Reference == candidate.Reference)).ToArray();
     }
 
-    private static DistributedTextWitnessV1 Capture(PhysicalShardCatalogFixture owner,
+    private static DistributedTextWitnessV1 Capture(DocumentPatchAtomicityOwner owner,
         SearchRequest request, PhysicalShardRecord placement, CancellationToken token)
     {
         var budget = Budget(owner, token);
-        return DistributedTextStatisticsLeaf.Execute(owner.Database, RemoteDocumentNativeFixture.Reader, request,
-            placement, RemoteDocumentNativeFixture.Tenant, UnitExecutionOptions.QueryExecution(), budget, Grant(owner, budget));
+        return DistributedTextStatisticsLeaf.Execute(owner.Database, QueryNativeFixture.Reader, request,
+            placement, QueryNativeFixture.Tenant, UnitExecutionOptions.QueryExecution(), budget, Grant(owner, budget));
     }
 
-    private static DistributedSearchCandidateLeafV1 Candidates(PhysicalShardCatalogFixture owner,
+    private static DistributedSearchCandidateLeafV1 Candidates(DocumentPatchAtomicityOwner owner,
         SearchRequest request, DistributedTextWitnessV1 witness, DistributedTextStatisticsV1 statistics,
         GlobalBranchScope scope, string window, CancellationToken token)
     {
         var budget = Budget(owner, token);
-        return DistributedSearchCandidateExecution.Execute(owner.Database, RemoteDocumentNativeFixture.Reader,
-            request, RemoteDocumentNativeFixture.Tenant, witness, statistics, scope, window,
+        return DistributedSearchCandidateExecution.Execute(owner.Database, QueryNativeFixture.Reader,
+            request, QueryNativeFixture.Tenant, witness, statistics, scope, window,
             UnitExecutionOptions.QueryExecution(), budget, Grant(owner, budget));
     }
 
-    private static ImmutableArray<RankedDocument> Project(PhysicalShardCatalogFixture owner,
+    private static ImmutableArray<RankedDocument> Project(DocumentPatchAtomicityOwner owner,
         SearchRequest request, DistributedTextWitnessV1 witness, ImmutableArray<GlobalBranchCandidate> selected,
         CancellationToken token)
     {
         var budget = Budget(owner, token);
-        return DistributedSearchProjectionExecution.Execute(owner.Database, RemoteDocumentNativeFixture.Reader,
-            request, RemoteDocumentNativeFixture.Tenant, witness,
+        return DistributedSearchProjectionExecution.Execute(owner.Database, QueryNativeFixture.Reader,
+            request, QueryNativeFixture.Tenant, witness,
             [.. selected.Where(candidate => candidate.Reference.Partition == request.Partition)],
             budget, Grant(owner, budget)).Hits;
     }
 
-    private static ReadExecutionBudget Budget(PhysicalShardCatalogFixture owner, CancellationToken token)
+    private static ReadExecutionBudget Budget(DocumentPatchAtomicityOwner owner, CancellationToken token)
         => new(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
 
     private static global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant Grant(
-        PhysicalShardCatalogFixture owner, ReadExecutionBudget budget)
+        DocumentPatchAtomicityOwner owner, ReadExecutionBudget budget)
         => budget.CreateReadGrant(owner.Database.Limits.MaxQueryReadBytes / IndependentOwners,
             owner.Database.Limits.MaxScanRecords);
 }

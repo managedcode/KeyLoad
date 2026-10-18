@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -38,18 +39,18 @@ internal sealed class SerializationExecutionPolicyTests
         await Assert.That(JsonDefaults.Serialize(decoded).SequenceEqual(json)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(decoded[TextKey]).SequenceEqual(
             NativeSerialization.Serialize(payload))).IsTrue();
-        var operation = new ReplicatedOperation(new Guid(NativeFingerprintFixtures.Id), OperationKind.Batch,
-            "root界\\\"😀", DateTimeOffset.UnixEpoch, payload + "\uD800");
+        var id = new Guid(NativeFingerprintFixtures.Id);
+        const string Principal = "root界\\\"😀";
+        var authored = payload + "\uD800";
         var fingerprint = JsonData.Fingerprint(new
         {
-            operation.Id,
-            operation.Kind,
-            operation.PrincipalId,
-            operation.PayloadJson
+            Id = id,
+            Kind = OperationKind.Batch,
+            PrincipalId = Principal,
+            PayloadJson = authored
         });
-        await Assert.That(NativeOperationFingerprint.Compute(operation, options)).IsEqualTo(fingerprint);
-        await Assert.That(NativeOperationFingerprint.Compute(operation.Id, operation.Kind, operation.PrincipalId,
-            Encoding.UTF8.GetBytes(operation.PayloadJson), options)).IsEqualTo(fingerprint);
+        await Assert.That(DatabaseCommandFingerprint.Compute(id, OperationKind.Batch, Principal, authored))
+            .IsEqualTo(fingerprint);
     }
 
     [Test]

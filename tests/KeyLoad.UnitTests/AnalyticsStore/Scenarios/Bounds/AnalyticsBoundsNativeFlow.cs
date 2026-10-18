@@ -14,10 +14,10 @@ internal static class AnalyticsBoundsNativeFlow
         await AnalyticsBoundsOwner.SeedAsync(db, [D.Event(db, D.First, D.Alpha, 2), D.Event(db, D.Second, D.Beta, 4)]);
         await N.UnchangedAsync(db, async () =>
         {
-            var error = await N.RefusedAsync(() => N.QueryAsync(db.Database, P.Query(db) with { MaxGroups = 1 }, token));
+            var error = await N.RefusedAsync(() => N.Query(db.Database, P.Query(db) with { MaxGroups = 1 }, token));
             await Assert.That(error.InnerException is AnalyticsQueryException).IsTrue();
             await O.EqualAsync(new AnalyticsAggregateResult([P.Row(D.Alpha, 1, 2), P.Row(D.Beta, 1, 4)], 2),
-                await N.QueryAsync(db.Database, P.Query(db), token));
+                N.Query(db.Database, P.Query(db), token));
         });
     }
 
@@ -28,7 +28,7 @@ internal static class AnalyticsBoundsNativeFlow
             [D.Event(db, D.First, D.Alpha, double.MaxValue), D.Event(db, D.Second, D.Alpha, double.MaxValue)]);
         await N.UnchangedAsync(db, async () =>
         {
-            await N.RefusedAsync(() => N.QueryAsync(db.Database, P.Query(db), token));
+            await N.RefusedAsync(() => N.Query(db.Database, P.Query(db), token));
             var count = P.Query(db) with
             {
                 Metrics = [new(D.Count, string.Empty, AnalyticsAggregateKind.Count)]
@@ -36,7 +36,7 @@ internal static class AnalyticsBoundsNativeFlow
             var expected = new AnalyticsAggregateResult([new(
                 System.Collections.Immutable.ImmutableDictionary<string, string>.Empty.Add(D.Kind, D.Alpha),
                 System.Collections.Immutable.ImmutableDictionary<string, double>.Empty.Add(D.Count, 2))], 2);
-            await O.EqualAsync(expected, await N.QueryAsync(db.Database, count, token));
+            await O.EqualAsync(expected, N.Query(db.Database, count, token));
         });
     }
 
@@ -48,9 +48,9 @@ internal static class AnalyticsBoundsNativeFlow
         var bound = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options).Length - 1;
         await N.UnchangedAsync(db, async () =>
         {
-            await N.RefusedAsync(() => N.QueryAsync(db.Database, P.Query(db), token, bound));
+            await N.RefusedAsync(() => N.Query(db.Database, P.Query(db), token, bound));
             await O.EqualAsync(new AnalyticsAggregateResult([P.Row(D.Alpha, 1, 7)], 1),
-                await N.QueryAsync(db.Database, P.Query(db, P.HealthyStore), token, bound));
+                N.Query(db.Database, P.Query(db, P.HealthyStore), token, bound));
         });
     }
 }

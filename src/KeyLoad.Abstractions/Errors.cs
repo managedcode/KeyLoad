@@ -6,6 +6,25 @@ namespace KeyLoad;
 public static class Errors
 {
     private const string ProblemTypePrefix = "urn:keyload:error:";
+    private const string InvalidDomainProblem = "The database command problem is invalid.";
+
+    /// <summary>Reads the exact domain error from a native problem, or returns null for success.</summary>
+    /// <param name="problem">The native problem associated with the database result.</param>
+    /// <returns>The validated domain code, or null when no problem exists.</returns>
+    public static ErrorCode? Code(Problem? problem)
+    {
+        if (problem is null)
+        {
+            return null;
+        }
+        if (!Enum.TryParse<ErrorCode>(problem.ErrorCode, out var code) || !Enum.IsDefined(code)
+            || problem.ErrorCode != code.ToString() || problem.Title != code.ToString() || problem.Type != $"{ProblemTypePrefix}{code}"
+            || problem.StatusCode != Status(code) || string.IsNullOrWhiteSpace(problem.Detail))
+        {
+            throw Fail(ErrorCode.Corruption, InvalidDomainProblem);
+        }
+        return code;
+    }
     /// <summary>Returns the HTTP status code associated with an error code.</summary>
     /// <param name="code">Specifies the code value.</param>
     /// <returns>The requested value.</returns>

@@ -20,8 +20,8 @@ internal static class QueueProducerClusterLiteralAssertions
             _ => throw new InvalidOperationException(QueueProducerClusterEnqueueProtocol.UnexpectedMutation)
         }).ToImmutableArray();
         await QueueProducerClusterAssertions.EqualAsync(receipt, new CommitReceipt(command.CommandId,
-            new(receipt.Token.Incarnation, command.Partition.AtomicPartitionId, receipt.Token.Position, receipt.Token.OwnershipEpoch),
-            mutations, DurabilityProfile.QuorumProcessDurable));
+            new(receipt.Token.Incarnation, command.Partition.AtomicPartitionId, receipt.Token.Position),
+            mutations, DurabilityProfile.ProcessDurable, 3));
         await QueueProducerClusterAssertions.EqualAsync(image.Ready,
             new MessageInspection(new(id, MessageState.Ready, QueueProducerClusterProtocol.InitialAttempts, QueueProducerClusterProtocol.InitialRevision, sequence, null, null), payload, QueueProducerClusterProtocol.Headers));
         await QueueProducerClusterAssertions.EqualAsync(image.Scheduled,

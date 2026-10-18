@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 using P = KeyLoad.UnitTests.Features.ClientApi.SdkNativeProblemBoundaryProtocol;
 
@@ -8,7 +9,7 @@ internal static class SdkNativeProblemBoundaryOutbox
     internal static async Task RequireAsync(SdkNativeProblemBoundaryScenario state)
     {
         var db = state.Native.Fixture.Database;
-        var seedTime = db.ReadRetainedEntry(state.Seed.CommandId).Operation!.EvaluatedAt;
+        var seedTime = new DateTimeOffset(db.ReadStoredOutcome(state.Seed.CommandId).PreparedCommand!.Timestamp);
         var forbidden = new DocumentRecord(state.Forbidden, P.FirstRevision, P.SeedJson, new RowAccess(), seedTime);
         var allowed = new DocumentRecord(state.Allowed, P.FirstRevision, P.SeedJson, new RowAccess(), seedTime);
         var entries = new List<OutboxEntry>
@@ -20,7 +21,7 @@ internal static class SdkNativeProblemBoundaryOutbox
         };
         if (state.HealthyReceipt is { } healthy)
         {
-            var time = db.ReadRetainedEntry(state.Healthy.CommandId).Operation!.EvaluatedAt;
+            var time = new DateTimeOffset(db.ReadStoredOutcome(state.Healthy.CommandId).PreparedCommand!.Timestamp);
             var after = new DocumentRecord(state.Allowed, P.HealthyRevision, P.HealthyJson, new RowAccess(), time);
             entries.Add(new(P.HealthySequence, P.FirstOrdinal, healthy.Token, time,
                 state.Healthy.Mutations[P.FirstOrdinal], healthy.Mutations[P.FirstOrdinal], Before: allowed, After: after));

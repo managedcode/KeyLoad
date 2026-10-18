@@ -49,7 +49,7 @@ internal static class CredentialAuthorityCold
             await Assert.That(after[node].NodeId).IsEqualTo(before[node].NodeId);
             await Assert.That(after[node].Incarnation).IsEqualTo(before[node].Incarnation);
             await Assert.That(after[node].ReadGeneration).IsGreaterThanOrEqualTo(before[node].ReadGeneration);
-            await Assert.That(after[node].Applied).IsGreaterThanOrEqualTo(before[node].Applied);
+            await Assert.That(after[node].Position).IsGreaterThanOrEqualTo(before[node].Position);
             await Assert.That(after[node].RoutingReady).IsTrue();
         }
     }

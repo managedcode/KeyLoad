@@ -28,9 +28,9 @@ internal static class RemoteTransferRepairColdTrial
         var accept = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept),
             fixture.DestinationPartition, [new AcceptQueueTransfer(fixture.DestinationQueue, original.IntentToken)]);
         var denied = RemoteTransferRepairColdNative.Apply(fixture, accept);
-        await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(denied.Json).IsNull();
-        await Assert.That(denied.NativeValue).IsNull();
+        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        
+        await Assert.That(denied.Value).IsNull();
         var bytes = RemoteTransferRepairColdNative.Outcome(fixture, accept.CommandId, fixture.DestinationPartition);
         await RemoteTransferRepairColdAdvance.DeniedWithoutWitnessAsync(fixture, hint, original.IntentToken,
             QueueTransferRepairStage.Accept, null);

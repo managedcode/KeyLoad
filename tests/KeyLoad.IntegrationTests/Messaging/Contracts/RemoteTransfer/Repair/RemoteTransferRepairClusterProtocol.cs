@@ -9,5 +9,5 @@ internal static class RemoteTransferRepairClusterProtocol
     internal const int ClaimedAttempts = 1;
     internal const long AckedVersion = 3;
     internal const long OriginalLeaseVersion = 1;
-    internal const string Missing = "The actual policy-repaired CLUSTER transfer result is unavailable.";
+    internal const string Missing = "The actual policy-repaired Orleans transfer result is unavailable.";
 }

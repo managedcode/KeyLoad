@@ -32,9 +32,7 @@ internal static class NativeArchiveEntryAssertions
     internal static async Task ReceiptAsync(CommitReceipt actual, CommandRequest command,
         AtomicPartitionPlacementResolution placement, long position, long revision, DurabilityProfile durability)
     {
-        var expected = new CommitReceipt(command.CommandId,
-            new(placement.Incarnation, command.Partition.AtomicPartitionId, position, placement.PlacementEpoch),
-            [new(P.Put, P.Collection, P.Document, revision)], durability);
+        var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, position), [new(P.Put, P.Collection, P.Document, revision)], durability, (durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(actual.Mutations.All(mutation => mutation.CompositionReferences.IsEmpty)).IsTrue();
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -71,7 +72,7 @@ internal static class QueueAccountingFaultSetup
         _ => throw new ArgumentOutOfRangeException(nameof(column))
     };
 
-    private static ReplicatedOperation Operation(QueueLaneRef lane, QueueAccountingOperation kind, string? token, DateTimeOffset time)
+    private static Command<DatabaseCommand> Operation(QueueLaneRef lane, QueueAccountingOperation kind, string? token, DateTimeOffset time)
     {
         var id = Guid.NewGuid();
         if (kind == QueueAccountingOperation.Processing)

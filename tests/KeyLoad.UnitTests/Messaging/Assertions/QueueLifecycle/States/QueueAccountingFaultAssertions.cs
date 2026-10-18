@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Globalization;
 using System.Text;
 using KeyLoad.Core;
@@ -23,7 +24,7 @@ internal static class QueueAccountingFaultAssertions
         {
             var returned = database.Apply(state.Operation);
             var counters = QueueAccountingFaultSetup.Counters(store, state.Lane);
-            var code = returned.Error is { } error ? (int)error : NoResultError;
+            var code = Errors.Code(returned.Problem) is { } error ? (int)error : NoResultError;
             throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, UnexpectedReturnCounterFormat,
                 code, counters.StoredMessages, counters.StoredBytes, counters.InFlightMessages, counters.InFlightBytes));
         });
@@ -34,12 +35,12 @@ internal static class QueueAccountingFaultAssertions
         await Assert.That(database.GetDocument(QueueAccountingFaultProtocol.Root,
             new(state.Lane.Partition, QueueAccountingFaultProtocol.Collection, QueueAccountingFaultProtocol.Document))).IsNull();
         var outcome = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Lane.Partition, QueueAccountingFaultProtocol.Root, state.Operation.Id)));
+            state.Lane.Partition, QueueAccountingFaultProtocol.Root, state.Operation.CommandId)));
         await Assert.That(outcome).IsNull();
     }
 
     internal static async Task CompletedAsync(DatabaseEngine database, ZoneTreeStore store,
-        QueueAccountingFaultState state, OperationResult result)
+        QueueAccountingFaultState state, Result<object> result)
     {
         var expected = ExpectedMetadata(state);
         var retained = expected.State is MessageState.Leased or MessageState.Scheduled;
@@ -62,13 +63,13 @@ internal static class QueueAccountingFaultAssertions
     }
 
     private static async Task ResultAsync(DatabaseEngine database, QueueAccountingFaultState state,
-        OperationResult result, MessageMetadata expected)
+        Result<object> result, MessageMetadata expected)
     {
-        await Assert.That(result.Error).IsNull();
-        if (state.Operation.Kind == OperationKind.Receive)
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        if (state.Operation.Value!.Kind == OperationKind.Receive)
         {
             var received = result.Get<ReceiveResult>();
-            await Assert.That(received.RequestId).IsEqualTo(state.Operation.Id);
+            await Assert.That(received.RequestId).IsEqualTo(state.Operation.CommandId);
             if (state.Kind != QueueAccountingOperation.Reclaim)
             {
                 await Assert.That(received.Deliveries).IsEmpty();
@@ -84,7 +85,7 @@ internal static class QueueAccountingFaultAssertions
             return;
         }
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(state.Operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(state.Operation.CommandId);
         var mutation = new MutationReceipt(state.Kind == QueueAccountingOperation.Nack ? nameof(DeliveryAction.Nack)
             : nameof(DeliveryAction.Ack), state.Lane.Queue, state.Message.MessageId, QueueAccountingFaultProtocol.Three);
         MutationReceipt[] expectedMutations = state.Kind == QueueAccountingOperation.Processing
@@ -124,7 +125,7 @@ internal static class QueueAccountingFaultAssertions
             Attempts = QueueAccountingFaultProtocol.Two,
             ReadySequence = QueueAccountingFaultProtocol.Two,
             LeaseVersion = QueueAccountingFaultProtocol.Two,
-            LeaseUntil = state.Operation.EvaluatedAt.AddSeconds(QueueAccountingFaultProtocol.LeaseSeconds)
+            LeaseUntil = new DateTimeOffset(state.Operation.Timestamp).AddSeconds(QueueAccountingFaultProtocol.LeaseSeconds)
         },
         QueueAccountingOperation.ReadyExpiry or QueueAccountingOperation.ScheduledExpiry => state.Metadata with
         {

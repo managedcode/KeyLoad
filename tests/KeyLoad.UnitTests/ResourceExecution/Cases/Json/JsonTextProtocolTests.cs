@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Storage;
@@ -30,8 +31,8 @@ internal sealed class JsonTextProtocolTests
             var expected = JsonDefaults.Deserialize<string>(Encoding.UTF8.GetBytes(json));
             var actual = JsonDefaults.Deserialize<string>(json);
             await Assert.That(actual).IsEqualTo(expected);
-            var result = new OperationResult(null) { NativeValue = actual };
-            var restored = NativeSerialization.Deserialize<OperationResult>(NativeSerialization.Serialize(result));
+            var result = Result<object>.Succeed(actual);
+            var restored = NativeSerialization.Deserialize<Result<object>>(NativeSerialization.Serialize(result));
             await Assert.That(restored.Get<string>()).IsEqualTo(expected);
         }
 
@@ -62,10 +63,10 @@ internal sealed class JsonTextProtocolTests
     [Test]
     public async Task AcMp006StoredErrorPrecedesMalformedJsonAndAbsentResultRemainsCorruption()
     {
-        var stored = new OperationResult(MalformedJson, ErrorCode.PermissionDenied, StoredErrorDetail);
+        var stored = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, StoredErrorDetail));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => stored.Get<ResourceDefinition>());
-        var malformed = Assert.ThrowsExactly<KeyLoadException>(() => new OperationResult(MalformedJson).Get<ResourceDefinition>());
-        var absent = Assert.ThrowsExactly<KeyLoadException>(() => new OperationResult(null).Get<string>());
+        var malformed = Assert.ThrowsExactly<KeyLoadException>(() => new Result<object>(MalformedJson).Get<ResourceDefinition>());
+        var absent = Assert.ThrowsExactly<KeyLoadException>(() => new Result<object>(null).Get<string>());
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.Message).IsEqualTo(StoredErrorDetail);

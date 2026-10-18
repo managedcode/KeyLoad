@@ -29,7 +29,7 @@ internal static class QueueLifecyclePublicCold
             await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
             await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
             await Assert.That(after.ReadGeneration).IsGreaterThanOrEqualTo(before.ReadGeneration);
-            await Assert.That(after.Applied).IsGreaterThanOrEqualTo(before.Applied);
+            await Assert.That(after.Position).IsGreaterThanOrEqualTo(before.Position);
             if (continueOperation)
             {
                 await QueueLifecyclePublicPhase.ContinueAsync(fixture, callers, state, token);

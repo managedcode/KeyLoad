@@ -29,7 +29,8 @@ internal static class NativeTextProtectedPublicColdMutation
         foreach (var original in new[] { (state.Patch, state.Patched), (state.Delete, state.Deleted) })
         {
             await Assert.That(original.Item2.CommandId).IsEqualTo(original.Item1.CommandId);
-            await Assert.That(original.Item2.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+            await Assert.That(original.Item2.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+            await Assert.That(original.Item2.PersistedCopies).IsEqualTo(3);
             await SqlClusterProtocol.EqualAsync(original.Item2,
                 await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(original.Item1, token)));
             await SqlClusterProtocol.EqualAsync(original.Item2,

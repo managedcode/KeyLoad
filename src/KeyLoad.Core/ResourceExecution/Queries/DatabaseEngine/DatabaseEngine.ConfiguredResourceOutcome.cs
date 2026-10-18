@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
@@ -8,17 +10,17 @@ public sealed partial class DatabaseEngine
 {
     private const string ConfiguredOutcomeLifetimeChanged = "The configured resource belongs to a different lifetime.";
 
-    private void ObserveConfiguredResourceOutcome(IKeyValueView view, ReplicatedOperation operation,
-        OperationResult result, ReadExecutionBudget work)
+    private void ObserveConfiguredResourceOutcome(IKeyValueView view, Command<DatabaseCommand> operation,
+        Result<object> result, ReadExecutionBudget work)
     {
-        if (operation.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable) || result.Error is not null)
+        if (operation.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable) || Errors.Code(result.Problem) is not null)
         {
             return;
         }
         string tenantId;
         string databaseId;
         string resourceName;
-        if (operation.Kind == OperationKind.ConfigureResource)
+        if (operation.Value!.Kind == OperationKind.ConfigureResource)
         {
             var request = Payload<ConfigureResourceRequest>(operation);
             (tenantId, databaseId, resourceName) = (request.TenantId, request.DatabaseId, request.Definition.Name);
@@ -33,7 +35,7 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
         var admitted = ResourceEffectAdmissionValidation.Read(operation, Limits);
         var sameLifetime = admitted.Bindings.IsEmpty
-            ? lifetime.CreationFingerprint == NativeOperationFingerprint.Compute(operation)
+            ? lifetime.CreationFingerprint == DatabaseCommandFingerprint.Compute(operation)
             : admitted.Bindings.Contains(lifetime);
         if (!sameLifetime)
         {

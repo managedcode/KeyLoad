@@ -24,7 +24,7 @@ internal static class FunctionalGateColdDrop
                 model.TableDefinition.Name);
             var dropped = await FunctionalGateDropCalls.InvokeAsync(context, parentId, request,
                 (DropLifecycleClusterRoute)model.Index, token);
-            await FunctionalGateDropAssertions.ResultAsync(parentId, request, dropped);
+            await FunctionalGateDropAssertions.ResultAsync(context, parentId, request, dropped);
             var create = model.TableCreate with
             {
                 CommandId = Guid.NewGuid()

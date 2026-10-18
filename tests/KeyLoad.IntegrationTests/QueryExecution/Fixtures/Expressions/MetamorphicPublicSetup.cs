@@ -23,9 +23,9 @@ internal static class MetamorphicPublicSetup
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(command, token));
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(command.CommandId,
-            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position, receipt.Token.OwnershipEpoch),
+            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position),
             [.. rows.Select(row => new MutationReceipt("putDocument", MetamorphicPublicData.Collection, row.Id, 1L))],
-            DurabilityProfile.QuorumProcessDurable), receipt);
+            DurabilityProfile.ProcessDurable, 3), receipt);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, MetamorphicPublicData.Collection,
             Capability.Query | Capability.DocumentsRead, token);
         var state = new MetamorphicPublicState(partition, rows, command, receipt, identity,

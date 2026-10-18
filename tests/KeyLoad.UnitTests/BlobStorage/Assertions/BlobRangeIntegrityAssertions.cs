@@ -87,8 +87,7 @@ internal static class BlobRangeIntegrityAssertions
     {
         foreach (var command in fixture.Commands)
         {
-            var replay = database.ApplyEmbedded(new(command.CommandId, command.Kind,
-                BlobRangeIntegrityFixture.Principal, default, command.PayloadJson), cancellationToken: default);
+            var replay = database.ApplyEmbedded(database.CreateCommand(command.Kind, command.CommandId, BlobRangeIntegrityFixture.Principal, default, command.PayloadJson), cancellationToken: default);
             await BlobWholeFlowAssertions.Exact(replay, command.Original);
         }
     }

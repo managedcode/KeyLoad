@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -47,31 +48,31 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
 
     private static async Task OriginalBytesAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeHistory entry)
     {
-        await Assert.That(Required(fixture, KeySpace.PartitionOutcome(fixture.Partition, Root, entry.Operation.Id))
+        await Assert.That(Required(fixture, KeySpace.PartitionOutcome(fixture.Partition, Root, entry.Operation.CommandId))
             .AsSpan().SequenceEqual(entry.OutcomeBytes)).IsTrue();
-        await Assert.That(Required(fixture, KeySpace.OutcomeLocatorV2(fixture.Partition, Root, entry.Operation.Id))
+        await Assert.That(Required(fixture, KeySpace.OutcomeLocatorV2(fixture.Partition, Root, entry.Operation.CommandId))
             .AsSpan().SequenceEqual(entry.LocatorBytes)).IsTrue();
     }
 
-    private static async Task ResultAsync(OperationResult actual, EventQueueStateEnvelopeHistory expected)
+    private static async Task ResultAsync(Result<object> actual, EventQueueStateEnvelopeHistory expected)
     {
         if (expected.ConsumedReceive)
         {
-            await Assert.That(actual.Error).IsEqualTo(ErrorCode.StaleLease);
-            await Assert.That(actual.SafeDetail).IsEqualTo(expected.Operation.Kind == OperationKind.Receive ? QueueStale : SubscriptionStale);
-            await Assert.That(actual.Json).IsNull();
-            await Assert.That(actual.NativeValue).IsNull();
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+            await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Operation.Value!.Kind == OperationKind.Receive ? QueueStale : SubscriptionStale);
+            
+            await Assert.That(actual.Value).IsNull();
             return;
         }
-        if (expected.Result.NativeValue is ReceiveResult)
+        if (expected.Result.Value is ReceiveResult)
         {
             await NativeReplayResultAssertions.Same<ReceiveResult>(actual, expected.Result);
         }
-        else if (expected.Result.NativeValue is ReceiveSubscriptionResult)
+        else if (expected.Result.Value is ReceiveSubscriptionResult)
         {
             await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(actual, expected.Result);
         }
-        else if (expected.Result.NativeValue is SubscriptionInfo)
+        else if (expected.Result.Value is SubscriptionInfo)
         {
             await NativeReplayResultAssertions.Same<SubscriptionInfo>(actual, expected.Result);
         }
@@ -98,13 +99,7 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
             Id = Root
         });
         await Assert.That(actual.Fingerprint).IsEqualTo(fingerprint);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(new(null)
-        {
-            NativeValue = actual.Receipt
-        }, new(null)
-        {
-            NativeValue = receipt
-        });
+        await NativeReplayResultAssertions.Same<CommitReceipt>(Result<object>.Succeed(actual.Receipt), Result<object>.Succeed(receipt));
         await EventQueueStateEnvelopeSourceAssertions.EqualAsync(fixture.Database.GetDocument(Root,
             new(fixture.Partition, Documents, Processed)),
             new DocumentResult(new(fixture.Partition, Documents, Processed), InitialRevision, Payload, false, []));

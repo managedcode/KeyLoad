@@ -33,12 +33,14 @@ internal static class BlobBoundedRetirementPublicReplay
             ct => callers.Sdk.CompleteBlobUploadAsync(old.Complete, ct), observe, token);
         await Assert.That(old.Begun.Receipt.CommandId).IsEqualTo(old.Begin.CommandId);
         await Assert.That(old.Completed.Receipt.CommandId).IsEqualTo(old.Complete.CommandId);
-        await Assert.That(old.Begun.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await Assert.That(old.Completed.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(old.Begun.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(old.Begun.Receipt.PersistedCopies).IsEqualTo(3);
+        await Assert.That(old.Completed.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(old.Completed.Receipt.PersistedCopies).IsEqualTo(3);
         for (var i = 0; i < old.Parts.Length; i++)
         {
             await Assert.That(old.Written[i].Receipt.CommandId).IsEqualTo(old.Parts[i].CommandId);
-            await Assert.That(old.Written[i].Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+            await Assert.That(old.Written[i].Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         }
     }
 }

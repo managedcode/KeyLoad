@@ -1,6 +1,6 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -8,19 +8,19 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    // Only a discarded native preparation child may consume this unsigned candidate.
+    // Only a discarded preparation child consumes these provisional retry choices.
     // Keep original fixed across the sequence; existing original choices are never resampled.
-    private ReplicatedOperation PrepareCompositionQueueRetry(IKeyValueView view,
-        ReplicatedOperation original, PartitionRef partition, Mutation requested, NativeCommandPayload payload,
+    private Command<DatabaseCommand> PrepareCompositionQueueRetry(IKeyValueView view,
+        Command<DatabaseCommand> original, PartitionRef partition, Mutation requested, DatabaseCommand payload,
         List<QueueRetryDecision> choices)
     {
-        var originalPayload = NativeSerialization.Deserialize<NativeCommandPayload>(original.NativePayload.Span);
+        var originalPayload = original.Value!;
         if (!originalPayload.RetryDecisions.IsEmpty)
         {
             return original;
         }
         if (requested is AdvanceQueueDeadline deadline
-            && ReadQueueDeadlineRetryInput(view, partition, original.EvaluatedAt, deadline) is { } input)
+            && ReadQueueDeadlineRetryInput(view, partition, original.Timestamp, deadline) is { } input)
         {
             if (choices.Count >= Limits.MaxBatchMutations)
             {
@@ -30,25 +30,18 @@ public sealed partial class DatabaseEngine
             choices.Add(new(input.Lane, input.Metadata.Id, input.Metadata.StateVersion, input.Metadata.LeaseVersion,
                 input.Metadata.DeliveryGeneration, input.Metadata.Attempts, input.DueIndexKey,
                 SHA256.HashData(NativeSerialization.Serialize(input.Policy)), delay,
-                original.EvaluatedAt.AddMilliseconds(delay)));
+                original.Timestamp.AddMilliseconds(delay)));
         }
         if (choices.Count == QueueRetryProtocol.Initial)
         {
             return original;
         }
         var decisions = NativeSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version,
-            original.EvaluatedAt, choices.ToImmutableArray()));
+            original.Timestamp, choices.ToImmutableArray()));
         RequireNativeBudget(decisions.Length);
-        var candidate = NativeSerialization.Serialize(payload with
-        {
-            RetryDecisions = decisions,
-            Authority = ReadOnlyMemory<byte>.Empty,
-            Signature = ReadOnlyMemory<byte>.Empty
-        });
-        RequireNativeBudget(candidate.Length);
-        return original with
-        {
-            NativePayload = candidate
-        };
+        var candidate = OwnCommand(original);
+        candidate.Value = payload with { RetryDecisions = decisions };
+        RequireNativeBudget(NativeSerialization.Measure(candidate));
+        return candidate;
     }
 }

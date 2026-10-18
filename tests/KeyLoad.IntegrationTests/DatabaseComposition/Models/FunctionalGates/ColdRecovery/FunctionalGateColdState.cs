@@ -4,7 +4,7 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal sealed record FunctionalGateColdState(PartitionRef Partition, EntityRef Anchor,
     McpPersistedIdentity Writer, McpPersistedIdentity Reader, McpPersistedIdentity QueueOperator,
-    FunctionalGateColdModel[] Models, AdminNodeSnapshot[] Analytics)
+    FunctionalGateColdModel[] Models, AdminNodeSnapshot[] Nodes)
 {
     internal FunctionalGateReferenceBindings ReferenceBindings { get; init; } = new();
     internal FunctionalGateAnalyticsColdUser[] UserAnalytics { get; init; } = [];

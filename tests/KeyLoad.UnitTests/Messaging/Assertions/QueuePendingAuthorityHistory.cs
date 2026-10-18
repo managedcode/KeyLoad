@@ -46,9 +46,9 @@ internal static class QueuePendingAuthorityHistory
             var replay = owner.Apply(operation);
             if (operation.Kind == OperationKind.Receive)
             {
-                await Assert.That(replay.Error).IsEqualTo(ErrorCode.StaleLease);
-                await Assert.That(replay.Json).IsNull();
-                await Assert.That(replay.NativeValue).IsNull();
+                await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
+                
+                await Assert.That(replay.Value).IsNull();
             }
             else
             {

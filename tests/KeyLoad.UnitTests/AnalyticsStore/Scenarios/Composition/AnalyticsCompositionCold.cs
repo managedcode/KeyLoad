@@ -14,13 +14,13 @@ internal static class AnalyticsCompositionCold
             var identity = NativeSerialization.Serialize(owner.Store.Identity);
             var image = TeamRowPolicyAssertions.Image(owner.Store);
             var position = owner.Store.Position;
-            var journal = owner.JournalCut();
+            var journal = owner.ReadCanonicalCut();
             var applied = owner.Database.LastApplied;
             await owner.ReopenAsync();
             await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
             await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
             await Assert.That(owner.Store.Position).IsEqualTo(position);
-            await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
             await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
             await AnalyticsCompositionOperations.ReplayAsync(owner, anchor);
             foreach (var commit in current)

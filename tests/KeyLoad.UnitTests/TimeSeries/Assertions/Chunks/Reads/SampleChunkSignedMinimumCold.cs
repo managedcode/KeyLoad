@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
@@ -53,8 +54,7 @@ internal static class SampleChunkSignedMinimumCold
         {
             await SampleChunkSignedMinimumAssertions.ObserveAsync(store, () =>
             {
-                var operation = new ReplicatedOperation(original.Request.CommandId, OperationKind.Batch,
-                    SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(original.Request, JsonDefaults.Options));
+                var operation = database.CreateCommand(OperationKind.Batch, original.Request.CommandId, SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(original.Request, JsonDefaults.Options));
                 var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
                 SampleChunkExplicitMinimumUnitReads.RequireBytes(original.Receipt, replay);
                 return Task.CompletedTask;

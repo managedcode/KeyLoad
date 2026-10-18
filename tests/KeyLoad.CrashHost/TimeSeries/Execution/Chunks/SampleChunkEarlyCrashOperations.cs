@@ -1,10 +1,11 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.CrashHost;
 
 internal static class SampleChunkEarlyCrashOperations
 {
-    internal static OperationResult Configure(DatabaseEngine database) => CrashDatabase.Submit(database,
+    internal static Result<object> Configure(DatabaseEngine database) => CrashDatabase.Submit(database,
         OperationKind.ConfigureResource, new ConfigureResourceRequest(SampleChunkCrashContract.Partition.TenantId,
             SampleChunkCrashContract.Partition.DatabaseId, new(SampleChunkCrashContract.Set,
                 ResourceKind.TimeSeries, SampleChunkCrashContract.Partition.TransactionDomainId)),

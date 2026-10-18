@@ -52,7 +52,8 @@ internal static class QueueWorkerClusterAssertions
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.Position).IsGreaterThan((long)QueueWorkerClusterProtocol.PositivePositionBoundary);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(seed.Lane.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await EqualAsync(receipt.Mutations.ToArray(), mutations);
     }
 }

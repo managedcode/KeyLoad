@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -47,7 +48,7 @@ internal static class FullPartitionOutcomeIdentityScenario
         _ = database.Submit(OperationKind.ConfigureResource, request).Get<ResourceDefinition>();
     }
 
-    private static ReplicatedOperation CreateOperation(Guid commandId, PartitionRef partition, string resource,
+    private static Command<DatabaseCommand> CreateOperation(Guid commandId, PartitionRef partition, string resource,
         string json, DateTimeOffset operationTime)
     {
         var request = new CommandRequest(commandId, partition, [new PutDocument(resource, DocumentId, json)]);
@@ -55,31 +56,29 @@ internal static class FullPartitionOutcomeIdentityScenario
             JsonSerializer.Serialize(request, JsonDefaults.Options));
     }
 
-    private static ReplicatedOperation ChangedOperation(ReplicatedOperation original, PartitionRef partition,
+    private static Command<DatabaseCommand> ChangedOperation(DatabaseEngine owner, Command<DatabaseCommand> original, PartitionRef partition,
         string resource, string json)
     {
-        var request = new CommandRequest(original.Id, partition, [new PutDocument(resource, DocumentId, json)]);
-        return original with
-        {
-            PayloadJson = JsonSerializer.Serialize(request, JsonDefaults.Options)
-        };
+        var request = new CommandRequest(original.CommandId, partition, [new PutDocument(resource, DocumentId, json)]);
+        return owner.CreateCommand(original.Value!.Kind, original.CommandId, original.UserId!,
+            new DateTimeOffset(original.Timestamp), JsonSerializer.Serialize(request, JsonDefaults.Options));
     }
 
-    private static async Task<(ReplicatedOperation First, ReplicatedOperation Second, byte[] FirstReceipt,
+    private static async Task<(Command<DatabaseCommand> First, Command<DatabaseCommand> Second, byte[] FirstReceipt,
         byte[] SecondReceipt, long FirstTail, long SecondTail)> CommitReplayAndCheckConflictsAsync(TestDatabase database,
-        ReplicatedOperation firstOperation, ReplicatedOperation secondOperation, PartitionRef firstPartition,
+        Command<DatabaseCommand> firstOperation, Command<DatabaseCommand> secondOperation, PartitionRef firstPartition,
         PartitionRef secondPartition)
     {
         var firstResult = database.Database.Apply(firstOperation);
         var secondResult = database.Database.Apply(secondOperation);
-        await Assert.That(firstResult.Error).IsNull();
-        await Assert.That(secondResult.Error).IsNull();
+        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(secondResult.Problem)).IsNull();
         var firstReceipt = NativeSerialization.Serialize(firstResult.Get<CommitReceipt>());
         var secondReceipt = NativeSerialization.Serialize(secondResult.Get<CommitReceipt>());
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(database.Store, firstPartition,
-            firstOperation.Id, firstReceipt);
+            firstOperation.CommandId, firstReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(database.Store, secondPartition,
-            secondOperation.Id, secondReceipt);
+            secondOperation.CommandId, secondReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertDocumentAsync(database.Database, firstPartition,
             FirstResource, DocumentId, FirstJson);
         await FullPartitionOutcomeIdentityAssertions.AssertDocumentAsync(database.Database, secondPartition,
@@ -91,16 +90,16 @@ internal static class FullPartitionOutcomeIdentityScenario
         var secondReplay = database.Database.Apply(secondOperation);
         await FullPartitionOutcomeIdentityAssertions.AssertReceiptAsync(firstReplay, firstReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertReceiptAsync(secondReplay, secondReceipt);
-        var changedFirst = database.Database.Apply(ChangedOperation(firstOperation, firstPartition, FirstResource,
+        var changedFirst = database.Database.Apply(ChangedOperation(database.Database, firstOperation, firstPartition, FirstResource,
             ChangedFirstJson));
-        var changedSecond = database.Database.Apply(ChangedOperation(secondOperation, secondPartition, SecondResource,
+        var changedSecond = database.Database.Apply(ChangedOperation(database.Database, secondOperation, secondPartition, SecondResource,
             ChangedSecondJson));
-        await Assert.That(changedFirst.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(changedSecond.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changedFirst.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changedSecond.Problem)).IsEqualTo(ErrorCode.Conflict);
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(database.Store, firstPartition,
-            firstOperation.Id, firstReceipt);
+            firstOperation.CommandId, firstReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(database.Store, secondPartition,
-            secondOperation.Id, secondReceipt);
+            secondOperation.CommandId, secondReceipt);
         await VerifyUnchangedAfterRetriesAsync(database, firstPartition, secondPartition, firstTail, secondTail);
 
         return (firstOperation, secondOperation, firstReceipt, secondReceipt, firstTail, secondTail);
@@ -118,7 +117,7 @@ internal static class FullPartitionOutcomeIdentityScenario
     }
 
     private static async Task ReopenAndResolveAsync(TestDatabase database,
-        (ReplicatedOperation First, ReplicatedOperation Second, byte[] FirstReceipt, byte[] SecondReceipt,
+        (Command<DatabaseCommand> First, Command<DatabaseCommand> Second, byte[] FirstReceipt, byte[] SecondReceipt,
             long FirstTail, long SecondTail) committed, PartitionRef firstPartition, PartitionRef secondPartition)
     {
         var directory = database.Directory;
@@ -140,7 +139,7 @@ internal static class FullPartitionOutcomeIdentityScenario
     }
 
     private static async Task VerifyReopenedDocumentsAsync(DatabaseEngine reopened, PartitionRef firstPartition,
-        PartitionRef secondPartition, (ReplicatedOperation First, ReplicatedOperation Second, byte[] FirstReceipt,
+        PartitionRef secondPartition, (Command<DatabaseCommand> First, Command<DatabaseCommand> Second, byte[] FirstReceipt,
             byte[] SecondReceipt, long FirstTail, long SecondTail) committed)
     {
         await FullPartitionOutcomeIdentityAssertions.AssertDocumentAsync(reopened, firstPartition, FirstResource,

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -34,7 +36,7 @@ internal static class OutboxHeadAuthorityAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,
-        ReplicatedOperation operation, OperationResult expected, CancellationToken token)
+        Command<DatabaseCommand> operation, Result<object> expected, CancellationToken token)
     {
         var image = Image(store);
         var position = store.Position;
@@ -42,9 +44,9 @@ internal static class OutboxHeadAuthorityAssertions
         await SameAsync(store, image, position);
     }
 
-    internal static async Task ReceiptAsync(ReplicatedOperation command, CommitReceipt receipt, params MutationReceipt[] expected)
+    internal static async Task ReceiptAsync(Command<DatabaseCommand> command, CommitReceipt receipt, params MutationReceipt[] expected)
     {
-        await Assert.That(receipt.CommandId).IsEqualTo(command.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await ExactAsync(receipt.Mutations, global::System.Collections.Immutable.ImmutableArray.CreateRange(expected));
     }
 

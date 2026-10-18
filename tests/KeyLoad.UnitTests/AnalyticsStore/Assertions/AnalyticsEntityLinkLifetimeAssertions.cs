@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.AnalyticsStore;
 using KeyLoad.Core.Features.DocumentStorage;
@@ -21,7 +22,7 @@ internal static class AnalyticsEntityLinkLifetimeAssertions
         }
     }
 
-    internal static async Task RowsAsync(AnalyticsEntityLinkLifetimeFixture fixture, ReplicatedOperation operation,
+    internal static async Task RowsAsync(AnalyticsEntityLinkLifetimeFixture fixture, Command<DatabaseCommand> operation,
         long revision, CancellationToken token)
     {
         var owner = fixture.Owner;
@@ -32,7 +33,7 @@ internal static class AnalyticsEntityLinkLifetimeAssertions
         var expected = new AnalyticsEventRecord(value.Id, value.Timestamp, value.Dimensions, value.Metrics, null, [fixture.Bound], revision);
         var raw = owner.Store.Read(view => view.ReadOwnedValue(AnalyticsStoreKeys.Event(owner.Source.Partition, D.Store, D.First)))
             ?? throw new InvalidOperationException("The committed analytics event is absent.");
-        await EqualAsync(new AnalyticsStoredEvent(expected, false, operation.EvaluatedAt),
+        await EqualAsync(new AnalyticsStoredEvent(expected, false, new DateTimeOffset(operation.Timestamp)),
             NativeSerialization.Deserialize<AnalyticsStoredEvent>(raw));
         var generation = owner.Store.Read(view => view.ReadOwnedValue(AnalyticsStoreKeys.Generation(owner.Source.Partition, D.Store)))!;
         await Assert.That(NativeSerialization.Deserialize<long>(generation)).IsEqualTo(revision);
@@ -77,12 +78,12 @@ internal static class AnalyticsEntityLinkLifetimeAssertions
         var identity = NativeSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.JournalCut();
+        var journal = owner.ReadCanonicalCut();
         await read();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+        await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
     }
 }

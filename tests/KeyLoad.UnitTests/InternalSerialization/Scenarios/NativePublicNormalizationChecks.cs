@@ -1,28 +1,28 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal static class NativePublicNormalizationChecks
 {
-    internal static bool HasNullElement(ReplicatedOperation operation, NativePublicShape shape) => shape switch
+    internal static bool HasNullElement(Command<DatabaseCommand> operation, NativePublicShape shape) => shape switch
     {
-        NativePublicShape.NullMutation => NativeCommandPayload.Read<CommandRequest>(operation).Mutations[0] is null,
-        NativePublicShape.NullPatch => ((PatchDocument)NativeCommandPayload.Read<CommandRequest>(operation).Mutations[0]).Patches[0] is null,
-        NativePublicShape.NullGrant => NativeCommandPayload.Read<ConfigurePrincipalRequest>(operation).Principal.Grants[0] is null,
+        NativePublicShape.NullMutation => NativeSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span, NativeValidationProfile.PublicInputElements).Mutations[0] is null,
+        NativePublicShape.NullPatch => ((PatchDocument)NativeSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span, NativeValidationProfile.PublicInputElements).Mutations[0]).Patches[0] is null,
+        NativePublicShape.NullGrant => NativeSerialization.Deserialize<ConfigurePrincipalRequest>((operation).Value!.Input.Span, NativeValidationProfile.PublicInputElements).Principal.Grants[0] is null,
         _ => throw new ArgumentOutOfRangeException(nameof(shape))
     };
 
-    internal static async Task DurableFailureAsync(TestDatabase database, ReplicatedOperation operation,
+    internal static async Task DurableFailureAsync(TestDatabase database, Command<DatabaseCommand> operation,
         ErrorCode code, string detail)
     {
-        var normalized = database.Database.NormalizeOperation(operation);
-        var payload = NativeAuthorityFixture.Read(normalized);
-        await Assert.That(payload.Error).IsNull();
-        await Assert.That(payload.Value.IsEmpty).IsFalse();
-        await Assert.That(normalized.PayloadJson).IsEqualTo(operation.PayloadJson);
+        var normalized = database.Database.OwnCommand(operation);
+        await Assert.That(normalized.Value!.Input.IsEmpty).IsFalse();
+        await Assert.That(normalized.Value.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
+        await Assert.That(normalized.Value.Fingerprint).IsEqualTo(NativePublicNormalizationFixture.Fingerprint(operation));
         var result = database.Database.Apply(normalized);
-        await Assert.That(result.Error).IsEqualTo(code);
-        await Assert.That(result.SafeDetail).IsEqualTo(detail);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
         var stored = NativePublicNormalizationFixture.Stored(database, operation);
         await Assert.That(stored.Result).IsEqualTo(result);
         await Assert.That(stored.Fingerprint).IsEqualTo(NativePublicNormalizationFixture.Fingerprint(operation));

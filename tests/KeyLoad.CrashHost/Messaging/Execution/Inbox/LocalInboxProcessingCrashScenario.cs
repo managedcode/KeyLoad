@@ -28,7 +28,7 @@ internal static class LocalInboxProcessingCrashScenario
                 [new(LocalInboxProcessingCrashContract.Effect, ProcessedEventType, LocalInboxProcessingCrashContract.Payload)], ExpectedStreamRevision.NoStream),
              new EnqueueMessage(LocalInboxProcessingCrashContract.Output, LocalInboxProcessingCrashContract.Message,
                 LocalInboxProcessingCrashContract.Payload)]);
-        var operation = CrashDatabase.Operation(OperationKind.Processing, request, request.CommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Processing, request, request.CommandId);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.OperationFile, operation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.InputFile,
             database.InspectMessage(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.InputLane,

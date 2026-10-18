@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -7,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal static class ResourceIncarnationQueueCold
 {
     internal static async Task RunAsync(TestDatabase fixture, ResourceDefinition definition, byte[] lifetime,
-        MessageInspection warm, List<(ReplicatedOperation Command, OperationResult Result)> replays, CancellationToken token)
+        MessageInspection warm, List<(Command<DatabaseCommand> Command, Result<object> Result)> replays, CancellationToken token)
     {
         var lane = new QueueLaneRef(fixture.Partition, ResourceIncarnationQueueFlow.Queue);
         var identity = fixture.Store.Identity;

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KeyLoad.IntegrationTests.Features.CodeQuality;
 
-/// <summary>Exercises owned directory preparation and the actual native CLUSTER resource composition.</summary>
+/// <summary>Exercises owned directory preparation and the actual native Orleans resource composition.</summary>
 internal sealed class NativeCoverageClusterPreparationTests
 {
     private const string RootPrefix = "keyload-coverage-preparation-";

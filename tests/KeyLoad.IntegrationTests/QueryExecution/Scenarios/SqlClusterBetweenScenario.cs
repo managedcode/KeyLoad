@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-/// <summary>Independent actual CLUSTER corpus and literal row oracle for AC-SQLC-006A.</summary>
+/// <summary>Independent actual Orleans corpus and literal row oracle for AC-SQLC-006A.</summary>
 internal sealed record SqlClusterBetweenScenario(PartitionRef Partition, long CommittedPosition)
 {
     internal const string Lower = "lower";

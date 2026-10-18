@@ -55,7 +55,9 @@ internal static class NativeWireSchema
         {
             return scope == RootScope && id < KeyValueTypeArgumentCount ? type.GenericTypeArguments[id] : null;
         }
-        var scopes = Members.GetOrAdd(type == typeof(JsonElement) ? typeof(JsonElementSurrogate) : type, Create);
+        var schema = type == typeof(JsonElement) ? typeof(JsonElementSurrogate)
+            : NativeCommunicationContracts.Surrogate(type) ?? type;
+        var scopes = Members.GetOrAdd(schema, Create);
         return scope < scopes.Count && scopes[scope].TryGetValue(id, out var member) ? member : null;
     }
 

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -5,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ProjectionCheckpointRetentionFixture
 {
-    internal static ReplicatedOperation Purge(PartitionRef partition, long through, int limit)
+    internal static Command<DatabaseCommand> Purge(PartitionRef partition, long through, int limit)
     {
         var id = Guid.NewGuid();
         return ProjectionConsumerIdentityFixture.Operation(OperationKind.PurgeOutbox, id, new PurgeOutboxRequest(id, partition, through, limit));

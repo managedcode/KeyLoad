@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Storage;
@@ -11,20 +12,20 @@ public sealed partial class DatabaseEngine
     private const string UnsupportedBatchMutationMessage = "This mutation is unsupported.";
     private const string CompositionBatchRequiredMessage = "Database composition requires a standalone atomic command.";
 
-    private AtomicPartitionPlacementResolution? AuthorizeOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    private AtomicPartitionPlacementResolution? AuthorizeOperation(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
-        RuntimeJournalIdentity.RequireOperation(principal, operation.Kind,
-            operation.Kind == OperationKind.RuntimeJournal ? Payload<RuntimeJournalMutation>(operation) : null);
-        if (operation.Kind == OperationKind.RuntimeJournal)
+        RuntimeJournalIdentity.RequireOperation(principal, operation.Value!.Kind,
+            operation.Value!.Kind == OperationKind.RuntimeJournal ? Payload<RuntimeJournalMutation>(operation) : null);
+        if (operation.Value!.Kind == OperationKind.RuntimeJournal)
         {
             return null;
         }
-        if (BlobStorageOperations.Handles(operation.Kind))
+        if (BlobStorageOperations.Handles(operation.Value!.Kind))
         {
             new BlobStorageOperations(this).Authorize(view, principal, operation);
             return null;
         }
-        if (operation.Kind is OperationKind.ConfigureSubscription or OperationKind.SeekSubscription
+        if (operation.Value!.Kind is OperationKind.ConfigureSubscription or OperationKind.SeekSubscription
             or OperationKind.SetSubscriptionPaused or OperationKind.ReceiveSubscription
             or OperationKind.SubscriptionDelivery or OperationKind.SubscriptionProcessing)
         {
@@ -35,9 +36,9 @@ public sealed partial class DatabaseEngine
     }
 
     private AtomicPartitionPlacementResolution? AuthorizeModelOperation(IKeyValueView view,
-        PrincipalRecord principal, ReplicatedOperation operation)
+        PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
-        switch (operation.Kind)
+        switch (operation.Value!.Kind)
         {
             case OperationKind.Bm25CorpusPublicationPhase:
                 AuthorizeBm25CorpusPublication(view, principal, operation);
@@ -78,34 +79,34 @@ public sealed partial class DatabaseEngine
         Authorization.RequireWorkerInput(principal, Resource(view, receive.Lane.Partition, receive.Lane.Queue, ResourceKind.WorkQueue));
     }
 
-    private void AuthorizeSubscriptionOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    private void AuthorizeSubscriptionOperation(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
-        switch (operation.Kind)
+        switch (operation.Value!.Kind)
         {
             case OperationKind.ConfigureSubscription:
                 AuthorizeSubscription(view, principal, Payload<ConfigureSubscriptionRequest>(operation).Subscription,
-                    Capability.SubscriptionsManage, operation.EvaluatedAt);
+                    Capability.SubscriptionsManage, operation.Timestamp);
                 break;
             case OperationKind.SeekSubscription:
                 AuthorizeSubscription(view, principal, Payload<SeekSubscriptionRequest>(operation).Subscription,
-                    Capability.SubscriptionsManage, operation.EvaluatedAt);
+                    Capability.SubscriptionsManage, operation.Timestamp);
                 break;
             case OperationKind.SetSubscriptionPaused:
                 AuthorizeSubscription(view, principal, Payload<SetSubscriptionPausedRequest>(operation).Subscription,
-                    Capability.SubscriptionsManage, operation.EvaluatedAt);
+                    Capability.SubscriptionsManage, operation.Timestamp);
                 break;
             case OperationKind.ReceiveSubscription:
                 AuthorizeSubscription(view, principal, Payload<ReceiveSubscriptionRequest>(operation).Subscription,
-                    Capability.SubscriptionsConsume, operation.EvaluatedAt, requireDataPrincipal: true);
+                    Capability.SubscriptionsConsume, operation.Timestamp, requireDataPrincipal: true);
                 break;
             case OperationKind.SubscriptionDelivery:
                 AuthorizeSubscription(view, principal, Payload<SubscriptionDeliveryCommand>(operation).Subscription,
-                    Capability.SubscriptionsAck, operation.EvaluatedAt, requireDataPrincipal: true);
+                    Capability.SubscriptionsAck, operation.Timestamp, requireDataPrincipal: true);
                 break;
             case OperationKind.SubscriptionProcessing:
                 var subscriptionProcessing = Payload<SubscriptionProcessingRequest>(operation);
                 AuthorizeSubscription(view, principal, subscriptionProcessing.Subscription, Capability.SubscriptionsAck,
-                    operation.EvaluatedAt, requireDataPrincipal: true);
+                    operation.Timestamp, requireDataPrincipal: true);
                 AuthorizeBatch(view, principal, new(subscriptionProcessing.CommandId, subscriptionProcessing.Subscription.Source.Partition, subscriptionProcessing.Effects), allowEmpty: true);
                 break;
         }

@@ -68,9 +68,9 @@ internal static class CompositionBoundReferenceNativeFlow
     {
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
-        var operation = owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, D.Root,
+        var operation = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
-        var receipt = new CommitReceipt(request.CommandId, owner.NextToken(), expectedMutations, DurabilityProfile.ProcessDurable);
+        var receipt = new CommitReceipt(request.CommandId, owner.NextToken(), expectedMutations, DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(receipt, owner.Submit(operation).Get<CommitReceipt>());
         return new(request, operation, receipt, derived, authorityReferences);
     }

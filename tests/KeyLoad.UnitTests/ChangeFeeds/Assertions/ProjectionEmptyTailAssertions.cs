@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -16,8 +18,8 @@ internal static class ProjectionEmptyTailAssertions
     internal static string[] Image(ZoneTreeStore store)
         => global::KeyLoad.UnitTests.Features.GraphTraversal.GraphShortestPathFullStoreImage.Bytes(store);
 
-    internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, ReplicatedOperation original,
-        OperationResult expected, CancellationToken token)
+    internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, Command<DatabaseCommand> original,
+        Result<object> expected, CancellationToken token)
     {
         var image = Image(store);
         var position = store.Position;
@@ -26,17 +28,17 @@ internal static class ProjectionEmptyTailAssertions
         await Assert.That(store.Position).IsEqualTo(position);
     }
 
-    internal static async Task<OperationResult> RejectEffectsAsync(DatabaseEngine owner, ZoneTreeStore store,
-        PartitionRef partition, ReplicatedOperation rejected, CancellationToken token)
+    internal static async Task<Result<object>> RejectEffectsAsync(DatabaseEngine owner, ZoneTreeStore store,
+        PartitionRef partition, Command<DatabaseCommand> rejected, CancellationToken token)
     {
         var image = Image(store);
         var position = store.Position;
-        var key = OutcomeStoreOracle.PartitionKey(partition, Root, rejected.Id);
-        var locatorKey = KeySpace.OutcomeLocatorV2(partition, Root, rejected.Id);
+        var key = OutcomeStoreOracle.PartitionKey(partition, Root, rejected.CommandId);
+        var locatorKey = KeySpace.OutcomeLocatorV2(partition, Root, rejected.CommandId);
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locatorKey))).IsNull();
         var result = owner.ApplyEmbedded(rejected, token);
-        await ExactAsync(result, new OperationResult(null, ErrorCode.Validation, EmptyDetail));
+        await ExactAsync(result, Result<object>.Fail(Errors.Problem(ErrorCode.Validation, EmptyDetail)));
         var prefix = Convert.ToHexString(key) + ":";
         var locatorPrefix = Convert.ToHexString(locatorKey) + ":";
         var after = Image(store);
@@ -48,7 +50,7 @@ internal static class ProjectionEmptyTailAssertions
             && !row.StartsWith(locatorPrefix, StringComparison.Ordinal)).ToArray())
             .IsEquivalentTo(image, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position + 1L);
-        await ExactAsync(OutcomeStoreOracle.ReadPartition(store, partition, Root, rejected.Id), result);
+        await ExactAsync(OutcomeStoreOracle.ReadPartition(store, partition, Root, rejected.CommandId), result);
         return result;
     }
 
@@ -81,11 +83,11 @@ internal static class ProjectionEmptyTailAssertions
         }
     }
 
-    internal static async Task ResultAsync(ReplicatedOperation original, OperationResult result, long checkpoint,
+    internal static async Task ResultAsync(Command<DatabaseCommand> original, Result<object> result, long checkpoint,
         params MutationReceipt[] mutations)
     {
         var actual = result.Get<ProjectionBatchResult>();
-        await Assert.That(actual.Receipt.CommandId).IsEqualTo(original.Id);
+        await Assert.That(actual.Receipt.CommandId).IsEqualTo(original.CommandId);
         await ExactAsync(actual.Receipt.Mutations, global::System.Collections.Immutable.ImmutableArray.CreateRange(mutations));
         await Assert.That(actual.AlreadyProcessed).IsFalse();
         await Assert.That(actual.Checkpoint).IsEqualTo(checkpoint);

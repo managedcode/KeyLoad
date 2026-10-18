@@ -272,7 +272,7 @@ qualification of this matrix.
 | REQ-BC-050 Linux-only complete qualification | AC-ISO-001 | workflow inventory + actual full Linux CI |
 | REQ-BC-051 one isolated agent per engine/node/scenario | AC-ISO-002 | closed current source plan (see SessionExecution and the scaled/vector qualification documents) and native resource inventory |
 | REQ-BC-052 actual native1/3 and honest unsupported topology | AC-ISO-003 | independent membership/copies/ACK proof |
-| REQ-BC-053 safe benchmark-only KeyLoad replica-count selection | AC-ISO-004 | negative configuration, SDK/MCP restart, majority-loss and replicated-cluster contract proof |
+| REQ-BC-053 safe benchmark-only KeyLoad replica-count selection | AC-ISO-004 | negative configuration, SDK/MCP restart, required-copy-loss and replicated-cluster contract proof |
 | REQ-BC-054 intensive shared CRUD correctness and raw failures | AC-ISO-005 | deterministic plan/oracle + real native full body/cardinality/absence |
 | REQ-BC-055 exact per-worker versioned JSON/provenance | AC-ISO-006 | strict single-target/scenario report and actual job identity |
 | REQ-BC-056 complete authenticated aggregation | AC-ISO-007 | real Node/files/TUnit corruption checks + GitHub job/artifact manifest |

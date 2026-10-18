@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -7,9 +8,9 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class EventMessageSensitiveReplayOperations
 {
-    internal static OperationResult Apply(DatabaseEngine database, OperationKind kind, object request,
+    internal static Result<object> Apply(DatabaseEngine database, OperationKind kind, object request,
         string principal, Guid id, CancellationToken token)
-        => database.ApplyEmbedded(new(id, kind, principal, default, JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options)), token);
+        => database.ApplyEmbedded(database.CreateCommand(kind, id, principal, default, JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options)), token);
 
     internal static object Receive(EventMessageSensitiveReplayState state, Guid id, bool fresh)
         => state.Subscription

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Globalization;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -83,7 +84,7 @@ internal sealed class SagaTimeoutTests
     private static SagaTimeoutDefinition Timeout(RecurringSagaDatabase fixture, TimeSpan ttl)
         => new(fixture.TimeoutQueue, TimeoutPayload, TimeoutHeaders, TimeToLive: ttl);
 
-    private static OperationResult Expire(RecurringSagaDatabase fixture, Guid sagaId, long revision,
+    private static Result<object> Expire(RecurringSagaDatabase fixture, Guid sagaId, long revision,
         DateTimeOffset now)
         => fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.Partition, [new ExpireSaga(fixture.Queue, sagaId, revision)]),

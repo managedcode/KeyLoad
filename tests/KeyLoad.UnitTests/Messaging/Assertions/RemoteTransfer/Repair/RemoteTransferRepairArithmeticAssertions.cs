@@ -107,9 +107,9 @@ internal static class RemoteTransferRepairArithmeticAssertions
             fixture.DestinationPartition).AsSpan().SequenceEqual(original.DenialBytes)).IsTrue();
         await RemoteTransferCoordinationColdAssertions.EqualAsync(NativeSerialization.Deserialize<StoredOutcome>(original.DenialBytes).Result, original.Denial);
         var replay = RemoteTransferRepairColdNative.Apply(fixture, original.Denied);
-        await Assert.That(replay.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(replay.SafeDetail).IsEqualTo("The principal policy changed since this command was evaluated.");
-        await Assert.That(replay.Json).IsNull();
-        await Assert.That(replay.NativeValue).IsNull();
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(replay.Problem?.Detail).IsEqualTo("The principal policy changed since this command was evaluated.");
+        
+        await Assert.That(replay.Value).IsNull();
     }
 }

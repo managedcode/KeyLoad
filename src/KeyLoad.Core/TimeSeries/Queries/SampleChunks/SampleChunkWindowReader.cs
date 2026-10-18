@@ -17,7 +17,7 @@ internal static class SampleChunkWindowReader
         }
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
-        var resource = database.BindAuthorizedReadResource(view, request.Partition, request.Set, ResourceKind.TimeSeries);
+        var resource = DatabaseEngine.BindAuthorizedReadResource(view, request.Partition, request.Set, ResourceKind.TimeSeries);
         var tag = SampleChunkTagPredicate.Prepare(database, principal, resource, request);
         var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
         var window = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(request.Partition,

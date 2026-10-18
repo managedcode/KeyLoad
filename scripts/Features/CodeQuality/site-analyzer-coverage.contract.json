@@ -292,6 +292,10 @@
     {
       "path": "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTestOwnership.cs",
       "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationSourceIdentity.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -460,7 +464,8 @@
         "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermPermissions.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermSymbols.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/ImplementationTermCatalog.cs",
-        "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTestOwnership.cs"
+        "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTestOwnership.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationSourceIdentity.cs"
       ]
     },
     {

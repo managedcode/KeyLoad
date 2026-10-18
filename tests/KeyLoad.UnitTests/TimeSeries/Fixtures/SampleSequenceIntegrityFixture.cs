@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -23,7 +25,7 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
         get; set;
     }
     internal DatabaseEngine Database => ColdDatabase ?? (!sourceJoined ? Source.Owner.Database : throw new InvalidOperationException(Unknown));
-    internal List<(ReplicatedOperation Operation, OperationResult Result, CommandRequest Command, CommitReceipt Expected)> Originals { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result, CommandRequest Command, CommitReceipt Expected)> Originals { get; } = [];
     internal byte[] Counter => KeySpace.Partition("sample-sequence", Source.Owner.Partition,
         SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series);
     internal void RetainEvidence() => preserve = true;

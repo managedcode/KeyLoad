@@ -1,5 +1,7 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal sealed record LocalInboxProcessingRecoveryState(
-    (ReplicatedOperation Operation, OperationResult Result)[] History,
-    ReplicatedOperation Receive, OperationResult Received);
+    (Command<DatabaseCommand> Operation, Result<object> Result)[] History,
+    Command<DatabaseCommand> Receive, Result<object> Received);

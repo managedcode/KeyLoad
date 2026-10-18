@@ -74,10 +74,7 @@ internal sealed class ModelRootPolicyFixture(bool queue, bool headerRoot) : IDis
         Seed = new(Guid.NewGuid(), Harness.Partition, [new PutDocument(Target, TargetId, TargetJson), source]);
         var before = Harness.Store.Position;
         Receipt = Harness.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
-        var expected = new CommitReceipt(Seed.CommandId,
-            new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new("putDocument", Target, TargetId, 1L), new(queue ? "enqueue" : "appendEvents", Source, queue ? Id : StreamId, 1L)],
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [new("putDocument", Target, TargetId, 1L), new(queue ? "enqueue" : "appendEvents", Source, queue ? Id : StreamId, 1L)], DurabilityProfile.ProcessDurable, 1);
         await ModelRootPolicyAssertions.EqualAsync(Receipt, expected);
         foreach (var mutation in Receipt.Mutations)
         {

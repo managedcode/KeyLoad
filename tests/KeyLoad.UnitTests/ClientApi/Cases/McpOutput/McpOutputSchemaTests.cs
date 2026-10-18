@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.BlobStorage;
@@ -124,21 +125,21 @@ internal sealed class McpOutputSchemaTests
         var credential = global::KeyLoad.Core.DatabaseEngine.Credential("status-native-key", "root", "status-native-secret");
         var request = new ConfigureApiKeyRequest(credential);
         var original = database.Submit(OperationKind.ConfigureApiKey, request, id: commandId);
-        await Assert.That(original.Error).IsNull();
-        await Assert.That(original.SafeDetail).IsNull();
+        await Assert.That(Errors.Code(original.Problem)).IsNull();
+        await Assert.That(original.Problem?.Detail).IsNull();
         await Assert.That(original.Get<bool>()).IsTrue();
         var originalResult = NativeSerialization.Serialize(original);
-        var entry = database.ReadRetainedEntry(commandId);
+        var entry = database.ReadStoredOutcome(commandId);
         var entryBytes = NativeSerialization.Serialize(entry);
         var outcome = database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.GlobalOutcome("root", commandId)));
         var key = database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)));
         await Assert.That(outcome).IsNotNull();
         await Assert.That(key).IsNotNull();
-        await Assert.That(PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, original.NativeValue)).IsNull();
+        await Assert.That(PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, original.Value)).IsNull();
         var replay = database.Submit(OperationKind.ConfigureApiKey, request, id: commandId);
         await Assert.That(replay.Get<bool>()).IsTrue();
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(originalResult)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(database.ReadRetainedEntry(commandId)).SequenceEqual(entryBytes)).IsTrue();
+        await Assert.That(NativeSerialization.Serialize(database.ReadStoredOutcome(commandId)).SequenceEqual(entryBytes)).IsTrue();
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.GlobalOutcome("root", commandId)))!
             .SequenceEqual(outcome!)).IsTrue();
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)))!

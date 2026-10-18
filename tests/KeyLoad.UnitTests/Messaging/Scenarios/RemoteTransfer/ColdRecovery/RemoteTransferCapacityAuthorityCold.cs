@@ -35,9 +35,9 @@ internal static class RemoteTransferCapacityAuthorityCold
         await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Apply(OperationKind.Delivery,
             item.Acknowledge, id: item.Acknowledge.CommandId), item.Acknowledged);
         var stale = fixture.Apply(OperationKind.Receive, item.Receive, id: item.Receive.RequestId);
-        await Assert.That(stale.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(stale.NativeValue).IsNull();
-        await Assert.That(stale.Json).IsNull();
+        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(stale.Value).IsNull();
+        
         var retained = OutcomeStoreOracle.ReadPartition(RemoteTransferCapacityAuthorityStorage.Native(fixture), fixture.DestinationPartition,
             RemoteTransferDatabase.RootPrincipal, item.Receive.RequestId)!;
         await NativeReplayResultAssertions.Same<ReceiveResult>(retained, item.Received);

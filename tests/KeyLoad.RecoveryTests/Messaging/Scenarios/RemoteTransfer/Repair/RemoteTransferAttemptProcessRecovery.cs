@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.CrashHost.Features.Messaging;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -8,8 +9,8 @@ internal static class RemoteTransferAttemptProcessRecovery
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferAttemptCrashProtocol.OperationFile), token));
-        var advance = JsonDefaults.Deserialize<CommandRequest>(System.Text.Encoding.UTF8.GetBytes(operation.PayloadJson));
+        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferAttemptCrashProtocol.OperationFile), token));
+        var advance = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var failedAccept = JsonDefaults.Deserialize<CommandRequest>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferAttemptCrashProtocol.AcceptFile), token));
         var failedBytes = await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferAttemptCrashProtocol.FailureFile), token);
         CommitReceipt? advanced = null;

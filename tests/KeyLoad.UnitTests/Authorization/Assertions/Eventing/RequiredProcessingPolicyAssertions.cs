@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.GraphTraversal;
@@ -21,16 +23,16 @@ internal static class RequiredProcessingPolicyAssertions
             await Assert.That(receipt.CompositionReferences).IsEmpty();
         }
     }
-    internal static async Task FailureAsync(OperationResult actual, ErrorCode code, string detail)
+    internal static async Task FailureAsync(Result<object> actual, ErrorCode code, string detail)
     {
-        await EqualAsync(new OperationResult(null, code, detail), actual);
-        await Assert.That(actual.NativeValue).IsNull();
+        await EqualAsync(Result<object>.Fail(Errors.Problem(code, detail)), actual);
+        await Assert.That(actual.Value).IsNull();
     }
-    internal static Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, ReplicatedOperation operation,
+    internal static Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> operation,
         CommitReceipt receipt, byte[] outcome, PartitionRef partition, CancellationToken token)
         => ObserveAsync(store, async () =>
         {
             await ReceiptAsync(receipt, database.ApplyEmbedded(operation, token).Get<CommitReceipt>());
-            await Assert.That(Outcome(store, partition, operation.PrincipalId, operation.Id).AsSpan().SequenceEqual(outcome)).IsTrue();
+            await Assert.That(Outcome(store, partition, operation.UserId!, operation.CommandId).AsSpan().SequenceEqual(outcome)).IsTrue();
         });
 }

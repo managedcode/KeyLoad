@@ -15,7 +15,7 @@ internal static class ScopedCommandIdentityClusterOracle
         => new(new("same-message", MessageState.Ready, 0, 1, 1, null, null, null, 0, null, 1, null),
             first ? "{\"value\":\"partition-a-original\"}" : "{\"value\":\"partition-b-original\"}", "{}");
 
-    internal static async Task<(Guid Incarnation, long Applied)> BeforeCommandAsync(KeyLoadClient sdk,
+    internal static async Task<(Guid Incarnation, long CutPosition)> BeforeCommandAsync(KeyLoadClient sdk,
         ScopedCommandIdentityClusterScenario scenario, Guid issuedId, CommandRequest command, bool first,
         CancellationToken token)
     {
@@ -24,26 +24,34 @@ internal static class ScopedCommandIdentityClusterOracle
             [new PutDocument(scenario.Collection, document.Reference.Id, document.Json),
                 new EnqueueMessage(scenario.Queue, "same-message", document.Json, "{}")]);
         await EqualAsync(expectedCommand, command);
-        var cut = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
-        return (cut.Incarnation, cut.Applied);
+        var node = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
+        var cut = await ReadCutAsync(sdk, document.Reference.Partition, scenario.Collection, token);
+        return (node.Incarnation, cut.CutPosition);
     }
 
     internal static async Task ReceiptAsync(KeyLoadClient sdk, CommitReceipt actual,
         ScopedCommandIdentityClusterScenario scenario, Guid issuedId, bool first,
-        (Guid Incarnation, long Applied) before, CancellationToken token)
+        (Guid Incarnation, long CutPosition) before, CancellationToken token)
     {
         var document = Document(scenario, first);
         var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
-        await Assert.That(actual.Token.Position).IsGreaterThan(before.Applied);
-        await Assert.That(actual.Token.Position).IsLessThanOrEqualTo(after.Applied);
+        var cut = await ReadCutAsync(sdk, document.Reference.Partition, scenario.Collection, token);
+        await Assert.That(actual.Token.Position).IsGreaterThan(before.CutPosition);
+        await Assert.That(actual.Token.Position).IsLessThanOrEqualTo(cut.CutPosition);
+        await EqualAsync(new QueryRow[] { new(document.Reference.Id, document.Revision, document.Json, false, []) },
+            cut.Rows.ToArray());
         var expected = new CommitReceipt(issuedId,
             new(before.Incarnation, document.Reference.Partition.AtomicPartitionId,
-                actual.Token.Position, actual.Token.OwnershipEpoch),
+                actual.Token.Position),
             [new("putDocument", scenario.Collection, document.Reference.Id, 1),
-                new("enqueue", scenario.Queue, "same-message", 1)], DurabilityProfile.QuorumProcessDurable);
+                new("enqueue", scenario.Queue, "same-message", 1)], DurabilityProfile.ProcessDurable, 3);
         await EqualAsync(expected, actual);
     }
+
+    private static async Task<QueryPage> ReadCutAsync(KeyLoadClient sdk, PartitionRef partition, string collection,
+        CancellationToken token) => await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAstAsync(new(partition,
+        new(collection, null, [new("*", "*")], null, [], 1), AllowFullScan: true), token));
 
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan()

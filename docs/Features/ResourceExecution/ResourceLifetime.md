@@ -6,7 +6,7 @@ This foundation supports REQ-SQLC-006 / AC-SQLC-006, SQLC-DDL, without closing t
 
 ## Frozen D1 contracts
 
-Both new records are internal, generated Orleans contracts in namespace `KeyLoad`. No field is added to ResourceDefinition, EntityRef, ReplicatedOperation, public requests or default public JSON. Existing request fingerprints and native raw-byte conventions remain unchanged.
+Both new records are internal, generated Orleans contracts in namespace `KeyLoad`. No field is added to ResourceDefinition, EntityRef, Command<DatabaseCommand>, public requests or default public JSON. Existing request fingerprints and native raw-byte conventions remain unchanged.
 
 | Record | Stable alias | Fields |
 |---|---|---|

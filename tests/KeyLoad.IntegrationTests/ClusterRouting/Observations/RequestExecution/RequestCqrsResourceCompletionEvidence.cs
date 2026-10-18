@@ -58,11 +58,11 @@ internal sealed class RequestCqrsResourceCompletionEvidence
             Returned = true
         };
 
-    internal void EnterFallback(bool captureCanceled)
+    internal void EnterForcedCancellation(bool captureCanceled)
         => drain = drain with
         {
-            FallbackEntered = true,
-            CaptureCanceledAtFallback = captureCanceled
+            ForcedCancellationEntered = true,
+            CaptureCanceledAtForcedCancellation = captureCanceled
         };
 
     internal void JoinOriginal(bool captureCanceled, TaskStatus? first, TaskStatus? second, TaskStatus? third)
@@ -192,7 +192,7 @@ internal sealed class RequestCqrsResourceCompletionEvidence
         => $"{CompletionState(value.State)}:{CompactStatus(value.StatusAtStart)}:{CompactStatus(value.StatusAtReturn)}";
 
     private static string Drain(RequestCqrsDrainObservationSnapshot value)
-        => $"{Bit(value.Started)}:{OptionalBit(value.TokenCanceledAtStart)}:{Statuses(value.StartNode1, value.StartNode2, value.StartNode3)}:{OptionalBit(value.TokenCanceledAtFailure)}:{Statuses(value.FailureNode1, value.FailureNode2, value.FailureNode3)}:{OptionalBit(value.Returned)}:{Bit(value.FallbackEntered)}:{OptionalBit(value.CaptureCanceledAtFallback)}:{OptionalBit(value.OriginalJoined)}:{Statuses(value.JoinedNode1, value.JoinedNode2, value.JoinedNode3)}:{OptionalBit(value.CaptureCanceledAfterJoin)}";
+        => $"{Bit(value.Started)}:{OptionalBit(value.TokenCanceledAtStart)}:{Statuses(value.StartNode1, value.StartNode2, value.StartNode3)}:{OptionalBit(value.TokenCanceledAtFailure)}:{Statuses(value.FailureNode1, value.FailureNode2, value.FailureNode3)}:{OptionalBit(value.Returned)}:{Bit(value.ForcedCancellationEntered)}:{OptionalBit(value.CaptureCanceledAtForcedCancellation)}:{OptionalBit(value.OriginalJoined)}:{Statuses(value.JoinedNode1, value.JoinedNode2, value.JoinedNode3)}:{OptionalBit(value.CaptureCanceledAfterJoin)}";
 
     private static string Statuses(TaskStatus? first, TaskStatus? second, TaskStatus? third)
         => $"{CompactStatus(first)}/{CompactStatus(second)}/{CompactStatus(third)}";

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -37,7 +38,7 @@ internal sealed class TransactionProtocolTests
         };
         var id = Guid.NewGuid();
         var result = db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), id: id);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, "root", id)!.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
         db.Commit(new PutDocument("orders", "valid-after-rejection", "{}", 0));
@@ -62,18 +63,17 @@ internal sealed class TransactionProtocolTests
                 },
                     DatabaseEngine.Credential("root", "root", "root.frame-test-credential-32-characters"));
                 PhysicalShardTestBootstrap.Bootstrap(database, "root");
-                OperationResult Submit<T>(OperationKind kind, Guid id, T payload, long index) => database.Apply(new(id, kind, "root", TimeProvider.System.GetUtcNow(),
-                    JsonSerializer.Serialize(payload, JsonDefaults.Options)), index);
+                Result<object> Submit<T>(OperationKind kind, Guid id, T payload, long index) => database.Apply(database.CreateCommand(kind, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options)), index);
                 var partition = new PartitionRef("tenant", "database", "orders", PartitionId);
                 Submit(OperationKind.ConfigureResource, Guid.NewGuid(), new ConfigureResourceRequest("tenant", "database", new("orders", ResourceKind.Collection, "orders")), 1).Get<ResourceDefinition>();
                 rejectedId = Guid.NewGuid();
                 var rejected = new CommandRequest(rejectedId, partition,
                     [new PutDocument("orders", "too-big", "{\"data\":\"" + new string('x', 2_000) + "\"}", 0)]);
-                await Assert.That(Submit(OperationKind.Batch, rejectedId, rejected, 2).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+                await Assert.That(Errors.Code(Submit(OperationKind.Batch, rejectedId, rejected, 2).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
                 await Assert.That(database.LastApplied).IsEqualTo(2);
                 await Assert.That(database.GetOutboxStatus("root", partition).Head.Tail).IsEqualTo(0);
                 await Assert.That(database.GetDocument("root", new(partition, "orders", "too-big"))).IsNull();
-                await Assert.That(Submit(OperationKind.Batch, rejectedId, rejected, 3).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+                await Assert.That(Errors.Code(Submit(OperationKind.Batch, rejectedId, rejected, 3).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
                 var nextId = Guid.NewGuid();
                 Submit(OperationKind.Batch, nextId, new CommandRequest(nextId, partition, [new PutDocument("orders", "valid", "{}", 0)]), 4).Get<CommitReceipt>();
                 await Assert.That(database.LastApplied).IsEqualTo(4);

@@ -25,15 +25,13 @@ internal static class SubscriptionCurrentEventIdentityTrial
         var stream = new EventSourceRef(db.Partition, "streams", EventSourceKind.Stream, "a");
 
         var duplicateId = Guid.NewGuid();
-        var duplicate = database.Apply(new(duplicateId, OperationKind.Batch, "root", database.EvaluationClock.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(new CommandRequest(duplicateId, db.Partition,
+        var duplicate = database.Apply(database.CreateCommand(OperationKind.Batch, duplicateId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(duplicateId, db.Partition,
                 [new AppendEvents("streams", "a", [new("same", "Created", "{}")], ExpectedStreamRevision.Any)]), JsonDefaults.Options)));
-        await Assert.That(duplicate.Error).IsEqualTo(ErrorCode.DuplicateEventId);
+        await Assert.That(Errors.Code(duplicate.Problem)).IsEqualTo(ErrorCode.DuplicateEventId);
         var changedId = Guid.NewGuid();
-        var changed = database.Apply(new(changedId, OperationKind.Batch, "root", database.EvaluationClock.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(new CommandRequest(changedId, db.Partition,
+        var changed = database.Apply(database.CreateCommand(OperationKind.Batch, changedId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(changedId, db.Partition,
                 [new AppendEvents("streams", "a", [new("same", "Created", "{\"different\":true}")], ExpectedStreamRevision.Any)]), JsonDefaults.Options)));
-        await Assert.That(changed.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changed.Problem)).IsEqualTo(ErrorCode.Conflict);
 
         var retained = database.ReadEventSource("root", new ReadEventSourceRequest(stream));
         await Assert.That(retained.Head.TailPosition).IsEqualTo(1);
@@ -43,20 +41,17 @@ internal static class SubscriptionCurrentEventIdentityTrial
         await Assert.That(retained.Events[0].Data.PayloadJson).IsEqualTo("{}");
 
         var otherStreamId = Guid.NewGuid();
-        var otherStreamReceipt = database.Apply(new(otherStreamId, OperationKind.Batch, "root", database.EvaluationClock.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(new CommandRequest(otherStreamId, db.Partition,
+        var otherStreamReceipt = database.Apply(database.CreateCommand(OperationKind.Batch, otherStreamId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(otherStreamId, db.Partition,
                 [new AppendEvents("streams", "b", [new("same", "Created", "{}")], ExpectedStreamRevision.NoStream)]), JsonDefaults.Options)));
         await Assert.That(otherStreamReceipt.Get<CommitReceipt>().Mutations.Length).IsEqualTo(1);
         var topicId = Guid.NewGuid();
-        var topicReceipt = database.Apply(new(topicId, OperationKind.Batch, "root", database.EvaluationClock.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(new CommandRequest(topicId, db.Partition,
+        var topicReceipt = database.Apply(database.CreateCommand(OperationKind.Batch, topicId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(topicId, db.Partition,
                 [new PublishTopic("topic", [new("same", "Created", "{}")])]), JsonDefaults.Options)));
         await Assert.That(topicReceipt.Get<CommitReceipt>().Mutations.Length).IsEqualTo(1);
         var topicConflictId = Guid.NewGuid();
-        var topicConflict = database.Apply(new(topicConflictId, OperationKind.Batch, "root", database.EvaluationClock.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(new CommandRequest(topicConflictId, db.Partition,
+        var topicConflict = database.Apply(database.CreateCommand(OperationKind.Batch, topicConflictId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(topicConflictId, db.Partition,
                 [new PublishTopic("topic", [new("same", "Other", "{}")])]), JsonDefaults.Options)));
-        await Assert.That(topicConflict.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(topicConflict.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.ReadEventSource("root", new ReadEventSourceRequest(Topic(db))).Head.TailPosition).IsEqualTo(1);
         await Assert.That(database.ReadEventSource("root", new ReadEventSourceRequest(
             new EventSourceRef(db.Partition, "streams", EventSourceKind.Stream, "b"))).Events.Length).IsEqualTo(1);

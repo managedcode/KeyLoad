@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -13,7 +14,7 @@ internal sealed class NativeDropCommandPhaseGate(Guid commandId, GrainRequestPha
     internal TaskCompletionSource Released { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource Disposed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    internal TaskCompletionSource<ReplicatedOperation> Original { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    internal TaskCompletionSource<Command<DatabaseCommand>> Original { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal CancellationToken SelectedCancellation
     {
         get; private set;

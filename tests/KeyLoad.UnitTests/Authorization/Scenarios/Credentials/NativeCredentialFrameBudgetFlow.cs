@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -11,7 +10,6 @@ internal static class NativeCredentialFrameBudgetFlow
     private const string Secret = "bounded-auth-key.actual-unit-secret-32-characters";
     private const string Tenant = "tenant";
     private const int CredentialRecords = 2;
-    private const int OwnerRecord = 1;
     private const long OneByte = 1;
     private const long FirstEpoch = 1;
     private const long RevokedEpoch = 2;
@@ -23,13 +21,11 @@ internal static class NativeCredentialFrameBudgetFlow
     {
         using var fixture = new TestDatabase();
         var subject = new PrincipalRecord(PrincipalId, Tenant, [], []) { PolicyEpoch = FirstEpoch };
-        await Assert.That(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Error).IsNull();
-        await Assert.That(fixture.Submit(OperationKind.ConfigureApiKey,
-            new ConfigureApiKeyRequest(DatabaseEngine.Credential(CredentialId, PrincipalId, Secret))).Error).IsNull();
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Problem)).IsNull();
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigureApiKey,
+            new ConfigureApiKeyRequest(DatabaseEngine.Credential(CredentialId, PrincipalId, Secret))).Problem)).IsNull();
         var expected = fixture.Store.Read(view => checked(Size(view, KeySpace.ApiKey(CredentialId))
             + Size(view, KeySpace.Principal(PrincipalId))));
-        var owner = fixture.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view))!.DefaultShard;
-        var ownerBytes = fixture.Store.Read(view => Size(view, PhysicalShardCatalogRecordSerialization.CatalogKey()));
         var before = Image(fixture);
         var position = fixture.Store.Position;
         var shortWork = fixture.CreateReadWork(CancellationToken.None);
@@ -39,13 +35,12 @@ internal static class NativeCredentialFrameBudgetFlow
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await UnchangedAsync(fixture, before, position);
         var work = fixture.CreateReadWork(CancellationToken.None);
-        work.ConstrainNativeWork(checked(expected + ownerBytes), CredentialRecords + OwnerRecord);
+        work.ConstrainNativeWork(expected, CredentialRecords);
         var principal = fixture.Database.Authenticate(Secret, fixture.Database.EvaluationClock.GetUtcNow(), work);
-        fixture.Database.VerifyPhysicalCommandOwner(owner, false, work, CancellationToken.None);
         await Assert.That(principal.Id).IsEqualTo(PrincipalId);
         await Assert.That(principal.ClusterAdministrator).IsFalse();
-        await Assert.That(work.ReadBytes).IsEqualTo(checked(expected + ownerBytes));
-        await Assert.That(work.ConstrainedNativeRecords).IsEqualTo(CredentialRecords + OwnerRecord);
+        await Assert.That(work.ReadBytes).IsEqualTo(expected);
+        await Assert.That(work.ConstrainedNativeRecords).IsEqualTo(CredentialRecords);
         var aggregate = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Authenticate(
             Secret, fixture.Database.EvaluationClock.GetUtcNow(), work));
         await Assert.That(aggregate.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -56,23 +51,23 @@ internal static class NativeCredentialFrameBudgetFlow
 
     private static async Task CurrentPolicyAsync(TestDatabase fixture, PrincipalRecord subject)
     {
-        await Assert.That(fixture.Submit(OperationKind.ConfigurePrincipal,
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(subject with
             {
                 Revoked = true,
                 PolicyEpoch = RevokedEpoch
-            })).Error).IsNull();
+            })).Problem)).IsNull();
         var before = Image(fixture);
         var position = fixture.Store.Position;
         var revoked = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Authenticate(Secret,
             fixture.Database.EvaluationClock.GetUtcNow(), fixture.CreateReadWork(CancellationToken.None)));
         await Assert.That(revoked.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await UnchangedAsync(fixture, before, position);
-        await Assert.That(fixture.Submit(OperationKind.ConfigurePrincipal,
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(subject with
             {
                 PolicyEpoch = RepairedEpoch
-            })).Error).IsNull();
+            })).Problem)).IsNull();
         before = Image(fixture);
         position = fixture.Store.Position;
         var repaired = fixture.Database.Authenticate(Secret, fixture.Database.EvaluationClock.GetUtcNow(),

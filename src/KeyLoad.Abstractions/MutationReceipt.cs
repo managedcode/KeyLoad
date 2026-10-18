@@ -12,6 +12,7 @@ namespace KeyLoad;
 [Orleans.Alias(NativeContractAliases.MutationReceipt)]
 public sealed record MutationReceipt([property: Orleans.Id(0)] string Kind, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] string Id, [property: Orleans.Id(3)] long Revision)
 {
+    [NonSerialized]
     private ImmutableArray<EntityRef> compositionReferences;
 
     [JsonIgnore]

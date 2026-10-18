@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
@@ -6,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueDeadlineCapacityOperations
 {
-    internal static ReplicatedOperation Due(DatabaseEngine database, QueueLaneRef lane, MessageMetadata metadata,
+    internal static Command<DatabaseCommand> Due(DatabaseEngine database, QueueLaneRef lane, MessageMetadata metadata,
         DateTimeOffset due, QueueDeadlineKind kind, bool sweep)
     {
         var id = Guid.NewGuid();
@@ -20,11 +22,8 @@ internal static class QueueDeadlineCapacityOperations
         return QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Batch, id, request, Root, due);
     }
 
-    internal static Task ReceiptAsync(OperationResult actual, CommitReceipt expected)
-        => NativeReplayResultAssertions.Same<CommitReceipt>(actual, new(null)
-        {
-            NativeValue = expected
-        });
+    internal static Task ReceiptAsync(Result<object> actual, CommitReceipt expected)
+        => NativeReplayResultAssertions.Same<CommitReceipt>(actual, Result<object>.Succeed(expected));
 
     internal static long ParkedSequence(QueueDeadlineCapacityState state, MessageMetadata metadata)
         => state.Fault is QueueDeadlineCapacityFault.FullDeadLetterMaxPark or QueueDeadlineCapacityFault.ExpiryBeforeDeadLetterMaxPark

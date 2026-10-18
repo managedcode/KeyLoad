@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -6,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueDeadlineCapacityRefusal
 {
     internal static async Task RequireAsync(DatabaseEngine database, ZoneTreeStore store,
-        QueueDeadlineCapacityState state, OperationResult refusal, CancellationToken token)
+        QueueDeadlineCapacityState state, Result<object> refusal, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var metadata = state.Fault == QueueDeadlineCapacityFault.StateVersion
@@ -38,11 +40,11 @@ internal static class QueueDeadlineCapacityRefusal
         }
     }
 
-    internal static string[] Domain(ZoneTreeStore store, QueueLaneRef lane, ReplicatedOperation operation)
+    internal static string[] Domain(ZoneTreeStore store, QueueLaneRef lane, Command<DatabaseCommand> operation)
     {
         var outcome = Convert.ToHexString(OutcomeStoreOracle.Key(store, operation)) + QueueDeadlineCapacityProtocol.ByteSeparator;
-        var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(lane.Partition, operation.PrincipalId,
-            operation.Id)) + QueueDeadlineCapacityProtocol.ByteSeparator;
+        var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(lane.Partition, operation.UserId!,
+            operation.CommandId)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
             && !row.StartsWith(clock, StringComparison.Ordinal) && !row.StartsWith(locator, StringComparison.Ordinal)).ToArray();

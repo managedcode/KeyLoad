@@ -14,7 +14,7 @@ ZoneTree remains centrally pinned1.9.8. Use its real public
 `IndexOfTokenRecordPreviousToken<ulong,ulong>` and primary native ZoneTree iterator;
 do not copy its implementation or use its unbounded/partial-cancellation search.
 Canonical records, policy, exact BM25 statistics/ranks, vector/RRF accumulation,
-selected payload projection, synchronous WAL and majority acknowledgement remain unchanged.
+selected payload projection, synchronous WAL and acknowledgement from every configured copy remain unchanged.
 
 This first provider generation is a correctness integration: canonical authorized
 corpus visitation remains the exact scoring and completeness oracle. Native

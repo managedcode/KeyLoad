@@ -21,13 +21,13 @@ internal static class RequestCqrsNativeTextCheckpointObservation
             ?? throw new InvalidOperationException();
         var original = NativeTextIncrementalMetadata.ReadIntent(Path.Combine(root, leaf), options.Value.MaximumDiskBytes, budget);
         var command = original.CheckpointCommand;
-        var issued = database.Database.CreateNativeOperation(OperationKind.CommitProjectionBatch,
+        var issued = database.Database.CreateCommand(OperationKind.CommitProjectionBatch,
             command.CommandId, NativeTextMaintenanceTestValues.Principal, default, NativeSerialization.Serialize(command));
         var outcome = database.Database.ResolveOutcome(issued);
-        var actual = outcome.NativeValue as ProjectionBatchResult;
+        var actual = outcome.Value as ProjectionBatchResult;
         var applied = database.Store.Read(view => NativeSerialization.Deserialize<long>(
             view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw new InvalidOperationException()));
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store).AsSpan().SequenceEqual(before)).IsTrue();
-        await Console.Error.WriteLineAsync($"{ObservationPrefix} hasOutcome={actual is not null} error={outcome.Error} checkpoint={actual?.Checkpoint} applied={applied} ackPosition={actual?.Receipt.Token.Position}").ConfigureAwait(false);
+        await Console.Error.WriteLineAsync($"{ObservationPrefix} hasOutcome={actual is not null} error={Errors.Code(outcome.Problem)} checkpoint={actual?.Checkpoint} applied={applied} ackPosition={actual?.Receipt.Token.Position}").ConfigureAwait(false);
     }
 }

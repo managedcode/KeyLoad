@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
@@ -78,8 +80,7 @@ internal sealed class NativeJournalPrincipalIntegrityTests
         Apply(database.Database, OperationKind.ConfigureResource, request, RootPrincipalId, 1).Get<ResourceDefinition>();
     }
 
-    private static OperationResult Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
+    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
         long replicationIndex = 0)
-        => database.Apply(new ReplicatedOperation(Guid.NewGuid(), kind, principalId, OperationTime,
-            JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
+        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
 }

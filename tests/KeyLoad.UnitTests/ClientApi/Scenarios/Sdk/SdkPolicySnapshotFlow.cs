@@ -30,7 +30,7 @@ internal static class SdkPolicySnapshotFlow
     {
         var calls = 0;
         var healthy = new NodeStatus(NodeId, Guid.Empty, 1L, NodeId, 3,
-            DurabilityProfile.QuorumProcessDurable, true, Environment.ProcessId);
+            DurabilityProfile.ProcessDurable, true, Environment.ProcessId);
         await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
         {
             var count = Interlocked.Increment(ref calls);

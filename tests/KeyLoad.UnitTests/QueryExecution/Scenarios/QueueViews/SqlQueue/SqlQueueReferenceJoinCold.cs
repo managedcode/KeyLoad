@@ -45,8 +45,7 @@ internal static class SqlQueueReferenceJoinCold
                     SqlQueueReferenceJoinFixture.Request(database.Partition)), position, repaired: true);
                 await SqlQueueReferenceJoinAssertions.PageAsync(engine.Execute(SqlQueueReferenceJoinFixture.Reader,
                     SqlQueueReferenceJoinFixture.Request(database.Partition)), position, restricted: true, repaired: true);
-                var replay = owner.ApplyEmbedded(new(seed.CommandId, OperationKind.Batch, "root", default,
-                    JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
+                var replay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, "root", default, JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
                 await Assert.That(JsonDefaults.Serialize(replay)).IsEquivalentTo(JsonDefaults.Serialize(original), CollectionOrdering.Matching);
                 var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
                     SqlQueueReferenceJoinFixture.Request(database.Partition, SqlQueueReferenceJoinFixture.InvalidQueue)));

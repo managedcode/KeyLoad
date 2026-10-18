@@ -5,7 +5,7 @@ Date: 2026-10-06.
 
 ## Decision
 
-Use native .NET TimeProvider throughout KeyLoad-owned C# clock access. Execution owners borrow an injected or explicitly passed provider. Constructor defaults and process/DI composition roots may choose TimeProvider.System. UTC time uses GetUtcNow; durations use matching GetTimestamp/GetElapsedTime and TimestampFrequency. Relative delays and deadline cancellation use native provider overloads; linked tokens retain cancellation and dispose every owned timer. Orleans timers/jobs stay under native Orleans scheduling and persisted majority-acknowledged authority.
+Use native .NET TimeProvider throughout KeyLoad-owned C# clock access. Execution owners borrow an injected or explicitly passed provider. Constructor defaults and process/DI composition roots may choose TimeProvider.System. UTC time uses GetUtcNow; durations use matching GetTimestamp/GetElapsedTime and TimestampFrequency. Relative delays and deadline cancellation use native provider overloads; linked tokens retain cancellation and dispose every owned timer. Orleans timers/jobs stay under native Orleans scheduling and persisted required-copy acknowledgementnowledged authority.
 
 A controlled test clock is authorized by the owner for real operation tests; storage, authorization and transports remain real. No new dependency is required. Do not derive durations from UTC subtraction, change persisted timestamp formats, turn expiry into a caller-authorized effect, or claim a performance improvement from mechanical source refactoring.
 
@@ -23,7 +23,7 @@ flowchart TD
     Root --> Runtime[Orleans and server owners]
     Root --> Tools[Aspire diagnostics and measurements]
     Engine --> Tests[Controlled time real operation tests]
-    Runtime --> Cluster[Native scheduling and majority acknowledgement]
+    Runtime --> Cluster[Native scheduling and acknowledgement from every configured copy]
 ```
 
 

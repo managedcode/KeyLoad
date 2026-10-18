@@ -10,7 +10,7 @@ internal static class RequestCqrsNativeCommandStream
     private const int EarlyFailedSequence = 1;
     private const int PostStartFailedSequence = 2;
 
-    internal static Task<GrainOperationReply> InvokeAsync(RequestCqrsClusterFixture fixture, PrincipalRecord principal,
+    internal static Task<GrainOperationReply> InvokeAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
         Guid requestId, Guid commandId, CommandRequest command, Func<Task>? beforeFirstPull = null)
     {
         var signed = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId,
@@ -19,26 +19,26 @@ internal static class RequestCqrsNativeCommandStream
             beforeFirstPull: beforeFirstPull);
     }
 
-    internal static Task<GrainOperationReply> InvokeAsync(RequestCqrsClusterFixture fixture, string signed,
+    internal static Task<GrainOperationReply> InvokeAsync(RequestCqrsHostedRuntimeFixture fixture, string signed,
         PrincipalRecord contextPrincipal, Guid requestId, Guid commandId, int terminalSequence,
         ErrorCode? expectedError = null, Func<Task>? beforeFirstPull = null)
         => InvokeCoreAsync(fixture, signed, contextPrincipal, true, requestId, commandId, terminalSequence,
             expectedError, beforeFirstPull);
 
-    internal static Task<GrainOperationReply> InvokeWithoutContextAsync(RequestCqrsClusterFixture fixture,
+    internal static Task<GrainOperationReply> InvokeWithoutContextAsync(RequestCqrsHostedRuntimeFixture fixture,
         string signed, Guid requestId, Guid commandId, int terminalSequence, ErrorCode expectedError)
         => InvokeCoreAsync(fixture, signed, null, false, requestId, commandId, terminalSequence, expectedError);
 
-    private static async Task<GrainOperationReply> InvokeCoreAsync(RequestCqrsClusterFixture fixture, string signed,
+    private static async Task<GrainOperationReply> InvokeCoreAsync(RequestCqrsHostedRuntimeFixture fixture, string signed,
         PrincipalRecord? contextPrincipal, bool publishContext, Guid requestId, Guid commandId, int terminalSequence,
         ErrorCode? expectedError, Func<Task>? beforeFirstPull = null)
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
         using IDisposable context = publishContext
-            ? new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, contextPrincipal,
+            ? new GrainRequestIdentityScope(fixture.Services, contextPrincipal,
                 requestId, commandId, deadline.Token, connectionId: fixture.ConnectionId)
             : RequestCqrsClientContext.Set(null, false, null, includeState: false);
-        var actor = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
+        var actor = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
         var stream = actor.ExecuteStreamAsync(signed, deadline.Token)
             .WithBatchSize(GrainRequestStreamProtocol.BatchSize);
         if (beforeFirstPull is not null)

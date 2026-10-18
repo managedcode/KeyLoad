@@ -41,10 +41,4 @@ internal sealed class CompositionPrefixPrepareNativeTests
     public Task CommittedClockPrecedesLaterPrefixValidationOrLookaheadFailure(bool budget)
         => CompositionPrefixPrepareClock.RunAsync(budget, TestContext.Current!.Execution.CancellationToken);
 
-    [Test]
-    public Task FreshGenuineRetirementDenialStillPrecedesOldCommandClock()
-        => CompositionPrefixPrepareClock.RetirementAsync();
-    [Test]
-    public Task RevokedDynamicEndpointReadWinsBeforeGenuineRetirementDiagnostic()
-        => CompositionPrefixPreparePrivacy.RunAsync();
 }

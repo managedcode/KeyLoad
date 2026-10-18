@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnation, long Position,
@@ -39,14 +40,14 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
     }
 
     internal static async Task RequireRetainedAsync(Bm25OriginalPhaseRecoveryOwner owner,
-        ReplicatedOperation original, byte[] originalEntry)
+        Command<DatabaseCommand> original, byte[] originalEntry)
     {
-        var actual = owner.Entry(original.Id);
-        await Assert.That(actual.Operation).IsNotNull();
-        await Assert.That(actual.Operation!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
-        await Assert.That(actual.Operation.Id).IsEqualTo(original.Id);
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(original.NativePayload.ToArray(),
-            actual.Operation.NativePayload.ToArray());
+        var actual = owner.Entry(original.CommandId);
+        await Assert.That(actual.PreparedCommand).IsNotNull();
+        await Assert.That(actual.PreparedCommand!.Value!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
+        await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(original.CommandId);
+        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(original.Value!.Input.ToArray(),
+            actual.PreparedCommand.Value!.Input.ToArray());
         await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(originalEntry, NativeSerialization.Serialize(actual));
     }
 }

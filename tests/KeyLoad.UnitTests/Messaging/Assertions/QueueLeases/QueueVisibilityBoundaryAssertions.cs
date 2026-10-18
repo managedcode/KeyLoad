@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -20,7 +22,7 @@ internal static class QueueVisibilityBoundaryAssertions
 
     internal static async Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane,
         Delivery original, DateTimeOffset time, ErrorCode expected, string detail,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, string? activeToken = null)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, string? activeToken = null)
     {
         foreach (var action in new[] { DeliveryAction.Ack, DeliveryAction.Renew })
         {
@@ -28,24 +30,24 @@ internal static class QueueVisibilityBoundaryAssertions
             var id = Guid.NewGuid();
             var command = new DeliveryCommand(id, lane, original.Token, action, LeaseSeconds: 1);
             var result = QueueVisibilityBoundaryWholeFlow.Submit(owner, OperationKind.Delivery, command, id, time, outcomes);
-            await Assert.That(result.Error).IsEqualTo(expected);
-            await Assert.That(result.SafeDetail).IsEqualTo(detail);
-            await Assert.That(result.Json).IsNull();
-            await Assert.That(result.NativeValue).IsNull();
+            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+            await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
+            
+            await Assert.That(result.Value).IsNull();
             await QueueLifecycleImage.SameAsync(store, lane, before);
             await ReplayAsync(owner, store, outcomes, activeToken);
         }
     }
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, string? activeToken = null)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, string? activeToken = null)
     {
         var cut = Capture(store);
         foreach (var original in outcomes)
         {
-            if (original.Operation.Kind == OperationKind.Receive && original.Result.Error is null)
+            if (original.Operation.Value!.Kind == OperationKind.Receive && Errors.Code(original.Result.Problem) is null)
             {
-                var request = JsonSerializer.Deserialize<ReceiveRequest>(original.Operation.PayloadJson, JsonDefaults.Options)
+                var request = NativeSerialization.Deserialize<ReceiveRequest>(original.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
                     ?? throw new InvalidOperationException("The original Receive request is absent.");
                 var current = original.Result.Get<ReceiveResult>().Deliveries.All(item => item.Token == activeToken);
                 await QueueReceiveReplayAssertions.SameAsync(store, request.Lane.Partition, original.Operation,
@@ -54,14 +56,14 @@ internal static class QueueVisibilityBoundaryAssertions
                 continue;
             }
             var actual = owner.Apply(original.Operation);
-            if (original.Result.Error is not null)
+            if (Errors.Code(original.Result.Problem) is not null)
             {
                 await Assert.That(NativeSerialization.Serialize(actual))
                     .IsEquivalentTo(NativeSerialization.Serialize(original.Result), CollectionOrdering.Matching);
-                await Assert.That(actual.Error).IsEqualTo(original.Result.Error);
-                await Assert.That(actual.SafeDetail).IsEqualTo(original.Result.SafeDetail);
+                await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Result.Problem));
+                await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Result.Problem?.Detail);
                 await Assert.That(actual.Json).IsEqualTo(original.Result.Json);
-                await Assert.That(actual.NativeValue).IsNull();
+                await Assert.That(actual.Value).IsNull();
             }
             else
             {
@@ -96,10 +98,10 @@ internal static class QueueVisibilityBoundaryAssertions
         }
     }
 
-    internal static async Task DeliveryReceiptAsync((ReplicatedOperation Operation, OperationResult Result) original,
+    internal static async Task DeliveryReceiptAsync((Command<DatabaseCommand> Operation, Result<object> Result) original,
         DeliveryAction action, string message, long version)
     {
-        var command = JsonSerializer.Deserialize<DeliveryCommand>(original.Operation.PayloadJson, JsonDefaults.Options)
+        var command = NativeSerialization.Deserialize<DeliveryCommand>(original.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original delivery command is absent.");
         var receipt = original.Result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);

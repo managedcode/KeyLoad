@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -11,7 +12,7 @@ internal static class QueueLifecycleCeilingFailureAssertions
     private const int FailureCommit = 1;
     private const string Separator = ":";
 
-    internal static async Task<OperationResult> FailAsync(DatabaseEngine database, QueueLifecycleCeilingRows rows,
+    internal static async Task<Result<object>> FailAsync(DatabaseEngine database, QueueLifecycleCeilingRows rows,
         string principal, DateTimeOffset time, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -37,7 +38,7 @@ internal static class QueueLifecycleCeilingFailureAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database, QueueLifecycleCeilingRows rows,
-        OperationResult original, string principal, DateTimeOffset time, CancellationToken token)
+        Result<object> original, string principal, DateTimeOffset time, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var store = (ZoneTreeStore)database.Store;
@@ -50,20 +51,18 @@ internal static class QueueLifecycleCeilingFailureAssertions
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
     }
 
-    private static OperationResult Apply(DatabaseEngine database, QueueLifecycleCeilingRows rows,
+    private static Result<object> Apply(DatabaseEngine database, QueueLifecycleCeilingRows rows,
         string principal, DateTimeOffset time)
         => rows.Delivery is { } delivery
-            ? database.Apply(new(delivery.CommandId, OperationKind.Delivery, principal, time,
-                JsonSerializer.Serialize(delivery, JsonDefaults.Options)))
-            : database.Apply(new(rows.Request.CommandId, OperationKind.Batch, principal, time,
-                JsonSerializer.Serialize(rows.Request, JsonDefaults.Options)));
+            ? database.Apply(database.CreateCommand(OperationKind.Delivery, delivery.CommandId, principal, time, JsonSerializer.Serialize(delivery, JsonDefaults.Options)))
+            : database.Apply(database.CreateCommand(OperationKind.Batch, rows.Request.CommandId, principal, time, JsonSerializer.Serialize(rows.Request, JsonDefaults.Options)));
 
-    private static async Task RefusalAsync(OperationResult actual)
+    private static async Task RefusalAsync(Result<object> actual)
     {
-        await Assert.That(actual.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(actual.SafeDetail).IsEqualTo(Exhausted);
-        await Assert.That(actual.Json).IsNull();
-        await Assert.That(actual.NativeValue).IsNull();
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(Exhausted);
+        
+        await Assert.That(actual.Value).IsNull();
     }
 
     private static string[] Domain(ZoneTreeStore store, QueueLifecycleCeilingRows rows, string principal)

@@ -18,12 +18,12 @@ internal static class SafeProjectorOperationCold
         {
             var image = TeamRowPolicyAssertions.Image(owner.Store);
             var position = owner.Store.Position;
-            var journal = owner.JournalCut();
+            var journal = owner.ReadCanonicalCut();
             var applied = owner.Database.LastApplied;
             await owner.ReopenAsync();
             await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
             await Assert.That(owner.Store.Position).IsEqualTo(position);
-            await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
             await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
             await history.CurrentAsync(owner, SafeProjectorOperationProtocol.FinalMaskedEpoch, [SafeProjectorOperationProtocol.WriteGrant]);
             await SafeProjectorOperationReplay.AllAsync(owner, history.Commands, SafeProjectorOperationProtocol.FinalMaskedEpoch);

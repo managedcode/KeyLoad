@@ -40,8 +40,7 @@ internal sealed class TargetInboxAtomicProcessingTests
             [new PutDocument(TargetInboxUnitProtocol.Collection, TargetInboxUnitProtocol.Changed, TargetInboxUnitProtocol.Payload)]
         }, ErrorCode.Conflict, token);
         var ack = new DeliveryCommand(Guid.NewGuid(), seed.Source, seed.Delivery.Token, DeliveryAction.Ack);
-        var ackResult = database.ApplyEmbedded(new(ack.CommandId, OperationKind.Delivery, TargetInboxUnitProtocol.Root, default,
-            System.Text.Json.JsonSerializer.Serialize(ack, JsonDefaults.Options)), token);
+        var ackResult = database.ApplyEmbedded(database.CreateCommand(OperationKind.Delivery, ack.CommandId, TargetInboxUnitProtocol.Root, default, System.Text.Json.JsonSerializer.Serialize(ack, JsonDefaults.Options)), token);
         _ = ackResult.Get<CommitReceipt>();
         await Assert.That(database.InspectMessage(TargetInboxUnitProtocol.Root, seed.Source,
             TargetInboxUnitProtocol.Message)!.Metadata.State).IsEqualTo(MessageState.Acked);

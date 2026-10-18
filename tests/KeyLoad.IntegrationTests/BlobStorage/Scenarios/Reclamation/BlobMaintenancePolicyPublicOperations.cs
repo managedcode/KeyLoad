@@ -37,7 +37,8 @@ internal static class BlobMaintenancePolicyPublicOperations
         await SqlClusterProtocol.EqualAsync(state.Tombstone, state.Deleted.Value);
         await Assert.That(state.Deleted.Receipt.CommandId).IsEqualTo(state.Delete.CommandId);
         await BlobMaintenancePolicyPublicAssertions.ReceiptAsync(state.Blob, state.Deleted.Receipt);
-        await Assert.That(state.Deleted.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(state.Deleted.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(state.Deleted.Receipt.PersistedCopies).IsEqualTo(3);
         Task Observe() => BlobMaintenancePolicyPublicAssertions.RetiredAsync(creator, state, token);
         await Observe();
         await BlobBoundedRetirementPublicReplay.MatchingAsync(creator, "keyload_blobs_delete", state.Delete, state.Deleted,
@@ -51,7 +52,8 @@ internal static class BlobMaintenancePolicyPublicOperations
         await SqlClusterProtocol.EqualAsync(new BlobReclaimResult(state.Original.Begin.UploadId, 1, 0, 4L, true), state.Reclaimed.Value);
         await Assert.That(state.Reclaimed.Receipt.CommandId).IsEqualTo(state.Reclaim.CommandId);
         await BlobMaintenancePolicyPublicAssertions.ReceiptAsync(state.Blob, state.Reclaimed.Receipt);
-        await Assert.That(state.Reclaimed.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(state.Reclaimed.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(state.Reclaimed.Receipt.PersistedCopies).IsEqualTo(3);
         await BlobBoundedRetirementPublicAssertions.HeadAsync(creator, state.Tombstone, token);
         await BlobBoundedRetirementPublicAssertions.UploadAsync(creator, state.Blob, state.Original.Begin.UploadId, null, token);
         state.Healthy = await BlobBoundedRetirementPublicPublication.CreateAsync(creator, state.Blob, 2L, [71, 73, 79, 83], token);

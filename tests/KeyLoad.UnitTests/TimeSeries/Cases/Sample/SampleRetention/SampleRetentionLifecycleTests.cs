@@ -214,8 +214,7 @@ internal sealed class SampleRetentionLifecycleTests
         },
             DatabaseEngine.Credential("root", "root", "root.unit-test-credential-32-characters"));
         PhysicalShardTestBootstrap.Bootstrap(database, "root");
-        database.Apply(new(Guid.NewGuid(), OperationKind.ConfigureResource, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(new ConfigureResourceRequest("tenant", "database",
+        database.Apply(database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new ConfigureResourceRequest("tenant", "database",
                 new ResourceDefinition(SampleAggregateTestData.Set, ResourceKind.TimeSeries, "orders")), JsonDefaults.Options)));
         return database;
     }
@@ -224,7 +223,6 @@ internal sealed class SampleRetentionLifecycleTests
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, new("tenant", "database", "orders", CustomerId), [.. mutations]);
-        return database.Apply(new(id, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(command, JsonDefaults.Options))).Get<CommitReceipt>();
+        return database.Apply(database.CreateCommand(OperationKind.Batch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options))).Get<CommitReceipt>();
     }
 }

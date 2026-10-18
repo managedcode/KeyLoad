@@ -71,7 +71,8 @@ internal static class SqlParserAdmissionClusterCurrent
         await Assert.That(receipt.CommandId).IsEqualTo(command);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         MutationReceipt[] expected = command == state.Events.CommandId ? [new("appendEvents", SqlParserAdmissionClusterState.EventResource, "source", 2L)]
             : command == state.Insert.CommandId ? [new("putDocument", SqlParserAdmissionClusterState.Table, "typed-row", 1L)]
             : [.. state.Original.Seed.Mutations.Cast<PutDocument>().Select(input => new MutationReceipt("putDocument", input.Collection, input.Id, 1L))];

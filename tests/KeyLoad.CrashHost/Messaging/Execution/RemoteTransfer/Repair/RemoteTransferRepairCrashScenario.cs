@@ -34,7 +34,7 @@ internal static class RemoteTransferRepairCrashScenario
         var id = RemoteTransferRepairIdentity.AdvanceId(hint, stage, claims.OutcomeDigest);
         var command = new CommandRequest(id, source.Partition, [new AdvanceQueueTransferRepair(source,
             transfer.TransferId, stage, hint.AcceptGeneration, hint.AcceptPolicyGeneration, hint.CompleteGeneration, witness)]);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, command, command.CommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, command.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferRepairCrashProtocol.OperationFile), JsonDefaults.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferRepairCrashProtocol.OriginalFile), JsonDefaults.Serialize(failed.Original));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferRepairCrashProtocol.FailureFile), failureBytes);

@@ -9,7 +9,7 @@ internal static class FunctionalGateColdScenario
         => RunCoreAsync(nodes, fileOwnership: false, cancellationToken);
 
     internal static Task RunFileOwnershipAsync(CancellationToken cancellationToken)
-        => RunCoreAsync(FunctionalGateFileOwnershipProtocol.Voters, fileOwnership: true, cancellationToken);
+        => RunCoreAsync(FunctionalGateFileOwnershipProtocol.SiloCount, fileOwnership: true, cancellationToken);
 
     private static async Task RunCoreAsync(int nodes, bool fileOwnership, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ internal static class FunctionalGateColdScenario
         {
             await using var fixture = fileOwnership
                 ? await FunctionalGateFixture.StartFileOwnershipAsync(lifetime.Token)
-                : await FunctionalGateFixture.StartColdAsync(nodes, lifetime.Token);
+                : await FunctionalGateFixture.StartColdAsync(nodes, nodes, lifetime.Token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, fixture.NodeNames[0], fixture.AdminKey,
@@ -29,7 +29,7 @@ internal static class FunctionalGateColdScenario
                     context => FunctionalGateColdSeed.RunAsync(context, state, lifetime.Token), lifetime.Token);
                 state = await FunctionalGateColdWorkloads.SeedAsync(fixture, state, lifetime.Token);
                 state = await FunctionalGateAnalyticsCold.SeedAsync(fixture, state, lifetime.Token);
-                state = await FunctionalGateColdAnalytics.CaptureAsync(fixture, state, lifetime.Token);
+                state = await FunctionalGateColdNodeObservations.CaptureAsync(fixture, state, lifetime.Token);
                 if (fileOwnership)
                 {
                     await FunctionalGateFileOwnershipProbe.RunAsync(fixture, lifetime.Token);
@@ -50,7 +50,7 @@ internal static class FunctionalGateColdScenario
                     _ = await FunctionalGateColdConcurrent.RunAsync(fixture, context, state, seed: false, lifetime.Token);
                     await FunctionalGateColdWorkloads.VerifyAsync(fixture, context, state, lifetime.Token);
                     await FunctionalGateColdAuthorization.RunAsync(context, state, lifetime.Token);
-                    await FunctionalGateColdAnalytics.VerifyAsync(fixture, state, lifetime.Token);
+                    await FunctionalGateColdNodeObservations.VerifyAsync(fixture, state, lifetime.Token);
                     return true;
                 }, lifetime.Token);
                 var dropped = await FunctionalGateColdCallers.RunAsync(fixture, state,

@@ -84,7 +84,7 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
             return;
         }
 
-        var resolution = DatabaseEngine.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition,
+        var resolution = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition,
             grant.NativeGrant);
         PartitionQueryPlacementValidation.Validate(resolution, partition, expectedOwner);
     }

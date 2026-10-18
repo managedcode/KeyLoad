@@ -23,7 +23,8 @@ internal static class QueueDueDatabaseScopeClusterExpected
         await Assert.That(actual.CommandId).IsEqualTo(id);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(lane.Lane.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await EqualAsync(actual.Mutations.ToArray(), mutations);
     }
 

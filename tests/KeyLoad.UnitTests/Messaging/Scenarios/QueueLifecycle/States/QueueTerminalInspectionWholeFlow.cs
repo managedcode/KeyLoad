@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -104,8 +105,7 @@ internal static class QueueTerminalInspectionWholeFlow
             ExpiresAt = terminalState == MessageState.Expired ? time.AddSeconds(1) : null
         };
         var command = new CommandRequest(id, state.Partition, [message]);
-        var operation = new ReplicatedOperation(id, OperationKind.Batch, QueueLifecycleTestProtocol.Administrator,
-            time, JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = fixture.Database.CreateCommand(OperationKind.Batch, id, QueueLifecycleTestProtocol.Administrator, time, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var result = fixture.Database.Apply(operation);
         result.Get<CommitReceipt>();
         state.Successes.Add((operation, result));

@@ -2,7 +2,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 
-/// <summary>REQ/AC-FEED-002/003/005: genuine CLUSTER persisted privacy, cursor and live-query continuation.</summary>
+/// <summary>REQ/AC-FEED-002/003/005: genuine Orleans persisted privacy, cursor and live-query continuation.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class FeedLiveClusterTests(ClusterFixture fixture)

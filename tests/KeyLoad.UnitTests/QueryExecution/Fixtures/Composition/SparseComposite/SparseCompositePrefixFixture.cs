@@ -1,10 +1,11 @@
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SparseCompositePrefixFixture
 {
-    internal static async Task<List<(ReplicatedOperation Operation, byte[] Result)>> SeedAsync(
+    internal static async Task<List<(Command<DatabaseCommand> Operation, byte[] Result)>> SeedAsync(
         TestDatabase fixture, bool includeNull, bool includeMissing)
     {
         foreach (var fallback in new[] { false, true })
@@ -17,16 +18,13 @@ internal static class SparseCompositePrefixFixture
             .SelectMany(collection => SparseCompositePrefixData.Rows.Select(row =>
                 (Mutation)new PutDocument(collection, row.Id, SparseCompositePrefixRequests.SeedJson(row.Id, row.Json)))).ToArray();
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, [.. mutations]);
-        var originals = new List<(ReplicatedOperation Operation, byte[] Result)>();
+        var originals = new List<(Command<DatabaseCommand> Operation, byte[] Result)>();
         var before = fixture.Store.Position;
         var identity = fixture.Store.Identity;
         var receipt = QueryAdapterNullParityReplay.Apply(fixture.Database, OperationKind.Batch,
             command.CommandId, command, originals).Get<CommitReceipt>();
         await NoReferencesAsync(receipt);
-        var expected = new CommitReceipt(command.CommandId,
-            new(identity.Incarnation, fixture.Partition.AtomicPartitionId, before + 1L, 1L),
-            [.. mutations.Cast<PutDocument>().Select(row => new MutationReceipt("putDocument", row.Resource, row.Id, 1L))],
-            identity.Durability);
+        var expected = new CommitReceipt(command.CommandId, new(identity.Incarnation, fixture.Partition.AtomicPartitionId, before + 1L), [.. mutations.Cast<PutDocument>().Select(row => new MutationReceipt("putDocument", row.Resource, row.Id, 1L))], identity.Durability, (identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(receipt)).IsEquivalentTo(JsonDefaults.Serialize(expected), CollectionOrdering.Matching);
         await PolicyAsync(fixture.Database, fixture.Partition, true, 1L, originals);
         return originals;
@@ -39,7 +37,7 @@ internal static class SparseCompositePrefixFixture
         }
     }
     internal static async Task PolicyAsync(global::KeyLoad.Core.DatabaseEngine owner, PartitionRef partition,
-        bool use, long epoch, List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        bool use, long epoch, List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         var principal = new PrincipalRecord(SparseCompositePrefixData.Reader, partition.TenantId,
             [new(partition.DatabaseId, SparseCompositePrefixData.Only, Capability.Query | Capability.DocumentsRead),

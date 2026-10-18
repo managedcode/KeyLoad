@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 internal static class NativeArchiveEntryHealthy
 {
     internal static async Task RunAsync(NativeArchiveEntryFixture fixture, StoreIdentity sourceIdentity, long cut,
-        ReplicatedOperation original, byte[] originalOutcome,
+        Command<DatabaseCommand> original, byte[] originalOutcome,
         Dictionary<string, byte[]> archive, CancellationToken token)
     {
         var identity = fixture.ReadTargetIdentity();
@@ -23,10 +24,10 @@ internal static class NativeArchiveEntryHealthy
         var before = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var refused = database.Apply(original);
-        await Assert.That(refused.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await NativeArchiveEntryAssertions.ImageAsync(store, before, position);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(store, fixture.Source.Partition,
-            original.Id, originalOutcome);
+            original.CommandId, originalOutcome);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Partition,
             [new PutDocument(P.Collection, P.Document, P.After, P.InitialRevision)]);
         var healthy = NativeArchiveEntryFlow.Operation(database, command);
@@ -40,13 +41,13 @@ internal static class NativeArchiveEntryHealthy
     }
 
     private static async Task ColdAsync(NativeArchiveEntryFixture fixture, StoreIdentity identity,
-        ReplicatedOperation original, byte[] originalOutcome, ReplicatedOperation healthy, CommitReceipt receipt, CancellationToken token)
+        Command<DatabaseCommand> original, byte[] originalOutcome, Command<DatabaseCommand> healthy, CommitReceipt receipt, CancellationToken token)
     {
         var failures = new List<Exception>();
         var first = fixture.OpenedStore();
         var rows = QueueWholeFlowStorage.Bytes(first);
         var position = first.Position;
-        var outcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(first, fixture.Source.Partition, P.Root, healthy.Id);
+        var outcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(first, fixture.Source.Partition, P.Root, healthy.CommandId);
         var replayed = BackupIndexedDocumentDedupFixture.CreateDatabase(first).Apply(healthy).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replayed).SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await NativeArchiveEntryAssertions.ImageAsync(first, rows, position);
@@ -59,11 +60,11 @@ internal static class NativeArchiveEntryHealthy
                 var database = BackupIndexedDocumentDedupFixture.CreateDatabase(store);
                 await NativeArchiveEntryAssertions.ImageAsync(store, rows, position);
                 await NativeArchiveEntryAssertions.ContentAsync(database, fixture.Source.Partition, healthy: true, token);
-                await Assert.That(database.Apply(original).Error).IsEqualTo(ErrorCode.TokenInvalidated);
+                await Assert.That(Errors.Code(database.Apply(original).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
                 var replay = database.Apply(healthy).Get<CommitReceipt>();
                 await Assert.That(JsonDefaults.Serialize(replay).SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
-                await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(store, fixture.Source.Partition, original.Id, originalOutcome);
-                await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(store, fixture.Source.Partition, healthy.Id, outcome);
+                await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(store, fixture.Source.Partition, original.CommandId, originalOutcome);
+                await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(store, fixture.Source.Partition, healthy.CommandId, outcome);
                 await NativeArchiveEntryAssertions.ImageAsync(store, rows, position);
             }, failures);
             fixture.CloseOpened(failures);

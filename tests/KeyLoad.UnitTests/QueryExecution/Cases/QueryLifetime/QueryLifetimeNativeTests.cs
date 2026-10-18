@@ -1,5 +1,4 @@
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -9,7 +8,7 @@ internal sealed class QueryLifetimeNativeTests
     [Arguments(false)]
     [Arguments(true)]
     public async Task BothAuthoritiesRestrictRowsBeforeQueryPredicatesAndStatisticsThenRepairReplayAndTwoColdOwners(bool sourceNarrower)
-        => await RemoteDocumentNativeAssertions.RunAsync(async fixture =>
+        => await QueryNativeFixtureAssertions.RunAsync(async fixture =>
         {
             var flow = new QueryLifetimeNativeFlow(fixture, sourceNarrower);
             flow.Seed(restrictedRows: true);
@@ -30,44 +29,44 @@ internal sealed class QueryLifetimeNativeTests
     [Arguments(false)]
     [Arguments(true)]
     public async Task BothAuthoritiesProjectThenHideKnownAndUnknownSchemaBeforeFieldBindingWithoutChangingState(bool sourceNarrower)
-        => await RemoteDocumentNativeAssertions.RunAsync(async fixture =>
+        => await QueryNativeFixtureAssertions.RunAsync(async fixture =>
         {
             var flow = new QueryLifetimeNativeFlow(fixture, sourceNarrower);
             flow.Seed(restrictedRows: false);
             await QueryLifetimeNativeAssertions.UnchangedAsync(flow, () => QueryLifetimeNativeAssertions.HealthyAsync(flow));
             await QueryLifetimeNativeAssertions.UnchangedAsync(flow, async () =>
             {
-                var selected = flow.Query(RemoteDocumentNativeFixture.Secret).Candidates.Single().Row;
-                var expected = new QueryRow(RemoteDocumentNativeFixture.DocumentId, RemoteDocumentNativeFixture.First,
-                    QueryLifetimeNativeProtocol.NullSecretJson, true, [RemoteDocumentNativeFixture.Secret]);
+                var selected = flow.Query(QueryNativeFixture.Secret).Candidates.Single().Row;
+                var expected = new QueryRow(QueryNativeFixture.DocumentId, QueryNativeFixture.First,
+                    QueryLifetimeNativeProtocol.NullSecretJson, true, [QueryNativeFixture.Secret]);
                 await Assert.That(JsonDefaults.Serialize(selected).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             });
             await QueryLifetimeNativeAssertions.UnchangedAsync(flow, async () =>
             {
-                var filter = new Comparison(new FieldOperand(RemoteDocumentNativeFixture.Secret), QueryLifetimeNativeProtocol.EqualsOperator,
+                var filter = new Comparison(new FieldOperand(QueryNativeFixture.Secret), QueryLifetimeNativeProtocol.EqualsOperator,
                     new ValueOperand(System.Text.Json.JsonSerializer.SerializeToElement(QueryLifetimeNativeProtocol.PrivateValue)));
                 await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Query(filter: filter),
                     ErrorCode.PermissionDenied, QueryLifetimeNativeProtocol.UseDenied);
                 await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Statistics(
-                    field: RemoteDocumentNativeFixture.Secret, text: QueryLifetimeNativeProtocol.PrivateTerm),
+                    field: QueryNativeFixture.Secret, text: QueryLifetimeNativeProtocol.PrivateTerm),
                     ErrorCode.PermissionDenied, QueryLifetimeNativeProtocol.UseDenied);
                 var unknown = flow.Query(QueryLifetimeNativeProtocol.MissingPath).Candidates.Single().Row;
-                var expected = new QueryRow(RemoteDocumentNativeFixture.DocumentId, RemoteDocumentNativeFixture.First,
+                var expected = new QueryRow(QueryNativeFixture.DocumentId, QueryNativeFixture.First,
                     QueryLifetimeNativeProtocol.NullSecretJson, false, []);
                 await Assert.That(JsonDefaults.Serialize(unknown).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             });
             flow.HideNarrowSchema();
             await QueryLifetimeNativeAssertions.UnchangedAsync(flow, async () =>
             {
-                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Query(RemoteDocumentNativeFixture.Secret),
+                await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Query(QueryNativeFixture.Secret),
                     ErrorCode.Validation, QueryLifetimeNativeProtocol.SchemaDenied);
                 await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Query(QueryLifetimeNativeProtocol.MissingPath),
                     ErrorCode.Validation, QueryLifetimeNativeProtocol.SchemaDenied);
                 await QueryLifetimeNativeAssertions.RefusedAsync(() => _ = flow.Statistics(),
                     ErrorCode.Validation, QueryLifetimeNativeProtocol.SchemaDenied);
                 var hidden = flow.Query().Candidates.Single().Row;
-                var expected = new QueryRow(RemoteDocumentNativeFixture.DocumentId, RemoteDocumentNativeFixture.First,
-                    RemoteDocumentNativeFixture.ProjectedJson, true, []);
+                var expected = new QueryRow(QueryNativeFixture.DocumentId, QueryNativeFixture.First,
+                    QueryNativeFixture.ProjectedJson, true, []);
                 await Assert.That(JsonDefaults.Serialize(hidden).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             });
             flow.RepairSchema();
@@ -76,7 +75,7 @@ internal sealed class QueryLifetimeNativeTests
 
     [Test]
     public async Task ActualIndependentLifetimeCannotSatisfyAnotherResourceLeafThenHealthyReplaySurvivesTwoColdOwners()
-        => await RemoteDocumentNativeAssertions.RunAsync(async fixture =>
+        => await QueryNativeFixtureAssertions.RunAsync(async fixture =>
         {
             var flow = new QueryLifetimeNativeFlow(fixture, sourceNarrower: true);
             flow.Seed(restrictedRows: false);

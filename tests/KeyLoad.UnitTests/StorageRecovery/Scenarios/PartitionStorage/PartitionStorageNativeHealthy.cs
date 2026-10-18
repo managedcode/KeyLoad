@@ -21,12 +21,10 @@ internal static class PartitionStorageNativeHealthy
         var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(source, P.Command, token)
             .ConfigureAwait(false);
         await Assert.That(entry.Operation is not null).IsTrue();
-        await Assert.That(entry.Operation!.Id).IsEqualTo(P.Command);
-        await Assert.That(entry.Operation.Kind).IsEqualTo(OperationKind.Batch);
-        await Assert.That(entry.Operation.PrincipalId).IsEqualTo(P.Root);
-        var expected = new CommitReceipt(P.Command,
-            new(source.Store.Identity.Incarnation, P.Partition.AtomicPartitionId, entry.Index, P.OwnershipEpoch),
-            [new(P.PutKind, P.Collection, P.Document, P.InitialRevision)], DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(entry.Operation!.CommandId).IsEqualTo(P.Command);
+        await Assert.That(entry.Operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
+        await Assert.That(entry.Operation.UserId!).IsEqualTo(P.Root);
+        var expected = new CommitReceipt(P.Command, new(source.Store.Identity.Incarnation, P.Partition.AtomicPartitionId, entry.Index), [new(P.PutKind, P.Collection, P.Document, P.InitialRevision)], DurabilityProfile.ProcessDurable, 1);
         await RequireReceiptAsync(reply, expected).ConfigureAwait(false);
         await PartitionStorageNativeRead.RequireAsync(source, expected.Token, token).ConfigureAwait(false);
         return new(expected, entry, PartitionStorageNativeReplay.ReadBytes(source, entry.Index, token));

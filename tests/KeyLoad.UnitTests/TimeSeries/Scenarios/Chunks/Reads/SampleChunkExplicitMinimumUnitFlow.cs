@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -77,13 +78,11 @@ internal static class SampleChunkExplicitMinimumUnitFlow
         foreach (var mutation in mutations)
         {
             var request = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition, [mutation]);
-            var expectedPosition = checked(fixture.Owner.ReadJournalCut().LastIndex + NextPosition);
+            var expectedPosition = checked(fixture.Owner.ReadCanonicalCut().AppliedPosition + NextPosition);
             var actual = fixture.Owner.Submit(OperationKind.Batch, request, id: request.CommandId).Get<CommitReceipt>();
             var index = commands.Count;
-            var expected = new CommitReceipt(request.CommandId,
-                new(fixture.Owner.Store.Identity.Incarnation, request.Partition.AtomicPartitionId, expectedPosition, FirstEpoch),
-                [new MutationReceipt(kinds[index], SampleChunkCanonicalFixture.Set,
-                    SampleChunkCanonicalFixture.Series, revisions[index])], DurabilityProfile.ProcessDurable);
+            var expected = new CommitReceipt(request.CommandId, new(fixture.Owner.Store.Identity.Incarnation, request.Partition.AtomicPartitionId, expectedPosition), [new MutationReceipt(kinds[index], SampleChunkCanonicalFixture.Set,
+                    SampleChunkCanonicalFixture.Series, revisions[index])], DurabilityProfile.ProcessDurable, 1);
             await SampleChunkExplicitMinimumUnitReads.EqualAsync(expected, actual);
             commands.Add((request, expected));
         }
@@ -101,8 +100,7 @@ internal static class SampleChunkExplicitMinimumUnitFlow
             await SampleChunkExplicitMinimumUnitReads.ObserveAsync(database, store, fixture.Request,
                 SampleChunkCanonicalFixture.Principal, () =>
                 {
-                    var operation = new ReplicatedOperation(original.Request.CommandId, OperationKind.Batch,
-                        SampleChunkCanonicalFixture.Principal, default, System.Text.Json.JsonSerializer.Serialize(
+                    var operation = database.CreateCommand(OperationKind.Batch, original.Request.CommandId, SampleChunkCanonicalFixture.Principal, default, System.Text.Json.JsonSerializer.Serialize(
                             original.Request, JsonDefaults.Options));
                     var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
                     SampleChunkExplicitMinimumUnitReads.RequireBytes(original.Receipt, replay);

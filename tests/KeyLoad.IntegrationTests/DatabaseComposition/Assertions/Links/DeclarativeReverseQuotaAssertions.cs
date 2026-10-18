@@ -21,9 +21,10 @@ internal static class DeclarativeReverseQuotaAssertions
         var expected = new CommitReceipt(command.CommandId, actual.Token,
             [new(EnqueueKind, DeclarativeReverseQuotaFlow.Target, DeclarativeReverseQuotaFlow.Prefix + FirstEdge, InitialVersion),
              new(EnqueueKind, DeclarativeReverseQuotaFlow.Target, DeclarativeReverseQuotaFlow.Prefix + SecondEdge, InitialVersion)],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
     }
 

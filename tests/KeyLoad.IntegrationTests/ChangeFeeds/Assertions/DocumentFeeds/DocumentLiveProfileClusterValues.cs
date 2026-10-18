@@ -14,7 +14,8 @@ internal static class DocumentLiveProfileClusterValues
         await Assert.That(actual.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(effects, actual.Mutations.ToArray());
     }
     internal static async Task<string> ImageAsync(RequestCqrsClusterCallers root, DocumentLiveProfileClusterState state, int phase, CancellationToken token)

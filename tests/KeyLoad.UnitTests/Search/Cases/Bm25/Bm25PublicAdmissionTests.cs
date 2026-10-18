@@ -11,7 +11,7 @@ internal sealed class Bm25PublicAdmissionTests
             var payload = NativeSerialization.Serialize(new CommandRequest(original.Id, flow.Database.Partition,
                 [new PutDocument(ReplicaSubmissionOutcomeFlow.Resource, "bm25-boundary", "{\"value\":1}")]));
             var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
-            var native = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateNativeOperation(
+            var native = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateCommand(
                 OperationKind.Bm25CorpusPublicationPhase, original.Id, original.PrincipalId, original.EvaluatedAt, payload));
             await Assert.That(native.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
             var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
@@ -33,7 +33,7 @@ internal sealed class Bm25PublicAdmissionTests
             var signed = codec.CreateCommand(Guid.NewGuid(), original.PrincipalId, OperationKind.Batch, original.Id, payload);
             await Assert.That(codec.Verify(signed).Envelope.CommandKind).IsEqualTo(OperationKind.Batch);
             var result = flow.Submit(original);
-            await Assert.That(result.Error).IsNull();
+            await Assert.That(Errors.Code(result.Problem)).IsNull();
             await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result,
                 flow.Database.Database.ResolveSubmissionOutcome(original));
             await Assert.That(flow.Document("bm25-boundary").Length).IsGreaterThan(0);

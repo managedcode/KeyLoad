@@ -12,7 +12,7 @@ internal static class FunctionalGateFileOwnershipAssertions
 {
     internal static async Task ModelAsync(FunctionalGateFixture fixture)
     {
-        await Assert.That(fixture.NodeNames.Length).IsEqualTo(P.Voters);
+        await Assert.That(fixture.NodeNames.Length).IsEqualTo(P.SiloCount);
         var paths = new HashSet<string>(StringComparer.Ordinal);
         foreach (var name in fixture.NodeNames)
         {

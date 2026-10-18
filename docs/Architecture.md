@@ -79,12 +79,12 @@ own; scaling means adding silos to the Orleans cluster.
 - **Copies.** The writer finds the target silos through native Orleans
   membership (`IClusterMembershipService` / `IManagementGrain`) and sends the
   write through ordinary Orleans calls to the ZoneTree owner Grain Services on
-  `KeyLoad:ReplicaCount` silos. The write is acknowledged after a majority of
-  those copies confirm durable local apply. `ReplicaCount` is positive, defaults
+  `KeyLoad:ReplicaCount` silos. The write is acknowledged after every configured
+  copy confirms persisted apply. `ReplicaCount` is positive, defaults
   to 3 and is not larger than `KeyLoad:SiloCount`
-  ([ADR-143](ADR/ADR-143-independent-silo-replica-topology.md)). A copy that was
-  offline catches up by reading committed records from another copy through
-  Orleans calls.
+  ([ADR-143](ADR/ADR-143-independent-silo-replica-topology.md)). An unfinished original command can complete on
+  a missing copy through a stable-ID retry; unrelated gaps require explicit
+  recovery and general empty-copy restoration remains unqualified.
 - **Request flow.** Public API (HTTP, .NET SDK, MCP, SQL) -> connection grain ->
   partition grains -> ZoneTree owner on the same node or on other nodes through
   Orleans -> results are gathered -> returned to the caller.
@@ -175,7 +175,6 @@ NuGet publication follow root policy.
 | src/KeyLoad.Diagnostics | ResourceExecution/Models/DatabasePhaseKind.cs, ResourceExecution/Models/DatabasePhaseSnapshot.cs | ResourceExecution; BCL-only callback-free scalar phase observations, with no database state, public control endpoint or framework dependency. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageRecovery/Execution/ZoneTreeStoreRuntime.cs, StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
 | src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
-| src/KeyLoad.Replication | ClusterReplication/ | ClusterReplication; sends each write through Orleans calls to the ZoneTree owners of `ReplicaCount` silos and acknowledges after majority durable local apply. |
 | src/KeyLoad.Clustering | ClusterRouting/Grains/ConnectionGrain.cs, ClusterRouting/Grains/CommandPartitionGrain.cs, ClusterRouting/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | ClusterRouting; connection and partition grains route through Orleans to the silo-local ZoneTree owners. |
 | src/KeyLoad.Server | Program.cs, NodeOptions.cs, ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | ClientApi/Transport/KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
@@ -258,7 +257,7 @@ sequenceDiagram
     Conn->>Part: Ordered command for one logical partition
     Part->>Owners: Orleans calls with the command
     Owners-->>Part: Durable local apply confirmations
-    Part-->>Conn: Outcome after majority of copies
+    Part-->>Conn: Outcome after every configured copy confirms
     Conn-->>API: Public result
     API-->>Caller: Contract result
 ```
@@ -552,7 +551,7 @@ classDiagram
 under the ResourceExecution slice. The common retained pool and the embedded
 positive point-value cache are disposable node-local state over committed
 ZoneTree data. Cached state never replaces persisted authorization, committed
-ZoneTree state or the majority acknowledgement of copies, and it never moves
+ZoneTree state or the acknowledgement from every configured copy of copies, and it never moves
 files or handles.
 
 ```mermaid

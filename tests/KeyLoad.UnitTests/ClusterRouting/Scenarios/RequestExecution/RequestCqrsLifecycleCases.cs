@@ -10,12 +10,12 @@ internal static class RequestCqrsLifecycleCases
 {
     private static readonly TimeSpan SettlementBound = TimeSpan.FromSeconds(10);
 
-    internal static async Task AcCrs003RealNativeProducerSettlesOnCancellation(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs003RealNativeProducerSettlesOnCancellation(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         using var cancelled = new CancellationTokenSource();
         var observed = new RequestCqrsProducerObservation();
-        var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<
+        var serializer = fixture.Services.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var stream = NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => WaitForCancellationAsync(writer, requestId, observed), token), serializer, requestId, TimeProvider.System, observed.MarkActivationSettled, options: fixture.RoutingOptions, owner: null, cancellationToken: cancelled.Token);

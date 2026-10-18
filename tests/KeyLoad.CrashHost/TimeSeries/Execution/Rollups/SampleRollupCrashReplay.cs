@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.CrashHost;
@@ -19,7 +20,7 @@ internal static class SampleRollupCrashReplay
             SampleRollupCrashContract.Refresh(InitialRevision)).Get<CommitReceipt>();
         RequireEqual(NativeSerialization.Serialize(acknowledged),
             File.ReadAllBytes(Path.Combine(directory, SampleRollupCrashContract.AcknowledgedReceiptFile)));
-        var operation = NativeSerialization.Deserialize<ReplicatedOperation>(
+        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(
             File.ReadAllBytes(Path.Combine(directory, SampleRollupCrashContract.OperationFile)));
         var first = database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         var kind = drop ? SampleRollupProtocol.DropKind : SampleRollupProtocol.RefreshKind;

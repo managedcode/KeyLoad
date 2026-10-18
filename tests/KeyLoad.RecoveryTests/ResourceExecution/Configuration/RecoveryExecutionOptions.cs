@@ -107,17 +107,4 @@ internal static class RecoveryExecutionOptions
         settings.Validate();
         return Options.Create(settings);
     }
-
-    internal static IOptions<ReplicaExecutionOptions> Replica(ReplicaExecutionOptions? configured = null)
-    {
-        var settings = configured ?? new ReplicaExecutionOptions();
-        settings.Validate();
-        return Options.Create(settings);
-    }
-
-    internal static IOptions<ReplicaConfiguration> Configuration(ReplicaConfiguration configured)
-    {
-        configured.Validate();
-        return Options.Create(configured);
-    }
 }

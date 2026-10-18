@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -6,10 +8,10 @@ internal static class QueueReadyAuthorityColdContinuation
 {
     internal static async Task RunAsync(global::KeyLoad.Core.DatabaseEngine database,
         global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, string directory, QueueLaneRef lane,
-        ReceiveResult original, bool expired, ReplicatedOperation operation, CommandRequest producer,
-        OperationResult produced, byte[] identity, CancellationToken token)
+        ReceiveResult original, bool expired, Command<DatabaseCommand> operation, CommandRequest producer,
+        Result<object> produced, byte[] identity, CancellationToken token)
     {
-        var receipts = new List<(DeliveryCommand Command, OperationResult Receipt)>();
+        var receipts = new List<(DeliveryCommand Command, Result<object> Receipt)>();
         if (expired)
         {
             await Assert.That(original.Deliveries).IsEmpty();
@@ -20,24 +22,24 @@ internal static class QueueReadyAuthorityColdContinuation
             await Assert.That(delivery.Id).IsEqualTo("input");
             await Assert.That(delivery.PayloadJson).IsEqualTo("{\"input\":1}");
             await Assert.That(delivery.HeadersJson).IsEqualTo("{\"kind\":\"job\"}");
-            receipts.Add(AckCounter(database, lane, delivery, operation.EvaluatedAt));
+            receipts.Add(AckCounter(database, lane, delivery, new DateTimeOffset(operation.Timestamp)));
         }
         var healthy = new CommandRequest(Guid.NewGuid(), lane.Partition,
             [new EnqueueMessage("jobs", "healthy", "{\"input\":2}", "{\"kind\":\"healthy\"}")]);
-        QueueWholeFlowStorage.Apply(database, OperationKind.Batch, healthy, healthy.CommandId, operation.EvaluatedAt).Get<CommitReceipt>();
+        QueueWholeFlowStorage.Apply(database, OperationKind.Batch, healthy, healthy.CommandId, new DateTimeOffset(operation.Timestamp)).Get<CommitReceipt>();
         var request = new ReceiveRequest(Guid.NewGuid(), lane);
         var current = await Assert.That(QueueWholeFlowStorage.Apply(database, OperationKind.Receive, request,
-            request.RequestId, operation.EvaluatedAt).Get<ReceiveResult>().Deliveries).HasSingleItem();
+            request.RequestId, new DateTimeOffset(operation.Timestamp)).Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(current.Id).IsEqualTo("healthy");
         await Assert.That(current.PayloadJson).IsEqualTo("{\"input\":2}");
         await Assert.That(current.HeadersJson).IsEqualTo("{\"kind\":\"healthy\"}");
-        receipts.Add(AckCounter(database, lane, current, operation.EvaluatedAt));
+        receipts.Add(AckCounter(database, lane, current, new DateTimeOffset(operation.Timestamp)));
         await Assert.That(database.InspectMessage("root", lane, "healthy")).IsEqualTo(new MessageInspection(
             new("healthy", MessageState.Acked, 1, 3, 2, null, null, LeaseVersion: 1), null, null));
         var input = database.InspectMessage("root", lane, "input")!;
         await Assert.That(input).IsEqualTo(new MessageInspection(new("input",
             expired ? MessageState.Expired : MessageState.Acked, expired ? 0 : 1, expired ? 2 : 3,
-            1, null, expired ? operation.EvaluatedAt.AddSeconds(-1) : null, LeaseVersion: expired ? 0 : 1), null, null));
+            1, null, expired ? new DateTimeOffset(operation.Timestamp).AddSeconds(-1) : null, LeaseVersion: expired ? 0 : 1), null, null));
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         store.Dispose();
@@ -49,10 +51,10 @@ internal static class QueueReadyAuthorityColdContinuation
         foreach (var (command, result) in receipts)
         {
             await global::KeyLoad.UnitTests.Features.ResourceExecution.NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
-                OperationKind.Delivery, command, command.CommandId, operation.EvaluatedAt), result);
+                OperationKind.Delivery, command, command.CommandId, new DateTimeOffset(operation.Timestamp)), result);
         }
         await global::KeyLoad.UnitTests.Features.ResourceExecution.NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
-            OperationKind.Batch, producer, producer.CommandId, operation.EvaluatedAt), produced);
+            OperationKind.Batch, producer, producer.CommandId, new DateTimeOffset(operation.Timestamp)), produced);
         await Assert.That(restored.InspectMessage("root", lane, "input")).IsEqualTo(input);
         await Assert.That(restored.InspectMessage("root", lane, "healthy")).IsEqualTo(new MessageInspection(
             new("healthy", MessageState.Acked, 1, 3, 2, null, null, LeaseVersion: 1), null, null));
@@ -62,7 +64,7 @@ internal static class QueueReadyAuthorityColdContinuation
         await Assert.That(counters).IsEqualTo(new QueueCounters(0, 0, 0, 0, 2));
     }
 
-    private static (DeliveryCommand Command, OperationResult Receipt) AckCounter(
+    private static (DeliveryCommand Command, Result<object> Receipt) AckCounter(
         global::KeyLoad.Core.DatabaseEngine database, QueueLaneRef lane, Delivery delivery, DateTimeOffset time)
     {
         var command = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);

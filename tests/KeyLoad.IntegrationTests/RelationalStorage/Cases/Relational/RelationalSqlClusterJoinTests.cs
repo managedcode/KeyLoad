@@ -6,7 +6,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Exercises the same bounded Q2 join through the actual CLUSTER SDK and official MCP clients.</summary>
+/// <summary>Exercises the same bounded Q2 join through the actual Orleans SDK and official MCP clients.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterJoinTests(ClusterFixture fixture)

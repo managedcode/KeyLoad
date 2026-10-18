@@ -1,9 +1,11 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed record RestoreIdentityOverrideState(
-    ReplicatedOperation Seed, OperationResult SeedResult, byte[] SeedOutcome, StoreIdentity SourceIdentity,
+    Command<DatabaseCommand> Seed, Result<object> SeedResult, byte[] SeedOutcome, StoreIdentity SourceIdentity,
     long SourceCut, string[] SourceImage, IReadOnlyDictionary<string, byte[]> Archive)
 {
     internal const string Principal = "root";

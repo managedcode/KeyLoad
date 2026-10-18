@@ -14,8 +14,8 @@ internal static class BlobCurrentFormatOperations
         var request = new BeginBlobUploadRequest(id, blob, upload,
             BlobCurrentFormatFixture.DefaultMaxBlobBytes + BlobCurrentFormatFixture.ExceededBy, BlobCurrentFormatFixture.InitialRevision);
         var rejected = database.Submit(OperationKind.BeginBlobUpload, request, id: id);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(rejected.SafeDetail).IsEqualTo(BlobCurrentFormatFixture.InvalidDetail);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(rejected.Problem?.Detail).IsEqualTo(BlobCurrentFormatFixture.InvalidDetail);
         var operations = new BlobStorageOperations(database.Database);
         await Assert.That(operations.Metadata(BlobCurrentFormatFixture.Principal, new(blob))).IsNull();
         await Assert.That(operations.UploadInfo(BlobCurrentFormatFixture.Principal, new(blob, upload))).IsNull();

@@ -33,11 +33,9 @@ internal static class ComposedProjectionLineageCold
                     await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     var owner = database.CreateConfiguredDatabase(reopened);
                     await ComposedProjectionLineageFlow.VerifyAsync(owner, reopened, database.Partition, masked: false, repaired: true, token);
-                    var replay = owner.ApplyEmbedded(new(seed.CommandId, OperationKind.Batch, "root", default,
-                        JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: token).Get<CommitReceipt>();
+                    var replay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, "root", default, JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: token).Get<CommitReceipt>();
                     await Assert.That(JsonDefaults.Serialize(replay)).IsEquivalentTo(JsonDefaults.Serialize(original), global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
-                    var repairReplay = owner.ApplyEmbedded(new(repair.CommandId, OperationKind.Batch, "root", default,
-                        JsonSerializer.Serialize(repair, JsonDefaults.Options)), cancellationToken: token).Get<CommitReceipt>();
+                    var repairReplay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, repair.CommandId, "root", default, JsonSerializer.Serialize(repair, JsonDefaults.Options)), cancellationToken: token).Get<CommitReceipt>();
                     await Assert.That(JsonDefaults.Serialize(repairReplay)).IsEquivalentTo(JsonDefaults.Serialize(repaired), global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     await Assert.That(reopened.Position).IsEqualTo(position);

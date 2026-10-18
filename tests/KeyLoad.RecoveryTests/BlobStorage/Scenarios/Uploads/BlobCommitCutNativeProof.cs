@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -33,17 +35,7 @@ internal static class BlobCommitCutNativeProof
         await Assert.That(store.Identity.NodeId).IsEqualTo(proof.NodeId);
         await Assert.That(store.Identity.Incarnation).IsEqualTo(proof.Incarnation);
         await Assert.That(store.Identity.ReadGeneration).IsEqualTo(proof.ReadGeneration);
-        var actualCatalog = database.ReadPhysicalShardCatalog(BlobCommitCutProtocol.Principal);
-        await Assert.That(actualCatalog.Version).IsEqualTo(1);
-        await Assert.That(actualCatalog.Revision).IsEqualTo(1L);
-        await Assert.That(actualCatalog.DefaultShard.PhysicalShardId).IsEqualTo(Guid.Parse("778899aa-bbcc-ddee-ff00-112233445566"));
-        await Assert.That(actualCatalog.DefaultShard.Incarnation).IsEqualTo(proof.Incarnation);
-        await Assert.That(actualCatalog.DefaultShard.PlacementEpoch).IsEqualTo(1L);
-        string[] voters = ["crash-a", "crash-b", "crash-c"];
-        await Assert.That(actualCatalog.DefaultShard.VoterIds.SequenceEqual(voters, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Identity.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
-        var catalog = NativeSerialization.Serialize(actualCatalog);
-        await Assert.That(catalog.SequenceEqual(proof.Catalog)).IsTrue();
         var principal = store.Read(view => view.ReadOwnedValue(KeySpace.Principal(BlobCommitCutProtocol.Principal)));
         var denied = store.Read(view => view.ReadOwnedValue(KeySpace.Principal(BlobCommitCutProtocol.DeniedPrincipal)));
         await Assert.That(principal is not null && principal.SequenceEqual(proof.PrincipalBytes)).IsTrue();
@@ -57,7 +49,7 @@ internal static class BlobCommitCutNativeProof
         var position = database.Store.Position;
         for (var i = 0; i < proof.Operations.Length; i++)
         {
-            var original = NativeSerialization.Deserialize<ReplicatedOperation>(proof.Operations[i]);
+            var original = NativeSerialization.Deserialize<Command<DatabaseCommand>>(proof.Operations[i]);
             var result = database.Apply(original);
             await Assert.That(NativeSerialization.Serialize(result).SequenceEqual(proof.Results[i])).IsTrue();
         }
@@ -66,41 +58,40 @@ internal static class BlobCommitCutNativeProof
     }
 
     internal static async Task DeniedOutcomesAsync(DatabaseEngine database, BlobCommitCutSeedProof proof,
-        ReplicatedOperation selected)
+        Command<DatabaseCommand> selected)
     {
         var store = (ZoneTreeStore)database.Store;
         var image = Image(store);
         var position = store.Position;
-        var originals = proof.Operations.Select(bytes => NativeSerialization.Deserialize<ReplicatedOperation>(bytes)).Append(selected);
+        var originals = proof.Operations.Select(bytes => NativeSerialization.Deserialize<Command<DatabaseCommand>>(bytes)).Append(selected);
         foreach (var original in originals)
         {
-            var payload = original.Kind switch
+            var payload = original.Value!.Kind switch
             {
-                OperationKind.ConfigurePrincipal => NativeSerialization.Serialize(NativeCommandPayload.Read<ConfigurePrincipalRequest>(original)),
-                OperationKind.ConfigureResource => NativeSerialization.Serialize(NativeCommandPayload.Read<ConfigureResourceRequest>(original)),
-                OperationKind.BeginBlobUpload => NativeSerialization.Serialize(NativeCommandPayload.Read<BeginBlobUploadRequest>(original)),
-                OperationKind.WriteBlobPart => NativeSerialization.Serialize(NativeCommandPayload.Read<WriteBlobPartRequest>(original)),
-                OperationKind.CompleteBlobUpload => NativeSerialization.Serialize(NativeCommandPayload.Read<CompleteBlobUploadRequest>(original)),
-                OperationKind.DeleteBlob => NativeSerialization.Serialize(NativeCommandPayload.Read<DeleteBlobRequest>(original)),
+                OperationKind.ConfigurePrincipal => NativeSerialization.Serialize(NativeSerialization.Deserialize<ConfigurePrincipalRequest>((original).Value!.Input.Span)),
+                OperationKind.ConfigureResource => NativeSerialization.Serialize(NativeSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span)),
+                OperationKind.BeginBlobUpload => NativeSerialization.Serialize(NativeSerialization.Deserialize<BeginBlobUploadRequest>((original).Value!.Input.Span)),
+                OperationKind.WriteBlobPart => NativeSerialization.Serialize(NativeSerialization.Deserialize<WriteBlobPartRequest>((original).Value!.Input.Span)),
+                OperationKind.CompleteBlobUpload => NativeSerialization.Serialize(NativeSerialization.Deserialize<CompleteBlobUploadRequest>((original).Value!.Input.Span)),
+                OperationKind.DeleteBlob => NativeSerialization.Serialize(NativeSerialization.Deserialize<DeleteBlobRequest>((original).Value!.Input.Span)),
                 _ => throw new InvalidOperationException("The original blob denial corpus contains an unsupported command.")
             };
-            var denied = database.CreateNativeOperation(original.Kind, original.Id, BlobCommitCutProtocol.DeniedPrincipal,
+            var denied = database.CreateCommand(original.Value!.Kind, original.CommandId, BlobCommitCutProtocol.DeniedPrincipal,
                 database.EvaluationClock.GetUtcNow(), payload);
             var result = database.ResolveOutcome(denied);
-            await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
-            await Assert.That(result.Json).IsNull();
-            await Assert.That(result.NativeValue).IsNull();
+            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+            await Assert.That(result.Value).IsNull();
             await Assert.That(Image(store)).IsEqualTo(image);
             await Assert.That(store.Position).IsEqualTo(position);
         }
     }
 
-    internal static async Task<ReplicatedOperation> OriginalOperationAsync(string root, CancellationToken cancellationToken)
-        => NativeSerialization.Deserialize<ReplicatedOperation>(await BlobCommitCutSeedProofReader.ReadAsync(root,
+    internal static async Task<Command<DatabaseCommand>> OriginalOperationAsync(string root, CancellationToken cancellationToken)
+        => NativeSerialization.Deserialize<Command<DatabaseCommand>>(await BlobCommitCutSeedProofReader.ReadAsync(root,
             BlobCommitCutProtocol.OperationFile, cancellationToken));
 
-    internal static async Task<OperationResult> ReturnedAsync(string root, CancellationToken cancellationToken)
-        => NativeSerialization.Deserialize<OperationResult>(await BlobCommitCutSeedProofReader.ReadAsync(root,
+    internal static async Task<Result<object>> ReturnedAsync(string root, CancellationToken cancellationToken)
+        => NativeSerialization.Deserialize<Result<object>>(await BlobCommitCutSeedProofReader.ReadAsync(root,
             BlobCommitCutProtocol.ReturnedFile, cancellationToken));
 
     internal static async Task AssertFaultAsync(string root, CancellationToken cancellationToken)

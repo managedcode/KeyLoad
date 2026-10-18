@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
@@ -23,7 +25,7 @@ internal static class AnalyticsCompositionRefusals
     private const string EventFeedFamily = "event-feed";
     private const string GraphOwnerFamily = "graph-edge-owner-version";
     private const string GraphIntentFamily = "graph-cross-partition-intent";
-    internal static async Task RequireAsync(SafeProjectorOperationDatabase owner, ReplicatedOperation operation,
+    internal static async Task RequireAsync(SafeProjectorOperationDatabase owner, Command<DatabaseCommand> operation,
         string id, ErrorCode error, string detail, IReadOnlyList<AnalyticsCompositionCommit> commits)
     {
         var before = Image(owner);
@@ -31,8 +33,8 @@ internal static class AnalyticsCompositionRefusals
         for (var replay = 0; replay < 2; replay++)
         {
             var actual = owner.Submit(operation);
-            await O.EqualAsync(new OperationResult(null, error, detail), actual);
-            await Assert.That(actual.NativeValue).IsNull();
+            await O.EqualAsync(Result<object>.Fail(Errors.Problem(error, detail)), actual);
+            await Assert.That(actual.Value).IsNull();
             await Assert.That(Image(owner).SequenceEqual(before, StringComparer.Ordinal)).IsTrue();
             await O.EqualAsync(status, owner.Database.GetOutboxStatus(D.Root, owner.Source.Partition));
             await Assert.That(owner.Database.GetDocument(D.Root, new(owner.Source.Partition, D.AnchorCollection, id),

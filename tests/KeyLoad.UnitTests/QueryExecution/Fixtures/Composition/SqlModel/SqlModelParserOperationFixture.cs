@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class SqlModelParserOperationFixture : IDisposable
 {
     private readonly TestDatabase original = new();
-    private (ReplicatedOperation Operation, CommitReceipt Receipt)? seed;
+    private (Command<DatabaseCommand> Operation, CommitReceipt Receipt)? seed;
     private const long DeniedPolicyEpoch = 1;
     private const long RepairedPolicyEpoch = 2;
     private const string SeedRequired = "The original acknowledged model seed is required.";
@@ -28,7 +29,7 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
         get; private set;
     }
     internal PartitionRef Partition => original.Partition;
-    internal ReplicatedOperation Seed => seed?.Operation ?? throw new InvalidOperationException(SeedRequired);
+    internal Command<DatabaseCommand> Seed => seed?.Operation ?? throw new InvalidOperationException(SeedRequired);
     internal CommitReceipt Original => seed?.Receipt ?? throw new InvalidOperationException(SeedRequired);
 
     internal SqlModelParserOperationFixture()
@@ -71,8 +72,8 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
             .Get<PrincipalRecord>();
     }
 
-    private ReplicatedOperation Operation<T>(OperationKind kind, T payload, Guid command)
-        => new(command, kind, SqlModelParserOperationData.Root, Owner.EvaluationClock.GetUtcNow(),
+    private Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, Guid command)
+        => Owner.CreateCommand(kind, command, SqlModelParserOperationData.Root, Owner.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(payload, JsonDefaults.Options));
 
     internal void Reopen()

@@ -34,5 +34,4 @@ internal static class CatalogBootstrapAuthorityProtocol
     internal const long ChangedEpoch = 2;
     internal const long EmptyRevision = 0;
     internal static readonly string[] Nodes = ["node1", "node2", "node3"];
-    internal static readonly string[] Voters = ["http://node1:8080", "http://node2:8080", "http://node3:8080"];
 }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -25,8 +26,7 @@ internal static class QueryAdapterCursorFlow
                 var command = new CommandRequest(SeedId, fixture.Partition,
                     [new PutDocument(Collection, "a", "{\"number\":2}"), new PutDocument(Collection, "b", "{\"number\":3}"),
                     new PutDocument(Collection, "c", "{\"number\":4}")]);
-                var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, Principal, default,
-                    System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
+                var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, Principal, default, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
                 var receipt = fixture.Database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
                 await Assert.That(receipt.CommandId).IsEqualTo(SeedId);
                 await WaveAsync(fixture.Database, fixture.Store, fixture.Partition, operation, receipt);
@@ -43,7 +43,7 @@ internal static class QueryAdapterCursorFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ColdAsync(TestDatabase fixture, ReplicatedOperation operation, CommitReceipt receipt,
+    private static async Task ColdAsync(TestDatabase fixture, Command<DatabaseCommand> operation, CommitReceipt receipt,
         string[] image, long position, byte[] identity)
     {
         var failures = new List<Exception>();
@@ -62,7 +62,7 @@ internal static class QueryAdapterCursorFlow
     }
 
     private static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        ReplicatedOperation operation, CommitReceipt receipt)
+        Command<DatabaseCommand> operation, CommitReceipt receipt)
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;

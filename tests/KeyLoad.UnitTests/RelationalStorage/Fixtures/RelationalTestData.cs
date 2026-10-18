@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
@@ -43,13 +44,13 @@ internal static class RelationalTestData
     internal static ResourceDefinition Configure(TestDatabase database, ResourceDefinition? definition = null)
         => ConfigureResult(database, definition ?? Definition()).Get<ResourceDefinition>();
 
-    internal static OperationResult ConfigureResult(TestDatabase database, ResourceDefinition definition)
+    internal static Result<object> ConfigureResult(TestDatabase database, ResourceDefinition definition)
         => database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition));
 
     internal static string Row(string id = First) => string.Format(CultureInfo.InvariantCulture, RowFormat, id);
 
-    internal static OperationResult Submit(TestDatabase database, params Mutation[] mutations)
+    internal static Result<object> Submit(TestDatabase database, params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
         return database.Submit(OperationKind.Batch, new CommandRequest(id, database.Partition, [.. mutations]), id: id);

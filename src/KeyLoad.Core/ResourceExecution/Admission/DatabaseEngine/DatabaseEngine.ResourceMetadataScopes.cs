@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -9,9 +10,9 @@ public sealed partial class DatabaseEngine
         => kind is OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey or OperationKind.SetDispatch
             or OperationKind.RuntimeJournal;
 
-    private static bool ObserveCatalogResourceEffect(IKeyValueView view, ReplicatedOperation operation)
+    private static bool ObserveCatalogResourceEffect(IKeyValueView view, Command<DatabaseCommand> operation)
     {
-        switch (operation.Kind)
+        switch (operation.Value!.Kind)
         {
             case OperationKind.ConfigureResource:
                 var configure = Payload<ConfigureResourceRequest>(operation);

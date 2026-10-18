@@ -7,10 +7,6 @@ internal sealed class AdmissionOwnershipTests
     private const string PrincipalId = "principal";
     private const string TenantId = "tenant";
     private const string RequestPath = "/v1/commands";
-    private const string QueueStoppedDetail = "The node stopped before returning a command outcome. Query or retry the same command ID.";
-    private const string SuccessfulResultJson = "true";
-    private const string EmptyOperationJson = "{}";
-    private const int WaitSeconds = 5;
 
     [Test]
     public async Task InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged()
@@ -27,67 +23,6 @@ internal sealed class AdmissionOwnershipTests
     }
 
     [Test]
-    public async Task InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal()
-    {
-        await using var inbox = new AdmittedCommandInbox(new CommandAdmissionGovernor(UnitAdmissionOptions.Command()), UnitAdmissionOptions.Inbox());
-        using var cancellation = new CancellationTokenSource();
-        var reader = inbox.ReadAsync(cancellation.Token).AsTask();
-
-        await Assert.That(() => inbox.ReadAsync(cancellation.Token).AsTask()).Throws<InvalidOperationException>();
-        var command = inbox.Enqueue(NewOperation(), NewPrincipal(), 0);
-
-        await Assert.That(await reader.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), TimeProvider.System)).IsSameReferenceAs(command);
-        command.Complete(new(SuccessfulResultJson));
-    }
-
-    [Test]
-    public async Task AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork()
-    {
-        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
-        await using var inbox = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
-        using var cancellation = new CancellationTokenSource();
-        var reader = inbox.ReadAsync(cancellation.Token).AsTask();
-        var firstDisposal = inbox.DisposeAsync().AsTask();
-        var secondDisposal = inbox.DisposeAsync().AsTask();
-
-        await Task.WhenAll(firstDisposal, secondDisposal).WaitAsync(TimeSpan.FromSeconds(WaitSeconds), TimeProvider.System);
-        await Assert.That(await reader.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), TimeProvider.System)).IsNull();
-        await Assert.That(() => inbox.ReadAsync(cancellation.Token).AsTask()).Throws<ObjectDisposedException>();
-        Assert.ThrowsExactly<ObjectDisposedException>(() => inbox.Enqueue(NewOperation(), NewPrincipal(), 0));
-        await Assert.That(governor.Snapshot()).IsEqualTo(new(0, 0, 0, 0, 0, 0));
-    }
-
-    [Test]
-    public async Task PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop()
-    {
-        await using var inbox = new AdmittedCommandInbox(new CommandAdmissionGovernor(UnitAdmissionOptions.Command()), UnitAdmissionOptions.Inbox());
-        inbox.Stop();
-        using var cancellation = new CancellationTokenSource();
-        await cancellation.CancelAsync();
-
-        await Assert.That(() => inbox.ReadAsync(cancellation.Token).AsTask()).Throws<OperationCanceledException>();
-        await Assert.That(await inbox.ReadAsync()).IsNull();
-    }
-
-    [Test]
-    public async Task DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce()
-    {
-        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
-        await using var inbox = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
-        var command = inbox.Enqueue(NewOperation(), NewPrincipal(), 0);
-        await Assert.That(await inbox.ReadAsync()).IsSameReferenceAs(command);
-
-        command.Dispose();
-        command.Dispose();
-        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => command.Completion);
-
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
-        await Assert.That(failure.Message).IsEqualTo(QueueStoppedDetail);
-        await Assert.That(governor.Snapshot()).IsEqualTo(new(0, 0, 0, 0, 0, 0));
-        inbox.Stop();
-    }
-
-    [Test]
     public async Task HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation()
     {
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
@@ -101,6 +36,4 @@ internal sealed class AdmissionOwnershipTests
 
     private static PrincipalRecord NewPrincipal() => new(PrincipalId, TenantId, [], []);
 
-    private static ReplicatedOperation NewOperation() => new(Guid.NewGuid(), OperationKind.Batch, PrincipalId,
-        TimeProvider.System.GetUtcNow(), EmptyOperationJson);
 }

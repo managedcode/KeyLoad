@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Logging;
@@ -36,15 +37,15 @@ internal static class GrainReplyFactory
         }
     }
 
-    internal static GrainOperationReply Operation(OperationResult result, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
+    internal static GrainOperationReply Operation(Result<object> result, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
     {
-        if (result.Error is { } error)
+        if (result.IsFailed)
         {
-            return Rejected(code: error, detail: result.SafeDetail, options: options);
+            return Rejected(code: Errors.Code(result.Problem)!.Value, detail: result.Problem!.Detail, options: options);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        return Value(value: result.NativeValue, cancellationToken: cancellationToken, options: options);
+        return Value(value: result.Value, cancellationToken: cancellationToken, options: options);
     }
 
     internal static Result<GrainOperationReply> StreamResult(GrainOperationReply reply, IOptions<GrainRoutingOptions> options)

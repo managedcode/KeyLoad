@@ -62,9 +62,9 @@ internal static class QueueLifecycleConditionTrial
             ? ErrorCode.Validation : kind == QueueLifecycleConditionRefusal.Missing ? ErrorCode.NotFound : ErrorCode.Conflict;
         var queue = QueueLifecycleImage.Capture(fixture.Store, state.Lane);
         var failed = fixture.Database.Apply(bad);
-        await Assert.That(failed.Error).IsEqualTo(expected);
-        await Assert.That(failed.Json).IsNull();
-        await Assert.That(failed.NativeValue).IsNull();
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(expected);
+        
+        await Assert.That(failed.Value).IsNull();
         state.Failures.Add((bad, failed));
         await QueueLifecycleImage.SameAsync(fixture.Store, state.Lane, queue);
         await QueueLifecycleConditionAssertions.Replay(fixture.Database, fixture.Store, bad, failed);

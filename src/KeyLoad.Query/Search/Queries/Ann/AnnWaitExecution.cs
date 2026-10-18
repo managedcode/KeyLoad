@@ -10,11 +10,11 @@ internal static class AnnWaitExecution
     private const long InitialPosition = 0;
     private const string Invalid = "The ANN wait requires a vector scope, generation and acknowledged minimum token.";
     private const string WrongToken = "The ANN wait token belongs to another incarnation, atomic partition or placement.";
-    private const string Future = "The ANN wait token is beyond the current quorum-applied cut.";
+    private const string Future = "The ANN wait token is beyond the current committed storage cut.";
     private const string Corrupt = "The native ANN indexed or canonical applied prefix is invalid.";
     private const string Missing = "The native ANN generation does not cover the required prefix; explicitly restore the generation.";
 
-    internal static async Task<WaitForAnnIndexResult> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
+    internal static Task<WaitForAnnIndexResult> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, WaitForAnnIndexRequest request, IOptions<QueryExecutionOptions> configured,
         CancellationToken cancellationToken)
     {
@@ -28,10 +28,10 @@ internal static class AnnWaitExecution
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => Read(database, projection, principalId, request, budget), cancellationToken).ConfigureAwait(false);
+        return Task.FromResult(Read(database, projection, principalId, request, budget));
     }
 
-    internal static async Task<WaitForAnnIndexResult> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
+    internal static Task<WaitForAnnIndexResult> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, WaitForAnnIndexRequest request, IOptions<QueryExecutionOptions> configured,
         ReadExecutionBudget budget, CancellationToken cancellationToken, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
@@ -45,8 +45,7 @@ internal static class AnnWaitExecution
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => Read(database, projection, principalId, request, budget, sourceMetadata),
-            cancellationToken).ConfigureAwait(false);
+        return Task.FromResult(Read(database, projection, principalId, request, budget, sourceMetadata));
     }
 
     private static WaitForAnnIndexResult Read(DatabaseEngine database, IAnnProjection? projection,
@@ -72,7 +71,7 @@ internal static class AnnWaitExecution
             }
             JsonData.Identifier(request.Consumer.Name);
             var authority = new BudgetedReadView(view, budget);
-            DatabaseEngine.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WrongToken);
+            database.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WrongToken);
             var raw = authority.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, Corrupt);
             var applied = NativeSerialization.Deserialize<long>(raw);
             if (applied < InitialPosition)

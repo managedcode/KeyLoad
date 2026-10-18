@@ -22,7 +22,7 @@ internal static class QueueWorkerClusterSetup
             [.. QueueWorkerClusterProtocol.Messages.Select(id => new EnqueueMessage(lane.Queue, id,
                 QueueWorkerClusterProtocol.Payload, QueueWorkerClusterProtocol.Headers))]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(producer, token));
-        var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root);
+        var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
         var seed = new QueueWorkerClusterSeed(lane, identity, producer, receipt, Convert.FromBase64String(profile.SigningKey));
         await QueueWorkerClusterAssertions.ReceiptAsync(receipt, producer.CommandId, seed,
             [.. QueueWorkerClusterProtocol.Messages.Select(id => new MutationReceipt(QueueWorkerClusterProtocol.Enqueue,

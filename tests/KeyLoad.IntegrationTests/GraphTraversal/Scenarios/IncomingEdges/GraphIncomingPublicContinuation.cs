@@ -68,8 +68,8 @@ internal static class GraphIncomingPublicContinuation
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(receipt.Token.Position).IsGreaterThan(GraphIncomingPublicPolicy.EmptyPosition);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(GraphIncomingPublicPolicy.EmptyPosition);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(GraphIncomingPublicPolicy.Version);
         var mutation = (PutDocument)command.Mutations.Single();
         await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(

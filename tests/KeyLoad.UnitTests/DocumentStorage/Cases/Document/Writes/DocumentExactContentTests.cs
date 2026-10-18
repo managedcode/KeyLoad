@@ -61,7 +61,7 @@ internal sealed class DocumentExactContentTests
         var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database);
         var result = DocumentCrudFixture.Submit(database, new PutDocument(Collection, DocumentId, json));
 
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(database.Database.GetDocument(Root, reference)).IsNull();
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(outbox,
             DocumentCommandOutcomeTestSupport.CaptureOutbox(database))).IsTrue();

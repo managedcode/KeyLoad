@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.RelationalStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
@@ -9,7 +11,7 @@ public sealed partial class DatabaseEngine
     private const string TableRemovalMissing = "The table resource is not configured.";
     private const string TableRemovalKind = "The resource is not a canonical typed table.";
 
-    private OperationResult ExecuteDropTable(IAtomicTransaction transaction, ReplicatedOperation operation,
+    private Result<object> ExecuteDropTable(IAtomicTransaction transaction, Command<DatabaseCommand> operation,
         long position)
     {
         var request = Payload<DropTableRequest>(operation);
@@ -37,6 +39,6 @@ public sealed partial class DatabaseEngine
         transaction.Delete(ResourceLifetimeCatalog.Key(request.TenantId, request.DatabaseId, request.ResourceName));
         var token = new CommitToken(Store.Identity.Incarnation, NativeCatalogRoute.PartitionId, position);
         return Result(new DropTableResult(request.TenantId, request.DatabaseId, request.ResourceName,
-            new(operation.Id, token, [], Durability, AcknowledgedPersistedCopies)));
+            new(operation.CommandId, token, [], Durability, AcknowledgedPersistedCopies)));
     }
 }

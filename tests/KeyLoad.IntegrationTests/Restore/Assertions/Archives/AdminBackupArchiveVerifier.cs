@@ -24,15 +24,15 @@ internal static class AdminBackupArchiveVerifier
     private const string ArchiveDirectoryMissing = "The observed backup archive directory is absent.";
     private const string ObservedArchiveFileMissing = "An observed backup file is absent from its physical owner.";
     private const string ArchivePathOutsideFixture = "An observed backup path resolved outside its fixture-owned root.";
-    private const string MissingVoterIdentity = "The dashboard did not report the executing physical voter.";
-    private const string VoterDirectoryOutsideFixture = "The actual voter name did not resolve to one fixture-owned node directory.";
+    private const string MissingSiloIdentity = "The dashboard did not report the executing physical silo.";
+    private const string SiloDirectoryOutsideFixture = "The actual silo name did not resolve to one fixture-owned node directory.";
     private const int EmptyInventoryCount = 0;
     private const string DataMountTarget = "/data";
     private static readonly string[] Nodes =
         [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
 
     internal static async Task VerifyRestoreAsync(ClusterFixture fixture, BackupReceipt receipt,
-        EntityRef reference, string expectedJson, long expectedRevision, long seedPosition,
+        EntityRef reference, string expectedJson, long expectedRevision, long minimumLocalPosition,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(fixture);
@@ -44,7 +44,7 @@ internal static class AdminBackupArchiveVerifier
         var originalManifestDigest = await AdminBackupArchiveIntegrity.CaptureManifestDigestAsync(
             archiveDirectory, policy.Value, cancellationToken).ConfigureAwait(false);
         await Assert.That(verifiedPosition).IsEqualTo(receipt.Position);
-        await Assert.That(verifiedPosition).IsGreaterThanOrEqualTo(seedPosition);
+        await Assert.That(verifiedPosition).IsGreaterThanOrEqualTo(minimumLocalPosition);
 
         var restoreDirectory = Path.GetFullPath(Path.Combine(fixture.Root, string.Concat(RestoreDirectoryPrefix,
             Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat))));
@@ -107,9 +107,9 @@ internal static class AdminBackupArchiveVerifier
                 await sdk.DashboardAsync(cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
             await Assert.That(snapshot.Storage.Complete).IsTrue();
             await Assert.That(snapshot.Storage.Files.Length).IsEqualTo(snapshot.Storage.ObservedFiles);
-            var voter = snapshot.LocalVoter
-                ?? throw new InvalidOperationException(MissingVoterIdentity);
-            await Assert.That(snapshot.Voters.Contains(voter, StringComparer.Ordinal)).IsTrue();
+            var silo = snapshot.SiloName
+                ?? throw new InvalidOperationException(MissingSiloIdentity);
+            await Assert.That(snapshot.ActiveSilos.Contains(silo, StringComparer.Ordinal)).IsTrue();
             var manifests = snapshot.Storage.Files.Where(file => file.Category == BackupCategory
                 && string.Equals(file.Path, expectedManifest, StringComparison.Ordinal)).ToArray();
             if (manifests.Length == EmptyInventoryCount)
@@ -119,10 +119,10 @@ internal static class AdminBackupArchiveVerifier
             await Assert.That(manifests.Length).IsEqualTo(SingleMatchingManifestCount);
             var manifest = manifests.Single();
             await Assert.That(manifest.Bytes).IsGreaterThan(EmptyInventoryCount);
-            var voterDirectory = ResolveVoterDirectory(fixture, voter);
-            var archiveDirectory = ResolveArchiveDirectory(fixture.Root, voterDirectory, receipt.Id);
+            var siloDirectory = ResolveSiloDirectory(fixture, silo);
+            var archiveDirectory = ResolveArchiveDirectory(fixture.Root, siloDirectory, receipt.Id);
             await VerifyRetainedArchiveFilesAsync(snapshot.Storage.Files, archivePrefix, fixture.Root,
-                voterDirectory, cancellationToken).ConfigureAwait(false);
+                siloDirectory, cancellationToken).ConfigureAwait(false);
             var manifestPath = Path.Combine(archiveDirectory, BackupManifestName);
             var manifestFile = new FileInfo(manifestPath);
             await Assert.That(manifestFile.Exists).IsTrue();
@@ -134,7 +134,7 @@ internal static class AdminBackupArchiveVerifier
     }
 
     private static async Task VerifyRetainedArchiveFilesAsync(ImmutableArray<AdminFileInfo> files,
-        string archivePrefix, string fixtureRoot, string voterDirectory, CancellationToken cancellationToken)
+        string archivePrefix, string fixtureRoot, string siloDirectory, CancellationToken cancellationToken)
     {
         const int NoObservedArchiveFiles = 0;
 
@@ -146,7 +146,7 @@ internal static class AdminBackupArchiveVerifier
             cancellationToken.ThrowIfCancellationRequested();
             var relativePath = observed.Path.Replace(RelativePathSeparator, Path.DirectorySeparatorChar.ToString(),
                 StringComparison.Ordinal);
-            var path = ResolveFixtureOwnedPath(fixtureRoot, Path.Combine(voterDirectory, relativePath));
+            var path = ResolveFixtureOwnedPath(fixtureRoot, Path.Combine(siloDirectory, relativePath));
             var file = new FileInfo(path);
             if (!file.Exists)
             {
@@ -156,9 +156,9 @@ internal static class AdminBackupArchiveVerifier
         }
     }
 
-    private static string ResolveArchiveDirectory(string fixtureRoot, string voterDirectory, string receiptId)
+    private static string ResolveArchiveDirectory(string fixtureRoot, string siloDirectory, string receiptId)
     {
-        var path = Path.Combine(voterDirectory, BackupDirectoryName, receiptId);
+        var path = Path.Combine(siloDirectory, BackupDirectoryName, receiptId);
         var directory = ResolveFixtureOwnedPath(fixtureRoot, path);
         if (!Directory.Exists(directory))
         {
@@ -182,24 +182,20 @@ internal static class AdminBackupArchiveVerifier
         return fullPath;
     }
 
-    private static string ResolveVoterDirectory(ClusterFixture fixture, string voter)
+    private static string ResolveSiloDirectory(ClusterFixture fixture, string silo)
     {
-        if (!Uri.TryCreate(voter, UriKind.Absolute, out var origin) || origin.Scheme != Uri.UriSchemeHttp
-            || !Nodes.Contains(origin.Host, StringComparer.Ordinal) || origin.UserInfo.Length != EmptyInventoryCount
-            || origin.GetLeftPart(UriPartial.Authority) != voter)
+        if (!Nodes.Contains(silo, StringComparer.Ordinal))
         {
-            throw new InvalidDataException(VoterDirectoryOutsideFixture);
+            throw new InvalidDataException(SiloDirectoryOutsideFixture);
         }
         var resource = fixture.App.Services.GetRequiredService<DistributedApplicationModel>().Resources
-            .OfType<ContainerResource>().Single(item => item.Name == origin.Host);
-        var endpoint = resource.Annotations.OfType<EndpointAnnotation>()
-            .Single(item => item.Name == McpCallerProtocol.HttpEndpoint);
+            .OfType<ContainerResource>().Single(item => item.Name == silo);
         var mount = resource.Annotations.OfType<ContainerMountAnnotation>()
             .Single(item => item.Target == DataMountTarget);
-        if (origin.Port != endpoint.TargetPort || mount.Type != ContainerMountType.BindMount || mount.IsReadOnly
+        if (mount.Type != ContainerMountType.BindMount || mount.IsReadOnly
             || mount.Source is not { } source)
         {
-            throw new InvalidDataException(VoterDirectoryOutsideFixture);
+            throw new InvalidDataException(SiloDirectoryOutsideFixture);
         }
         return ResolveFixtureOwnedPath(fixture.Root, source);
     }

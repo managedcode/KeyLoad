@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using P = KeyLoad.UnitTests.Features.Authorization.FieldWriteOutputProtocol;
@@ -18,9 +19,8 @@ internal sealed class FieldWriteOutputState(TestDatabase owner)
     internal Dictionary<Guid, byte[]> Outcomes { get; } = [];
     internal ResourceDefinition Resource { get; set; } = null!;
     internal EntityRef Reference => new(Owner.Partition, P.Collection, P.Document);
-    internal OperationResult Apply(CommandRequest command, string principal, CancellationToken token)
-        => Database.ApplyEmbedded(new(command.CommandId, OperationKind.Batch, principal, default,
-            System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)), token);
+    internal Result<object> Apply(CommandRequest command, string principal, CancellationToken token)
+        => Database.ApplyEmbedded(Database.CreateCommand(OperationKind.Batch, command.CommandId, principal, default, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)), token);
     internal byte[] Outcome(CommandRequest command, string principal)
         => Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Owner.Partition, principal, command.CommandId)))
             ?? throw new InvalidOperationException("The original field operation outcome is absent.");

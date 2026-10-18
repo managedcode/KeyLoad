@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
@@ -12,7 +13,7 @@ internal static class SampleRollupLeaseDropFlow
     private const int MaximumRecords = 4096;
     private const string Truncated = "The complete held rollup read exceeded its fixture bound.";
     private const string WrongSession = "The pending writer belongs to a different store opening.";
-    internal static async Task<OperationResult> RunAsync(TestDatabase db, Guid id, DropSampleRollup drop)
+    internal static async Task<Result<object>> RunAsync(TestDatabase db, Guid id, DropSampleRollup drop)
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(ScopeSeconds), TimeProvider.System);
         using var scope = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
@@ -24,7 +25,7 @@ internal static class SampleRollupLeaseDropFlow
         var position = db.Store.Position;
         var reader = Task.Factory.StartNew(() => HoldRead(db, entered, release, scope.Token), CancellationToken.None,
             TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        Task<OperationResult>? writer = null;
+        Task<Result<object>>? writer = null;
         var failures = new List<Exception>();
         try
         {
@@ -77,9 +78,8 @@ internal static class SampleRollupLeaseDropFlow
         }
         catch (Exception error) { entered.TrySetException(error); throw; }
     }
-    private static OperationResult Submit(TestDatabase db, Guid id, DropSampleRollup drop, CancellationToken cancellation)
-        => db.Database.ApplyEmbedded(new(id, OperationKind.Batch, SampleRollupWholeFlow.Root, default,
-            JsonSerializer.Serialize(new CommandRequest(id, db.Partition, [drop]), JsonDefaults.Options)), cancellation);
+    private static Result<object> Submit(TestDatabase db, Guid id, DropSampleRollup drop, CancellationToken cancellation)
+        => db.Database.ApplyEmbedded(db.Database.CreateCommand(OperationKind.Batch, id, SampleRollupWholeFlow.Root, default, JsonSerializer.Serialize(new CommandRequest(id, db.Partition, [drop]), JsonDefaults.Options)), cancellation);
     private static async Task<ZoneTreeGateSnapshot> ObserveQueuedAsync(ZoneTreeStore store, Guid session,
         CancellationToken cancellation)
     {

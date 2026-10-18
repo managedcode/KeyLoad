@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -9,7 +11,7 @@ internal static class CommandIdempotencyCrashAssertions
     private const int EventReadPageSize = 2;
     private const string EnqueueMutationKind = "enqueue";
 
-    internal static CommitReceipt RequireReceipt(OperationResult result) => result.Get<CommitReceipt>();
+    internal static CommitReceipt RequireReceipt(Result<object> result) => result.Get<CommitReceipt>();
 
     internal static void RequireInitialReceipt(CommitReceipt receipt)
     {
@@ -52,7 +54,7 @@ internal static class CommandIdempotencyCrashAssertions
             CommandIdempotencyCrashContract.Partition, CrashFixtureValues.Principal, CommandIdempotencyCrashContract.CommandId)))?.Result.Get<CommitReceipt>()
             ?? throw new InvalidOperationException(AssertCanonicalEffectsMessageText);
         RequireSameReceipt(durable, expectedReceipt);
-        var reference = CommandIdempotencyCrashData.ExpectedDocumentReference(CommandIdempotencyCrashContract.DocumentId);
+        var reference = CommandIdempotencyCrashData.ExpectedDocumentReference(database, CommandIdempotencyCrashContract.DocumentId);
         RequireDocument(database.GetDocument(CrashFixtureValues.Principal, reference), reference,
             InitialRevision, CommandIdempotencyCrashContract.DocumentJson);
         var page = database.ReadStream(CrashFixtureValues.Principal,
@@ -69,7 +71,7 @@ internal static class CommandIdempotencyCrashAssertions
     }
 
     internal static void AssertRetriesAndConflict(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, CommitReceipt expected, long committedTail, long seedTail)
+        Command<DatabaseCommand> operation, CommitReceipt expected, long committedTail, long seedTail)
     {
         const int FirstReplayAttempt = 0;
         const string AssertRetriesAndConflictMessageText = "A matching command retry appended an outbox effect.";
@@ -84,8 +86,8 @@ internal static class CommandIdempotencyCrashAssertions
                 throw new InvalidOperationException(AssertRetriesAndConflictMessageText);
             }
         }
-        var changed = CommandIdempotencyCrashData.CreateChangedOperation(operation);
-        if (database.Apply(changed).Error != ErrorCode.Conflict)
+        var changed = CommandIdempotencyCrashData.CreateChangedOperation(database, operation);
+        if (Errors.Code(database.Apply(changed).Problem) != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(AssertRetriesAndConflictAssertRetriesAndConflictMessageText);
         }

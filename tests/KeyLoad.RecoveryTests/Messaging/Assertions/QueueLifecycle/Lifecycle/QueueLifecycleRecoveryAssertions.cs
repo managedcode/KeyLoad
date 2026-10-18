@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
@@ -11,7 +12,7 @@ internal static class QueueLifecycleRecoveryAssertions
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = Open(store);
-        var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueLifecycleCrashProtocol.OperationFile), token));
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;

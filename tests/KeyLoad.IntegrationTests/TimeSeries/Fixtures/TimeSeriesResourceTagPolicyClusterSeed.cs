@@ -36,7 +36,8 @@ internal static class TimeSeriesResourceTagPolicyClusterSeed
         await Assert.That(receipt.CommandId).IsEqualTo(append.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(new[] { new MutationReceipt("appendSamples", TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, 2L) }, receipt.Mutations.ToArray());
         var sealedWindow = await TimeSeriesResourceChunkPolicyClusterEnrollment.SealAsync(administrator, partition, opened.WindowId, token);

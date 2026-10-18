@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.CrashHost;
 
@@ -65,7 +66,7 @@ internal static class SampleChunkProcessAssertions
     private static async Task OriginalOutcomeAsync(SampleChunkCrashSnapshot snapshot)
     {
         await Assert.That(snapshot.OriginalInflightResult).IsNotNull();
-        var outcome = NativeSerialization.Deserialize<OperationResult>(Convert.FromHexString(snapshot.OriginalInflightResult!));
+        var outcome = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(snapshot.OriginalInflightResult!));
         var receipt = outcome.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
         await Assert.That(receipt.Token.Position).IsEqualTo(snapshot.Position);

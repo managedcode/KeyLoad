@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
@@ -8,7 +10,7 @@ internal static class GrainOnlineTextPublicationCommand
 {
     internal static string Resolve(DecodedGrainRequest request)
     {
-        var phase = NativeCommandPayload.Read<OnlineTextPublicationPhaseCommand>(Read(request));
+        var phase = DatabaseEngine.Payload<OnlineTextPublicationPhaseCommand>(Read(request));
         var partition = phase.Request.Consumer.Partition;
         ArgumentNullException.ThrowIfNull(partition);
         JsonData.Identifier(partition.TenantId);
@@ -18,17 +20,17 @@ internal static class GrainOnlineTextPublicationCommand
         return partition.AtomicPartitionId;
     }
 
-    internal static async Task<OperationResult> SubmitAsync(DatabaseEngine database,
+    internal static async Task<Result<object>> SubmitAsync(DatabaseEngine database,
         ICommitCoordinator coordinator, DecodedGrainRequest request, PrincipalRecord principal,
         INativeOnlineTextMaintenance? maintenance, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var operation = database.VerifyOperationAuthority(Read(request));
-        if (operation.PrincipalId != principal.Id || !principal.ClusterAdministrator)
+        var operation = database.OwnCommand(Read(request));
+        if (operation.UserId != principal.Id || !principal.ClusterAdministrator)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
         }
-        var phase = NativeCommandPayload.Read<OnlineTextPublicationPhaseCommand>(operation);
+        var phase = DatabaseEngine.Payload<OnlineTextPublicationPhaseCommand>(operation);
         if (maintenance is null)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
@@ -38,21 +40,21 @@ internal static class GrainOnlineTextPublicationCommand
         return await work.AwaitCallerAsync(cancellationToken).ConfigureAwait(true);
     }
 
-    private static ReplicatedOperation Read(DecodedGrainRequest request)
+    private static Command<DatabaseCommand> Read(DecodedGrainRequest request)
     {
         if (!OnlineTextRequestScope.Validate(request.Envelope))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var operation = GrainNativePayload.Read<ReplicatedOperation>(request.Payload);
-        if (operation.Kind != OperationKind.OnlineTextPublicationPhase
-            || operation.Id != request.Envelope.CommandId
-            || operation.PrincipalId != request.Envelope.PrincipalId)
+        var operation = GrainNativePayload.Read<Command<DatabaseCommand>>(request.Payload);
+        if (operation.Value!.Kind != OperationKind.OnlineTextPublicationPhase
+            || operation.CommandId != request.Envelope.CommandId
+            || operation.UserId != request.Envelope.PrincipalId)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var phase = NativeCommandPayload.Read<OnlineTextPublicationPhaseCommand>(operation);
-        if (phase.Request.CommandId != operation.Id || phase.Result.CommandId != operation.Id)
+        var phase = DatabaseEngine.Payload<OnlineTextPublicationPhaseCommand>(operation);
+        if (phase.Request.CommandId != operation.CommandId || phase.Result.CommandId != operation.CommandId)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

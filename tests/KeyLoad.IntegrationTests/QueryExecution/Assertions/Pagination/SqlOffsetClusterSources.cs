@@ -31,7 +31,8 @@ internal static class SqlOffsetClusterSources
         var replay = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(state.Seed, token));
         await SqlClusterProtocol.EqualAsync(state.Receipt, replay);
         await Assert.That(NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(state.Receipt))).IsTrue();
-        await Assert.That(replay.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(replay.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(replay.PersistedCopies).IsEqualTo(3);
         var official = await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, SqlClusterProtocol.Call(state.Partition, McpCallerTools.DocumentsCommit, state.Seed) with
         {
             CommandId = state.Seed.CommandId

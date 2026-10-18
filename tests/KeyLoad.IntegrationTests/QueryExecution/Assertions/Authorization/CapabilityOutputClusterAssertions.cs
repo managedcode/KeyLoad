@@ -11,13 +11,13 @@ internal static class CapabilityOutputClusterAssertions
     {
         var expected = new CommitReceipt(command.CommandId, actual.Token,
             [new("putDocument", CapabilityOutputClusterProtocol.Collection, ((PutDocument)command.Mutations[0]).Id, 1L)],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
-        await Assert.That(actual.Token.OwnershipEpoch).IsEqualTo(1L);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await Assert.That(actual.Token.Incarnation)
-            .IsEqualTo(ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root).Incarnation);
+            .IsEqualTo(ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation);
     }
 
     internal static async Task<string> ImageAsync(KeyLoadClient root, CapabilityOutputClusterState state, CancellationToken token)

@@ -25,7 +25,7 @@ internal sealed class RelationalResourceTests
         });
         RelationalTestData.Configure(database);
         var rejected = RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, row));
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(database.Database.GetDocument(RelationalTestData.Root,
             new(database.Partition, RelationalTestData.Table, RelationalTestData.First))).IsNull();
     }
@@ -36,7 +36,7 @@ internal sealed class RelationalResourceTests
         using var database = new TestDatabase();
         RelationalTestData.Configure(database);
         var row = RelationalTestData.Row().Replace(EmptyKey, string.Empty, StringComparison.Ordinal);
-        await Assert.That(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, row)).Error)
+        await Assert.That(Errors.Code(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, row)).Problem))
             .IsEqualTo(ErrorCode.Validation);
     }
 
@@ -56,6 +56,6 @@ internal sealed class RelationalResourceTests
         second = second[..^1] + NullNote;
         database.Commit(new PutDocument(RelationalTestData.Table, RelationalTestData.First, first));
         var result = RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.Second, second));
-        await Assert.That(result.Error).IsEqualTo(includeNull ? ErrorCode.Conflict : (ErrorCode?)null);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(includeNull ? ErrorCode.Conflict : (ErrorCode?)null);
     }
 }

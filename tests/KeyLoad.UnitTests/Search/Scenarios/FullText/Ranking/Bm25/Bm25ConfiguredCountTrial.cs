@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -57,7 +59,7 @@ internal static class Bm25ConfiguredCountTrial
         await RequireReplayAsync(flow, next, result);
     }
 
-    private static ReplicatedOperation CaptureSecond(Bm25OriginalPhaseRecoveryFlow flow)
+    private static Command<DatabaseCommand> CaptureSecond(Bm25OriginalPhaseRecoveryFlow flow)
         => Bm25CorpusCapture.Create(flow.Owner.Database, Bm25OriginalPhaseRecoveryFlow.Publisher, SecondSubject,
             new(flow.Owner.Source.Partition, "orders", "/text", "needle"), Guid.NewGuid(), null,
             flow.Owner.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
@@ -85,13 +87,13 @@ internal static class Bm25ConfiguredCountTrial
         });
     }
 
-    private static byte[] Outcome(Bm25OriginalPhaseRecoveryFlow flow, ReplicatedOperation operation)
+    private static byte[] Outcome(Bm25OriginalPhaseRecoveryFlow flow, Command<DatabaseCommand> operation)
     {
         var work = flow.Owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         return flow.Owner.Store.Read(view =>
         {
             var bounded = work.CreateView(view);
-            var selected = CommandOutcomeKeyResolver.Select(bounded, operation.PrincipalId, operation.Id,
+            var selected = CommandOutcomeKeyResolver.Select(bounded, operation.UserId!, operation.CommandId,
                 CommandOutcomePartitionIdentity.Resolve(operation));
             return bounded.ReadOwnedValue(selected.Key)
                 ?? throw new InvalidOperationException("The original publication outcome is missing.");
@@ -99,12 +101,12 @@ internal static class Bm25ConfiguredCountTrial
     }
 
     private static async Task RequireQuotaFailureAsync(Bm25OriginalPhaseRecoveryFlow flow,
-        ReplicatedOperation operation, OperationResult result, Bm25OriginalPhaseRecoveryState before, string[] familyBefore)
+        Command<DatabaseCommand> operation, Result<object> result, Bm25OriginalPhaseRecoveryState before, string[] familyBefore)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(result.SafeDetail).IsEqualTo(Bm25CorpusProtocol.Capacity);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Capacity);
+        
+        await Assert.That(result.Value).IsNull();
         await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(familyBefore),
             NativeSerialization.Serialize(Family(flow)));
         var after = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
@@ -119,15 +121,15 @@ internal static class Bm25ConfiguredCountTrial
     }
 
     private static async Task RequireStoredAsync(Bm25OriginalPhaseRecoveryFlow flow,
-        ReplicatedOperation operation, OperationResult result)
+        Command<DatabaseCommand> operation, Result<object> result)
     {
-        await Assert.That(result.Error).IsNull();
-        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(operation);
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(1);
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(1L);
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
-        await Assert.That(receipt.Token.Position).IsEqualTo(flow.Owner.Entry(operation.Id).Index);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
+        await Assert.That(receipt.Token.Position).IsEqualTo(flow.Owner.Entry(operation.CommandId).CanonicalSequence);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(flow.Owner.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(flow.Owner.Source.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(flow.Owner.Database.Durability);
@@ -139,11 +141,11 @@ internal static class Bm25ConfiguredCountTrial
     }
 
     private static async Task RequireReplayAsync(Bm25OriginalPhaseRecoveryFlow flow,
-        ReplicatedOperation original, OperationResult expected)
+        Command<DatabaseCommand> original, Result<object> expected)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var raw = Outcome(flow, original);
-        var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.Id));
+        var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.CommandId));
         await ReplicaSubmissionOutcomeFlow.RequireResultAsync(expected, flow.Publish(flow.Reissue(original)));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(raw, Outcome(flow, original));

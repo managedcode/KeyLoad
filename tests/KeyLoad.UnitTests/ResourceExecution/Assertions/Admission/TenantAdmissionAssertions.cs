@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -20,10 +22,10 @@ internal static class TenantAdmissionAssertions
             Convert.ToHexString(record.Value.Span)).ToArray();
     });
 
-    internal static async Task RecordAsync(DatabaseEngine database, ReplicatedOperation operation,
+    internal static async Task RecordAsync(DatabaseEngine database, Command<DatabaseCommand> operation,
         PartitionRef partition, string id)
     {
-        var record = database.GetDocument(operation.PrincipalId,
+        var record = database.GetDocument(operation.UserId!,
             new(partition, TenantAdmissionOperations.Collection, id));
         ArgumentNullException.ThrowIfNull(record);
         var reference = new EntityRef(partition, TenantAdmissionOperations.Collection, id);
@@ -38,7 +40,7 @@ internal static class TenantAdmissionAssertions
         await Assert.That(stored.Reference).IsEqualTo(reference);
         await Assert.That(stored.Revision).IsEqualTo(1L);
         await Assert.That(stored.Json).IsEqualTo(TenantAdmissionOperations.Body);
-        await Assert.That(stored.UpdatedAt).IsEqualTo(operation.EvaluatedAt);
+        await Assert.That(stored.UpdatedAt).IsEqualTo(new DateTimeOffset(operation.Timestamp));
         await Assert.That(stored.Deleted).IsFalse();
         ArgumentNullException.ThrowIfNull(stored.Access);
         await Assert.That(stored.Access.OwnerId).IsNull();
@@ -46,14 +48,15 @@ internal static class TenantAdmissionAssertions
         await Assert.That(stored.Access.TeamId).IsNull();
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, ReplicatedOperation operation,
+    internal static async Task ReceiptAsync(Result<object> result, Command<DatabaseCommand> operation,
         string id, CommitToken expectedToken)
     {
-        await Assert.That(result.Error).IsNull();
-        await Assert.That(result.SafeDetail).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(result.Problem?.Detail).IsNull();
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(1);
         await Assert.That(receipt.Token).IsEqualTo(expectedToken);
         var mutation = receipt.Mutations.Single();
         await Assert.That(mutation.Kind).IsEqualTo("putDocument");
@@ -64,18 +67,19 @@ internal static class TenantAdmissionAssertions
     }
 
     internal static async Task UnchangedAsync(TestDatabase fixture, string[] state,
-        (long LastIndex, long CommittedIndex, long Term) journal)
+        (long AppliedPosition, long StorePosition) journal)
     {
         await Assert.That(State(fixture.Store).SequenceEqual(state)).IsTrue();
-        await Assert.That(fixture.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(journal);
     }
-    internal static async Task<ReplicatedOperation> CommittedAsync(TestDatabase fixture, ReplicatedOperation issued)
+    internal static async Task<Command<DatabaseCommand>> CommittedAsync(TestDatabase fixture, Command<DatabaseCommand> issued)
     {
-        var committed = fixture.ReadRetainedEntry(issued.Id).Operation;
+        var committed = fixture.ReadStoredOutcome(issued.CommandId).PreparedCommand;
         ArgumentNullException.ThrowIfNull(committed);
-        await Assert.That(committed.Id).IsEqualTo(issued.Id);
-        await Assert.That(committed.PrincipalId).IsEqualTo(issued.PrincipalId);
-        await Assert.That(committed.PayloadJson).IsEqualTo(issued.PayloadJson);
+        await Assert.That(committed.CommandId).IsEqualTo(issued.CommandId);
+        await Assert.That(committed.UserId!).IsEqualTo(issued.UserId!);
+        await Assert.That(committed.Value!.Input.Span.SequenceEqual(issued.Value!.Input.Span)).IsTrue();
+        await Assert.That(committed.Value.Fingerprint).IsEqualTo(issued.Value.Fingerprint);
         return committed;
     }
 }

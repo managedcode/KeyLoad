@@ -112,9 +112,9 @@ internal sealed class AggregateSnapshotRaceClusterCold
             await Assert.That(after[index].NodeId).IsEqualTo(before[index].NodeId);
             await Assert.That(after[index].Incarnation).IsEqualTo(before[index].Incarnation);
             await Assert.That(after[index].ReadGeneration).IsGreaterThanOrEqualTo(before[index].ReadGeneration);
-            await Assert.That(after[index].Applied).IsGreaterThanOrEqualTo(before[index].Applied);
-            await Assert.That(before[index].Voters).IsEqualTo(3);
-            await Assert.That(after[index].Voters).IsEqualTo(3);
+            await Assert.That(after[index].Position).IsGreaterThanOrEqualTo(before[index].Position);
+            await Assert.That(before[index].SiloCount).IsEqualTo(3);
+            await Assert.That(after[index].SiloCount).IsEqualTo(3);
             await Assert.That(after[index].Durability).IsEqualTo(before[index].Durability);
             await Assert.That(after[index].RoutingReady).IsTrue();
         }

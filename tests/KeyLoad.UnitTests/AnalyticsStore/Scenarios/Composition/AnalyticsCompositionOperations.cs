@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
@@ -9,11 +11,11 @@ namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
 internal static class AnalyticsCompositionOperations
 {
-    internal static ReplicatedOperation Issue<T>(SafeProjectorOperationDatabase owner, OperationKind kind,
+    internal static Command<DatabaseCommand> Issue<T>(SafeProjectorOperationDatabase owner, OperationKind kind,
         T payload, Guid id, string principal = D.Root)
     {
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, owner.CallerToken);
-        return owner.Database.CreateNativeOperation(kind, id, principal,
+        return owner.Database.CreateCommand(kind, id, principal,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload), work);
     }
 
@@ -41,7 +43,7 @@ internal static class AnalyticsCompositionOperations
         await O.EqualAsync(principal, owner.Submit(operation).Get<PrincipalRecord>());
     }
 
-    internal static ReplicatedOperation Batch(SafeProjectorOperationDatabase owner, ImmutableArray<Mutation> mutations,
+    internal static Command<DatabaseCommand> Batch(SafeProjectorOperationDatabase owner, ImmutableArray<Mutation> mutations,
         string principal = P.Writer)
     {
         var id = Guid.NewGuid();
@@ -49,9 +51,9 @@ internal static class AnalyticsCompositionOperations
     }
 
     internal static async Task<AnalyticsCompositionCommit> CommitAsync(SafeProjectorOperationDatabase owner,
-        ReplicatedOperation operation, ImmutableArray<MutationReceipt> receipts, long creatorEpoch = 1)
+        Command<DatabaseCommand> operation, ImmutableArray<MutationReceipt> receipts, long creatorEpoch = 1)
     {
-        var expected = new CommitReceipt(operation.Id, owner.NextToken(), receipts, DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(operation.CommandId, owner.NextToken(), receipts, DurabilityProfile.ProcessDurable, 1);
         var actual = owner.Submit(operation).Get<CommitReceipt>();
         await ReceiptAsync(expected, actual);
         return new(operation, expected, creatorEpoch);
@@ -70,13 +72,12 @@ internal static class AnalyticsCompositionOperations
     {
         var image = TeamRowPolicyAssertions.Image(owner.Store);
         var position = owner.Store.Position;
-        await ReceiptAsync(original.Receipt, owner.Database.Apply(original.Operation, owner.Entry(original.Operation).Index).Get<CommitReceipt>());
+        await ReceiptAsync(original.Receipt, owner.Database.Apply(original.Operation).Get<CommitReceipt>());
         var fresh = owner.Submit(original.Operation);
-        if (original.Operation.PrincipalId == P.Writer && original.CreatorEpoch != currentEpoch)
+        if (original.Operation.UserId! == P.Writer && original.CreatorEpoch != currentEpoch)
         {
-            await O.EqualAsync(new OperationResult(null, ErrorCode.PermissionDenied,
-                "The principal policy changed since this command was evaluated."), fresh);
-            await Assert.That(fresh.NativeValue).IsNull();
+            await O.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, "The principal policy changed since this command was evaluated.")), fresh);
+            await Assert.That(fresh.Value).IsNull();
         }
         else
         {

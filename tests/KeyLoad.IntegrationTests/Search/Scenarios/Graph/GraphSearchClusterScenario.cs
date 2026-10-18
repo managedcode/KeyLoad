@@ -6,7 +6,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
-/// <summary>Seeds an independently specified multi-collection graph for public CLUSTER search tests.</summary>
+/// <summary>Seeds an independently specified multi-collection graph for public Orleans search tests.</summary>
 internal sealed record GraphSearchClusterScenario(PartitionRef Partition)
 {
     internal const string Documents = "graphdocs";

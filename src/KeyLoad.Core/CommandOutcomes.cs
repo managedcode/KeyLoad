@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
@@ -15,34 +17,34 @@ public sealed partial class DatabaseEngine
     /// <summary>Resolves a replicated outcome and rechecks current authorization and content identity.</summary>
     /// <param name="operation">Operation whose persisted result is requested.</param>
     /// <returns>The reauthorized stored result or a safe domain failure.</returns>
-    public OperationResult ResolveOutcome(ReplicatedOperation operation)
+    public Result<object> ResolveOutcome(Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        return ResolveOutcomeCore(NormalizeOperation(operation));
+        return ResolveOutcomeCore(OwnCommand(operation));
     }
-    private OperationResult ResolveOutcomeCore(ReplicatedOperation operation) => Store.Read(view =>
+    private Result<object> ResolveOutcomeCore(Command<DatabaseCommand> operation) => Store.Read(view =>
     {
         try
         {
             return ReadValidatedSubmissionOutcome(view, operation);
         }
-        catch (KeyLoadException exception) { return new OperationResult(null, exception.Code, exception.Message); }
+        catch (KeyLoadException exception) { return ManagedCode.Communication.Result<object>.Fail(Errors.Problem(exception.Code, exception.Message)); }
     });
 
     /// <summary>Returns only the actual validated stored outcome; observation failures retain their cause.</summary>
     /// <param name="operation">Original native operation with its stable command identity.</param>
     /// <returns>The canonical stored result after all current authority and identity checks.</returns>
-    internal OperationResult ResolveSubmissionOutcome(ReplicatedOperation operation)
+    internal Result<object> ResolveSubmissionOutcome(Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        var normalized = NormalizeOperation(operation);
+        var normalized = OwnCommand(operation);
         return Store.Read(view => ReadValidatedSubmissionOutcome(view, normalized, allowStoredDocumentDenial: true));
     }
 
-    private OperationResult ReadValidatedSubmissionOutcome(IKeyValueView view, ReplicatedOperation operation,
+    private Result<object> ReadValidatedSubmissionOutcome(IKeyValueView view, Command<DatabaseCommand> operation,
         bool allowStoredDocumentDenial = false, CommandOutcomeSelection? verifiedSelection = null)
     {
-        var principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
+        var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
         KeyLoadException? denied = null;
         try
         {
@@ -57,7 +59,7 @@ public sealed partial class DatabaseEngine
             denied = refusal;
         }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-        var selection = verifiedSelection ?? CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+        var selection = verifiedSelection ?? CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
         var outcome = selection.Outcome;
         if (outcome is null)
         {
@@ -68,23 +70,20 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
         }
         ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome, verifiedSelection.HasValue);
-        if (denied is not null && (outcome.Result.Error != denied.Code
-            || !string.Equals(outcome.Result.SafeDetail, denied.Message, StringComparison.Ordinal)
-            || outcome.Result.Json is not null || outcome.Result.NativeValue is not null
+        if (denied is not null && (Errors.Code(outcome.Result.Problem) != denied.Code
+            || !string.Equals(outcome.Result.Problem?.Detail, denied.Message, StringComparison.Ordinal)
+            || outcome.Result.Value is not null
             || outcome.BlobAuthority is not null || outcome.CompositionAuthority is not null
             || outcome.OnlineTextAuthority is not null || outcome.RemoteTransferFailureAuthority is not null
             ))
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw();
         }
-        ValidateCachedResult(view, principal, operation with
-        {
-            EvaluatedAt = Clock.GetUtcNow()
-        }, outcome);
+        ValidateCachedResult(view, principal, EvaluateCommand(operation, Clock.GetUtcNow()), outcome);
         return outcome.Result;
     }
     private void ValidateSubmissionOutcomeIdentity(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, CommandOutcomeSelection selection, StoredOutcome outcome, bool originalIdentityVerified = false)
+        Command<DatabaseCommand> operation, CommandOutcomeSelection selection, StoredOutcome outcome, bool originalIdentityVerified = false)
     {
         if (outcome.PolicyEpoch != principal.PolicyEpoch)
         {
@@ -96,14 +95,14 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous)
+    private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, StoredOutcome previous)
     {
         if (previous.PolicyEpoch != principal.PolicyEpoch)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
         }
 
-        if (BlobStorageOperations.Handles(operation.Kind))
+        if (BlobStorageOperations.Handles(operation.Value!.Kind))
         {
             new BlobStorageOperations(this).ValidateOutcomeAuthority(view, operation, previous.Result, previous.BlobAuthority);
         }
@@ -113,47 +112,47 @@ public sealed partial class DatabaseEngine
         ValidateCompositionOutcome(view, principal, operation, previous);
         ReauthorizeExtendedOutcome(view, principal, operation, previous);
 
-        if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
+        if (operation.Value!.Kind == OperationKind.Receive && Errors.Code(previous.Result.Problem) is null)
         {
             ValidateCachedQueueReceive(view, principal, operation, previous.Result);
         }
 
-        if (operation.Kind == OperationKind.ReceiveSubscription && previous.Result.Error is null)
+        if (operation.Value!.Kind == OperationKind.ReceiveSubscription && Errors.Code(previous.Result.Problem) is null)
         {
             ValidateCachedSubscriptionReceive(view, principal, operation, previous.Result);
         }
-        if (operation.Kind == OperationKind.SubscriptionProcessing && previous.Result.Error is null)
+        if (operation.Value!.Kind == OperationKind.SubscriptionProcessing && Errors.Code(previous.Result.Problem) is null)
         {
             var processing = Payload<SubscriptionProcessingRequest>(operation);
-            ValidateGroupClaims(view, principal, processing.Subscription, processing.Token, operation.EvaluatedAt);
+            ValidateGroupClaims(view, principal, processing.Subscription, processing.Token, operation.Timestamp);
             ReauthorizeEffects(view, principal, processing.Subscription.Source.Partition, processing.Effects);
         }
-        if (operation.Kind == OperationKind.CommitProjectionBatch && previous.Result.Error is null)
+        if (operation.Value!.Kind == OperationKind.CommitProjectionBatch && Errors.Code(previous.Result.Problem) is null)
         {
             var projection = Payload<CommitProjectionBatchRequest>(operation);
-            ProjectionClaims(view, projection, operation.EvaluatedAt, allowExpiredReceipt: true);
+            ProjectionClaims(view, projection, operation.Timestamp, allowExpiredReceipt: true);
             ReauthorizeEffects(view, principal, projection.Consumer.Partition, projection.Effects);
         }
     }
 
-    private void ReauthorizeExtendedOutcome(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation,
+    private void ReauthorizeExtendedOutcome(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation,
         StoredOutcome previous)
     {
-        if (previous.Result.Error is not null)
+        if (Errors.Code(previous.Result.Problem) is not null)
         {
             return;
         }
-        if (operation.Kind == OperationKind.Batch)
+        if (operation.Value!.Kind == OperationKind.Batch)
         {
             var command = Payload<CommandRequest>(operation);
             ReauthorizeExtendedEffects(view, principal, command.Partition, command.Mutations);
         }
-        else if (operation.Kind == OperationKind.CommitInbox)
+        else if (operation.Value!.Kind == OperationKind.CommitInbox)
         {
             var inbox = Payload<CommitInboxRequest>(operation);
             ReauthorizeEffects(view, principal, inbox.Target.Partition, inbox.Effects);
         }
-        else if (operation.Kind == OperationKind.Processing)
+        else if (operation.Value!.Kind == OperationKind.Processing)
         {
             var processing = Payload<ProcessingRequest>(operation);
             ReauthorizeExtendedEffects(view, principal, processing.Lane.Partition, processing.Effects);
@@ -175,7 +174,7 @@ public sealed partial class DatabaseEngine
     }
 
     private void ValidateCachedQueueReceive(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, OperationResult result)
+        Command<DatabaseCommand> operation, Result<object> result)
     {
         var deliveries = result.Get<ReceiveResult>().Deliveries;
         if (deliveries.IsEmpty)
@@ -186,14 +185,14 @@ public sealed partial class DatabaseEngine
         var lane = Payload<ReceiveRequest>(operation).Lane;
         foreach (var delivery in deliveries)
         {
-            Lease(view, principal, lane, delivery.Token, operation.EvaluatedAt);
+            Lease(view, principal, lane, delivery.Token, operation.Timestamp);
             var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
             RequireCachedDeliveryProjection(principal, resource, delivery.PayloadJson, delivery.HeadersJson);
         }
     }
 
     private void ValidateCachedSubscriptionReceive(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, OperationResult result)
+        Command<DatabaseCommand> operation, Result<object> result)
     {
         var cached = result.Get<ReceiveSubscriptionResult>();
         var subscription = Payload<ReceiveSubscriptionRequest>(operation).Subscription;
@@ -206,9 +205,9 @@ public sealed partial class DatabaseEngine
         var budget = new SubscriptionWindowAuthorityReadBudget(OperationLimitsOptions);
         foreach (var delivery in cached.Deliveries)
         {
-            var lease = ReadSubscriptionLease(view, principal, subscription, delivery.Token, operation.EvaluatedAt, budget);
+            var lease = ReadSubscriptionLease(view, principal, subscription, delivery.Token, operation.Timestamp, budget);
             var resource = SourceResource(view, subscription.Source);
-            var dataPrincipal = Principal(view, lease.State.Definition.DataPrincipalId, operation.EvaluatedAt);
+            var dataPrincipal = Principal(view, lease.State.Definition.DataPrincipalId, operation.Timestamp);
             RequireCachedDeliveryProjection(dataPrincipal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
             RequireCachedDeliveryProjection(principal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
         }

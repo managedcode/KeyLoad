@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -28,12 +29,11 @@ internal static class SubscriptionPendingCounterAuthorityAssertions
         }
     }
 
-    internal static async Task NackAsync(OperationResult actual, SubscriptionDeliveryCommand request, CommitToken token)
+    internal static async Task NackAsync(Result<object> actual, SubscriptionDeliveryCommand request, CommitToken token)
     {
-        var expected = new CommitReceipt(request.CommandId, token,
-            [new(nameof(DeliveryAction.Nack), request.Subscription.Source.Resource,
-                NackedPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), InitialLeaseVersion)], DurabilityProfile.ProcessDurable);
-        await Assert.That(actual.Error).IsNull();
+        var expected = new CommitReceipt(request.CommandId, token, [new(nameof(DeliveryAction.Nack), request.Subscription.Source.Resource,
+                NackedPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), InitialLeaseVersion)], DurabilityProfile.ProcessDurable, 1);
+        await Assert.That(Errors.Code(actual.Problem)).IsNull();
         await Assert.That(NativeSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
     }

@@ -83,7 +83,7 @@ internal static class SampleRollupProcessAssertions
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(SampleRollupCrashContract.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(prepared.Position);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialRevision);
+
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(SampleRollupCrashContract.PositionStep);
         var expectedMutation = new MutationReceipt(SampleRollupProtocol.RefreshKind,

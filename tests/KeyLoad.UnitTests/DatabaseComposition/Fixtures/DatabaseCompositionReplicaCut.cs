@@ -111,7 +111,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
         var token = TestContext.Current!.Execution.CancellationToken;
         var request = new CommandRequest(Guid.NewGuid(), source.Partition, [.. mutations]);
         var work = new ReadExecutionBudget(Database.OperationLimitsOptions, Database.EvaluationClock, token);
-        var original = Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, RootPrincipal,
+        var original = Database.CreateCommand(OperationKind.Batch, request.CommandId, RootPrincipal,
             Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
         return Database.Apply(original).Get<CommitReceipt>();
     }

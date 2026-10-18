@@ -18,7 +18,7 @@ internal static class DocumentCommandPrincipalColdReplayAssertions
         Exception? ambiguous = null;
         try
         {
-            owner.Entry(first.Entry.Operation!.Id);
+            owner.Entry(first.Entry.Operation!.CommandId);
         }
         catch (InvalidOperationException error) { ambiguous = error; }
         await Assert.That(ambiguous).IsNotNull();
@@ -30,9 +30,9 @@ internal static class DocumentCommandPrincipalColdReplayAssertions
         Retained original, string document, long revision)
     {
         var operation = original.Entry.Operation ?? throw new InvalidOperationException("The original operation is missing.");
-        await Assert.That(original.Result.Error).IsNull();
+        await Assert.That(Errors.Code(original.Result.Problem)).IsNull();
         var receipt = original.Result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Token.Position).IsEqualTo(original.Entry.Index);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(owner.Source.Partition.AtomicPartitionId);
@@ -48,7 +48,7 @@ internal static class DocumentCommandPrincipalColdReplayAssertions
     {
         var operation = original.Entry.Operation ?? throw new InvalidOperationException("The original operation is missing.");
         var before = DocumentPatchAtomicityState.Read(owner);
-        var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, operation.PrincipalId, operation.Id)
+        var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, operation.UserId!, operation.CommandId)
             ?? throw new InvalidOperationException("The original scoped outcome is missing.");
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(original.Result), NativeSerialization.Serialize(stored));
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(original.Result), NativeSerialization.Serialize(owner.Submit(operation)));

@@ -19,7 +19,7 @@ internal static class FunctionalGateEvents
             var data = FunctionalGateEventsProtocol.Event(context, -1, linked: true);
             var command = FunctionalGateEventsProtocol.Append(context, stream, data, 0);
             var receipt = await context.SdkAsync(context.Administrator.Sdk.CommitAsync(command, token));
-            await FunctionalGateEventsAssertions.ReceiptAsync(receipt, command, stream, 1);
+            await FunctionalGateEventsAssertions.ReceiptAsync(context, receipt, command, stream, 1);
             await FunctionalGateEventsAssertions.ReadAsync(context, context.Administrator, stream, [data], receipt, token);
         }
     }
@@ -38,7 +38,7 @@ internal static class FunctionalGateEvents
         await FunctionalGateEventsAssertions.DeniedAsync(context, stream, token);
         var firstCommand = FunctionalGateEventsProtocol.Append(context, stream, linked, 0);
         var first = await context.SdkAsync(context.Writer.Sdk.CommitAsync(firstCommand, token));
-        await FunctionalGateEventsAssertions.ReceiptAsync(first, firstCommand, stream, 1);
+        await FunctionalGateEventsAssertions.ReceiptAsync(context, first, firstCommand, stream, 1);
         var firstReplay = await context.McpAsync<CommitReceipt>(context.Writer,
             McpCallerTools.DocumentsCommit, firstCommand, token);
         await FunctionalGateEventsAssertions.SameAsync(first, firstReplay);
@@ -46,7 +46,7 @@ internal static class FunctionalGateEvents
         var secondCommand = FunctionalGateEventsProtocol.Append(context, stream, unlinked, 1);
         var second = await context.McpAsync<CommitReceipt>(context.Writer,
             McpCallerTools.DocumentsCommit, secondCommand, token);
-        await FunctionalGateEventsAssertions.ReceiptAsync(second, secondCommand, stream, 2);
+        await FunctionalGateEventsAssertions.ReceiptAsync(context, second, secondCommand, stream, 2);
         await Assert.That(second.Token.Position).IsGreaterThan(first.Token.Position);
         var secondReplay = await context.SdkAsync(context.Writer.Sdk.CommitAsync(secondCommand, token));
         await FunctionalGateEventsAssertions.SameAsync(second, secondReplay);

@@ -7,9 +7,7 @@ internal static class CommittedResponseAssertions
 {
     internal static CommitReceipt Expected(ConnectionNativeScenario scenario, CommandRequest command, long position, long revision)
         => new(command.CommandId, new(scenario.Fixture.Database.Store.Identity.Incarnation,
-            command.Partition.AtomicPartitionId, position, CommittedResponseProtocol.InitialEpoch),
-            [new(CommittedResponseProtocol.MutationKind, ConnectionNativeProtocol.Collection, CommittedResponseProtocol.Document, revision)],
-            DurabilityProfile.QuorumProcessDurable);
+            command.Partition.AtomicPartitionId, position), [new(CommittedResponseProtocol.MutationKind, ConnectionNativeProtocol.Collection, CommittedResponseProtocol.Document, revision)], DurabilityProfile.ProcessDurable, 1);
 
     internal static async Task ReceiptAsync(CommitReceipt? actual, CommitReceipt expected)
     {

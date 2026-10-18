@@ -203,8 +203,8 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <returns>An immutable snapshot without keys, payloads, credentials or storage paths.</returns>
     public ZoneTreeReadSnapshot GetReadDiagnostics() => runtime.ReadCounters.Snapshot();
 
-    /// <summary>Samples native write-gate contention without acquiring that gate.</summary>
-    /// <remarks>Sample only while the owner is open. Counts include maintenance, are transient and confer no authority.</remarks>
+    /// <summary>Observes native write-gate contention without acquiring that gate.</summary>
+    /// <remarks>Read only while the owner is open. Counts include maintenance, are transient and confer no authority.</remarks>
     /// <returns>Only the ephemeral store session and native pending writer count; no data or secrets.</returns>
     public ZoneTreeGateSnapshot GateDiagnostics
         => new(runtime.ReadCounters.SessionId, runtime.Gate.WaitingWriteCount);

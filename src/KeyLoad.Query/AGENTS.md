@@ -6,7 +6,7 @@
 - Entry points/types: `QueryExecution/Execution/SqlParser.cs`, `QueryExecution/Validation/QuerySemantics/QueryValidation.cs`, `QueryExecution/Queries/QueryEngine.cs`, `Search/Queries/QueryExecution/SearchEngine.cs`, `ChangeFeeds/Execution/LiveQueries.cs`, and query AST definitions.
 - Query feature work belongs under `<SliceName>/` with matching canonical feature documentation. Query code consumes abstractions and database capabilities; it does not own storage, command routing, or credentials.
 - Search and query authorization must honor persisted database policy; callers cannot provide trusted roles.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Apply the installed Orleans skill when choosing distributed query execution primitives; retain the query algorithms and bounds in their owning slice.
 - Preserve resource budgets, cancellation, validation and error semantics. Local Aspire results are development evidence; qualification requires exact-source Linux GitHub Actions artifacts and every required gate.
 
 ## Boundaries and protected risks

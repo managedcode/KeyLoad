@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.Messaging;
 using KeyLoad.Storage.ZoneTree;
@@ -13,14 +14,14 @@ internal static class LocalInboxProcessingRecoveryOriginalRows
     private const int FirstMutationOrdinal = 0;
     private const int NextOutboxSequence = 1;
 
-    internal static (byte[] Key, byte[] Value)[] Capture(ZoneTreeStore store, ReplicatedOperation original, long seedTail)
+    internal static (byte[] Key, byte[] Value)[] Capture(ZoneTreeStore store, Command<DatabaseCommand> original, long seedTail)
     {
         var partition = LocalInboxProcessingCrashContract.Partition;
         var keys = new List<byte[]>
         {
             LocalInboxProcessingRecoveryImage.InboxKey(),
-            KeySpace.PartitionOutcome(partition, original.PrincipalId, original.Id),
-            KeySpace.OutcomeLocatorV2(partition, original.PrincipalId, original.Id)
+            KeySpace.PartitionOutcome(partition, original.UserId!, original.CommandId),
+            KeySpace.OutcomeLocatorV2(partition, original.UserId!, original.CommandId)
         };
         for (var ordinal = FirstMutationOrdinal; ordinal < LocalInboxProcessingCrashContract.MutationCount; ordinal++)
         {

@@ -27,7 +27,7 @@ internal sealed class SampleChunkCodecTests
     }
 
     [Test]
-    public async Task AcChunk002UnpairedSurrogateTagsUseExactUtf16Fallback()
+    public async Task AcChunk002UnpairedCodeUnitsUseExactUtf16Encoding()
     {
         var expected = new[]
         {

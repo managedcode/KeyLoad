@@ -11,7 +11,7 @@ internal sealed class RequestCqrsOfflineProcessTests
         {
             var result = await scope.StartSuccessAsync().ConfigureAwait(false);
             await Assert.That(result.ExitCode).IsEqualTo(0);
-            await Assert.That(result.Stdout).IsEqualTo(new string('A', NodeEpochClusterOfflineProtocol.MaximumOutputBytes));
+            await Assert.That(result.Stdout).IsEqualTo(new string('A', OwnedChildProcessProtocol.MaximumOutputBytes));
             await Assert.That(result.Stderr).IsEqualTo(RequestCqrsOfflineProcessProtocol.SuccessError);
         }, TestContext.Current!.Execution.CancellationToken);
 
@@ -37,7 +37,7 @@ internal sealed class RequestCqrsOfflineProcessTests
             var process = await child.WaitForStartedAsync().ConfigureAwait(false);
             await child.ReleaseOutputAsync().ConfigureAwait(false);
             var failure = await child.ExpectOutputLimitAsync().ConfigureAwait(false);
-            await Assert.That(failure.Message).IsEqualTo(NodeEpochClusterOfflineProtocol.OutputExceeded);
+            await Assert.That(failure.Message).IsEqualTo(OwnedChildProcessProtocol.OutputExceeded);
             await RequestCqrsOfflineProcessAssertions.AssertExitedAsync(process).ConfigureAwait(false);
             var healthy = await scope.StartSuccessAsync().ConfigureAwait(false);
             await Assert.That(healthy.ExitCode).IsEqualTo(0);

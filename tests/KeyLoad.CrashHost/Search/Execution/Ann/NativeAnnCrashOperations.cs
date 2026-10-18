@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 
@@ -44,8 +45,8 @@ internal static class NativeAnnCrashOperations
     internal static PutVector Vector(int index, ImmutableArray<float> values)
         => new(NativeAnnCrashContract.Collection, NativeAnnCrashContract.Id(index), NativeAnnCrashContract.Field,
             values, NativeAnnCrashContract.Space, NativeAnnCrashContract.Revision);
-    internal static OperationResult Apply<T>(NativeAnnCrashCommandOwner commands, OperationKind kind, T payload, Guid id)
-        => commands.Submit(CrashDatabase.Operation(kind, payload, id), explicitTime: false);
+    internal static Result<object> Apply<T>(NativeAnnCrashCommandOwner commands, OperationKind kind, T payload, Guid id)
+        => commands.Submit(CrashDatabase.Operation(commands.Database, kind, payload, id), explicitTime: false);
     internal static ProjectionBatch Read(DatabaseEngine database, AnnMaintenanceRequest request, long upper)
         => database.ReadProjectionBatch(CrashFixtureValues.Principal,
             new(request.Consumer, NativeAnnCrashContract.PageLimit, NativeAnnCrashContract.PageBytes, upper));

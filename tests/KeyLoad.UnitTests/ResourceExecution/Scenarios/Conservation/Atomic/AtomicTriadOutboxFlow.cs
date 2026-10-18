@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Messaging;
 using TUnit.Assertions.Enums;
@@ -76,7 +77,7 @@ internal static class AtomicTriadOutboxFlow
         var image = AtomicTriadOutboxImage.Domain(source.Store, source.Partition);
         var refusal = source.Database.ApplyEmbedded(operation, token);
         await AtomicTriadOutboxImage.ExactAsync(refusal,
-            new OperationResult(null, ErrorCode.ResourceExhausted, AtomicTriadOutboxFixture.QuotaDetail));
+            Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, AtomicTriadOutboxFixture.QuotaDetail)));
         await Assert.That(AtomicTriadOutboxImage.Domain(source.Store, source.Partition))
             .IsEquivalentTo(image, CollectionOrdering.Matching);
         await AtomicTriadOutboxImage.AbsentAsync(source.Database, source.Partition);

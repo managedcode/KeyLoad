@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,9 +8,9 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueMissingMetadataAssertions
 {
     internal static async Task RefusalAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state,
-        ReplicatedOperation operation, QueueLifecycleConditionCut cut)
+        Command<DatabaseCommand> operation, QueueLifecycleConditionCut cut)
     {
-        var outcomeKey = KeySpace.PartitionOutcome(state.Partition, QueueLifecycleTestProtocol.Administrator, operation.Id);
+        var outcomeKey = KeySpace.PartitionOutcome(state.Partition, QueueLifecycleTestProtocol.Administrator, operation.CommandId);
         for (var repeat = 0; repeat < 2; repeat++)
         {
             var inspected = Assert.ThrowsExactly<KeyLoadException>(() => owner.InspectMessage(

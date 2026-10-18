@@ -42,7 +42,7 @@ internal static class GraphReferenceLifetimeNativeRefusals
             [new UpsertEdge(FreshGraph, DeniedEdge, anchor, originalTarget, Label, Attributes)]);
         var reply = await profile.Source.SubmitAsync(OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, NativeSerialization.Serialize(command), token);
-        await Assert.That(reply.Error).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
+        await Assert.That(Errors.Code(reply.Problem)).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
         await Assert.That(reply.Payload.IsEmpty).IsTrue();
         await SameAsync(profile, image, position);
     }

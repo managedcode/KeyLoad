@@ -27,7 +27,7 @@ internal static class FunctionalGateColdAuthorization
         };
         await SqlClusterProtocol.EqualAsync(restored, await context.SdkAsync(context.Administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), restored, token)));
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
-        await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, context.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(context, receipt, command.CommandId, context.Partition,
             [new("putDocument", reference.Collection, reference.Id, 1)]);
         await SqlClusterProtocol.EqualAsync(receipt, await context.McpAsync<CommitReceipt>(context.Writer, McpCallerTools.DocumentsCommit, command, token));
         var expected = new DocumentReadResult(new(reference, 1, "{\"stage\":\"healthy-after-cold\"}", false, []));

@@ -71,7 +71,7 @@ internal static class GenerationVisibilityWriteAssertions
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(db.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(db.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(db.Store.Position);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialOwnership);
+
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         MutationReceipt[] expected = [new(kind, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam, revision)];
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

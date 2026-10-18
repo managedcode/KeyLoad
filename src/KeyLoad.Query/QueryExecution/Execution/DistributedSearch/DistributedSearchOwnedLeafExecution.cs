@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
@@ -32,8 +31,6 @@ internal static partial class DistributedSearchOwnedLeafExecution
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.ConstrainLifetime(originalExpiry);
         DistributedSearchOwnedLeafValidation.Require(original, database.Limits, execution, budget);
-        PartitionControlLifetimeCoverage.Require(request.Coverage, original.Search.Partition,
-            [request.Definition], database.Limits.MaxBatchBytes);
         RequireOwner(database, original.Owner, actualOwner);
         budget.ConstrainResultBytes(original.MaxResultBytes);
         var grant = budget.CreateReadGrant(original.MaxReadBytes, original.MaxExaminedRecords);

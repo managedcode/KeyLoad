@@ -35,7 +35,7 @@ internal sealed class DatabaseCompositionDeterminismTests
                 [new QueueToGraph(Graph, Queue, EdgePrefix),
                     new GraphToQueueMutation(Queue, Graph, Vertex(left, From), MessagePrefix)]);
             var work = left.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
-            var operation = left.Database.CreateNativeOperation(OperationKind.Batch, commandId, "root", fixedEvaluation,
+            var operation = left.Database.CreateCommand(OperationKind.Batch, commandId, "root", fixedEvaluation,
                 NativeSerialization.Serialize(request), work);
             var limits = new DatabaseLimits { QueryDeadlineSeconds = OneSecondDeadline };
             var steady = new DivergentClock(DateTimeOffset.UnixEpoch, timestampStep: 0);

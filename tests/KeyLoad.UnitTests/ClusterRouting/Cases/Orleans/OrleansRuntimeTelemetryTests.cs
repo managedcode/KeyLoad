@@ -1,8 +1,8 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource]
+[RequestCqrsHostedDataSource]
 [NotInParallel]
-internal sealed class OrleansRuntimeTelemetryTests(RequestCqrsClusterFixture fixture)
+internal sealed class OrleansRuntimeTelemetryTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]
     public Task AcOrl012RealSignedOperationsExportBoundedPrivateNativeTelemetry()

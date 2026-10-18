@@ -7,6 +7,10 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainIdentityContext
 {
+    internal static SiloAddress RequireOriginSilo()
+        => RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is GrainRequestContextState { OriginSilo: { } address }
+            ? address : throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+
     internal static ClaimsPrincipal CreatePrincipal(string principalId)
     {
         JsonData.Identifier(principalId);

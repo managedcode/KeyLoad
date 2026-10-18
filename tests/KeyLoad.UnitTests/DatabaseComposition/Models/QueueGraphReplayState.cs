@@ -1,10 +1,11 @@
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal sealed record QueueGraphReplayState(
     QueueGraphIdentityState Source,
-    ReplicatedOperation Reverse,
+    Command<DatabaseCommand> Reverse,
     byte[] ReverseReceipt,
-    ReplicatedOperation Next,
+    Command<DatabaseCommand> Next,
     EntityRef ContinuationReference)
 {
     internal byte[] NextReceipt { get; set; } = [];

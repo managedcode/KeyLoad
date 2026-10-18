@@ -72,7 +72,7 @@ internal static class NativeChecksumProfileScenario
         var database = CrashDatabase.Create(store);
         CommandIdempotencyCrashData.ConfigureResources(database);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, CommandIdempotencyCrashContract.Partition).Head.Tail;
-        var operation = CommandIdempotencyCrashData.CreateOperation();
+        var operation = CommandIdempotencyCrashData.CreateOperation(database);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         CommandIdempotencyCrashAssertions.RequireInitialReceipt(receipt);
         CommandIdempotencyCrashAssertions.AssertCanonicalEffects(database, store, receipt, tail + NativeChecksumProfileProtocol.OriginalEffects, tail);

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage;
 
@@ -111,7 +112,7 @@ internal sealed class BlobReclaimTests
             blob.Partition.TransactionDomainId, blob.Partition.PartitionKey, blob.Resource,
             blob.Id, uploadId.ToString("N"), (long)ordinal);
 
-    private static OperationResult Reclaim(TestDatabase database, BlobRef blob,
+    private static Result<object> Reclaim(TestDatabase database, BlobRef blob,
         Guid uploadId, int maxParts, Guid commandId, DateTimeOffset? time = null)
     {
         var request = new ReclaimBlobRequest(commandId, blob, uploadId, maxParts);

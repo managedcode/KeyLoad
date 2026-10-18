@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.RecoveryTests.Features.Messaging;
@@ -11,15 +12,15 @@ internal static class BlobPriorPublicationDamage
     internal static async Task<BlobPriorPublicationFault> ApplyAsync(string root, DatabaseEngine owner,
         ZoneTreeStore store, BlobPriorPublicationState seed, bool missing, CancellationToken token)
     {
-        var queueOperation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var queueOperation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueLifecycleCrashProtocol.OperationFile), token));
         await Assert.That(OutcomeStoreOracle.Read(store, queueOperation)).IsNull();
         await QueueLifecycleRecoveryImage.AssertAsync(owner, store, committed: false);
         await BlobPriorPublicationAssertions.HealthyAsync(owner, seed);
         var deleteRequest = new DeleteBlobRequest(Guid.NewGuid(), seed.Blob, 1);
-        var delete = CrashDatabase.Operation(OperationKind.DeleteBlob, deleteRequest, deleteRequest.CommandId);
+        var delete = CrashDatabase.Operation(owner, OperationKind.DeleteBlob, deleteRequest, deleteRequest.CommandId);
         var reclaimRequest = new ReclaimBlobRequest(Guid.NewGuid(), seed.Blob, seed.Upload, 1);
-        var reclaim = CrashDatabase.Operation(OperationKind.ReclaimBlob, reclaimRequest, reclaimRequest.CommandId);
+        var reclaim = CrashDatabase.Operation(owner, OperationKind.ReclaimBlob, reclaimRequest, reclaimRequest.CommandId);
         var image = BlobPriorPublicationImage.Capture(store);
         var position = store.Position;
         var key = BlobPriorPublicationOracle.Key("blob-state-v1", seed);

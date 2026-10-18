@@ -66,7 +66,7 @@ internal static class QueueClaimVersionExhaustionTrial
             return true;
         });
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var operation = fixture.Database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, time));
+        var operation = fixture.Database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, time));
         var body = new MessageBody(message.MessageId, message.PayloadJson, message.HeadersJson, message.OrderingKey, JsonData.Fingerprint(message));
         return new(lane, time, producer, produced, key, row, damaged, body, operation);
     }

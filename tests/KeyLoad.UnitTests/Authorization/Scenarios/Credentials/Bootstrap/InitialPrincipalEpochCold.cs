@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class InitialPrincipalEpochCold
 {
     internal static async Task RunAsync(InitialPrincipalEpochFixture fixture, InitialPrincipalEpochState state,
-        ReplicatedOperation refused, CancellationToken token)
+        Command<DatabaseCommand> refused, CancellationToken token)
     {
         var db = fixture.Harness;
         var image = InitialPrincipalEpochAssertions.Image(db.Store);

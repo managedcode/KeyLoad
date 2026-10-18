@@ -12,7 +12,7 @@ internal sealed class PartitionQueryPublicMergeTests
         fixture.AddRows(fixture.Second, new PartitionQueryPublicSeed("shared", 2, "second"), new PartitionQueryPublicSeed("second-only", 0, "b"));
         var request = PartitionQueryPublicTestSupport.Request([fixture.Second, fixture.First], 4);
         var result = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", request,
-            PartitionQueryPublicTestSupport.ExpectedOwner);
+            fixture.ExpectedOwner);
 
         await Assert.That(result.Rows.Select(row => row.Row.Json).SequenceEqual(
             ["{\"label\":\"first\"}", "{\"label\":\"second\"}", "{\"label\":\"a\"}", "{\"label\":\"b\"}"])).IsTrue();

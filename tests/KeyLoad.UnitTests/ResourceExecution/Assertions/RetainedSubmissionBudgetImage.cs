@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -9,7 +10,7 @@ internal sealed record RetainedSubmissionBudgetImage(Dictionary<string, string> 
     private const string BoundedImageRequired = "The retained-outcome fixture exceeded its bounded image.";
 
     internal static RetainedSubmissionBudgetImage Capture(TestDatabase fixture)
-        => new(RowsOf(fixture), fixture.Store.Position, fixture.ReadJournalCut());
+        => new(RowsOf(fixture), fixture.Store.Position, fixture.ReadCanonicalCut());
 
     internal async Task UnchangedAsync(TestDatabase fixture)
     {
@@ -21,14 +22,14 @@ internal sealed record RetainedSubmissionBudgetImage(Dictionary<string, string> 
             await Assert.That(actual[row.Key]).IsEqualTo(row.Value);
         }
         await Assert.That(fixture.Store.Position).IsEqualTo(Position);
-        await Assert.That(fixture.ReadJournalCut()).IsEqualTo(Journal);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(Journal);
     }
 
-    internal static async Task ResultAsync(OperationResult expected, OperationResult? actual)
+    internal static async Task ResultAsync(Result<object> expected, Result<object>? actual)
     {
         await Assert.That(actual).IsNotNull();
-        await Assert.That(actual!.Error).IsEqualTo(expected.Error);
-        await Assert.That(actual.SafeDetail).IsEqualTo(expected.SafeDetail);
+        await Assert.That(Errors.Code(actual!.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Json).IsEqualTo(expected.Json);
         await Assert.That(JsonSerializer.Serialize(actual.Get<CommitReceipt>(), JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected.Get<CommitReceipt>(), JsonDefaults.Options));

@@ -1,5 +1,4 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterReplication;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -11,7 +10,7 @@ internal static class NativeLocalChildLifetimeCleanup
         foreach (var producer in session.Producers)
         {
             await ServerFailureObserver.ObserveAsync(() =>
-                producer.WaitAsync(RequestCqrsCohortRuntimeFixture.ShutdownBound), failures);
+                producer.WaitAsync(new NativeRuntimeTestOptions().ShutdownTimeout), failures);
         }
         var original = failures.FirstOrDefault();
         foreach (var reservation in session.Reservations)

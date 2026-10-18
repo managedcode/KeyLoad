@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
@@ -48,14 +49,14 @@ internal static class AnnProjectionPinTestSupport
         string principal = Principal, int limit = 1, int maxBytes = 4_194_304)
         => database.Database.ReadProjectionBatch(principal, new(consumer, limit, maxBytes));
 
-    internal static OperationResult CommitEmpty(TestDatabase database, ProjectionConsumerRef consumer,
+    internal static Result<object> CommitEmpty(TestDatabase database, ProjectionConsumerRef consumer,
         ProjectionBatch batch, string principal, Guid commandId, DateTimeOffset evaluatedAt)
     {
         var request = new CommitProjectionBatchRequest(commandId, consumer, batch.Token, []);
         return database.Submit(OperationKind.CommitProjectionBatch, request, principal, commandId, evaluatedAt);
     }
 
-    internal static OperationResult Release(TestDatabase database, ProjectionConsumerRef consumer,
+    internal static Result<object> Release(TestDatabase database, ProjectionConsumerRef consumer,
         string principal = Principal, long generation = 1)
     {
         var commandId = Guid.NewGuid();
@@ -63,7 +64,7 @@ internal static class AnnProjectionPinTestSupport
             new ReleaseProjectionConsumerRequest(commandId, consumer, generation), principal, commandId);
     }
 
-    internal static OperationResult Purge(TestDatabase database, long through, string principal = Principal, int limit = 1_000)
+    internal static Result<object> Purge(TestDatabase database, long through, string principal = Principal, int limit = 1_000)
     {
         var commandId = Guid.NewGuid();
         return database.Submit(OperationKind.PurgeOutbox,

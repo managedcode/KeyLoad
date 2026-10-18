@@ -2,13 +2,13 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Routes bounded admin observations after the existing quorum read and authority reload.</summary>
+/// <summary>Routes bounded node observations after a canonical read cut and current persisted authorization.</summary>
 internal static class GrainAdminDashboardCapabilities
 {
     internal static bool Handles(GrainReadKind kind) => kind is GrainReadKind.AdminDashboard
         or GrainReadKind.AdminResources or GrainReadKind.AdminQueue;
 
-    internal static async Task<object> ExecuteAsync(DatabaseEngine database, INodeAdministration administration,
+    internal static async Task<object> ExecuteAsync(DatabaseEngine database, ISiloDatabaseService administration,
         PrincipalRecord principal, GrainReadKind kind, DecodedGrainRequest request, GrainRequestCodec codec,
         TimeProvider clock, CancellationToken cancellationToken)
     {
@@ -18,7 +18,7 @@ internal static class GrainAdminDashboardCapabilities
         if (kind == GrainReadKind.AdminDashboard)
         {
             GrainNativePayload.RequireNoDto(payload);
-            var result = await administration.DashboardAsync(cancellationToken).ConfigureAwait(true);
+            var result = await administration.ReadDashboardAsync(cancellationToken).ConfigureAwait(true);
             ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, cancellationToken);
             GrainRequestAuthority.RequireAdministrator(GrainRequestAuthority.ReloadForRequest(database,
                 request.Envelope, clock));

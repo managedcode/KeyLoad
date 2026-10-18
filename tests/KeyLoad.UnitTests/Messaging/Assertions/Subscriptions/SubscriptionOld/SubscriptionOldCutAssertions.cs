@@ -41,9 +41,7 @@ internal static class SubscriptionOldCutAssertions
     internal static async Task ReceiptAsync(CommitReceipt receipt, Guid id, ZoneTreeStore store, PartitionRef partition,
         long position, params MutationReceipt[] mutations)
     {
-        await SameAsync(receipt, new CommitReceipt(id,
-            new(store.Identity.Incarnation, partition.AtomicPartitionId, position, 1),
-            [.. mutations], DurabilityProfile.ProcessDurable));
+        await SameAsync(receipt, new CommitReceipt(id, new(store.Identity.Incarnation, partition.AtomicPartitionId, position), [.. mutations], DurabilityProfile.ProcessDurable, 1));
         foreach (var mutation in receipt.Mutations)
         {
             await Assert.That(mutation.CompositionReferences).IsEmpty();

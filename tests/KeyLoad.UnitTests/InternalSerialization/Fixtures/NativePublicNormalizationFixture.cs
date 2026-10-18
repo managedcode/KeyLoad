@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text;
 using KeyLoad.Core;
 
@@ -14,16 +15,16 @@ internal static class NativePublicNormalizationFixture
     private const string InvalidNestedMutation = "A nested mutation entry or enum value is invalid.";
     private const string InvalidGrant = "The principal scope exceeds its budget or contains an invalid grant.";
 
-    internal static ReplicatedOperation Create(TestDatabase database, NativePublicShape shape,
+    internal static Command<DatabaseCommand> Create(TestDatabase database, NativePublicShape shape,
         string principal = NativeAuthorityFixture.Root, DateTimeOffset? time = null,
-        long ownershipEpoch = 1, string targetPrincipal = TargetPrincipal)
+        string targetPrincipal = TargetPrincipal)
     {
         var id = Guid.NewGuid();
         var payload = shape switch
         {
-            NativePublicShape.NullMutation => JsonDefaults.Serialize(new CommandRequest(id, database.Partition, [null!], ownershipEpoch)),
+            NativePublicShape.NullMutation => JsonDefaults.Serialize(new CommandRequest(id, database.Partition, [null!])),
             NativePublicShape.NullPatch => JsonDefaults.Serialize(new CommandRequest(id, database.Partition,
-                [new PatchDocument(Collection, Entity, [null!], 1)], ownershipEpoch)),
+                [new PatchDocument(Collection, Entity, [null!], 1)])),
             NativePublicShape.NullGrant => JsonDefaults.Serialize(new ConfigurePrincipalRequest(
                 new PrincipalRecord(targetPrincipal, database.Partition.TenantId, [null!], []))),
             _ => throw new ArgumentOutOfRangeException(nameof(shape))
@@ -31,7 +32,7 @@ internal static class NativePublicNormalizationFixture
         var kind = shape == NativePublicShape.NullGrant ? OperationKind.ConfigurePrincipal : OperationKind.Batch;
         // Retain exact authored whitespace as part of the existing command identity.
         var json = " \n" + Encoding.UTF8.GetString(payload) + "\t ";
-        return new(id, kind, principal, time ?? database.Database.EvaluationClock.GetUtcNow(), json);
+        return database.Database.CreateCommand(kind, id, principal, time ?? database.Database.EvaluationClock.GetUtcNow(), json);
     }
 
     internal static string Detail(NativePublicShape shape) => shape switch
@@ -42,21 +43,31 @@ internal static class NativePublicNormalizationFixture
         _ => throw new ArgumentOutOfRangeException(nameof(shape))
     };
 
-    internal static KeyLoadException EncodingFailure(ReplicatedOperation operation)
-        => operation.Kind == OperationKind.Batch
-            ? Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson)))
-            : Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(JsonDefaults.Deserialize<ConfigurePrincipalRequest>(operation.PayloadJson)));
+    internal static KeyLoadException EncodingFailure(Command<DatabaseCommand> operation)
+        => operation.Value!.Kind == OperationKind.Batch
+            ? Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(
+                NativeSerialization.Deserialize<CommandRequest>(operation.Value.Input.Span, NativeValidationProfile.PublicInputElements)))
+            : Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(
+                NativeSerialization.Deserialize<ConfigurePrincipalRequest>(operation.Value.Input.Span, NativeValidationProfile.PublicInputElements)));
 
-    internal static StoredOutcome Stored(TestDatabase database, ReplicatedOperation operation)
+    internal static StoredOutcome Stored(TestDatabase database, Command<DatabaseCommand> operation)
         => OutcomeStoreOracle.ReadStored(database.Store, operation)!;
 
-    internal static string Fingerprint(ReplicatedOperation operation)
+    internal static string PublicJson(Command<DatabaseCommand> operation)
+    {
+        object input = operation.Value!.Kind == OperationKind.Batch
+            ? NativeSerialization.Deserialize<CommandRequest>(operation.Value.Input.Span, NativeValidationProfile.PublicInputElements)
+            : NativeSerialization.Deserialize<ConfigurePrincipalRequest>(operation.Value.Input.Span, NativeValidationProfile.PublicInputElements);
+        return " \n" + Encoding.UTF8.GetString(JsonDefaults.Serialize(input)) + "\t ";
+    }
+
+    internal static string Fingerprint(Command<DatabaseCommand> operation)
         => JsonData.Fingerprint(new
         {
-            operation.Id,
-            operation.Kind,
-            operation.PrincipalId,
-            operation.PayloadJson
+            Id = operation.CommandId,
+            Kind = operation.Value!.Kind,
+            PrincipalId = operation.UserId!,
+            PayloadJson = PublicJson(operation)
         });
 
     internal static PrincipalRecord OrdinaryPrincipal(TestDatabase database)

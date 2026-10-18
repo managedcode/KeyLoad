@@ -14,7 +14,7 @@ internal static class RequestCqrsAnnWholeFlow
         var built = await RequestCqrsAnnInvocation.RunAsync(fixture, request, token);
         await RequestCqrsAnnEnrollmentFlow.RequireSettledAsync(fixture, request, built.Result, originalReservationBytes);
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, request, built.Result, before, changed: false, token);
-        await RequestCqrsAnnCheckpointAssertions.RequireAsync(fixture, request, built.Result, beforeJournal);
+        await RequestCqrsAnnCheckpointAssertions.RequireAsync(fixture, request, built.Result, beforeJournal, before);
         await RequestCqrsAnnCheckpointReplay.RunAsync(fixture, request, built.Result, token);
         await RequestCqrsAnnGraphIdentityReplay.RequireAsync(fixture, request, built.Result, token);
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, request, built.Result, token);
@@ -44,7 +44,7 @@ internal static class RequestCqrsAnnWholeFlow
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, restore, restored.Result, before, changed: true, token);
         await Assert.That(restored.Result.Source!.ThroughSequence).IsGreaterThan(built.Result.Source!.ThroughSequence);
         await Assert.That(restored.Result.IndexSha256).IsNotEqualTo(built.Result.IndexSha256);
-        await RequestCqrsAnnCheckpointAssertions.RequireAsync(fixture, restore, restored.Result, beforeJournal);
+        await RequestCqrsAnnCheckpointAssertions.RequireAsync(fixture, restore, restored.Result, beforeJournal, before);
         await RequestCqrsAnnCheckpointReplay.RunAsync(fixture, restore, restored.Result, token);
         await RequestCqrsAnnOriginalReplay.RefusePriorAsync(fixture, request, token);
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, restore, restored.Result, token);

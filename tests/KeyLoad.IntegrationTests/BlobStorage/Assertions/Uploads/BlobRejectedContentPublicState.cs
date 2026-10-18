@@ -22,7 +22,8 @@ internal static class BlobRejectedContentPublicState
         {
             await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(value.Begin.Blob.Partition.AtomicPartitionId);
             await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+            await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         }
         await Assert.That(value.Begun.Receipt.CommandId).IsEqualTo(value.Begin.CommandId);
         await Assert.That(value.Written.Receipt.CommandId).IsEqualTo(value.Part.CommandId);

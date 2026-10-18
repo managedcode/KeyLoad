@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -25,7 +27,7 @@ internal sealed class SampleChunkPendingBoundTrial(SampleChunkCanonicalFixture f
     private const string OpenKind = "openSampleChunkWindow";
     private const string SealKind = "sealSampleChunkWindow";
 
-    internal async Task SeedAsync(List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+    internal async Task SeedAsync(List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         await CommitAsync(new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, SampleChunkCanonicalFixture.Start,
@@ -42,7 +44,7 @@ internal sealed class SampleChunkPendingBoundTrial(SampleChunkCanonicalFixture f
     }
 
     private Task CommitAsync(Mutation mutation, string kind, long revision,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
         => SampleChunkCorrectionBoundReceipts.CommitAsync(fixture, mutation, kind, revision, originals);
 
     internal Task RequireAsync(bool firstMerged, bool secondCorrected)

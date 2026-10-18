@@ -16,18 +16,17 @@ internal static class QueueLifecycleNativeReceiptAssertions
     internal static async Task ResultAsync(DatabaseEngine database, QueueLaneRef lane,
         Func<string, EnqueueMessage> literal, QueueLifecycleNativeSample sample)
     {
-        if (sample.Result.Error is not null)
+        if (Errors.Code(sample.Result.Problem) is not null)
         {
-            await Assert.That(sample.Result.Json).IsNull();
-            await Assert.That(sample.Result.NativeValue).IsNull();
+            
+            await Assert.That(sample.Result.Value).IsNull();
             return;
         }
-        if (sample.Result.NativeValue is CommitReceipt)
+        if (sample.Result.Value is CommitReceipt)
         {
-            await EqualAsync(sample.Result.Get<CommitReceipt>(), new CommitReceipt(sample.Operation.Id,
-                sample.ExpectedToken, ExpectedMutations(database, lane, sample), DurabilityProfile.ProcessDurable));
+            await EqualAsync(sample.Result.Get<CommitReceipt>(), new CommitReceipt(sample.Operation.CommandId, sample.ExpectedToken, ExpectedMutations(database, lane, sample), DurabilityProfile.ProcessDurable, 1));
         }
-        else if (sample.Result.NativeValue is ReceiveResult result)
+        else if (sample.Result.Value is ReceiveResult result)
         {
             await ReceiveAsync(database, lane, literal, sample, result);
         }
@@ -36,14 +35,14 @@ internal static class QueueLifecycleNativeReceiptAssertions
     private static ImmutableArray<MutationReceipt> ExpectedMutations(DatabaseEngine database, QueueLaneRef lane,
         QueueLifecycleNativeSample sample)
     {
-        if (sample.Operation.Kind == OperationKind.Delivery)
+        if (sample.Operation.Value!.Kind == OperationKind.Delivery)
         {
-            var request = JsonDefaults.Deserialize<DeliveryCommand>(sample.Operation.PayloadJson);
+            var request = NativeSerialization.Deserialize<DeliveryCommand>(sample.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
             var claims = database.Verify<DeliveryClaims>(request.Token);
             return [new(request.Action.ToString(), lane.Queue, claims.MessageId,
                 checked(sample.Before[claims.MessageId].StateVersion + Increment))];
         }
-        var batch = JsonDefaults.Deserialize<CommandRequest>(sample.Operation.PayloadJson);
+        var batch = NativeSerialization.Deserialize<CommandRequest>(sample.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var expected = ImmutableArray.CreateBuilder<MutationReceipt>();
         foreach (var mutation in batch.Mutations)
         {
@@ -65,17 +64,17 @@ internal static class QueueLifecycleNativeReceiptAssertions
     private static async Task ReceiveAsync(DatabaseEngine database, QueueLaneRef lane,
         Func<string, EnqueueMessage> literal, QueueLifecycleNativeSample sample, ReceiveResult actual)
     {
-        var request = JsonDefaults.Deserialize<ReceiveRequest>(sample.Operation.PayloadJson);
+        var request = NativeSerialization.Deserialize<ReceiveRequest>(sample.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var expected = ImmutableArray.CreateBuilder<Delivery>();
         foreach (var delivery in actual.Deliveries)
         {
             var before = sample.Before[delivery.Id];
             var body = literal(delivery.Id);
             var version = checked(before.LeaseVersion + Increment);
-            var claims = new DeliveryClaims(lane, delivery.Id, sample.Operation.PrincipalId, version,
+            var claims = new DeliveryClaims(lane, delivery.Id, sample.Operation.UserId!, version,
                 before.DeliveryGeneration, sample.ExpectedToken.Incarnation);
             expected.Add(new(delivery.Id, body.PayloadJson, body.HeadersJson, database.Sign(claims), version,
-                sample.Operation.EvaluatedAt.AddSeconds(request.LeaseSeconds), checked(before.Attempts + Increment),
+                new DateTimeOffset(sample.Operation.Timestamp).AddSeconds(request.LeaseSeconds), checked(before.Attempts + Increment),
                 before.DeliveryGeneration));
             await EqualAsync(database.Verify<DeliveryClaims>(delivery.Token), claims);
         }

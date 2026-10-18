@@ -10,8 +10,8 @@ internal static class HeavyDocumentLoadReadback
 {
     private const int SentinelOrdinal = 0;
     private const int SentinelPageSize = 1;
-    private const string CursorFailure = "Heavy CLUSTER cursor failed to advance.";
-    private const string ExtraRecordFailure = "Heavy CLUSTER readback contains extra records.";
+    private const string CursorFailure = "Heavy Orleans cursor failed to advance.";
+    private const string ExtraRecordFailure = "Heavy Orleans readback contains extra records.";
     private readonly record struct DocumentMarker;
 
     internal static EntityRef Sentinel(PartitionRef partition)
@@ -25,7 +25,8 @@ internal static class HeavyDocumentLoadReadback
     internal static async Task VerifyReceiptAsync(CommitReceipt receipt, CommandRequest command, int ordinal)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(receipt.Mutations[0].Resource).IsEqualTo(McpDocumentProtocol.Collection);
         await Assert.That(receipt.Mutations[0].Kind).IsEqualTo(HeavyDocumentLoadProtocol.PutKind);

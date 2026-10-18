@@ -33,7 +33,7 @@ internal static class DueSagaClusterAssertions
             }
             await Task.Delay(PollInterval, TimeProvider.System, cancellationToken);
         }
-        throw new TimeoutException("The waiting saga did not time out within its bounded CLUSTER window.");
+        throw new TimeoutException("The waiting saga did not time out within its bounded Orleans window.");
     }
 
     internal static async Task AssertSagaAsync(KeyLoadClient sdk, McpOfficialClient mcp,

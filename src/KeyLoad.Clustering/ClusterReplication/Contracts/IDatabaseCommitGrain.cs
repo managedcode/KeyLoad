@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using Orleans.CodeGeneration;
 
 namespace KeyLoad.Clustering;
@@ -7,9 +9,9 @@ namespace KeyLoad.Clustering;
 public interface IDatabaseCommitGrain : IGrainWithGuidKey
 {
     /// <summary>Returns only after every configured data copy has persisted the same operation.</summary>
-    Task<OperationResult> ApplyAsync(ReplicatedOperation operation, CancellationToken cancellationToken);
-    /// <summary>Requires matching durable copies before admitting a read.</summary>
+    Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
+    /// <summary>Returns the committed canonical cut from an available native storage service.</summary>
     Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken);
     /// <summary>Returns an actual native address only after verifying the durable data-copy cut.</summary>
-    Task<SiloAddress> GetReadOwnerAsync(CancellationToken cancellationToken);
+    Task<SiloAddress> GetReadOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken);
 }

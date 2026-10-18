@@ -14,10 +14,10 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 internal sealed class LocalClusterImageTestSession : IAsyncDisposable
 {
     private const string RunnerName = "tests-cluster";
-    private const string RunnerConfigurationFailure = "The local CLUSTER image runner configuration is invalid.";
-    private const string PreparationFailure = "The local CLUSTER image preparation did not complete successfully.";
-    private const string UnexpectedPreparationResources = "The local CLUSTER image session contains an unexpected resource.";
-    private const string CleanupFailure = "Local CLUSTER image session cleanup failed.";
+    private const string RunnerConfigurationFailure = "The local Orleans image runner configuration is invalid.";
+    private const string PreparationFailure = "The local Orleans image preparation did not complete successfully.";
+    private const string UnexpectedPreparationResources = "The local Orleans image session contains an unexpected resource.";
+    private const string CleanupFailure = "Local Orleans image session cleanup failed.";
 
     private DistributedApplication? application;
     private IDistributedApplicationTestingBuilder? testingBuilder;

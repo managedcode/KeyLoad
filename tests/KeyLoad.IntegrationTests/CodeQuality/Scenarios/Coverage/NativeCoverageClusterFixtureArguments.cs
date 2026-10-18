@@ -41,7 +41,7 @@ internal static class NativeCoverageClusterFixtureArguments
         };
         return [.. fields.Select(field => ArgumentPrefix + field.Name + Separator + field.Value),
             ClusterFixtureProtocol.EphemeralArgument,
-            ClusterFixtureProtocol.SnapshotThresholdArgument];
+            ClusterFixtureProtocol.SiloCountArgument, ClusterFixtureProtocol.ReplicaCountArgument];
     }
 
     private static string Seconds(string value)

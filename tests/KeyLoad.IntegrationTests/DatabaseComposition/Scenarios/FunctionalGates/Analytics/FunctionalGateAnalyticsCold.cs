@@ -110,6 +110,6 @@ internal static class FunctionalGateAnalyticsCold
                 WriterPrincipalId = user.Identity.Principal.Id,
                 ReaderPrincipalId = user.Identity.Principal.Id,
                 ReferenceBindings = state.ReferenceBindings,
-                VoterCount = fixture.NodeNames.Length
+                ReplicaCount = fixture.ReplicaCount
             }), token);
 }

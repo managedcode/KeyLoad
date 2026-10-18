@@ -10,7 +10,7 @@ internal static class NativeTextParentBoundaryAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateNativeOperation(
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateCommand(
             OperationKind.MaintainTextIndex, request.CommandId, NativeTextMaintenanceTestValues.Principal,
             database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request)));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

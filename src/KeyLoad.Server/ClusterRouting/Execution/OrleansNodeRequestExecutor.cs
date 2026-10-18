@@ -5,7 +5,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Server;
 
-/// <summary>Bounds one admitted native request, including its cohort check and complete CQRS stream.</summary>
+/// <summary>Bounds one admitted native request and its complete CQRS response stream.</summary>
 internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> routingOptions,
     ILogger<OrleansNode> logger)
 {
@@ -48,7 +48,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var reply = await DrainAsync(grains, services, connectionId, requestId, signedRequest, command, clock,
             progress, execution.Token, cancellationToken).ConfigureAwait(false);
-        if (reply.Error is { } error && reply.Metadata is null)
+        if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
         }
@@ -79,14 +79,6 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
                     routingOptions, purpose, executionToken).ConfigureAwait(false)
                 : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, serializer, requestId, clock,
                     routingOptions, purpose, progress, executionToken).ConfigureAwait(false);
-            if (reply.Metadata is not null)
-            {
-                if (purpose.MetadataAdmission is not { } metadata)
-                {
-                    throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-                }
-                NativeCommandMetadataReplies.Require(reply, metadata, routingOptions);
-            }
             return reply;
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))

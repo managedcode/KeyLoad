@@ -89,7 +89,7 @@ internal static class EventMessageSensitivePublicTrial
         await Assert.That(after.NodeId).IsEqualTo(state.Before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(state.Before.Incarnation);
         await Assert.That(after.ReadGeneration).IsGreaterThanOrEqualTo(state.Before.ReadGeneration);
-        await Assert.That(after.Applied).IsGreaterThanOrEqualTo(state.Before.Applied);
+        await Assert.That(after.Position).IsGreaterThanOrEqualTo(state.Before.Position);
         var caller = state.DataAuthority ? root : worker;
         await EventMessageSensitivePublicRefusals.ReceiveAsync(caller, state, state.OriginalRequest, ErrorCode.PermissionDenied, token);
         await EventMessageSensitivePublicAssertions.ReplayAsync(root, caller, state, token);

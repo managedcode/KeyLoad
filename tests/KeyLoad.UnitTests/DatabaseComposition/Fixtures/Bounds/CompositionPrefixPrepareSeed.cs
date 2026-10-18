@@ -18,7 +18,7 @@ internal static class CompositionPrefixPrepareSeed
                     ? new(IdColumn, [new(IdColumn, RelationalColumnType.Text)]) : null
             };
             var request = new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition);
-            var original = owner.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), D.Root,
+            var original = owner.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), D.Root,
                 owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
             var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
             var bytes = NativeSerialization.Serialize(original);
@@ -42,7 +42,7 @@ internal static class CompositionPrefixPrepareSeed
         {
             ClusterAdministrator = true
         };
-        var original = owner.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
+        var original = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(administrator)));
         await CompositionPrefixPrepareAssertions.EqualAsync(administrator, owner.Submit(original).Get<PrincipalRecord>());
         return administratorId;

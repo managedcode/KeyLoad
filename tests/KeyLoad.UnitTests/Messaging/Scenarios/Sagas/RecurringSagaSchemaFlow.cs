@@ -57,9 +57,8 @@ internal static class RecurringSagaSchemaFlow
         var id = Guid.NewGuid();
         var seed = SafeProjectorOperationSeed.Issue(owner, OperationKind.Batch, id,
             new CommandRequest(id, partition, [schedule, saga]), principal: Scheduler, creatorEpoch: InitialEpoch);
-        var expected = new CommitReceipt(id, seed.ExpectedToken,
-            [new(ScheduleKind, Queue, ScheduleId.ToString(Format), One),
-                new(SagaKind, Queue, SagaId.ToString(Format), One)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, seed.ExpectedToken, [new(ScheduleKind, Queue, ScheduleId.ToString(Format), One),
+                new(SagaKind, Queue, SagaId.ToString(Format), One)], DurabilityProfile.ProcessDurable, 1);
         await SafeProjectorOperationSeed.EqualAsync(seed.Result.Get<CommitReceipt>(), expected);
         await RecurringSagaSchemaCanonical.PrivateReferencesAsync(seed.Result.Get<CommitReceipt>());
         var state = new RecurringSagaSchemaState(resource, scheduler, reader, denied, definition, schedule, saga,

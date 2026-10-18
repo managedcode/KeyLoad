@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -30,7 +31,7 @@ internal static class QueuePositiveInspectionAuthorityTrial
         await QueueLiveInspectionAuthorityAssertions.PositiveRefuseAsync(fixture.Database, fixture.Store, state, positive, target, damaged);
         fixture.Store.Dispose();
         QueuePendingAuthorityCut terminal;
-        OperationResult processed;
+        Result<object> processed;
         QueueLeaseAuthorityHealthyState healthy;
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
         {

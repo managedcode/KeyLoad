@@ -74,8 +74,8 @@ internal static class FunctionalGateQueues
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(ctx.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(0);
-        await Assert.That(receipt.Durability).IsNotEqualTo(DurabilityProfile.Buffered);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(ctx.ReplicaCount);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
     }
 
     private static async Task BaselineAsync(FunctionalGateContext ctx, int index, CancellationToken token)

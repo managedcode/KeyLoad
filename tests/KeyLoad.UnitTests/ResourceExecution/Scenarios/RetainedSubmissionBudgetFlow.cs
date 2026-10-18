@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -27,10 +29,10 @@ internal static class RetainedSubmissionBudgetFlow
         {
             PolicyEpoch = InitialEpoch
         };
-        await Assert.That(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Error).IsNull();
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Problem)).IsNull();
         var original = Issue(fixture, DocumentId);
         var committed = fixture.SubmitIssued(original);
-        await Assert.That(committed.Error).IsNull();
+        await Assert.That(Errors.Code(committed.Problem)).IsNull();
         await Assert.That(committed.Get<CommitReceipt>().CommandId).IsEqualTo(original.Id);
         var work = Work(fixture);
         await HealthyAsync(fixture, original, committed, work);
@@ -38,8 +40,8 @@ internal static class RetainedSubmissionBudgetFlow
         await CurrentAuthorityAsync(fixture, subject, original, work);
     }
 
-    private static async Task HealthyAsync(TestDatabase fixture, ReplicatedOperation original,
-        OperationResult committed, ReadExecutionBudget work)
+    private static async Task HealthyAsync(TestDatabase fixture, Command<DatabaseCommand> original,
+        Result<object> committed, ReadExecutionBudget work)
     {
         var before = RetainedSubmissionBudgetImage.Capture(fixture);
         var first = fixture.Database.ReadRetainedSubmissionOutcome(original, work);
@@ -73,14 +75,14 @@ internal static class RetainedSubmissionBudgetFlow
     }
 
     private static async Task CurrentAuthorityAsync(TestDatabase fixture, PrincipalRecord subject,
-        ReplicatedOperation original, ReadExecutionBudget work)
+        Command<DatabaseCommand> original, ReadExecutionBudget work)
     {
-        await Assert.That(fixture.Submit(OperationKind.ConfigurePrincipal,
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(subject with
             {
                 Revoked = true,
                 PolicyEpoch = RevokedEpoch
-            })).Error).IsNull();
+            })).Problem)).IsNull();
         var before = RetainedSubmissionBudgetImage.Capture(fixture);
         var previousBytes = work.ReadBytes;
         var previousRecords = work.ConstrainedNativeRecords;
@@ -99,11 +101,11 @@ internal static class RetainedSubmissionBudgetFlow
         return work;
     }
 
-    private static ReplicatedOperation Issue(TestDatabase fixture, string documentId)
+    private static Command<DatabaseCommand> Issue(TestDatabase fixture, string documentId)
     {
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, fixture.Partition, [new PutDocument(Collection, documentId, Content)]);
-        return fixture.Database.CreateNativeOperation(OperationKind.Batch, id, Subject,
+        return fixture.Database.CreateCommand(OperationKind.Batch, id, Subject,
             fixture.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
     }
 }

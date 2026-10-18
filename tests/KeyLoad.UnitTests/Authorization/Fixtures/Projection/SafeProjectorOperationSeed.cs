@@ -20,25 +20,24 @@ internal static class SafeProjectorOperationSeed
                 SafeProjectorOperationProtocol.SecondJson, ExpectedRevision: SafeProjectorOperationProtocol.AbsentRevision)
         ]);
         var seed = Issue(owner, OperationKind.Batch, id, request);
-        await EqualAsync(seed.Result.Get<CommitReceipt>(), new CommitReceipt(id, seed.ExpectedToken,
-        [
+        await EqualAsync(seed.Result.Get<CommitReceipt>(), new CommitReceipt(id, seed.ExpectedToken, [
             new(SafeProjectorOperationProtocol.PutKind, SafeProjectorOperationProtocol.Collection,
                 SafeProjectorOperationProtocol.First, SafeProjectorOperationProtocol.InitialRevision),
             new(SafeProjectorOperationProtocol.PutKind, SafeProjectorOperationProtocol.Collection,
                 SafeProjectorOperationProtocol.Second, SafeProjectorOperationProtocol.InitialRevision)
-        ], DurabilityProfile.ProcessDurable));
+        ], DurabilityProfile.ProcessDurable, 1));
         return new(resource, reader, configured, principal, seed);
     }
 
     internal static SafeProjectorOperationCommand Issue<T>(SafeProjectorOperationDatabase owner, OperationKind kind,
         Guid id, T request, string principal = SafeProjectorOperationProtocol.Root, long creatorEpoch = SafeProjectorOperationProtocol.RootPolicyEpoch)
     {
-        var operation = owner.Database.CreateNativeOperation(kind, id, principal,
+        var operation = owner.Database.CreateCommand(kind, id, principal,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var expected = owner.NextToken();
         var result = owner.Submit(operation);
         var image = SafeProjectorOperationHistoryImages.Capture(owner, operation);
-        return new(owner.Entry(operation), result, expected, creatorEpoch, image);
+        return new(operation, owner.ReadOutcome(operation), result, expected, creatorEpoch, image);
     }
 
     internal static PrincipalRecord Principal(SafeProjectorOperationDatabase owner, long epoch,

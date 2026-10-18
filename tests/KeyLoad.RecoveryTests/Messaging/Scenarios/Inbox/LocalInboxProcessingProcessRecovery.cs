@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.CrashHost.Features.DocumentStorage;
 using KeyLoad.CrashHost.Features.Messaging;
 using KeyLoad.Server;
@@ -13,7 +14,7 @@ internal static class LocalInboxProcessingProcessRecovery
 
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        var original = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, LocalInboxProcessingCrashContract.OperationFile, token);
+        var original = await CommandIdempotencyCrashData.ReadEvidenceAsync<Command<DatabaseCommand>>(root, LocalInboxProcessingCrashContract.OperationFile, token);
         var input = await CommandIdempotencyCrashData.ReadEvidenceAsync<MessageInspection>(root, LocalInboxProcessingCrashContract.InputFile, token);
         var position = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, LocalInboxProcessingCrashContract.PositionFile, token);
         var tail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, LocalInboxProcessingCrashContract.TailFile, token);

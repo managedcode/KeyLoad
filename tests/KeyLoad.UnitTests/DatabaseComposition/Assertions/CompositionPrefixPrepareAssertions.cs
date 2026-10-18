@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
@@ -15,11 +16,10 @@ internal static class CompositionPrefixPrepareAssertions
         => await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
 
-    internal static async Task ResultAsync(CompositionPrefixPrepareCommand command, OperationResult result)
+    internal static async Task ResultAsync(CompositionPrefixPrepareCommand command, Result<object> result)
     {
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.Error).IsEqualTo(command.Error);
-        await Assert.That(result.SafeDetail).IsEqualTo(command.SafeDetail);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(command.Error);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(command.SafeDetail);
         if (command.Receipt is { } receipt)
         {
             await EqualAsync(receipt, result.Get<CommitReceipt>());
@@ -28,7 +28,7 @@ internal static class CompositionPrefixPrepareAssertions
         }
         else
         {
-            await Assert.That(result.NativeValue).IsNull();
+            await Assert.That(result.Value).IsNull();
         }
     }
 
@@ -42,11 +42,11 @@ internal static class CompositionPrefixPrepareAssertions
         {
             await Assert.That(NativeSerialization.Serialize(command.Original).SequenceEqual(command.OriginalBytes)).IsTrue();
             await Assert.That(NativeSerialization.Serialize(owner.Retained(command.Original)).SequenceEqual(command.OriginalBytes)).IsTrue();
-            await EqualAsync(command.Request, NativeCommandPayload.Read<CommandRequest>(command.Original));
+            await EqualAsync(command.Request, NativeSerialization.Deserialize<CommandRequest>((command.Original).Value!.Input.Span));
             await ResultAsync(command, owner.Submit(command.Original));
             await ResultAsync(command, owner.Database.ResolveOutcome(command.Original));
             var stored = OutcomeStoreOracle.ReadStored(owner.Store, command.Original)!;
-            await Assert.That(stored.Fingerprint).IsEqualTo(NativeOperationFingerprint.Compute(command.Original));
+            await Assert.That(stored.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Original));
             await ResultAsync(command, stored.Result);
         }
         await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();

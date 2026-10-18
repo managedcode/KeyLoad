@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using System.Text.Json.Serialization;
 using KeyLoad.Core.Features.BlobStorage;
 
@@ -9,7 +11,8 @@ internal sealed record StoredOutcome(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.Fingerprint)] string Fingerprint,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.Incarnation)] Guid Incarnation,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.PolicyEpoch)] long PolicyEpoch,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.Result)] OperationResult Result)
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.Result)] Result<object> Result,
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.PreparedCommand)] Command<DatabaseCommand> PreparedCommand)
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.BlobAuthority)]

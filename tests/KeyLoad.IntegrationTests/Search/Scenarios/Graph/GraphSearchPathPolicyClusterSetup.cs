@@ -76,7 +76,7 @@ internal static class GraphSearchPathPolicyClusterSetup
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(command, token));
         await Assert.That(receipt.Token.Position > 0L).IsTrue();
         var expected = new CommitReceipt(command.CommandId, new(receipt.Token.Incarnation, command.Partition.AtomicPartitionId,
-            receipt.Token.Position, receipt.Token.OwnershipEpoch), expectedMutations, DurabilityProfile.QuorumProcessDurable);
+            receipt.Token.Position), expectedMutations, DurabilityProfile.ProcessDurable, 3);
         await NativeSubmissionColdAssertions.ReceiptAsync(receipt, expected);
         return receipt;
     }

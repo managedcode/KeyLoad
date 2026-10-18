@@ -27,7 +27,7 @@ internal static class CompositionBoundReferenceNativeReads
             await A.EqualAsync(new DocumentResult(reference, 1, json, false, []),
                 owner.Database.GetDocument(D.Root, reference, cancellationToken: token));
             var raw = owner.Store.Read(view => view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(reference)))!;
-            await A.EqualAsync(new DocumentRecord(reference, 1, json, new(), state.Commands[0].Operation.EvaluatedAt), raw);
+            await A.EqualAsync(new DocumentRecord(reference, 1, json, new(), new DateTimeOffset(state.Commands[0].Operation.Timestamp)), raw);
         }
         foreach (var (graph, id) in new[] { (D.Graph, D.EdgeId), (D.RoundGraph, D.RoundEdgeId) })
         {

@@ -7,8 +7,8 @@
 - Tests and comparison artifacts belong to the `BenchmarkComparisons` slice and matching `docs/Features/BenchmarkComparisons.md`.
 - This project validates the comparative harness and emits controlled CI evidence; it does not establish production readiness or own product runtime behavior.
 - Keep positive, negative and error assertions meaningful. Never weaken checks or replace the real cluster KeyLoad target with a fake/in-memory substitute.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
-- CI comparison data is distinct from durability, endurance and production qualification. Existing runner/framework migration gaps remain governed by root policy; TUnit is the target.
+- Apply the installed Orleans and Aspire skills for native runtime and resource-lifecycle decisions.
+- CI comparison data is distinct from durability, endurance and production qualification. Use native TUnit and Microsoft.Testing.Platform for current test execution.
 
 ## Boundaries and protected risks
 

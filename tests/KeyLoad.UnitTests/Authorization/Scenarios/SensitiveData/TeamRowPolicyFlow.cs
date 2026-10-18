@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Query;
@@ -93,7 +94,7 @@ internal static class TeamRowPolicyFlow
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
-    internal static ReplicatedOperation Operation(CommandRequest command)
+    internal static Command<DatabaseCommand> Operation(CommandRequest command)
         => new(command.CommandId, OperationKind.Batch, Reader, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
 
     internal static byte[] Outcome(ZoneTreeStore store, CommandRequest command)

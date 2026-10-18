@@ -44,7 +44,8 @@ internal static class CompositeUniqueClusterAssertions
             McpCallerTools.DocumentsCommit, command, token))).Value;
         direct ??= await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token));
         await Assert.That(direct.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(direct.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(direct.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(direct.PersistedCopies).IsEqualTo(3);
         await Assert.That(direct.Mutations.Length).IsEqualTo(command.Mutations.Length);
         await Assert.That(JsonDefaults.Serialize(direct).AsSpan().SequenceEqual(JsonDefaults.Serialize(official))).IsTrue();
         return direct;

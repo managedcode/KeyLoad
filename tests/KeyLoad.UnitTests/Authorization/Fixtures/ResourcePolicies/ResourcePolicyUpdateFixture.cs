@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -63,7 +65,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
     internal byte[]? OutcomeBytes(Guid operationId) => Store.Read(view => view.ReadOwnedValue(
         KeySpace.GlobalOutcome(RootId, operationId)));
 
-    internal ReplicatedOperation ConfigureResource(ResourceDefinition definition, long? expectedSchemaVersion = null,
+    internal Command<DatabaseCommand> ConfigureResource(ResourceDefinition definition, long? expectedSchemaVersion = null,
         Guid? operationId = null, string principalId = RootId)
     {
         var payload = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, definition)
@@ -74,14 +76,13 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
             TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
     }
 
-    internal OperationResult Apply(ReplicatedOperation operation) => Database.Apply(operation);
+    internal Result<object> Apply(Command<DatabaseCommand> operation) => Database.Apply(operation);
 
     private CommitReceipt Commit(Mutation mutation)
     {
         var commandId = Guid.NewGuid();
         var request = new CommandRequest(commandId, Partition, [mutation]);
-        var operation = new ReplicatedOperation(commandId, OperationKind.Batch, RootId,
-            TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = Database.CreateCommand(OperationKind.Batch, commandId, RootId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
         return Database.Apply(operation).Get<CommitReceipt>();
     }
 
@@ -89,8 +90,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
     {
         var principal = new PrincipalRecord(ReaderId, TenantId,
             [new(DatabaseId, Collection, Capability.DocumentsRead)], []);
-        Database.Apply(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, RootId,
-            TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal),
+        Database.Apply(Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), RootId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal),
                 JsonDefaults.Options))).Get<PrincipalRecord>();
     }
 
@@ -104,7 +104,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
     }
 
-    internal static KeyLoadException Failure(OperationResult result)
+    internal static KeyLoadException Failure(Result<object> result)
     {
         var exception = Assert.ThrowsExactly<KeyLoadException>(() => result.Get<ResourceDefinition>());
         return exception!;

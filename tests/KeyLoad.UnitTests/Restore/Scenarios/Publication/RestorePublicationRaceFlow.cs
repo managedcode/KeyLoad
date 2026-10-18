@@ -27,7 +27,7 @@ internal static class RestorePublicationRaceFlow
                 await CompleteAsync(fixture, authority, capture, backup, target, source, archive, token);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
-        }, nativeAdmission: true);
+        });
     }
 
     private static async Task CompleteAsync(EventingArtifactFixture fixture,

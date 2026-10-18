@@ -9,7 +9,6 @@ internal static class BlobPriorPublicationAssertions
     internal static async Task AuthorityAsync(DatabaseEngine owner, BlobPriorPublicationState seed)
     {
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(seed.Identity)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(owner.ReadPhysicalShardCatalog("root")).AsSpan().SequenceEqual(seed.Catalog)).IsTrue();
         await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(KeySpace.Principal("root")))!.AsSpan().SequenceEqual(seed.Principal)).IsTrue();
     }
 

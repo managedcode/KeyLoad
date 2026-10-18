@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -25,20 +27,20 @@ internal static class SubscriptionPausedDrainAssertions
         },
             1, checkpoint, tail, tail, paused, null);
 
-    internal static async Task RefuseAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, ReplicatedOperation operation,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+    internal static async Task RefuseAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, Command<DatabaseCommand> operation,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
-        var domain = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, operation.Id);
+        var domain = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, operation.CommandId);
         var position = store.Position;
         var failure = db.Apply(operation);
         await FailureAsync(failure);
         await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, domain, position + 1);
-        history.Add((operation, failure, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id)));
+        history.Add((operation, failure, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)));
         await ReplayAsync(db, store, group, history);
     }
 
     internal static async Task ReplayAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -46,13 +48,13 @@ internal static class SubscriptionPausedDrainAssertions
         foreach (var entry in history)
         {
             var replay = db.Apply(entry.Operation);
-            if (entry.Result.Error is not null)
+            if (Errors.Code(entry.Result.Problem) is not null)
             {
                 await FailureAsync(replay);
                 await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
                     .IsEqualTo(JsonSerializer.Serialize(entry.Result, JsonDefaults.Options));
             }
-            else if (entry.Result.NativeValue is SubscriptionInfo)
+            else if (entry.Result.Value is SubscriptionInfo)
             {
                 await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
             }
@@ -60,23 +62,23 @@ internal static class SubscriptionPausedDrainAssertions
             {
                 await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
             }
-            var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.Id);
+            var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.CommandId);
             await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
         }
     }
 
     internal static async Task OriginalClaimAsync(DatabaseEngine db, ZoneTreeStore store, ReceiveSubscriptionRequest request,
-        OperationResult original, byte[] saved, CancellationToken token)
+        Result<object> original, byte[] saved, CancellationToken token)
     {
         var retained = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, request.Subscription, request.RequestId);
         await Assert.That(retained.AsSpan().SequenceEqual(saved)).IsTrue();
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, request, original, token);
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, SubscriptionDeliveryCommand command, long position)
+    internal static async Task ReceiptAsync(Result<object> result, SubscriptionDeliveryCommand command, long position)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo(
@@ -84,12 +86,12 @@ internal static class SubscriptionPausedDrainAssertions
                 position.ToString(global::System.Globalization.CultureInfo.InvariantCulture), 1L) }, CollectionOrdering.Matching);
     }
 
-    private static async Task FailureAsync(OperationResult result)
+    private static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.DispatchPaused);
-        await Assert.That(result.SafeDetail).IsEqualTo("Subscription delivery is paused.");
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.DispatchPaused);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("Subscription delivery is paused.");
+        
+        await Assert.That(result.Value).IsNull();
     }
 }
 

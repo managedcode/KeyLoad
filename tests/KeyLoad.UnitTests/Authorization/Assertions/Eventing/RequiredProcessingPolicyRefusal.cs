@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -17,12 +18,12 @@ internal static class RequiredProcessingPolicyRefusal
             && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes))
             .Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
-    internal static async Task<byte[]> FreshAsync(RequiredProcessingPolicyFixture fixture, ReplicatedOperation operation,
+    internal static async Task<byte[]> FreshAsync(RequiredProcessingPolicyFixture fixture, Command<DatabaseCommand> operation,
         ErrorCode code, string detail, CancellationToken token)
     {
         var store = fixture.Harness.Store;
-        var outcome = KeySpace.PartitionOutcome(fixture.Harness.Partition, operation.PrincipalId, operation.Id);
-        var locator = KeySpace.OutcomeLocatorV2(fixture.Harness.Partition, operation.PrincipalId, operation.Id);
+        var outcome = KeySpace.PartitionOutcome(fixture.Harness.Partition, operation.UserId!, operation.CommandId);
+        var locator = KeySpace.OutcomeLocatorV2(fixture.Harness.Partition, operation.UserId!, operation.CommandId);
         await Assert.That(store.Read(view => view.ReadOwnedValue(outcome))).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locator))).IsNull();
         var before = Image(store, outcome, locator);
@@ -40,16 +41,16 @@ internal static class RequiredProcessingPolicyRefusal
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
             view.ReadOwnedValue(KeySpace.ClockBytes)!))).IsGreaterThanOrEqualTo(clock), failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        var bytes = RequiredProcessingPolicyAssertions.Outcome(store, fixture.Harness.Partition, operation.PrincipalId, operation.Id);
+        var bytes = RequiredProcessingPolicyAssertions.Outcome(store, fixture.Harness.Partition, operation.UserId!, operation.CommandId);
         await ExistingAsync(fixture.Harness.Database, store, fixture.Harness.Partition, operation, bytes, code, detail, token);
         return bytes;
     }
-    internal static Task ExistingAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition, ReplicatedOperation operation,
+    internal static Task ExistingAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition, Command<DatabaseCommand> operation,
         byte[] outcome, ErrorCode code, string detail, CancellationToken token)
         => RequiredProcessingPolicyAssertions.ObserveAsync(store, async () =>
         {
             await RequiredProcessingPolicyAssertions.FailureAsync(database.ApplyEmbedded(operation, token), code, detail);
-            await Assert.That(RequiredProcessingPolicyAssertions.Outcome(store, partition, operation.PrincipalId, operation.Id)
+            await Assert.That(RequiredProcessingPolicyAssertions.Outcome(store, partition, operation.UserId!, operation.CommandId)
                 .AsSpan().SequenceEqual(outcome)).IsTrue();
         });
 }

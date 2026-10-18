@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class SampleChunkCanonicalAssertions
@@ -19,7 +20,7 @@ internal static class SampleChunkCanonicalAssertions
     }
 
     internal static async Task Replay(SampleChunkCanonicalFixture fixture, Guid id, Mutation mutation,
-        OperationResult original)
+        Result<object> original)
     {
         var image = fixture.Image();
         var position = fixture.Owner.Store.Position;

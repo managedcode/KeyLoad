@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -12,7 +14,7 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     private const string GuidFormat = "N";
     private const string RootPrincipal = "root";
     internal const string AuthorityResource = "backup-authority-metadata";
-    private const long InitialAppliedIndex = 1;
+    private long expectedApplied;
     private const string SystemNamespace = ZoneTreePersistenceFormat.SystemNamespace;
     private const string LastAppliedKey = ZoneTreePersistenceFormat.LastAppliedKey;
     private const string ClockKey = ZoneTreePersistenceFormat.ClockKey;
@@ -72,18 +74,17 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
         Source = new(directory: sourceDirectory);
     }
 
-    internal ReplicatedOperation Batch(DatabaseEngine database, Guid commandId, params Mutation[] mutations)
-        => new(commandId, OperationKind.Batch, RootPrincipal, database.EvaluationClock.GetUtcNow(),
+    internal Command<DatabaseCommand> Batch(DatabaseEngine database, Guid commandId, params Mutation[] mutations)
+        => database.CreateCommand(OperationKind.Batch, commandId, RootPrincipal, database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new CommandRequest(commandId, Partition, [.. mutations]), JsonDefaults.Options));
 
-    internal OperationResult SeedReplicaAuthority()
+    internal Result<object> SeedCanonicalAuthority()
     {
         var metadata = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
             new ResourceDefinition(AuthorityResource, ResourceKind.Collection, Partition.TransactionDomainId));
-        var operation = new ReplicatedOperation(MetadataCommandId,
-            OperationKind.ConfigureResource, RootPrincipal,
-            Source.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(metadata, JsonDefaults.Options));
-        return Source.Database.Apply(operation, InitialAppliedIndex);
+        var operation = Source.Database.CreateCommand(OperationKind.ConfigureResource, MetadataCommandId, RootPrincipal, Source.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(metadata, JsonDefaults.Options));
+        expectedApplied = checked(Source.Database.LastApplied + 1);
+        return Source.Database.Apply(operation);
     }
 
     internal async Task<Dictionary<string, byte[]>> CaptureArchiveAsync()
@@ -96,9 +97,9 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
         return captured;
     }
 
-    internal static void RequireSuccess(OperationResult result)
+    internal static void RequireSuccess(Result<object> result)
     {
-        if (result.Error is not null)
+        if (Errors.Code(result.Problem) is not null)
         {
             throw new InvalidOperationException("A canonical backup fixture operation was rejected.");
         }
@@ -110,11 +111,11 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
         var clock = Source.Store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, ClockKey)));
         var metadata = Source.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             Partition.TenantId, Partition.DatabaseId, AuthorityResource)));
-        if (applied is null || NativeSerialization.Deserialize<long>(applied) != InitialAppliedIndex
+        if (applied is null || NativeSerialization.Deserialize<long>(applied) != expectedApplied
             || clock is null || JsonSerializer.Serialize(metadata, JsonDefaults.Options) != JsonSerializer.Serialize(
                 new ResourceDefinition(AuthorityResource, ResourceKind.Collection, Partition.TransactionDomainId), JsonDefaults.Options))
         {
-            throw new InvalidOperationException("The source backup did not contain the exercised replica authority fields.");
+            throw new InvalidOperationException("The source backup did not contain the exercised canonical applied cut and metadata.");
         }
     }
 

@@ -1,10 +1,12 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Clustering.Features.Search;
 
 namespace KeyLoad.Clustering;
 
 public sealed partial class GrainRequestCodec
 {
-    internal string CreateOnlineTextPublication(Guid actor, ReplicatedOperation operation, DateTimeOffset expiry)
+    internal string CreateOnlineTextPublication(Guid actor, Command<DatabaseCommand> operation, DateTimeOffset expiry)
         => Issue(OnlineTextRequestEnvelopes.Publication(database, clock.GetUtcNow(), settings.RequestLifetime,
             actor, operation, expiry));
 

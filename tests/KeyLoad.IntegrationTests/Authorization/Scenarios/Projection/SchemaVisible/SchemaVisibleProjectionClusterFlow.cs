@@ -21,7 +21,7 @@ internal static class SchemaVisibleProjectionClusterFlow
                 [
                     new(S.PutKind, state.State.Collection, S.First, S.InitialRevision),
                     new(S.PutKind, state.State.Collection, S.Second, S.InitialRevision)
-                ], DurabilityProfile.QuorumProcessDurable));
+                ], DurabilityProfile.ProcessDurable, 3));
             await SchemaVisibleProjectionClusterJoins.ConfigureAsync(root, state, deadline.Token);
             await SchemaVisibleProjectionClusterAuthority.InvalidAsync(root, state, deadline.Token);
             var resource = await SchemaVisibleProjectionClusterAuthority.ResourceAsync(root, state, state.State.Resource, false, deadline.Token);

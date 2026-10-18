@@ -134,8 +134,8 @@ internal sealed class NativeSagaTimeoutRuntimeGeneration(NativeSagaTimeoutFixtur
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(
             view, NativeSagaTimeoutTestData.RootPrincipalId, TimeProvider.System.GetUtcNow()));
         var services = Cluster.GetSiloServiceProvider();
-        var startup = new RuntimeJournalStartupRequests(Cluster.Client, fixture.Codec, fixture.Database.Database,
-            fixture.Coordinator, services, TimeProvider.System, fixture.Routing);
+        var startup = new RuntimeJournalStartupRequests(Cluster.Client, fixture.Codec,
+            services, TimeProvider.System, fixture.Routing);
         await startup.BootstrapAsync(principal, Guid.NewGuid(), cancellationToken);
         services.GetRequiredService<RuntimeJournalAdmission>().Open(cancellationToken);
         fixture.SetJobHarness(new NativeSagaTimeoutJobHarness(Cluster.Client, services, fixture.TestProfile));

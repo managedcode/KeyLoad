@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
-/// <summary>AC-LINEAGE-001/002/003: explicit projection operations on the real CLUSTER cluster.</summary>
+/// <summary>AC-LINEAGE-001/002/003: explicit projection operations on the real Orleans cluster.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
@@ -83,7 +83,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
     }
 
     [Test]
-    public async Task AcLineage003CommittedProjectionReceiptAndLiveVectorSurviveLeaderLossAndRestart()
+    public async Task AcLineage003CommittedProjectionReceiptAndLiveVectorSurviveSiloLossAndRejoin()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await EventProjectionClusterScenario.CreateAsync(fixture, deadline.Token);
@@ -92,7 +92,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         var original = await McpCallerAssertions.SdkSuccessAsync(await clients.Callers[0].CommitAsync(
             scenario.ApplyCommand(), deadline.Token));
         await EventProjectionClusterAssertions.AssertReceiptAsync(original, scenario);
-        await new EventProjectionClusterLeaderLoss(fixture).RunAsync(scenario, clients, original, nodes,
+        await new EventProjectionClusterSiloRestart(fixture).RunAsync(scenario, clients, original, nodes,
             deadline.Token);
     }
 

@@ -48,7 +48,7 @@ internal sealed class RequestCqrsClusterCallers : IAsyncDisposable
         using var reply = JsonDocument.Parse(buffer.AsMemory(0, length));
         await Assert.That(reply.RootElement.EnumerateObject().Count()).IsEqualTo(RequestCqrsClusterProtocol.ReadyReplyPropertyCount);
         await Assert.That(reply.RootElement.GetProperty(RequestCqrsClusterProtocol.ReadyReplyStatusProperty).GetString()).IsEqualTo(RequestCqrsClusterProtocol.ReadyReplyExpectedStatus);
-        await Assert.That(reply.RootElement.GetProperty(RequestCqrsClusterProtocol.ReadyReplyVotersProperty).GetInt32()).IsEqualTo(RequestCqrsClusterProtocol.NodeCount);
+        await Assert.That(reply.RootElement.GetProperty(RequestCqrsClusterProtocol.ReadyReplyReplicaCountProperty).GetInt32()).IsEqualTo(RequestCqrsClusterProtocol.NodeCount);
     }
 
     internal static async Task<RequestCqrsClusterCallers> ConnectAsync(DistributedApplication app,

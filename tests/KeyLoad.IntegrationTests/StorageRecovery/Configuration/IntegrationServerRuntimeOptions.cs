@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Composes validated native server policy for the explicit stopped-node CLUSTER fixture.</summary>
+/// <summary>Composes validated native server policy for the explicit stopped-node Orleans fixture.</summary>
 internal static class IntegrationServerRuntimeOptions
 {
     internal static ServerRuntimeOptions Runtime(NodeOptions node)

@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 /// <summary>Finite evidence bounds for the explicit native same-live-files refusal scenario.</summary>
 internal static class FunctionalGateFileOwnershipProtocol
 {
-    internal const int Voters = 3;
+    internal const int SiloCount = 3;
     internal const int FirstContender = 0;
     internal const int SuccessExit = 0;
     internal const int MaximumLogCharacters = 16_384;

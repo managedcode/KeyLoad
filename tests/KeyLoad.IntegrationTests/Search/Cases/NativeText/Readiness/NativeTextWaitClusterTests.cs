@@ -55,7 +55,7 @@ internal sealed class NativeTextWaitClusterTests(ClusterFixture fixture)
             ErrorCode.PermissionDenied, dispatched: true);
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
         await NativeTextWaitClusterCutAssertions.OwnerAsync(cut, after);
-        await Assert.That(after.Applied).IsGreaterThanOrEqualTo(cut.Applied);
+        await Assert.That(after.Position).IsGreaterThanOrEqualTo(cut.Position);
         await NativeTextClusterReplayHistory.RequireAsync(administrator, scenario.Partition, history, token);
         await NativeTextClusterReplayHistory.RequireDocumentsAsync(administrator, scenario, token);
         await SqlClusterProtocol.EqualAsync(outbox, await McpCallerAssertions.SdkSuccessAsync(

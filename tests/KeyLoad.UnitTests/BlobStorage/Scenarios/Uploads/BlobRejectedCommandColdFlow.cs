@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -13,13 +14,13 @@ internal static class BlobRejectedCommandColdFlow
     private const int Empty = 0;
     private const int Single = 1;
 
-    internal sealed record Retained(Guid Id, OperationKind Kind, string PayloadJson, OperationResult Original);
+    internal sealed record Retained(Guid Id, OperationKind Kind, string PayloadJson, Result<object> Original);
 
     private sealed record Scope(BlobRef Blob, Guid Upload, BlobCommitResult<BlobUploadInfo> Begun,
         BlobCommitResult<BlobUploadInfo> Written, BlobMetadata Metadata, ReadOnlyMemory<byte> Bytes,
         ImmutableArray<Retained> Commands);
 
-    internal static Retained Retain<T>(Guid id, OperationKind kind, T request, OperationResult original)
+    internal static Retained Retain<T>(Guid id, OperationKind kind, T request, Result<object> original)
         => new(id, kind, global::System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options), original);
 
     internal static string[] DomainImage(global::KeyLoad.Core.DatabaseEngine database, BlobRef blob, Guid upload)
@@ -66,7 +67,7 @@ internal static class BlobRejectedCommandColdFlow
         await BlobWholeFlowAssertions.Exact(read, new BlobReadResult(scope.Metadata, FirstOrdinal, scope.Bytes));
         foreach (var command in scope.Commands)
         {
-            var replay = database.ApplyEmbedded(new(command.Id, command.Kind, Principal, default, command.PayloadJson),
+            var replay = database.ApplyEmbedded(database.CreateCommand(command.Kind, command.Id, Principal, default, command.PayloadJson),
                 cancellationToken: default);
             await BlobWholeFlowAssertions.Exact(replay, command.Original);
             await BlobWholeFlowAssertions.Unchanged(store, position, image);

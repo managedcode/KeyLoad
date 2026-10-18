@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -19,8 +21,7 @@ internal static class QueueReadyAuthorityTrial
             new("input", MessageState.Ready, 0, 1, 1, null, expired ? time.AddSeconds(1) : null),
             "{\"input\":1}", "{\"kind\":\"job\"}"));
         var request = new ReceiveRequest(Guid.NewGuid(), lane);
-        var operation = fixture.Database.NormalizeOperation(new(request.RequestId, OperationKind.Receive, "root",
-            time.AddSeconds(2), System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        var operation = fixture.Database.OwnCommand(fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId, "root", time.AddSeconds(2), System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options)));
         var original = QueueWholeFlowStorage.Bytes(fixture.Store);
         var (key, row) = DamageAuthorityRow(fixture, lane, fault);
         var detail = IsNumericReadyFault(fault)
@@ -85,7 +86,7 @@ internal static class QueueReadyAuthorityTrial
         };
 
     private static async Task CounterRefusalAsync(global::KeyLoad.Core.DatabaseEngine database,
-        global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, ReplicatedOperation operation, QueueLaneRef lane,
+        global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, Command<DatabaseCommand> operation, QueueLaneRef lane,
         string[] image, long position, byte[] identity, string detail)
     {
         for (var repeat = 0; repeat < 2; repeat++)
@@ -95,7 +96,7 @@ internal static class QueueReadyAuthorityTrial
             await Assert.That(failure.Message).IsEqualTo(detail);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
             var outcome = store.Read(view => view.GetRecord<global::KeyLoad.Core.StoredOutcome>(
-                global::KeyLoad.Core.KeySpace.PartitionOutcome(lane.Partition, "root", operation.Id)));
+                global::KeyLoad.Core.KeySpace.PartitionOutcome(lane.Partition, "root", operation.CommandId)));
             await Assert.That(outcome).IsNull();
         }
     }
@@ -132,21 +133,21 @@ internal static class QueueReadyAuthorityTrial
                     request, principal: "worker", id: id, time: now.AddSeconds(2)));
                 failures.Add(first);
                 await Assert.That(first.Code).IsEqualTo(ErrorCode.RecoveryRequired);
-                var retained = fixture.ReadRetainedEntry(id);
-                var original = retained.Operation ?? throw new InvalidOperationException("The failed native entry is absent.");
+                var retained = fixture.ReadStoredOutcome(id);
+                var original = retained.PreparedCommand ?? throw new InvalidOperationException("The failed native entry is absent.");
                 await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
-                var cut = fixture.ReadJournalCut();
+                var cut = fixture.ReadCanonicalCut();
                 var repeat = Assert.ThrowsExactly<KeyLoadException>(() => fixture.SubmitIssued(original));
                 failures.Add(repeat);
                 await Assert.That(repeat.Code).IsEqualTo(ErrorCode.RecoveryRequired);
-                await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
+                await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
                 await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
                 var recovered = fixture.RecoverFaultOwnedRow(original,
                     () => QueueReadyAuthorityFaultRow.Restore(fixture, row.Key, row.Original), failures, token, expectedError);
-                await Assert.That(recovered.Index).IsEqualTo(retained.Index);
-                await Assert.That(recovered.Operation!.Id).IsEqualTo(id);
-                await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
-                await Assert.That(recovered.Operation!.NativePayload.ToArray()).IsEquivalentTo(original.NativePayload.ToArray(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+                await Assert.That(recovered.Index).IsEqualTo(retained.CanonicalSequence);
+                await Assert.That(recovered.Operation!.CommandId).IsEqualTo(id);
+                await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
+                await Assert.That(recovered.Operation!.Value!.Input.ToArray()).IsEquivalentTo(original.Value!.Input.ToArray(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 await QueueReadyAuthorityRefusalAssertions.RequireOriginalFailuresAsync(failures, expectedError);
                 var receive = fixture.SubmitIssued(original).Get<ReceiveResult>();
                 await QueueReadyAuthorityRefusalAssertions.RequireRepairedReplayAsync(fixture, original, receive);

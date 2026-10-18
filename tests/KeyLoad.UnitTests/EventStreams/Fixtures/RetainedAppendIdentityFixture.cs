@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -17,7 +18,7 @@ internal sealed class RetainedAppendIdentityFixture : IDisposable
     internal static readonly DateTimeOffset Epoch = new(2040, 1, 1, 0, 0, 0, TimeSpan.Zero);
     internal TestDatabase Harness { get; } = new(timeProvider: new ControlledReadClock(Epoch));
     internal StreamRef Stream => new(Harness.Partition, Streams, Target);
-    internal Dictionary<CommandRequest, OperationResult> Successes { get; } = [];
+    internal Dictionary<CommandRequest, Result<object>> Successes { get; } = [];
     internal List<OutboxEntry> ExpectedOutbox { get; } = [];
     internal string[] ColdImage { get; set; } = [];
     internal long ColdPosition
@@ -39,7 +40,7 @@ internal sealed class RetainedAppendIdentityFixture : IDisposable
     internal CommandRequest Producer(string id, string eventId, ExpectedStreamRevision revision) => new(Guid.NewGuid(), Harness.Partition,
         [new PutDocument(Documents, id, "{\"producer\":true}", 0), new EnqueueMessage(Queue, id, "{\"work\":true}"),
          new AppendEvents(Streams, Target, [Data(eventId)], revision)]);
-    internal async Task<OperationResult> CommitAsync(DatabaseEngine database, ZoneTreeStore store,
+    internal async Task<Result<object>> CommitAsync(DatabaseEngine database, ZoneTreeStore store,
         CommandRequest command, MutationReceipt[] effects)
     {
         var position = store.Position + 1;

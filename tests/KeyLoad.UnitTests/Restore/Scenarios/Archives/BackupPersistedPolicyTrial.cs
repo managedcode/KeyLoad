@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 
@@ -24,7 +26,7 @@ internal static class BackupPersistedPolicyTrial
         var source = BackupPersistedPolicyAssertions.Capture(fixture.Source.Store);
         var sourceIdentity = fixture.Source.Store.Identity;
         var sourceOutcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
-            fixture.Partition, BackupPersistedPolicySeed.Root, original.Operation.Id);
+            fixture.Partition, BackupPersistedPolicySeed.Root, original.Operation.CommandId);
         var backupCut = fixture.CreateBackup();
         await Assert.That(backupCut).IsEqualTo(source.Position);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
@@ -40,7 +42,7 @@ internal static class BackupPersistedPolicyTrial
         await Assert.That(fixture.TargetStore.Identity.DispatchPaused).IsTrue();
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(source.Position + 1L);
         await Assert.That(BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.TargetStore, fixture.Partition,
-            BackupPersistedPolicySeed.Root, original.Operation.Id).AsSpan().SequenceEqual(sourceOutcome)).IsTrue();
+            BackupPersistedPolicySeed.Root, original.Operation.CommandId).AsSpan().SequenceEqual(sourceOutcome)).IsTrue();
         await RefuseOriginalAsync(fixture, database, original.Operation, original.Result, token);
         await BackupPersistedPolicyAssertions.CurrentAsync(fixture, database, false, token);
         var restoredIdentity = fixture.TargetStore.Identity;
@@ -68,7 +70,7 @@ internal static class BackupPersistedPolicyTrial
             new CommandRequest(id, fixture.Partition, [new PutDocument(BackupPersistedPolicySeed.Collection,
                 BackupPersistedPolicySeed.HealthyId, BackupPersistedPolicySeed.HealthyJson)]), id);
         var result = database.ApplyEmbedded(healthy, token);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await BackupPersistedPolicyAssertions.ReceiptAsync(database, fixture.Partition, id, result.Get<CommitReceipt>());
         await HealthyDocumentAsync(fixture, database, token);
         await BackupPersistedPolicyAssertions.ReplayAsync(database, healthy, result, token);
@@ -94,7 +96,7 @@ internal static class BackupPersistedPolicyTrial
     }
 
     private static async Task RefuseOriginalAsync(BackupIndexedDocumentDedupFixture fixture,
-        DatabaseEngine database, ReplicatedOperation operation, OperationResult result, CancellationToken token)
+        DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> result, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var cut = BackupPersistedPolicyAssertions.Capture(fixture.TargetStore);
@@ -103,7 +105,7 @@ internal static class BackupPersistedPolicyTrial
         var originalToken = result.Get<CommitReceipt>().Token;
         var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, fixture.Partition));
         await Assert.That(owner.Incarnation).IsEqualTo(originalToken.Incarnation);
-        await Assert.That(owner.PlacementEpoch).IsEqualTo(originalToken.OwnershipEpoch);
+
         await Assert.That(originalToken.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
         await Assert.That(originalToken.Position).IsGreaterThan(0L);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))).IsNull();

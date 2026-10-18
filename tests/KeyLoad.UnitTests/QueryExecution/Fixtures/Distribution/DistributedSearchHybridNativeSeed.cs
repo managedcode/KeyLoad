@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -16,41 +15,41 @@ internal static class DistributedSearchHybridNativeSeed
     private const string ModelVersion = "one";
     internal static readonly VectorSpace Space = new(SpaceId, TwoDimensions, DistanceMetric.DotProduct, ModelId, ModelVersion);
 
-    internal static void Seed(RemoteDocumentNativeFixture fixture)
+    internal static void Seed(QueryNativeFixture fixture)
     {
-        var flow = new RemotePartitionQueryNativeFlow(fixture);
+        var flow = new QueryNativePartitionFlow(fixture);
         flow.Seed();
         Configure(fixture.Source);
         Configure(fixture.Destination);
-        WriteVector(fixture.Source, RemotePartitionQueryNativeFlow.Local, [1f, 0f]);
-        WriteVector(fixture.Destination, RemoteDocumentNativeFixture.Partition, [0f, 1f]);
+        WriteVector(fixture.Source, QueryNativePartitionFlow.Local, [1f, 0f]);
+        WriteVector(fixture.Destination, QueryNativeFixture.Partition, [0f, 1f]);
     }
 
     internal static SearchRequest Request(PartitionRef partition)
-        => new(partition, RemoteDocumentNativeFixture.Collection,
-            TextField: RemoteDocumentNativeFixture.Title, Text: "source destination",
+        => new(partition, QueryNativeFixture.Collection,
+            TextField: QueryNativeFixture.Title, Text: "source destination",
             VectorField: VectorField, Vector: [1f, 0f], Space: Space,
             Limit: TwoDimensions, TextWeight: TextWeight, VectorWeight: VectorWeight);
 
-    private static void Configure(PhysicalShardCatalogFixture owner)
+    private static void Configure(DocumentPatchAtomicityOwner owner)
     {
-        var principal = new PrincipalRecord(RemoteDocumentNativeFixture.Reader, RemoteDocumentNativeFixture.Tenant,
-            [new(RemoteDocumentNativeFixture.Partition.DatabaseId, RemoteDocumentNativeFixture.Collection,
+        var principal = new PrincipalRecord(QueryNativeFixture.Reader, QueryNativeFixture.Tenant,
+            [new(QueryNativeFixture.Partition.DatabaseId, QueryNativeFixture.Collection,
                 Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)], [])
         {
             PolicyEpoch = CurrentEpoch
         };
-        _ = owner.Database.Apply(RemoteDocumentNativeFixture.Operation(owner, OperationKind.ConfigurePrincipal,
+        _ = owner.Database.Apply(QueryNativeFixture.Operation(owner, OperationKind.ConfigurePrincipal,
             Guid.NewGuid(), new ConfigurePrincipalRequest(principal))).Get<PrincipalRecord>();
     }
 
-    private static void WriteVector(PhysicalShardCatalogFixture owner, PartitionRef partition, ImmutableArray<float> values)
+    private static void WriteVector(DocumentPatchAtomicityOwner owner, PartitionRef partition, ImmutableArray<float> values)
     {
         var command = Guid.NewGuid();
         var request = new CommandRequest(command, partition,
-            [new PutVector(RemoteDocumentNativeFixture.Collection, RemoteDocumentNativeFixture.DocumentId,
-                VectorField, values, Space, RemoteDocumentNativeFixture.First)]);
-        _ = owner.Database.Apply(RemoteDocumentNativeFixture.Operation(owner, OperationKind.Batch, command, request))
+            [new PutVector(QueryNativeFixture.Collection, QueryNativeFixture.DocumentId,
+                VectorField, values, Space, QueryNativeFixture.First)]);
+        _ = owner.Database.Apply(QueryNativeFixture.Operation(owner, OperationKind.Batch, command, request))
             .Get<CommitReceipt>();
     }
 }

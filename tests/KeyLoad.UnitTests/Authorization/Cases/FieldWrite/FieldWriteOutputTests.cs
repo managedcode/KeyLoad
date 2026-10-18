@@ -9,7 +9,7 @@ internal sealed class FieldWriteOutputTests
     [Arguments(true)]
     public async Task FreshEscapedAndAncestorPatchSeparatesPersistedWriteFromRawOutputAcrossRepairReplayAndTwoCold(bool ancestor)
     {
-        using var timeout = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound, TimeProvider.System);
+        using var timeout = new CancellationTokenSource(new NativeRuntimeTestOptions().ShutdownTimeout, TimeProvider.System);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, TestContext.Current!.Execution.CancellationToken);
         await FieldWriteOutputFlow.RunAsync(ancestor, caller.Token);
     }

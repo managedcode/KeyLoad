@@ -1,5 +1,5 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
@@ -7,26 +7,26 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    /// <summary>Creates an internal native command and the frozen JSON identity material used by deduplication.</summary>
+    /// <summary>Creates the native communication command from typed, generated database input.</summary>
     /// <param name="kind">The exact command capability.</param>
     /// <param name="id">Stable command identity.</param>
     /// <param name="principalId">Persisted principal selected by the caller's trusted boundary.</param>
     /// <param name="evaluatedAt">Original operation evaluation time.</param>
     /// <param name="payload">Native attributed payload for this capability.</param>
-    /// <returns>The typed internal operation; public JSON is retained solely for its existing fingerprint.</returns>
-    public ReplicatedOperation CreateNativeOperation(OperationKind kind, Guid id, string principalId,
+    /// <returns>An owned native command retaining the original input fingerprint.</returns>
+    public Command<DatabaseCommand> CreateCommand(OperationKind kind, Guid id, string principalId,
         DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload)
-        => CreateNativeOperationCore(kind, id, principalId, evaluatedAt, payload, null);
+        => CreateCommandCore(kind, id, principalId, evaluatedAt, payload, null);
 
-    internal ReplicatedOperation CreateNativeOperation(OperationKind kind, Guid id, string principalId,
+    internal Command<DatabaseCommand> CreateCommand(OperationKind kind, Guid id, string principalId,
         DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget work)
     {
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
-        return CreateNativeOperationCore(kind, id, principalId, evaluatedAt, payload, work);
+        return CreateCommandCore(kind, id, principalId, evaluatedAt, payload, work);
     }
 
-    private ReplicatedOperation CreateNativeOperationCore(OperationKind kind, Guid id, string principalId,
+    private Command<DatabaseCommand> CreateCommandCore(OperationKind kind, Guid id, string principalId,
         DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)
     {
         RequireNativeBudget(payload.Length);
@@ -62,11 +62,10 @@ public sealed partial class DatabaseEngine
             OperationKind.AbortBlobUpload => Identity<AbortBlobUploadRequest>(payload),
             OperationKind.DeleteBlob => Identity<DeleteBlobRequest>(payload),
             OperationKind.ReclaimBlob => Identity<ReclaimBlobRequest>(payload),
-            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, NativeCommandContract.Unsupported)
+            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand)
         };
-        var operation = new ReplicatedOperation(id, kind, principalId, evaluatedAt, identity);
-        return work is null ? IssueNativeOperation(operation, new NativeCommandPayload(payload))
-            : IssueNativeOperation(operation, new NativeCommandPayload(payload), work);
+        return CreatePreparedCommand(kind, id, principalId, evaluatedAt, payload,
+            DatabaseCommandFingerprint.Compute(id, kind, principalId, identity), work);
     }
 
     private string BatchIdentity(ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)

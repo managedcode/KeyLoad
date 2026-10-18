@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -16,7 +17,7 @@ internal sealed class TargetInboxCancellationTests
         using var caller = new CancellationTokenSource();
         await caller.CancelAsync();
         var coordinator = new EmbeddedCoordinator(fixture.Database);
-        OperationResult? partial = null;
+        Result<object>? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => partial =
             await coordinator.SubmitAsync(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
                 JsonSerializer.Serialize(seed.Request, JsonDefaults.Options), caller.Token));

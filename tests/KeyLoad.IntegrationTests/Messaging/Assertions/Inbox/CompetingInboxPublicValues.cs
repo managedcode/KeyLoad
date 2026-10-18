@@ -14,7 +14,7 @@ internal static class CompetingInboxPublicValues
         ImmutableArray<MutationReceipt> mutations)
     {
         var expected = new CommitReceipt(id, new(actual.Token.Incarnation, state.Partition.AtomicPartitionId,
-            actual.Token.Position, actual.Token.OwnershipEpoch), mutations, DurabilityProfile.QuorumProcessDurable);
+            actual.Token.Position), mutations, DurabilityProfile.ProcessDurable, 3);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
         await EqualAsync(expected, actual);
     }

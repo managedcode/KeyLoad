@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -27,22 +29,19 @@ internal sealed class DeniedCommandReplayClockTests
         fixture.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(new(Reader, fixture.Partition.TenantId, [], []))).Get<PrincipalRecord>();
         var time = fixture.Database.EvaluationClock.GetUtcNow();
-        var original = new ReplicatedOperation(Guid.NewGuid(), OperationKind.SetDispatch, Reader,
-            time, JsonSerializer.Serialize(false, JsonDefaults.Options));
+        var original = fixture.Database.CreateCommand(OperationKind.SetDispatch, Guid.NewGuid(), Reader, time, JsonSerializer.Serialize(false, JsonDefaults.Options));
         var before = fixture.Store.Position;
         var first = fixture.Database.Apply(original);
-        await Assert.That(first.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(first.SafeDetail).IsEqualTo(AdministrationRequired);
+        await Assert.That(Errors.Code(first.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(first.Problem?.Detail).IsEqualTo(AdministrationRequired);
         await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
         var retained = Bytes(fixture.Store);
-        var retry = original with
-        {
-            EvaluatedAt = laterTime ? time.AddSeconds(1) : time
-        };
+        var retry = fixture.Database.OwnCommand(original);
+        retry.Timestamp = (laterTime ? time.AddSeconds(1) : time).UtcDateTime;
         await SameResultAsync(first, fixture.Database.Apply(retry));
         await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
         await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(retained, CollectionOrdering.Matching);
-        var stored = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.GlobalKey(Reader, original.Id)))!;
+        var stored = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.GlobalKey(Reader, original.CommandId)))!;
         var lastTime = await VerifyReplicaApplyAsync(fixture, first, retry, stored);
         var id = Guid.NewGuid();
         fixture.Submit(OperationKind.Batch, new CommandRequest(id, fixture.Partition,
@@ -62,8 +61,7 @@ internal sealed class DeniedCommandReplayClockTests
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(writer)).Get<PrincipalRecord>();
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, fixture.Partition, [new PutDocument(Collection, Healthy, Json, 0)]);
-        var original = new ReplicatedOperation(id, OperationKind.Batch, Reader,
-            fixture.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var original = fixture.Database.CreateCommand(OperationKind.Batch, id, Reader, fixture.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
         var originalPosition = fixture.Store.Position;
         var originalReceipt = fixture.Database.Apply(original).Get<CommitReceipt>();
         await DeniedCommandRepairContinuation.OriginalReceiptAsync(fixture, originalReceipt, id, originalPosition);
@@ -76,12 +74,9 @@ internal sealed class DeniedCommandReplayClockTests
         var position = fixture.Store.Position;
         var retained = Bytes(fixture.Store);
         var outcome = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(fixture.Partition, Reader, id)))!;
-        var failure = fixture.Database.Apply(original with
-        {
-            EvaluatedAt = original.EvaluatedAt.AddSeconds(1)
-        });
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(failure.SafeDetail).IsEqualTo(ScopeDenied);
+        var failure = fixture.Database.Apply(fixture.Database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (new DateTimeOffset(original.Timestamp).AddSeconds(1)).UtcDateTime, Value = original.Value }));
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(failure.Problem?.Detail).IsEqualTo(ScopeDenied);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(retained, CollectionOrdering.Matching);
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(fixture.Partition, Reader, id))))
@@ -95,31 +90,25 @@ internal sealed class DeniedCommandReplayClockTests
         await DeniedCommandRepairContinuation.RunAsync(fixture, writer, original, outcome, expectedReference);
     }
 
-    private static async Task<DateTimeOffset> VerifyReplicaApplyAsync(TestDatabase fixture, OperationResult expected,
-        ReplicatedOperation original, byte[] stored)
+    private static async Task<DateTimeOffset> VerifyReplicaApplyAsync(TestDatabase fixture, Result<object> expected,
+        Command<DatabaseCommand> original, byte[] stored)
     {
-        var operation = original with
-        {
-            EvaluatedAt = original.EvaluatedAt.AddSeconds(1)
-        };
+        var operation = fixture.Database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (new DateTimeOffset(original.Timestamp).AddSeconds(1)).UtcDateTime, Value = original.Value });
         var position = fixture.Store.Position;
         await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 1));
         await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
-        await AssertReplicaMetadataAsync(fixture, 1, operation.EvaluatedAt);
+        await AssertReplicaMetadataAsync(fixture, 1, new DateTimeOffset(operation.Timestamp));
         var bytes = Bytes(fixture.Store);
         await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 1));
         await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
         await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
-        operation = operation with
-        {
-            EvaluatedAt = operation.EvaluatedAt.AddSeconds(1)
-        };
+        operation = fixture.Database.OwnCommand(new Command<DatabaseCommand> { CommandId = operation.CommandId, UserId = operation.UserId, Timestamp = (new DateTimeOffset(operation.Timestamp).AddSeconds(1)).UtcDateTime, Value = operation.Value });
         await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 2));
         await Assert.That(fixture.Store.Position).IsEqualTo(position + 2);
-        await AssertReplicaMetadataAsync(fixture, 2, operation.EvaluatedAt);
-        await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.GlobalKey(Reader, original.Id))))
+        await AssertReplicaMetadataAsync(fixture, 2, new DateTimeOffset(operation.Timestamp));
+        await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.GlobalKey(Reader, original.CommandId))))
             .IsEquivalentTo(stored, CollectionOrdering.Matching);
-        return operation.EvaluatedAt;
+        return new DateTimeOffset(operation.Timestamp);
     }
 
     private static async Task AssertReplicaMetadataAsync(TestDatabase fixture, long index, DateTimeOffset time)
@@ -129,7 +118,7 @@ internal sealed class DeniedCommandReplayClockTests
         await Assert.That(fixture.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!)))
             .IsEqualTo(time);
     }
-    private static async Task SameResultAsync(OperationResult expected, OperationResult actual)
+    private static async Task SameResultAsync(Result<object> expected, Result<object> actual)
         => await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(actual)))
             .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(expected)));
     private static string[] Bytes(ZoneTreeStore store) => store.Read(view =>

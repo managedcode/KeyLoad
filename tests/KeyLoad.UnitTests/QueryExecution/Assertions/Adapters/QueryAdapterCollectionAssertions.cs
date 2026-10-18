@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server;
@@ -9,7 +10,7 @@ internal static class QueryAdapterCollectionAssertions
 {
     private const string Unsupported = "This expression is outside the supported Q1 C# subset.";
     internal static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         var constant = new QueryAdapterUnsafeConstant();

@@ -5,7 +5,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-/// <summary>AC-SQLVIEW-005: real SDK and official MCP clients read matching CLUSTER model views.</summary>
+/// <summary>AC-SQLVIEW-005: real SDK and official MCP clients read matching Orleans model views.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class SqlModelViewClusterParityTests(ClusterFixture fixture)

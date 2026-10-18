@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>Frozen caller-visible document values and commands for the real CLUSTER CRUD parity cases.</summary>
+/// <summary>Frozen caller-visible document values and commands for the real Orleans CRUD parity cases.</summary>
 internal sealed record McpDocumentCrudParityScenario(PartitionRef Partition)
 {
     internal const long CreatedRevision = 1;

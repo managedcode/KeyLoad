@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using P = KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalFixture;
@@ -28,7 +30,7 @@ internal static class SampleSequenceIntegrityAssertions
     }
 
     internal static async Task ReplayAsync(SampleSequenceIntegrityFixture fixture,
-        ReplicatedOperation original, OperationResult expected)
+        Command<DatabaseCommand> original, Result<object> expected)
     {
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
         var position = fixture.Store.Position;
@@ -75,7 +77,7 @@ internal static class SampleSequenceIntegrityAssertions
         {
             var original = originals[index];
             var expected = new OutboxEntry(index + 1L, 0, original.Expected.Token,
-                original.Operation.EvaluatedAt, original.Command.Mutations[0], original.Expected.Mutations[0]);
+                new DateTimeOffset(original.Operation.Timestamp), original.Command.Mutations[0], original.Expected.Mutations[0]);
             var actual = NativeSerialization.Deserialize<OutboxEntry>(page.Records[index].Value.Span);
             await EqualAsync(expected, actual);
             await Assert.That(actual.Commit).IsEqualTo(expected.Commit);

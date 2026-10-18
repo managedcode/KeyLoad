@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Messaging;
 
@@ -31,7 +32,7 @@ internal static class AtomicTriadStagedWarm
             var result = state.Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken);
             ServerFailureObserver.Observe(() => AtomicTriadStagedReplay.Retain(state, operation, result), failures);
             await AtomicTriadStagedCurrent.EqualAsync(result,
-                new OperationResult(null, ErrorCode.Conflict, AtomicTriadStagedProtocol.DuplicateDetail));
+                Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, AtomicTriadStagedProtocol.DuplicateDetail)));
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(AtomicTriadOutboxImage.Domain(state.Store, state.Partition))
             .IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching), failures);
@@ -47,7 +48,7 @@ internal static class AtomicTriadStagedWarm
             var result = state.Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken);
             ServerFailureObserver.Observe(() => AtomicTriadStagedReplay.Retain(state, operation, result), failures);
             await AtomicTriadStagedCurrent.EqualAsync(result,
-                new OperationResult(null, ErrorCode.PermissionDenied, AtomicTriadStagedProtocol.ScopeDetail));
+                Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, AtomicTriadStagedProtocol.ScopeDetail)));
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => AtomicTriadStagedCurrent.EmptyAsync(state), failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -58,9 +59,9 @@ internal static class AtomicTriadStagedWarm
         var operation = state.Operation(state.Healthy);
         var position = state.Store.Position + AtomicTriadStagedProtocol.InitialRevision;
         var committed = state.Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken);
-        state.HealthyCommitted = committed.Error is null;
+        state.HealthyCommitted = Errors.Code(committed.Problem) is null;
         state.Receipt = new(state.Healthy.CommandId, new(state.Store.Identity.Incarnation, state.Partition.AtomicPartitionId,
-            position, AtomicTriadStagedProtocol.InitialEpoch), AtomicTriadStagedRecipe.Receipts, DurabilityProfile.ProcessDurable);
+            position), AtomicTriadStagedRecipe.Receipts, DurabilityProfile.ProcessDurable, 1);
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => AtomicTriadStagedReplay.Retain(state, operation, committed), failures);
         ServerFailureObserver.Observe(() => state.CommittedAt = QueueWholeFlowStorage.Clock(state.Store), failures);

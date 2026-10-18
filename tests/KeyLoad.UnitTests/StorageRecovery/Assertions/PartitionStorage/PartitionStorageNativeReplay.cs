@@ -61,9 +61,9 @@ internal static class PartitionStorageNativeReplay
                 continue;
             }
             admissions++;
-            await Assert.That(entry.Operation.Kind).IsEqualTo(OperationKind.Batch);
-            await Assert.That(entry.Operation.PrincipalId).IsEqualTo(P.Root);
-            var command = NativeCommandPayload.Read<CommandRequest>(entry.Operation);
+            await Assert.That(entry.Operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
+            await Assert.That(entry.Operation.UserId!).IsEqualTo(P.Root);
+            var command = NativeSerialization.Deserialize<CommandRequest>((entry.Operation).Value!.Input.Span);
             await Assert.That(JsonDefaults.Serialize(command).AsSpan().SequenceEqual(JsonDefaults.Serialize(P.Request())))
                 .IsTrue();
         }

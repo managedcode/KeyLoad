@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
@@ -10,18 +12,17 @@ internal static class NativeAnnWaitWholeFlow
     internal const long FirstPosition = 1;
     internal const int CorpusCount = 3;
     private const string Json = "{}";
-    private const long Term = 1;
     private const int FirstRecord = 0;
     private const long Revision = 1;
 
-    internal static async Task RunAsync(Func<ReplicaAppliedPositionWaitFixture,
+    internal static async Task RunAsync(Func<CanonicalReadCutFixture,
         NativeAnnMaintenanceTestRuntime, AnnMaintenanceRequest, CommitReceipt, Task> operation,
         DatabaseLimits? limits = null, TimeProvider? clock = null)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var fixture = new ReplicaAppliedPositionWaitFixture(limits, clock);
+            using var fixture = new CanonicalReadCutFixture(limits, clock);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = fixture.Canonical;
@@ -40,7 +41,7 @@ internal static class NativeAnnWaitWholeFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static Task<CommitReceipt> SeedAsync(ReplicaAppliedPositionWaitFixture fixture, CancellationToken token)
+    private static Task<CommitReceipt> SeedAsync(CanonicalReadCutFixture fixture, CancellationToken token)
     {
         var mutations = new List<Mutation>();
         for (var index = FirstRecord; index < CorpusCount; index++)
@@ -53,23 +54,16 @@ internal static class NativeAnnWaitWholeFlow
         return CommitAsync(fixture, [.. mutations], token);
     }
 
-    internal static async Task<CommitReceipt> CommitAsync(ReplicaAppliedPositionWaitFixture fixture,
+    internal static async Task<CommitReceipt> CommitAsync(CanonicalReadCutFixture fixture,
         System.Collections.Immutable.ImmutableArray<Mutation> mutations, CancellationToken token)
     {
         var database = fixture.Canonical;
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, database.Partition, mutations);
-        var operation = database.Database.NormalizeOperation(new ReplicatedOperation(id, OperationKind.Batch,
-            Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
-        if (fixture.Log.State.Term < Term)
-        {
-            fixture.Log.SaveTermAndVote(Term, fixture.Configuration.LocalId);
-        }
-        var index = checked(fixture.Log.State.LastIndex + FirstPosition);
-        fixture.Log.Append([new ReplicaEntry(index, Term, operation)]);
-        fixture.Materializer.Commit(index);
-        await fixture.Materializer.WaitForApplyAsync(index, token);
-        var receipt = database.Database.ResolveOutcome(operation).Get<CommitReceipt>();
+        var operation = database.Database.OwnCommand(database.Database.CreateCommand(OperationKind.Batch, id, Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
+        token.ThrowIfCancellationRequested();
+        var index = checked(database.Database.LastApplied + FirstPosition);
+        var receipt = database.SubmitIssuedEmbedded(operation, token).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.Position).IsEqualTo(index);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);

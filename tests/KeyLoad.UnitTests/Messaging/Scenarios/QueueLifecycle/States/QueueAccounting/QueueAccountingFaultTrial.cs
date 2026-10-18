@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -31,7 +32,7 @@ internal static class QueueAccountingFaultTrial
         var restored = QueueWholeFlowStorage.Open(cold);
         await ReplayAsync(restored, state, result);
         await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,
-            state.Producer, state.Producer.CommandId, state.Operation.EvaluatedAt), state.Produced);
+            state.Producer, state.Producer.CommandId, new DateTimeOffset(state.Operation.Timestamp)), state.Produced);
         await QueueAccountingFaultHealthy.ReplayAsync(restored, state, healthy);
         await Assert.That(QueueWholeFlowStorage.Bytes(cold)).IsEquivalentTo(complete, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
@@ -47,8 +48,8 @@ internal static class QueueAccountingFaultTrial
             _ => ErrorCode.Corruption
         };
 
-    private static Task ReplayAsync(DatabaseEngine database, QueueAccountingFaultState state, OperationResult result)
-        => state.Operation.Kind == OperationKind.Receive
+    private static Task ReplayAsync(DatabaseEngine database, QueueAccountingFaultState state, Result<object> result)
+        => state.Operation.Value!.Kind == OperationKind.Receive
             ? NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(state.Operation), result)
             : NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(state.Operation), result);
 }

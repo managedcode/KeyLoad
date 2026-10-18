@@ -5,7 +5,7 @@ Related: REQ-CACHE-001..007 / AC-CACHE-001..011 and REQ-MP-002/005 / AC-MP-002/0
 
 ## Decision and boundaries
 
-A node-local, bounded RAM pool may accelerate eligible reads from canonical ZoneTree state. ZoneTree and its native WAL and atomic journals remain authoritative. Cache content is disposable across restart and activation migration. Orleans coordinates policy through ordinary bounded grain calls; storage handles and authority never move with an activation. Cache admission never replaces persisted authorization, a committed read cut, a majority-acknowledgement barrier or an acknowledged write.
+A node-local, bounded RAM pool may accelerate eligible reads from canonical ZoneTree state. ZoneTree and its native WAL and atomic journals remain authoritative. Cache content is disposable across restart and activation migration. Orleans coordinates policy through ordinary bounded grain calls; storage handles and authority never move with an activation. Cache admission never replaces persisted authorization, a committed read cut, a required-copy acknowledgement barrier or an acknowledged write.
 
 The local provider cache starts opt-in and cold. A shared node-owned reservation pool accounts for retained bytes and entries across opted-in cache families. Keys and values are privately owned; exact-key mutation invalidation and snapshot-generation fencing occur under the existing storage gate. Pins, in-flight fills, index reservation, eviction and release remain bounded and charged until actual ownership ends. Pressure or stale/uncertain coordination bypasses acceleration and uses the original native path.
 

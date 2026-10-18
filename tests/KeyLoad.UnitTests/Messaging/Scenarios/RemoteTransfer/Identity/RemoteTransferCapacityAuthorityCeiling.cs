@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
@@ -32,10 +33,10 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         var position = fixture.Store.Position;
         var time = TimeProvider.System.GetUtcNow();
         var failed = fixture.Apply(OperationKind.Batch, request, time: time);
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(failed.SafeDetail).IsEqualTo(CapacityFailure);
-        await Assert.That(failed.Json).IsNull();
-        await Assert.That(failed.NativeValue).IsNull();
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(failed.Problem?.Detail).IsEqualTo(CapacityFailure);
+        
+        await Assert.That(failed.Value).IsNull();
         await Assert.That(fixture.Store.Position).IsEqualTo(position + First);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await RequireLocatorAsync(fixture, request.CommandId);
@@ -62,7 +63,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         await FailureReplayAsync(fixture, request, failed, retained);
     }
 
-    private static async Task FailureReplayAsync(RemoteTransferDatabase fixture, CommandRequest request, OperationResult original, byte[] retained)
+    private static async Task FailureReplayAsync(RemoteTransferDatabase fixture, CommandRequest request, Result<object> original, byte[] retained)
     {
         var image = RemoteTransferCapacityAuthorityStorage.Capture(fixture);
         var position = fixture.Store.Position;

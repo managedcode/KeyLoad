@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.Clustering.Features.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(OnlineTextRequestScope.CapabilityResultAlias)]
@@ -9,6 +11,6 @@ internal sealed record OnlineTextCapabilityResult(
     [property: global::Orleans.Id(4)] int TrackedRecords,
     [property: global::Orleans.Id(5)] string? IndexSha256,
     [property: global::Orleans.Id(6)] OnlineTextIndexMaintenanceResult? OriginalResult,
-    [property: global::Orleans.Id(7)] ReplicatedOperation? IssuedPublication,
+    [property: global::Orleans.Id(7)] Command<DatabaseCommand>? IssuedPublication,
     [property: global::Orleans.Id(8)] CommitProjectionBatchRequest? CheckpointIntent,
     [property: global::Orleans.Id(9)] Guid? CurrentCommandId);

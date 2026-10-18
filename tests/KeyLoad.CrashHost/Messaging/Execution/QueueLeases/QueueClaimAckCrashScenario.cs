@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.CrashHost;
@@ -17,7 +18,7 @@ internal static class QueueClaimAckCrashScenario
                 QueueClaimAckCrashProtocol.Payload, QueueClaimAckCrashProtocol.Headers)]), id).Get<CommitReceipt>();
         var request = new ReceiveRequest(ack ? Guid.NewGuid() : QueueClaimAckCrashProtocol.OperationId,
             QueueClaimAckCrashProtocol.Lane, MaxMessages: QueueClaimAckCrashProtocol.MaximumClaimMessages, LeaseSeconds: QueueClaimAckCrashProtocol.LeaseSeconds);
-        ReplicatedOperation operation;
+        Command<DatabaseCommand> operation;
         if (ack)
         {
             var delivery = CrashDatabase.Submit(database, OperationKind.Receive, request, request.RequestId)
@@ -25,18 +26,18 @@ internal static class QueueClaimAckCrashScenario
             await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.DeliveryFile),
                 NativeSerialization.Serialize(delivery));
             var command = new DeliveryCommand(QueueClaimAckCrashProtocol.OperationId, request.Lane, delivery.Token, DeliveryAction.Ack);
-            operation = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, command, command.CommandId));
+            operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Delivery, command, command.CommandId));
         }
         else
         {
-            operation = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Receive, request, request.RequestId));
+            operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Receive, request, request.RequestId));
         }
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.OperationFile),
             NativeSerialization.Serialize(operation));
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
             QueueClaimAckCrashProtocol.Partition);
         var target = new CommitToken(placement.Incarnation, QueueClaimAckCrashProtocol.Partition.AtomicPartitionId,
-            checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition), placement.PlacementEpoch);
+            checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.BaselineFile),
             NativeSerialization.Serialize(CaptureBaseline(store)));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.TargetFile),

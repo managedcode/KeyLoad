@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -26,21 +27,21 @@ internal static class QueueLifecycleNativeHistoryAssertions
     }
 
     private static async Task ResultAsync(DatabaseEngine database, QueueLaneRef lane,
-        QueueLifecycleNativeSample sample, OperationResult actual)
+        QueueLifecycleNativeSample sample, Result<object> actual)
     {
-        if (sample.Result.NativeValue is ReceiveResult received)
+        if (sample.Result.Value is ReceiveResult received)
         {
             await ReceiveAsync(database, lane, sample, actual, received);
             return;
         }
-        if (sample.Result.Error is not null)
+        if (Errors.Code(sample.Result.Problem) is not null)
         {
             await Assert.That(actual).IsEqualTo(sample.Result);
-            await Assert.That(actual.Json).IsNull();
-            await Assert.That(actual.NativeValue).IsNull();
+            
+            await Assert.That(actual.Value).IsNull();
             return;
         }
-        switch (sample.Operation.Kind)
+        switch (sample.Operation.Value!.Kind)
         {
             case OperationKind.ConfigurePrincipal:
                 await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, sample.Result);
@@ -55,19 +56,19 @@ internal static class QueueLifecycleNativeHistoryAssertions
     }
 
     private static async Task ReceiveAsync(DatabaseEngine database, QueueLaneRef lane,
-        QueueLifecycleNativeSample sample, OperationResult actual, ReceiveResult received)
+        QueueLifecycleNativeSample sample, Result<object> actual, ReceiveResult received)
     {
         if (received.Deliveries.IsEmpty)
         {
             await NativeReplayResultAssertions.Same<ReceiveResult>(actual, sample.Result);
             return;
         }
-        await Assert.That(actual.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(actual.SafeDetail).IsEqualTo(Stale);
-        await Assert.That(actual.Json).IsNull();
-        await Assert.That(actual.NativeValue).IsNull();
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(Stale);
+        
+        await Assert.That(actual.Value).IsNull();
         var saved = OutcomeStoreOracle.ReadPartition(database.Store, lane.Partition,
-            sample.Operation.PrincipalId, sample.Operation.Id) ?? throw new InvalidOperationException(MissingOriginal);
+            sample.Operation.UserId!, sample.Operation.CommandId) ?? throw new InvalidOperationException(MissingOriginal);
         await NativeReplayResultAssertions.Same<ReceiveResult>(saved, sample.Result);
     }
 }

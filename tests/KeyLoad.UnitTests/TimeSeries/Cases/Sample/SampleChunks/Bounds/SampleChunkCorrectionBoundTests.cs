@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -19,7 +21,7 @@ internal sealed class SampleChunkCorrectionBoundTests
     {
         await SampleChunkCorrectionBoundLifetime.RunAsync(async fixture =>
         {
-            var originals = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+            var originals = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
             fixture.Open();
             fixture.AppendInitial();
             fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set,

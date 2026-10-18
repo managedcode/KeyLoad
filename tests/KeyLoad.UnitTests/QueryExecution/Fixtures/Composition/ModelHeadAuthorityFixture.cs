@@ -38,9 +38,7 @@ internal sealed class ModelHeadAuthorityFixture : IDisposable
              new EnqueueMessage(Queue, "ready", Payload("queue"), Headers, Epoch)]);
         var before = Harness.Store.Position;
         Receipt = Harness.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
-        await ModelHeadAuthorityOperations.EqualAsync(Receipt, new CommitReceipt(Seed.CommandId,
-            new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new("appendEvents", Events, Stream, 2L), new("enqueue", Queue, "ready", 1L)], DurabilityProfile.ProcessDurable));
+        await ModelHeadAuthorityOperations.EqualAsync(Receipt, new CommitReceipt(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [new("appendEvents", Events, Stream, 2L), new("enqueue", Queue, "ready", 1L)], DurabilityProfile.ProcessDurable, 1));
         foreach (var effect in Receipt.Mutations)
         {
             await Assert.That(effect.CompositionReferences).IsEmpty();

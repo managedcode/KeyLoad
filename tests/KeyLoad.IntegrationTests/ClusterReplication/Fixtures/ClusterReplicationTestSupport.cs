@@ -35,7 +35,15 @@ internal static class ClusterReplicationTestSupport
         return result;
     }
 
-    internal static async Task<Result> RetryDuringElectionAsync(Func<Task<Result>> action,
+    internal static async Task MissingCopiesAsync(Result<CommitReceipt> result)
+    {
+        await Assert.That(result.IsFailed).IsTrue();
+        await Assert.That(result.Value).IsNull();
+        await Assert.That(result.Problem?.ErrorCode is nameof(ErrorCode.OwnershipLost)
+            or nameof(ErrorCode.UnknownWriteOutcome)).IsTrue();
+    }
+
+    internal static async Task<Result> RetryDuringSiloRecoveryAsync(Func<Task<Result>> action,
         CancellationToken cancellationToken)
     {
         while (true)
@@ -47,7 +55,7 @@ internal static class ClusterReplicationTestSupport
             }
             var code = result.Problem?.ErrorCode ?? "MissingProblem";
             await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
-                .Because($"Unexpected election retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
+                .Because($"Unexpected silo recovery retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
             await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken);
         }
     }
@@ -61,7 +69,7 @@ internal static class ClusterReplicationTestSupport
         }
     }
 
-    internal static async Task<Result<T>> RetryDuringElectionAsync<T>(Func<Task<Result<T>>> action,
+    internal static async Task<Result<T>> RetryDuringSiloRecoveryAsync<T>(Func<Task<Result<T>>> action,
         CancellationToken cancellationToken)
     {
         while (true)
@@ -74,7 +82,7 @@ internal static class ClusterReplicationTestSupport
 
             var code = result.Problem?.ErrorCode ?? "MissingProblem";
             await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
-                .Because($"Unexpected election retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
+                .Because($"Unexpected silo recovery retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
             await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken);
         }
     }

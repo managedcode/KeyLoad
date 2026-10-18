@@ -10,7 +10,7 @@ internal static class NativeRequestWorkKernelAssertions
     private static readonly TimeSpan ObservationBound = TimeSpan.FromMilliseconds(ObservationMilliseconds);
     private static readonly TimeSpan SettlementBound = TimeSpan.FromSeconds(SettlementSeconds);
 
-    internal static async Task AssertHealthyFollowingStreamAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task AssertHealthyFollowingStreamAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();

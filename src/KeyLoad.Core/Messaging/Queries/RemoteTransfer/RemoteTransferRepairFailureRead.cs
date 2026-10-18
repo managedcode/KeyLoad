@@ -31,15 +31,15 @@ public sealed partial class DatabaseEngine
         }
         var original = RequireRemoteTransferRepairOriginal(view, principal, request, intent);
         var partition = request.RepairStage == QueueTransferRepairStage.Accept ? request.Destination.Partition : request.Source.Partition;
-        var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, original.Id,
+        var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, original.CommandId,
             new(CommandOutcomeScopeKind.Partition, partition));
         var outcome = selected.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Unavailable);
         if (outcome.Incarnation != Store.Identity.Incarnation || outcome.Fingerprint != CommandFingerprint(original))
         {
             throw Errors.Fail(ErrorCode.Conflict, RemoteTransferRepairProtocol.Invalid);
         }
-        if (outcome.Result is null || outcome.Result.Error != ErrorCode.PermissionDenied || outcome.Result.Json is not null
-            || outcome.Result.NativeValue is not null)
+        if (Errors.Code(outcome.Result.Problem) != ErrorCode.PermissionDenied
+            || outcome.Result.Value is not null)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferRepairProtocol.Unavailable);
         }
@@ -55,7 +55,7 @@ public sealed partial class DatabaseEngine
         var claims = new RemoteTransferRepairClaims(RemoteTransferRepairProtocol.Purpose, intent.Source, intent.Destination,
             intent.TransferId, principal.Id, intent.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(request.IntentToken),
             request.RepairStage!.Value, request.ExpectedGeneration, request.PolicyGeneration, request.CompleteGeneration,
-            original.Id, outcome.Fingerprint, Convert.ToHexString(SHA256.HashData(bytes)), outcome.PolicyEpoch, principal.PolicyEpoch,
+            original.CommandId, outcome.Fingerprint, Convert.ToHexString(SHA256.HashData(bytes)), outcome.PolicyEpoch, principal.PolicyEpoch,
             JsonData.Fingerprint(new
             {
                 resource.FieldPolicies,

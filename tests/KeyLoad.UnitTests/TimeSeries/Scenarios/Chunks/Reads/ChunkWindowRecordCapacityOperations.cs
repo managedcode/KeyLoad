@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Server;
 
@@ -25,7 +27,7 @@ internal static class ChunkWindowRecordCapacityOperations
     internal static SampleData Fresh => new(FreshId, SampleChunkCanonicalFixture.Until, FreshValue);
 
     internal static async Task SeedAsync(SampleChunkCanonicalFixture fixture,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         await CommitAsync(fixture, new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, SampleChunkCanonicalFixture.Start,
@@ -44,24 +46,23 @@ internal static class ChunkWindowRecordCapacityOperations
     }
 
     internal static async Task RefuseAsync(SampleChunkCanonicalFixture fixture,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         var request = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition,
             [new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
                 [ChunkSelectedIntegrityFixture.Fresh], SampleChunkCanonicalFixture.Tags)]);
-        var operation = new ReplicatedOperation(request.CommandId, OperationKind.Batch,
-            SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = fixture.Owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
         var raw = fixture.Raw();
         var failures = new List<Exception>();
-        OperationResult? refused = null;
+        Result<object>? refused = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             refused = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
             originals.Add((operation, refused));
-            var expected = new OperationResult(null, ErrorCode.ResourceExhausted, Exhausted);
+            var expected = Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, Exhausted));
             await Assert.That(SampleRollupWholeFlow.Outcome(refused)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
-            await Assert.That(refused.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(refused.Json).IsNull();
+            await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(fixture.Raw()).IsEqualTo(raw), failures);
@@ -76,12 +77,12 @@ internal static class ChunkWindowRecordCapacityOperations
     }
 
     internal static Task ExpireAsync(SampleChunkCanonicalFixture fixture, long purged,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
         => CommitAsync(fixture, new ExpireSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             SampleChunkCanonicalFixture.Until, PageLimit), ExpireKind, purged, originals);
 
     internal static async Task HealthyAsync(SampleChunkCanonicalFixture fixture, Guid freshWindow,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         await CommitAsync(fixture, new DropSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, ChunkMultiblockBoundaryData.InitialRevision),
@@ -96,6 +97,6 @@ internal static class ChunkWindowRecordCapacityOperations
     }
 
     private static Task CommitAsync(SampleChunkCanonicalFixture fixture, Mutation mutation, string kind, long revision,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
         => SampleChunkCorrectionBoundReceipts.CommitAsync(fixture, mutation, kind, revision, originals);
 }

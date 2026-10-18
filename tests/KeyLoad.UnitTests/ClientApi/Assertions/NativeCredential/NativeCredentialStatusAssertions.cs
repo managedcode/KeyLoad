@@ -51,7 +51,7 @@ internal static class NativeCredentialStatusAssertions
         });
         var clock = database.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
             view.ReadOwnedValue(KeySpace.ClockBytes) ?? throw new InvalidOperationException(P.Failure)));
-        return new(hashes, database.Store.Position, database.ReadJournalCut(), clock);
+        return new(hashes, database.Store.Position, database.ReadCanonicalCut(), clock);
     }
 
     internal static async Task UnchangedAsync(NativeCredentialStatusState state, NativeCredentialStatusCut original,

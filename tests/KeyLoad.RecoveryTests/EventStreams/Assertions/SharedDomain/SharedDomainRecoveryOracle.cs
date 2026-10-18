@@ -64,7 +64,7 @@ internal static class SharedDomainRecoveryOracle
             var others = scopes.Where(candidate => candidate != scope).ToDictionary(candidate => candidate.Partition,
                 candidate => SharedDomainStoredImage.Capture(store, candidate.Partition));
             var command = SharedDomainCorpus.Producer(scope, id, Healthy);
-            var operation = SharedDomainCrashOperations.Create(OperationKind.Batch, id, command, input.Original.EvaluatedAt);
+            var operation = SharedDomainCrashOperations.Create(database, OperationKind.Batch, id, command, input.Original.EvaluatedAt);
             var position = store.Position + FirstRevision;
             var result = database.Apply(operation);
             await SharedDomainRecoveryValues.ProducerAsync(result, scope, id, Healthy, store.Identity.Incarnation, position);

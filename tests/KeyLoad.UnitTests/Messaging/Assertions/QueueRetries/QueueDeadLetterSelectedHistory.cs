@@ -16,14 +16,14 @@ internal static class QueueDeadLetterSelectedHistory
         foreach (var saved in history)
         {
             var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-                state.Lane.Partition, QueueDeadLetterSelectedProtocol.Administrator, saved.Operation.Id)))!;
-            if (saved.Operation.Kind == OperationKind.Receive)
+                state.Lane.Partition, QueueDeadLetterSelectedProtocol.Administrator, saved.Operation.CommandId)))!;
+            if (saved.Operation.Value!.Kind == OperationKind.Receive)
             {
                 await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, saved.Result);
                 var stale = database.Apply(saved.Operation);
-                await Assert.That(stale.Error).IsEqualTo(ErrorCode.StaleLease);
-                await Assert.That(stale.Json).IsNull();
-                await Assert.That(stale.NativeValue).IsNull();
+                await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+                
+                await Assert.That(stale.Value).IsNull();
             }
             else
             {

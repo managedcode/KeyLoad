@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 
@@ -30,7 +32,7 @@ internal static class BlobPortableBackupAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database,
-        (ReplicatedOperation Operation, OperationResult Result)[] originals, CancellationToken token)
+        (Command<DatabaseCommand> Operation, Result<object> Result)[] originals, CancellationToken token)
     {
         foreach (var original in originals)
         {
@@ -56,7 +58,7 @@ internal static class BlobPortableBackupAssertions
     }
 
     internal static async Task FencedAsync(DatabaseEngine database, BlobMetadata metadata,
-        ReplicatedOperation source, CancellationToken token)
+        Command<DatabaseCommand> source, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var before = BackupPersistedPolicyAssertions.Capture(database.Store);

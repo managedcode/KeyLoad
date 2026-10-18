@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using OpenTelemetry;
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
@@ -10,7 +12,7 @@ namespace KeyLoad.Server;
 /// <param name="loggerFactory">The borrowed native logger factory.</param>
 /// <param name="owner">The same silo-local owner retained through opening and eventual joined physical close.</param>
 internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, ILoggerFactory loggerFactory,
-    PartitionHostApplicationOwner owner, IGrainFactory grains) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
+    PartitionHostApplicationOwner owner, IGrainFactory grains, IServiceProvider services) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
 {
     private readonly PartitionHostApplicationOwner owner = owner;
 
@@ -21,10 +23,13 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
         return Task.FromResult(database.Store.Read(_ => new SiloStorageCut(database.Store.Identity.Incarnation, database.LastApplied)));
     }
 
-    public Task<ReplicatedOperation> PrepareAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    public Task<Command<DatabaseCommand>> PrepareAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
         => Task.FromResult(owner.Borrow().Database.PrepareStorageOperation(operation, cancellationToken));
 
-    public Task<StorageOperationResult> ApplyAsync(ReplicatedOperation operation, long sequence, CancellationToken cancellationToken)
+    public Task<StoredCommand?> ReadStoredCommandAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+        => Task.FromResult(owner.Borrow().Database.ReadStoredCommand(operation, cancellationToken));
+
+    public Task<StorageOperationResult> ApplyAsync(Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken)
         => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, sequence, cancellationToken));
 
     public IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
@@ -36,6 +41,21 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
         CancellationToken cancellationToken)
         => grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForCommands())
             .ExecuteCommandAsync(signedRequest, actorKey, cancellationToken);
+
+    public Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken)
+        => services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken);
+
+    public Task<NodeAdmissionStatus> ReadAdmissionAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(services.GetRequiredService<INodeAdministration>().Admission());
+    }
+
+    public Task<AdminNodeSnapshot> ReadDashboardAsync(CancellationToken cancellationToken)
+        => services.GetRequiredService<INodeAdministration>().DashboardAsync(cancellationToken);
+
+    public Task<BackupReceipt> CreateBackupAsync(CancellationToken cancellationToken)
+        => services.GetRequiredService<INodeAdministration>().BackupAsync(cancellationToken);
 
     /// <inheritdoc />
     public override async Task Init(IServiceProvider serviceProvider)

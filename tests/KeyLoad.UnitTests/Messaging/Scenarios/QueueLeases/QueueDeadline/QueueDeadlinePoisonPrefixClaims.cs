@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -10,13 +12,12 @@ internal static class QueueDeadlinePoisonPrefixClaims
     internal static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef lane)
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
-        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First), placement.PlacementEpoch);
+        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First));
     }
 
-    internal static ReplicatedOperation Operation<T>(DatabaseEngine database, OperationKind kind, Guid id,
+    internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine database, OperationKind kind, Guid id,
         T payload, string subject, DateTimeOffset time)
-        => database.PrepareQueueRetryOperation(database.NormalizeOperation(new(id, kind, subject, time,
-            System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options))));
+        => database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(kind, id, subject, time, System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options))));
 
     internal static async Task<ReceiveResult> ReceiveAsync(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef lane,
         MessageMetadata[] ready, string subject, DateTimeOffset time, CancellationToken token)
@@ -34,7 +35,7 @@ internal static class QueueDeadlinePoisonPrefixClaims
         var operation = Operation(database, OperationKind.Receive, request.RequestId, request, subject, time);
         var result = database.Apply(operation);
         await NativeReplayResultAssertions.Same<ReceiveResult>(result,
-            new OperationResult(null) { NativeValue = new ReceiveResult(request.RequestId, expected, expectedToken) });
+            Result<object>.Succeed(new ReceiveResult(request.RequestId, expected, expectedToken)));
         foreach (var delivery in result.Get<ReceiveResult>().Deliveries)
         {
             var source = ready.Single(value => value.Id == delivery.Id);
@@ -59,10 +60,7 @@ internal static class QueueDeadlinePoisonPrefixClaims
         var request = new ReceiveRequest(original.RequestId, lane, MaxMessages: original.Deliveries.Length);
         var operation = Operation(database, OperationKind.Receive, request.RequestId, request, subject, time);
         await NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation),
-            new(null)
-            {
-                NativeValue = original
-            });
+            Result<object>.Succeed(original));
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }
 }

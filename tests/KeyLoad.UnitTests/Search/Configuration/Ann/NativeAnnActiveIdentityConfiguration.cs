@@ -10,7 +10,7 @@ internal static class NativeAnnActiveIdentityConfiguration
     internal static (AnnMaintenanceRequest Request, ProjectionConsumerInfo Configured) Create(TestDatabase database)
     {
         var actual = database.Database.ReadAtomicPartitionPlacement(AnnProjectionPinTestSupport.Principal, database.Partition);
-        var placement = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation, actual.VoterIds, actual.PlacementEpoch);
+        var placement = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation);
         var consumer = AnnProjectionPinTestSupport.Consumer(database, ConsumerName);
         var space = AnnSeedTestSupport.Space();
         var request = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 
@@ -5,16 +7,16 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed record QueueLifecycleTestState(PartitionRef Partition, DateTimeOffset Time)
 {
-    internal Func<ReplicatedOperation, OperationResult>? NativeSubmit
+    internal Func<Command<DatabaseCommand>, Result<object>>? NativeSubmit
     {
         get; init;
     }
-    internal OperationResult SubmitOriginal(DatabaseEngine database, ReplicatedOperation operation)
+    internal Result<object> SubmitOriginal(DatabaseEngine database, Command<DatabaseCommand> operation)
         => NativeSubmit is { } submit ? submit(operation) : database.Apply(operation);
 
     internal QueueLaneRef Lane => new(Partition, QueueLifecycleTestProtocol.Queue);
-    internal List<(ReplicatedOperation Operation, OperationResult Result)> Successes { get; } = [];
-    internal List<(ReplicatedOperation Operation, OperationResult Result)> Failures { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result)> Successes { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result)> Failures { get; } = [];
     internal CommandRequest? CancelledCommand
     {
         get; set;
@@ -27,10 +29,10 @@ internal sealed record QueueLifecycleTestState(PartitionRef Partition, DateTimeO
     {
         get; set;
     }
-    internal OperationResult Execute<T>(DatabaseEngine database, OperationKind kind, T payload,
+    internal Result<object> Execute<T>(DatabaseEngine database, OperationKind kind, T payload,
         Guid id, string principal = QueueLifecycleTestProtocol.Administrator)
     {
-        var operation = new ReplicatedOperation(id, kind, principal, Time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        var operation = database.CreateCommand(kind, id, principal, Time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
         var result = SubmitOriginal(database, operation);
         if (result.Error is null)
         {
@@ -42,7 +44,7 @@ internal sealed record QueueLifecycleTestState(PartitionRef Partition, DateTimeO
         }
         return result;
     }
-    internal OperationResult Batch(DatabaseEngine database, params Mutation[] mutations)
+    internal Result<object> Batch(DatabaseEngine database, params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
         return Execute(database, OperationKind.Batch, new CommandRequest(id, Partition, [.. mutations]), id);

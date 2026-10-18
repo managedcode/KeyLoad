@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.AnalyticsStore;
 using KeyLoad.Core.Features.ResourceExecution;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
@@ -8,7 +9,7 @@ internal static class AnalyticsSharedAssertions
 {
     internal static async Task BindingsAsync(TestDatabase fixture, Guid commandId)
     {
-        var operation = fixture.ReadRetainedEntry(commandId).Operation!;
+        var operation = fixture.ReadStoredOutcome(commandId).PreparedCommand!;
         var captured = ResourceEffectAdmissionValidation.Read(operation, new DatabaseLimits());
         var expected = new[]
         {

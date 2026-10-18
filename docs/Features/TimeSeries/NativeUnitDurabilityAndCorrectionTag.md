@@ -1,16 +1,15 @@
-# Native Unit durability and correction tag premise
+# Native time-series durability and correction tags
 
-The two explicit/signed-minimum Unit owners create the original TestDatabase native replica admission. ZoneTreeIdentityFile creates ProcessDurable identity, DatabaseEngine copies that durability, native TestDatabaseReplicaAdmission appends/commits/applies via ReplicaCanonicalApply into the same engine, and ExecuteBatch puts that durability in the full CommitReceipt. That path does not construct the production replicated write path, which assigns QuorumProcessDurable after a majority of the `KeyLoad:ReplicaCount` copies confirm. Therefore the independently authored Unit receipt goldens declare ProcessDurable; scope, original GUID, positions, epoch, full mutations, all assertions and original native admission remain. Public replicated-cluster QuorumProcessDurable goldens and production profiles are unchanged.
+In-process tests use the real ZoneTree owner and canonical atomic command apply.
+Their complete receipts require `ProcessDurable` and exactly one persisted copy.
+Public cluster tests independently require the fixture's configured persisted
+copy count. Neither an enum nor an in-process receipt qualifies cluster recovery.
 
-The newly added correction tag positive premise used numeric JSON23 while the public TagValue is string and native SampleChunkTagPredicate.Matches accepts only an actual JSON string with ordinal equality. Use JSON string23 only for that new correction; preserve numeric17 in the original base corpus, exact original sample bits, sequence4, revision7/8, generation2/3, all bounds, same tag string23, and every independently authored full row/page. This is not numeric/string coercion or a changed product matcher. The same TaggedJson input remains used by the actual append and the independent full expected correction record.
+Tag selection uses an actual JSON string and ordinal equality. A numeric JSON
+value does not match a string tag. Correction tests preserve independently
+specified sample bits, sequences, revisions, generations, complete pages and
+bounded refusal behavior; input and expected rows retain their original types.
 
-The complete original three cases, failed outcomes, current permission/cancellation/replay and same-root cold flows remain mandatory. Compilation, native discovery, full original runtime and Linux qualification are OPEN until Root runs the coherent image.
-
-```mermaid
-flowchart LR
-    Native[Native replica admission] --> Receipt[ProcessDurable receipt]
-    Native --> Tags[Actual string tag correction]
-    Receipt --> Minimum[Current minimum and permission checks]
-    Tags --> Minimum
-    Minimum --> Cold[Original replay and two cold owners]
-```
+Current authorization, cancellation, original-command replay and same-root cold
+reopen remain mandatory. Full native execution and Linux qualification are open
+until their original reports exist. No conversion or alternate matcher is added.

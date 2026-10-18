@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -10,12 +11,10 @@ internal static class NativeRequestDrainLifecycleOperation
     {
         state.Database.Configure(NativeRequestDrainLifecycleProtocol.Collection, ResourceKind.Collection,
             state.Database.Partition.TransactionDomainId);
-        var before = state.Database.ReadJournalCut().LastIndex;
+        var before = state.Database.ReadCanonicalCut().AppliedPosition;
         state.Receipt = state.Database.Submit(OperationKind.Batch, state.Original, id: state.Original.CommandId)
             .Get<CommitReceipt>();
-        var expected = new CommitReceipt(state.Original.CommandId,
-            new(state.Database.Store.Identity.Incarnation, state.Database.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new("putDocument", "native-request-drain", "original", 1L)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(state.Original.CommandId, new(state.Database.Store.Identity.Incarnation, state.Database.Partition.AtomicPartitionId, before + 1L), [new("putDocument", "native-request-drain", "original", 1L)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(state.Receipt, expected);
         await AppliedAsync(state, state.Original.CommandId, before + 1L);
         await Assert.That(state.Receipt.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();
@@ -111,14 +110,12 @@ internal static class NativeRequestDrainLifecycleOperation
         using var admitted = healthy.Acquire(Guid.NewGuid(), NativeRequestWorkKind.CommandCapability);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var before = state.Database.ReadJournalCut().LastIndex;
+            var before = state.Database.ReadCanonicalCut().AppliedPosition;
             var command = new CommandRequest(Guid.NewGuid(), state.Database.Partition,
                 [new PutDocument(NativeRequestDrainLifecycleProtocol.Collection, NativeRequestDrainLifecycleProtocol.Document,
                     NativeRequestDrainLifecycleProtocol.ContinuedJson, 1L)]);
             var receipt = state.Database.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
-            var expectedReceipt = new CommitReceipt(command.CommandId,
-                new(state.Database.Store.Identity.Incarnation, state.Database.Partition.AtomicPartitionId, before + 1L, 1L),
-                [new("putDocument", "native-request-drain", "original", 2L)], DurabilityProfile.ProcessDurable);
+            var expectedReceipt = new CommitReceipt(command.CommandId, new(state.Database.Store.Identity.Incarnation, state.Database.Partition.AtomicPartitionId, before + 1L), [new("putDocument", "native-request-drain", "original", 2L)], DurabilityProfile.ProcessDurable, 1);
             await EqualAsync(receipt, expectedReceipt);
             await AppliedAsync(state, command.CommandId, before + 1L);
             await Assert.That(receipt.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();
@@ -131,10 +128,10 @@ internal static class NativeRequestDrainLifecycleOperation
 
     private static async Task AppliedAsync(NativeRequestDrainLifecycleState state, Guid commandId, long position)
     {
-        var entry = state.Database.ReadRetainedEntry(commandId);
-        var cut = state.Database.ReadJournalCut();
-        await Assert.That(entry.Index).IsEqualTo(position);
-        await Assert.That(entry.Operation!.Id).IsEqualTo(commandId);
+        var entry = state.Database.ReadStoredOutcome(commandId);
+        var cut = state.Database.ReadCanonicalCut();
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(position);
+        await Assert.That(entry.PreparedCommand!.CommandId).IsEqualTo(commandId);
         await Assert.That(cut.LastIndex).IsEqualTo(position);
         await Assert.That(cut.CommittedIndex).IsEqualTo(position);
         await Assert.That(state.Database.Database.LastApplied).IsEqualTo(position);

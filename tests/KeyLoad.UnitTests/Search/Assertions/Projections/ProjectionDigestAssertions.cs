@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
@@ -11,7 +12,7 @@ internal static class ProjectionDigestAssertions
     private const string Corrupt = "The stored vector projection effect is corrupt.";
     private const double Rank = 1d / 61d;
 
-    internal static async Task<(CommandRequest Command, OperationResult Result)> MalformedOwnerAsync(EventProjectionFixture fixture)
+    internal static async Task<(CommandRequest Command, Result<object> Result)> MalformedOwnerAsync(EventProjectionFixture fixture)
     {
         var request = fixture.Request();
         var malformed = request with
@@ -24,13 +25,12 @@ internal static class ProjectionDigestAssertions
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, [malformed]);
         var domain = ProjectionDigestImage.Domain(fixture);
         var before = fixture.Harness.Store.Position;
-        OperationResult? result = null;
+        Result<object>? result = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             result = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
-            await EqualAsync(result, new OperationResult(null, ErrorCode.Validation,
-                "The mutation resource and canonical owner differ."));
+            await EqualAsync(result, Result<object>.Fail(Errors.Problem(ErrorCode.Validation, "The mutation resource and canonical owner differ.")));
             await Assert.That(fixture.Harness.Store.Position).IsEqualTo(before + 1L);
             var outcome = fixture.Harness.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
                 fixture.Partition, EventProjectionFixture.WorkerId, command.CommandId)));
@@ -47,10 +47,7 @@ internal static class ProjectionDigestAssertions
     internal static async Task ReceiptAsync(EventProjectionFixture fixture, CommandRequest command,
         CommitReceipt receipt, long before)
     {
-        var expected = new CommitReceipt(command.CommandId,
-            new(fixture.Harness.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new("applyVectorProjection", fixture.TargetCollection, EventProjectionFixture.TargetId, 1L)],
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, new(fixture.Harness.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, before + 1L), [new("applyVectorProjection", fixture.TargetCollection, EventProjectionFixture.TargetId, 1L)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(receipt, expected);
     }
 

@@ -26,7 +26,7 @@ internal static class FunctionalGateRelational
             new PutDocument(P.Independent, P.Baseline, FunctionalGateRelationalRows.Independent(P.Baseline), P.Absent)
         ]);
         var receipt = await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(command, token));
-        await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, ctx.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(ctx, receipt, command.CommandId, ctx.Partition,
             [new(P.PutKind, P.Parent, P.Baseline, P.Initial), new(P.PutKind, P.Child, P.Baseline, P.Initial),
                 new(P.PutKind, P.Independent, P.Baseline, P.Initial)]);
         DocumentResult[] baseline =

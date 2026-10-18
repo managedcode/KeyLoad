@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -106,7 +107,6 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         ]), id: commandId).Get<CommitReceipt>();
     }
 
-    private OperationResult Submit<T>(OperationKind kind, T payload, Guid? id = null)
-        => Database.Apply(new(id ?? Guid.NewGuid(), kind, RootPrincipal, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+    private Result<object> Submit<T>(OperationKind kind, T payload, Guid? id = null)
+        => Database.Apply(Database.CreateCommand(kind, id ?? Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options)));
 }

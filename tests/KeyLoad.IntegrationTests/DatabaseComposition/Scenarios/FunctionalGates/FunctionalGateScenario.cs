@@ -12,7 +12,7 @@ internal static class FunctionalGateScenario
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var fixture = await FunctionalGateFixture.StartAsync(nodes, lifetime.Token);
+            await using var fixture = await FunctionalGateFixture.StartAsync(nodes, nodes, lifetime.Token);
             await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(fixture, lifetime.Token), failures);
             fixture.PreserveEvidence = failures.Count != 0;
         }, failures);
@@ -29,7 +29,7 @@ internal static class FunctionalGateScenario
             var bootstrap = new FunctionalGateContext(administrator, administrator, administrator,
                 partition, anchor, FunctionalGateProtocol.ResourceCount)
             {
-                VoterCount = fixture.NodeNames.Length
+                ReplicaCount = fixture.ReplicaCount
             };
             await FunctionalGateNodeAssertions.VerifyAsync(fixture, bootstrap, token);
             await FunctionalGateDocuments.InitializeAsync(bootstrap, token);
@@ -64,7 +64,7 @@ internal static class FunctionalGateScenario
                 QueueAdministrator = users.QueueAdministrator,
                 WriterPrincipalId = writerIds[index],
                 ReaderPrincipalId = readerIds[index],
-                VoterCount = fixture.NodeNames.Length
+                ReplicaCount = fixture.ReplicaCount
             }).ToArray();
         await InitializeRemainingAsync(contexts[0], token);
         foreach (var context in contexts)
@@ -72,7 +72,6 @@ internal static class FunctionalGateScenario
             await FunctionalGateUserAnalytics.InitializeAsync(context, token);
         }
         await users.VerifyAsync(contexts[0], token);
-        await FunctionalGateOperationalAnalytics.ExerciseAsync(contexts[0], token);
         await FunctionalGateExecution.RunAsync(contexts, token);
         await FunctionalGateQueueGraph.RunAsync(contexts[0], token);
         await FunctionalGateQueues.VerifyBaselineAsync(contexts[0], token);

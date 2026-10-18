@@ -128,7 +128,7 @@ internal static class CommandObservedReturnEdgeFlow
             expected = await CommandObservedReturnEdgeAssertions.OriginalAsync(scenario, request, token);
             await Assert.That(expected.Token.Position).IsEqualTo(checked(before.Journal.LastIndex
                 + CommandObservedPolicyProtocol.Step));
-            var cut = scenario.Fixture.Database.ReadJournalCut();
+            var cut = scenario.Fixture.Database.ReadCanonicalCut();
             await Assert.That(cut.LastIndex).IsEqualTo(expected.Token.Position);
             await Assert.That(cut.CommittedIndex).IsEqualTo(expected.Token.Position);
             await Assert.That(scenario.Fixture.Database.Database.LastApplied).IsEqualTo(expected.Token.Position);

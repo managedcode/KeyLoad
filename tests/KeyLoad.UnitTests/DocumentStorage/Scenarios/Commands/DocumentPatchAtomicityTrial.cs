@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentPatchAtomicityContract;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
@@ -22,10 +23,10 @@ internal static class DocumentPatchAtomicityTrial
         var failed = owner.Submit(operation);
         var retained = owner.Entry(operation.Id);
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(operation),
-            NativeSerialization.Serialize(retained.Operation));
+            NativeSerialization.Serialize(retained.PreparedCommand));
         await DocumentPatchAtomicityAssertions.FailureAsync(failed, fault);
         await before.RequireDomainAsync(DocumentPatchAtomicityState.Read(owner));
-        await Assert.That(retained.Index).IsEqualTo(before.LastIndex + 1L);
+        await Assert.That(retained.CanonicalSequence).IsEqualTo(before.LastIndex + 1L);
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var failedState = DocumentPatchAtomicityState.Read(owner);
         await owner.ReopenAsync();
@@ -43,7 +44,7 @@ internal static class DocumentPatchAtomicityTrial
         var healthy = owner.Submit(fresh);
         var healthyEntry = owner.Entry(fresh.Id);
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(fresh),
-            NativeSerialization.Serialize(healthyEntry.Operation));
+            NativeSerialization.Serialize(healthyEntry.PreparedCommand));
         await DocumentPatchAtomicityAssertions.HealthyAsync(owner, fault, healthyEntry, healthy, originalTail + 3L);
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var healthyState = DocumentPatchAtomicityState.Read(owner);
@@ -54,17 +55,17 @@ internal static class DocumentPatchAtomicityTrial
         await healthyState.RequireAsync(DocumentPatchAtomicityState.Read(owner));
     }
 
-    private static ReplicatedOperation Batch(DocumentPatchAtomicityOwner owner, int fault, long secondRevision)
+    private static Command<DatabaseCommand> Batch(DocumentPatchAtomicityOwner owner, int fault, long secondRevision)
         => Create(owner, new PutDocument(Collection, First, FirstAfter, 1),
             new PatchDocument(Collection, Second,
                 [new(ValuePath, PatchKind.Set, "11"), new(fault == 0 ? MissingPath : ArrayPath, PatchKind.Set, "5")],
                 secondRevision));
 
-    private static ReplicatedOperation Create(DocumentPatchAtomicityOwner owner, params Mutation[] mutations)
+    private static Command<DatabaseCommand> Create(DocumentPatchAtomicityOwner owner, params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, owner.Source.Partition, [.. mutations]);
-        return owner.Database.CreateNativeOperation(OperationKind.Batch, id, Root,
+        return owner.Database.CreateCommand(OperationKind.Batch, id, Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
     }
 }

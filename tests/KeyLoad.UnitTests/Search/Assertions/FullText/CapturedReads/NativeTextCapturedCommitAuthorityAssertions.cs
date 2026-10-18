@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
 using P = KeyLoad.UnitTests.Features.Search.NativeTextCapturedCommitAuthorityProtocol;
@@ -34,23 +35,21 @@ internal static class NativeTextCapturedCommitAuthorityAssertions
 
     internal static async Task SeedReceiptAsync(PartitionRef partition, CommandRequest command, CommitReceipt actual)
     {
-        var expected = new CommitReceipt(command.CommandId, actual.Token,
-        [
+        var expected = new CommitReceipt(command.CommandId, actual.Token, [
             new(P.PutKind, P.Collection, P.First, P.InitialRevision),
             new(P.PutKind, P.Collection, P.Second, P.InitialRevision)
-        ], DurabilityProfile.ProcessDurable);
+        ], DurabilityProfile.ProcessDurable, 1);
         await SafeProjectorOperationSeed.EqualAsync(actual, expected);
         await TokenAsync(partition, actual.Token);
     }
 
     internal static async Task ReceiptAsync(PartitionRef partition, CommandRequest command, CommitReceipt actual)
     {
-        var expected = new CommitReceipt(command.CommandId, actual.Token,
-        [
+        var expected = new CommitReceipt(command.CommandId, actual.Token, [
             new(P.PutKind, P.Collection, P.First, P.UpdatedRevision),
             new(P.DeleteKind, P.Collection, P.Second, P.UpdatedRevision),
             new(P.PutKind, P.Collection, P.Third, P.InitialRevision)
-        ], DurabilityProfile.ProcessDurable);
+        ], DurabilityProfile.ProcessDurable, 1);
         await SafeProjectorOperationSeed.EqualAsync(actual, expected);
         await TokenAsync(partition, actual.Token);
     }
@@ -73,10 +72,10 @@ internal static class NativeTextCapturedCommitAuthorityAssertions
 
     internal static async Task JournalAsync(TestDatabase fixture, CommandRequest command, CommitReceipt receipt)
     {
-        var entry = fixture.ReadRetainedEntry(command.CommandId);
-        await Assert.That(entry.Index).IsEqualTo(receipt.Token.Position);
-        await Assert.That(entry.Operation is not null).IsTrue();
-        await Assert.That(entry.Operation!.Id).IsEqualTo(command.CommandId);
+        var entry = fixture.ReadStoredOutcome(command.CommandId);
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(receipt.Token.Position);
+        await Assert.That(entry.PreparedCommand is not null).IsTrue();
+        await Assert.That(entry.PreparedCommand!.CommandId).IsEqualTo(command.CommandId);
     }
 
     private static async Task TokenAsync(PartitionRef partition, CommitToken token)

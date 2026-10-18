@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
@@ -8,7 +10,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 internal static class QueueClaimAckRecoveryContinuation
 {
     internal static async Task ColdAsync(string root, DatabaseEngine restored, ZoneTreeStore cold,
-        ReplicatedOperation operation, bool ack, OperationResult result, Delivery? delivery, CancellationToken token)
+        Command<DatabaseCommand> operation, bool ack, Result<object> result, Delivery? delivery, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (!ack)
@@ -21,7 +23,7 @@ internal static class QueueClaimAckRecoveryContinuation
         if (!ack)
         {
             var command = new DeliveryCommand(Guid.NewGuid(), QueueClaimAckCrashProtocol.Lane, delivery!.Token, DeliveryAction.Ack);
-            var completion = restored.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, command, command.CommandId));
+            var completion = restored.OwnCommand(CrashDatabase.Operation(restored, OperationKind.Delivery, command, command.CommandId));
             token.ThrowIfCancellationRequested();
             var target = QueueClaimAckRecovery.NextToken(restored, cold);
             var receipt = restored.Apply(completion);
@@ -37,29 +39,29 @@ internal static class QueueClaimAckRecoveryContinuation
     {
         token.ThrowIfCancellationRequested();
         var id = Guid.NewGuid();
-        var enqueue = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Batch,
+        var enqueue = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch,
             new CommandRequest(id, QueueClaimAckCrashProtocol.Partition, [new EnqueueMessage(QueueClaimAckCrashProtocol.Queue,
                 QueueClaimAckCrashProtocol.Healthy, QueueClaimAckCrashProtocol.Payload, QueueClaimAckCrashProtocol.Headers)]), id));
         var enqueueTarget = QueueClaimAckRecovery.NextToken(database, store);
         var created = database.Apply(enqueue);
-        await EnqueueReceiptAsync(created.Get<CommitReceipt>(), enqueue.Id, enqueueTarget);
+        await EnqueueReceiptAsync(created.Get<CommitReceipt>(), enqueue.CommandId, enqueueTarget);
         await QueueClaimAckRecoveryAssertions.ImageAsync(database, QueueClaimAckCrashProtocol.Healthy, MessageState.Ready, null, 2);
         await QueueClaimAckRecovery.ReplayAsync(database, store, enqueue, created, token);
         var request = new ReceiveRequest(Guid.NewGuid(), QueueClaimAckCrashProtocol.Lane, MaxMessages: 1,
             LeaseSeconds: QueueClaimAckCrashProtocol.LeaseSeconds);
-        var claim = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Receive, request, request.RequestId));
+        var claim = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Receive, request, request.RequestId));
         var claimTarget = QueueClaimAckRecovery.NextToken(database, store);
         var received = database.Apply(claim);
         await QueueClaimAckRecoveryAssertions.DeliveryAsync(database, received.Get<ReceiveResult>(), request.RequestId,
-            claim.EvaluatedAt, QueueClaimAckCrashProtocol.Healthy, claimTarget);
+            new DateTimeOffset(claim.Timestamp), QueueClaimAckCrashProtocol.Healthy, claimTarget);
         var delivery = received.Get<ReceiveResult>().Deliveries.Single();
         await QueueClaimAckRecoveryAssertions.ImageAsync(database, QueueClaimAckCrashProtocol.Healthy, MessageState.Leased, delivery, 2);
         await QueueClaimAckRecovery.ReplayAsync(database, store, claim, received, token);
         await HealthyColdAsync(root, store, enqueue, created, enqueueTarget, claim, received, claimTarget, delivery, token);
     }
 
-    private static async Task HealthyColdAsync(string root, ZoneTreeStore store, ReplicatedOperation enqueue,
-        OperationResult created, CommitToken enqueueTarget, ReplicatedOperation claim, OperationResult received,
+    private static async Task HealthyColdAsync(string root, ZoneTreeStore store, Command<DatabaseCommand> enqueue,
+        Result<object> created, CommitToken enqueueTarget, Command<DatabaseCommand> claim, Result<object> received,
         CommitToken claimTarget, Delivery delivery, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -74,13 +76,13 @@ internal static class QueueClaimAckRecoveryContinuation
         var restored = QueueLifecycleRecoveryAssertions.Open(cold);
         await Assert.That(TimeProvider.System.GetUtcNow()).IsLessThan(delivery.LeaseUntil);
         await QueueClaimAckRecovery.ReplayAsync(restored, cold, enqueue, created, token);
-        await EnqueueReceiptAsync(restored.ResolveOutcome(enqueue).Get<CommitReceipt>(), enqueue.Id, enqueueTarget);
+        await EnqueueReceiptAsync(restored.ResolveOutcome(enqueue).Get<CommitReceipt>(), enqueue.CommandId, enqueueTarget);
         await QueueClaimAckRecovery.ReplayAsync(restored, cold, claim, received, token);
         await QueueClaimAckRecoveryAssertions.DeliveryAsync(restored, restored.ResolveOutcome(claim).Get<ReceiveResult>(),
-            claim.Id, claim.EvaluatedAt, QueueClaimAckCrashProtocol.Healthy, claimTarget);
+            claim.CommandId, new DateTimeOffset(claim.Timestamp), QueueClaimAckCrashProtocol.Healthy, claimTarget);
         await QueueClaimAckRecoveryAssertions.ImageAsync(restored, QueueClaimAckCrashProtocol.Healthy, MessageState.Leased, delivery, 2);
         var ack = new DeliveryCommand(Guid.NewGuid(), QueueClaimAckCrashProtocol.Lane, delivery.Token, DeliveryAction.Ack);
-        var completion = restored.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, ack, ack.CommandId));
+        var completion = restored.OwnCommand(CrashDatabase.Operation(restored, OperationKind.Delivery, ack, ack.CommandId));
         token.ThrowIfCancellationRequested();
         var target = QueueClaimAckRecovery.NextToken(restored, cold);
         var completed = restored.Apply(completion);
@@ -92,9 +94,9 @@ internal static class QueueClaimAckRecoveryContinuation
         await FinalColdAsync(root, cold, enqueue, created, enqueueTarget, completion, completed, target, token);
     }
 
-    private static async Task FinalColdAsync(string root, ZoneTreeStore store, ReplicatedOperation enqueue,
-        OperationResult created, CommitToken enqueueTarget, ReplicatedOperation completion,
-        OperationResult completed, CommitToken ackTarget, CancellationToken token)
+    private static async Task FinalColdAsync(string root, ZoneTreeStore store, Command<DatabaseCommand> enqueue,
+        Result<object> created, CommitToken enqueueTarget, Command<DatabaseCommand> completion,
+        Result<object> completed, CommitToken ackTarget, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var image = QueueClaimAckRecoveryAssertions.Capture(store);
@@ -107,16 +109,15 @@ internal static class QueueClaimAckRecoveryContinuation
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
         var restored = QueueLifecycleRecoveryAssertions.Open(cold);
         await QueueClaimAckRecovery.ReplayAsync(restored, cold, enqueue, created, token);
-        await EnqueueReceiptAsync(restored.ResolveOutcome(enqueue).Get<CommitReceipt>(), enqueue.Id, enqueueTarget);
+        await EnqueueReceiptAsync(restored.ResolveOutcome(enqueue).Get<CommitReceipt>(), enqueue.CommandId, enqueueTarget);
         await QueueClaimAckRecovery.ReplayAsync(restored, cold, completion, completed, token);
-        await QueueClaimAckRecovery.ReceiptAsync(restored.ResolveOutcome(completion).Get<CommitReceipt>(), completion.Id,
+        await QueueClaimAckRecovery.ReceiptAsync(restored.ResolveOutcome(completion).Get<CommitReceipt>(), completion.CommandId,
             QueueClaimAckCrashProtocol.Healthy, ackTarget);
         await QueueClaimAckRecoveryAssertions.ImageAsync(restored, QueueClaimAckCrashProtocol.Healthy, MessageState.Acked, null, 2);
         await QueueClaimAckRecoveryAssertions.ImageAsync(restored, QueueClaimAckCrashProtocol.Message, MessageState.Acked, null, 1, counterSequence: 2);
     }
 
     private static Task EnqueueReceiptAsync(CommitReceipt receipt, Guid commandId, CommitToken target)
-        => QueueClaimAckRecoveryAssertions.EqualAsync(receipt, new CommitReceipt(commandId, target,
-            [new("enqueue", QueueClaimAckCrashProtocol.Queue, QueueClaimAckCrashProtocol.Healthy, 1)], DurabilityProfile.ProcessDurable));
+        => QueueClaimAckRecoveryAssertions.EqualAsync(receipt, new CommitReceipt(commandId, target, [new("enqueue", QueueClaimAckCrashProtocol.Queue, QueueClaimAckCrashProtocol.Healthy, 1)], DurabilityProfile.ProcessDurable, 1));
 
 }

@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using static KeyLoad.UnitTests.Features.Search.AnnProviderQualificationProtocol;
 
@@ -11,7 +13,7 @@ internal static class AnnProviderQualificationProducer
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, owner.Source.Partition.TransactionDomainId);
         var request = new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition);
         var operation = Create(owner, OperationKind.ConfigureResource, Guid.NewGuid(), request);
-        var result = owner.Native.Submit(operation, explicitTime: false, token);
+        var result = owner.Submit(operation, explicitTime: false, token);
         await AnnProviderQualificationHistoryAssertions.SaveAsync(owner, state, operation, result, definition);
         foreach (var row in AnnProviderQualificationCorpus.Expected(state))
         {
@@ -53,16 +55,16 @@ internal static class AnnProviderQualificationProducer
         token.ThrowIfCancellationRequested();
         var id = Guid.NewGuid();
         var placement = owner.Database.ReadAtomicPartitionPlacement(Root, owner.Source.Partition);
-        var next = checked(owner.Native.ReadJournalCut().LastIndex + NextJournalEntry);
+        var next = checked(owner.ReadCanonicalCut().AppliedPosition + NextJournalEntry);
         var expected = new CommitReceipt(id, new(placement.Incarnation, owner.Source.Partition.AtomicPartitionId,
-            next, placement.PlacementEpoch), receipts, DurabilityProfile.ProcessDurable);
+            next), receipts, DurabilityProfile.ProcessDurable, 1);
         var operation = Create(owner, OperationKind.Batch, id, new CommandRequest(id, owner.Source.Partition, mutations));
-        var result = owner.Native.Submit(operation, explicitTime: false, token);
+        var result = owner.Submit(operation, explicitTime: false, token);
         await AnnProviderQualificationHistoryAssertions.SaveAsync(owner, state, operation, result, expected);
-        await Assert.That(owner.Native.ReadRetainedEntry(operation.Id).Index).IsEqualTo(next);
+        await Assert.That(owner.ReadStoredOutcome(operation.Id).CanonicalSequence).IsEqualTo(next);
     }
 
-    private static ReplicatedOperation Create<T>(AnnProviderQualificationOwner owner, OperationKind kind, Guid id, T request)
-        => owner.Database.CreateNativeOperation(kind, id, Root, owner.Database.EvaluationClock.GetUtcNow(),
+    private static Command<DatabaseCommand> Create<T>(AnnProviderQualificationOwner owner, OperationKind kind, Guid id, T request)
+        => owner.Database.CreateCommand(kind, id, Root, owner.Database.EvaluationClock.GetUtcNow(),
             NativeSerialization.Serialize(request));
 }

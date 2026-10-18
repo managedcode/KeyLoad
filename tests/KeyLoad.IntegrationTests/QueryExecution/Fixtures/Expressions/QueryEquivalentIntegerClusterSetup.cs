@@ -21,9 +21,9 @@ internal static class QueryEquivalentIntegerClusterSetup
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(command, token));
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(command.CommandId,
-            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position, receipt.Token.OwnershipEpoch),
+            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position),
             [.. Records.Select(row => new MutationReceipt(PutKind, Collection, row.Id, Revision))],
-            DurabilityProfile.QuorumProcessDurable), receipt);
+            DurabilityProfile.ProcessDurable, 3), receipt);
         var outbox = await QueryCursorRequestIdentityR47Current.OutboxAsync(root, partition, token);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, Collection,
             Capability.Query | Capability.DocumentsRead, token);

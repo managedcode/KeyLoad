@@ -138,9 +138,7 @@ internal sealed class ResourcePolicyUpdateRejectionTests
         using var fixture = new ResourcePolicyUpdateFixture();
         var previous = fixture.Resource();
         var writer = new PrincipalRecord("ordinary-writer", ResourcePolicyUpdateFixture.TenantId, [], []);
-        fixture.Database.Apply(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal,
-            ResourcePolicyUpdateFixture.RootId, TimeProvider.System.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(writer), JsonDefaults.Options)))
+        fixture.Database.Apply(fixture.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), ResourcePolicyUpdateFixture.RootId, TimeProvider.System.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(writer), JsonDefaults.Options)))
             .Get<PrincipalRecord>();
         var replacement = previous with
         {

@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Server;
 using P = KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalFixture;
 
@@ -83,18 +84,16 @@ internal static class SampleSequenceIntegrityFlow
         string kind, long revision, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Owner.Partition, [mutation]);
-        var journal = fixture.Source.Owner.ReadJournalCut();
-        var issued = fixture.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId, P.Principal,
+        var journal = fixture.Source.Owner.ReadCanonicalCut();
+        var issued = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Principal,
             TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(command));
         var result = fixture.Source.Owner.SubmitIssuedEmbedded(issued, token);
-        var operation = fixture.Source.Owner.ReadRetainedEntry(command.CommandId).Operation
+        var operation = fixture.Source.Owner.ReadStoredOutcome(command.CommandId).PreparedCommand
             ?? throw new InvalidOperationException(Missing);
-        var expected = new CommitReceipt(command.CommandId,
-            new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, journal.CommittedIndex + 1, 1),
-            [new(kind, P.Set, P.Series, revision)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, journal.CommittedIndex + 1), [new(kind, P.Set, P.Series, revision)], DurabilityProfile.ProcessDurable, 1);
         fixture.Originals.Add((operation, result, command, expected));
         await SampleSequenceIntegrityAssertions.EqualAsync(expected, result.Get<CommitReceipt>());
         await Assert.That(result.Get<CommitReceipt>().Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
-        await Assert.That(fixture.Source.Owner.ReadJournalCut().CommittedIndex).IsEqualTo(journal.CommittedIndex + 1);
+        await Assert.That(fixture.Source.Owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(journal.CommittedIndex + 1);
     }
 }

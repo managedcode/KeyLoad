@@ -14,7 +14,7 @@ internal static class AnnProjectionPinHistoryAssertions
         var result = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(commandId, consumer,
                 new(1, [AnnProjectionPinTestSupport.Collection], [AnnProjectionPinTestSupport.VectorMutation]), 0), id: commandId);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.HistoryUnavailable);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Head)
             .IsEqualTo(before);
         await Assert.That(AnnProjectionPinTestSupport.ConsumerExists(database, consumer)).IsFalse();

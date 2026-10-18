@@ -21,8 +21,8 @@ internal static class SeriesExtremeAggregateSeed
         var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
         await Assert.That(actual.Token.Position).IsGreaterThan(NoPosition);
         var expected = new CommitReceipt(command.CommandId,
-            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
-            [new(AppendKind, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, sequence)], DurabilityProfile.QuorumProcessDurable);
+            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position),
+            [new(AppendKind, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, sequence)], DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         state.Receipts.Add((command, expected));
     }
@@ -46,8 +46,8 @@ internal static class SeriesExtremeAggregateSeed
         var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
         await Assert.That(actual.Token.Position).IsGreaterThan(NoPosition);
         var expected = new CommitReceipt(command.CommandId,
-            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
-            [new(kind, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, revision)], DurabilityProfile.QuorumProcessDurable);
+            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position),
+            [new(kind, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, revision)], DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         state.Receipts.Add((command, expected));
     }

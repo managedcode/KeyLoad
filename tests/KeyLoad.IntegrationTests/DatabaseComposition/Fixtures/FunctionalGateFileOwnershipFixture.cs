@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Selects only an ephemeral negative ownership probe beside the original CLUSTER owners.</summary>
+/// <summary>Selects only an ephemeral negative ownership probe beside the original Orleans owners.</summary>
 internal sealed partial class FunctionalGateFixture
 {
     private readonly FunctionalGateFileContenderSettlement fileContenders;
@@ -11,7 +11,7 @@ internal sealed partial class FunctionalGateFixture
     }
 
     internal static Task<FunctionalGateFixture> StartFileOwnershipAsync(CancellationToken token)
-        => StartCoreAsync(ThreeVoters, true, true, token);
+        => StartCoreAsync(ThreeSilos, ThreeSilos, true, true, token);
 
     internal void RegisterFileContenderSettlement(Task<bool> settlement)
         => fileContenders.Register(settlement);

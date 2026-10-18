@@ -49,7 +49,7 @@ internal static class FunctionalGateBlobs
     {
         var delete = new DeleteBlobRequest(Guid.NewGuid(), published.Begin.Blob, 1L);
         var deleted = await context.SdkAsync(context.Writer.Sdk.DeleteBlobAsync(delete, token));
-        await FunctionalGateBlobAssertions.ReceiptAsync(deleted.Receipt, delete.CommandId, delete.Blob);
+        await FunctionalGateBlobAssertions.ReceiptAsync(context, deleted.Receipt, delete.CommandId, delete.Blob);
         var expected = published.Published.Value with
         {
             Revision = 2L,
@@ -67,7 +67,7 @@ internal static class FunctionalGateBlobs
         var reclaim = new ReclaimBlobRequest(Guid.NewGuid(), delete.Blob, published.Begin.UploadId, 2);
         var reclaimed = await context.McpAsync<BlobCommitResult<BlobReclaimResult>>(
             context.Writer, "keyload_blobs_reclaim", reclaim, token);
-        await FunctionalGateBlobAssertions.ReceiptAsync(reclaimed.Receipt, reclaim.CommandId, delete.Blob);
+        await FunctionalGateBlobAssertions.ReceiptAsync(context, reclaimed.Receipt, reclaim.CommandId, delete.Blob);
         await SqlClusterProtocol.EqualAsync(new BlobReclaimResult(published.Begin.UploadId, 2, 0, published.Bytes.Length, true), reclaimed.Value);
         await SqlClusterProtocol.EqualAsync(reclaimed,
             await context.SdkAsync(context.Writer.Sdk.ReclaimBlobAsync(reclaim, token)));

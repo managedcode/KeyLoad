@@ -144,7 +144,8 @@ internal static class EventMessageSensitiveSafeR52Flow
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Model.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan((long)EventMessageSensitiveSafeR52Protocol.EmptyCount);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         var key = state.Model.Subscription
             ? (id == EventMessageSensitiveSafeR52Protocol.First ? EventMessageSensitiveSafeR52Protocol.FirstPosition
                 : EventMessageSensitiveSafeR52Protocol.SecondPosition).ToString(System.Globalization.CultureInfo.InvariantCulture) : id;

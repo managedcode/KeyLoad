@@ -1,8 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using K = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
-using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
+using P = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -10,12 +11,12 @@ internal static class NativeLocalChildLifetimeExecution
 {
     internal static NativeRequestWorkLease Consume(NativeLocalChildLifetimeSeeded state,
         NativeLocalChildLifetimeOperation operation, NativeLocalChildLifetimeInput input)
-        => operation.Owner.AcquireVerifiedProducer(input.Verified, state.PhysicalOwner, state.Leader.Discovery.Read());
+        => operation.Owner.AcquireVerifiedProducer(input.Verified, state.PhysicalOwner, state.Leader.Services.GetRequiredService<SiloStorageIdentityProvider>().Read());
 
     internal static PartitionQueryLeafResultV1 Read(NativeLocalChildLifetimeSeeded state,
         NativeLocalChildLifetimeOperation operation, NativeLocalChildLifetimeInput input, NativeRequestWorkLease child)
     {
-        var database = state.Leader.Journal.Database;
+        var database = state.Leader.Database.Database;
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         return PartitionQueryLifetimeLeafExecution.ExecuteBound(engine, P.Root, input.Request, state.PhysicalOwner,
             database.EvaluationClock, operation.Expiry, child, operation.Token);

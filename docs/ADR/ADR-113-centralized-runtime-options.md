@@ -26,7 +26,7 @@ contracts remain exact. Persisted authorization and replica acknowledgement cann
 configured away. Preserve serializer Id/Alias, native bytes and canonical digests.
 This options contract does not alter SQL/client protocol behavior, Orleans
 activation movement, node-local storage authority, recovery ordering or
-majority acknowledgement requirements.
+acknowledgement from every configured copy requirements.
 
 Persisted user policies (queue/subscription/retention) and explicit caller request
 parameters are domain data, not server execution configuration. Their stable

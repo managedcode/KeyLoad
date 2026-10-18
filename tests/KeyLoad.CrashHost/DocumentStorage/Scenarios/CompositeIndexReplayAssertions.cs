@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.CrashHost.Features.DocumentStorage;
@@ -58,7 +59,7 @@ internal static class CompositeIndexReplayAssertions
         RequireEffectsUnchanged(database, CompositeIndexCrashOperations.Capture(database));
     }
 
-    private static OperationResult ReplaySuccess(DatabaseEngine database)
+    private static Result<object> ReplaySuccess(DatabaseEngine database)
     {
         var id = Guid.Parse(CompositeIndexCrashContract.ReplaceCommandText);
         return CrashDatabase.Submit(database, OperationKind.Batch, new CommandRequest(id, CompositeIndexCrashContract.Partition,
@@ -66,7 +67,7 @@ internal static class CompositeIndexReplayAssertions
                 CompositeIndexCrashContract.ReplacedJson, OriginalExpectedRevision, ExplicitReplacement: true)]), id);
     }
 
-    private static OperationResult ApplyConflict(DatabaseEngine database)
+    private static Result<object> ApplyConflict(DatabaseEngine database)
     {
         var id = Guid.Parse(CompositeIndexCrashContract.ConflictCommandText);
         return CrashDatabase.Submit(database, OperationKind.Batch, new CommandRequest(id, CompositeIndexCrashContract.Partition,

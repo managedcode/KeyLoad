@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
@@ -20,7 +21,7 @@ internal static class EventAppendReceiptAssertions
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(EventAppendCrashContract.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(expectedPosition);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(1L);
+
         var expected = new[] { new MutationReceipt(PutKind, EventAppendCrashContract.Documents, EventAppendCrashContract.Producer, 1),
             new MutationReceipt(AppendKind, EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, 2),
             new MutationReceipt(EnqueueKind, EventAppendCrashContract.Queue, EventAppendCrashContract.Producer, 1) };
@@ -76,7 +77,7 @@ internal static class EventAppendReceiptAssertions
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(EventAppendCrashContract.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(1L);
+
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         var expected = new[] { new MutationReceipt(PutKind, EventAppendCrashContract.Documents, EventAppendCrashContract.Healthy, 1),
             new MutationReceipt(AppendKind, EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, 3),
@@ -85,7 +86,7 @@ internal static class EventAppendReceiptAssertions
             .IsEquivalentTo(expected.Select(value => Convert.ToHexString(NativeSerialization.Serialize(value))), CollectionOrdering.Matching);
     }
 
-    internal static async Task SameResultAsync(OperationResult expected, OperationResult actual)
+    internal static async Task SameResultAsync(Result<object> expected, Result<object> actual)
         => await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
 }

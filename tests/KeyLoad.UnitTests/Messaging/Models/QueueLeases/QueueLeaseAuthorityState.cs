@@ -1,7 +1,9 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed record QueueLeaseAuthorityState(QueueLaneRef Lane, DateTimeOffset Start,
-    EnqueueMessage Message, CommandRequest Producer, OperationResult Produced,
-    ReplicatedOperation Claim, OperationResult Claimed, Delivery Delivery,
-    ReplicatedOperation Original, QueueLeaseAuthorityOperation Kind, MessageMetadata Metadata,
+    EnqueueMessage Message, CommandRequest Producer, Result<object> Produced,
+    Command<DatabaseCommand> Claim, Result<object> Claimed, Delivery Delivery,
+    Command<DatabaseCommand> Original, QueueLeaseAuthorityOperation Kind, MessageMetadata Metadata,
     QueueCounters Counters, long BodyBytes, byte[] FaultKey, byte[] OriginalBytes);

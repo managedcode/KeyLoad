@@ -48,13 +48,13 @@ internal static class QueueReadyAuthorityHealthy
         var request = new ProcessingRequest(id, lane, delivery.Token, "handler", 1,
             [new PutDocument("orders", delivery.Id, delivery.PayloadJson, 0)]);
         var result = fixture.Submit(OperationKind.Processing, request, principal: "worker", id: id, time: now).Get<CommitReceipt>();
-        var original = fixture.ReadRetainedEntry(id).Operation!;
+        var original = fixture.ReadStoredOutcome(id).PreparedCommand!;
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var cut = fixture.ReadJournalCut();
+        var cut = fixture.ReadCanonicalCut();
         var replay = fixture.SubmitIssued(original).Get<CommitReceipt>();
         await Assert.That(NativeSerialization.Serialize(replay)).IsEquivalentTo(NativeSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
         await Assert.That(fixture.Database.InspectMessage("root", lane, delivery.Id)!.Metadata.State).IsEqualTo(MessageState.Acked);
         var document = fixture.Database.GetDocument("root", new(fixture.Partition, "orders", delivery.Id))!;
         await Assert.That(document.Revision).IsEqualTo(ProcessedDocumentRevision);

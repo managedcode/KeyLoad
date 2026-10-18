@@ -1,4 +1,5 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-internal sealed record TargetInboxCapacityAuthorityContinuation(OperationResult Healthy, CommitInboxRequest Duplicate,
-    OperationResult DuplicateResult, CommitInboxRequest Quota, OperationResult QuotaResult, long HealthyPosition, string[] Image, long Position);
+internal sealed record TargetInboxCapacityAuthorityContinuation(Result<object> Healthy, CommitInboxRequest Duplicate,
+    Result<object> DuplicateResult, CommitInboxRequest Quota, Result<object> QuotaResult, long HealthyPosition, string[] Image, long Position);

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using TUnit.Assertions.Enums;
 
@@ -8,7 +10,7 @@ internal static class CatalogArchiveRetryAssertions
     internal const string LaterId = "after-original-capture";
     private const string LaterJson = "{\"afterCapture\":true}";
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result, byte[] Outcome)> AdvanceAsync(EventingArtifactFixture fixture,
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome)> AdvanceAsync(EventingArtifactFixture fixture,
         CancellationToken token)
     {
         var id = Guid.NewGuid();
@@ -17,7 +19,7 @@ internal static class CatalogArchiveRetryAssertions
         var operation = fixture.Operation(OperationKind.Batch, command, id);
         var result = fixture.SubmitIssued(fixture.Source.Database, operation, explicitTime: false,
             cancellationToken: token);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(id);
         await DocumentAsync(fixture);
         var outcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
@@ -86,7 +88,7 @@ internal static class CatalogArchiveRetryAssertions
     }
 
     internal static async Task ReplayAsync(EventingArtifactFixture fixture,
-        (ReplicatedOperation Operation, OperationResult Result, byte[] Outcome) original, string[] image, long position)
+        (Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome) original, string[] image, long position)
     {
         await EventingArtifactState.SameResultAsync(original.Result,
             fixture.SubmitIssued(fixture.Source.Database, original.Operation, explicitTime: false));
@@ -95,7 +97,7 @@ internal static class CatalogArchiveRetryAssertions
         await Assert.That(EventingArtifactState.FullBytes(fixture.Source.Store))
             .IsEquivalentTo(image, CollectionOrdering.Matching);
         await Assert.That(BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
-            fixture.Source.Partition, EventingArtifactFixture.Principal, original.Operation.Id))
+            fixture.Source.Partition, EventingArtifactFixture.Principal, original.Operation.CommandId))
             .IsEquivalentTo(original.Outcome, CollectionOrdering.Matching);
     }
 }

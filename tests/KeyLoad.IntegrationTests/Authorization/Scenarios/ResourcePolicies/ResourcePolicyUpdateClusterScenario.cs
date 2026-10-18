@@ -5,7 +5,7 @@ using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-/// <summary>Owns the actual persisted CLUSTER partition, scoped reader and public update calls.</summary>
+/// <summary>Owns the actual persisted Orleans partition, scoped reader and public update calls.</summary>
 internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partition, EntityRef Reference,
     ResourceDefinition InitialDefinition, McpPersistedIdentity Reader, long DocumentRevision)
 {

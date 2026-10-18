@@ -23,7 +23,7 @@ internal static class RemoteTransferRepairRecoveryContinuation
             await Assert.That(proof).IsNull();
             var accept = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept),
                 target.Partition, [new AcceptQueueTransfer(target, intent.IntentToken)]);
-            var accepted = database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, accept, accept.CommandId), token).Get<CommitReceipt>();
+            var accepted = database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, accept, accept.CommandId), token).Get<CommitReceipt>();
             proof = database.InspectQueueTransferReceipt(CrashFixtureValues.Principal, target, source, mutation.TransferId, token)!;
             await Assert.That(proof.TargetCommit).IsEqualTo(accepted.Token);
         }
@@ -33,7 +33,7 @@ internal static class RemoteTransferRepairRecoveryContinuation
         }
         var complete = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete),
             source.Partition, [new CompleteQueueTransfer(source, mutation.TransferId, proof.ReceiptToken)]);
-        var completed = database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, complete, complete.CommandId), token).Get<CommitReceipt>();
+        var completed = database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, complete, complete.CommandId), token).Get<CommitReceipt>();
         var delivered = database.InspectQueueTransfer(CrashFixtureValues.Principal, source, mutation.TransferId, token)!;
         await EqualAsync(delivered, intent with
         {
@@ -52,7 +52,7 @@ internal static class RemoteTransferRepairRecoveryContinuation
     internal static async Task FailureAsync(ZoneTreeStore store, DatabaseEngine database, CommandRequest request,
         byte[] bytes, CancellationToken token)
     {
-        await Assert.That(database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, request, request.CommandId), token).Error)
+        await Assert.That(Errors.Code(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId), token).Problem))
             .IsEqualTo(ErrorCode.PermissionDenied);
         var retained = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(request.Partition,
             CrashFixtureValues.Principal, request.CommandId))) ?? throw new InvalidOperationException(RemoteTransferRepairCrashProtocol.Missing);

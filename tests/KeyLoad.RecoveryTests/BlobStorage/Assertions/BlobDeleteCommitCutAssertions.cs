@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.CrashHost.Features.BlobStorage;
@@ -17,14 +18,14 @@ internal static class BlobDeleteCommitCutAssertions
     private const string GuidFormat = "N";
 
     internal static async Task PublishedAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof,
-        ReplicatedOperation selected, bool deleted, bool reclaimed = false, int objects = 1)
+        Command<DatabaseCommand> selected, bool deleted, bool reclaimed = false, int objects = 1)
     {
         var blob = BlobCommitCutProtocol.Blob;
         var upload = BlobCommitCutProtocol.OriginalUpload;
         byte[] bytes = [1, 2, 3, 4];
         var hash = BlobDeleteCommitCutOracle.Chain(proof.Incarnation, blob, upload, bytes);
         var metadata = deleted
-            ? new BlobMetadata(blob, 2, null, 0, 0, null, new RowAccess(), selected.EvaluatedAt, true)
+            ? new BlobMetadata(blob, 2, null, 0, 0, null, new RowAccess(), new DateTimeOffset(selected.Timestamp), true)
             : new BlobMetadata(blob, 1, upload, 4, 1, hash, new RowAccess(), BlobDeleteCommitCutOracle.PriorComplete(proof).EvaluatedAt);
         var operations = new BlobStorageOperations(owner);
         await BlobDeleteCommitCutOracle.ExactAsync(operations.Metadata(BlobCommitCutProtocol.Principal, new(blob)), metadata);
@@ -70,9 +71,9 @@ internal static class BlobDeleteCommitCutAssertions
             new BlobPartMetadata(1, 4, BlobDeleteCommitCutOracle.Hash(bytes)));
     }
 
-    internal static async Task RetainedAfterHealthyAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof, ReplicatedOperation selected)
+    internal static async Task RetainedAfterHealthyAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof, Command<DatabaseCommand> selected)
     {
-        var metadata = new BlobMetadata(BlobCommitCutProtocol.Blob, 2, null, 0, 0, null, new RowAccess(), selected.EvaluatedAt, true);
+        var metadata = new BlobMetadata(BlobCommitCutProtocol.Blob, 2, null, 0, 0, null, new RowAccess(), new DateTimeOffset(selected.Timestamp), true);
         await BlobDeleteCommitCutOracle.ExactAsync(new BlobStorageOperations(owner).Metadata(BlobCommitCutProtocol.Principal,
             new(BlobCommitCutProtocol.Blob)), metadata);
         await BlobDeleteCommitCutOracle.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobHead>(Key(HeadSpace))),

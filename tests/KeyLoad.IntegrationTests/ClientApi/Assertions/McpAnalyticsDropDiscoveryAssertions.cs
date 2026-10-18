@@ -52,6 +52,6 @@ internal static class McpAnalyticsDropDiscoveryAssertions
         await NativeSubmissionColdAssertions.AtomicPartitionAsync(command, actual);
         await Assert.That(actual.Token.Position).IsGreaterThan(0);
         await NativeSubmissionColdAssertions.ReceiptAsync(actual,
-            new(command.CommandId, actual.Token, [.. effects], DurabilityProfile.QuorumProcessDurable));
+            new(command.CommandId, actual.Token, [.. effects], DurabilityProfile.ProcessDurable, 3));
     }
 }

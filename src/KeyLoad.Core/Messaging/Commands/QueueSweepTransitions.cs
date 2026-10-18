@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -37,7 +38,7 @@ public sealed partial class DatabaseEngine
     private const string MissingIndexedMetadata = "A queue index points to absent metadata.";
     private const string MissingIndexedBody = "A queue message body is absent.";
 
-    private void SweepDueEntries(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now, ReplicatedOperation operation)
+    private void SweepDueEntries(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now, Command<DatabaseCommand> operation)
     {
         // Sweep transitions use the replicated command time and one in-gate counter value.
         QueueCounters? counters = null;
@@ -50,7 +51,7 @@ public sealed partial class DatabaseEngine
     }
 
     private QueueCounters? SweepDueSpace(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
-        DateTimeOffset now, string space, bool leased, QueueCounters? counters, ReplicatedOperation operation)
+        DateTimeOffset now, string space, bool leased, QueueCounters? counters, Command<DatabaseCommand> operation)
     {
         var page = tx.Scan(QueueKey(space, lane), messagingExecution.QueueScanPageSize);
         foreach (var item in page.Records)
@@ -66,7 +67,7 @@ public sealed partial class DatabaseEngine
     }
 
     private QueueCounters ApplyDueEntry(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
-        DateTimeOffset now, bool leased, KeyValueRecord item, QueueCounters? counters, ReplicatedOperation operation)
+        DateTimeOffset now, bool leased, KeyValueRecord item, QueueCounters? counters, Command<DatabaseCommand> operation)
     {
         var id = NativeSerialization.Deserialize<string>(item.Value.Span);
         var metadataKey = QueueKey(MessageMetadataSpace, lane, id);

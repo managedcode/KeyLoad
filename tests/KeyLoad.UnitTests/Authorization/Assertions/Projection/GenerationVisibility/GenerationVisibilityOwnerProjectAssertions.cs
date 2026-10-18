@@ -66,7 +66,7 @@ internal static class GenerationVisibilityOwnerProjectAssertions
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialOwnershipEpoch);
+
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }

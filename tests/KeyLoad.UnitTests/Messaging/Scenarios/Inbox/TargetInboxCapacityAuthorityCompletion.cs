@@ -59,8 +59,7 @@ internal static class TargetInboxCapacityAuthorityCompletion
     private static async Task AckAsync(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef output, Delivery delivery)
     {
         var ack = new DeliveryCommand(Guid.NewGuid(), output, delivery.Token, DeliveryAction.Ack);
-        var expected = new CommitReceipt(ack.CommandId, NextToken(database, store, output),
-            [new(AckKind, output.Queue, delivery.Id, FinalVersion)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(ack.CommandId, NextToken(database, store, output), [new(AckKind, output.Queue, delivery.Id, FinalVersion)], DurabilityProfile.ProcessDurable, 1);
         var result = QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, ack,
             ack.CommandId, database.EvaluationClock.GetUtcNow());
         await ExactAsync(result.Get<CommitReceipt>(), expected);
@@ -89,7 +88,7 @@ internal static class TargetInboxCapacityAuthorityCompletion
     {
         var placement = database.ReadAtomicPartitionPlacement(TargetInboxUnitProtocol.Root, output.Partition);
         return new(placement.Incarnation, output.Partition.AtomicPartitionId,
-            checked(store.Position + NextCommitPosition), placement.PlacementEpoch);
+            checked(store.Position + NextCommitPosition));
     }
 
     private static async Task ExactAsync<T>(T actual, T expected)

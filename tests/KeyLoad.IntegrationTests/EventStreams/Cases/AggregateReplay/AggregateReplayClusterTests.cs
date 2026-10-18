@@ -17,10 +17,12 @@ internal sealed class AggregateReplayClusterTests(ClusterFixture fixture)
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var sdk = new KeyLoadClient(http, scenario.WorkerSecret, IntegrationClientOptions.Execution());
         var append = await scenario.AppendInitialAsync(sdk, Guid.NewGuid(), deadline.Token);
-        await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(append.PersistedCopies).IsEqualTo(3);
         var snapshot = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(
             scenario.InitialSnapshotCommand(Guid.NewGuid()), deadline.Token));
-        await Assert.That(snapshot.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(snapshot.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(snapshot.PersistedCopies).IsEqualTo(3);
         await Assert.That(snapshot.Mutations.Single().Revision).IsEqualTo(AggregateReplayClusterTokens.FirstSnapshotVersion);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             scenario.WorkerSecret, deadline.Token);
@@ -90,11 +92,13 @@ internal sealed class AggregateReplayClusterTests(ClusterFixture fixture)
         CancellationToken cancellationToken)
     {
         var append = await scenario.AppendInitialAsync(sdk, Guid.NewGuid(), cancellationToken);
-        await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(append.PersistedCopies).IsEqualTo(3);
         var snapshotCommand = scenario.InitialSnapshotCommand(Guid.NewGuid());
         var snapshot = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(
             snapshotCommand, cancellationToken));
-        await Assert.That(snapshot.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(snapshot.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(snapshot.PersistedCopies).IsEqualTo(3);
         var request = scenario.ReadRequest();
         var sdkPage = McpCallerAssertions.SdkSuccessAsync(await sdk.ReadAggregateReplayAsync(request, cancellationToken));
         var mcpPage = McpCallerAssertions.SuccessAsync<AggregateReplayPage>(await mcp.CallAsync(

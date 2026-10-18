@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -5,15 +7,15 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private OperationResult ExecuteTargetInbox(IAtomicTransaction transaction, PrincipalRecord principal,
-        ReplicatedOperation operation, long position)
+    private Result<object> ExecuteTargetInbox(IAtomicTransaction transaction, PrincipalRecord principal,
+        Command<DatabaseCommand> operation, long position)
     {
         var request = Payload<CommitInboxRequest>(operation);
-        if (request.CommandId != operation.Id)
+        if (request.CommandId != operation.CommandId)
         {
             throw Errors.Fail(ErrorCode.Validation, TargetInboxProtocol.Invalid);
         }
-        return Result(CompleteTargetInbox(transaction, principal, request, operation.EvaluatedAt, position));
+        return Result(CompleteTargetInbox(transaction, principal, request, operation.Timestamp, position));
     }
 
     private CommitInboxResult CompleteTargetInbox(IAtomicTransaction transaction, PrincipalRecord principal,

@@ -6,7 +6,7 @@
 - Test sources include `QueryExecution/Cases/QueryAdapter/QueryAdapterTests.cs`, `ResourceExecution/Cases/Transaction/TransactionTests.cs`, `StorageRecovery/Cases/KeyCodec/KeyCodecTests.cs`, `ResourceExecution/Cases/Command/CommandAdmissionGovernorTests.cs`, `GraphTraversal/Cases/Graph/GraphTraversalTests.cs` and `Search/Cases/SearchResource/SearchResourceTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.
 - Organize feature-owned tests under the same canonical `<SliceName>/` used by implementation and `docs/Features/<SliceName>.md`; shared test infrastructure may remain outside slices.
 - Tests must derive from acceptance criteria and prove observable behavior. Do not add mocks, fakes or stubs, weaken assertions, or treat these unit tests as cluster, real-process recovery or production proof.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.
 - Maintain meaningful success, negative, edge and failure assertions. Coverage qualification is not configured; numeric complexity rules are configured but their complete delivered-SHA gate remains pending. Neither gate may be claimed as passing without its authentic required evidence.
 
 ## Boundaries and protected risks

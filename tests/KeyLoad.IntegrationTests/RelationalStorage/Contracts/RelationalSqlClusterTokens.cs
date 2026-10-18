@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Independent typed-row and cross-model data for real CLUSTER SQL callers.</summary>
+/// <summary>Independent typed-row and cross-model data for real Orleans SQL callers.</summary>
 internal static class RelationalSqlClusterTokens
 {
     internal const string TenantPrefix = "aisql-cluster-";

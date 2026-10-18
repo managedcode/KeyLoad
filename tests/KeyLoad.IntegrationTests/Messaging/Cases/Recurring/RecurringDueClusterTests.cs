@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Proves autonomous recurrence honors live creator authority and cancellation across CLUSTER.</summary>
+/// <summary>Proves autonomous recurrence honors live creator authority and cancellation across Orleans.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RecurringDueClusterTests(ClusterFixture fixture)

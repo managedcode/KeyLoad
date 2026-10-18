@@ -15,15 +15,15 @@ internal static class UserAnalyticsProcessScenario
         }
 
         var root = args[P.RootArgument];
-        using var timeout = new CancellationTokenSource(CrashExecutionOptions.Replica().Value.CommandTimeout, TimeProvider.System);
+        using var timeout = new CancellationTokenSource(CrashExecutionOptions.Child().Value.InspectionExecutionTimeout, TimeProvider.System);
         await UserAnalyticsProcessHost.RunAsync(root, (host, options) => args[P.ModeArgument] == P.Prepare
-            ? PrepareAsync(root, host, timeout.Token) : RecoverAsync(root, host, options, timeout.Token));
+            ? PrepareAsync(root, host, timeout.Token) : RecoverAsync(root, host, options, timeout.Token), timeout.Token);
         return true;
     }
 
     private static async Task PrepareAsync(string root, PartitionHost host, CancellationToken token)
     {
-        UserAnalyticsProcessMutations.Bootstrap(root, host, token);
+        UserAnalyticsProcessMutations.Bootstrap(host, token);
         var seeded = UserAnalyticsProcessMutations.Write(host, update: false, token);
         var cut = UserAnalyticsProcessState.Capture(host, seeded.Operation, seeded.Receipt);
         await UserAnalyticsProcessState.WriteAsync(root, cut, token);
@@ -33,10 +33,10 @@ internal static class UserAnalyticsProcessScenario
         var failures = new List<Exception>();
         try
         {
-            await using var generation = new AnalyticsStoreNativeGeneration(snapshot, directory);
+            using var generation = new AnalyticsStoreNativeGeneration(snapshot, directory);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                UserAnalyticsProcessState.Equal(P.Expected(updated: false), await generation.QueryAsync(token));
+                UserAnalyticsProcessState.Equal(P.Expected(updated: false), generation.Query(token));
                 UserAnalyticsProcessState.Require(host, cut);
                 if (generation.HasJoinedEngine || !Directory.Exists(directory) || !Directory.EnumerateFileSystemEntries(directory).Any())
                 {

@@ -19,7 +19,7 @@ internal static class NativeAnnPublicProfileFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var fixture = new ReplicaAppliedPositionWaitFixture();
+            using var fixture = new CanonicalReadCutFixture();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = fixture.Canonical;
@@ -43,7 +43,7 @@ internal static class NativeAnnPublicProfileFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static Task<CommitReceipt> SeedAsync(ReplicaAppliedPositionWaitFixture fixture, CancellationToken token)
+    private static Task<CommitReceipt> SeedAsync(CanonicalReadCutFixture fixture, CancellationToken token)
     {
         var mutations = new List<Mutation>();
         for (var index = First; index < Count; index++)
@@ -68,7 +68,7 @@ internal static class NativeAnnPublicProfileFlow
             .Get<ProjectionConsumerInfo>();
         var actual = database.Database.ReadAtomicPartitionPlacement(NativeAnnWaitWholeFlow.Root,
             database.Partition);
-        var placement = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation, actual.VoterIds, actual.PlacementEpoch);
+        var placement = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation);
         var pin = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,
             placement, AnnMaintenanceMode.Build)

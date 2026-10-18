@@ -27,10 +27,7 @@ internal sealed class HeavyRouteAdmissionFixture : IDisposable
              new UpsertEdge(Graph, Edge.Id, Edge.From, Edge.To, Edge.Label, Edge.AttributesJson)]);
         var cut = Harness.Store.Position;
         Receipt = Harness.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
-        var expected = new CommitReceipt(Seed.CommandId,
-            new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, cut + 1L, 1L),
-            [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L), new("upsertEdge", Graph, "ab", 1L)],
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, cut + 1L), [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L), new("upsertEdge", Graph, "ab", 1L)], DurabilityProfile.ProcessDurable, 1);
         await HeavyRouteAdmissionReads.EqualAsync(Receipt, expected);
         await NativeReceiptAsync(Receipt);
         await Assert.That(Harness.Store.Position).IsEqualTo(cut + 1L);

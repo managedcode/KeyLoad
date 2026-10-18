@@ -31,7 +31,7 @@ internal static class FunctionalGateColdWorkloads
         var command = new CommandRequest(Guid.NewGuid(), state.Partition,
             [new PutDocument(collection, "original", json, 0)]);
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
-        await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, state.Partition,
+        await FunctionalGateRelationalAssertions.ReceiptAsync(context, receipt, command.CommandId, state.Partition,
             [new("putDocument", collection, "original", 1)]);
         var literal = new DocumentResult(new(state.Partition, collection, "original"), 1, json, false, []);
         var reference = await FunctionalGateEntityReferences.CaptureAsync(context, context.Reader, literal, token);

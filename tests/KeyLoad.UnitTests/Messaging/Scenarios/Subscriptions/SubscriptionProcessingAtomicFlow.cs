@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -60,8 +62,8 @@ internal static class SubscriptionProcessingAtomicFlow
     }
 
     private static async Task ContinueAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
-        SubscriptionRef group, SubscriptionProcessingRequest request, ReplicatedOperation failed, OperationResult failure,
-        byte[] failureBytes, ReplicatedOperation claim, OperationResult originalClaim, DateTimeOffset time,
+        SubscriptionRef group, SubscriptionProcessingRequest request, Command<DatabaseCommand> failed, Result<object> failure,
+        byte[] failureBytes, Command<DatabaseCommand> claim, Result<object> originalClaim, DateTimeOffset time,
         string[] source, CancellationToken token)
     {
         var repaired = request with
@@ -91,10 +93,10 @@ internal static class SubscriptionProcessingAtomicFlow
         await Assert.That(JsonSerializer.Serialize(projected.Receipt, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(result.Get<SubscriptionProcessingResult>().Receipt, JsonDefaults.Options));
         await SubscriptionProcessingAtomicAssertions.DocumentsAsync(db, group);
-        var receipts = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>
+        var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (operation, result, saved), (onceOperation, onceResult,
             SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, onceOperation.Id)) };
-        var ackReceipts = new List<(SubscriptionDeliveryCommand Command, OperationResult Result)>();
+        var ackReceipts = new List<(SubscriptionDeliveryCommand Command, Result<object> Result)>();
         var deliveries = originalClaim.Get<ReceiveSubscriptionResult>().Deliveries;
         foreach (var delivery in deliveries.Skip(1))
         {
@@ -107,17 +109,17 @@ internal static class SubscriptionProcessingAtomicFlow
         }
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
-        var receive = JsonSerializer.Deserialize<ReceiveSubscriptionRequest>(claim.PayloadJson, JsonDefaults.Options)
+        var receive = NativeSerialization.Deserialize<ReceiveSubscriptionRequest>(claim.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, receive, originalClaim, token);
         await SecondColdAsync(db, store, directory, group, failed, failure, failureBytes, receipts, ackReceipts, receive, originalClaim, source, token);
     }
 
     private static async Task SecondColdAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
-        SubscriptionRef group, ReplicatedOperation failed, OperationResult failure, byte[] failureBytes,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> receipts,
-        List<(SubscriptionDeliveryCommand Command, OperationResult Result)> ackReceipts,
-        ReceiveSubscriptionRequest receive, OperationResult originalClaim, string[] source, CancellationToken token)
+        SubscriptionRef group, Command<DatabaseCommand> failed, Result<object> failure, byte[] failureBytes,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> receipts,
+        List<(SubscriptionDeliveryCommand Command, Result<object> Result)> ackReceipts,
+        ReceiveSubscriptionRequest receive, Result<object> originalClaim, string[] source, CancellationToken token)
     {
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, store, group.Source, source);
         var cut = QueueWholeFlowStorage.Bytes(store);
@@ -148,7 +150,7 @@ internal static class SubscriptionProcessingAtomicFlow
             QueueWholeFlowStorage.Clock(second).AddSeconds(1), token);
     }
 
-    private static ReplicatedOperation Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
+    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
         => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }
 

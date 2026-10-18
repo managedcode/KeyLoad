@@ -15,7 +15,7 @@ KeyLoad adds no clustering of its own. A public operation runs on the client's
 connection grain, which calls logical partition grains; they call the silo-local
 ZoneTree owner Grain Service on their own or another node through ordinary
 Orleans calls. Writes reach the owners on `KeyLoad:ReplicaCount` silos the same
-way and are acknowledged after a majority confirm durable local apply.
+way and are acknowledged after every configured copy confirms durable local apply.
 
 ## Decision method
 
@@ -36,7 +36,7 @@ architecture judgments; no measured speed or memory benefit is inferred.
 
 | Capability / source | Current source and KeyLoad use | Required join |
 |---|---|---|
-| Direct RPC — [delivery](https://learn.microsoft.com/en-us/dotnet/orleans/implementation/messaging-delivery-guarantees) | Source-present: connection grain -> logical partition grains -> silo-local ZoneTree owner over ordinary grain calls. Default RPC is at-most-once; a timeout can hide a committed effect. | Stable command outcome identity, bounded retries and effect deduplication; fresh persisted authorization and majority acknowledgement stay the authority. |
+| Direct RPC — [delivery](https://learn.microsoft.com/en-us/dotnet/orleans/implementation/messaging-delivery-guarantees) | Source-present: connection grain -> logical partition grains -> silo-local ZoneTree owner over ordinary grain calls. Default RPC is at-most-once; a timeout can hide a committed effect. | Stable command outcome identity, bounded retries and effect deduplication; fresh persisted authorization and acknowledgement from every configured copy stay the authority. |
 | `IAsyncEnumerable` responses — [enumerator lifecycle](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Core/Runtime/AsyncEnumerableGrainExtension.cs) | Source-present: CQRS chunks through `IConnectionGrain.ExecuteStreamAsync` with backpressure and joined disposal; Started plus a terminal chunk today. | Native enumeration methods are AlwaysInterleave; test cancellation, early disposal, slow consumers and identity isolation. No durable subscription claim. |
 | Streams, subscriptions, providers — [overview](https://learn.microsoft.com/en-us/dotnet/orleans/streaming/) | Source-present: a memory-stream provider for event-feed notifications. Candidate: persistent post-commit delivery to index, projection and workflow consumers; StatelessWorker consumers only for live preprocessing. | Provider, outbox handoff, deduplication/checkpoint, ordering, replay, cache and lag bounds. Publishing acknowledges no write; cache rewind is not durable replay; EventStreams stay committed records. |
 | Broadcast channels and observers — [broadcast](https://learn.microsoft.com/en-us/dotnet/orleans/streaming/broadcast-channel) | Candidate: "refresh may help" fan-out repaired by canonical revalidation. Defer observers until a status-push requirement exists. | No durable history; authorization, cache leases and write acknowledgements never become advisory signals. |
@@ -50,7 +50,7 @@ architecture judgments; no measured speed or memory benefit is inferred.
 |---|---|---|
 | Activation state and caches — [lifecycle](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-lifecycle) | Candidate: bounded validated caches rebuilt after migration. | Read-cut/policy-epoch identity, byte budget, invalidation and restart tests; never write or credential authority. |
 | `IPersistentState<T>` — [persistence](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-persistence/) | Candidate: bounded snapshots through a ZoneTree adapter; no product grain uses it. | ETag CAS and uncertain-write recovery; never two writable copies of canonical state. |
-| Transactions — [transactions](https://learn.microsoft.com/en-us/dotnet/orleans/grains/transactions) | Candidate: short multi-grain transactions or a cross-partition SQL stage; current atomic batches are same-partition. | ZoneTree calls do not enlist automatically; an adapter must persist prepare/commit/abort to ReplicaCount copies with majority acknowledgement and define read visibility before any ACID claim. |
+| Transactions — [transactions](https://learn.microsoft.com/en-us/dotnet/orleans/grains/transactions) | Candidate: short multi-grain transactions or a cross-partition SQL stage; current atomic batches are same-partition. | ZoneTree calls do not enlist automatically; an adapter must persist prepare/commit/abort to ReplicaCount copies with acknowledgement from every configured copy and define read visibility before any ACID claim. |
 | JournaledGrain and Orleans.Journaling — [journaling](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Journaling/README.md) | Source-present under RuntimeJournal: the ZoneTree-backed journal provider used by Durable Jobs (10.4.0-alpha.1). Defer whole-history LogStorage. | Native binary format, ETag fencing, replay/compaction/corruption tests; recovery journals stay distinct. |
 | Durable Jobs — [README](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.DurableJobs/README.md) | Source-present: job handlers for due, ANN projection and time-series chunk work; persisted, at-least-once. | Idempotent effects, occurrence fences, missed-due restart and cancel/dispatch-race tests; a running attempt may finish after cancellation. |
 | Grain timers and reminders — [timers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/timers-and-reminders) | Selected: the timer flush of StatelessWorker batches (not yet in source). Candidate: reminders for rare reconciliation; no provider today. | Bounded callback, joined disposal and a typed interval; a timer stops with its activation and never holds a durable schedule. |
@@ -93,7 +93,7 @@ flowchart LR
     Caller[SDK SQL MCP caller] --> Conn[Connection grain]
     Conn --> Part[Logical partition grain]
     Part --> Owner[Silo local ZoneTree owners on ReplicaCount silos]
-    Owner --> Ack[Majority acknowledgement]
+    Owner --> Ack[Acknowledgement from every configured copy]
     Owner --> Outbox[Committed outbox position]
     Outbox --> Bus[Future native Streams]
     Bus --> Worker[StatelessWorker buffer]

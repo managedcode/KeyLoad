@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Text.Json;
 
@@ -32,10 +33,10 @@ internal static class AtomicTriadOutboxFixture
         return new(Guid.NewGuid(), partition, [.. mutations.Skip(rotation), .. mutations.Take(rotation)]);
     }
 
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, Guid id, T payload)
+    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T payload)
         => new(id, kind, Root, default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 
-    internal static ReplicatedOperation Operation(CommandRequest command)
+    internal static Command<DatabaseCommand> Operation(CommandRequest command)
         => Operation(OperationKind.Batch, command.CommandId, command);
 
     internal static ImmutableArray<MutationReceipt> Receipts(CommandRequest command)

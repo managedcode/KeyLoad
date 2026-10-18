@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Diagnostics;
 using System.Globalization;
 using KeyLoad.Core;
@@ -72,7 +73,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var tail = long.Parse(await File.ReadAllTextAsync(Path.Combine(root,
             DatabaseCompositionCrashScenario.SeedOutboxTailFile), cancellationToken), CultureInfo.InvariantCulture);
-        var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, DatabaseCompositionCrashScenario.CommandFile), cancellationToken));
         var committed = await AssertAtomicRecoveredCutAsync(store, database, tail, operation, stage);
         var recoveredReceipt = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
@@ -87,7 +88,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
     }
 
     private static async Task<bool> AssertAtomicRecoveredCutAsync(ZoneTreeStore store, DatabaseEngine database, long tail,
-        ReplicatedOperation operation, CommitStage stage)
+        Command<DatabaseCommand> operation, CommitStage stage)
     {
         var partition = DatabaseCompositionCrashScenario.Partition;
         var from = new EntityRef(partition, DatabaseCompositionCrashScenario.Collection, DatabaseCompositionCrashScenario.First);

@@ -77,8 +77,8 @@ internal sealed class EventAppendWholeFlowTests
         var command = fixture.Producer("rolled-back-producer", condition, events);
         var before = fixture.DomainBytes();
         var failed = fixture.Submit(command);
-        await Assert.That(failed.Error).IsEqualTo(expectedError);
-        await Assert.That(failed.SafeDetail).IsEqualTo(expectedDetail);
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(expectedError);
+        await Assert.That(failed.Problem?.Detail).IsEqualTo(expectedDetail);
         await Assert.That(fixture.DomainBytes()).IsEquivalentTo(before, CollectionOrdering.Matching);
         await fixture.AssertProducerAsync("rolled-back-producer", false);
         await fixture.AssertPageAsync(EventAppendWholeFlowFixture.Data(EventAppendWholeFlowFixture.InitialId));

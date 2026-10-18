@@ -54,7 +54,8 @@ internal static class LocalProcessingLateR53Current
         await Assert.That(receipt.CommandId).IsEqualTo(originalId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Lane.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await InboxProcessingClusterAssertions.EqualAsync(receipt.Mutations.ToArray(), mutations);
     }
 }

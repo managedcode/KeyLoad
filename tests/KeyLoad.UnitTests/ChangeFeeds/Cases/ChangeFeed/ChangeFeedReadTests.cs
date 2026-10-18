@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -19,11 +20,10 @@ internal sealed class ChangeFeedReadTests
         {
             MaxOutboxRecords = 1
         }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        OperationResult Write(params Mutation[] mutations)
+        Result<object> Write(params Mutation[] mutations)
         {
             var id = Guid.NewGuid();
-            return engine.Apply(new(id, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(),
-                JsonSerializer.Serialize(new CommandRequest(id, db.Partition, [.. mutations]), JsonDefaults.Options)));
+            return engine.Apply(engine.CreateCommand(OperationKind.Batch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new CommandRequest(id, db.Partition, [.. mutations]), JsonDefaults.Options)));
         }
         await Assert.That(Write(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
@@ -127,8 +127,7 @@ internal sealed class ChangeFeedReadTests
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(1);
         await Assert.That(engine.ReadChangeFeed("root", new(db.Partition, "orders")).Changes).HasSingleItem();
         var id = Guid.NewGuid();
-        var replay = engine.Apply(new(id, OperationKind.CommitProjectionBatch, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(new CommitProjectionBatchRequest(id, consumer, batch.Token, [new PutDocument("projection", "a", "{}", 0)]), JsonDefaults.Options))).Get<ProjectionBatchResult>();
+        var replay = engine.Apply(engine.CreateCommand(OperationKind.CommitProjectionBatch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new CommitProjectionBatchRequest(id, consumer, batch.Token, [new PutDocument("projection", "a", "{}", 0)]), JsonDefaults.Options))).Get<ProjectionBatchResult>();
         await Assert.That(replay.AlreadyProcessed).IsTrue();
         await Assert.That(replay.Receipt.Token).IsEqualTo(original.Receipt.Token);
         await Assert.That(engine.GetDocument("root", new(db.Partition, "projection", "a"))!.Revision).IsEqualTo(1);

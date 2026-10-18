@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.CrashHost;
@@ -33,10 +34,10 @@ internal static class SampleRollupCrashOperations
             SampleRollupCrashContract.Series, SampleRollupCrashContract.Start, SampleRollupCrashContract.SampleLimit)).Get<CommitReceipt>();
     }
 
-    internal static OperationResult Commit(DatabaseEngine database, Guid id, Mutation mutation)
+    internal static Result<object> Commit(DatabaseEngine database, Guid id, Mutation mutation)
     {
         var request = new CommandRequest(id, SampleRollupCrashContract.Partition, [mutation]);
-        return database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, request, id), cancellationToken: default);
+        return database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, request, id), cancellationToken: default);
     }
 
     internal static async Task HealthyAsync(string directory, DatabaseEngine database)

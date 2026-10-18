@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
@@ -21,19 +23,19 @@ internal static class Bm25ColdInvalidationAssertions
     }
 
     internal static async Task MutationReplayAsync(Bm25OriginalPhaseRecoveryFlow flow,
-        (ReplicatedOperation Operation, OperationResult Result, byte[] Entry)[] originals)
+        (Command<DatabaseCommand> Operation, Result<object> Result, byte[] Entry)[] originals)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         foreach (var original in originals)
         {
             await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(original.Entry,
-                NativeSerialization.Serialize(flow.Owner.Entry(original.Operation.Id)));
+                NativeSerialization.Serialize(flow.Owner.Entry(original.Operation.CommandId)));
             await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original.Result, flow.Owner.Submit(original.Operation));
         }
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
     }
 
-    internal static async Task ColdAsync(Bm25OriginalPhaseRecoveryFlow flow, ReplicatedOperation original, byte[] entry)
+    internal static async Task ColdAsync(Bm25OriginalPhaseRecoveryFlow flow, Command<DatabaseCommand> original, byte[] entry)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         flow.Owner.Reopen();
@@ -42,7 +44,7 @@ internal static class Bm25ColdInvalidationAssertions
     }
 
     internal static async Task ReplayAsync(Bm25OriginalPhaseRecoveryFlow flow,
-        ReplicatedOperation original, OperationResult expected, byte[] entry)
+        Command<DatabaseCommand> original, Result<object> expected, byte[] entry)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var replay = flow.Publish(flow.Reissue(original));
@@ -73,7 +75,7 @@ internal static class Bm25ColdInvalidationAssertions
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
     }
 
-    internal static async Task DeniedAsync(Bm25OriginalPhaseRecoveryFlow flow, ReplicatedOperation original)
+    internal static async Task DeniedAsync(Bm25OriginalPhaseRecoveryFlow flow, Command<DatabaseCommand> original)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
@@ -85,7 +87,7 @@ internal static class Bm25ColdInvalidationAssertions
         await PhaseDeniedAsync(flow, original);
     }
 
-    internal static async Task PhaseDeniedAsync(Bm25OriginalPhaseRecoveryFlow flow, ReplicatedOperation original)
+    internal static async Task PhaseDeniedAsync(Bm25OriginalPhaseRecoveryFlow flow, Command<DatabaseCommand> original)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => flow.Reissue(original));

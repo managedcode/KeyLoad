@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.CrashHost;
@@ -50,7 +51,7 @@ internal static class SampleChunkCrashRecovery
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
         var bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
-        var original = NativeSerialization.Deserialize<ReplicatedOperation>(bytes);
+        var original = NativeSerialization.Deserialize<Command<DatabaseCommand>>(bytes);
         var before = SampleChunkCrashState.Complete(database);
         var position = database.Store.Position;
         var replay = database.ApplyEmbedded(original, cancellationToken: default);

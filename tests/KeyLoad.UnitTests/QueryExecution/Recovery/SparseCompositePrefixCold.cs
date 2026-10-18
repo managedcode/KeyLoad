@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class SparseCompositePrefixCold
 {
     internal static async Task RunAsync(TestDatabase fixture, bool includeNull, bool includeMissing,
-        List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(fixture.Store);
         var position = fixture.Store.Position;

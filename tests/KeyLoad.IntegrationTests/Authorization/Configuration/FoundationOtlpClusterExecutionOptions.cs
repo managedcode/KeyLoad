@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-/// <summary>Frozen bounded policy for the native dashboard CLUSTER observation.</summary>
+/// <summary>Frozen bounded policy for the native dashboard Orleans observation.</summary>
 [ConfigurationOptions]
 internal sealed class FoundationOtlpClusterExecutionOptions
 {
@@ -13,7 +13,7 @@ internal sealed class FoundationOtlpClusterExecutionOptions
     private const int ObservationSeconds = 30;
     private const int RequestSeconds = 10;
     private const int PollMilliseconds = 250;
-    private const string InvalidPolicy = "The CLUSTER telemetry observation policy exceeds its frozen bounds.";
+    private const string InvalidPolicy = "The Orleans telemetry observation policy exceeds its frozen bounds.";
 
     public int MaximumResponseBytes { get; init; } = ResponseCeiling;
     public int MaximumRecords { get; init; } = RecordsCeiling;

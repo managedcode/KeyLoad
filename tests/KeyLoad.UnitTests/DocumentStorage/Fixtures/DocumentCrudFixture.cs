@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Query;
@@ -21,23 +22,22 @@ internal static class DocumentCrudFixture
     internal const string RawUseGrant = "secret.use";
     internal const string WriteGrant = "secret.write";
 
-    internal static OperationResult Submit(TestDatabase database, params Mutation[] mutations)
+    internal static Result<object> Submit(TestDatabase database, params Mutation[] mutations)
         => Submit(database, Root, mutations);
 
-    internal static OperationResult Submit(TestDatabase database, string principal, params Mutation[] mutations)
+    internal static Result<object> Submit(TestDatabase database, string principal, params Mutation[] mutations)
     {
         var commandId = Guid.NewGuid();
         return database.Submit(OperationKind.Batch,
             new CommandRequest(commandId, database.Partition, [.. mutations]), principal, commandId);
     }
 
-    internal static OperationResult SubmitAt(TestDatabase database, string principal, PartitionRef partition,
+    internal static Result<object> SubmitAt(TestDatabase database, string principal, PartitionRef partition,
         params Mutation[] mutations)
     {
         var commandId = Guid.NewGuid();
         var request = new CommandRequest(commandId, partition, [.. mutations]);
-        return database.Database.Apply(new(commandId, OperationKind.Batch, principal,
-            TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        return database.Database.Apply(database.Database.CreateCommand(OperationKind.Batch, commandId, principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
     }
 
     internal static DocumentRecord? ReadRecord(TestDatabase database, EntityRef reference)

@@ -51,7 +51,7 @@ internal sealed class KeyLoadClientNullReadTests
         var paths = new List<string>();
         var statusCalls = 0;
         var expected = new NodeStatus(Node, Guid.NewGuid(), 1, Node, 3,
-            DurabilityProfile.QuorumProcessDurable, true, Environment.ProcessId);
+            DurabilityProfile.ProcessDurable, true, Environment.ProcessId);
         await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
         {
             context.Response.ContentType = JsonContentType;
@@ -93,7 +93,7 @@ internal sealed class KeyLoadClientNullReadTests
     {
         var partition = new PartitionRef("tenant", "database", "domain", PartitionId);
         var reference = new EntityRef(partition, "documents", "absent");
-        var minimum = new CommitToken(Guid.NewGuid(), "literal-atomic-partition", 1, 1);
+        var minimum = new CommitToken(Guid.NewGuid(), "literal-atomic-partition", 1);
         var lane = new QueueLaneRef(partition, "queue");
         var other = new QueueLaneRef(partition, "other-queue");
         var blob = new BlobRef(partition, "blobs", "absent");

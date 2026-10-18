@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.CrashHost;
@@ -11,11 +12,11 @@ internal static class QueueOrderedRetryRecovery
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
-        var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueOrderedRetryCrashProtocol.OperationFile), token));
         var delivery = NativeSerialization.Deserialize<Delivery>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueOrderedRetryCrashProtocol.DeliveryFile), token));
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+        var payload = operation.Value!;
         var decisions = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
         await QueueOrderedRetryRecoveryChoice.AssertAsync(store, operation, payload, decisions);
         var outcome = OutcomeStoreOracle.Read(store, operation);

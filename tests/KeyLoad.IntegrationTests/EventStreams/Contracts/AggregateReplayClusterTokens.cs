@@ -36,10 +36,9 @@ internal static class AggregateReplayClusterTokens
     internal const string PrivateHeader = "aggregate-replay-private-header";
     internal const string InitialState = "{\"" + CountProperty + "\":1}";
     internal const string FailoverState = "{\"" + CountProperty + "\":6}";
-    internal const string FailureScenario = "aggregate-replay-leader-loss";
+    internal const string FailureScenario = "aggregate-replay-silo-restart";
     internal const string RestartFailureKey = "KeyLoad.AggregateReplayRestartFailure";
     internal const string DiagnosticsFailureKey = "KeyLoad.AggregateReplayDiagnosticsFailure";
-    internal const string MissingLeaderMessage = "CLUSTER leader URI is absent.";
     internal const int NodeCount = 3;
     internal const int InitialReducedCount = 6;
     internal const int FailoverReducedCount = 15;

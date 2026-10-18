@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -86,7 +87,7 @@ internal static class BlobCommitCutScenario
         await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System).ConfigureAwait(false);
     }
 
-    private static ReplicatedOperation Selected(DatabaseEngine database, bool complete)
+    private static Command<DatabaseCommand> Selected(DatabaseEngine database, bool complete)
     {
         var id = complete ? BlobCommitCutProtocol.CompleteId : BlobCommitCutProtocol.DeleteId;
         var payload = complete
@@ -95,12 +96,12 @@ internal static class BlobCommitCutScenario
                     new(BlobCommitCutProtocol.Blob, BlobCommitCutProtocol.NewUpload))?.IntegrityHash
                     ?? throw new InvalidOperationException(StagedUploadAbsent)))
             : NativeSerialization.Serialize(new DeleteBlobRequest(id, BlobCommitCutProtocol.Blob, PublishedRevision));
-        return database.CreateNativeOperation(complete ? OperationKind.CompleteBlobUpload : OperationKind.DeleteBlob,
+        return database.CreateCommand(complete ? OperationKind.CompleteBlobUpload : OperationKind.DeleteBlob,
             id, BlobCommitCutProtocol.Principal, database.EvaluationClock.GetUtcNow(), payload);
     }
 
     private static async Task ObserveUnknownAsync(string root, ZoneTreeStore store, DatabaseEngine database,
-        ReplicatedOperation operation, Func<(bool Injected, CommitStage? Stage, long Position)> injected)
+        Command<DatabaseCommand> operation, Func<(bool Injected, CommitStage? Stage, long Position)> injected)
     {
         KeyLoadException? observed = null;
         try

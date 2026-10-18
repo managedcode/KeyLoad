@@ -73,10 +73,10 @@ internal static class NativeTextIncrementalExpiryTrial
     {
         var before = JsonDefaults.Serialize(database.Database.GetOutboxStatus(NativeTextMaintenanceTestValues.Principal, database.Partition));
         var failure = database.Submit(OperationKind.CommitProjectionBatch, original, id: original.CommandId);
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(failure.Json).IsNull();
-        await Assert.That(failure.NativeValue).IsNull();
-        await Assert.That(failure.SafeDetail).IsEqualTo(ExpiredDetail);
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        
+        await Assert.That(failure.Value).IsNull();
+        await Assert.That(failure.Problem?.Detail).IsEqualTo(ExpiredDetail);
         await Assert.That(JsonDefaults.Serialize(database.Database.GetOutboxStatus(NativeTextMaintenanceTestValues.Principal, database.Partition)).SequenceEqual(before)).IsTrue();
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;

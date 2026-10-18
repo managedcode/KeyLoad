@@ -23,11 +23,11 @@ internal static class RemoteTransferAttemptColdRefusals
         var malformed = new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
             [new AdvanceQueueTransferAttempt(fixture.SourceQueue, transfer.TransferId,
                 RemoteTransferAttemptColdProtocol.FirstGeneration, InvalidNativePrefix + witness)]);
-        await Assert.That(fixture.Apply(OperationKind.Batch, malformed).Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(fixture.Apply(OperationKind.Batch, malformed).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         var stale = new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
             [new AdvanceQueueTransferAttempt(fixture.SourceQueue, transfer.TransferId,
                 RemoteTransferAttemptColdProtocol.SecondGeneration, witness)]);
-        await Assert.That(fixture.Apply(OperationKind.Batch, stale).Error).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(fixture.Apply(OperationKind.Batch, stale).Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId), state);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.SourceCapacity(fixture.SourceQueue), source);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.TargetCapacity(fixture.DestinationQueue), target);

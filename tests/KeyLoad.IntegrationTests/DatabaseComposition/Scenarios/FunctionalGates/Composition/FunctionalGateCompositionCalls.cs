@@ -38,7 +38,7 @@ internal static class FunctionalGateCompositionCalls
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(context.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(P.Absent);
         await NativeSubmissionColdAssertions.ReceiptAsync(actual,
-            new(commandId, actual.Token, effects, DurabilityProfile.QuorumProcessDurable));
+            new(commandId, actual.Token, effects, DurabilityProfile.ProcessDurable, context.ReplicaCount));
     }
 
     internal static SqlOperationRequest Read(FunctionalGateContext context, string collection, string id)

@@ -23,7 +23,7 @@ internal static class QueueViewLeaseIsolationSeed
         await Assert.That(result.RequestId).IsEqualTo(request.RequestId);
         await Assert.That(result.Token.Position).IsGreaterThan((long)QueueViewLeaseIsolationProtocol.Empty);
         await SqlClusterProtocol.EqualAsync(new CommitToken(result.Token.Incarnation, state.Scenario.Partition.AtomicPartitionId,
-            result.Token.Position, result.Token.OwnershipEpoch), result.Token);
+            result.Token.Position), result.Token);
         await Assert.That(result.Deliveries.Length).IsEqualTo(QueueViewLeaseIsolationProtocol.One);
         var delivery = result.Deliveries.Single();
         await Assert.That(delivery.Id).IsEqualTo(SqlModelViewClusterScenario.FirstMessageId);

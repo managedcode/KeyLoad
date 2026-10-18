@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -41,8 +42,7 @@ internal static class QueueLifecycleRefusals
         var whole = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var cancelled = new CancellationToken(canceled: true);
-        var original = new ReplicatedOperation(state.CancelledCommand.CommandId, OperationKind.Batch,
-            QueueLifecycleTestProtocol.Administrator, default, JsonSerializer.Serialize(state.CancelledCommand, JsonDefaults.Options));
+        var original = database.CreateCommand(OperationKind.Batch, state.CancelledCommand.CommandId, QueueLifecycleTestProtocol.Administrator, default, JsonSerializer.Serialize(state.CancelledCommand, JsonDefaults.Options));
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => database.ApplyEmbedded(original, cancelled));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancelled);
         await Assert.That(store.Position).IsEqualTo(position);

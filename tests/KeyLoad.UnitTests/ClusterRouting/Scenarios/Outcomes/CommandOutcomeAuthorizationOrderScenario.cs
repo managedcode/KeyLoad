@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.DocumentStorage;
@@ -21,7 +22,7 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         var principal = CreateWriter(database);
         var commandId = Guid.NewGuid();
         var operation = CreateWrite(database, commandId);
-        await Assert.That(database.Database.Apply(operation).Error).IsNull();
+        await Assert.That(Errors.Code(database.Database.Apply(operation).Problem)).IsNull();
         var outcomeKey = CorruptCurrentPartitionOutcome(database, commandId);
         var original = database.Store.Read(view => view.ReadOwnedValue(outcomeKey)!);
         var locatorKey = KeySpace.OutcomeLocatorV2(database.Partition, Writer, commandId);
@@ -41,7 +42,7 @@ internal static class CommandOutcomeAuthorizationOrderScenario
             locatorKey, locator, commandId);
         var healthyFollowup = CreateWrite(database, Guid.NewGuid(), HealthyFollowupDocumentId, HealthyFollowupJson);
         var followupResult = database.Database.Apply(healthyFollowup);
-        await Assert.That(followupResult.Error).IsNull();
+        await Assert.That(Errors.Code(followupResult.Problem)).IsNull();
         await Assert.That(database.Database.GetDocument(Writer, new(database.Partition,
             CommandOutcomePartitionScopeTestData.Resource, HealthyFollowupDocumentId))?.Json).IsEqualTo(HealthyFollowupJson);
     }
@@ -54,10 +55,10 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         return database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(writer)).Get<PrincipalRecord>();
     }
 
-    private static ReplicatedOperation CreateWrite(TestDatabase database, Guid commandId)
+    private static Command<DatabaseCommand> CreateWrite(TestDatabase database, Guid commandId)
         => CreateWrite(database, commandId, DocumentId, DocumentJson);
 
-    private static ReplicatedOperation CreateWrite(TestDatabase database, Guid commandId, string documentId,
+    private static Command<DatabaseCommand> CreateWrite(TestDatabase database, Guid commandId, string documentId,
         string documentJson)
         => CommandOutcomePartitionScopeTestData.Operation(database, commandId, OperationKind.Batch,
             new CommandRequest(commandId, database.Partition,
@@ -86,16 +87,16 @@ internal static class CommandOutcomeAuthorizationOrderScenario
     private static void Configure(TestDatabase database, PrincipalRecord principal)
         => database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
 
-    private static async Task AssertDeniedPreservesOutcomeAsync(TestDatabase database, ReplicatedOperation operation,
+    private static async Task AssertDeniedPreservesOutcomeAsync(TestDatabase database, Command<DatabaseCommand> operation,
         byte[] outcomeKey, byte[] original, byte[] locatorKey, byte[] locator)
     {
         var denied = database.Database.Apply(operation);
-        await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await AssertOutcomeAndDocumentUnchangedAsync(database, outcomeKey, original, locatorKey, locator);
     }
 
     private static async Task AssertAuthorizedCorruptionPreservesStateAsync(TestDatabase database,
-        ReplicatedOperation operation, byte[] outcomeKey, byte[] original, byte[] locatorKey, byte[] locator,
+        Command<DatabaseCommand> operation, byte[] outcomeKey, byte[] original, byte[] locatorKey, byte[] locator,
         Guid commandId)
     {
         var before = database.Store.Position;

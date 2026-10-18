@@ -17,7 +17,6 @@ internal static class AnnProviderQualificationProtocol
     internal const string DeleteKind = "deleteDocument";
     internal const string SnapshotFile = "ann-provider-qualification.bin";
     internal const string HealthySnapshotFile = "ann-provider-qualification-healthy.bin";
-    internal const string JournalDirectory = "ann-native-replica";
     internal const string MissingOriginal = "The original ANN qualification history is missing.";
     internal const string WrongRoot = "The original ANN qualification root must remain canonical, existing and nonempty.";
     internal const string MissingOwner = "The original ANN qualification native owner is closed.";

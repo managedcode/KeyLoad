@@ -17,8 +17,8 @@ internal static class FunctionalGateNodeAssertions
                 var mcp = await context.McpWithoutBodyAsync<NodeStatus>(caller, McpCallerTools.AdminStatus, token);
                 await Assert.That(mcp.NodeId).IsEqualTo(sdk.NodeId);
                 await Assert.That(mcp.Incarnation).IsEqualTo(sdk.Incarnation);
-                await RequireAsync(sdk, fixture.NodeNames.Length);
-                await RequireAsync(mcp, fixture.NodeNames.Length);
+                await RequireAsync(sdk, fixture.NodeNames.Length, fixture.ReplicaCount);
+                await RequireAsync(mcp, fixture.NodeNames.Length, fixture.ReplicaCount);
                 return sdk;
             }, token);
             await Assert.That(owners.Add(status.NodeId)).IsTrue();
@@ -26,14 +26,14 @@ internal static class FunctionalGateNodeAssertions
         await Assert.That(owners.Count).IsEqualTo(fixture.NodeNames.Length);
     }
 
-    private static async Task RequireAsync(NodeStatus status, int voters)
+    private static async Task RequireAsync(NodeStatus status, int silos, int replicas)
     {
         await Assert.That(Guid.TryParse(status.NodeId, out var owner) && owner != Guid.Empty).IsTrue();
         await Assert.That(status.Incarnation).IsNotEqualTo(Guid.Empty);
-        await Assert.That(status.Voters).IsEqualTo(voters);
+        await Assert.That(status.SiloCount).IsEqualTo(silos);
+        await Assert.That(status.ReplicaCount).IsEqualTo(replicas);
         await Assert.That(status.RoutingReady).IsTrue();
         await Assert.That(status.ProcessId).IsGreaterThan(0);
-        await Assert.That(status.Leader).IsNotNull();
-        await Assert.That(status.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(status.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
     }
 }

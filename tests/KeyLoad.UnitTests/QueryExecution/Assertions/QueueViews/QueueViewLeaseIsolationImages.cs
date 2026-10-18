@@ -8,24 +8,23 @@ internal static class QueueViewLeaseIsolationImages
 {
     internal static QueueViewLeaseIsolationImage Capture(DocumentPatchAtomicityOwner owner)
     {
-        var cut = owner.JournalCut();
+        var cut = owner.ReadCut();
         return new(NativeReadCutStoreStateAssertions.SnapshotIdentity(owner.Store), owner.Store.Position,
-            QueueWholeFlowStorage.Bytes(owner.Store), cut.LastIndex, cut.CommittedIndex, cut.Term);
+            QueueWholeFlowStorage.Bytes(owner.Store), cut.AppliedPosition, cut.StorePosition);
     }
 
     internal static async Task SameAsync(DocumentPatchAtomicityOwner owner, QueueViewLeaseIsolationImage expected)
     {
         await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(owner.Store, expected.Identity, expected.Position);
         await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store).SequenceEqual(expected.Rows)).IsTrue();
-        var cut = owner.JournalCut();
-        await Assert.That(cut.LastIndex).IsEqualTo(expected.LastIndex);
-        await Assert.That(cut.CommittedIndex).IsEqualTo(expected.CommittedIndex);
-        await Assert.That(cut.Term).IsEqualTo(expected.Term);
+        var cut = owner.ReadCut();
+        await Assert.That(cut.AppliedPosition).IsEqualTo(expected.AppliedPosition);
+        await Assert.That(cut.StorePosition).IsEqualTo(expected.StorePosition);
     }
 
     internal static void RequireRoots(DocumentPatchAtomicityOwner owner)
     {
-        foreach (var directory in new[] { owner.Source.Directory, owner.Source.Directory + TestDatabaseReplicaDirectory.Suffix })
+        foreach (var directory in new[] { owner.Source.Directory })
         {
             if (!Path.IsPathFullyQualified(directory) || !Directory.Exists(directory)
                 || !Directory.EnumerateFileSystemEntries(directory).Any())

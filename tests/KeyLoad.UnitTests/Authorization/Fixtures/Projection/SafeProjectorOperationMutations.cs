@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -20,7 +21,7 @@ internal static class SafeProjectorOperationMutations
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, owner.Source.Partition, mutations);
         var before = owner.Store.Position;
-        var journal = owner.JournalCut();
+        var journal = owner.ReadCanonicalCut();
         var domain = Domain(owner, id);
         var command = SafeProjectorOperationSeed.Issue(owner, OperationKind.Batch, id, request,
             SafeProjectorOperationProtocol.Reader, creatorEpoch: policyEpoch);
@@ -29,9 +30,9 @@ internal static class SafeProjectorOperationMutations
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await Assert.That(Domain(owner, id).SequenceEqual(domain, StringComparer.Ordinal)).IsTrue();
-            await Assert.That(command.Entry.Index).IsEqualTo(journal.LastIndex + OnePosition);
-            await Assert.That(owner.JournalCut()).IsEqualTo((command.Entry.Index, command.Entry.Index, command.Entry.Term));
-            await Assert.That(owner.Database.LastApplied).IsEqualTo(command.Entry.Index);
+            await Assert.That(command.Outcome.CanonicalSequence).IsEqualTo(journal.AppliedPosition + OnePosition);
+            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((command.Outcome.CanonicalSequence, before + OnePosition));
+            await Assert.That(owner.Database.LastApplied).IsEqualTo(command.Outcome.CanonicalSequence);
             await Assert.That(owner.Store.Position).IsEqualTo(before + OnePosition);
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => StoredRefusalAsync(owner, command, expectedDetail, policyEpoch), failures);
@@ -42,11 +43,11 @@ internal static class SafeProjectorOperationMutations
     private static async Task StoredRefusalAsync(SafeProjectorOperationDatabase owner,
         SafeProjectorOperationCommand command, string expectedDetail, long policyEpoch)
     {
-        var key = KeySpace.PartitionOutcome(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, command.Operation.Id);
+        var key = KeySpace.PartitionOutcome(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, command.Operation.CommandId);
         var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))
             ?? throw new InvalidOperationException(MissingOutcome);
         await RefusalAsync(stored.Result, expectedDetail);
-        await Assert.That(StringComparer.Ordinal.Equals(stored.Fingerprint, NativeOperationFingerprint.Compute(command.Operation))).IsTrue();
+        await Assert.That(StringComparer.Ordinal.Equals(stored.Fingerprint, DatabaseCommandFingerprint.Compute(command.Operation))).IsTrue();
         await Assert.That(stored.PolicyEpoch).IsEqualTo(policyEpoch);
         await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(stored.Partition).IsEqualTo(owner.Source.Partition);
@@ -54,13 +55,12 @@ internal static class SafeProjectorOperationMutations
         await Assert.That(stored.BlobAuthority is null).IsTrue();
         await Assert.That(stored.CompositionAuthority is null).IsTrue();
         await Assert.That(stored.OnlineTextAuthority is null).IsTrue();
-        await Assert.That(stored.RemoteTransferAuthority is null).IsTrue();
         await Assert.That(stored.RemoteTransferFailureAuthority is null).IsTrue();
         var encodedClock = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))
             ?? throw new InvalidOperationException(MissingClock);
-        await Assert.That(NativeSerialization.Deserialize<DateTimeOffset>(encodedClock)).IsEqualTo(command.Operation.EvaluatedAt);
+        await Assert.That(NativeSerialization.Deserialize<DateTimeOffset>(encodedClock)).IsEqualTo(new DateTimeOffset(command.Operation.Timestamp));
         var locator = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
-            owner.Source.Partition, SafeProjectorOperationProtocol.Reader, command.Operation.Id)));
+            owner.Source.Partition, SafeProjectorOperationProtocol.Reader, command.Operation.CommandId)));
         await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(key)).IsTrue();
     }
 
@@ -86,9 +86,8 @@ internal static class SafeProjectorOperationMutations
 
     internal static async Task PatchReceiptAsync(SafeProjectorOperationCommand command, long expectedRevision)
     {
-        await SafeProjectorOperationSeed.EqualAsync(command.Result.Get<CommitReceipt>(), new CommitReceipt(command.Operation.Id,
-            command.ExpectedToken, [new(SafeProjectorOperationProtocol.PatchKind, SafeProjectorOperationProtocol.Collection,
-                SafeProjectorOperationProtocol.First, expectedRevision)], DurabilityProfile.ProcessDurable));
+        await SafeProjectorOperationSeed.EqualAsync(command.Result.Get<CommitReceipt>(), new CommitReceipt(command.Operation.CommandId, command.ExpectedToken, [new(SafeProjectorOperationProtocol.PatchKind, SafeProjectorOperationProtocol.Collection,
+                SafeProjectorOperationProtocol.First, expectedRevision)], DurabilityProfile.ProcessDurable, 1));
     }
 
     internal static ImmutableArray<Mutation> Replacement(string actualProjectedJson, long revision, bool explicitReplacement)
@@ -100,13 +99,13 @@ internal static class SafeProjectorOperationMutations
             [new(SafeProjectorOperationProtocol.LiteralPath, PatchKind.Set,
                 JsonSerializer.Serialize(SafeProjectorOperationProtocol.Canary, JsonDefaults.Options))], revision)];
 
-    internal static async Task RefusalAsync(OperationResult actual, string detail)
+    internal static async Task RefusalAsync(Result<object> actual, string detail)
     {
-        await Assert.That(actual.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(StringComparer.Ordinal.Equals(actual.SafeDetail, detail)).IsTrue();
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(StringComparer.Ordinal.Equals(actual.Problem?.Detail, detail)).IsTrue();
         await Assert.That(actual.Json is null).IsTrue();
-        await Assert.That(actual.NativeValue is null).IsTrue();
-        await Assert.That(actual.SafeDetail?.Contains(SafeProjectorOperationProtocol.Canary, StringComparison.Ordinal) is true).IsFalse();
+        await Assert.That(actual.Value is null).IsTrue();
+        await Assert.That(actual.Problem?.Detail?.Contains(SafeProjectorOperationProtocol.Canary, StringComparison.Ordinal) is true).IsFalse();
     }
 
     private static string[] Domain(SafeProjectorOperationDatabase owner, Guid id)

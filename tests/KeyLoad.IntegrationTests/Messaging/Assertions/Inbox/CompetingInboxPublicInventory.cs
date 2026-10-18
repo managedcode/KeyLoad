@@ -45,6 +45,8 @@ internal static class CompetingInboxPublicInventory
                     ? (await McpCallerAssertions.SuccessAsync<QueryPage>(await root.Mcp.CallAsync(McpCallerTools.QueryAst, request, token))).Value
                     : await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.QueryAstAsync(request, token));
                 await Assert.That(page.CutPosition).IsGreaterThan(0L);
+                await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(state.Producers.Select(value => value.Receipt.Token.Position)
+                    .Concat(state.Current.Select(value => value.Receipt.Token.Position)).Append(state.Winner.Token.Position).Max());
                 await Assert.That(page.Cursor).IsNull();
                 var rows = expected.Order(StringComparer.Ordinal).Select(id => Row(state, resource, id)).ToArray();
                 await CompetingInboxPublicValues.EqualAsync(rows, page.Rows.ToArray());

@@ -34,7 +34,8 @@ internal static class SqlOffsetClusterSetup
             new PutDocument(SqlOffsetClusterProtocol.Right, "c4", """{"id":"c4","name":"Dee"}""")
         ]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token));
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, SqlOffsetClusterProtocol.Left,
             Capability.Query | Capability.DocumentsRead, token);
         var state = new SqlOffsetClusterState(partition, command, receipt, identity);

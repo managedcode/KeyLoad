@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
-/// <summary>Owns one real native Aspire resource stream independent of the three CLUSTER captures.</summary>
+/// <summary>Owns one real native Aspire resource stream independent of the three Orleans captures.</summary>
 internal sealed class RequestCqrsClusterDiagnosticsIndependentConsumer : IAsyncDisposable
 {
     private const string MarkerTemplate = "Native diagnostic join oracle {Marker}";

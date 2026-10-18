@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.AnalyticsStore;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
@@ -31,7 +32,7 @@ internal static class AnalyticsSharedFamilies
         await AnalyticsSharedAssertions.SameAsync(lifetime, enrollment!.Lifetime);
         await Assert.That(enrollment.Partition).IsEqualTo(partition);
         await Assert.That(enrollment.Origin.Proven).IsTrue();
-        var evaluatedAt = fixture.ReadRetainedEntry(command.CommandId).Operation!.EvaluatedAt;
+        var evaluatedAt = new DateTimeOffset(fixture.ReadStoredOutcome(command.CommandId).PreparedCommand!.Timestamp);
         var row = new AnalyticsStoredEvent(new(P.EventId, P.Epoch, P.Dimensions, P.Metrics, null, [], 1), false, evaluatedAt);
         await PageAsync(fixture, partition, PartitionRecordFamilies.AnalyticsEvent,
             AnalyticsStoreKeys.Event(partition, P.Store, P.EventId), NativeSerialization.Serialize(row), token);

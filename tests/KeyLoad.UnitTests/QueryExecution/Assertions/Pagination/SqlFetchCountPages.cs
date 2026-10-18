@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Query;
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -62,8 +63,7 @@ internal static class SqlFetchCountPages
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine database, CommandRequest seed, CommitReceipt receipt)
     {
-        var operation = new ReplicatedOperation(seed.CommandId, OperationKind.Batch, SqlFetchCountProtocol.Root,
-            default, global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options));
+        var operation = database.CreateCommand(OperationKind.Batch, seed.CommandId, SqlFetchCountProtocol.Root, default, global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options));
         var actual = database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
     }

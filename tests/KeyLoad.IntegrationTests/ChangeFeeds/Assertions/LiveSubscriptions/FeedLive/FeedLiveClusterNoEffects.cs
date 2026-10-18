@@ -52,9 +52,9 @@ internal static class FeedLiveClusterNoEffects
         await Assert.That(actual.ProcessId).IsEqualTo(endpoint.ProcessId);
         await Assert.That(actual.Incarnation).IsEqualTo(endpoint.Incarnation);
         await Assert.That(actual.RoutingReady).IsTrue();
-        await Assert.That(actual.Voters).IsEqualTo(RequestCqrsClusterProtocol.NodeCount);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await Assert.That(actual.Applied).IsGreaterThanOrEqualTo(endpoint.Applied);
+        await Assert.That(actual.SiloCount).IsEqualTo(RequestCqrsClusterProtocol.NodeCount);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.Position).IsGreaterThanOrEqualTo(endpoint.Position);
         await Assert.That(actual.ReadGeneration).IsGreaterThanOrEqualTo(endpoint.ReadGeneration);
     }
 }

@@ -35,7 +35,7 @@ internal static class CatalogRestoreCancellationFlow
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
-        }, nativeAdmission: true);
+        });
     }
 
     private static async Task CompleteAsync(EventingArtifactFixture fixture, NativeCatalogBackupCapture capture,

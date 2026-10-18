@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -14,10 +16,10 @@ internal static class OutboxHeadAuthorityFixture
     internal const string BytesDetail = "The committed outbox byte accounting does not match the reclaimed entry.";
     internal const string QuotaDetail = "The committed outbox quota is exhausted; advance consumers and reclaim retained entries.";
 
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, Guid id, T request)
+    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T request)
         => new(id, kind, Root, default, global::System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
 
-    internal static ReplicatedOperation Write(PartitionRef partition, string id)
+    internal static Command<DatabaseCommand> Write(PartitionRef partition, string id)
     {
         var command = Guid.NewGuid();
         return Operation(OperationKind.Batch, command,
@@ -47,7 +49,7 @@ internal static class OutboxHeadAuthorityFixture
         var quota = Write(database.Partition, "c");
         var failure = database.Database.ApplyEmbedded(quota, token);
         await OutboxHeadAuthorityAssertions.ExactAsync(failure,
-            new OperationResult(null, ErrorCode.ResourceExhausted, QuotaDetail));
+            Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, QuotaDetail)));
         await Assert.That(database.Database.GetDocument(Root, new(database.Partition, Collection, "c"), cancellationToken: token)).IsNull();
         var purgeId = Guid.NewGuid();
         var purge = Operation(OperationKind.PurgeOutbox, purgeId, new PurgeOutboxRequest(purgeId, database.Partition, 2L));

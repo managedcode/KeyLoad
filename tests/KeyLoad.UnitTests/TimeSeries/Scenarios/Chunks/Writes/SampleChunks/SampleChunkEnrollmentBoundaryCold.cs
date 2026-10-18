@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -9,7 +11,7 @@ internal static class SampleChunkEnrollmentBoundaryCold
     private const int ColdOwners = 2;
 
     internal static async Task RunAsync(SampleChunkCanonicalFixture fixture, Guid window,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Owner.Store);
         var position = fixture.Owner.Store.Position;
@@ -30,7 +32,7 @@ internal static class SampleChunkEnrollmentBoundaryCold
     }
 
     private static async Task ColdAsync(SampleChunkCanonicalFixture fixture, Guid window,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals, string image, long position, byte[] identity)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals, string image, long position, byte[] identity)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -48,7 +50,7 @@ internal static class SampleChunkEnrollmentBoundaryCold
     }
 
     private static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store, SampleChunkCanonicalFixture fixture,
-        Guid window, List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        Guid window, List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => SampleChunkEnrollmentBoundaryRows.CurrentAsync(

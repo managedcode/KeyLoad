@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Net;
 using System.Text.Json;
 
@@ -18,7 +19,7 @@ internal static class AuthorizationCredentialHttpExportAssertions
         }
     }
 
-    internal static async Task<(Guid Id, ConfigureApiKeyRequest Request, OperationResult Result)> ConfigureAsync(TestDatabase database, global::KeyLoad.ApiKeyRecord key)
+    internal static async Task<(Guid Id, ConfigureApiKeyRequest Request, Result<object> Result)> ConfigureAsync(TestDatabase database, global::KeyLoad.ApiKeyRecord key)
     {
         var request = new global::KeyLoad.ConfigureApiKeyRequest(key);
         var command = Guid.NewGuid();

@@ -101,7 +101,7 @@ internal sealed class KeyLoadTimeSeriesIntensiveReceiptTests
     private static CommitReceipt ValidReceipt(long revision, long position) => new(CommandId,
         new(Incarnation, Partition().AtomicPartitionId, position),
         [new(KeyLoadTimeSeriesIntensiveProtocol.AppendSamplesKind, Set, Series, revision)],
-        DurabilityProfile.ProcessDurable) { PersistedCopies = 3 };
+        DurabilityProfile.ProcessDurable, 3);
 
     private static PartitionRef Partition() => new("tenant", "database", "domain", PartitionKey);
 }

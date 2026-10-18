@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-METH-005: broad, disabled or covered native selections fail before acquiring a private CLUSTER fixture.</summary>
+/// <summary>AC-METH-005: broad, disabled or covered native selections fail before acquiring a private Orleans fixture.</summary>
 internal sealed class HeavyDocumentLoadAdmissionTests
 {
     private const string BroadFilter = "/*/*/*/*";

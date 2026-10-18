@@ -5,7 +5,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
-/// <summary>AC-FILTER-001/002/003 and F1 of AC-FILTER-005: public CLUSTER allowlist behavior.</summary>
+/// <summary>AC-FILTER-001/002/003 and F1 of AC-FILTER-005: public Orleans allowlist behavior.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class FilteredSearchClusterTests(ClusterFixture fixture)

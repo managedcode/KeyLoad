@@ -62,7 +62,7 @@ internal static class ChunkMultiblockCrashScenario
     {
         var request = new CommandRequest(SampleChunkCrashContract.InflightId, SampleChunkCrashContract.Partition,
             [ChunkMultiblockCrashOperations.Intended(merge)]);
-        var original = CrashDatabase.Operation(OperationKind.Batch, request, request.CommandId);
+        var original = CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile), NativeSerialization.Serialize(original)).ConfigureAwait(false);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
         boundary.Armed = true;

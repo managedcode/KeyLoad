@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -52,14 +53,13 @@ internal sealed class GraphSearchLineageFixture(bool expansion, bool emptyLabels
         Seed = GraphSearchLineageRecipe.Seed(Partition);
         var position = Store.Position + 1L;
         Receipt = Owner.ApplyEmbedded(Operation(), TestContext.Current!.Execution.CancellationToken).Get<CommitReceipt>();
-        await GraphSearchLineageValues.ReceiptAsync(Receipt, new(Seed.CommandId,
-            new(Store.Identity.Incarnation, Partition.AtomicPartitionId, position, 1L), GraphSearchLineageRecipe.Receipts, DurabilityProfile.ProcessDurable));
+        await GraphSearchLineageValues.ReceiptAsync(Receipt, new(Seed.CommandId, new(Store.Identity.Incarnation, Partition.AtomicPartitionId, position), GraphSearchLineageRecipe.Receipts, DurabilityProfile.ProcessDurable, 1));
         Outcome = Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Partition, GraphSearchLineageProtocol.Root, Seed.CommandId)))
             ?? throw new InvalidOperationException(GraphSearchLineageProtocol.Missing);
         await PolicyAsync(GraphSearchLineageProtocol.InitialEpoch, false);
     }
 
-    internal ReplicatedOperation Operation() => Owner.CreateNativeOperation(OperationKind.Batch, Seed.CommandId,
+    internal Command<DatabaseCommand> Operation() => Owner.CreateCommand(OperationKind.Batch, Seed.CommandId,
         GraphSearchLineageProtocol.Root, default, NativeSerialization.Serialize(Seed));
 
     internal async Task PolicyAsync(long epoch, bool allow)
@@ -71,7 +71,7 @@ internal sealed class GraphSearchLineageFixture(bool expansion, bool emptyLabels
         {
             PolicyEpoch = epoch
         };
-        var operation = Owner.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), GraphSearchLineageProtocol.Root,
+        var operation = Owner.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), GraphSearchLineageProtocol.Root,
             default, NativeSerialization.Serialize(new ConfigurePrincipalRequest(expected)));
         await GraphSearchLineageValues.EqualAsync(Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken).Get<PrincipalRecord>(), expected);
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -5,10 +6,10 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private List<QueueRetryInput> ReadQueueRetryInputs(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    private List<QueueRetryInput> ReadQueueRetryInputs(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         var inputs = new List<QueueRetryInput>();
-        if (operation.Kind == OperationKind.Delivery)
+        if (operation.Value!.Kind == OperationKind.Delivery)
         {
             var request = Payload<DeliveryCommand>(operation);
             var policy = Resource(view, request.Lane.Partition, request.Lane.Queue, ResourceKind.WorkQueue).QueuePolicy;
@@ -16,13 +17,13 @@ public sealed partial class DatabaseEngine
             {
                 return inputs;
             }
-            var lease = Lease(view, principal, request.Lane, request.Token, operation.EvaluatedAt);
+            var lease = Lease(view, principal, request.Lane, request.Token, operation.Timestamp);
             if (lease.Metadata.Attempts < policy.MaxAttempts)
             {
                 inputs.Add(new(request.Lane, policy, lease.Metadata, ReadOnlyMemory<byte>.Empty));
             }
         }
-        if (operation.Kind == OperationKind.Receive)
+        if (operation.Value!.Kind == OperationKind.Receive)
         {
             var request = Payload<ReceiveRequest>(operation);
             var resource = Resource(view, request.Lane.Partition, request.Lane.Queue, ResourceKind.WorkQueue);
@@ -31,9 +32,9 @@ public sealed partial class DatabaseEngine
                 return inputs;
             }
             RequireQueueRetryReceive(request, resource.QueuePolicy);
-            ReadQueueLeaseRetryInputs(view, request.Lane, resource.QueuePolicy, operation.EvaluatedAt, inputs);
+            ReadQueueLeaseRetryInputs(view, request.Lane, resource.QueuePolicy, operation.Timestamp, inputs);
         }
-        if (operation.Kind == OperationKind.Batch)
+        if (operation.Value!.Kind == OperationKind.Batch)
         {
             ReadQueueDeadlineRetryInputs(view, operation, inputs);
         }

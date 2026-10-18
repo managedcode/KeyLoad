@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
@@ -145,10 +146,10 @@ internal static class CompositeIndexCrashOperations
         => database.Store.Read(view => view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(
             new EntityRef(partition, CompositeIndexCrashContract.Collection, id))));
 
-    private static OperationResult Submit(DatabaseEngine database, string commandId, params Mutation[] mutations)
+    private static Result<object> Submit(DatabaseEngine database, string commandId, params Mutation[] mutations)
         => Apply(database, CompositeIndexCrashContract.Partition, commandId, mutations);
 
-    private static OperationResult Apply(DatabaseEngine database, PartitionRef partition, string commandId,
+    private static Result<object> Apply(DatabaseEngine database, PartitionRef partition, string commandId,
         params Mutation[] mutations)
     {
         var id = Guid.Parse(commandId);

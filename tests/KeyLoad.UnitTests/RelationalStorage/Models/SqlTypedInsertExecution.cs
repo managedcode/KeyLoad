@@ -1,5 +1,6 @@
+using ManagedCode.Communication;
 using KeyLoad.Server;
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
 
 internal sealed record SqlTypedInsertExecution(McpDecodedOperation Command, DateTimeOffset At,
-    OperationResult Result, byte[] Bytes, CommitToken ExpectedToken);
+    Result<object> Result, byte[] Bytes, CommitToken ExpectedToken);

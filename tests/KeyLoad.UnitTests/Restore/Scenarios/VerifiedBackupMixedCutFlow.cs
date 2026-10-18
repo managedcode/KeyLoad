@@ -24,7 +24,7 @@ internal static class VerifiedBackupMixedCutFlow
                 await CompleteAsync(fixture, authority, selected, donor, target, sourcePosition, sourceRows, token);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
-        }, nativeAdmission: true);
+        });
     }
 
     private static async Task CompleteAsync(EventingArtifactFixture fixture, RestorePublicationRaceAuthority authority,

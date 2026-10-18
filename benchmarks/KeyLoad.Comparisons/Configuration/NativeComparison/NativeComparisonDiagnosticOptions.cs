@@ -41,7 +41,7 @@ public sealed class NativeComparisonDiagnosticOptions
     /// <summary>The maximum outbox consumers inspected for a failure projection.</summary>
     public int KeyLoadOutboxMaximumConsumers { get; set; } = DefaultKeyLoadOutboxMaximumConsumers;
 
-    /// <summary>Checks supported ceilings and the immutable fallback projection minima.</summary>
+    /// <summary>Checks supported ceilings and the immutable failure projection minima.</summary>
     /// <returns>Whether all diagnostic policy values are supported.</returns>
     public bool IsValid() => KurrentSetupMaximumCauses is >= MinimumPositiveLimit and <= DefaultKurrentSetupMaximumCauses
         && KurrentSetupMaximumFramesPerCause is >= MinimumPositiveLimit and <= DefaultKurrentSetupMaximumFramesPerCause

@@ -1,4 +1,5 @@
-using System.Security.Cryptography;
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -11,16 +12,13 @@ internal sealed class DocumentPatchAtomicityOwner
     private const string DirectoryPrefix = "keyload-document-patch-atomic-";
     private const string MissingOwner = "The original document native owner is not open.";
     private readonly StoreIdentity originalIdentity;
-    private StoreIdentity originalReplicaIdentity = null!;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
     private DatabaseEngine? coldDatabase;
-    private TestDatabaseReplicaAdmission? coldAdmission;
     internal TestDatabase Source
     {
         get;
     }
-    private string ReplicaDirectory => Source.Directory + TestDatabaseReplicaDirectory.Suffix;
 
     private DocumentPatchAtomicityOwner()
     {
@@ -41,7 +39,6 @@ internal sealed class DocumentPatchAtomicityOwner
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             owner = new();
-            owner.originalReplicaIdentity = owner.ReadReplicaIdentity();
             await operation(owner);
         }, failures);
         if (owner is not null)
@@ -55,27 +52,24 @@ internal sealed class DocumentPatchAtomicityOwner
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal OperationResult Submit(ReplicatedOperation operation) => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).Submit(operation, explicitTime: true)
+    internal Result<object> Submit(Command<DatabaseCommand> operation) => originalJoined
+        ? Database.Apply(operation)
         : Source.SubmitIssued(operation);
 
-    internal ReplicaEntry Entry(Guid id) => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadRetainedEntry(id)
-        : Source.ReadRetainedEntry(id);
+    internal StoredOutcome Entry(Guid id) => originalJoined
+        ? OutcomeStoreOracle.ReadStored(Database, id, CancellationToken.None)
+        : Source.ReadStoredOutcome(id);
 
-    internal ReplicaEntry Entry(ReplicatedOperation original) => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadRetainedEntry(original)
-        : Source.ReadRetainedEntry(original);
+    internal StoredOutcome Entry(Command<DatabaseCommand> original) => originalJoined
+        ? OutcomeStoreOracle.ReadStored(Store, original) ?? throw new InvalidOperationException(MissingOwner)
+        : Source.ReadStoredOutcome(original);
 
-    internal (long LastIndex, long CommittedIndex, long Term) JournalCut() => originalJoined
-        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadJournalCut()
-        : Source.ReadJournalCut();
+    internal (long AppliedPosition, long StorePosition) ReadCut()
+        => Store.Read(_ => (Database.LastApplied, Store.Position));
 
     internal async Task ReopenAsync()
     {
         Join();
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(originalReplicaIdentity),
-            NativeSerialization.Serialize(ReadReplicaIdentity()));
         coldStore = ZoneTreeExistingStore.Open(new(Source.Directory)
         {
             Incarnation = originalIdentity.Incarnation
@@ -83,21 +77,6 @@ internal sealed class DocumentPatchAtomicityOwner
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(originalIdentity),
             NativeSerialization.Serialize(coldStore.Identity));
         coldDatabase = Source.CreateConfiguredDatabase(coldStore);
-        coldAdmission = Source.CreateTargetAdmission(coldDatabase, coldStore,
-            Source.Directory, ReplicaDirectory, originalReplicaIdentity.NodeId);
-    }
-
-    private StoreIdentity ReadReplicaIdentity()
-    {
-        var limits = Source.StorageExecution.Value;
-        var replica = ZoneTreeIdentityFile.Read(Path.Combine(ReplicaDirectory, ZoneTreePersistenceFormat.IdentityFileName),
-            limits.MaximumIdentityFileBytes, limits.StreamBufferBytes);
-        if (replica.NodeId == originalIdentity.NodeId || replica.Incarnation != originalIdentity.Incarnation
-            || !CryptographicOperations.FixedTimeEquals(replica.SigningKey.Span, originalIdentity.SigningKey.Span))
-        {
-            throw new InvalidOperationException("The original native replica identity is not the canonical owner\'s distinct replica.");
-        }
-        return replica;
     }
 
     private void Join()
@@ -108,16 +87,10 @@ internal sealed class DocumentPatchAtomicityOwner
             Source.JoinOwnedResources();
             return;
         }
-        var admission = coldAdmission;
         var store = coldStore;
-        coldAdmission = null;
         coldStore = null;
         coldDatabase = null;
         var failures = new List<Exception>();
-        if (admission is not null)
-        {
-            ServerFailureObserver.Observe(admission.Dispose, failures);
-        }
         if (store is not null)
         {
             ServerFailureObserver.Observe(store.Dispose, failures);
@@ -128,7 +101,6 @@ internal sealed class DocumentPatchAtomicityOwner
     private void DeleteJoinedDirectories()
     {
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => Directory.Delete(ReplicaDirectory, true), failures);
         ServerFailureObserver.Observe(() => Directory.Delete(Source.Directory, true), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -27,9 +27,9 @@ internal static class RemoteTransferRepairColdHealthy
     {
         await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedAccept.CommandId, fixture.DestinationPartition).AsSpan().SequenceEqual(acceptBytes)).IsTrue();
         await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedComplete.CommandId, fixture.SourcePartition).AsSpan().SequenceEqual(completeBytes)).IsTrue();
-        await Assert.That(RemoteTransferRepairColdNative.Apply(fixture, deniedAccept).Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(RemoteTransferRepairColdNative.Apply(fixture, deniedComplete).Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(RemoteTransferRepairColdNative.Apply(fixture, acceptedCommand).Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(RemoteTransferRepairColdNative.Apply(fixture, deniedAccept).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(RemoteTransferRepairColdNative.Apply(fixture, deniedComplete).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(RemoteTransferRepairColdNative.Apply(fixture, acceptedCommand).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedAccept.CommandId, fixture.DestinationPartition).AsSpan().SequenceEqual(acceptBytes)).IsTrue();
         await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedComplete.CommandId, fixture.SourcePartition).AsSpan().SequenceEqual(completeBytes)).IsTrue();
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairColdNative.Apply(fixture, completedCommand).Get<CommitReceipt>(), completed);

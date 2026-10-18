@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
@@ -19,10 +21,10 @@ internal static class Bm25ColdInvalidationTrial
         var result = flow.Publish(original);
         await flow.RequireHealthyAsync(original, result);
         var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.Id));
-        var head = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(original).Current;
+        var head = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span).Current;
         var rawHead = Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head);
         var tail = Tail(flow);
-        var mutations = new (ReplicatedOperation Operation, OperationResult Result, byte[] Entry)[4];
+        var mutations = new (Command<DatabaseCommand> Operation, Result<object> Result, byte[] Entry)[4];
         mutations[0] = await MutationAsync(flow, new PatchDocument(Collection, "first",
             [new(Field, PatchKind.Set, "\"needle changed\"")], 1), tail + 1);
         mutations[1] = await MutationAsync(flow, new PutDocument(Collection, "first", "{\"text\":\"needle extra extra\"}", 2,
@@ -38,14 +40,14 @@ internal static class Bm25ColdInvalidationTrial
         await PolicyAsync(flow, original, tail + 4);
     }
 
-    private static async Task<(ReplicatedOperation Operation, OperationResult Result, byte[] Entry)> MutationAsync(Bm25OriginalPhaseRecoveryFlow flow, Mutation mutation, long tail)
+    private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Entry)> MutationAsync(Bm25OriginalPhaseRecoveryFlow flow, Mutation mutation, long tail)
     {
         var owner = flow.Owner;
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, owner.Source.Partition, [mutation]);
         var operation = Issue(flow, OperationKind.Batch, id, request);
         var result = owner.Submit(operation);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(id);
         var entry = NativeSerialization.Serialize(owner.Entry(id));
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
@@ -56,7 +58,7 @@ internal static class Bm25ColdInvalidationTrial
         return (operation, result, entry);
     }
 
-    private static async Task PolicyAsync(Bm25OriginalPhaseRecoveryFlow flow, ReplicatedOperation original, long tail)
+    private static async Task PolicyAsync(Bm25OriginalPhaseRecoveryFlow flow, Command<DatabaseCommand> original, long tail)
     {
         var owner = flow.Owner;
         var revoked = flow.Configure(flow.Reader with
@@ -98,11 +100,11 @@ internal static class Bm25ColdInvalidationTrial
         await Assert.That(Tail(flow)).IsEqualTo(tail);
         await Bm25ColdInvalidationAssertions.SearchAsync(flow, expectedCurrent: false);
         await Bm25ColdInvalidationAssertions.PhaseDeniedAsync(flow, original);
-        var fresh = flow.Capture(original.Id);
+        var fresh = flow.Capture(original.CommandId);
         var result = flow.Publish(fresh);
         await Assert.That(result.Error).IsNull();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(fresh.Id);
-        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(fresh);
+        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(4L);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(1);
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(2L);
@@ -115,8 +117,8 @@ internal static class Bm25ColdInvalidationTrial
             NativeSerialization.Serialize(owner.Entry(fresh.Id)));
     }
 
-    private static ReplicatedOperation Issue<T>(Bm25OriginalPhaseRecoveryFlow flow, OperationKind kind, Guid id, T payload)
-        => flow.Owner.Database.CreateNativeOperation(kind, id, "root",
+    private static Command<DatabaseCommand> Issue<T>(Bm25OriginalPhaseRecoveryFlow flow, OperationKind kind, Guid id, T payload)
+        => flow.Owner.Database.CreateCommand(kind, id, "root",
             flow.Owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload));
 
     private static long Tail(Bm25OriginalPhaseRecoveryFlow flow)

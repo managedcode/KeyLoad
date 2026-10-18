@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -59,7 +60,7 @@ internal static class NativeArchiveEntryFlow
         await NativeArchiveEntryHealthy.RunAsync(fixture, sourceIdentity, cut, operation, outcome, archive, token);
     }
 
-    internal static ReplicatedOperation Operation(DatabaseEngine database, CommandRequest command)
+    internal static Command<DatabaseCommand> Operation(DatabaseEngine database, CommandRequest command)
         => new(command.CommandId, OperationKind.Batch, P.Root, database.EvaluationClock.GetUtcNow(),
             System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(command)));
 }

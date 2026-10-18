@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -13,20 +15,20 @@ internal static class BlobPortableBackupSeed
     internal static byte[] Payload() => Enumerable.Range(0, BlobLimits.RawPartBytes + 1)
         .Select(static index => (byte)(index % 251)).ToArray();
 
-    internal static (ReplicatedOperation Operation, OperationResult Result) Send<T>(DatabaseEngine database,
+    internal static (Command<DatabaseCommand> Operation, Result<object> Result) Send<T>(DatabaseEngine database,
         OperationKind kind, Guid id, T request, CancellationToken token)
     {
-        var operation = database.CreateNativeOperation(kind, id, Root,
+        var operation = database.CreateCommand(kind, id, Root,
             database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var result = database.ApplyEmbedded(operation, token);
-        if (result.Error is not null)
+        if (Errors.Code(result.Problem) is not null)
         {
             throw new InvalidOperationException("The genuine portable blob seed operation was rejected.");
         }
         return (operation, result);
     }
 
-    internal static async Task<(BlobMetadata Metadata, (ReplicatedOperation Operation, OperationResult Result)[] Originals)>
+    internal static async Task<(BlobMetadata Metadata, (Command<DatabaseCommand> Operation, Result<object> Result)[] Originals)>
         PublishAsync(DatabaseEngine database, BlobRef blob, byte[] bytes, CancellationToken token)
     {
         var upload = Guid.NewGuid();
@@ -47,13 +49,13 @@ internal static class BlobPortableBackupSeed
         await BlobPortableBackupAssertions.ReceiptAsync(database, blob, result.Receipt, id);
         var committedAt = database.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
             view.ReadOwnedValue(KeySpace.ClockBytes) ?? throw new InvalidOperationException(MissingCommittedClock)));
-        await Assert.That(committedAt).IsGreaterThanOrEqualTo(complete.Operation.EvaluatedAt);
+        await Assert.That(committedAt).IsGreaterThanOrEqualTo(new DateTimeOffset(complete.Operation.Timestamp));
         await BackupPersistedPolicyAssertions.SameAsync(new BlobMetadata(blob, 1L, upload, bytes.Length,
             2, hash, new RowAccess(), committedAt), result.Value);
         return (result.Value, [begin, first, second, complete]);
     }
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result)> PartAsync(
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> PartAsync(
         DatabaseEngine database, BlobRef blob, Guid upload, int ordinal, ReadOnlyMemory<byte> bytes,
         CancellationToken token)
     {

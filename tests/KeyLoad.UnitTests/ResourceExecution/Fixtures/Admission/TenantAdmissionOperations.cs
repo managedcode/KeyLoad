@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -35,17 +36,17 @@ internal static class TenantAdmissionOperations
         => fixture.Store.Read(view => fixture.Database.Principal(view, id,
             fixture.Database.EvaluationClock.GetUtcNow()));
 
-    internal static ReplicatedOperation Create(TestDatabase fixture, string principal, string id)
+    internal static Command<DatabaseCommand> Create(TestDatabase fixture, string principal, string id)
     {
         var commandId = Guid.NewGuid();
         var partition = principal == PrincipalA ? fixture.Partition : PartitionB(fixture);
         var request = new CommandRequest(commandId, partition, [new PutDocument(Collection, id, Body)]);
-        return RuntimeJournalBootstrapAdmissionFlow.CreateNative(fixture, OperationKind.Batch,
-            commandId, request, principal);
+        return fixture.Database.CreateCommand(OperationKind.Batch, commandId, principal,
+            fixture.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
     }
 
-    internal static AdmittedCommand Enqueue(TestDatabase fixture, AdmittedCommandInbox inbox,
-        ReplicatedOperation operation, CancellationToken token)
-        => inbox.Enqueue(operation, Principal(fixture, operation.PrincipalId),
-            RuntimeJournalBootstrapAdmissionFlow.PayloadBytes(operation), cancellationToken: token);
+    internal static CommandAdmissionLease Reserve(TestDatabase fixture, CommandAdmissionGovernor governor,
+        Command<DatabaseCommand> operation, CancellationToken token)
+        => governor.Reserve(operation, Principal(fixture, operation.UserId!),
+            checked((int)NativeSerialization.Measure(operation)), token);
 }

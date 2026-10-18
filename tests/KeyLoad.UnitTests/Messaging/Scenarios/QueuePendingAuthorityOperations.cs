@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
@@ -25,8 +26,7 @@ internal static class QueuePendingAuthorityOperations
         var marker = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         var command = new CommandRequest(Guid.NewGuid(), flow.Partition,
             [new ParkPendingQueueMessage(flow.Lane.Queue, QueueLifecycleTestProtocol.Pending, 3, 1)]);
-        var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, QueueLifecycleTestProtocol.Administrator,
-            flow.Time, JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, QueueLifecycleTestProtocol.Administrator, flow.Time, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var state = new QueuePendingAuthorityState(flow, operation, key, marker);
         await ProcessAsync(fixture.Database, fixture.Store, state, QueuePendingAuthorityProtocol.History, 1, 1, 3);
         flow.Batch(fixture.Database, new CancelQueueMessage(flow.Lane.Queue, QueueLifecycleTestProtocol.Parked, 3, 1))

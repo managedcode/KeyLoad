@@ -19,7 +19,7 @@ internal sealed class NativeTextWaitForIndexTests
     [Arguments(true)]
     public async Task RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy(bool future)
     {
-        await using var fixture = new ReplicaAppliedPositionWaitFixture();
+        using var fixture = new CanonicalReadCutFixture();
         var database = fixture.Canonical;
         database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
         var token = TestContext.Current!.Execution.CancellationToken;

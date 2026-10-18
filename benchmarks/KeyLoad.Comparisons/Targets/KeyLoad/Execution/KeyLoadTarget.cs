@@ -71,7 +71,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.VectorExact
         or Scenario.QueueCycle or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.StreamAppend or Scenario.StreamRead
         or Scenario.DocumentUpdate or Scenario.DocumentDelete;
-    /// <summary>Requires the selected native topology, checks persisted copy receipts and reads every copy.</summary>
+    /// <summary>Requires the selected native topology, checks persisted copy receipts and reads through every endpoint.</summary>
     /// <param name="dataset">The deterministic documents, vectors, graph edges, and workload options to provision.</param>
     /// <param name="cancellationToken">A token that cancels status checks and database operations.</param>
     /// <returns>A task that completes after seeding and replica observation.</returns>

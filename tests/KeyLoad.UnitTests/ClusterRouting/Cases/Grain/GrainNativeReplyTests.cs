@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests;
@@ -48,24 +49,18 @@ internal sealed class GrainNativeReplyTests
     public async Task OperationUsesNativeValueAndDomainFailurePrecedesCallerCancellation()
     {
         var value = new BackupReceipt(Entity, CutPosition);
-        var reply = GrainReplyFactory.Operation(new(UserJson)
-        {
-            NativeValue = value
-        }, UnitRoutingOptions.Routing(), CancellationToken.None);
+        var reply = GrainReplyFactory.Operation(Result<object>.Succeed(value), UnitRoutingOptions.Routing(), CancellationToken.None);
         await Assert.That(NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value).IsEqualTo(value);
         var empty = GrainReplyFactory.Operation(new(null), UnitRoutingOptions.Routing(), CancellationToken.None);
         await Assert.That(NativeSerialization.Deserialize<GrainValue>(empty.Payload.Span).Value).IsNull();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var failure = GrainReplyFactory.Operation(new(null, ErrorCode.PermissionDenied, Detail), UnitRoutingOptions.Routing(), cancellation.Token);
+        var failure = GrainReplyFactory.Operation(Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, Detail)), UnitRoutingOptions.Routing(), cancellation.Token);
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.SafeDetail).IsEqualTo(Detail);
         await Assert.That(failure.Payload.Length).IsEqualTo(0);
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
-            GrainReplyFactory.Operation(new(null)
-            {
-                NativeValue = value
-            }, UnitRoutingOptions.Routing(), cancellation.Token))).IsNotNull();
+            GrainReplyFactory.Operation(Result<object>.Succeed(value), UnitRoutingOptions.Routing(), cancellation.Token))).IsNotNull();
     }
 
     [Test]

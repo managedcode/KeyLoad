@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -37,8 +38,7 @@ internal static class QueueMissingMetadataWholeFlow
         await Assert.That(row.SequenceEqual(NativeSerialization.Serialize(new MessageMetadata(
             QueueLifecycleConditionOperations.Source, MessageState.Ready, 0, 1, 1, null, null)))).IsTrue();
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1, LeaseSeconds: 30);
-        var operation = new ReplicatedOperation(request.RequestId, OperationKind.Receive,
-            QueueLifecycleTestProtocol.Administrator, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId, QueueLifecycleTestProtocol.Administrator, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options));
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         fixture.Store.Commit((tx, _) => { tx.Delete(key); return true; });
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
@@ -82,7 +82,7 @@ internal static class QueueMissingMetadataWholeFlow
     }
 
     private static async Task FinishAsync(DatabaseEngine owner, ZoneTreeStore store,
-        QueueLifecycleTestState state, ReplicatedOperation operation)
+        QueueLifecycleTestState state, Command<DatabaseCommand> operation)
     {
         var result = owner.Apply(operation);
         var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();

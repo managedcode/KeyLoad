@@ -76,7 +76,7 @@ internal static class QueueEntityRefJoinBinding
             throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         }
         database.Authorization.Require(principal, request.Partition, join.Collection, Capability.Query | Capability.DocumentsRead);
-        var target = database.BindAuthorizedReadResource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
+        var target = DatabaseEngine.BindAuthorizedReadResource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
         database.Authorization.RequireSchemaVisibility(principal, target);
         var schema = target.RelationalSchema ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         RelationalRowValidation.ValidateSchema(target);

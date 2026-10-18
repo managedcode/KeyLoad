@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -7,7 +9,7 @@ internal static class RestoreResumedTokenAssertions
     private const string InvalidSignedToken = "The signed token is invalid.";
     private const long OutcomeStep = 1;
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result)[]> RefuseAsync(
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)[]> RefuseAsync(
         EventingArtifactFixture fixture)
     {
         var queueId = Guid.NewGuid();
@@ -21,14 +23,14 @@ internal static class RestoreResumedTokenAssertions
                 new SubscriptionDeliveryCommand(groupId, fixture.Group, fixture.Received.Deliveries[1].Token,
                     DeliveryAction.Ack), groupId)
         };
-        var saved = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var saved = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         foreach (var operation in operations)
         {
             var before = EventingArtifactState.Bytes(fixture.Database.Store, fixture.Source.Partition);
             var position = fixture.Database.Store.Position;
             var result = fixture.Database.Apply(operation);
-            await Assert.That(result).IsEqualTo(new OperationResult(null, ErrorCode.TokenInvalidated, InvalidSignedToken));
-            await Assert.That(result.NativeValue).IsNull();
+            await Assert.That(result).IsEqualTo(Result<object>.Fail(Errors.Problem(ErrorCode.TokenInvalidated, InvalidSignedToken)));
+            await Assert.That(result.Value).IsNull();
             await Assert.That(fixture.Database.Store.Position).IsEqualTo(position + OutcomeStep);
             await EventingArtifactState.SameAsync(before, fixture.Database.Store, fixture.Source.Partition);
             saved.Add((operation, result));
@@ -37,7 +39,7 @@ internal static class RestoreResumedTokenAssertions
     }
 
     internal static async Task ReplayAsync(EventingArtifactFixture fixture,
-        (ReplicatedOperation Operation, OperationResult Result)[] saved)
+        (Command<DatabaseCommand> Operation, Result<object> Result)[] saved)
     {
         var before = EventingArtifactState.FullBytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;

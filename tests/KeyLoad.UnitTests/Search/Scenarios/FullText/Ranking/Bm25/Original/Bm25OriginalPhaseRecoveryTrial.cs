@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class Bm25OriginalPhaseRecoveryTrial
@@ -35,7 +37,7 @@ internal static class Bm25OriginalPhaseRecoveryTrial
     }
 
     private static async Task RequireColdReplayAsync(Bm25OriginalPhaseRecoveryFlow flow,
-        ReplicatedOperation original, OperationResult expected, byte[] entry)
+        Command<DatabaseCommand> original, Result<object> expected, byte[] entry)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         flow.Owner.Reopen();

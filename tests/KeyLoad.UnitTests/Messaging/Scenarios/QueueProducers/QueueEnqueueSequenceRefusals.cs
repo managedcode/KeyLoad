@@ -22,12 +22,12 @@ internal static class QueueEnqueueSequenceRefusals
             };
             var operation = QueueStoredCapacitySetup.Operation(OperationKind.Batch, command, command.CommandId, time);
             var result = owner.Apply(operation);
-            await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
-            await Assert.That(result.SafeDetail).IsEqualTo(string.IsNullOrEmpty(key)
+            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(result.Problem?.Detail).IsEqualTo(string.IsNullOrEmpty(key)
                 ? QueueEnqueueAuthorityProtocol.ExpectedMissingKeyDetail
                 : QueueEnqueueAuthorityProtocol.ExpectedIdentifierDetail);
-            await Assert.That(result.Json).IsNull();
-            await Assert.That(result.NativeValue).IsNull();
+            
+            await Assert.That(result.Value).IsNull();
             await QueueClaimVersionExhaustionAssertions.DomainAsync(store, lane, domain);
             await Assert.That(owner.GetDocument(QueueEnqueueColdProtocol.Root, new(lane.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document))).IsNull();
             await QueueStoredCapacityReceipts.FailureAsync(owner, store, lane.Partition, operation, result);

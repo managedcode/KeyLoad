@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 
@@ -8,7 +10,7 @@ internal sealed class QueueOrderedRetryState(PartitionRef partition, DateTimeOff
 {
     internal PartitionRef Partition { get; } = partition;
     internal string Principal { get; } = principal;
-    internal Action<DatabaseEngine, ReplicatedOperation>? BeforeApply
+    internal Action<DatabaseEngine, Command<DatabaseCommand>>? BeforeApply
     {
         get; init;
     }
@@ -20,7 +22,7 @@ internal sealed class QueueOrderedRetryState(PartitionRef partition, DateTimeOff
     internal QueueLaneRef Lane { get; } = new(partition, QueueOrderedRetryProtocol.Queue);
     internal DateTimeOffset Time { get; set; } = time;
     internal QueueParkedHeadPolicy ParkedHead { get; } = parkedHead;
-    internal List<(ReplicatedOperation Operation, OperationResult Result)> Outcomes { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result)> Outcomes { get; } = [];
     internal Delivery? FirstLease
     {
         get; set;
@@ -29,17 +31,16 @@ internal sealed class QueueOrderedRetryState(PartitionRef partition, DateTimeOff
     {
         get; set;
     }
-    internal OperationResult Execute<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
+    internal Result<object> Execute<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
     {
-        var operation = database.NormalizeOperation(new(id, kind, Principal, Time,
-            JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+        var operation = database.OwnCommand(database.CreateCommand(kind, id, Principal, Time, JsonSerializer.Serialize(payload, JsonDefaults.Options)));
         operation = database.PrepareQueueRetryOperation(operation);
         BeforeApply?.Invoke(database, operation);
         var result = database.Apply(operation);
         Outcomes.Add((operation, result));
         return result;
     }
-    internal OperationResult Batch(DatabaseEngine database, params Mutation[] mutations)
+    internal Result<object> Batch(DatabaseEngine database, params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
         return Execute(database, OperationKind.Batch, new CommandRequest(id, Partition, [.. mutations]), id);

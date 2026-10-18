@@ -73,12 +73,10 @@ internal static class SqlCompositionParameterFlow
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);
         var decoded = NativeSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
         await SqlCompositionParameterAssertions.EqualAsync(decoded, command);
-        var operation = fixture.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId, C.Root,
+        var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, C.Root,
             fixture.Seed.SeedAt.AddSeconds(reverse ? SqlCompositionParameterData.ReverseOperationOffsetSeconds
                 : SqlCompositionParameterData.ForwardOperationOffsetSeconds), NativeSerialization.Serialize(decoded));
-        var expected = new CommitReceipt(command.CommandId,
-            new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, fixture.Store.Position + 1L, 1L),
-            [SqlCompositionParameterData.Receipt(fixture, reverse)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, fixture.Store.Position + 1L), [SqlCompositionParameterData.Receipt(fixture, reverse)], DurabilityProfile.ProcessDurable, 1);
         var actual = fixture.Database.Apply(operation).Get<CommitReceipt>();
         await SqlCompositionParameterAssertions.NativeReceiptAsync(actual, expected);
         fixture.Originals.Add(new(command, operation, expected, SqlCompositionParameterData.Effect(fixture, reverse)));

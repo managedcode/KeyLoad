@@ -36,12 +36,11 @@ internal static class AnalyticsBoundsOwner
             TestContext.Current!.Execution.CancellationToken);
         var id = Guid.NewGuid();
         var revisions = events.ToImmutableDictionary(row => row.Id, _ => expectedRevision, StringComparer.Ordinal);
-        var operation = db.Database.CreateNativeOperation(OperationKind.Batch, id, D.Root,
+        var operation = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
             db.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new CommandRequest(id, db.Partition,
                 [new UpsertAnalyticsEvents(store, [.. events], revisions)])), work);
         var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-            checked(db.Database.LastApplied + 1), 1),
-            [new(P.UpsertKind, store, events.OrderBy(row => row.Id, StringComparer.Ordinal).Last().Id, generation)], DurabilityProfile.ProcessDurable);
+            checked(db.Database.LastApplied + 1)), [new(P.UpsertKind, store, events.OrderBy(row => row.Id, StringComparer.Ordinal).Last().Id, generation)], DurabilityProfile.ProcessDurable, 1);
         var actual = db.SubmitIssued(operation).Get<CommitReceipt>();
         await O.EqualAsync(expected, actual);
         await Assert.That(actual.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();

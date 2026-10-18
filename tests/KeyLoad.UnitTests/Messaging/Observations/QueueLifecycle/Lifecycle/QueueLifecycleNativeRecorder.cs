@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -17,7 +19,7 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
 
     private readonly Dictionary<(string Subject, Guid Id), QueueLifecycleNativeExpectation> expectations = [];
 
-    internal OperationResult Apply(ReplicatedOperation operation)
+    internal Result<object> Apply(Command<DatabaseCommand> operation)
     {
         Observe(Database, operation);
         var result = Database.Apply(operation);
@@ -25,9 +27,9 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
         return result;
     }
 
-    internal void Observe(DatabaseEngine owner, ReplicatedOperation operation)
+    internal void Observe(DatabaseEngine owner, Command<DatabaseCommand> operation)
     {
-        var identity = (operation.PrincipalId, operation.Id);
+        var identity = (operation.UserId!, operation.CommandId);
         if (expectations.ContainsKey(identity))
         {
             return;
@@ -35,7 +37,7 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
         var store = owner.Store;
         var placement = owner.ReadAtomicPartitionPlacement(Subject, lane.Partition);
         var token = new CommitToken(placement.Incarnation, lane.Partition.AtomicPartitionId,
-            checked(store.Position + NextCommitPosition), placement.PlacementEpoch);
+            checked(store.Position + NextCommitPosition));
         var before = store.Read(view =>
         {
             var page = view.Scan(KeySpace.Partition(MetadataFamily, lane.Partition, lane.Queue), MetadataReadBound);
@@ -50,7 +52,7 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
         expectations.Add(identity, new(token, before, counters));
     }
 
-    internal void Capture(IEnumerable<(ReplicatedOperation Operation, OperationResult Result)> outcomes)
+    internal void Capture(IEnumerable<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes)
     {
         Samples.Clear();
         foreach (var outcome in outcomes)
@@ -59,9 +61,9 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
         }
     }
 
-    private void Record(ReplicatedOperation operation, OperationResult result)
+    private void Record(Command<DatabaseCommand> operation, Result<object> result)
     {
-        var expected = expectations[(operation.PrincipalId, operation.Id)];
+        var expected = expectations[(operation.UserId!, operation.CommandId)];
         Samples.Add(new(operation, result, expected.Token, expected.Before, expected.Counters));
     }
 

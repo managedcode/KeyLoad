@@ -70,8 +70,7 @@ internal static class NativeTextAuthorityContinuation
                 await Assert.That(reopened.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
                 await UnchangedAsync(reopened, bytes, cut);
                 var owner = NativeTextBilingualAudit.Owner(reopened);
-                var replay = owner.ApplyEmbedded(new(command.CommandId, OperationKind.Batch, Root, default,
-                    JsonSerializer.Serialize(command, JsonDefaults.Options)), cancellationToken: token).Get<CommitReceipt>();
+                var replay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, command.CommandId, Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options)), cancellationToken: token).Get<CommitReceipt>();
                 await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
                 await UnchangedAsync(reopened, bytes, cut);
                 projection = OpenProjection(database);

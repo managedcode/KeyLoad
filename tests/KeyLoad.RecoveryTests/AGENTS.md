@@ -7,7 +7,7 @@
 - Feature cases belong under matching canonical `<SliceName>/` paths; real process-host and shared recovery fixture infrastructure may remain shared.
 - Use the real `KeyLoad.CrashHost` process where required. Preserve node-local ZoneTree storage ownership (files never move with activations; Orleans does all clustering, ADR-136).
 - These tests establish process-recovery behavior only. They must never be presented as power-loss durability, endurance or complete production qualification; do not substitute mocks/fakes or weaken fault assertions.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.
 - Treat recovery ordering, snapshot replacement and filesystem durability as critical contracts. Report unconfigured coverage/complexity gates honestly.
 
 ## Boundaries and protected risks

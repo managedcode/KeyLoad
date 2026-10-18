@@ -18,7 +18,7 @@ internal static class FunctionalGateFileOwnershipProbe
         fixture.RegisterFileContenderSettlement(settlement.Task);
         var tasks = new List<Task<string>>();
         var ids = new List<string>();
-        var settled = new bool[P.Voters];
+        var settled = new bool[P.SiloCount];
         var failures = new List<Exception>();
         try
         {
@@ -34,7 +34,7 @@ internal static class FunctionalGateFileOwnershipProbe
                 await Assert.That(owner.Source).IsEqualTo(saved.Directory);
                 var output = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
                 var names = ExclusiveOwnerContentionResources.ResourceNames;
-                await Assert.That(names.Length).IsEqualTo(P.Voters);
+                await Assert.That(names.Length).IsEqualTo(P.SiloCount);
                 for (var index = P.FirstContender; index < names.Length; index++)
                 {
                     var slot = index;
@@ -60,7 +60,7 @@ internal static class FunctionalGateFileOwnershipProbe
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
-        await Assert.That(ids.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(P.Voters);
+        await Assert.That(ids.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(P.SiloCount);
     }
 
     private static async Task<string> RunOneAsync(FunctionalGateFixture fixture, string name,

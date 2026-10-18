@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Proves F1 transfer intent, signed destination receipt and source completion through real CLUSTER callers.</summary>
+/// <summary>Proves F1 transfer intent, signed destination receipt and source completion through real Orleans callers.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RemoteTransfersClusterTests(ClusterFixture fixture)

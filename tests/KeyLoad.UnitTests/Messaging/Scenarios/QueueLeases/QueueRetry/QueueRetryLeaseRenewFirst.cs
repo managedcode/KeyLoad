@@ -13,8 +13,7 @@ internal static class QueueRetryLeaseRenewFirst
         var policy = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             state.Partition.TenantId, state.Partition.DatabaseId, state.Lane.Queue)))!.QueuePolicy;
         var retry = new DeliveryCommand(Guid.NewGuid(), state.Lane, original.Token, DeliveryAction.Nack);
-        var prepared = database.PrepareQueueRetryOperation(database.NormalizeOperation(new(retry.CommandId, OperationKind.Delivery,
-            QueueOrderedRetryProtocol.Root, state.Time, JsonSerializer.Serialize(retry, JsonDefaults.Options))));
+        var prepared = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Delivery, retry.CommandId, QueueOrderedRetryProtocol.Root, state.Time, JsonSerializer.Serialize(retry, JsonDefaults.Options))));
         var renewal = new DeliveryCommand(Guid.NewGuid(), state.Lane, original.Token, DeliveryAction.Renew, policy.MaxLeaseSeconds);
         state.Execute(database, OperationKind.Delivery, renewal, renewal.CommandId).Get<CommitReceipt>();
         var until = state.Time.AddSeconds(policy.MaxLeaseSeconds);

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -21,7 +23,7 @@ internal static class SampleChunkCorrectionTagFlow
 
     private static async Task CompleteAsync(SampleChunkCanonicalFixture fixture)
     {
-        var originals = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var originals = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         await CommitAsync(fixture, new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, SampleChunkCanonicalFixture.Start,
             SampleChunkCanonicalFixture.Until), "openSampleChunkWindow", SampleChunkCanonicalFixture.FirstRevision, originals);
@@ -61,6 +63,6 @@ internal static class SampleChunkCorrectionTagFlow
     }
 
     private static Task CommitAsync(SampleChunkCanonicalFixture fixture, Mutation mutation, string kind, long revision,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
         => SampleChunkCorrectionBoundReceipts.CommitAsync(fixture, mutation, kind, revision, originals);
 }

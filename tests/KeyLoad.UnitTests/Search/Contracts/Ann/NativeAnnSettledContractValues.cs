@@ -34,7 +34,7 @@ internal sealed record NativeAnnSettledContractValues(AnnMaintenanceRequest Requ
             database.Partition);
         var request = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,
-            new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),
+            new(placement.PhysicalShardId, placement.Incarnation),
             AnnMaintenanceMode.Build)
         {
             MaintenanceProfile = profile

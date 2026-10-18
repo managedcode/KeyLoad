@@ -24,7 +24,8 @@ internal static class BlobSupersessionPublicAssertions
             await callers.Mcp.CallAsync("keyload_blobs_complete_upload", value.Complete, token))).Value);
         foreach (var receipt in new[] { value.Begun.Receipt, value.Written.Receipt, value.Completed.Receipt })
         {
-            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+            await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
             await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(value.Begin.Blob.Partition.AtomicPartitionId);
             await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         }

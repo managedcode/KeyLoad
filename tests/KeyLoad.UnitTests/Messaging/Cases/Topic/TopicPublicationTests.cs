@@ -35,7 +35,7 @@ internal sealed class TopicPublicationTests
         var shortId = Guid.NewGuid();
         var rejected = shortQuota.Submit(OperationKind.Batch, new CommandRequest(shortId, shortQuota.Partition,
             [new PublishTopic(TopicName, [.. events])]), id: shortId, time: publicationTime);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(shortQuota.Database.ReadEventSource("root", new(new(shortQuota.Partition, TopicName, EventSourceKind.Topic))).Head.TailPosition).IsEqualTo(0);
         await Assert.That(shortQuota.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, shortQuota.Partition)))).IsNull();
     }
@@ -61,9 +61,9 @@ internal sealed class TopicPublicationTests
             return 0;
         });
         var staleId = Guid.NewGuid();
-        await Assert.That(stale.Submit(OperationKind.Batch, new CommandRequest(staleId, stale.Partition,
+        await Assert.That(Errors.Code(stale.Submit(OperationKind.Batch, new CommandRequest(staleId, stale.Partition,
             [new PublishTopic(TopicName, [new("stale", EventType, "{}")])]), id: staleId,
-            time: SourceReadBusinessTime.Next(stale)).Error)
+            time: SourceReadBusinessTime.Next(stale)).Problem))
             .IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(stale.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, stale.Partition)))).IsNull();
     }
@@ -76,24 +76,24 @@ internal sealed class TopicPublicationTests
         var duplicateTime = SourceReadBusinessTime.Next(duplicate);
         Publish(duplicate, [new("same", EventType, "{}")], Guid.NewGuid(), duplicateTime);
         var duplicateId = Guid.NewGuid();
-        await Assert.That(duplicate.Submit(OperationKind.Batch, new CommandRequest(duplicateId, duplicate.Partition,
+        await Assert.That(Errors.Code(duplicate.Submit(OperationKind.Batch, new CommandRequest(duplicateId, duplicate.Partition,
             [new PublishTopic(TopicName, [new("same", EventType, "{}")])]), id: duplicateId,
-            time: duplicateTime.AddTicks(1)).Error)
+            time: duplicateTime.AddTicks(1)).Problem))
             .IsEqualTo(ErrorCode.DuplicateEventId);
 
         using var paused = new TestDatabase();
         ConfigureTopic(paused, long.MaxValue, paused: true);
         var pausedId = Guid.NewGuid();
-        await Assert.That(paused.Submit(OperationKind.Batch, new CommandRequest(pausedId, paused.Partition,
+        await Assert.That(Errors.Code(paused.Submit(OperationKind.Batch, new CommandRequest(pausedId, paused.Partition,
             [new PublishTopic(TopicName, [])]), id: pausedId,
-            time: SourceReadBusinessTime.Next(paused)).Error).IsEqualTo(ErrorCode.DispatchPaused);
+            time: SourceReadBusinessTime.Next(paused)).Problem)).IsEqualTo(ErrorCode.DispatchPaused);
 
         using var invalid = new TestDatabase();
         ConfigureTopic(invalid, long.MaxValue);
         var invalidId = Guid.NewGuid();
-        await Assert.That(invalid.Submit(OperationKind.Batch, new CommandRequest(invalidId, invalid.Partition,
+        await Assert.That(Errors.Code(invalid.Submit(OperationKind.Batch, new CommandRequest(invalidId, invalid.Partition,
             [new PublishTopic(TopicName, [new("", EventType, "{}")])]), id: invalidId,
-            time: SourceReadBusinessTime.Next(invalid)).Error)
+            time: SourceReadBusinessTime.Next(invalid)).Problem))
             .IsEqualTo(ErrorCode.Validation);
     }
 
@@ -110,7 +110,7 @@ internal sealed class TopicPublicationTests
         var failed = database.Submit(OperationKind.Batch, new CommandRequest(failedId, database.Partition,
             [new PutDocument(ResourceName, "rolled-back", "{}"), new PublishTopic(TopicName, [new("overflow", EventType, "{}")])]),
             id: failedId, time: publicationTime.AddMinutes(1));
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(database.Database.GetDocument("root", new(database.Partition, ResourceName, "rolled-back"))).IsNull();
         await Assert.That(database.Database.ReadEventSource("root", new(new(database.Partition, TopicName, EventSourceKind.Topic))).Head.TailPosition).IsEqualTo(1L);
         var currentSequence = database.Store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, database.Partition))!));

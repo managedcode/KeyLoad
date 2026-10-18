@@ -3,7 +3,6 @@ using KeyLoad;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.AnalyticsStore;
 using KeyLoad.CrashHost.Features.BlobStorage;
-using KeyLoad.CrashHost.Features.ClusterReplication;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.CrashHost.Features.Messaging;
 using KeyLoad.CrashHost.Features.ResourceExecution;
@@ -30,21 +29,14 @@ if (await SampleChunkCrashScenario.TryRunAsync(args))
 }
 
 _ = SerializationExecutionRegistration.Process.Value;
-if (await D2InventoryCrashScenario.TryRunAsync(args)
-    || await BlobCommitCutScenario.TryRunAsync(args)
+if (await BlobCommitCutScenario.TryRunAsync(args)
     || await UserAnalyticsProcessScenario.TryRunAsync(args)
     || await NativeChecksumProfileScenario.TryRunAsync(args)
-    || await ClusterRestoreProcessCutScenario.TryRunAsync(args)
     || await NativeTextOnlineCrashScenario.TryRunAsync(args)
     || await NativeTextIncrementalCrashScenario.TryRunAsync(args)
     || await NativeTextCrashScenario.TryRunAsync(args)
-    || await C1OutcomeInspection.TryRunAsync(args)
-    || await C1SubmissionOutcomeInspection.TryRunAsync(args)
-    || await C1SubmissionJournalInspection.TryRunAsync(args)
     || await ExistingStoreInspector.TryRunAsync(args)
     || await SnapshotManifestEntryProbe.TryRunAsync(args)
-    || await ReplicaPrefixGcCrashScenario.TryRunAsync(args)
-    || await ReplicaCrashScenario.TryRunAsync(args)
     || await ExternalQueueWorkerCrashScenario.TryRunAsync(args))
 {
     return;

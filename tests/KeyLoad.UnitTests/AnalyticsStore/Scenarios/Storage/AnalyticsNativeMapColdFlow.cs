@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
@@ -17,12 +18,11 @@ internal static class AnalyticsNativeMapColdFlow
             var request = new CommandRequest(id, owner.Source.Partition,
                 [new UpsertAnalyticsEvents(D.Store, [.. events], O.Revisions((D.First, 0), (D.Second, 0), (D.Third, 0)))]);
             // Submit owns the actual public JSON -> NormalizePayload -> native ordered journal/apply path.
-            var expected = new CommitReceipt(id, owner.NextToken(),
-                [new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.Third, 1)], DurabilityProfile.ProcessDurable);
+            var expected = new CommitReceipt(id, owner.NextToken(), [new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.Third, 1)], DurabilityProfile.ProcessDurable, 1);
             await O.EqualAsync(expected, owner.Source.Submit(OperationKind.Batch, request, id: id).Get<CommitReceipt>());
-            var original = owner.Source.ReadRetainedEntry(id).Operation
+            var original = owner.Source.ReadStoredOutcome(id).PreparedCommand
                 ?? throw new InvalidOperationException("The original native analytics command was not retained.");
-            var decoded = KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(original);
+            var decoded = NativeSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
             await O.EqualAsync(request, decoded);
             await Assert.That(decoded.Mutations.Single()).IsTypeOf<UpsertAnalyticsEvents>();
             await AnalyticsNativeMapColdReads.VerifyAsync(owner, events, token);
@@ -33,13 +33,13 @@ internal static class AnalyticsNativeMapColdFlow
                 var image = TeamRowPolicyAssertions.Image(owner.Store);
                 var identity = NativeSerialization.Serialize(owner.Store.Identity);
                 var position = owner.Store.Position;
-                var journal = owner.JournalCut();
+                var journal = owner.ReadCanonicalCut();
                 var applied = owner.Database.LastApplied;
                 await owner.ReopenAsync();
                 await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
                 await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
                 await Assert.That(owner.Store.Position).IsEqualTo(position);
-                await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+                await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
                 await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
                 await AnalyticsNativeMapColdReads.VerifyAsync(owner, events, token);
                 await AnalyticsNativeMapColdReads.UnchangedAsync(owner, async () =>

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -23,9 +24,7 @@ internal static class QueryEquivalentIntegerDecimalCurrent
     }
     internal static async Task ReceiptAsync(TestDatabase fixture, CommandRequest seed, CommitReceipt receipt)
     {
-        var expected = new CommitReceipt(seed.CommandId,
-            new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, fixture.Store.Position, OwnershipEpoch),
-            [.. Records.Select(row => new MutationReceipt(PutKind, Collection, row.Id, Revision))], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(seed.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, fixture.Store.Position), [.. Records.Select(row => new MutationReceipt(PutKind, Collection, row.Id, Revision))], DurabilityProfile.ProcessDurable, 1);
         await QueryEquivalentIntegerDecimalPages.EqualAsync(expected, receipt);
     }
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,
@@ -37,8 +36,7 @@ internal static class QueryEquivalentIntegerDecimalCurrent
         var failures = new List<Exception>();
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            var original = new ReplicatedOperation(seed.CommandId, OperationKind.Batch, Root, default,
-                JsonSerializer.Serialize(seed, JsonDefaults.Options));
+            var original = owner.CreateCommand(OperationKind.Batch, seed.CommandId, Root, default, JsonSerializer.Serialize(seed, JsonDefaults.Options));
             await QueryEquivalentIntegerDecimalPages.EqualAsync(receipt, owner.ApplyEmbedded(original,
                 cancellationToken: token).Get<CommitReceipt>());
         }, failures);

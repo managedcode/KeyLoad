@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
@@ -35,7 +36,7 @@ internal static class QueueLeaseAuthorityProcessImage
         }
     }
 
-    internal static async Task RefuseAsync(DatabaseEngine database, ZoneTreeStore store, ReplicatedOperation original,
+    internal static async Task RefuseAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> original,
         string[] image, long position, byte[] identity)
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(original));

@@ -18,7 +18,7 @@ internal static class ColdBootstrapCliStatus
     private const string CredentialEnvironment = "KEYLOAD_API_KEY";
     private const string Missing = "The actual bootstrap CLI process or typed status was absent.";
     private const int Success = 0;
-    private const int Voters = 3;
+    private const int SiloCount = 3;
 
     internal static async Task VerifyAsync(ClusterFixture fixture, NodeStatus expected, CancellationToken token)
     {
@@ -70,7 +70,7 @@ internal static class ColdBootstrapCliStatus
         await Assert.That(actual.NodeId).IsEqualTo(expected.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
         await Assert.That(actual.RoutingReady).IsTrue();
-        await Assert.That(actual.Voters).IsEqualTo(Voters);
+        await Assert.That(actual.SiloCount).IsEqualTo(SiloCount);
         await Assert.That(actual.ProcessId).IsGreaterThan(Success);
     }
 }

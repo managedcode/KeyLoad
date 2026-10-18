@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
-/// <summary>Describes only closed field differences for the fixed three-document native CLUSTER corpus.</summary>
+/// <summary>Describes only closed field differences for the fixed three-document native Orleans corpus.</summary>
 internal static class NativeTextClusterResultDiagnostic
 {
     private const int FirstRow = 0;

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -7,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal static class EventAppendSequenceAuthorityCold
 {
     internal static async Task RunAsync(EventAppendWholeFlowFixture fixture, CommandRequest command,
-        OperationResult original, CommandRequest healthy, OperationResult healthyResult, CancellationToken token)
+        Result<object> original, CommandRequest healthy, Result<object> healthyResult, CancellationToken token)
     {
         var position = fixture.Database.Store.Position;
         var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -19,7 +20,7 @@ internal static class EventAppendSequenceAuthorityCold
     }
 
     private static async Task ColdAsync(EventAppendWholeFlowFixture fixture, CommandRequest command,
-        OperationResult original, CommandRequest healthy, OperationResult healthyResult, long position,
+        Result<object> original, CommandRequest healthy, Result<object> healthyResult, long position,
         string[] before, CancellationToken token)
     {
         var failures = new List<Exception>();

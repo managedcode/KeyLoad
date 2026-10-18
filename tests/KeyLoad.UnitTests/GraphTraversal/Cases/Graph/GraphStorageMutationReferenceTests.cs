@@ -43,7 +43,7 @@ internal sealed class GraphStorageMutationReferenceTests
             {
                 Mutations = [new PutDocument(GraphStorageReferenceFixture.Nodes, "forbidden", "{}")]
             };
-            await Assert.That(GraphStorageReferenceFixture.Submit(database.Database, changed).Error).IsEqualTo(ErrorCode.Conflict);
+            await Assert.That(Errors.Code(GraphStorageReferenceFixture.Submit(database.Database, changed).Problem)).IsEqualTo(ErrorCode.Conflict);
             await Assert.That(database.Database.GetDocument(GraphStorageReferenceFixture.Root,
                 new(database.Partition, GraphStorageReferenceFixture.Nodes, "forbidden"))).IsNull();
             await Assert.That(database.Store.Position).IsEqualTo(position);

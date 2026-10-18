@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -68,7 +69,7 @@ internal static class SampleRawIntegrityScenario
             return true;
         });
 
-    internal static ReplicatedOperation Expiry(SampleRawIntegrityFixture fixture)
+    internal static Command<DatabaseCommand> Expiry(SampleRawIntegrityFixture fixture)
         => fixture.Operation(new ExpireSamples(SampleAggregateTestData.Set, SampleAggregateTestData.Series, FinalFloor, 2));
 
     internal static ReadSamplesRequest Range(SampleRawIntegrityFixture fixture, bool final)

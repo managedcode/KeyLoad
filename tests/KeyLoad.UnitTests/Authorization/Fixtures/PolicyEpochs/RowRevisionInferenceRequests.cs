@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
 
@@ -18,7 +19,7 @@ internal static class RowRevisionInferenceRequests
         return new(Guid.NewGuid(), partition, [mutation]);
     }
 
-    internal static ReplicatedOperation Operation(CommandRequest command)
+    internal static Command<DatabaseCommand> Operation(CommandRequest command)
         => new(command.CommandId, OperationKind.Batch, P.Reader, default,
             JsonSerializer.Serialize(command, JsonDefaults.Options));
 

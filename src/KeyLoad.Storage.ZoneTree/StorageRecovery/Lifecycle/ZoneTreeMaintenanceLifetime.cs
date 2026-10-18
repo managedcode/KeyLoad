@@ -44,21 +44,26 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
         }
         catch (Exception original)
         {
-            var failures = new List<Exception> { original };
-            try
-            {
-                if (created is not null)
-                {
-                    ZoneTreeReadCutCleanup.Capture(created.Dispose, failures);
-                }
-            }
-            finally
-            {
-                ZoneTreeReadCutCleanup.Capture(stop.Dispose, failures);
-            }
-            ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
+            CloseFailedConstruction(original, created);
             throw;
         }
+    }
+
+    private void CloseFailedConstruction(Exception original, IMaintainer? created)
+    {
+        var failures = new List<Exception> { original };
+        try
+        {
+            if (created is not null)
+            {
+                ZoneTreeReadCutCleanup.Capture(created.Dispose, failures);
+            }
+        }
+        finally
+        {
+            ZoneTreeReadCutCleanup.Capture(stop.Dispose, failures);
+        }
+        ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
     }
 
     internal IMaintainer Maintainer

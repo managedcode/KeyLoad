@@ -29,14 +29,16 @@ internal static class FunctionalGateFixtureStartup
         }
     }
 
-    internal static List<string> Arguments(string root, int nodes, bool coldReopen, bool exclusiveOwnerContention,
+    internal static List<string> Arguments(string root, int nodes, int replicas, bool coldReopen, bool exclusiveOwnerContention,
         LocalClusterImageSelection.Selection? selection)
     {
         var arguments = new List<string>
         {
             ClusterFixtureProtocol.DataRootArgument + root,
             ClusterFixtureProtocol.EphemeralArgument,
-            "--KeyLoadTests:FunctionalNodeCount=" + nodes.ToString(CultureInfo.InvariantCulture)
+            "--KeyLoadTests:FunctionalNodeCount=" + nodes.ToString(CultureInfo.InvariantCulture),
+            "--KeyLoad:SiloCount=" + nodes.ToString(CultureInfo.InvariantCulture),
+            "--KeyLoad:ReplicaCount=" + replicas.ToString(CultureInfo.InvariantCulture)
         };
         if (coldReopen)
         {

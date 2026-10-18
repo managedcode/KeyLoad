@@ -9,8 +9,11 @@ public sealed partial class SearchEngine
 {
     internal Task<RankedDocument[]> SearchBoundAsync(string principalId, SearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
-        => SearchLifetimeWorkBudget.RunNativeAsync(database, execution, binding,
-            budget => SearchCore(principalId, request, budget), token);
+    {
+        var budget = SearchLifetimeWorkBudget.Create(database, execution, binding, token);
+        using var reservation = database.AdmitQuery(token);
+        return Task.FromResult(SearchCore(principalId, request, budget));
+    }
 
     internal Task<GraphSearchResult> GraphSearchBoundAsync(string principalId, GraphSearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
@@ -18,9 +21,12 @@ public sealed partial class SearchEngine
 
     internal Task<WaitForIndexResult> WaitForIndexBoundAsync(string principalId, WaitForIndexRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
-        => SearchLifetimeWorkBudget.RunNativeAsync(database, execution, binding,
-            budget => TextIndexWaitExecution.Execute(database, textProjection, execution,
-                readCutObserver, principalId, request, budget), token);
+    {
+        var budget = SearchLifetimeWorkBudget.Create(database, execution, binding, token);
+        using var reservation = database.AdmitQuery(token);
+        return Task.FromResult(TextIndexWaitExecution.Execute(database, textProjection, execution,
+            readCutObserver, principalId, request, budget));
+    }
 
     internal Task<WaitForAnnIndexResult> WaitForAnnIndexBoundAsync(string principalId, WaitForAnnIndexRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)

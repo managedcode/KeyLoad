@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Globalization;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -25,8 +26,8 @@ internal static class SagaTimeoutRecoveryAssertions
         await AssertStableRetryAsync(database, store, operation, receipt, seedTail);
     }
 
-    private static async Task<ReplicatedOperation> ReadOperationAsync(string root, CancellationToken cancellationToken)
-        => JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+    private static async Task<Command<DatabaseCommand>> ReadOperationAsync(string root, CancellationToken cancellationToken)
+        => JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, SagaTimeoutCrashScenario.OperationFile), cancellationToken));
 
     private static async Task<long> ReadSeedTailAsync(string root, CancellationToken cancellationToken)
@@ -38,7 +39,7 @@ internal static class SagaTimeoutRecoveryAssertions
             new(SagaTimeoutCrashScenario.Partition, SagaTimeoutCrashScenario.Queue),
             Guid.Parse(SagaTimeoutCrashScenario.SagaIdText))!;
 
-    private static async Task AssertDeadlineReachedAsync(SagaInspection recovered, ReplicatedOperation operation)
+    private static async Task AssertDeadlineReachedAsync(SagaInspection recovered, Command<DatabaseCommand> operation)
     {
         var waiting = recovered.Phase == SagaPhase.Waiting
             && recovered.Revision == SagaTimeoutCrashScenario.WaitingRevision;
@@ -46,11 +47,11 @@ internal static class SagaTimeoutRecoveryAssertions
             && recovered.Revision == SagaTimeoutCrashScenario.TimedOutRevision;
         await Assert.That(waiting || timedOut).IsTrue();
         await Assert.That(recovered.Deadline).IsNotNull();
-        await Assert.That(operation.EvaluatedAt).IsGreaterThanOrEqualTo(recovered.Deadline!.Value);
+        await Assert.That(new DateTimeOffset(operation.Timestamp)).IsGreaterThanOrEqualTo(recovered.Deadline!.Value);
     }
 
     private static async Task<CommitReceipt?> AssertAtomicCutAsync(ZoneTreeStore store, DatabaseEngine database,
-        ReplicatedOperation operation, long seedTail, SagaInspection waiting, CommitStage stage)
+        Command<DatabaseCommand> operation, long seedTail, SagaInspection waiting, CommitStage stage)
     {
         var timeoutLane = new QueueLaneRef(SagaTimeoutCrashScenario.Partition, SagaTimeoutCrashScenario.TimeoutQueue);
         var message = database.InspectMessage(CrashFixtureValues.Principal, timeoutLane,
@@ -117,7 +118,7 @@ internal static class SagaTimeoutRecoveryAssertions
     }
 
     private static async Task AssertStableRetryAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, CommitReceipt first, long seedTail)
+        Command<DatabaseCommand> operation, CommitReceipt first, long seedTail)
     {
         var timeoutLane = new QueueLaneRef(SagaTimeoutCrashScenario.Partition, SagaTimeoutCrashScenario.TimeoutQueue);
         var repeated = database.Apply(operation).Get<CommitReceipt>();

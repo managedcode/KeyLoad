@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
@@ -11,5 +13,5 @@ internal static class DocumentCommandPrincipalColdReplayContract
     internal const string FirstJson = "{\"owner\":\"one\"}";
     internal const string SecondJson = "{\"owner\":\"two\"}";
     internal const string ChangedJson = "{\"owner\":\"healthy-one\"}";
-    internal sealed record Retained(ReplicaEntry Entry, OperationResult Result);
+    internal sealed record Retained(StoredOutcome Entry, Result<object> Result);
 }

@@ -39,37 +39,37 @@ internal static class SafeProjectorOperationOutbox
         var firstRef = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First);
         var secondRef = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second);
         var first = new DocumentRecord(firstRef, SafeProjectorOperationProtocol.InitialRevision,
-            SafeProjectorOperationProtocol.InitialJson, new RowAccess(), state.Seed.Operation.EvaluatedAt);
+            SafeProjectorOperationProtocol.InitialJson, new RowAccess(), new DateTimeOffset(state.Seed.Operation.Timestamp));
         var second = new DocumentRecord(secondRef, SafeProjectorOperationProtocol.InitialRevision,
-            SafeProjectorOperationProtocol.SecondJson, new RowAccess(), state.Seed.Operation.EvaluatedAt);
+            SafeProjectorOperationProtocol.SecondJson, new RowAccess(), new DateTimeOffset(state.Seed.Operation.Timestamp));
         List<OutboxEntry> rows =
         [
-            new(FirstSequence, FirstOrdinal, state.Seed.ExpectedToken, state.Seed.Operation.EvaluatedAt,
+            new(FirstSequence, FirstOrdinal, state.Seed.ExpectedToken, new DateTimeOffset(state.Seed.Operation.Timestamp),
                 new PutDocument(SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First,
                     SafeProjectorOperationProtocol.InitialJson, SafeProjectorOperationProtocol.AbsentRevision),
                 new(SafeProjectorOperationProtocol.PutKind, SafeProjectorOperationProtocol.Collection,
                     SafeProjectorOperationProtocol.First, SafeProjectorOperationProtocol.InitialRevision), null, first),
-            new(SecondSequence, SecondOrdinal, state.Seed.ExpectedToken, state.Seed.Operation.EvaluatedAt,
+            new(SecondSequence, SecondOrdinal, state.Seed.ExpectedToken, new DateTimeOffset(state.Seed.Operation.Timestamp),
                 new PutDocument(SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second,
                     SafeProjectorOperationProtocol.SecondJson, SafeProjectorOperationProtocol.AbsentRevision),
                 new(SafeProjectorOperationProtocol.PutKind, SafeProjectorOperationProtocol.Collection,
                     SafeProjectorOperationProtocol.Second, SafeProjectorOperationProtocol.InitialRevision), null, second)
         ];
         var updated = patch is null ? null : new DocumentRecord(firstRef, SafeProjectorOperationProtocol.UpdatedRevision,
-            SafeProjectorOperationProtocol.UpdatedJson, new RowAccess(), patch.Operation.EvaluatedAt);
+            SafeProjectorOperationProtocol.UpdatedJson, new RowAccess(), new DateTimeOffset(patch.Operation.Timestamp));
         if (patch is not null)
         {
-            rows.Add(new(PublicSequence, FirstOrdinal, patch.ExpectedToken, patch.Operation.EvaluatedAt,
+            rows.Add(new(PublicSequence, FirstOrdinal, patch.ExpectedToken, new DateTimeOffset(patch.Operation.Timestamp),
                 PublicPatch(), new(SafeProjectorOperationProtocol.PatchKind, SafeProjectorOperationProtocol.Collection,
                     SafeProjectorOperationProtocol.First, SafeProjectorOperationProtocol.UpdatedRevision), first, updated));
         }
         if (healthy is not null)
         {
-            rows.Add(new(HealthySequence, FirstOrdinal, healthy.ExpectedToken, healthy.Operation.EvaluatedAt,
+            rows.Add(new(HealthySequence, FirstOrdinal, healthy.ExpectedToken, new DateTimeOffset(healthy.Operation.Timestamp),
                 HealthyPatch(), new(SafeProjectorOperationProtocol.PatchKind, SafeProjectorOperationProtocol.Collection,
                     SafeProjectorOperationProtocol.First, SafeProjectorOperationProtocol.HealthyRevision), updated,
                 new DocumentRecord(firstRef, SafeProjectorOperationProtocol.HealthyRevision, SafeProjectorOperationProtocol.HealthyJson,
-                    new RowAccess(), healthy.Operation.EvaluatedAt)));
+                    new RowAccess(), new DateTimeOffset(healthy.Operation.Timestamp))));
         }
         return [.. rows];
     }

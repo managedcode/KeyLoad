@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -25,7 +26,7 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
     }
 
     internal static async Task ReplayEmptyAsync(DatabaseEngine db, ZoneTreeStore store,
-        ReceiveSubscriptionRequest request, OperationResult original, CancellationToken token)
+        ReceiveSubscriptionRequest request, Result<object> original, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -39,8 +40,8 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
     }
 
     internal static async Task SettledAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReceiveSubscriptionRequest request, OperationResult result, ReceiveSubscriptionRequest claimRequest,
-        OperationResult original, (SubscriptionDeliveryCommand Command, OperationResult Result)[] receipts,
+        ReceiveSubscriptionRequest request, Result<object> result, ReceiveSubscriptionRequest claimRequest,
+        Result<object> original, (SubscriptionDeliveryCommand Command, Result<object> Result)[] receipts,
         CancellationToken token)
     {
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 3, 3, 3);
@@ -83,7 +84,7 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, request, result, token);
     }
 
-    private static OperationResult ApplyHealthy<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id,
+    private static Result<object> ApplyHealthy<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id,
         DateTimeOffset? evaluatedAt, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -91,7 +92,6 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
         {
             return SubscriptionReceiveSlotAuthorityFlow.Apply(db, kind, payload, id, token);
         }
-        return db.Apply(new(id, kind, "root", evaluatedAt.Value,
-            System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+        return db.Apply(db.CreateCommand(kind, id, "root", evaluatedAt.Value, System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)));
     }
 }

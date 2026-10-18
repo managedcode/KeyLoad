@@ -9,14 +9,14 @@ internal static class SafeProjectorOperationImages
         var rows = TeamRowPolicyAssertions.Image(owner.Store);
         var cut = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.JournalCut();
+        var journal = owner.ReadCanonicalCut();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(operation, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await TeamRowPolicyAssertions.UnchangedAsync(owner.Store, rows, cut);
             await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-            await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

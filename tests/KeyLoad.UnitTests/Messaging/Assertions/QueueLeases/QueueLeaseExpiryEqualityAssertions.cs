@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -5,11 +6,11 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueLeaseExpiryEqualityAssertions
 {
-    internal static async Task RefusalAsync(OperationResult result, ErrorCode code)
+    internal static async Task RefusalAsync(Result<object> result, ErrorCode code)
     {
-        await Assert.That(result.Error).IsEqualTo(code);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        
+        await Assert.That(result.Value).IsNull();
     }
 
     internal static async Task ColdImageAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)

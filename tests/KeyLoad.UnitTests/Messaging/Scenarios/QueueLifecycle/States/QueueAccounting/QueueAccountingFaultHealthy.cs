@@ -13,16 +13,16 @@ internal static class QueueAccountingFaultHealthy
         var prior = QueueAccountingFaultSetup.Counters(store, state.Lane);
         var producer = new CommandRequest(Guid.NewGuid(), state.Lane.Partition,
             [new EnqueueMessage(state.Lane.Queue, QueueAccountingFaultProtocol.Healthy, QueueAccountingFaultProtocol.HealthyPayload)]);
-        var produced = QueueWholeFlowStorage.Apply(database, OperationKind.Batch, producer, producer.CommandId, state.Operation.EvaluatedAt);
+        var produced = QueueWholeFlowStorage.Apply(database, OperationKind.Batch, producer, producer.CommandId, new DateTimeOffset(state.Operation.Timestamp));
         produced.Get<CommitReceipt>();
         var claim = new ReceiveRequest(Guid.NewGuid(), state.Lane, LeaseSeconds: QueueAccountingFaultProtocol.LeaseSeconds);
-        var claimed = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, claim, claim.RequestId, state.Operation.EvaluatedAt);
+        var claimed = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, claim, claim.RequestId, new DateTimeOffset(state.Operation.Timestamp));
         var delivery = await Assert.That(claimed.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo(QueueAccountingFaultProtocol.Healthy);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueAccountingFaultProtocol.HealthyPayload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueAccountingFaultProtocol.EmptyHeaders);
         var ack = new DeliveryCommand(Guid.NewGuid(), state.Lane, delivery.Token, DeliveryAction.Ack);
-        var acked = QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, ack, ack.CommandId, state.Operation.EvaluatedAt);
+        var acked = QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, ack, ack.CommandId, new DateTimeOffset(state.Operation.Timestamp));
         var receipt = acked.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(ack.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo([new MutationReceipt(nameof(DeliveryAction.Ack), state.Lane.Queue,
@@ -42,13 +42,13 @@ internal static class QueueAccountingFaultHealthy
     internal static async Task ReplayAsync(DatabaseEngine database, QueueAccountingFaultState state, QueueAccountingHealthyState healthy)
     {
         await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
-            healthy.Producer, healthy.Producer.CommandId, state.Operation.EvaluatedAt), healthy.Produced);
+            healthy.Producer, healthy.Producer.CommandId, new DateTimeOffset(state.Operation.Timestamp)), healthy.Produced);
         await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
-            healthy.Ack, healthy.Ack.CommandId, state.Operation.EvaluatedAt), healthy.Acked);
-        var stale = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, healthy.Claim, healthy.Claim.RequestId, state.Operation.EvaluatedAt);
-        await Assert.That(stale.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(stale.Json).IsNull();
-        await Assert.That(stale.NativeValue).IsNull();
+            healthy.Ack, healthy.Ack.CommandId, new DateTimeOffset(state.Operation.Timestamp)), healthy.Acked);
+        var stale = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, healthy.Claim, healthy.Claim.RequestId, new DateTimeOffset(state.Operation.Timestamp));
+        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        
+        await Assert.That(stale.Value).IsNull();
         var retained = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Lane.Partition, QueueAccountingFaultProtocol.Root, healthy.Claim.RequestId)))!;
         await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, healthy.Claimed);

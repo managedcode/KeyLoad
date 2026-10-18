@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -30,8 +31,8 @@ internal sealed class SampleRollupLimitTests
             UntilExclusive = SampleRollupWholeFlow.End.AddMinutes(1)
         };
         var failure = Apply(engine, db.Partition, request);
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(failure.SafeDetail).IsEqualTo(SampleRollupProtocol.BucketBudget);
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(failure.Problem?.Detail).IsEqualTo(SampleRollupProtocol.BucketBudget);
         await Assert.That(SampleRollupWholeFlow.Raw(db)).IsEqualTo(raw);
         await Assert.That(SampleRollupWholeFlow.Rollups(db)).IsEqualTo(rollups);
         Apply(engine, db.Partition, SampleRollupWholeFlow.Refresh(1)).Get<CommitReceipt>();
@@ -58,11 +59,10 @@ internal sealed class SampleRollupLimitTests
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
             UnitExecutionOptions.NativeClaimsExecution(), Options.Create(options), db.Database.EvaluationClock);
-    private static OperationResult Apply(DatabaseEngine engine, PartitionRef partition, Mutation mutation)
+    private static Result<object> Apply(DatabaseEngine engine, PartitionRef partition, Mutation mutation)
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, partition, [mutation]);
-        return engine.ApplyEmbedded(new(id, OperationKind.Batch, SampleRollupWholeFlow.Root, default,
-            JsonSerializer.Serialize(command, JsonDefaults.Options)), cancellationToken: default);
+        return engine.ApplyEmbedded(engine.CreateCommand(OperationKind.Batch, id, SampleRollupWholeFlow.Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options)), cancellationToken: default);
     }
 }

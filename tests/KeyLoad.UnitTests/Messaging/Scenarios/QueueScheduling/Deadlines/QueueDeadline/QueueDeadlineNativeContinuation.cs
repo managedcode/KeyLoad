@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueDeadlineNativeContinuation
 {
     internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore first, string directory,
-        QueueLaneRef lane, CommandRequest command, OperationResult seeded, CommandRequest seed,
+        QueueLaneRef lane, CommandRequest command, Result<object> seeded, CommandRequest seed,
         MessageMetadata metadata, DateTimeOffset due, CancellationToken token)
     {
         QueueDeadlineNativeOperations.ConfigureWorker(database, lane.Partition, due, Capability.QueueInspect,

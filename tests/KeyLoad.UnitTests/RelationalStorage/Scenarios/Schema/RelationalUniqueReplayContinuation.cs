@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
@@ -36,9 +37,9 @@ internal static class RelationalUniqueReplayContinuation
         var issued = db.Database.EvaluationClock.GetUtcNow();
         var failed = Request(db, id, ConflictingThird);
         var failure = db.Submit(OperationKind.Batch, failed, id: id, time: issued);
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(failure.Json).IsNull();
-        await Assert.That(failure.NativeValue).IsNull();
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
+        
+        await Assert.That(failure.Value).IsNull();
         await RowsAsync(db, db.Store, db.Database, InitialSecond, InitialRevision, false);
         await SameAsync(before, db.Database.GetOutboxStatus(Root, db.Partition));
         var rejectedImage = QueueWholeFlowStorage.Bytes(db.Store);
@@ -68,7 +69,7 @@ internal static class RelationalUniqueReplayContinuation
          new PutDocument(RelationalTestData.Table, Third, json, 0)]);
 
     private static async Task ColdAsync(TestDatabase db, CommandRequest failed, DateTimeOffset issued,
-        OperationResult failure, CommandRequest healthy, DateTimeOffset healthyTime, CommitReceipt receipt,
+        Result<object> failure, CommandRequest healthy, DateTimeOffset healthyTime, CommitReceipt receipt,
         string[] image, long cut)
     {
         var identity = db.Store.Identity;

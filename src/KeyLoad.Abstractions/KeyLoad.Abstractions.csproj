@@ -2,6 +2,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
     <PackageReference Include="ManagedCode.Communication" />
+    <PackageReference Include="ManagedCode.Communication.Orleans" />
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />

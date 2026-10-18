@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -13,7 +15,7 @@ internal static class RequiredProcessingPolicyProcessing
         var actual = result.Deliveries[0];
         await RequiredProcessingPolicyAssertions.EqualAsync(new ReceiveResult(request.RequestId,
             [new(id, fixture.Payload, fixture.Headers, actual.Token, 1L, actual.LeaseUntil, 1, 1L)],
-            new(fixture.Harness.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position, 1L)), result);
+            new(fixture.Harness.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position)), result);
         await Assert.That(actual.Token).IsNotEmpty();
         var evaluatedAt = fixture.Harness.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
         await Assert.That(actual.LeaseUntil).IsEqualTo(evaluatedAt.AddSeconds(fixture.Resource.QueuePolicy.MaxLeaseSeconds));
@@ -21,16 +23,13 @@ internal static class RequiredProcessingPolicyProcessing
             1L, 1L, fixture.Harness.Store.Identity.Incarnation), fixture.Harness.Database.Verify<DeliveryClaims>(actual.Token));
         return actual;
     }
-    internal static async Task<(ReplicatedOperation Operation, CommitReceipt Receipt, byte[] Outcome)> CompleteAsync(
+    internal static async Task<(Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome)> CompleteAsync(
         RequiredProcessingPolicyFixture fixture, ProcessingRequest request, string document, CancellationToken token)
     {
         var operation = RequiredProcessingPolicyFixture.Operation(OperationKind.Processing, request, request.CommandId);
         var position = fixture.Harness.Store.Position + 1L;
         var actual = fixture.Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(request.CommandId,
-            new(fixture.Harness.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position, 1L),
-            [new("putDocument", RequiredProcessingPolicyFixture.Derived, document, 1L), new("Ack", RequiredProcessingPolicyFixture.Queue, document, 3L)],
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(request.CommandId, new(fixture.Harness.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position), [new("putDocument", RequiredProcessingPolicyFixture.Derived, document, 1L), new("Ack", RequiredProcessingPolicyFixture.Queue, document, 3L)], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, actual);
         return (operation, expected, RequiredProcessingPolicyAssertions.Outcome(fixture.Harness.Store, fixture.Harness.Partition,
             RequiredProcessingPolicyFixture.Worker, request.CommandId));
@@ -40,7 +39,7 @@ internal static class RequiredProcessingPolicyProcessing
         {
             using var cancellation = new CancellationTokenSource();
             await cancellation.CancelAsync();
-            OperationResult? result = null;
+            Result<object>? result = null;
             var failure = Assert.ThrowsExactly<OperationCanceledException>(() => result = fixture.Apply(OperationKind.Processing,
                 request, request.CommandId, token: cancellation.Token));
             await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);

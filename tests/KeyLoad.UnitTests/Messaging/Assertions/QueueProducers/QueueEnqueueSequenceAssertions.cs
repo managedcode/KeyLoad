@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
@@ -9,15 +10,15 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueEnqueueSequenceAssertions
 {
     internal static async Task ResultAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane,
-        CommandRequest command, EnqueueMessage message, QueueCounters counters, OperationResult result,
+        CommandRequest command, EnqueueMessage message, QueueCounters counters, Result<object> result,
         CommitToken expected, bool succeeds, string[] domain)
     {
         if (!succeeds)
         {
-            await Assert.That(result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(result.SafeDetail).IsEqualTo(QueueEnqueueAuthorityProtocol.ExpectedSequenceDetail);
-            await Assert.That(result.Json).IsNull();
-            await Assert.That(result.NativeValue).IsNull();
+            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(result.Problem?.Detail).IsEqualTo(QueueEnqueueAuthorityProtocol.ExpectedSequenceDetail);
+            
+            await Assert.That(result.Value).IsNull();
             await QueueClaimVersionExhaustionAssertions.DomainAsync(store, lane, domain);
             await Assert.That(owner.GetDocument(QueueEnqueueColdProtocol.Root, new(lane.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document))).IsNull();
             await Assert.That(owner.InspectMessage(QueueEnqueueColdProtocol.Root, lane, message.MessageId)).IsNull();

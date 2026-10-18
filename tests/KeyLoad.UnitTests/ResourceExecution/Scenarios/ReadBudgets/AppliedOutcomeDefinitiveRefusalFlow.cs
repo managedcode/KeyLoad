@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -25,7 +27,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         await ContinueColdAsync(fixture, lane, original, changed, committed, token);
     }
 
-    private static async Task<(QueueLaneRef Lane, ReplicatedOperation Original, ReplicatedOperation Changed, OperationResult Committed)>
+    private static async Task<(QueueLaneRef Lane, Command<DatabaseCommand> Original, Command<DatabaseCommand> Changed, Result<object> Committed)>
         SeedAsync(TestDatabase fixture, CancellationToken token)
     {
         fixture.Configure(Queue, ResourceKind.WorkQueue);
@@ -57,8 +59,8 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         return (lane, original, changed, committed);
     }
 
-    private static async Task ContinueColdAsync(TestDatabase fixture, QueueLaneRef lane, ReplicatedOperation original,
-        ReplicatedOperation changed, OperationResult committed, CancellationToken token)
+    private static async Task ContinueColdAsync(TestDatabase fixture, QueueLaneRef lane, Command<DatabaseCommand> original,
+        Command<DatabaseCommand> changed, Result<object> committed, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
@@ -77,7 +79,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
     }
 
     private static async Task FinalColdAsync(string directory, ZoneTreeStore store, QueueLaneRef lane,
-        ReplicatedOperation original, ReplicatedOperation changed, OperationResult committed, CancellationToken token)
+        Command<DatabaseCommand> original, Command<DatabaseCommand> changed, Result<object> committed, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -114,6 +116,6 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         await Assert.That(db.Apply(Issue(db, OperationKind.Receive, request, request.RequestId)).Get<ReceiveResult>().Deliveries).IsEmpty();
     }
 
-    internal static ReplicatedOperation Issue<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id)
-        => db.CreateNativeOperation(kind, id, Worker, db.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload));
+    internal static Command<DatabaseCommand> Issue<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id)
+        => db.CreateCommand(kind, id, Worker, db.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload));
 }

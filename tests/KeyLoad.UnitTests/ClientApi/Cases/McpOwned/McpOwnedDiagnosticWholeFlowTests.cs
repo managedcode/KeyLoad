@@ -23,8 +23,7 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, database.Partition,
             [new PutDocument(Collection, Document, Json, ExpectedRevision: Absent)]);
-        var receipt = database.Database.Apply(new(id, OperationKind.Batch, Root,
-            database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)), First).Get<CommitReceipt>();
+        var receipt = database.Database.Apply(database.Database.CreateCommand(OperationKind.Batch, id, Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)), First).Get<CommitReceipt>();
         var reference = new EntityRef(database.Partition, Collection, Document);
         var before = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
@@ -32,7 +31,6 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         [
             (receipt.Token with { Incarnation = Guid.NewGuid() }, McpOwnedDiagnosticAssertions.ForeignIncarnation),
             (receipt.Token with { AtomicPartitionId = Guid.NewGuid().ToString() }, McpOwnedDiagnosticAssertions.OutOfScope),
-            (receipt.Token with { OwnershipEpoch = receipt.Token.OwnershipEpoch + First }, McpOwnedDiagnosticAssertions.OutOfScope),
             (receipt.Token with { Position = long.MaxValue }, McpOwnedDiagnosticAssertions.FuturePosition),
             (receipt.Token with { Position = Absent }, McpOwnedDiagnosticAssertions.InvalidPosition)
         ];
@@ -73,10 +71,10 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         var model = ConfiguredVectorProfileFlow.ModelBytes(database, rejectedCommand);
         var position = database.Store.Position;
         var rejected = database.Submit(OperationKind.Batch, rejectedCommand, id: rejectedCommand.CommandId);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(rejected.SafeDetail).IsEqualTo(McpOwnedDiagnosticAssertions.VectorMismatch);
-        await Assert.That(rejected.Json).IsNull();
-        await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Validation, rejected.SafeDetail!, McpOwnedDiagnosticAssertions.VectorMismatch);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(rejected.Problem?.Detail).IsEqualTo(McpOwnedDiagnosticAssertions.VectorMismatch);
+        
+        await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Validation, rejected.Problem?.Detail!, McpOwnedDiagnosticAssertions.VectorMismatch);
         await Assert.That(ConfiguredVectorProfileFlow.ModelBytes(database, rejectedCommand)).IsEquivalentTo(model, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
         var retained = QueueWholeFlowStorage.Bytes(database.Store);

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -30,7 +32,7 @@ internal static class ProjectionConcurrentCommitFixture
             ProjectionConsumerIdentityAssertions.Image(database.Store), database.Store.Position);
     }
 
-    private static ReplicatedOperation Complete(ProjectionConsumerIdentityState source, string id)
+    private static Command<DatabaseCommand> Complete(ProjectionConsumerIdentityState source, string id)
     {
         var command = Guid.NewGuid();
         return ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, command,
@@ -39,8 +41,8 @@ internal static class ProjectionConcurrentCommitFixture
     }
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, ProjectionConsumerIdentityState source,
-        ReplicatedOperation first, OperationResult a, ReplicatedOperation second, OperationResult b,
-        ReplicatedOperation filtered, OperationResult advanced, CancellationToken token)
+        Command<DatabaseCommand> first, Result<object> a, Command<DatabaseCommand> second, Result<object> b,
+        Command<DatabaseCommand> filtered, Result<object> advanced, CancellationToken token)
     {
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, source.Seed, source.Seeded, token);
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, source.Configure, source.Configured, token);

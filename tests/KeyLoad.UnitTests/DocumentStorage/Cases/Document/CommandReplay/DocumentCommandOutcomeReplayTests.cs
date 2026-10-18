@@ -20,8 +20,8 @@ internal sealed class DocumentCommandOutcomeReplayTests
             [new PutDocument(Collection, DocumentId, OriginalJson, 1)]);
         var failed = database.Submit(OperationKind.Batch, failedCommand, Writer, failedId);
 
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.RevisionConflict);
-        await Assert.That(failed.SafeDetail).IsEqualTo(RevisionConflictDetail);
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(failed.Problem?.Detail).IsEqualTo(RevisionConflictDetail);
         var failedOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, Writer, failedId);
         await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Writer, failedId)!.SafeDetail).IsEqualTo(RevisionConflictDetail);
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(initialOutbox,
@@ -41,8 +41,8 @@ internal sealed class DocumentCommandOutcomeReplayTests
         var replay = database.Submit(OperationKind.Batch, failedCommand, Writer, failedId);
         var documentAfterReplay = database.Database.GetDocument("root", new(database.Partition, Collection, DocumentId));
 
-        await Assert.That(replay.Error).IsEqualTo(ErrorCode.RevisionConflict);
-        await Assert.That(replay.SafeDetail).IsEqualTo(RevisionConflictDetail);
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(replay.Problem?.Detail).IsEqualTo(RevisionConflictDetail);
         await Assert.That(DocumentCommandOutcomeTestSupport.OutcomeBytes(database, Writer, failedId)
             .AsSpan().SequenceEqual(failedOutcomeBytes)).IsTrue();
         await Assert.That(documentAfterReplay!.Revision).IsEqualTo(1);

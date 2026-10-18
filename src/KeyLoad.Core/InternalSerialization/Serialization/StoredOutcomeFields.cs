@@ -13,4 +13,5 @@ internal static class StoredOutcomeFields
     internal const uint OnlineTextAuthority = 8;
     internal const uint RemoteTransferFailureAuthority = 9;
     internal const uint CanonicalSequence = 11;
+    internal const uint PreparedCommand = 12;
 }

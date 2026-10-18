@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class DueAttemptSafetyTests
@@ -109,7 +110,7 @@ internal sealed class DueAttemptSafetyTests
         => new(fixture.Queue, id, firstDue, TimeSpan.FromDays(1), "UTC", RecurringMisfirePolicy.CatchUp,
             Payload, Headers);
 
-    private static OperationResult Emit(RecurringSagaDatabase fixture, Guid scheduleId, long generation,
+    private static Result<object> Emit(RecurringSagaDatabase fixture, Guid scheduleId, long generation,
         Guid commandId, DateTimeOffset evaluatedAt)
     {
         var request = new CommandRequest(commandId, fixture.Partition,

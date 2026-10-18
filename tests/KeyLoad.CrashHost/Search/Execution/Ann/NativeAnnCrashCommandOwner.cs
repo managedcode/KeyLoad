@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.CrashHost.Features.Search;
@@ -7,7 +9,7 @@ internal sealed class NativeAnnCrashCommandOwner(DatabaseEngine database)
 {
     internal DatabaseEngine Database => database;
 
-    internal OperationResult Submit(ReplicatedOperation operation, bool explicitTime)
+    internal Result<object> Submit(Command<DatabaseCommand> operation, bool explicitTime)
         => explicitTime ? database.Apply(operation)
             : database.ApplyEmbedded(operation, CancellationToken.None);
 }

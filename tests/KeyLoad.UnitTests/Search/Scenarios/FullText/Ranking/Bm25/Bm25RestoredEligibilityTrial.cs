@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree.Restore;
 using KeyLoad.UnitTests.Features.BackupRestore;
 
@@ -8,11 +9,11 @@ internal static class Bm25RestoredEligibilityTrial
     internal static Task RunAsync(CancellationToken token) => EventingArtifactFixture.RunAsync(async fixture =>
     {
         var seeded = await Bm25PortableFamilyBackupSeed.CreateAsync(fixture, token);
-        var original = fixture.Source.ReadRetainedEntry(seeded.Heads[0].Generation).Operation!;
+        var original = fixture.Source.ReadStoredOutcome(seeded.Heads[0].Generation).PreparedCommand!;
         var receipt = OutcomeStoreOracle.ReadPartition(fixture.Source.Store, fixture.Source.Partition,
-            Bm25PortableFamilyBackupSeed.Root, original.Id)!.Get<CommitReceipt>();
+            Bm25PortableFamilyBackupSeed.Root, original.CommandId)!.Get<CommitReceipt>();
         var source = Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database,
-            fixture.Source.ReadJournalCut(), token);
+            fixture.Source.ReadCanonicalCut(), token);
         var targetPath = await RestoreAsync(fixture, token);
         await Bm25PortableFamilyBytes.RequireHeadsAsync(fixture.Target!, seeded.Heads, seeded.Bytes,
             fixture.Database.EvaluationClock, token);
@@ -45,7 +46,7 @@ internal static class Bm25RestoredEligibilityTrial
             await Bm25RestoredEligibilityAssertions.ReplayAsync(fixture, false, repaired.Operation, repaired.Receipt, token);
         }
         await Bm25RestoredEligibilityAssertions.SameAsync(source,
-            Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database, fixture.Source.ReadJournalCut(), token));
+            Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database, fixture.Source.ReadCanonicalCut(), token));
         await Bm25PortableFamilyBytes.RequireHeadsAsync(fixture.Source.Store, seeded.Heads, seeded.Bytes,
             fixture.Source.Database.EvaluationClock, token);
     }, nativeAdmission: true);

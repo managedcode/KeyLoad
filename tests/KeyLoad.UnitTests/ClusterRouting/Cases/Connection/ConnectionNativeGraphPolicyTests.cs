@@ -68,14 +68,14 @@ internal sealed class ConnectionNativeGraphPolicyTests
         await Assert.That(ConnectionNativeAssertions.Value<CommitReceipt>(original).CommandId)
             .IsEqualTo(command.CommandId);
         await DocumentAsync(scenario);
-        var cut = scenario.Fixture.Database.ReadJournalCut();
+        var cut = scenario.Fixture.Database.ReadCanonicalCut();
         var position = scenario.Fixture.Database.Store.Position;
         var replayId = Guid.NewGuid();
         var replay = await scenario.CommandAsync(principal, replayId, command, token);
         await Assert.That(replay.Error).IsNull();
         await Assert.That(replay.SafeDetail).IsEqualTo(original.SafeDetail);
         await Assert.That(replay.Payload.Span.SequenceEqual(original.Payload.Span)).IsTrue();
-        await Assert.That(scenario.Fixture.Database.ReadJournalCut()).IsEqualTo(cut);
+        await Assert.That(scenario.Fixture.Database.ReadCanonicalCut()).IsEqualTo(cut);
         await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(position);
         await DocumentAsync(scenario);
         await ConnectionNativeAssertions.SameOwnerAsync(scenario, originalId, replayId, token);

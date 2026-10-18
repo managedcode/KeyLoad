@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -5,13 +6,13 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private void ReadQueueDeadlineRetryInputs(IKeyValueView view, ReplicatedOperation operation,
+    private void ReadQueueDeadlineRetryInputs(IKeyValueView view, Command<DatabaseCommand> operation,
         List<QueueRetryInput> inputs)
     {
         var batch = Payload<CommandRequest>(operation);
         foreach (var request in batch.Mutations.OfType<AdvanceQueueDeadline>())
         {
-            if (ReadQueueDeadlineRetryInput(view, batch.Partition, operation.EvaluatedAt, request) is { } input)
+            if (ReadQueueDeadlineRetryInput(view, batch.Partition, operation.Timestamp, request) is { } input)
             {
                 inputs.Add(input);
             }

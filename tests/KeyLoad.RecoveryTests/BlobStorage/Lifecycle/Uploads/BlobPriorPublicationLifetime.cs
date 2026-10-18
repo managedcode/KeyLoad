@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage;
@@ -8,13 +9,13 @@ namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 internal static class BlobPriorPublicationLifetime
 {
     internal static async Task<BlobPriorPublicationCommand> CleanAsync(DatabaseEngine owner, BlobPriorPublicationState seed,
-        ReplicatedOperation delete, ReplicatedOperation reclaim)
+        Command<DatabaseCommand> delete, Command<DatabaseCommand> reclaim)
     {
         var tombstone = await DeleteAsync(owner, seed, delete);
         var reclaimed = new BlobPriorPublicationCommand(reclaim, owner.Apply(reclaim));
         var result = reclaimed.Result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobPriorPublicationImage.ExactAsync(result.Value, new BlobReclaimResult(seed.Upload, 1, 0, 4, true));
-        await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, reclaim.Id, seed.Blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, reclaim.CommandId, seed.Blob);
         await BlobPriorPublicationAssertions.QuotasAsync(owner, seed, 0, 0);
         foreach (var family in new[] { "blob-state-v1", "blob-part-v1", "blob-partmeta-v1" })
         {
@@ -26,7 +27,7 @@ internal static class BlobPriorPublicationLifetime
         return reclaimed;
     }
 
-    private static async Task<BlobMetadata> DeleteAsync(DatabaseEngine owner, BlobPriorPublicationState seed, ReplicatedOperation delete)
+    private static async Task<BlobMetadata> DeleteAsync(DatabaseEngine owner, BlobPriorPublicationState seed, Command<DatabaseCommand> delete)
     {
         var deleted = new BlobPriorPublicationCommand(delete, owner.Apply(delete));
         var tombstone = seed.Metadata with
@@ -36,11 +37,11 @@ internal static class BlobPriorPublicationLifetime
             Length = 0,
             PartCount = 0,
             IntegrityHash = null,
-            UpdatedAt = delete.EvaluatedAt,
+            UpdatedAt = new DateTimeOffset(delete.Timestamp),
             Deleted = true
         };
         await BlobPriorPublicationImage.ExactAsync(deleted.Result.Get<BlobCommitResult<BlobMetadata>>().Value, tombstone);
-        await BlobPriorPublicationImage.ReceiptAsync(owner, deleted.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, delete.Id, seed.Blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, deleted.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, delete.CommandId, seed.Blob);
         await BlobPriorPublicationImage.ExactAsync(new BlobStorageOperations(owner).Metadata("root", new(seed.Blob)), tombstone);
         await BlobPriorPublicationImage.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobState>(
             BlobPriorPublicationOracle.Key("blob-state-v1", seed))), seed.State with

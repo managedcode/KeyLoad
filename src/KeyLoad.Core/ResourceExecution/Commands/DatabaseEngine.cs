@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -20,7 +22,7 @@ public sealed partial class DatabaseEngine
     private const string InvalidEventQuotaMessage = "The retained event quota is invalid.";
     private const string InvalidQueuePolicyMessage = "The queue policy is invalid.";
 
-    private OperationResult ExecuteConfigureResource(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private Result<object> ExecuteConfigureResource(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = Payload<ConfigureResourceRequest>(operation);
         ValidateResource(request);
@@ -31,7 +33,7 @@ public sealed partial class DatabaseEngine
         RequireQueueDeliveryPolicyChange(transaction, request, previous);
         if (previous is null)
         {
-            _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition, Limits);
+            _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition);
         }
         BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation,
             BlobExecution.InitialCatalogProofRecords);

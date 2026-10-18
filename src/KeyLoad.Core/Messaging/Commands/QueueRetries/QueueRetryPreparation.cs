@@ -1,8 +1,8 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -10,10 +10,10 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal ReplicatedOperation PrepareQueueRetryOperation(ReplicatedOperation operation)
+    internal Command<DatabaseCommand> PrepareQueueRetryOperation(Command<DatabaseCommand> operation)
         => Store.Read(view => PrepareQueueRetryInView(view, operation));
 
-    internal ReplicatedOperation PrepareQueueRetryOperation(ReplicatedOperation operation, ReadExecutionBudget work)
+    internal Command<DatabaseCommand> PrepareQueueRetryOperation(Command<DatabaseCommand> operation, ReadExecutionBudget work)
     {
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
@@ -22,18 +22,18 @@ public sealed partial class DatabaseEngine
         return prepared;
     }
 
-    private ReplicatedOperation PrepareQueueRetryInView(IKeyValueView view, ReplicatedOperation operation, bool preserveBudgetFailure = false)
+    private Command<DatabaseCommand> PrepareQueueRetryInView(IKeyValueView view, Command<DatabaseCommand> operation, bool preserveBudgetFailure = false)
     {
-        if (operation.Kind is not (OperationKind.Delivery or OperationKind.Receive or OperationKind.Batch))
+        if (operation.Value!.Kind is not (OperationKind.Delivery or OperationKind.Receive or OperationKind.Batch))
         {
             return operation;
         }
-        var original = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+        var original = operation.Value!;
         if (!original.RetryDecisions.IsEmpty)
         {
             return operation;
         }
-        if (operation.Kind == OperationKind.Batch && original.Error is null)
+        if (operation.Value!.Kind == OperationKind.Batch)
         {
             var batch = Payload<CommandRequest>(operation);
             if (!batch.Mutations.IsDefault && !batch.Mutations.Any(static mutation => mutation is AdvanceQueueDeadline))
@@ -42,7 +42,7 @@ public sealed partial class DatabaseEngine
             }
         }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-        var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+        var selection = CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
         if (selection.Outcome is { } outcome)
         {
             ValidateRetainedQueueRetryAdmission(view, operation, selection, outcome, preserveBudgetFailure);
@@ -51,7 +51,7 @@ public sealed partial class DatabaseEngine
         List<QueueRetryInput> inputs;
         try
         {
-            var principal = Principal(view, operation.PrincipalId, operation.EvaluatedAt);
+            var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
             _ = AuthorizeOperation(view, principal, operation);
             inputs = ReadQueueRetryInputs(view, principal, operation);
         }
@@ -71,15 +71,14 @@ public sealed partial class DatabaseEngine
             var delay = ChooseQueueRetryDelay(operation, input.Lane, input.Policy, input.Metadata);
             choices.Add(new(input.Lane, input.Metadata.Id, input.Metadata.StateVersion, input.Metadata.LeaseVersion,
                 input.Metadata.DeliveryGeneration, input.Metadata.Attempts, input.DueIndexKey,
-                SHA256.HashData(NativeSerialization.Serialize(input.Policy)), delay, operation.EvaluatedAt.AddMilliseconds(delay)));
+                SHA256.HashData(NativeSerialization.Serialize(input.Policy)), delay, operation.Timestamp.AddMilliseconds(delay)));
         }
         var decisions = NativeSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version,
-            operation.EvaluatedAt, choices.MoveToImmutable()));
+            operation.Timestamp, choices.MoveToImmutable()));
         RequireNativeBudget(decisions.Length);
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
-        return IssueNativeOperation(operation, payload with
-        {
-            RetryDecisions = decisions
-        }, preserveResourceAdmission: true);
+        var payload = operation.Value!;
+        var prepared = OwnCommand(operation);
+        prepared.Value = payload with { RetryDecisions = decisions };
+        return prepared;
     }
 }

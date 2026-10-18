@@ -7,8 +7,6 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>Independent frozen ADR-039 inventory used by AC-MCP-001 contract assertions.</summary>
 internal static class McpCatalogExpectations
 {
-    internal const string DocumentsReadFollower = "keyload_documents_read_follower";
-    private const string DocumentsReadFollowerRoute = "/v1/documents/read-follower";
     internal const string DocumentsGet = "keyload_documents_get";
     private const string DocumentsGetRoute = "/v1/documents/get";
     internal const string StreamsRead = "keyload_streams_read";
@@ -126,7 +124,6 @@ internal static class McpCatalogExpectations
         .. McpRemoteGraphCatalogExpectations.Entries,
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
-        (DocumentsReadFollower, DocumentsReadFollowerRoute, GrainReadKind.FollowerDocument, null),
         (StreamsRead, StreamsReadRoute, GrainReadKind.Stream, null),
         (StreamsReplay, StreamsReplayRoute, GrainReadKind.AggregateReplay, null),
         (EventsRead, EventsReadRoute, GrainReadKind.EventSource, null),

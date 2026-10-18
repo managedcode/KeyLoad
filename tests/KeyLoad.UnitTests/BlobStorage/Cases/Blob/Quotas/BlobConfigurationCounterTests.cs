@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 
 internal sealed class BlobConfigurationCounterTests
@@ -61,7 +62,7 @@ internal sealed class BlobConfigurationCounterTests
             .Get<ResourceDefinition>();
     }
 
-    private static OperationResult Begin(TestDatabase database, BlobRef blob, long length, Guid uploadId)
+    private static Result<object> Begin(TestDatabase database, BlobRef blob, long length, Guid uploadId)
     {
         var commandId = Guid.NewGuid();
         var request = new BeginBlobUploadRequest(commandId, blob, uploadId, length, 0);

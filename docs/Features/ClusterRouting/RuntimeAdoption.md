@@ -11,7 +11,7 @@ inventory; the cluster concept is in
 
 Adopt native mechanisms only where the production path needs their guarantees.
 Preserve the client's connection grain, fresh persisted authorization, silo-local
-ZoneTree owners, ordered apply and majority acknowledgement of the ReplicaCount
+ZoneTree owners, ordered apply and acknowledgement from every configured copy of the ReplicaCount
 copies. Frontend and new public SDK/MCP schemas are N/A for these stages;
 existing public commands, queries and inspection qualify their outcomes.
 
@@ -27,9 +27,8 @@ Queue work (deadlines, due and recurring messages, remote queue transfers), ANN
 projection and time-series chunk work run in Orleans `[StatelessWorker]` grains.
 A worker accepts events, buffers them in bounded memory and, on an Orleans grain
 timer (for example every 5 seconds; the interval is a typed option), writes the
-batch through the normal grain -> silo-local ZoneTree owner path. No worker checks
-leadership (`IsLeaderAsync`, leader hints or coordinator election), and no
-single-instance coordinator gates the work.
+batch through the normal grain -> silo-local ZoneTree owner path. Orleans owns
+activation scheduling; each worker processes its own admitted buffer.
 
 The buffer is disposable: it holds no store handle and is never the authority
 for an acknowledged write. Coalesce events instead of starting a task per commit.

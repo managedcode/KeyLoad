@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Server;
@@ -18,8 +19,8 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
         => Store.Read(_ => (Database.LastApplied, Store.Position));
 
-    internal OperationResult Submit<T>(OperationKind kind, T payload, string principal,
-        Guid? id, DateTimeOffset? time, CancellationToken cancellationToken)
+    internal Result<object> Submit<T>(OperationKind kind, T payload, string principal = RequestCqrsHostedProfile.Root,
+        Guid? id = null, DateTimeOffset? time = null, CancellationToken cancellationToken = default)
     {
         if (time is not null)
         {

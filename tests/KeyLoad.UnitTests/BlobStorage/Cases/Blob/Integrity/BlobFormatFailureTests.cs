@@ -36,8 +36,7 @@ internal sealed class BlobFormatFailureTests
         var command = new ReclaimBlobRequest(commandId, blob, uploadId, PartCount);
 
         var exception = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Apply(
-            new(commandId, OperationKind.ReclaimBlob, PrincipalId, evaluatedAt,
-                System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
+            database.Database.CreateCommand(OperationKind.ReclaimBlob, commandId, PrincipalId, evaluatedAt, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Read(database, OutcomeStoreOracle.PartitionKey(blob.Partition, PrincipalId, commandId))).IsNull();
@@ -75,8 +74,7 @@ internal sealed class BlobFormatFailureTests
         var command = new ReclaimBlobRequest(commandId, blob, uploadId, PartCount);
 
         var exception = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Apply(
-            new(commandId, OperationKind.ReclaimBlob, PrincipalId, TimeProvider.System.GetUtcNow().AddSeconds(1),
-                System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
+            database.Database.CreateCommand(OperationKind.ReclaimBlob, commandId, PrincipalId, TimeProvider.System.GetUtcNow().AddSeconds(1), System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Read(database, OutcomeStoreOracle.PartitionKey(blob.Partition, PrincipalId, commandId))).IsNull();

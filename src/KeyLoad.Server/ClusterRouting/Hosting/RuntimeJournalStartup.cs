@@ -20,8 +20,7 @@ internal static class RuntimeJournalStartup
         using var pending = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var token = pending.Token;
         var requests = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(),
-            services.GetRequiredService<GrainRequestCodec>(), partition.Database, partition.Coordinator,
-            services, clock, runtime.GrainRouting);
+            services.GetRequiredService<GrainRequestCodec>(), services, clock, runtime.GrainRouting);
         var commandId = BootstrapCommandId(partition.Database.Store.Identity.Incarnation, partition.Database.Store.Identity.Incarnation);
         await InitializeAuthorityAsync(requests, authenticateAdministrator, commandId, runtime, clock, token)
             .ConfigureAwait(false);

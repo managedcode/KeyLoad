@@ -11,7 +11,6 @@ public sealed class AnalyticsStoreNativeGeneration : IDisposable
     private const long TrackedEventStep = 1;
     private const string OccupiedGeneration = "The analytics projection generation is not empty.";
     private const string IncompleteProjection = "The analytics projection is incomplete.";
-    private const string IncompleteAcquisition = "The native analytics engine acquisition did not settle.";
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
     private const string AlreadyQueried = "The analytics projection generation was already queried.";
     private const long EmptyEvents = 0;
@@ -20,6 +19,7 @@ public sealed class AnalyticsStoreNativeGeneration : IDisposable
     private readonly AnalyticsStoreNativeDimensions dimensions;
     private AnalyticsEngine? engine;
     private bool acquisitionAttempted;
+    private bool disposed;
     private readonly AnalyticsStoreNativeFailures failures = new();
     private int started;
     private long tracked;
@@ -61,6 +61,7 @@ public sealed class AnalyticsStoreNativeGeneration : IDisposable
     /// <returns>Complete finite native aggregate rows.</returns>
     public AnalyticsAggregateResult Query(CancellationToken cancellationToken)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         if (Interlocked.Exchange(ref started, StartedState) != NotStartedState)
         {
             throw Errors.Fail(ErrorCode.Conflict, AlreadyQueried);
@@ -124,13 +125,18 @@ public sealed class AnalyticsStoreNativeGeneration : IDisposable
     /// <summary>Joins the actual native close; failures retain an unjoined generation for its physical owner.</summary>
     public void Dispose()
     {
+        disposed = true;
         if (!acquisitionAttempted)
         {
             HasJoinedEngine = true;
             return;
         }
-        var current = engine ?? throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteAcquisition);
-        current.Dispose();
+        if (engine is null)
+        {
+            return;
+        }
+        engine.Dispose();
+        engine = null;
         HasJoinedEngine = true;
     }
 }

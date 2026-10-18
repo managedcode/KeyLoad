@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.BlobStorage;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
@@ -48,7 +49,7 @@ internal sealed class BlobStorageRejectedCommandTests
         var wrongId = Guid.NewGuid();
         var wrongRequest = new CompleteBlobUploadRequest(wrongId, blob, uploadId, IncorrectHash);
         var wrongChain = db.Submit(OperationKind.CompleteBlobUpload, wrongRequest, id: wrongId);
-        await Assert.That(wrongChain.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(wrongChain.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(operations.Metadata(PrincipalId, new(blob))).IsNull();
         await BlobRejectedCommandColdFlow.DomainUnchanged(db.Database, blob, uploadId, beforeDuplicate);
 
@@ -71,7 +72,7 @@ internal sealed class BlobStorageRejectedCommandTests
         ]);
     }
 
-    private static OperationResult SubmitPart(TestDatabase db, BlobRef blob, Guid uploadId,
+    private static Result<object> SubmitPart(TestDatabase db, BlobRef blob, Guid uploadId,
         ReadOnlyMemory<byte> bytes, string sha256, Guid id)
     {
         var request = new WriteBlobPartRequest(id, blob, uploadId, PartOrdinal, bytes, sha256);

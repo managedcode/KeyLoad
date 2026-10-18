@@ -6,11 +6,11 @@ The functional fixture selects `--KeyLoadTests:FunctionalNodeCount=1` or `=3` in
 
 The AppHost resource loop creates exactly node1 for the first gate, or node1/node2/node3 for the second. Each server has its own ZoneTree roots, its own native Orleans silo (Orleans owns all clustering), HTTP readiness and connection-owned public request execution. No hidden silos or independently started server resources are introduced. The AppHost/fixture owns all resource startup, readiness, client/process shutdown and retained-root decisions.
 
-The one-node profile runs one copy with a majority of one. It provides no replica fault tolerance and does not qualify replicated durability. The `QuorumProcessDurable` receipt name refers to the configured majority; it does not claim that a second or third copy exists. The three-node gate uses the ordinary three-copy majority of two. Each gate uses its own fresh data root.
+The one-node profile runs one copy and requires one persisted acknowledgement. The three-node profile requires all three configured copies. Receipts use `ProcessDurable` with independent `PersistedCopies` values of 1 or 3, checked against each fixture's configuration. A missing required copy blocks successful writes. Available owners may still return earlier committed data after native membership settles. Each gate uses its own fresh data root.
 
 ```mermaid
 flowchart LR
-    G1[One-node gate: one copy, majority one] -->|passes| G2[Three-node gate: three copies, majority two]
+    G1[One-node gate: one copy, one required acknowledgement] -->|passes| G2[Three-node gate: three copies, three required acknowledgements]
     G2 --> F[Separate-files ownership case]
     F --> C[Two cold reopens over retained roots]
 ```
@@ -22,7 +22,7 @@ Local development image preparation admits only the two exact native selectors:
 
 The native runner executes the first gate alone, then the second only after the first passes. A class wildcard is not enrolled. Image provenance/receipt validation and conflicting GitHub/local image guards remain in force.
 
-`FunctionalSingleVoterTopologyTests.ExplicitDevelopmentSingleVoterPreservesDefaultClusterAndRejectsConflictingTopology` checks the node and copy configuration contracts, both acknowledgement majorities, and refusal of conflicting single-copy, benchmark and three-copy flag combinations. The Aspire SDK/MCP/SQL operation scenarios remain the separate runtime qualification.
+The AppHost validates both positive counts before allocating resources, requires `ReplicaCount <= SiloCount`, and rejects conflicting functional/benchmark selections. Actual SDK/MCP/SQL scenarios remain the separate runtime qualification.
 
 ## Physical file cases, owner direction 2026-10-16
 

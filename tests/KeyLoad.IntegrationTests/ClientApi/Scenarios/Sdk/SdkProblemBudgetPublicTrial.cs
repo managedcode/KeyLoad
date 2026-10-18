@@ -27,7 +27,7 @@ internal static class SdkProblemBudgetPublicTrial
                     var current = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));
                     await Assert.That(current.NodeId).IsEqualTo(state.Status.NodeId);
                     await Assert.That(current.Incarnation).IsEqualTo(state.Status.Incarnation);
-                    await Assert.That(current.Applied).IsGreaterThanOrEqualTo(state.Status.Applied);
+                    await Assert.That(current.Position).IsGreaterThanOrEqualTo(state.Status.Position);
                     await Assert.That(current.ReadGeneration).IsGreaterThanOrEqualTo(state.Status.ReadGeneration);
                     return await SdkProblemBudgetPublicCallers.RunOwnedAsync(fixture, state.Identity.Secret, async caller =>
                     {

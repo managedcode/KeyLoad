@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentCommandPrincipalColdReplayContract;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
@@ -40,7 +41,7 @@ internal static class DocumentCommandPrincipalColdReplayTrial
         await continued.RequireAsync(DocumentPatchAtomicityState.Read(owner));
     }
 
-    private static Retained Commit(DocumentPatchAtomicityOwner owner, ReplicatedOperation original)
+    private static Retained Commit(DocumentPatchAtomicityOwner owner, Command<DatabaseCommand> original)
     {
         var result = owner.Submit(original);
         result.Get<CommitReceipt>();
@@ -53,18 +54,18 @@ internal static class DocumentCommandPrincipalColdReplayTrial
         var before = DocumentPatchAtomicityState.Read(owner);
         var changedFirst = Create(owner, sharedId, FirstPrincipal, FirstDocument, ChangedJson, 1);
         var changedSecond = Create(owner, sharedId, SecondPrincipal, SecondDocument, ChangedJson, 1);
-        await Assert.That(owner.Submit(changedFirst).Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(owner.Submit(changedSecond).Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(owner.Submit(changedFirst).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(owner.Submit(changedSecond).Problem)).IsEqualTo(ErrorCode.Conflict);
         await DocumentCommandPrincipalColdReplayAssertions.ReplayAsync(owner, first);
         await DocumentCommandPrincipalColdReplayAssertions.ReplayAsync(owner, second);
         await before.RequireAsync(DocumentPatchAtomicityState.Read(owner));
     }
 
-    private static ReplicatedOperation Create(DocumentPatchAtomicityOwner owner, Guid id,
+    private static Command<DatabaseCommand> Create(DocumentPatchAtomicityOwner owner, Guid id,
         string principal, string document, string json, long revision)
     {
         var request = new CommandRequest(id, owner.Source.Partition, [new PutDocument(Collection, document, json, revision)]);
-        return owner.Database.CreateNativeOperation(OperationKind.Batch, id, principal,
+        return owner.Database.CreateCommand(OperationKind.Batch, id, principal,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
     }
 }

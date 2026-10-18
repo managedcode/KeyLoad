@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Owns its complete CLUSTER cold cohort; no shared caller fixture is stopped.</summary>
+/// <summary>Owns its complete Orleans cold cohort; no shared caller fixture is stopped.</summary>
 internal sealed class QueueLeaseFencingClusterTests
 {
     [Test]

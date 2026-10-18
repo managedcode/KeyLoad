@@ -6,7 +6,7 @@ namespace KeyLoad.Query.Features.Search;
 internal static class TextIndexWaitExecution
 {
     private const string WaitTokenInvalid = "The index wait token belongs to another incarnation, atomic partition or placement.";
-    private const string WaitTokenFuture = "The index wait token is beyond the current quorum-applied cut.";
+    private const string WaitTokenFuture = "The index wait token is beyond the current committed storage cut.";
     private const string WaitAppliedCorrupt = "The canonical applied position is invalid.";
     private const string WaitInvalidRequest = "A text field and acknowledged minimum token are required.";
     private const string WaitProviderUnavailable = "Native text index waiting is unavailable.";
@@ -27,7 +27,7 @@ internal static class TextIndexWaitExecution
             database.Authorization.RequireFieldUse(principal, resource, request.TextField);
             var path = JsonData.PathSegments(request.TextField);
             var authority = new BudgetedReadView(view, budget);
-            DatabaseEngine.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WaitTokenInvalid);
+            database.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WaitTokenInvalid);
             var bytes = authority.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, WaitAppliedCorrupt);
             var applied = NativeSerialization.Deserialize<long>(bytes);
             if (applied < WaitInitialPosition)

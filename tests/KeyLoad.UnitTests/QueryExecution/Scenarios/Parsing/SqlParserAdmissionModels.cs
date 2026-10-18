@@ -41,9 +41,8 @@ internal static class SqlParserAdmissionModels
     private static async Task RememberAsync(SqlParserAdmissionFixture fixture, CommandRequest request, MutationReceipt[] mutations)
     {
         var db = fixture.Harness;
-        var next = db.ReadJournalCut().LastIndex + 1L;
-        var expected = new CommitReceipt(request.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, next, 1L),
-            [.. mutations], DurabilityProfile.ProcessDurable);
+        var next = db.ReadCanonicalCut().AppliedPosition + 1L;
+        var expected = new CommitReceipt(request.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, next), [.. mutations], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, db.Submit(OperationKind.Batch, request, id: request.CommandId).Get<CommitReceipt>());
         fixture.Additional.Add((request, expected, RequiredProcessingPolicyAssertions.Outcome(db.Store, db.Partition, "root", request.CommandId)));
     }

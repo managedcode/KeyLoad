@@ -3,8 +3,8 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-MCP-005/007 and AC-DSTORE-001: real CLUSTER MCP and HTTP clients share canonical document outcomes.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire CLUSTER application.</param>
+/// <summary>AC-MCP-005/007 and AC-DSTORE-001: real Orleans MCP and HTTP clients share canonical document outcomes.</summary>
+/// <param name="fixture">The initialized actual Docker/Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDocumentParityTests(ClusterFixture fixture)
@@ -26,7 +26,8 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         var nativeRetry = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(McpCallerTools.DocumentsCommit,
             command, deadline.Token));
         await Assert.That(first.Value.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(first.Value.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(first.Value.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(first.Value.PersistedCopies).IsEqualTo(3);
         await Assert.That(httpRetry.Token).IsEqualTo(first.Value.Token);
         await Assert.That(nativeRetry.Value.Token).IsEqualTo(first.Value.Token);
         await Assert.That(JsonDefaults.Serialize(nativeRetry.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(httpRetry))).IsTrue();

@@ -30,8 +30,7 @@ internal static class SqlLeftFilteredJoinCold
             var page = new QueryEngine(owner, UnitExecutionOptions.QueryExecution())
                 .Execute("root", SqlLeftFilteredJoinFixture.Request(database.Partition));
             await SqlLeftFilteredJoinAssertions.PageAsync(page, position);
-            var replay = owner.ApplyEmbedded(new(seed.CommandId, OperationKind.Batch, "root", default,
-                JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
+            var replay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, "root", default, JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
             await Assert.That(JsonDefaults.Serialize(replay)).IsEquivalentTo(
                 JsonDefaults.Serialize(original), CollectionOrdering.Matching);
             await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, CollectionOrdering.Matching);

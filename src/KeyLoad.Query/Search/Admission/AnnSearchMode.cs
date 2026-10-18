@@ -2,7 +2,6 @@ namespace KeyLoad.Query.Features.Search;
 
 internal enum AnnSearchMode
 {
-    ExactSmallSet,
-    Approximate,
-    ExactAfterInsufficientCandidates
+    ExactSmallSet = 0,
+    Approximate = 1
 }

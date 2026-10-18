@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Server;
@@ -22,7 +24,7 @@ internal static class SampleChunkEnrollmentBoundaryFlow
 
     private static async Task CompleteAsync(SampleChunkCanonicalFixture fixture)
     {
-        var originals = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var originals = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         await CommitAsync(fixture, new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, SampleChunkCanonicalFixture.Initial, SampleChunkCanonicalFixture.Tags),
             "appendSamples", SampleChunkCanonicalFixture.InitialSequence, originals);
@@ -67,25 +69,24 @@ internal static class SampleChunkEnrollmentBoundaryFlow
     }
 
     private static Task CommitAsync(SampleChunkCanonicalFixture fixture, Mutation mutation, string kind, long revision,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
         => SampleChunkCorrectionBoundReceipts.CommitAsync(fixture, mutation, kind, revision, originals);
 
     private static async Task RefuseAsync(SampleChunkCanonicalFixture fixture, OpenSampleChunkWindow mutation,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals, Func<Task> current)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals, Func<Task> current)
     {
         var request = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition, [mutation]);
-        var operation = new ReplicatedOperation(request.CommandId, OperationKind.Batch,
-            SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = fixture.Owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
         var failures = new List<Exception>();
         var raw = fixture.Raw();
-        OperationResult? original = null;
+        Result<object>? original = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             original = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
             originals.Add((operation, original));
             await Assert.That(SampleRollupWholeFlow.Outcome(original)).IsEqualTo(
-                SampleRollupWholeFlow.Outcome(new OperationResult(null, ErrorCode.Conflict, ConflictDetail)));
-            await Assert.That(original.Json).IsNull();
+                SampleRollupWholeFlow.Outcome(Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, ConflictDetail))));
+            
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(fixture.Raw()).IsEqualTo(raw), failures);
         await ServerFailureObserver.ObserveAsync(current, failures);

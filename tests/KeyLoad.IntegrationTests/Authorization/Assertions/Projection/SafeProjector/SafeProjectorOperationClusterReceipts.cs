@@ -16,6 +16,6 @@ internal static class SafeProjectorOperationClusterReceipts
         await TokenAsync(actual.Token, state.Partition);
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(id, actual.Token,
             [new(SafeProjectorOperationClusterProtocol.PatchKind, state.Collection, SafeProjectorOperationClusterProtocol.First, revision)],
-            DurabilityProfile.QuorumProcessDurable), actual);
+            DurabilityProfile.ProcessDurable, 3), actual);
     }
 }

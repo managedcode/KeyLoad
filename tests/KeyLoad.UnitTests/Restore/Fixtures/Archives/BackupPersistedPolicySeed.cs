@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -33,14 +35,14 @@ internal static class BackupPersistedPolicySeed
     internal static ApiKeyRecord LiveKey => DatabaseEngine.Credential(LiveKeyId, Reader, LiveSecret);
     internal static ApiKeyRecord RevokedKey => DatabaseEngine.Credential(RevokedKeyId, Reader, RevokedSecret) with { Revoked = true };
 
-    internal static ReplicatedOperation Create<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
-        => database.CreateNativeOperation(kind, id, Root, database.EvaluationClock.GetUtcNow(),
+    internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
+        => database.CreateCommand(kind, id, Root, database.EvaluationClock.GetUtcNow(),
             NativeSerialization.Serialize(request));
 
-    internal static OperationResult Send<T>(DatabaseEngine database, OperationKind kind, T request, CancellationToken token)
+    internal static Result<object> Send<T>(DatabaseEngine database, OperationKind kind, T request, CancellationToken token)
         => database.ApplyEmbedded(Create(database, kind, request, Guid.NewGuid()), token);
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result)> RunAsync(
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> RunAsync(
         BackupIndexedDocumentDedupFixture fixture, CancellationToken token)
     {
         var database = fixture.Source.Database;
@@ -55,7 +57,7 @@ internal static class BackupPersistedPolicySeed
         var operation = Create(database, OperationKind.Batch, new CommandRequest(id, fixture.Partition,
             [new PutDocument(Collection, DocumentId, Json)]), id);
         var result = database.ApplyEmbedded(operation, token);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await BackupPersistedPolicyAssertions.ReceiptAsync(database, fixture.Partition, id, result.Get<CommitReceipt>());
         await BackupPersistedPolicyAssertions.CurrentAsync(fixture, database, false, token);
         await BackupPersistedPolicyAssertions.ReplayAsync(database, operation, result, token);

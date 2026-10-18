@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
@@ -41,7 +42,7 @@ internal static class RemoteTransferRepairColdNative
         => RemoteTransferPendingDiscovery.Read(fixture.Database, RemoteTransferRepairColdProtocol.Subject,
             null, CancellationToken.None).Hint ?? throw new InvalidOperationException(RemoteTransferRepairColdProtocol.Missing);
 
-    internal static OperationResult Apply(RemoteTransferDatabase fixture, CommandRequest request)
+    internal static Result<object> Apply(RemoteTransferDatabase fixture, CommandRequest request)
         => fixture.Apply(OperationKind.Batch, request, RemoteTransferRepairColdProtocol.Subject);
 
     internal static RemoteTransferRepairState State(RemoteTransferDatabase fixture, Guid transfer)

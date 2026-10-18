@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -36,7 +37,7 @@ internal static class ProjectionDigestWholeFlow
         var image = QueueWholeFlowStorage.Bytes(fixture.Harness.Store);
         var position = fixture.Harness.Store.Position;
         await FaultAndRepairAsync(fixture, effect, key, original, damaged, image, position, continuation);
-        OperationResult? continued = null;
+        Result<object>? continued = null;
         if (!effect)
         {
             var beforeRepair = fixture.Harness.Store.Position;
@@ -83,7 +84,7 @@ internal static class ProjectionDigestWholeFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task ReplayAsync(EventProjectionFixture fixture, CommandRequest command, OperationResult result)
+    internal static async Task ReplayAsync(EventProjectionFixture fixture, CommandRequest command, Result<object> result)
         => await ProjectionDigestImage.ObserveAsync(fixture, async () =>
         {
             var replay = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);

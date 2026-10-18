@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.QueryExecution;
@@ -91,13 +92,10 @@ internal static class QueueGraphIdentityFlow
                     payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]);
         var operation = await CompileAsync(db.Database, seed, at);
         var receipt = db.Database.Apply(operation).Get<CommitReceipt>();
-        var expectedReceipt = new CommitReceipt(operation.Id,
-            new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-                db.Store.Position, receipt.Token.OwnershipEpoch),
-            [new("putDocument", QueueGraphIdentityState.Collection, first.Id, 1),
+        var expectedReceipt = new CommitReceipt(operation.Id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
+                db.Store.Position), [new("putDocument", QueueGraphIdentityState.Collection, first.Id, 1),
                 new("putDocument", QueueGraphIdentityState.Collection, second.Id, 1),
-                new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, 1)],
-            receipt.Durability);
+                new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, 1)], receipt.Durability, (receipt.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedReceipt))).IsTrue();
         var failedRequest = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new PutDocument(QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker,
@@ -122,7 +120,7 @@ internal static class QueueGraphIdentityFlow
         return state;
     }
 
-    internal static async Task<ReplicatedOperation> CompileAsync(DatabaseEngine engine, CommandRequest command, DateTimeOffset at)
+    internal static async Task<Command<DatabaseCommand>> CompileAsync(DatabaseEngine engine, CommandRequest command, DateTimeOffset at)
     {
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
@@ -141,7 +139,7 @@ internal static class QueueGraphIdentityFlow
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(command))).IsTrue();
         var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
-        return engine.CreateNativeOperation(OperationKind.Batch, command.CommandId, QueueGraphIdentityState.Root, at,
+        return engine.CreateCommand(OperationKind.Batch, command.CommandId, QueueGraphIdentityState.Root, at,
             NativeSerialization.Serialize(decoded), work);
     }
 }

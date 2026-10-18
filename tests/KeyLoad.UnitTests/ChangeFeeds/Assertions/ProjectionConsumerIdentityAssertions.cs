@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -51,7 +53,7 @@ internal static class ProjectionConsumerIdentityAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,
-        ReplicatedOperation operation, OperationResult expected, CancellationToken token)
+        Command<DatabaseCommand> operation, Result<object> expected, CancellationToken token)
     {
         var image = Image(store);
         var position = store.Position;
@@ -59,9 +61,9 @@ internal static class ProjectionConsumerIdentityAssertions
         await SameAsync(store, image, position);
     }
 
-    internal static async Task ReceiptAsync(ReplicatedOperation operation, CommitReceipt receipt, params MutationReceipt[] expected)
+    internal static async Task ReceiptAsync(Command<DatabaseCommand> operation, CommitReceipt receipt, params MutationReceipt[] expected)
     {
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await ExactAsync(receipt.Mutations, global::System.Collections.Immutable.ImmutableArray.CreateRange(expected));
     }
 

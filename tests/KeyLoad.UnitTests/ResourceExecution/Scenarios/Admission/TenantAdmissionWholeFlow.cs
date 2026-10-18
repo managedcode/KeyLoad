@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -17,58 +19,46 @@ internal static class TenantAdmissionWholeFlow
             MaxTenantCommands = TenantCapacity,
             MaxPrincipalCommands = TenantCapacity
         }));
-        await using var inbox = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
-        var a1 = TenantAdmissionOperations.Create(fixture, TenantAdmissionOperations.PrincipalA, "a1");
-        var a2 = TenantAdmissionOperations.Create(fixture, TenantAdmissionOperations.PrincipalA, "a2");
-        var a3 = TenantAdmissionOperations.Create(fixture, TenantAdmissionOperations.PrincipalA, "a3");
-        var b1 = TenantAdmissionOperations.Create(fixture, TenantAdmissionOperations.PrincipalB, "b1");
-        using var first = TenantAdmissionOperations.Enqueue(fixture, inbox, a1, token);
-        using var second = TenantAdmissionOperations.Enqueue(fixture, inbox, a2, token);
-        using var third = TenantAdmissionOperations.Enqueue(fixture, inbox, a3, token);
-        using var other = TenantAdmissionOperations.Enqueue(fixture, inbox, b1, token);
-        await TenantAdmissionRefusals.RunAsync(fixture, inbox, governor, first, token);
-        AdmittedCommand[] expected = [first, other, second, third];
-        string[] ids = ["a1", "b1", "a2", "a3"];
-        var results = new List<OperationResult>();
-        var applied = new List<ReplicatedOperation>();
-        for (var index = 0; index < expected.Length; index++)
+        string[] ids = ["a1", "b1", "a2", "a3", "healthy-b"];
+        var operations = ids.Select(id => TenantAdmissionOperations.Create(fixture,
+            id is "b1" or "healthy-b" ? TenantAdmissionOperations.PrincipalB : TenantAdmissionOperations.PrincipalA, id)).ToArray();
+        using var first = TenantAdmissionOperations.Reserve(fixture, governor, operations[0], token);
+        using var second = TenantAdmissionOperations.Reserve(fixture, governor, operations[2], token);
+        using var third = TenantAdmissionOperations.Reserve(fixture, governor, operations[3], token);
+        using var other = TenantAdmissionOperations.Reserve(fixture, governor, operations[1], token);
+        await TenantAdmissionRefusals.RunAsync(fixture, governor, token);
+        CommandAdmissionLease[] leases = [first, other, second, third];
+        var results = new List<Result<object>>();
+        var applied = new List<Command<DatabaseCommand>>();
+        for (var index = 0; index < leases.Length; index++)
         {
-            var command = await inbox.ReadAsync(token);
-            await Assert.That(command).IsSameReferenceAs(expected[index]);
-            var result = fixture.SubmitIssuedEmbedded(command!.Operation, token);
-            var committed = await TenantAdmissionAssertions.CommittedAsync(fixture, command.Operation);
-            applied.Add(committed);
-            command.Complete(result);
-            var partition = command.Operation.PrincipalId == TenantAdmissionOperations.PrincipalA
-                ? fixture.Partition : TenantAdmissionOperations.PartitionB(fixture);
-            var position = fixture.ReadJournalCut().CommittedIndex;
-            var expectedToken = fixture.Store.Read(view => DatabaseEngine.Token(view, partition, position));
-            _ = result.Get<CommitReceipt>();
-            await NativeReplayResultAssertions.Same<CommitReceipt>(await command.Completion, result);
-            await TenantAdmissionAssertions.ReceiptAsync(result, command.Operation, ids[index], expectedToken);
-            await TenantAdmissionAssertions.RecordAsync(fixture.Database, committed, partition, ids[index]);
-            results.Add(result);
+            await ApplyAsync(fixture, operations[index], ids[index], results, applied, token);
+            leases[index].Dispose();
         }
-
         await Assert.That(governor.Snapshot()).IsEqualTo(new CommandAdmissionSnapshot(0, 0, 0, 0, 0, 0));
-        var healthy = TenantAdmissionOperations.Create(fixture, TenantAdmissionOperations.PrincipalB, "healthy-b");
-        using var pending = TenantAdmissionOperations.Enqueue(fixture, inbox, healthy, token);
-        await Assert.That(await inbox.ReadAsync(token)).IsSameReferenceAs(pending);
-        var healthyResult = fixture.SubmitIssuedEmbedded(healthy, token);
-        var committedHealthy = fixture.ReadRetainedEntry(healthy.Id).Operation;
-        ArgumentNullException.ThrowIfNull(committedHealthy);
-        applied.Add(committedHealthy);
-        pending.Complete(healthyResult);
-        await TenantAdmissionAssertions.RecordAsync(fixture.Database, committedHealthy,
-            TenantAdmissionOperations.PartitionB(fixture), "healthy-b");
-        var operations = applied.ToArray();
-        results.Add(healthyResult);
+        using (TenantAdmissionOperations.Reserve(fixture, governor, operations[^1], token))
+        {
+            await ApplyAsync(fixture, operations[^1], ids[^1], results, applied, token);
+        }
         await TenantAdmissionCold.ReplayAsync(fixture.Database, fixture.Store,
-            fixture.SubmitIssued, operations, results, fixture.Partition, token);
-        inbox.Stop();
-        await inbox.DisposeAsync();
+            fixture.SubmitIssued, applied.ToArray(), results, fixture.Partition, token);
         await Assert.That(governor.Snapshot()).IsEqualTo(new CommandAdmissionSnapshot(0, 0, 0, 0, 0, 0));
         fixture.JoinOwnedResources();
-        await TenantAdmissionCold.RunAsync(fixture, operations, results, token);
+        await TenantAdmissionCold.RunAsync(fixture, applied.ToArray(), results, token);
+    }
+
+    private static async Task ApplyAsync(TestDatabase fixture, Command<DatabaseCommand> operation, string id,
+        List<Result<object>> results, List<Command<DatabaseCommand>> applied, CancellationToken token)
+    {
+        var result = fixture.SubmitIssuedEmbedded(operation, token);
+        var committed = await TenantAdmissionAssertions.CommittedAsync(fixture, operation);
+        var partition = committed.UserId! == TenantAdmissionOperations.PrincipalA
+            ? fixture.Partition : TenantAdmissionOperations.PartitionB(fixture);
+        var expectedToken = new CommitToken(fixture.Store.Identity.Incarnation, partition.AtomicPartitionId,
+            fixture.Database.LastApplied);
+        await TenantAdmissionAssertions.ReceiptAsync(result, committed, id, expectedToken);
+        await TenantAdmissionAssertions.RecordAsync(fixture.Database, committed, partition, id);
+        results.Add(result);
+        applied.Add(committed);
     }
 }

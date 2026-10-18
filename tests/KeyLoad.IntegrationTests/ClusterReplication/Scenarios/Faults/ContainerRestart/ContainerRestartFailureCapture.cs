@@ -15,7 +15,7 @@ internal sealed class ContainerRestartFailureCapture
     private int sampleSequence;
 
     /// <summary>Captures the pre-start public Aspire snapshot and verified pre-kill identity.</summary>
-    /// <param name="app">The actual Aspire application for this CLUSTER fixture.</param>
+    /// <param name="app">The actual Aspire application for this Orleans fixture.</param>
     /// <param name="receipt">The verified SIGKILL receipt retained by the fixture.</param>
     /// <param name="repositoryRoot">The checkout root for qualification artifacts.</param>
     /// <param name="failureReceipts">The fixture-owned restart receipt store.</param>

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -57,12 +58,12 @@ internal sealed class RecurringSagaDatabase : IDisposable
         ConfigureQueueDefinition(TimeoutQueue, null, null, timeoutQueuePolicy, null);
     }
 
-    internal OperationResult Apply<T>(OperationKind kind, T payload, string principal = RootPrincipal,
+    internal Result<object> Apply<T>(OperationKind kind, T payload, string principal = RootPrincipal,
         Guid? id = null, DateTimeOffset? time = null)
     {
         var commandId = id ?? (payload is CommandRequest command ? command.CommandId : Guid.NewGuid());
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
-        return Database.Apply(new(commandId, kind, principal, time ?? Epoch, json));
+        return Database.Apply(Database.CreateCommand(kind, commandId, principal, time ?? Epoch, json));
     }
 
     internal CommitReceipt Commit(PartitionRef partition, params Mutation[] mutations)

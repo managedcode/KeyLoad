@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Selected local-child contract on native three-silo journals, not hosted D4 ACK qualification.</summary>
+/// <summary>Verifies child identity, cancellation and joined settlement against production Orleans hosts.</summary>
 internal sealed class NativeLocalChildLifetimeTests
 {
     [Test]

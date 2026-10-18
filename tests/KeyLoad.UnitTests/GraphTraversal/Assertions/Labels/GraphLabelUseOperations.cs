@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -82,8 +83,7 @@ internal static class GraphLabelUseOperations
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, CommandRequest seed, CommitReceipt receipt, byte[] outcome)
         => await ObserveAsync(store, async () =>
         {
-            var operation = new ReplicatedOperation(seed.CommandId, OperationKind.Batch, "root", default,
-                System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options));
+            var operation = database.CreateCommand(OperationKind.Batch, seed.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options));
             var replay = database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
             await EqualAsync(receipt, replay);
             foreach (var mutation in replay.Mutations)

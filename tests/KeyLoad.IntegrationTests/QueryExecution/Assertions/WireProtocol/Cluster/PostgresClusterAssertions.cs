@@ -12,7 +12,7 @@ internal static class PostgresClusterAssertions
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(original.CommandId, actual.Token,
             [new(PutKind, PostgresClusterState.Left.Collection, PostgresClusterState.Left.Id, PostgresClusterProtocol.SeedRevision),
              new(PutKind, PostgresClusterState.Right.Collection, PostgresClusterState.Right.Id, PostgresClusterProtocol.SeedRevision)],
-            DurabilityProfile.QuorumProcessDurable), actual);
+            DurabilityProfile.ProcessDurable, 3), actual);
         await global::TUnit.Assertions.Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(original.Partition.AtomicPartitionId);
         await global::TUnit.Assertions.Assert.That(actual.Token.Position).IsGreaterThan(PostgresClusterProtocol.FirstColumn);
     }

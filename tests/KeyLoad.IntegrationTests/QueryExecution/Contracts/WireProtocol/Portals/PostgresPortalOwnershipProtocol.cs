@@ -21,7 +21,7 @@ internal static class PostgresPortalOwnershipProtocol
     internal const byte Close = (byte)'C';
     internal const byte Flush = (byte)'H';
     internal const byte Sync = (byte)'S';
-    internal const byte SimpleQuery = (byte)'Q';
+    internal const byte QueryMessage = (byte)'Q';
     internal const byte Terminate = (byte)'X';
     internal const byte ParseComplete = (byte)'1';
     internal const byte BindComplete = (byte)'2';

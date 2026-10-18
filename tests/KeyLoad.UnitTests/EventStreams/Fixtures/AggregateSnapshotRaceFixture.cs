@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -20,15 +22,15 @@ internal sealed class AggregateSnapshotRaceFixture : IDisposable
     internal TestDatabase Harness { get; } = new(timeProvider: new ControlledReadClock(Epoch));
     internal ZoneTreeStore Store { get; set; } = null!;
     internal DatabaseEngine Database { get; set; } = null!;
-    internal OperationResult? HealthyResult
+    internal Result<object>? HealthyResult
     {
         get; set;
     }
     internal byte[] HealthyRaw { get; set; } = [];
     internal StreamRef Stream => new(Harness.Partition, StreamSet, StreamId);
-    internal List<(ReplicatedOperation Operation, OperationResult Result, byte[] Raw)> Outcomes { get; } = [];
-    internal ReplicatedOperation SeedOperation { get; private set; } = null!;
-    internal OperationResult SeedResult { get; private set; } = null!;
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Raw)> Outcomes { get; } = [];
+    internal Command<DatabaseCommand> SeedOperation { get; private set; } = null!;
+    internal Result<object> SeedResult { get; private set; } = null!;
     internal byte[] SeedRaw { get; private set; } = [];
     internal long SeedPosition
     {
@@ -82,7 +84,7 @@ internal sealed class AggregateSnapshotRaceFixture : IDisposable
     internal CommandRequest Snapshot(long source, string state, long version)
         => new(Guid.NewGuid(), Harness.Partition, [new StoreAggregateSnapshot(StreamSet, StreamId,
             source, Reducer, 1, state, version)]);
-    internal static ReplicatedOperation Operation(CommandRequest command)
+    internal static Command<DatabaseCommand> Operation(CommandRequest command)
         => new(command.CommandId, OperationKind.Batch, Worker, Epoch, JsonSerializer.Serialize(command, JsonDefaults.Options));
     internal string[] EventImage() => Store.Read(view =>
         view.Scan(KeySpace.Partition("event", Harness.Partition, StreamSet, StreamId, 1L), 4).Records

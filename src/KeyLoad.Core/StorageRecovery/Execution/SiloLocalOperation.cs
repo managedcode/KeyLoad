@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.InternalSerialization;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -10,15 +10,10 @@ public sealed partial class DatabaseEngine
     /// <summary>Classifies native node-bound derived work using its typed operation and persisted consumer definition.</summary>
     /// <param name="operation">The original Core-issued operation.</param>
     /// <returns>Whether the operation belongs only to the actual local silo's derived files.</returns>
-    public bool IsSiloLocalOperation(ReplicatedOperation operation)
+    public bool IsSiloLocalOperation(Command<DatabaseCommand> operation)
     {
-        var verified = VerifyOperationAuthority(operation);
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(verified.NativePayload.Span);
-        if (payload.Error is not null)
-        {
-            return false;
-        }
-        return verified.Kind switch
+        var verified = OwnCommand(operation);
+        return verified.Value!.Kind switch
         {
             OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase => true,
             OperationKind.ConfigureProjectionConsumer => IsSiloLocalConsumer(
@@ -29,11 +24,11 @@ public sealed partial class DatabaseEngine
         };
     }
 
-    private bool IsSiloLocalProjection(IKeyValueView view, ReplicatedOperation operation)
+    private bool IsSiloLocalProjection(IKeyValueView view, Command<DatabaseCommand> operation)
     {
-        var principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
+        var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
         AuthorizeOperation(view, principal, operation);
-        return operation.Kind == OperationKind.CommitProjectionBatch
+        return operation.Value!.Kind == OperationKind.CommitProjectionBatch
             ? IsSiloLocalCheckpoint(view, Payload<CommitProjectionBatchRequest>(operation))
             : IsSiloLocalConsumer(ProjectionConsumer(view,
                 Payload<ReleaseProjectionConsumerRequest>(operation).Consumer).Definition);

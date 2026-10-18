@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
-/// <summary>Owns actual Aspire-discovered administrative and reader HTTP clients for all CLUSTER nodes.</summary>
+/// <summary>Owns actual Aspire-discovered administrative and reader HTTP clients for all Orleans nodes.</summary>
 internal sealed class GraphSearchClusterNodeClients : IDisposable
 {
     private readonly HttpClient[] adminHttp;

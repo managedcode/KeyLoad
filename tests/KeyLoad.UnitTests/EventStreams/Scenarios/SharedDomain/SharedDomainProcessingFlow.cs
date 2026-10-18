@@ -28,7 +28,7 @@ internal static class SharedDomainProcessingFlow
             && delivery.LeaseUntil <= ended.AddSeconds(request.LeaseSeconds)).IsTrue();
         await Assert.That(received.Get<ReceiveResult>().RequestId).IsEqualTo(request.RequestId);
         await Assert.That(received.Get<ReceiveResult>().Token).IsEqualTo(new CommitToken(database.Store.Identity.Incarnation,
-            scope.Partition.AtomicPartitionId, expectedPosition, Generation));
+            scope.Partition.AtomicPartitionId, expectedPosition));
         var before = SharedDomainNativeImage.Capture(database.Store);
         var position = database.Store.Position;
         await NativeReplayResultAssertions.Same<ReceiveResult>(SharedDomainOperations.Apply(database, operation, token), received);

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Security.Cryptography;
 using KeyLoad.Core;
 
@@ -104,7 +105,7 @@ internal static class NativeTextOnlineSessionWork
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task JoinAsync(NativeTextOnlineSession session, Action<OperationResult> RequirePublicationReceipt)
+    internal static async Task JoinAsync(NativeTextOnlineSession session, Action<Result<object>> RequirePublicationReceipt)
     {
         var originalPublication = session.Publication.CloseAdmissionAndCaptureOriginal();
         var checkpoint = session.CheckpointWork;
@@ -129,7 +130,7 @@ internal static class NativeTextOnlineSessionWork
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static OnlineTextIndexMaintenanceResult RequireReceipt(OperationResult original, ref byte[]? expectedPublication, Guid commandId)
+    internal static OnlineTextIndexMaintenanceResult RequireReceipt(Result<object> original, ref byte[]? expectedPublication, Guid commandId)
     {
         var actual = original.Get<OnlineTextIndexMaintenanceResult>();
         if (expectedPublication is null || actual.CommandId != commandId

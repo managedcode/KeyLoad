@@ -1,26 +1,20 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.Core.Features.ClusterRouting.Identity;
 
 internal static class CommandOutcomePartitionIdentity
 {
-    internal static CommandOutcomePartitionScope Resolve(ReplicatedOperation operation)
+    internal static CommandOutcomePartitionScope Resolve(Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        if (operation.NativePayload.IsEmpty)
+        if (operation.Value!.Input.IsEmpty)
         {
             return CommandOutcomePartitionScope.Unknown;
         }
 
-        var envelope = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
-        if (envelope.Error is not null || envelope.Value.IsEmpty)
-        {
-            return CommandOutcomePartitionScope.Unknown;
-        }
-
-        return ResolveKind(operation.Kind, envelope.Value);
+        return ResolveKind(operation.Value!.Kind, operation.Value.Input);
     }
 
     private static CommandOutcomePartitionScope ResolveKind(OperationKind kind, ReadOnlyMemory<byte> payload)

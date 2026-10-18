@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class QueryAdapterCollectionCold
 {
     internal static async Task RunAsync(TestDatabase fixture,
-        List<(ReplicatedOperation Operation, byte[] Result)> originals, string[] image, long position, byte[] identity)
+        List<(Command<DatabaseCommand> Operation, byte[] Result)> originals, string[] image, long position, byte[] identity)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

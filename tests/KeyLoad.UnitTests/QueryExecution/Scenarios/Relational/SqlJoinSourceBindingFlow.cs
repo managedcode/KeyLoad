@@ -35,8 +35,7 @@ internal static class SqlJoinSourceBindingFlow
             await SqlJoinSourceBindingAssertions.PageAsync(engine.ExecuteAst(SqlJoinSourceBindingFixture.Root, healthy), kind, position);
             await SqlJoinSourceBindingAssertions.PageAsync(engine.Execute(SqlJoinSourceBindingFixture.Root,
                 SqlJoinSourceBindingFixture.Request(partition, kind)), kind, position);
-            var replay = owner.ApplyEmbedded(new(command.CommandId, global::KeyLoad.OperationKind.Batch, SqlJoinSourceBindingFixture.Root, default,
-                global::System.Text.Json.JsonSerializer.Serialize(command, global::KeyLoad.JsonDefaults.Options)), cancellationToken: default).Get<global::KeyLoad.CommitReceipt>();
+            var replay = owner.ApplyEmbedded(owner.CreateCommand(global::KeyLoad.OperationKind.Batch, command.CommandId, SqlJoinSourceBindingFixture.Root, default, global::System.Text.Json.JsonSerializer.Serialize(command, global::KeyLoad.JsonDefaults.Options)), cancellationToken: default).Get<global::KeyLoad.CommitReceipt>();
             await Assert.That(global::KeyLoad.JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(global::KeyLoad.JsonDefaults.Serialize(receipt))).IsTrue();
             await UnchangedAsync(store, before, position, identity);
         }

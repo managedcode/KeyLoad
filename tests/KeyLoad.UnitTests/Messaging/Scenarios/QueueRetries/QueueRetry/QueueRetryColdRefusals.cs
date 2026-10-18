@@ -16,8 +16,8 @@ internal static class QueueRetryColdRefusals
              new EnqueueMessage(state.Lane.Queue, QueueRetryColdProtocol.Healthy, QueueRetryColdProtocol.HealthyPayload)]);
         var quota = QueueWholeFlowStorage.Apply(database, OperationKind.Batch, producer, producer.CommandId, time);
         state.Rejected = (producer, quota);
-        await Assert.That(quota.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(quota.NativeValue).IsNull();
+        await Assert.That(Errors.Code(quota.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(quota.Value).IsNull();
         await Assert.That(database.GetDocument(QueueRetryColdProtocol.Root, new(state.Lane.Partition,
             QueueRetryColdProtocol.Collection, QueueRetryColdProtocol.Refused), cancellationToken: token)).IsNull();
         await Assert.That(QueueRetryColdAssertions.LaneBytes((ZoneTreeStore)database.Store, state.Lane)).IsEquivalentTo(image, CollectionOrdering.Matching);
@@ -25,18 +25,17 @@ internal static class QueueRetryColdRefusals
         {
             var command = new DeliveryCommand(Guid.NewGuid(), state.Lane, state.FirstDelivery.Token, action);
             var actual = QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, command, command.CommandId, time);
-            await Assert.That(actual.Error).IsEqualTo(ErrorCode.StaleLease);
-            await Assert.That(actual.NativeValue).IsNull();
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+            await Assert.That(actual.Value).IsNull();
             await Assert.That(QueueRetryColdAssertions.LaneBytes((ZoneTreeStore)database.Store, state.Lane)).IsEquivalentTo(image, CollectionOrdering.Matching);
         }
         var deniedInspection = Assert.ThrowsExactly<KeyLoadException>(() => database.InspectMessage(QueueRetryColdProtocol.Inspector,
             state.Lane, QueueRetryColdProtocol.Retry));
         await Assert.That(deniedInspection.Code).IsEqualTo(ErrorCode.PermissionDenied);
         var receive = new ReceiveRequest(Guid.NewGuid(), state.Lane);
-        var denied = database.Apply(new(receive.RequestId, OperationKind.Receive, QueueRetryColdProtocol.Inspector,
-            time, JsonSerializer.Serialize(receive, JsonDefaults.Options)));
-        await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(denied.NativeValue).IsNull();
+        var denied = database.Apply(database.CreateCommand(OperationKind.Receive, receive.RequestId, QueueRetryColdProtocol.Inspector, time, JsonSerializer.Serialize(receive, JsonDefaults.Options)));
+        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(denied.Value).IsNull();
         await Assert.That(QueueRetryColdAssertions.LaneBytes((ZoneTreeStore)database.Store, state.Lane)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await CancelledAsync(database, state);
         await QueueRetryColdAssertions.TerminalAsync(database, state, false);
@@ -48,8 +47,7 @@ internal static class QueueRetryColdRefusals
         var position = database.Store.Position;
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane);
         var cancelled = new CancellationToken(canceled: true);
-        var failure = Assert.ThrowsExactly<OperationCanceledException>(() => database.ApplyEmbedded(new(request.RequestId,
-            OperationKind.Receive, QueueRetryColdProtocol.Root, default, JsonSerializer.Serialize(request, JsonDefaults.Options)), cancelled));
+        var failure = Assert.ThrowsExactly<OperationCanceledException>(() => database.ApplyEmbedded(database.CreateCommand(OperationKind.Receive, request.RequestId, QueueRetryColdProtocol.Root, default, JsonSerializer.Serialize(request, JsonDefaults.Options)), cancelled));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancelled);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes((ZoneTreeStore)database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
@@ -62,8 +60,8 @@ internal static class QueueRetryColdRefusals
         var image = QueueRetryColdAssertions.LaneBytes((ZoneTreeStore)database.Store, state.Lane);
         var actual = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, state.FirstClaim,
             state.FirstClaim.RequestId, state.FinalTime);
-        await Assert.That(actual.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(actual.NativeValue).IsNull();
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(actual.Value).IsNull();
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(key)!)).IsEquivalentTo(original, CollectionOrdering.Matching);
         await Assert.That(QueueRetryColdAssertions.LaneBytes((ZoneTreeStore)database.Store, state.Lane)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

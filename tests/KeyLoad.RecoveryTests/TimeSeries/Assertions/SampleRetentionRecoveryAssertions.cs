@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
@@ -15,7 +17,7 @@ internal static class SampleRetentionRecoveryAssertions
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
-        var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, SampleRetentionCrashScenario.OperationFile), cancellationToken));
         var recoveredStatus = database.ReadSampleRetention(Principal, RetentionRequest(), cancellationToken);
         var committed = recoveredStatus.Before == SampleRetentionCrashScenario.Cutoff;
@@ -35,7 +37,7 @@ internal static class SampleRetentionRecoveryAssertions
     }
 
     private static async Task ReplayFirstPageAsync(DatabaseEngine database, ZoneTreeStore store, string root,
-        ReplicatedOperation operation, OperationResult? oldOutcome, CancellationToken cancellationToken)
+        Command<DatabaseCommand> operation, Result<object>? oldOutcome, CancellationToken cancellationToken)
     {
         var first = database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(first.Mutations).HasSingleItem();
@@ -59,11 +61,10 @@ internal static class SampleRetentionRecoveryAssertions
     }
 
     private static async Task CompleteRetentionAsync(DatabaseEngine database, ZoneTreeStore store, string root,
-        ReplicatedOperation operation, CancellationToken cancellationToken)
+        Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         var nextId = Guid.Parse("76d20dd7-5b66-4de4-9e63-ed09f0d19930");
-        var next = new ReplicatedOperation(nextId, OperationKind.Batch, Principal,
-            operation.EvaluatedAt, System.Text.Json.JsonSerializer.Serialize(new CommandRequest(nextId,
+        var next = database.CreateCommand(OperationKind.Batch, nextId, Principal, new DateTimeOffset(operation.Timestamp), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(nextId,
                 SampleRetentionCrashScenario.Partition,
                 [new ExpireSamples(SampleRetentionCrashScenario.SeriesSet, SampleRetentionCrashScenario.SeriesId,
                     SampleRetentionCrashScenario.Cutoff, SampleRetentionCrashScenario.RepeatPageDeletes)]),

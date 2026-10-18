@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
@@ -6,7 +7,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class QueueLifecycleRecoveryContinuation
 {
-    internal static async Task RunAsync(string directory, DatabaseEngine database, ZoneTreeStore store, ReplicatedOperation original,
+    internal static async Task RunAsync(string directory, DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> original,
         CommitReceipt receipt, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -19,7 +20,7 @@ internal static class QueueLifecycleRecoveryContinuation
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecycleCrashProtocol.Headers);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(QueueLifecycleCrashProtocol.Two);
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
-        var ackOperation = CrashDatabase.Operation(OperationKind.Delivery, ack, ack.CommandId);
+        var ackOperation = CrashDatabase.Operation(database, OperationKind.Delivery, ack, ack.CommandId);
         var acknowledged = database.Apply(ackOperation).Get<CommitReceipt>();
         await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.Apply(original).Get<CommitReceipt>());
         var image = Capture(store, lane);

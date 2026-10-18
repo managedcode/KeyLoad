@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 /// <summary>Checks canonical bounded EventStreams results returned by real SDK callers.</summary>
 internal static class McpEventStreamAssertions
 {
-    /// <summary>Requires canonical page parity, exact event bytes and a valid monotonic quorum cut.</summary>
+    /// <summary>Requires canonical page parity, exact event bytes and a valid monotonic database cut.</summary>
     /// <param name="scenario">The actual configured stream and expected event batch.</param>
     /// <param name="sdkPage">The page returned by the public .NET SDK.</param>
     /// <param name="mcpPage">The page decoded from the official MCP SDK result.</param>

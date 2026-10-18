@@ -22,7 +22,7 @@ internal static class NativeTextIncrementalCheckpointAssertions
         await Assert.That(checkpoint.Checkpoint).IsEqualTo(actual.Complete.Checkpoint);
         await Assert.That(checkpoint.Receipt.Token.AtomicPartitionId).IsEqualTo(request.Consumer.Partition.AtomicPartitionId);
         await Assert.That(checkpoint.Receipt.Token.Incarnation).IsEqualTo(actual.OriginalReceipt.Token.Incarnation);
-        await Assert.That(checkpoint.Receipt.Token.OwnershipEpoch).IsEqualTo(actual.OriginalReceipt.Token.OwnershipEpoch);
+
         await Assert.That(checkpoint.Receipt.Token.Position).IsGreaterThan(actual.OriginalReceipt.Token.Position);
         await Assert.That(checkpoint.Receipt.Token.Position).IsLessThanOrEqualTo(actual.AppliedPosition);
     }

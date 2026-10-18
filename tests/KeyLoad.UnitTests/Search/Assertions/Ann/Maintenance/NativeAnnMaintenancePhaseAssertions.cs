@@ -11,7 +11,7 @@ internal static class NativeAnnMaintenancePhaseAssertions
     {
         var state = NativeAnnMaintenanceTestData.Snapshot(database);
         var position = database.Store.Position;
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateNativeOperation(
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateCommand(
             OperationKind.MaintainAnnIndex, request.CommandId, AnnProjectionPinTestSupport.Principal,
             database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request)));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

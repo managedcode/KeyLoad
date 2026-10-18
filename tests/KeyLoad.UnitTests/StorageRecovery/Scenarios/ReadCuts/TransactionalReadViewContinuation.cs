@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -11,8 +12,7 @@ internal static class TransactionalReadViewContinuation
         state.Healthy = TransactionalReadViewCommands.Operation(id, new(id, state.Harness.Partition,
             [new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.HealthyId,
                 DocumentIndexCommittedScanOracle.HealthyJson, 0L)]));
-        state.HealthyReceipt = new(id, new(state.Identity.Incarnation, state.Harness.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.HealthyId, 1L)], DurabilityProfile.ProcessDurable);
+        state.HealthyReceipt = new(id, new(state.Identity.Incarnation, state.Harness.Partition.AtomicPartitionId, before + 1L), [new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.HealthyId, 1L)], DurabilityProfile.ProcessDurable, 1);
         var actual = state.Database.ApplyEmbedded(state.Healthy, token).Get<CommitReceipt>();
         state.HealthyOutcome = TransactionalReadViewCommands.Outcome(state, state.Healthy);
         state.FinalImage = TransactionalReadViewCommands.QueueImage(state.Store);
@@ -30,7 +30,7 @@ internal static class TransactionalReadViewContinuation
         await ServerFailureObserver.ObserveAsync(() => TransactionalReadViewValues.ConservedAsync(state, state.FinalImage, state.FinalPosition), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task ReplayAsync(TransactionalReadViewState state, ReplicatedOperation original,
+    private static async Task ReplayAsync(TransactionalReadViewState state, Command<DatabaseCommand> original,
         CommitReceipt receipt, byte[] bytes, CancellationToken token)
     {
         var failures = new List<Exception>();

@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-/// <summary>AC-PQUERY-006 caller parity on explicit, fallback and empty leaves sharing one CLUSTER owner.</summary>
+/// <summary>AC-PQUERY-006 caller parity on first, second and empty partitions sharing one Orleans owner.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class PartitionQueryPublicClusterTests(ClusterFixture fixture)

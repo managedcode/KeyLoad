@@ -27,7 +27,7 @@ internal static class StreamTraversalColdClusterFlow
             var after = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(deadline.Token));
             await Assert.That(after.NodeId).IsEqualTo(state.Before.NodeId);
             await Assert.That(after.Incarnation).IsEqualTo(state.Before.Incarnation);
-            await Assert.That(after.Voters).IsEqualTo(state.Before.Voters);
+            await Assert.That(after.SiloCount).IsEqualTo(state.Before.SiloCount);
             await Assert.That(after.RoutingReady).IsTrue();
             await ResumeAsync(callers, state.Scenario, state.First, state.Backward, state.Fourth, deadline.Token);
             await SqlClusterProtocol.EqualAsync(state.Original,

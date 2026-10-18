@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -129,8 +130,7 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
         var cut = store.Position;
         foreach (var item in original)
         {
-            var operation = new ReplicatedOperation(item.Command.CommandId, OperationKind.Batch,
-                TeamRowPolicyFlow.Root, default, JsonSerializer.Serialize(item.Command, JsonDefaults.Options));
+            var operation = database.CreateCommand(OperationKind.Batch, item.Command.CommandId, TeamRowPolicyFlow.Root, default, JsonSerializer.Serialize(item.Command, JsonDefaults.Options));
             var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
             await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(item.Receipt))).IsTrue();
             await Assert.That(store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.PartitionOutcome(

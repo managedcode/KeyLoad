@@ -86,11 +86,11 @@ internal sealed class SdkNativeProblemBoundaryScenario(ConnectionNativeScenario 
         var commandId = Guid.NewGuid();
         var configured = db.Submit(OperationKind.ConfigureResource, request, id: commandId).Get<ResourceDefinition>();
         await SdkNativeProblemBoundaryAssertions.EqualAsync(definition, configured);
-        var original = db.ReadRetainedEntry(commandId).Operation ?? throw new InvalidOperationException(P.Failure);
-        await Assert.That(original.Id).IsEqualTo(commandId);
-        await Assert.That(original.Kind).IsEqualTo(OperationKind.ConfigureResource);
-        await Assert.That(original.PrincipalId).IsEqualTo(P.Root);
-        await SdkNativeProblemBoundaryAssertions.EqualAsync(request, NativeCommandPayload.Read<ConfigureResourceRequest>(original));
+        var original = db.ReadStoredOutcome(commandId).PreparedCommand ?? throw new InvalidOperationException(P.Failure);
+        await Assert.That(original.CommandId).IsEqualTo(commandId);
+        await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
+        await Assert.That(original.UserId!).IsEqualTo(P.Root);
+        await SdkNativeProblemBoundaryAssertions.EqualAsync(request, NativeSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span));
         var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
         Allowed = new(db.Partition, P.Allowed, P.Document)
         {

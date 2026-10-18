@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -10,14 +11,11 @@ internal static class NativeTextProviderAuditHistoryAssertions
     internal static async Task SaveAsync<T>(NativeTextProtectedRebuildColdOwner owner, NativeTextProviderAuditState state,
         NativeTextProtectedRebuildColdOwner.Retained original, T expected) where T : class
     {
-        await NativeReplayResultAssertions.Same<T>(original.Result, new(null)
-        {
-            NativeValue = expected
-        });
-        var global = original.Operation.Kind == OperationKind.ConfigureResource;
-        var outcomeKey = global ? KeySpace.GlobalOutcome(Root, original.Operation.Id)
-            : KeySpace.PartitionOutcome(owner.Source.Partition, Root, original.Operation.Id);
-        var locatorKey = KeySpace.OutcomeLocatorV2(owner.Source.Partition, Root, original.Operation.Id);
+        await NativeReplayResultAssertions.Same<T>(original.Result, Result<object>.Succeed(expected));
+        var global = original.Operation.Value!.Kind == OperationKind.ConfigureResource;
+        var outcomeKey = global ? KeySpace.GlobalOutcome(Root, original.Operation.CommandId)
+            : KeySpace.PartitionOutcome(owner.Source.Partition, Root, original.Operation.CommandId);
+        var locatorKey = KeySpace.OutcomeLocatorV2(owner.Source.Partition, Root, original.Operation.CommandId);
         var outcome = Required(owner, outcomeKey);
         var locator = owner.Store.Read(view => view.ReadOwnedValue(locatorKey));
         if (global)
@@ -55,9 +53,9 @@ internal static class NativeTextProviderAuditHistoryAssertions
         }
     }
 
-    private static async Task ResultAsync(OperationResult actual, OperationResult expected)
+    private static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        if (expected.NativeValue is ResourceDefinition)
+        if (expected.Value is ResourceDefinition)
         {
             await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, expected);
         }

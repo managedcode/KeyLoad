@@ -1,6 +1,4 @@
-using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
 
 namespace KeyLoad.Core;
 
@@ -31,13 +29,5 @@ public sealed partial class DatabaseEngine
         });
         work.CheckResult(result);
         return result;
-    }
-
-    internal OwnedDocumentReadResultV1 ReadOwnedDocumentV2Bound(string principalId, OwnedDocumentReadRequestV2 request,
-        ReadExecutionBudget work, ReadExecutionBudgetReadGrant grant, IResourceLifetimeWorkBinding binding)
-    {
-        ArgumentNullException.ThrowIfNull(binding);
-        work.AttachResourceLifetimeBinding(binding);
-        return ReadOwnedDocumentV2(principalId, request, work, grant);
     }
 }

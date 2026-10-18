@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage;
@@ -10,7 +11,7 @@ internal static class SubscriptionProcessingRecoveryAssertions
 {
     internal static async Task VerifyAsync(string path, CommitStage stage, CancellationToken token)
     {
-        var original = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var original = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(path, CrashFixtureValues.ProcessingCommandFile), token));
         using var store = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution(),
             RecoveryExecutionOptions.PointCacheExecution());
@@ -26,11 +27,11 @@ internal static class SubscriptionProcessingRecoveryAssertions
         var first = db.Apply(original).Get<SubscriptionProcessingResult>();
         await Assert.That(first.AlreadyProcessed).IsFalse();
         await PrefixAsync(db, store, original, true, token);
-        await ReceiptAsync(first, original.Id);
+        await ReceiptAsync(first, original.CommandId);
         await SubscriptionProcessingRecoveryContinuation.RunAsync(db, store, path, original, first, token);
     }
 
-    private static async Task PrefixAsync(DatabaseEngine db, ZoneTreeStore store, ReplicatedOperation original,
+    private static async Task PrefixAsync(DatabaseEngine db, ZoneTreeStore store, Command<DatabaseCommand> original,
         bool committed, CancellationToken token)
     {
         var group = SubscriptionCrashScenario.Subscription;
@@ -41,13 +42,13 @@ internal static class SubscriptionProcessingRecoveryAssertions
         await Assert.That(actual.Checkpoint).IsEqualTo(committed ? 1L : 0L);
         await Assert.That(actual.Paused).IsFalse();
         await Assert.That(actual.SafeFailureCode).IsNull();
-        var request = JsonDefaults.Deserialize<SubscriptionProcessingRequest>(System.Text.Encoding.UTF8.GetBytes(original.PayloadJson));
+        var request = NativeSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var rows = store.Read(view => new
         {
             Window = view.GetRecord<GroupDelivery>(SubscriptionProcessingRecoveryContinuation.Key("subscription-window", group, 1L, 1L)),
             Completion = view.GetRecord<SubscriptionCompletion>(SubscriptionProcessingRecoveryContinuation.Key("subscription-completion", group, 1L, 1L)),
             Inbox = view.GetRecord<InboxRecord>(SubscriptionProcessingRecoveryContinuation.Key("subscription-inbox", group, 1L, request.HandlerScope, request.ExecutionGeneration)),
-            Outcome = view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(group.Source.Partition, CrashFixtureValues.Principal, original.Id))
+            Outcome = view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(group.Source.Partition, CrashFixtureValues.Principal, original.CommandId))
         });
         await Assert.That(rows.Window is null).IsEqualTo(committed);
         await Assert.That(rows.Completion is not null).IsEqualTo(committed);
@@ -59,7 +60,7 @@ internal static class SubscriptionProcessingRecoveryAssertions
         {
             await Assert.That(rows.Completion).IsEqualTo(new SubscriptionCompletion(1L, 1L, "Acked", 1L));
             var result = rows.Outcome!.Result.Get<SubscriptionProcessingResult>();
-            await ReceiptAsync(result, original.Id);
+            await ReceiptAsync(result, original.CommandId);
             await Assert.That(NativeSerialization.Serialize(rows.Inbox!.Receipt).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(result.Receipt))).IsTrue();
         }

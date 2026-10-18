@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
@@ -14,17 +15,16 @@ internal static class QueueEnqueueProcessAssertions
         var placement = owner.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
             QueueEnqueueCrashProtocol.Partition);
         return new(placement.Incarnation, QueueEnqueueCrashProtocol.Partition.AtomicPartitionId,
-            checked(store.Position + QueueEnqueueCrashProtocol.First), placement.PlacementEpoch);
+            checked(store.Position + QueueEnqueueCrashProtocol.First));
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, CommandRequest command, CommitToken expected)
-        => await QueueEnqueueProcessValueAssertions.EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, expected,
-            command.Mutations.Select(mutation => mutation switch
+    internal static async Task ReceiptAsync(Result<object> result, CommandRequest command, CommitToken expected)
+        => await QueueEnqueueProcessValueAssertions.EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, expected, command.Mutations.Select(mutation => mutation switch
             {
                 PutDocument document => new MutationReceipt(QueueEnqueueCrashProtocol.PutKind, document.Collection, document.Id, QueueEnqueueCrashProtocol.First),
                 EnqueueMessage message => new MutationReceipt(QueueEnqueueCrashProtocol.EnqueueKind, message.Queue, message.MessageId, QueueEnqueueCrashProtocol.First),
                 _ => throw new InvalidOperationException(QueueEnqueueCrashProtocol.UnexpectedMutation)
-            }).ToImmutableArray(), DurabilityProfile.ProcessDurable));
+            }).ToImmutableArray(), DurabilityProfile.ProcessDurable, 1));
 
     internal static async Task InitialAsync(DatabaseEngine owner, ZoneTreeStore store, CommandRequest command)
     {

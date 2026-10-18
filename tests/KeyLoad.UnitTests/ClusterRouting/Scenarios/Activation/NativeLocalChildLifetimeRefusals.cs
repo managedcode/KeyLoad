@@ -1,10 +1,9 @@
 using KeyLoad.Clustering;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterReplication;
 using Microsoft.Extensions.DependencyInjection;
 using K = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
-using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
+using P = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -75,10 +74,10 @@ internal static class NativeLocalChildLifetimeRefusals
             await Assert.That(refused.Code).IsEqualTo(code);
             await Assert.That(refused.Message).IsEqualTo(detail);
             await Assert.That(published).IsNull();
-            await ReplicaBarrierDeadlineAssertions.UnchangedAsync(state.Leader,
-                state.Images[state.Leader.Journal.Configuration.LocalId]);
-            await ReplicaBarrierDeadlineAssertions.UnchangedAsync(state.Other,
-                state.Images[state.Other.Journal.Configuration.LocalId]);
+            await NativeLocalChildLifetimeSeed.UnchangedAsync(state.Leader,
+                state.Images[state.Leader]);
+            await NativeLocalChildLifetimeSeed.UnchangedAsync(state.Other,
+                state.Images[state.Other]);
         }, failures);
         NativeRequestWorkOriginalSettlement? outcome = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -101,12 +100,11 @@ internal static class NativeLocalChildLifetimeRefusals
 
     private static async Task RefuseAsync(NativeLocalChildLifetimeSeeded state,
         NativeLocalChildLifetimeOperation operation, DecodedGrainRequest verified,
-        RequestCqrsCohortNativeNode actual)
+        RequestCqrsHostedRuntimeFixture actual)
     {
         var before = operation.Ledger.RetainedEncodedBytes;
         var entries = operation.Ledger.RetainedEntries;
-        var runtime = actual.Discovery.Read();
-        await Assert.That(runtime.TransportReady).IsTrue();
+        var runtime = actual.Services.GetRequiredService<SiloStorageIdentityProvider>().Read();
         await Assert.That(runtime.SiloAddress).IsEqualTo(actual.Services.GetRequiredService<ILocalSiloDetails>()
             .SiloAddress.ToParsableString());
         await NativeLocalChildLifetimeAssertions.RefusedAsync(() =>

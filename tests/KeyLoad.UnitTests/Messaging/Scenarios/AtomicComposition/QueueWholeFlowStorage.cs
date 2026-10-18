@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -26,7 +27,6 @@ internal static class QueueWholeFlowStorage
         UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
         UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
-    internal static OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, T payload,
-        Guid id, DateTimeOffset time) => database.Apply(new(id, kind, "root", time,
-            JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+    internal static Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T payload,
+        Guid id, DateTimeOffset time) => database.Apply(database.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options)));
 }

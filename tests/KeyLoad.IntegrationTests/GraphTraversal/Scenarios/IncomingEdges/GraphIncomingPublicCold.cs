@@ -51,7 +51,7 @@ internal static class GraphIncomingPublicCold
             await Assert.That(after[index].NodeId).IsEqualTo(before[index].NodeId);
             await Assert.That(after[index].Incarnation).IsEqualTo(before[index].Incarnation);
             await Assert.That(after[index].ReadGeneration).IsGreaterThanOrEqualTo(before[index].ReadGeneration);
-            await Assert.That(after[index].Applied).IsGreaterThanOrEqualTo(before[index].Applied);
+            await Assert.That(after[index].Position).IsGreaterThanOrEqualTo(before[index].Position);
             await Assert.That(after[index].RoutingReady).IsTrue();
         }
     }

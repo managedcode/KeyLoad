@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
@@ -6,10 +8,10 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal static class SharedDomainOperations
 {
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, Guid id, T request, string principal = Writer)
+    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T request, string principal = Writer)
         => new(id, kind, principal, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
 
-    internal static OperationResult Apply(DatabaseEngine database, ReplicatedOperation operation, CancellationToken token)
+    internal static Result<object> Apply(DatabaseEngine database, Command<DatabaseCommand> operation, CancellationToken token)
         => database.ApplyEmbedded(operation, token);
 
     internal static PrincipalRecord Principal(SharedDomainState state, bool denied)

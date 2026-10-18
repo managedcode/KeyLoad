@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -30,12 +31,11 @@ internal static class SignedClaimsExecutionPolicyFlow
             UnitExecutionOptions.BlobExecution(database.Database.BlobExecution), claimsOptions,
             UnitExecutionOptions.TimeSeriesExecution(), database.Database.EvaluationClock);
 
-    internal static OperationResult Acknowledge(DatabaseEngine engine, QueueLaneRef lane, Delivery delivery)
+    internal static Result<object> Acknowledge(DatabaseEngine engine, QueueLaneRef lane, Delivery delivery)
     {
         var commandId = Guid.NewGuid();
         var command = new DeliveryCommand(commandId, lane, delivery.Token, DeliveryAction.Ack);
-        return engine.Apply(new(commandId, OperationKind.Delivery, PrincipalId,
-            engine.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
+        return engine.Apply(engine.CreateCommand(OperationKind.Delivery, commandId, PrincipalId, engine.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
     }
 
     internal static byte[][] CaptureLease(TestDatabase database, Delivery delivery)

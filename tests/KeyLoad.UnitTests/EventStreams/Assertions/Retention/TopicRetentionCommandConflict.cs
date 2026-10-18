@@ -14,7 +14,7 @@ internal static class TopicRetentionCommandConflict
             Mutations = [new PurgeTopic("topic", 1)]
         };
         var conflict = fixture.Submit(reused);
-        await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
         var replay = fixture.Submit(command).Get<CommitReceipt>();

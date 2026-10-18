@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server;
@@ -88,8 +89,7 @@ internal static class CapabilityOutputOperations
     {
         foreach (var seed in seeds)
         {
-            var operation = new ReplicatedOperation(seed.Command.CommandId, OperationKind.Batch, "root", default,
-                System.Text.Json.JsonSerializer.Serialize(seed.Command, JsonDefaults.Options));
+            var operation = database.CreateCommand(OperationKind.Batch, seed.Command.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(seed.Command, JsonDefaults.Options));
             await EqualAsync(seed.Receipt, database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>());
         }
     }

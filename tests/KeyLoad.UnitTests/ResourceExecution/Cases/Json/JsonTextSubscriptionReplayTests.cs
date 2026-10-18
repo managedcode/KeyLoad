@@ -30,20 +30,19 @@ internal sealed class JsonTextSubscriptionReplayTests
         var replay = db.Submit(OperationKind.ReceiveSubscription, request, id: id, time: now);
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
         var changedSpelling = JsonSerializer.Serialize(request, JsonDefaults.Options) + RawSpellingSuffix;
-        var conflict = db.Database.Apply(new(id, OperationKind.ReceiveSubscription,
-            RootPrincipal, now, changedSpelling));
+        var conflict = db.Database.Apply(db.Database.CreateCommand(OperationKind.ReceiveSubscription, id, RootPrincipal, now, changedSpelling));
 
         await Assert.That(deliveries.Length).IsEqualTo(MultiDeliveryCount);
         await Assert.That(deliveries.Select(delivery => delivery.Event.Data.EventId))
             .IsEquivalentTo(new[] { FirstEventId, SecondEventId, ThirdEventId }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
-        await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
 
         var ack = Guid.NewGuid();
         db.Submit(OperationKind.SubscriptionDelivery,
             new SubscriptionDeliveryCommand(ack, subscription, deliveries[0].Token, DeliveryAction.Ack),
             id: ack, time: now).Get<CommitReceipt>();
-        await Assert.That(db.Submit(OperationKind.ReceiveSubscription, request, id: id, time: now).Error)
+        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id, time: now).Problem))
             .IsEqualTo(ErrorCode.StaleLease);
     }
 
@@ -66,8 +65,8 @@ internal sealed class JsonTextSubscriptionReplayTests
         db.Submit(OperationKind.SeekSubscription,
             new SeekSubscriptionRequest(seek, subscription, 1, SubscriptionStart.FromBeginning),
             id: seek, time: now.AddSeconds(1)).Get<SubscriptionInfo>();
-        await Assert.That(db.Submit(OperationKind.ReceiveSubscription, request, id: id,
-            time: now.AddSeconds(1)).Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id,
+            time: now.AddSeconds(1)).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 
     private static SubscriptionRef Configure(TestDatabase db)

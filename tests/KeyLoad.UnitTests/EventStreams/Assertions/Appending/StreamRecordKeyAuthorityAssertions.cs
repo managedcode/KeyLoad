@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 
@@ -7,7 +8,7 @@ internal static class StreamRecordKeyAuthorityAssertions
 {
     private const string Invalid = "The stream traversal request is invalid.";
 
-    internal static async Task ReceiptAsync(EventAppendWholeFlowFixture fixture, CommandRequest command, OperationResult result, long tail)
+    internal static async Task ReceiptAsync(EventAppendWholeFlowFixture fixture, CommandRequest command, Result<object> result, long tail)
     {
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);

@@ -39,7 +39,8 @@ internal static class EventProjectionClusterAssertions
     internal static async Task AssertReceiptAsync(CommitReceipt receipt, EventProjectionClusterScenario scenario)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(scenario.CommandId);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(1);
         await Assert.That(receipt.Mutations[0].Kind).IsEqualTo(EventProjectionClusterScenario.MutationKind);
         await Assert.That(receipt.Mutations[0].Resource).IsEqualTo(EventProjectionClusterScenario.Collection);

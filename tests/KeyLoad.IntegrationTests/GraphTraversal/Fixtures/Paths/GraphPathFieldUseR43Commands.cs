@@ -24,7 +24,8 @@ internal static class GraphPathFieldUseR43Commands
         await Assert.That(state.Receipt.CommandId).IsEqualTo(state.Command.CommandId);
         await Assert.That(state.Receipt.Token.AtomicPartitionId).IsEqualTo(state.Seed.Partition.AtomicPartitionId);
         await Assert.That(state.Receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(state.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(state.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(state.Receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(expected, state.Receipt.Mutations.ToArray());
         state.Outbox = await GraphPathFieldUseR43Current.OutboxAsync(admin, state, token);
     }

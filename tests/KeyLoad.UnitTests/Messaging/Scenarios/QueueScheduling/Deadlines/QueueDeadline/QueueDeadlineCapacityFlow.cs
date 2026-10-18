@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Storage.ZoneTree;
 using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
 
@@ -37,7 +38,7 @@ internal static class QueueDeadlineCapacityFlow
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(QueueDeadlineCapacityRefusal.Domain(fixture.Store, state.Lane, state.Attempt)).IsEquivalentTo(domain,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(result).IsEqualTo(new OperationResult(null, ErrorCode.ResourceExhausted, CapacityDetail));
+        await Assert.That(result).IsEqualTo(Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, CapacityDetail)));
         state.Outcomes.Add((state.Attempt, result));
         await QueueDeadlineCapacityRefusal.RequireAsync(fixture.Database, fixture.Store, state, result, token);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);

@@ -29,6 +29,6 @@ internal static class AnalyticsBoundsDimensionsFlow
             var expected = events.OrderBy(row => row.Dimensions[D.Kind], StringComparer.Ordinal)
                 .Select(row => P.Row(row.Dimensions[D.Kind], 1, row.Metrics[D.Value])).ToArray();
             await O.EqualAsync(new AnalyticsAggregateResult([.. expected], events.Length),
-                await N.QueryAsync(db.Database, P.Query(db), token));
+                N.Query(db.Database, P.Query(db), token));
         });
 }

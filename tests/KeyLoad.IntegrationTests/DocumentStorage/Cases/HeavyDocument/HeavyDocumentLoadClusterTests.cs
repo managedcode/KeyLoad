@@ -2,7 +2,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-METH-005: exclusive native CLUSTER correctness during one million acknowledged creates.</summary>
+/// <summary>AC-METH-005: exclusive native Orleans correctness during one million acknowledged creates.</summary>
 [Category(HeavyDocumentLoadProtocol.Category)]
 [NotInParallel]
 internal sealed class HeavyDocumentLoadClusterTests : IAsyncDisposable
@@ -17,7 +17,7 @@ internal sealed class HeavyDocumentLoadClusterTests : IAsyncDisposable
             MaxScanRecords = HeavyDocumentLoadProtocol.Records,
             MaxQueryReadBytes = HeavyDocumentLoadProtocol.QueryReadBytes
         };
-        fixture = new ClusterFixture(limits, HeavyDocumentLoadProtocol.SnapshotThreshold);
+        fixture = new ClusterFixture(limits);
         scenario = new(fixture);
     }
 

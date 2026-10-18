@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -39,7 +40,7 @@ internal static class CompetingInboxSeed
             state.EffectPosition = fixture.Store.Position + 1;
         }, failures);
         release.TrySetResult();
-        state.Results = new OperationResult[tasks.Length];
+        state.Results = new Result<object>[tasks.Length];
         for (var index = 0; index < tasks.Length; index++)
         {
             await ServerFailureObserver.ObserveAsync(async () => state.Results[index] = await tasks[index], failures);

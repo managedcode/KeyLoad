@@ -15,12 +15,12 @@ internal static class NativeRuntimeConstructorCycleClusterReceipt
         var mutation = (CompareExchangeSaga)command.Mutations.Single();
         var expected = new CommitReceipt(command.CommandId, receipt.Token,
             [new(SagaMutation, mutation.Lane.Queue, mutation.SagaId.ToString(GuidFormat), 1L)],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SameAsync(receipt, expected);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(
-            ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root).Incarnation);
+            ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(1L);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await ReplayAsync(sdk, mcp, command, receipt, token);
     }

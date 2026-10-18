@@ -15,10 +15,9 @@ internal sealed class QueryCapabilityVersionFixture : IDisposable
         await RequiredProcessingPolicyAssertions.EqualAsync(definition, db.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(db.Partition.TenantId, db.Partition.DatabaseId, definition)).Get<ResourceDefinition>());
         Seed = QueryCapabilityVersionRequests.Seed(db.Partition);
-        var next = db.ReadJournalCut().LastIndex + 1L;
-        Receipt = new(Seed.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, next, 1L),
-            [new("putDocument", QueryCapabilityVersionRequests.Collection, "a", 1L), new("putDocument", QueryCapabilityVersionRequests.Collection, "b", 1L),
-             new("putDocument", QueryCapabilityVersionRequests.Collection, "c", 1L), new("putDocument", QueryCapabilityVersionRequests.Collection, "d", 1L)], DurabilityProfile.ProcessDurable);
+        var next = db.ReadCanonicalCut().AppliedPosition + 1L;
+        Receipt = new(Seed.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, next), [new("putDocument", QueryCapabilityVersionRequests.Collection, "a", 1L), new("putDocument", QueryCapabilityVersionRequests.Collection, "b", 1L),
+             new("putDocument", QueryCapabilityVersionRequests.Collection, "c", 1L), new("putDocument", QueryCapabilityVersionRequests.Collection, "d", 1L)], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(Receipt, db.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>());
         Outcome = RequiredProcessingPolicyAssertions.Outcome(db.Store, db.Partition, "root", Seed.CommandId);
         await PolicyAsync(1L, true);

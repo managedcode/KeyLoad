@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,12 +9,12 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueExpiredReadyVersionExhaustionContinuation
 {
     internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore store, string root,
-        QueueClaimVersionExhaustionState state, OperationResult original, QueueClaimVersionExhaustion field,
+        QueueClaimVersionExhaustionState state, Result<object> original, QueueClaimVersionExhaustion field,
         byte[] identity, CancellationToken token)
     {
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, original);
         var metadata = QueueExpiredReadyVersionExhaustionAssertions.Expired(state.DamagedMetadata);
-        var successes = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var successes = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         if (field == QueueClaimVersionExhaustion.StateVersion)
         {
             await QueueExpiredReadyVersionExhaustionAssertions.CurrentAsync(database, store, state.Lane, state.DamagedMetadata, state.Body, 1);
@@ -26,7 +28,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
             await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, original);
             var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1,
                 LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-            var operation = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, state.Time));
+            var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, state.Time));
             var expected = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
             var expired = database.Apply(operation);
             await QueueExpiredReadyVersionExhaustionAssertions.EmptyAsync(expired, request.RequestId, expected);
@@ -49,8 +51,8 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
     }
 
-    private static async Task<(ReplicatedOperation Operation, OperationResult Result)> HealthyAsync(DatabaseEngine database,
-        ZoneTreeStore store, QueueClaimVersionExhaustionState state, List<(ReplicatedOperation Operation, OperationResult Result)> successes)
+    private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> HealthyAsync(DatabaseEngine database,
+        ZoneTreeStore store, QueueClaimVersionExhaustionState state, List<(Command<DatabaseCommand> Operation, Result<object> Result)> successes)
     {
         const string id = "healthy";
         const string payload = "{\"input\":2}";
@@ -58,7 +60,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
         var message = new EnqueueMessage(state.Lane.Queue, id, payload, headers);
         var body = new MessageBody(id, payload, headers, null, JsonData.Fingerprint(message));
         var command = new CommandRequest(Guid.NewGuid(), state.Lane.Partition, [message]);
-        var producer = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Batch, command, command.CommandId, state.Time));
+        var producer = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Batch, command, command.CommandId, state.Time));
         var expectedProducer = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
         var produced = database.Apply(producer);
         await QueueExpiredReadyVersionExhaustionAssertions.ReceiptAsync(produced, command.CommandId, expectedProducer,
@@ -68,7 +70,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
             new(id, MessageState.Ready, 0, 1, 2, null, null), body, 2);
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1,
             LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var claim = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, state.Time));
+        var claim = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, state.Time));
         var expectedClaim = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
         var claimed = database.Apply(claim);
         var delivery = await Assert.That(claimed.Get<ReceiveResult>().Deliveries).HasSingleItem();
@@ -84,7 +86,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
             new(id, MessageState.Leased, 1, 2, 2, null, null, QueueClaimVersionExhaustionProtocol.Root, 1, delivery.LeaseUntil), body, 2);
         await QueueClaimVersionExhaustionAssertions.EqualAsync(database.Apply(claim), claimed);
         var ack = new DeliveryCommand(Guid.NewGuid(), state.Lane, delivery.Token, DeliveryAction.Ack);
-        var completion = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, ack, ack.CommandId, state.Time));
+        var completion = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Delivery, ack, ack.CommandId, state.Time));
         var expectedAck = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
         var receipt = database.Apply(completion);
         await QueueExpiredReadyVersionExhaustionAssertions.ReceiptAsync(receipt, ack.CommandId, expectedAck,
@@ -96,8 +98,8 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
     }
 
     private static async Task ReplayColdAsync(DatabaseEngine database, ZoneTreeStore store, QueueClaimVersionExhaustionState state,
-        OperationResult original, MessageMetadata expired, List<(ReplicatedOperation Operation, OperationResult Result)> successes,
-        (ReplicatedOperation Operation, OperationResult Result) claim)
+        Result<object> original, MessageMetadata expired, List<(Command<DatabaseCommand> Operation, Result<object> Result)> successes,
+        (Command<DatabaseCommand> Operation, Result<object> Result) claim)
     {
         foreach (var pair in successes)
         {
@@ -107,11 +109,11 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
             state.Producer, state.Producer.CommandId, state.Time), state.Produced);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, original);
         var consumed = database.Apply(claim.Operation);
-        await Assert.That(consumed.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(consumed.Json).IsNull();
-        await Assert.That(consumed.NativeValue).IsNull();
+        await Assert.That(Errors.Code(consumed.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        
+        await Assert.That(consumed.Value).IsNull();
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, claim.Operation.Id)))!;
+            state.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, claim.Operation.CommandId)))!;
         await QueueClaimVersionExhaustionAssertions.EqualAsync(retained.Result, claim.Result);
         await QueueExpiredReadyVersionExhaustionAssertions.CurrentAsync(database, store, state.Lane, expired, null, 2);
         await QueueExpiredReadyVersionExhaustionAssertions.CurrentAsync(database, store, state.Lane,

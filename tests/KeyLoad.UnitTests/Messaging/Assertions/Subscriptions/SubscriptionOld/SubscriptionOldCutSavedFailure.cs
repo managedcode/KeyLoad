@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Server;
@@ -9,30 +11,27 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class SubscriptionOldCutSavedFailure
 {
     internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore store, SubscriptionOldCutState state,
-        ReplicatedOperation operation, ErrorCode code, string detail)
+        Command<DatabaseCommand> operation, ErrorCode code, string detail)
     {
         var partition = state.Group.Source.Partition;
         var expected = QueueWholeFlowStorage.Bytes(store).ToDictionary(row => row[..row.IndexOf(':', StringComparison.Ordinal)],
             row => row[(row.IndexOf(':', StringComparison.Ordinal) + 1)..], StringComparer.Ordinal);
         var position = store.Position;
         var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
-        var outcomeKey = KeySpace.PartitionOutcome(partition, operation.PrincipalId, operation.Id);
-        var fingerprint = JsonData.Fingerprint(new
-        {
-            operation.Id,
-            operation.Kind,
-            operation.PrincipalId,
-            operation.PayloadJson
-        });
-        var outcome = new StoredOutcome(fingerprint, store.Identity.Incarnation, 2, new(null, code, detail))
+        var outcomeKey = KeySpace.PartitionOutcome(partition, operation.UserId!, operation.CommandId);
+        var fingerprint = DatabaseCommandFingerprint.Compute(operation);
+        var next = checked(database.LastApplied + 1);
+        var outcome = new StoredOutcome(fingerprint, store.Identity.Incarnation, 2, Result<object>.Fail(Errors.Problem(code, detail)), operation)
         {
             ScopeKind = CommandOutcomeScopeKind.Partition,
-            Partition = partition
+            Partition = partition,
+            CanonicalSequence = next
         };
 
-        expected.Add(Convert.ToHexString(KeySpace.OutcomeLocatorV2(partition, operation.PrincipalId, operation.Id)),
+        expected.Add(Convert.ToHexString(KeySpace.OutcomeLocatorV2(partition, operation.UserId!, operation.CommandId)),
             Convert.ToHexString(outcomeKey));
-        expected[Convert.ToHexString(KeySpace.ClockBytes)] = Convert.ToHexString(NativeSerialization.Serialize(operation.EvaluatedAt));
+        expected[Convert.ToHexString(KeySpace.AppliedBytes)] = Convert.ToHexString(NativeSerialization.Serialize(next));
+        expected[Convert.ToHexString(KeySpace.ClockBytes)] = Convert.ToHexString(NativeSerialization.Serialize(new DateTimeOffset(operation.Timestamp)));
         var failures = new List<Exception>();
         byte[]? raw = null;
         for (var repeat = 0; repeat < 2; repeat++)
@@ -58,36 +57,34 @@ internal static class SubscriptionOldCutSavedFailure
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task ResultAsync(OperationResult result, ErrorCode code, string detail)
+    private static async Task ResultAsync(Result<object> result, ErrorCode code, string detail)
     {
-        await Assert.That(result.Error).IsEqualTo(code);
-        await Assert.That(result.SafeDetail).IsEqualTo(detail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
+        
+        await Assert.That(result.Value).IsNull();
     }
     private static async Task OutcomeAsync(StoredOutcome actual, StoredOutcome expected)
     {
         await Assert.That(actual.Fingerprint).IsEqualTo(expected.Fingerprint);
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(expected.PolicyEpoch);
-        await ResultAsync(actual.Result, expected.Result.Error!.Value, expected.Result.SafeDetail!);
+        await ResultAsync(actual.Result, Errors.Code(expected.Result.Problem)!.Value, expected.Result.Problem?.Detail!);
         await Assert.That(actual.ScopeKind).IsEqualTo(expected.ScopeKind);
         await Assert.That(actual.Partition).IsEqualTo(expected.Partition);
         await Assert.That(actual.BlobAuthority).IsNull();
         await Assert.That(actual.CompositionAuthority).IsNull();
         await Assert.That(actual.OnlineTextAuthority).IsNull();
-        await Assert.That(actual.RemoteTransferFailureAuthority).IsNull();
-        await Assert.That(actual.RemoteTransferAuthority).IsNull();
     }
 
-    private static void Retain(ZoneTreeStore store, SubscriptionOldCutState state, ReplicatedOperation operation, byte[] bytes)
+    private static void Retain(ZoneTreeStore store, SubscriptionOldCutState state, Command<DatabaseCommand> operation, byte[] bytes)
     {
         if (state.DeniedOperation is null)
         {
             state.DeniedOperation = operation;
             state.DeniedOutcome = bytes.ToArray();
             state.DeniedLocator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
-                state.Group.Source.Partition, operation.PrincipalId, operation.Id)))
+                state.Group.Source.Partition, operation.UserId!, operation.CommandId)))
                 ?? throw new InvalidOperationException("The original failure locator is missing.");
         }
     }
@@ -106,13 +103,13 @@ internal static class SubscriptionOldCutSavedFailure
             image, position, identity), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task OriginalBytesAsync(ZoneTreeStore store, SubscriptionOldCutState state, ReplicatedOperation operation)
+    private static async Task OriginalBytesAsync(ZoneTreeStore store, SubscriptionOldCutState state, Command<DatabaseCommand> operation)
     {
         await Assert.That(state.DeniedOutcome.Length > 0 && state.DeniedLocator.Length > 0).IsTrue();
-        var key = KeySpace.PartitionOutcome(state.Group.Source.Partition, operation.PrincipalId, operation.Id);
+        var key = KeySpace.PartitionOutcome(state.Group.Source.Partition, operation.UserId!, operation.CommandId);
         var raw = store.Read(view => view.ReadOwnedValue(key));
         var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
-            state.Group.Source.Partition, operation.PrincipalId, operation.Id)));
+            state.Group.Source.Partition, operation.UserId!, operation.CommandId)));
         await Assert.That(raw).IsNotNull();
         await Assert.That(locator).IsNotNull();
         await Assert.That(raw!.AsSpan().SequenceEqual(state.DeniedOutcome)).IsTrue();

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -28,7 +30,7 @@ internal static class ChunkWindowRecordCapacityFlow
     private static async Task CompleteAsync(SampleChunkCanonicalFixture fixture,
         SampleChunkRetentionClock clock, Guid freshWindow)
     {
-        var originals = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var originals = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         await ChunkWindowRecordCapacityOperations.SeedAsync(fixture, originals);
         await ChunkWindowRecordCapacityAssertions.InitialAsync(fixture, expired: false);
         var immutable = ChunkWindowRecordCapacityAssertions.Capture(fixture.Owner.Store, fixture);
@@ -42,7 +44,7 @@ internal static class ChunkWindowRecordCapacityFlow
     }
 
     private static async Task PageAsync(SampleChunkCanonicalFixture fixture,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals, string[] immutable,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals, string[] immutable,
         long purged, bool more)
     {
         var failures = new List<Exception>();

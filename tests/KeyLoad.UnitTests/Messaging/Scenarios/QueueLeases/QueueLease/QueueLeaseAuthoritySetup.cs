@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -117,7 +118,7 @@ internal static class QueueLeaseAuthoritySetup
         return NativeSerialization.Serialize(damaged);
     }
 
-    internal static ReplicatedOperation Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)
+    internal static Command<DatabaseCommand> Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)
         => new(id, kind, QueueLeaseAuthorityProtocol.Root, time, JsonSerializer.Serialize(value, JsonDefaults.Options));
 
     private static byte[] FaultKey(QueueLaneRef lane, QueueLeaseAuthorityFault fault, byte[] bodyKey, DateTimeOffset deadline)
@@ -133,7 +134,7 @@ internal static class QueueLeaseAuthoritySetup
             _ => KeySpace.Partition(QueueLeaseAuthorityProtocol.LeaseSpace, lane.Partition, lane.Queue, deadline, QueueLeaseAuthorityProtocol.Message)
         };
 
-    private static ReplicatedOperation Original(QueueLaneRef lane, QueueLeaseAuthorityOperation kind, string token, DateTimeOffset time)
+    private static Command<DatabaseCommand> Original(QueueLaneRef lane, QueueLeaseAuthorityOperation kind, string token, DateTimeOffset time)
     {
         var id = Guid.NewGuid();
         if (kind == QueueLeaseAuthorityOperation.Processing)

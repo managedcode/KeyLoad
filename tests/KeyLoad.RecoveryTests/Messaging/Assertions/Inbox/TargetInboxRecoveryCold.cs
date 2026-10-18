@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.Messaging;
@@ -6,7 +7,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class TargetInboxRecoveryCold
 {
-    internal static async Task VerifyAsync(string root, ReplicatedOperation operation, CommitInboxRequest request,
+    internal static async Task VerifyAsync(string root, Command<DatabaseCommand> operation, CommitInboxRequest request,
         CommitInboxResult original, CancellationToken token)
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
@@ -20,11 +21,9 @@ internal static class TargetInboxRecoveryCold
         await Assert.That(database.InspectMessage(CrashFixtureValues.Principal, request.Source, request.MessageId)!.Metadata.State).IsEqualTo(MessageState.Acked);
         var queue = new QueueLaneRef(request.Target.Partition, TargetInboxCrashProtocol.Output);
         var receive = new ReceiveRequest(Guid.NewGuid(), queue);
-        var delivery = database.ApplyEmbedded(new(receive.RequestId, OperationKind.Receive, CrashFixtureValues.Principal, default,
-            System.Text.Json.JsonSerializer.Serialize(receive, JsonDefaults.Options)), token).Get<ReceiveResult>().Deliveries.Single();
+        var delivery = database.ApplyEmbedded(database.CreateCommand(OperationKind.Receive, receive.RequestId, CrashFixtureValues.Principal, default, System.Text.Json.JsonSerializer.Serialize(receive, JsonDefaults.Options)), token).Get<ReceiveResult>().Deliveries.Single();
         var ack = new DeliveryCommand(Guid.NewGuid(), queue, delivery.Token, DeliveryAction.Ack);
-        _ = database.ApplyEmbedded(new(ack.CommandId, OperationKind.Delivery, CrashFixtureValues.Principal, default,
-            System.Text.Json.JsonSerializer.Serialize(ack, JsonDefaults.Options)), token).Get<CommitReceipt>();
+        _ = database.ApplyEmbedded(database.CreateCommand(OperationKind.Delivery, ack.CommandId, CrashFixtureValues.Principal, default, System.Text.Json.JsonSerializer.Serialize(ack, JsonDefaults.Options)), token).Get<CommitReceipt>();
         await Assert.That(database.InspectMessage(CrashFixtureValues.Principal, queue, delivery.Id)!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(store.Read(view => global::KeyLoad.Storage.StorageRecords.GetRecord<TargetInboxCapacity>(view, TargetInboxStorage.CapacityKey(request.Target)))!.Count).IsEqualTo(TargetInboxCrashProtocol.Generation);
     }

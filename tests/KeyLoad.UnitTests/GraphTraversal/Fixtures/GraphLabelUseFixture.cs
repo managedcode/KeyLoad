@@ -24,11 +24,9 @@ internal static class GraphLabelUseFixture
                 .. Edges(db.Partition).Select(edge => new UpsertEdge(Graph, edge.Id, edge.From, edge.To, edge.Label, edge.AttributesJson))]);
         var before = db.Store.Position;
         var receipt = db.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
-        var expected = new CommitReceipt(command.CommandId,
-            new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L),
+        var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, before + 1L), [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L),
                 new("putDocument", Collection, "c", 1L), new("upsertEdge", Graph, "ab", 1L),
-                new("upsertEdge", Graph, "bc", 1L)], DurabilityProfile.ProcessDurable);
+                new("upsertEdge", Graph, "bc", 1L)], DurabilityProfile.ProcessDurable, 1);
         await GraphLabelUseOperations.EqualAsync(expected, receipt);
         foreach (var mutation in receipt.Mutations)
         {

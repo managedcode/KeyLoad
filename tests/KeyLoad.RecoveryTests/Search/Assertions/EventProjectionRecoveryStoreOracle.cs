@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.Search;
@@ -8,7 +9,7 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class EventProjectionRecoveryStoreOracle
 {
-    internal static ProjectionCrashCut CaptureCut(ZoneTreeStore store, ReplicatedOperation operation,
+    internal static ProjectionCrashCut CaptureCut(ZoneTreeStore store, Command<DatabaseCommand> operation,
         ApplyVectorProjection projection, long priorOutboxTail)
     {
         var outcomeKey = OutcomeStoreOracle.Key(store, operation);
@@ -82,9 +83,9 @@ internal static class EventProjectionRecoveryStoreOracle
     }
 
     internal static async Task AssertReceiptAndOutboxAsync(ZoneTreeStore store, DatabaseEngine database,
-        ReplicatedOperation operation, CommitReceipt receipt, long beforeTail)
+        Command<DatabaseCommand> operation, CommitReceipt receipt, long beforeTail)
     {
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(1);
         await Assert.That(receipt.Mutations[0].Kind).IsEqualTo(EventProjectionCrashScenario.MutationKind);
         await Assert.That(receipt.Mutations[0].Resource).IsEqualTo(EventProjectionCrashScenario.Collection);
@@ -110,7 +111,7 @@ internal static class EventProjectionRecoveryStoreOracle
     }
 
     internal static async Task AssertRetryStableAsync(string root, ZoneTreeStore store, DatabaseEngine database,
-        ReplicatedOperation operation, CommitReceipt first, CancellationToken cancellationToken)
+        Command<DatabaseCommand> operation, CommitReceipt first, CancellationToken cancellationToken)
     {
         var beforePosition = store.Position;
         var firstState = CaptureCommittedBytes(store, operation, ReadProjection(operation));
@@ -127,13 +128,13 @@ internal static class EventProjectionRecoveryStoreOracle
         await AssertSeedBytesAsync(root, store, includeDocuments: true, cancellationToken);
     }
 
-    internal static ApplyVectorProjection ReadProjection(ReplicatedOperation operation)
-        => JsonDefaults.Deserialize<CommandRequest>(Encoding.UTF8.GetBytes(operation.PayloadJson))
+    internal static ApplyVectorProjection ReadProjection(Command<DatabaseCommand> operation)
+        => NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
             .Mutations.Single() as ApplyVectorProjection
             ?? throw new InvalidOperationException("The persisted projection operation has an unexpected mutation.");
 
     internal static ProjectionCommittedBytes CaptureCommittedBytes(ZoneTreeStore store,
-        ReplicatedOperation operation, ApplyVectorProjection projection)
+        Command<DatabaseCommand> operation, ApplyVectorProjection projection)
     {
         var outcomeKey = OutcomeStoreOracle.Key(store, operation);
         return store.Read(view => new ProjectionCommittedBytes(

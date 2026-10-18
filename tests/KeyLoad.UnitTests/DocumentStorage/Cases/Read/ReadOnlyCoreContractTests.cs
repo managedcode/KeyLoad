@@ -40,11 +40,10 @@ internal sealed class ReadOnlyCoreContractTests
             partition = database.Partition,
             mutations = (object?)null
         }, JsonDefaults.Options);
-        var rejected = database.Database.Apply(new(id, OperationKind.Batch, RootPrincipal,
-            TimeProvider.System.GetUtcNow(), payload));
+        var rejected = database.Database.Apply(database.Database.CreateCommand(OperationKind.Batch, id, RootPrincipal, TimeProvider.System.GetUtcNow(), payload));
 
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.UnknownOutcome(RootPrincipal, id)))!.Result.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.UnknownOutcome(RootPrincipal, id)))!.Result.Problem)).IsEqualTo(ErrorCode.Validation);
         database.Commit(new PutDocument(DocumentCollection, HealthyDocumentId, EmptyDocumentJson));
         await Assert.That(database.Database.GetDocument(RootPrincipal,
             new(database.Partition, DocumentCollection, HealthyDocumentId))).IsNotNull();

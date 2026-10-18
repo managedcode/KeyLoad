@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -6,9 +8,9 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private RemoteTransferAcceptFailureAuthority? CaptureRemoteTransferFailureAuthority(IKeyValueView view,
-        PrincipalRecord principal, ReplicatedOperation operation)
+        PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
-        if (Limits.MaxQueueTransferAcceptAttempts is null || operation.Kind != OperationKind.Batch)
+        if (Limits.MaxQueueTransferAcceptAttempts is null || operation.Value!.Kind != OperationKind.Batch)
         {
             return null;
         }
@@ -26,15 +28,15 @@ public sealed partial class DatabaseEngine
             return null;
         }
         return new(claims.Source, claims.Destination, claims.TransferId, principal.Id, claims.Fingerprint,
-            RemoteTransferCoordinationIdentity.IntentDigest(accept.IntentToken), operation.Id, CommandFingerprint(operation),
+            RemoteTransferCoordinationIdentity.IntentDigest(accept.IntentToken), operation.CommandId, CommandFingerprint(operation),
             Store.Identity.Incarnation, CaptureRemoteTransferDependency(view, principal, claims.Destination));
     }
 
-    private static bool HasRemoteTransferCapacityFailure(OperationResult result)
-        => result.Error == ErrorCode.ResourceExhausted && (result.SafeDetail == StoredQuotaExhausted
+    private static bool HasRemoteTransferCapacityFailure(Result<object> result)
+        => Errors.Code(result.Problem) == ErrorCode.ResourceExhausted && (result.Problem?.Detail == StoredQuotaExhausted
             || RemoteTransferStorage.IsCapacityFailure(result));
 
-    private static RemoteTransferAcceptFailureKind RemoteTransferFailureKind(OperationResult result)
-        => result.SafeDetail == StoredQuotaExhausted ? RemoteTransferAcceptFailureKind.QueueStorage
+    private static RemoteTransferAcceptFailureKind RemoteTransferFailureKind(Result<object> result)
+        => result.Problem?.Detail == StoredQuotaExhausted ? RemoteTransferAcceptFailureKind.QueueStorage
             : RemoteTransferAcceptFailureKind.TransferRetention;
 }

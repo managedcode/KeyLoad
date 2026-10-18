@@ -9,6 +9,7 @@ namespace KeyLoad.Clustering;
 public sealed class SiloDatabaseClient(IServiceProvider services) : GrainServiceClient<ISiloDatabaseService>(services)
 {
     private readonly IGrainFactory grains = services.GetRequiredService<IGrainFactory>();
+    private readonly ILocalSiloDetails local = services.GetRequiredService<ILocalSiloDetails>();
 
     /// <summary>Borrows the storage service on the exact native silo generation.</summary>
     public ISiloDatabaseService On(SiloAddress address) => GetGrainService(address);
@@ -17,7 +18,7 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
         Guid incarnation, string signedRequest, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var owner = await grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(incarnation))
-            .GetReadOwnerAsync(cancellationToken).ConfigureAwait(false);
+            .GetReadOwnerAsync(local.SiloAddress, cancellationToken).ConfigureAwait(false);
         await foreach (var frame in On(owner).ExecuteStreamAsync(signedRequest, cancellationToken)
             .WithCancellation(cancellationToken).ConfigureAwait(false))
         {
@@ -29,7 +30,7 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
         string actorKey, CancellationToken cancellationToken)
     {
         var owner = await grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(incarnation))
-            .GetReadOwnerAsync(cancellationToken).ConfigureAwait(false);
+            .GetReadOwnerAsync(local.SiloAddress, cancellationToken).ConfigureAwait(false);
         return await On(owner).ExecuteCommandAsync(signedRequest, actorKey, cancellationToken).ConfigureAwait(false);
     }
 }

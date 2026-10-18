@@ -2,7 +2,7 @@ using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication.Cases;
 
-/// <summary>Exercises the existing verifier process boundary, not Docker image provenance or CLUSTER qualification.</summary>
+/// <summary>Exercises the existing verifier process boundary, not Docker image provenance or Orleans qualification.</summary>
 internal sealed class LocalImageVerifierSettlementTests
 {
     private const string Tag = "local-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 internal static class BlobRetiredPartRefusal
 {
     internal static async Task AssertAsync(DatabaseEngine owner, ZoneTreeStore store, BlobRetiredPartState seed,
-        ReplicatedOperation reclaim, string[] image, long position)
+        Command<DatabaseCommand> reclaim, string[] image, long position)
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() => owner.Apply(reclaim));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);

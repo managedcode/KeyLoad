@@ -6,7 +6,7 @@ using KeyLoad.IntegrationTests.Features.RelationalStorage;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>AC-COMP-004/007: actual SQL .NET and official MCP compose models on CLUSTER.</summary>
+/// <summary>AC-COMP-004/007: actual SQL .NET and official MCP compose models on Orleans.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class DatabaseCompositionClusterTests(ClusterFixture fixture)

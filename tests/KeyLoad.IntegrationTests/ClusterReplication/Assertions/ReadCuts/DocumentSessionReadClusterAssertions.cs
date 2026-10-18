@@ -27,7 +27,6 @@ internal static class DocumentSessionReadClusterAssertions
         [
             (minimum with { Incarnation = Guid.NewGuid() }, WrongIncarnation),
             (minimum with { AtomicPartitionId = Guid.NewGuid().ToString() }, OutOfScope),
-            (minimum with { OwnershipEpoch = minimum.OwnershipEpoch + First }, OutOfScope),
             (minimum with { Position = long.MaxValue }, Future),
             (minimum with { Position = Zero }, Invalid)
         ];

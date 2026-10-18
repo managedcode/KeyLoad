@@ -22,10 +22,10 @@ internal static class QueueLeaseAuthorityRefusals
         await Assert.That(replay.Message).IsEqualTo(detail);
         await UnchangedAsync(store, position, image);
         var resolved = database.ResolveOutcome(state.Claim);
-        await Assert.That(resolved.Error).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(resolved.SafeDetail).IsEqualTo(detail);
-        await Assert.That(resolved.Json).IsNull();
-        await Assert.That(resolved.NativeValue).IsNull();
+        await Assert.That(Errors.Code(resolved.Problem)).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(resolved.Problem?.Detail).IsEqualTo(detail);
+        
+        await Assert.That(resolved.Value).IsNull();
         await UnchangedAsync(store, position, image);
         var outcome = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, state.Original.Id)));

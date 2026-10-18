@@ -46,9 +46,7 @@ internal static class ChunkMultiblockPagedRetentionFlow
             var before = SampleRawIntegrityAssertions.Capture(fixture.Store);
             var authority = fixture.Store.Identity;
             var issued = ChunkMultiblockPagedRetentionOperations.Expire(fixture);
-            var expected = new CommitReceipt(issued.Operation.Id,
-                new(authority.Incarnation, fixture.Partition.AtomicPartitionId, checked(before.Position + CommitIncrement), OwnershipEpoch),
-                [new(ExpireKind, SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, purged)], authority.Durability);
+            var expected = new CommitReceipt(issued.Operation.CommandId, new(authority.Incarnation, fixture.Partition.AtomicPartitionId, checked(before.Position + CommitIncrement)), [new(ExpireKind, SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, purged)], authority.Durability, (authority.Durability == DurabilityProfile.Buffered ? 0 : 1));
             await Assert.That(JsonDefaults.Serialize(issued.Receipt).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             await ChunkMultiblockPagedRetentionRows.PageAsync(fixture, purged, more);
             await ChunkMultiblockPagedRetentionRows.RequireAsync(fixture, expired: true, healthy: false);

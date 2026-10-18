@@ -38,7 +38,7 @@ internal static class DueRecurringClusterAssertions
             }
             await Task.Delay(DueRecurringClusterProtocol.PollInterval, TimeProvider.System, cancellationToken);
         }
-        throw new TimeoutException("The autonomous schedule did not advance within its bounded CLUSTER window.");
+        throw new TimeoutException("The autonomous schedule did not advance within its bounded Orleans window.");
     }
 
     internal static async Task AssertScheduleAsync(KeyLoadClient sdk, McpOfficialClient mcp,

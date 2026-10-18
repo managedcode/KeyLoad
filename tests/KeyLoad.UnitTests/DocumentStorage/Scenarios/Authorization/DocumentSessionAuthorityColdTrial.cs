@@ -1,47 +1,37 @@
+using KeyLoad.UnitTests.Features.Messaging;
+using A = KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionAuthorityColdAssertions;
+
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
 internal static class DocumentSessionAuthorityColdTrial
 {
-    private const long OneCommit = 1;
-    private const long DamageAndRepair = 2;
-
-    internal static async Task RunAsync(RemoteDocumentNativeFixture fixture, int damage)
+    internal static Task RunAsync(int damage) => DocumentPatchAtomicityOwner.RunAsync(async fixture =>
     {
-        fixture.Seed();
-        fixture.GrantDestination();
-        await RemoteDocumentNativeAssertions.ReceiptAsync(fixture);
-        var sourceImage = RemoteDocumentNativeAssertions.Image(fixture.Source);
-        var sourcePosition = fixture.Source.Store.Position;
-        var originalImage = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-        var originalPosition = fixture.Destination.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Destination.Store.Identity);
+        fixture.Source.Configure(A.Collection, ResourceKind.Collection);
+        var receipt = fixture.Source.Commit(new PutDocument(A.Collection, A.Id, A.Json, 0));
+        var originalCommand = fixture.Entry(receipt.CommandId).PreparedCommand;
+        var originalImage = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var originalPosition = fixture.Store.Position;
         var original = DocumentSessionAuthorityFault.Original(fixture);
         DocumentSessionAuthorityFault.Damage(fixture, original, damage);
-        var damagedImage = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-        await DocumentSessionAuthorityColdAssertions.UnchangedAsync(fixture, sourceImage, sourcePosition,
-            damagedImage, checked(originalPosition + OneCommit));
-        await RefusedAsync(fixture, damage);
-        fixture.Destination.Reopen();
-        await Assert.That(NativeSerialization.Serialize(fixture.Destination.Store.Identity).SequenceEqual(identity)).IsTrue();
-        await RefusedAsync(fixture, damage);
-        await DocumentSessionAuthorityColdAssertions.UnchangedAsync(fixture, sourceImage, sourcePosition,
-            damagedImage, checked(originalPosition + OneCommit));
+        var damagedImage = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var damagedPosition = checked(originalPosition + 1);
+        await RefusedAsync(fixture, receipt.Token, damage);
+        await DocumentSessionAuthorityColdAssertions.UnchangedAsync(fixture, damagedImage, damagedPosition);
+        await fixture.ReopenAsync();
+        await RefusedAsync(fixture, receipt.Token, damage);
+        await DocumentSessionAuthorityColdAssertions.UnchangedAsync(fixture, damagedImage, damagedPosition);
         DocumentSessionAuthorityFault.Repair(fixture, original);
-        await DocumentSessionAuthorityColdAssertions.UnchangedAsync(fixture, sourceImage, sourcePosition,
-            originalImage, checked(originalPosition + DamageAndRepair));
-        await DocumentSessionAuthorityColdAssertions.LiteralAsync(fixture, fixture.Receipt.Token,
-            RemoteDocumentNativeFixture.First, fixture.Destination.Store.Position);
-        await DocumentSessionAuthorityColdAssertions.ReplayAsync(fixture, fixture.Write, fixture.Receipt);
-        await DocumentSessionAuthorityContinuation.RunAsync(fixture);
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(sourceImage, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourcePosition);
-    }
+        await DocumentSessionAuthorityColdAssertions.UnchangedAsync(fixture, originalImage, checked(originalPosition + 2));
+        await A.LiteralAsync(fixture, receipt.Token, 1);
+        await A.ReplayAsync(fixture, originalCommand, receipt);
+        await DocumentSessionAuthorityContinuation.RunAsync(fixture, originalCommand, receipt);
+    });
 
-    private static async Task RefusedAsync(RemoteDocumentNativeFixture fixture, int damage)
+    private static async Task RefusedAsync(DocumentPatchAtomicityOwner fixture, CommitToken token, int damage)
     {
-        OwnedDocumentReadResultV1? actual = null;
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => actual =
-            DocumentSessionAuthorityColdAssertions.Read(fixture, fixture.Receipt.Token));
+        DocumentResult? actual = null;
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => actual = A.Read(fixture, token));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(error.Message).IsEqualTo(DocumentSessionAuthorityFault.Detail(damage));
         await Assert.That(actual).IsNull();

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server;
@@ -52,7 +54,7 @@ internal sealed class NativeTextProtectedRebuildColdOwner : IDisposable
 
     internal Retained Send<T>(OperationKind kind, T request, Guid? id = null)
     {
-        var operation = Database.CreateNativeOperation(kind, id ?? Guid.NewGuid(), "root",
+        var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), "root",
             Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         return new(operation, Database.ApplyEmbedded(operation, cancellationToken: default));
     }
@@ -90,5 +92,5 @@ internal sealed class NativeTextProtectedRebuildColdOwner : IDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal sealed record Retained(ReplicatedOperation Operation, OperationResult Result);
+    internal sealed record Retained(Command<DatabaseCommand> Operation, Result<object> Result);
 }

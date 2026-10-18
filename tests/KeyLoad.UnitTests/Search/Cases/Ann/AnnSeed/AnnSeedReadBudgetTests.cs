@@ -102,7 +102,6 @@ internal sealed class AnnSeedReadBudgetTests
         {
             var counter = new AnnSeedReadByteCounter();
             CountRead(view, KeySpace.Principal(AnnSeedTestSupport.Principal), counter);
-            CountPhysicalOwnerReads(view, counter);
             CountRead(view, KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId,
                 AnnSeedTestSupport.Collection), counter);
             CountRead(view, KeySpace.Partition("outbox-head", database.Partition), counter);
@@ -129,13 +128,6 @@ internal sealed class AnnSeedReadBudgetTests
 
     private static void CountRead(IKeyValueView view, byte[] key, AnnSeedReadByteCounter counter)
         => view.ReadValue(key, static _ => { }, counter.Add);
-
-    private static void CountPhysicalOwnerReads(IKeyValueView view, AnnSeedReadByteCounter counter)
-    {
-        var catalogKey = KeyLoad.Core.Features.ClusterRouting.Serialization.PhysicalShardCatalogRecordSerialization.CatalogKey();
-        CountRead(view, catalogKey, counter);
-        CountRead(view, catalogKey, counter);
-    }
 
     private sealed class AnnSeedReadByteCounter
     {

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -59,7 +60,7 @@ internal sealed class SampleChunkCanonicalFixture : IDisposable
         }
     }
 
-    internal OperationResult Commit(Guid id, Mutation mutation)
+    internal Result<object> Commit(Guid id, Mutation mutation)
         => Owner.Submit(OperationKind.Batch, new CommandRequest(id, Owner.Partition, [mutation]), Principal, id);
     internal CommitReceipt Commit(Mutation mutation) => Commit(Guid.NewGuid(), mutation).Get<CommitReceipt>();
     internal void Open() => Commit(new OpenSampleChunkWindow(Set, Series, WindowId, Start, Until));

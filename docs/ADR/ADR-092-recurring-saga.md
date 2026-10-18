@@ -6,7 +6,7 @@ Existing NotBefore and per-delivery inboxes implement delayed messages and handl
 deduplication; they do not establish recurring schedules or multi-step saga state.
 Architecture requires versioned timing, stable OccurrenceId and explicit
 cancel/timeout races. Use the existing Orleans-routed, node-local ordered atomic
-gate and logged ReplicatedOperation.EvaluatedAt as the sole durable decision time.
+gate and logged Command<DatabaseCommand>.Timestamp as the sole durable decision time.
 
 Decision: the precise UTC fixed-interval CatchUp profile, generated contracts,
 identity formulas, finite retention, persisted creator/caller authority and saga

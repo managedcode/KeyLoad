@@ -51,7 +51,8 @@ internal static class EventMessageSensitiveSafeR52Seed
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Model.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan((long)EventMessageSensitiveSafeR52Protocol.EmptyCount);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         var kind = state.Model.Subscription ? EventMessageSensitivePublicProtocol.PublishKind : EventMessageSensitivePublicProtocol.EnqueueKind;
         await SqlClusterProtocol.EqualAsync<MutationReceipt[]>([new(kind, state.Model.Resource.Name, id,
             state.Model.Subscription ? state.Published.Count + EventMessageSensitiveSafeR52Protocol.FirstPosition

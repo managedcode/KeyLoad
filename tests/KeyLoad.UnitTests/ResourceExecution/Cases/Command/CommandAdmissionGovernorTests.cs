@@ -5,10 +5,10 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class CommandAdmissionGovernorTests
 {
     private const long FullDataLaneRetainedByteCapacity = 4_096;
-    private const int ReservedBootstrapCommandCapacity = 2;
-    private const long ReservedBootstrapRetainedByteCapacity = 8_200;
-    private const int BootstrapReservationPayloadBytes = 1;
-    private const int BootstrapReservationPayloadCharacters = 1;
+    private const int ReservedDispatchCommandCapacity = 2;
+    private const long ReservedDispatchRetainedByteCapacity = 8_200;
+    private const int DispatchReservationPayloadBytes = 1;
+    private const int DispatchReservationPayloadCharacters = 1;
     private static CommandAdmissionLease Reserve(CommandAdmissionGovernor governor, OperationKind kind, PrincipalRecord principal,
         int bytes, int characters, CancellationToken? cancellationToken = null)
         => governor.Reserve(kind, principal, bytes, characters, cancellationToken ?? TestContext.Current!.Execution.CancellationToken);
@@ -58,7 +58,7 @@ internal sealed class CommandAdmissionGovernorTests
         }));
         using var data = Reserve(governor, OperationKind.Batch, Principal(), 0, 0);
         using var acknowledgement = Reserve(governor, OperationKind.Delivery, Principal(), 16, 16);
-        using var catalog = Reserve(governor, OperationKind.BootstrapPhysicalShardCatalog, Principal("root"), 0, 0);
+        using var dispatch = Reserve(governor, OperationKind.SetDispatch, Principal("root"), 0, 0);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             Reserve(governor, OperationKind.SubscriptionDelivery, Principal(), 0, 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -67,38 +67,38 @@ internal sealed class CommandAdmissionGovernorTests
         await Assert.That(governor.Snapshot().ControlCommands).IsEqualTo(2);
     }
     [Test]
-    public async Task PhysicalCatalogBootstrapUsesBoundedCapacityAndPreservesOtherReservations()
+    public async Task DispatchUsesBoundedCapacityAndPreservesOtherReservations()
     {
         var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new()
         {
             MaxRetainedBytes = FullDataLaneRetainedByteCapacity,
-            ReservedControlCommands = ReservedBootstrapCommandCapacity,
-            ReservedControlBytes = ReservedBootstrapRetainedByteCapacity,
-            MaxControlPayloadBytes = BootstrapReservationPayloadBytes
+            ReservedControlCommands = ReservedDispatchCommandCapacity,
+            ReservedControlBytes = ReservedDispatchRetainedByteCapacity,
+            MaxControlPayloadBytes = DispatchReservationPayloadBytes
         }));
         using var data = Reserve(governor, OperationKind.Batch, Principal(), 0, 0);
         var fullData = governor.Snapshot();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             Reserve(governor, OperationKind.Batch, Principal("other"), 0, 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(governor.Snapshot()).IsEqualTo(fullData);
-        using var bootstrap = Reserve(governor, OperationKind.BootstrapPhysicalShardCatalog, Principal("root"),
-            BootstrapReservationPayloadBytes, BootstrapReservationPayloadCharacters);
-        using var secondBootstrap = Reserve(governor, OperationKind.BootstrapPhysicalShardCatalog, Principal("root"),
-            BootstrapReservationPayloadBytes, BootstrapReservationPayloadCharacters);
+        using var dispatch = Reserve(governor, OperationKind.SetDispatch, Principal("root"),
+            DispatchReservationPayloadBytes, DispatchReservationPayloadCharacters);
+        using var secondDispatch = Reserve(governor, OperationKind.SetDispatch, Principal("root"),
+            DispatchReservationPayloadBytes, DispatchReservationPayloadCharacters);
         var fullControl = governor.Snapshot();
-        await Assert.That(fullControl.ControlCommands).IsEqualTo(ReservedBootstrapCommandCapacity);
-        await Assert.That(fullControl.ControlRetainedBytes).IsEqualTo(ReservedBootstrapRetainedByteCapacity);
+        await Assert.That(fullControl.ControlCommands).IsEqualTo(ReservedDispatchCommandCapacity);
+        await Assert.That(fullControl.ControlRetainedBytes).IsEqualTo(ReservedDispatchRetainedByteCapacity);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-            Reserve(governor, OperationKind.BootstrapPhysicalShardCatalog, Principal("root"),
-                BootstrapReservationPayloadBytes, BootstrapReservationPayloadCharacters)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            Reserve(governor, OperationKind.SetDispatch, Principal("root"),
+                DispatchReservationPayloadBytes, DispatchReservationPayloadCharacters)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(governor.Snapshot()).IsEqualTo(fullControl);
-        bootstrap.Dispose();
-        bootstrap.Dispose();
-        await Assert.That(governor.Snapshot().ControlCommands).IsEqualTo(ReservedBootstrapCommandCapacity - 1);
+        dispatch.Dispose();
+        dispatch.Dispose();
+        await Assert.That(governor.Snapshot().ControlCommands).IsEqualTo(ReservedDispatchCommandCapacity - 1);
         await Assert.That(governor.Snapshot().ControlRetainedBytes)
-            .IsEqualTo(ReservedBootstrapRetainedByteCapacity / ReservedBootstrapCommandCapacity);
-        secondBootstrap.Dispose();
-        secondBootstrap.Dispose();
+            .IsEqualTo(ReservedDispatchRetainedByteCapacity / ReservedDispatchCommandCapacity);
+        secondDispatch.Dispose();
+        secondDispatch.Dispose();
         await Assert.That(governor.Snapshot()).IsEqualTo(fullData);
         data.Dispose();
         data.Dispose();

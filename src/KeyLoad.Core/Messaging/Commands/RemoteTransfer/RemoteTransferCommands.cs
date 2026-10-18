@@ -18,7 +18,7 @@ public sealed partial class DatabaseEngine
     private const string TransferCapacityMessage = "The retained queue transfer capacity is exhausted.";
 
     internal MutationReceipt ApplyCreateQueueTransfer(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, CreateQueueTransfer request, DateTimeOffset now, long position)
+        PartitionRef partition, CreateQueueTransfer request, DateTimeOffset now)
     {
         ValidateTransferSource(request, partition);
         RequireTransferAdministrator(principal);

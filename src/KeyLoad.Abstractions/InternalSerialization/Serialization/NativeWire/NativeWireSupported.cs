@@ -5,8 +5,7 @@ using Orleans.Serialization.Codecs;
 
 namespace KeyLoad.Features.InternalSerialization;
 
-// Only verified native shapes and attributed owned DTOs may enter dynamic decoding.
-// Other Orleans codecs/surrogates require their own schema and qualification before admission.
+// Only selected native communication contracts, verified shapes and attributed owned DTOs enter dynamic decoding.
 internal static class NativeWireSupported
 {
     private const int RootWireDepth = 1;
@@ -64,6 +63,10 @@ internal static class NativeWireSupported
             return type.GetArrayRank() == VectorArrayRank && type == type.GetElementType()!.MakeArrayType();
         }
         if (type.IsGenericType && IsCollection(type.GetGenericTypeDefinition()))
+        {
+            return true;
+        }
+        if (NativeCommunicationContracts.Surrogate(type) is not null || NativeCommunicationContracts.IsSurrogate(type))
         {
             return true;
         }

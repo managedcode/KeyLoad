@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>Executes the caller-visible cross-partition identity flow on the Aspire-owned CLUSTER cluster.</summary>
+/// <summary>Executes the caller-visible cross-partition identity flow on the Aspire-owned Orleans cluster.</summary>
 internal static class ScopedCommandIdentityClusterWorkflow
 {
     private const string FirstEntity = "partition-a-document";
@@ -50,7 +50,7 @@ internal static class ScopedCommandIdentityClusterWorkflow
             await ScopedCommandIdentityClusterAssertions.AssertStateAsync(sdk, mcp, scenario, firstReceipt, secondReceipt, cancellationToken);
         }
 
-        await RestartAllVotersAsync(fixture, cancellationToken);
+        await RestartAllSilosAsync(fixture, cancellationToken);
         using var reopenedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
         var reopenedSdk = new KeyLoadClient(reopenedHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var reopenedMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
@@ -60,7 +60,7 @@ internal static class ScopedCommandIdentityClusterWorkflow
         await ScopedCommandIdentityClusterAssertions.AssertStateAsync(reopenedSdk, reopenedMcp, scenario, firstReceipt, secondReceipt, cancellationToken);
     }
 
-    private static async Task RestartAllVotersAsync(ClusterFixture fixture, CancellationToken cancellationToken)
+    private static async Task RestartAllSilosAsync(ClusterFixture fixture, CancellationToken cancellationToken)
     {
         foreach (var node in Nodes)
         {

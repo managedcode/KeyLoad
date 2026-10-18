@@ -133,7 +133,7 @@ internal static class SampleChunkText
         }
         else
         {
-            SampleChunkUtf16.ValidateFallback(bytes, budget, hashChunkBytes);
+            SampleChunkUtf16.ValidateUnpairedCodeUnits(bytes, budget, hashChunkBytes);
         }
     }
 

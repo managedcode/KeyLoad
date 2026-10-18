@@ -1,4 +1,3 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -9,7 +8,7 @@ internal sealed class RemotePartitionParallelCancellationTests
 
     [Test]
     public Task BothIndependentNativeLeafReadsAreObservedBeforeCallerCancellationAndJoinedBeforeLiteralHealthyMerge()
-        => RemoteDocumentNativeAssertions.RunAsync(async fixture =>
+        => QueryNativeFixtureAssertions.RunAsync(async fixture =>
         {
             var fixtureToken = TestContext.Current!.Execution.CancellationToken;
             using var caller = CancellationTokenSource.CreateLinkedTokenSource(fixtureToken);
@@ -18,11 +17,11 @@ internal sealed class RemotePartitionParallelCancellationTests
                 () => fixture.Source.Store.GetReadDiagnostics().RangeExaminedBytes, barrier);
             var destinationClock = new RemotePartitionNativeReadClock(
                 () => fixture.Destination.Store.GetReadDiagnostics().RangeExaminedBytes, barrier);
-            var flow = new RemotePartitionQueryNativeFlow(fixture, sourceClock, destinationClock);
+            var flow = new QueryNativePartitionFlow(fixture, sourceClock, destinationClock);
             flow.Seed();
             flow.GrantDestination();
-            var source = RemoteDocumentNativeAssertions.Image(fixture.Source);
-            var destination = RemoteDocumentNativeAssertions.Image(fixture.Destination);
+            var source = QueryNativeFixtureAssertions.Image(fixture.Source);
+            var destination = QueryNativeFixtureAssertions.Image(fixture.Destination);
             var sourcePosition = fixture.Source.Store.Position;
             var destinationPosition = fixture.Destination.Store.Position;
             PartitionQueryPageV1? page = null;
@@ -38,10 +37,10 @@ internal sealed class RemotePartitionParallelCancellationTests
             await Assert.That(sourceClock.Triggered).IsTrue();
             await Assert.That(destinationClock.Triggered).IsTrue();
             await Assert.That(page).IsNull();
-            await RemotePartitionQueryNativeAssertions.StateAsync(fixture, source, destination,
+            await QueryNativeFixtureAssertions.StateAsync(fixture, source, destination,
                 sourcePosition, destinationPosition);
-            await RemotePartitionQueryNativeAssertions.PageAsync(await flow.ExecuteAsync(fixtureToken), fixture);
-            await RemotePartitionQueryNativeAssertions.StateAsync(fixture, source, destination,
+            await QueryNativeFixtureAssertions.PageAsync(await flow.ExecuteAsync(fixtureToken), fixture);
+            await QueryNativeFixtureAssertions.StateAsync(fixture, source, destination,
                 sourcePosition, destinationPosition);
         });
 }

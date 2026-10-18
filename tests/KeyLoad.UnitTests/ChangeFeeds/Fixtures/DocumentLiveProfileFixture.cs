@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 
@@ -10,7 +11,7 @@ internal sealed class DocumentLiveProfileFixture : IDisposable
     internal const string Secret = "PRIVATE-LIVE-PROFILE";
     internal const string Unsupported = "The live-query profile requires an unordered complete scalar result set.";
     internal TestDatabase Harness { get; } = new();
-    internal List<(ReplicatedOperation Operation, CommitReceipt Receipt, byte[] Outcome)> Commands { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome)> Commands { get; } = [];
     internal AstQueryRequest Query => new(Harness.Partition,
         new(Collection, null, [new("*", "*")], new Comparison(new FieldOperand("/value"), ">", ValueOperand.Create(0)), [], 10), AllowFullScan: true);
     internal AstQueryRequest Model(ModelQuerySourceKind kind) => Query with
@@ -49,12 +50,10 @@ internal sealed class DocumentLiveProfileFixture : IDisposable
     internal async Task CommitAsync(Mutation[] mutations, MutationReceipt[] effects, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), Harness.Partition, [.. mutations]);
-        var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, "root", default,
-            System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = Harness.Database.CreateCommand(OperationKind.Batch, command.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
         var before = Harness.Store.Position;
         var receipt = Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(command.CommandId,
-            new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L, 1L), [.. effects], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [.. effects], DurabilityProfile.ProcessDurable, 1);
         await DocumentLiveProfileReads.EqualAsync(receipt, expected);
         await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
         foreach (var effect in receipt.Mutations)

@@ -1,17 +1,18 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class AtomicPartitionScopeLifecycleReplies
 {
-    internal static async Task SuccessAsync(OperationResult result, CommandRequest request,
+    internal static async Task SuccessAsync(Result<object> result, CommandRequest request,
         AtomicPartitionScopeLifecycleState state, bool healthy)
     {
-        await Assert.That(result.Error).IsNull();
-        await Assert.That(result.SafeDetail).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(result.Problem?.Detail).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(request.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(state.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(request.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(1);
+
         await Assert.That(receipt.Token.Position).IsGreaterThan(0);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         var item = healthy ? "healthy" : "item";
@@ -24,11 +25,11 @@ internal static class AtomicPartitionScopeLifecycleReplies
             await Assert.That(mutation.CompositionReferences).IsEmpty();
         }
     }
-    internal static async Task FailureAsync(OperationResult result, string detail)
+    internal static async Task FailureAsync(Result<object> result, string detail)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(result.SafeDetail).IsEqualTo(detail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
+        
+        await Assert.That(result.Value).IsNull();
     }
 }

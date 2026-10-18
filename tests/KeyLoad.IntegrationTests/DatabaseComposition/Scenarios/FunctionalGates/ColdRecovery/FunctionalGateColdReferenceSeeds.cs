@@ -18,7 +18,7 @@ internal static class FunctionalGateColdReferenceSeeds
                 var command = new CommandRequest(Guid.NewGuid(), context.Partition,
                     [new PutDocument(collection, WitnessId, WitnessJson, Absent)]);
                 var receipt = await context.SdkAsync(context.Administrator.Sdk.CommitAsync(command, token)).ConfigureAwait(false);
-                await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, context.Partition,
+                await FunctionalGateRelationalAssertions.ReceiptAsync(context, receipt, command.CommandId, context.Partition,
                     [new("putDocument", collection, WitnessId, Initial)]);
                 await FunctionalGateEntityReferences.CaptureAsync(context, context.Administrator,
                     new(new(context.Partition, collection, WitnessId), Initial, WitnessJson, false, []), token).ConfigureAwait(false);

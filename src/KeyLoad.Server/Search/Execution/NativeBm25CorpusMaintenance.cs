@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -27,25 +28,25 @@ internal static class NativeBm25CorpusMaintenance
     }
 
     internal static async Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
-        ReplicatedOperation original, DateTimeOffset envelopeExpiry, ReadExecutionBudget work,
+        Command<DatabaseCommand> original, DateTimeOffset envelopeExpiry, ReadExecutionBudget work,
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(original);
         token.ThrowIfCancellationRequested();
         work.ConstrainLifetime(envelopeExpiry);
-        var verified = partition.Database.VerifyOperationAuthority(original);
-        if (verified.Kind != OperationKind.Bm25CorpusPublicationPhase)
+        var verified = partition.Database.OwnCommand(original);
+        if (verified.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
         }
-        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(verified);
-        var actual = partition.Database.CreateVerifiedBm25CorpusPublication(verified.PrincipalId, phase, work);
+        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(verified.Value!.Input.Span);
+        var actual = partition.Database.CreateVerifiedBm25CorpusPublication(verified.UserId!, phase, work);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(
-            work.CreateView(view), actual.PrincipalId, partition.Database.EvaluationClock.GetUtcNow()));
+            work.CreateView(view), actual.UserId!, partition.Database.EvaluationClock.GetUtcNow()));
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual, envelopeExpiry);
         return await NativeBm25CorpusCall.ExecuteAsync(node, partition, principal, requestId,
-            actual.Id, signed, work, token).ConfigureAwait(false);
+            actual.CommandId, signed, work, token).ConfigureAwait(false);
     }
 
     private static async Task ReadCurrentViewAsync(PartitionHost partition, DateTimeOffset originalExpiry,

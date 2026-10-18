@@ -16,8 +16,7 @@ internal static class SqlTypedInsertAssertions
     internal static async Task ReceiptAsync(SqlTypedInsertExecution execution, params MutationReceipt[] expected)
     {
         var receipt = execution.Result.Get<CommitReceipt>();
-        await SameAsync(new CommitReceipt(execution.Command.CommandId, execution.ExpectedToken,
-            global::System.Collections.Immutable.ImmutableArray.CreateRange(expected), DurabilityProfile.ProcessDurable), receipt);
+        await SameAsync(new CommitReceipt(execution.Command.CommandId, execution.ExpectedToken, global::System.Collections.Immutable.ImmutableArray.CreateRange(expected), DurabilityProfile.ProcessDurable, 1), receipt);
     }
     internal static async Task ImageAsync(TestDatabase fixture, ZoneTreeStore store, DatabaseEngine database,
         bool repaired, int coldRows = NoColdRows)

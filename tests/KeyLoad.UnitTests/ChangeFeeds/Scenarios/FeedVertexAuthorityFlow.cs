@@ -72,8 +72,7 @@ internal static class FeedVertexAuthorityFlow
         var command = new CommandRequest(Guid.NewGuid(), database.Partition,
             [new PutDocument(FeedVertexAuthorityFixture.Collection, "c", "{\"n\":3}", 0L)]);
         token.ThrowIfCancellationRequested();
-        var receipt = owner.Apply(new(command.CommandId, OperationKind.Batch, FeedVertexAuthorityFixture.Root,
-            state.CommittedAt, global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))).Get<CommitReceipt>();
+        var receipt = owner.Apply(owner.CreateCommand(OperationKind.Batch, command.CommandId, FeedVertexAuthorityFixture.Root, state.CommittedAt, global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))).Get<CommitReceipt>();
         await FeedVertexAuthorityAssertions.ReceiptAsync(command, receipt,
             new MutationReceipt(FeedVertexAuthorityFixture.PutKind, FeedVertexAuthorityFixture.Collection, "c", 1L));
         await FeedVertexAuthorityAssertions.HealthyAsync(owner, cold, state, receipt, token);

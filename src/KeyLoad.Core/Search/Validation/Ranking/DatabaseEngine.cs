@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
@@ -8,15 +9,15 @@ public sealed partial class DatabaseEngine
     private const long NoBm25ReceiptPosition = 0;
 
     private void ValidateBm25CachedOutcome(IKeyValueView view, PrincipalRecord administrator,
-        ReplicatedOperation operation, StoredOutcome previous)
+        Command<DatabaseCommand> operation, StoredOutcome previous)
     {
-        if (operation.Kind != OperationKind.Bm25CorpusPublicationPhase)
+        if (operation.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase)
         {
             return;
         }
         var phase = Payload<Bm25CorpusPublicationPhaseCommand>(operation);
-        RequireBm25Subject(view, administrator, phase, operation.EvaluatedAt);
-        if (previous.Result.Error is not null)
+        RequireBm25Subject(view, administrator, phase, operation.Timestamp);
+        if (Errors.Code(previous.Result.Problem) is not null)
         {
             return;
         }

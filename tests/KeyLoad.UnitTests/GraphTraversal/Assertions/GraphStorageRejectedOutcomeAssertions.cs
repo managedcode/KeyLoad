@@ -9,9 +9,9 @@ internal static class GraphStorageRejectedOutcomeAssertions
         ErrorCode expectedError, string expectedDetail, long previousPosition)
     {
         var rejected = GraphStorageReferenceFixture.Submit(database.Database, command);
-        await Assert.That(rejected.Error).IsEqualTo(expectedError);
-        await Assert.That(rejected.SafeDetail).IsEqualTo(expectedDetail);
-        await Assert.That(rejected.Json).IsNull();
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(expectedError);
+        await Assert.That(rejected.Problem?.Detail).IsEqualTo(expectedDetail);
+        
         await Assert.That(database.Store.Position).IsEqualTo(previousPosition + 1);
         var persisted = OutcomeBytes(database, command);
         var retried = GraphStorageReferenceFixture.Submit(database.Database, command);

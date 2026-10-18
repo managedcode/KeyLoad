@@ -28,13 +28,11 @@ internal static class AnalyticsStorePolicyPublicationOperations
         token.ThrowIfCancellationRequested();
         var command = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new PutDocument(S.OtherCollection, S.OtherId, S.OtherJson, ExpectedRevision: S.Absent)]);
-        var expectedIndex = db.ReadJournalCut().LastIndex + S.Revision;
-        var issued = db.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId, D.Root,
+        var expectedIndex = db.ReadCanonicalCut().AppliedPosition + S.Revision;
+        var issued = db.Database.CreateCommand(OperationKind.Batch, command.CommandId, D.Root,
             db.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(command));
         var outcome = db.SubmitIssuedEmbedded(issued, token);
-        await O.EqualAsync(new CommitReceipt(command.CommandId,
-            new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, expectedIndex, S.Revision),
-            [new(PutKind, S.OtherCollection, S.OtherId, S.Revision)], DurabilityProfile.ProcessDurable),
+        await O.EqualAsync(new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, expectedIndex), [new(PutKind, S.OtherCollection, S.OtherId, S.Revision)], DurabilityProfile.ProcessDurable, 1),
             outcome.Get<CommitReceipt>());
         await Assert.That(db.Store.Position).IsGreaterThan(original.SourcePosition);
         var cut = AnalyticsStorePolicyPublicationCut.Capture(db);

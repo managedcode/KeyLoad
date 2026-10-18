@@ -16,17 +16,17 @@ internal static class CanonicalOutcomeReadBudgetFlow
     private const string Missing = "The genuine original native outcome is absent.";
     private const string Budget = "The native outcome validation exhausted its original read budget.";
 
-    internal static async Task RunAsync(C1OutcomeInspectionFixture fixture, bool records)
+    internal static async Task RunAsync(CanonicalOutcomeFixture fixture, bool records)
     {
         var store = fixture.Store;
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, fixture.Partition);
         var original = store.Read(view => Select(view, fixture, scope));
         var key = original.Key;
-        var locator = KeySpace.OutcomeLocatorV2(fixture.Partition, C1OutcomeInspectionAssertions.AdminId, fixture.CommandId);
+        var locator = KeySpace.OutcomeLocatorV2(fixture.Partition, CanonicalOutcomeFixture.AdminId, fixture.CommandId);
         var raw = store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(Missing);
         var link = store.Read(view => view.ReadOwnedValue(locator)) ?? throw new InvalidOperationException(Missing);
         var bytes = checked((long)key.Length + raw.Length + 2L * (locator.Length + link.Length));
-        var image = ControlledPartitionMovementRawImage.Bytes(store);
+        var image = CanonicalOutcomeFixture.Image(store);
         var position = store.Position;
         var examined = 0;
         var observedBytes = 0L;
@@ -66,11 +66,11 @@ internal static class CanonicalOutcomeReadBudgetFlow
         await ColdAsync(fixture, original, image, scope, raw, link);
     }
 
-    private static CommandOutcomeSelection Select(IKeyValueView view, C1OutcomeInspectionFixture fixture,
+    private static CommandOutcomeSelection Select(IKeyValueView view, CanonicalOutcomeFixture fixture,
         CommandOutcomePartitionScope scope, StorageReadObserver? observer = null)
-        => CommandOutcomeKeyResolver.Select(view, C1OutcomeInspectionAssertions.AdminId, fixture.CommandId, scope, observer);
+        => CommandOutcomeKeyResolver.Select(view, CanonicalOutcomeFixture.AdminId, fixture.CommandId, scope, observer);
 
-    private static async Task ColdAsync(C1OutcomeInspectionFixture fixture, CommandOutcomeSelection original,
+    private static async Task ColdAsync(CanonicalOutcomeFixture fixture, CommandOutcomeSelection original,
         string[] image, CommandOutcomePartitionScope scope, byte[] raw, byte[] locator)
     {
         var identity = fixture.Identity;
@@ -86,8 +86,8 @@ internal static class CanonicalOutcomeReadBudgetFlow
             await CanonicalOutcomeReadBudgetAssertions.OriginalAsync(original,
                 reopened.Read(view => Select(view, fixture, scope)), fixture);
             await CanonicalOutcomeReadBudgetAssertions.DocumentAsync(
-                C1OutcomeInspectionHealthyFollowUp.CreateDatabaseEngine(reopened), fixture);
+                fixture.Source.CreateConfiguredDatabase(reopened), fixture);
         }
-        await C1OutcomeInspectionHealthyFollowUp.AssertUnrelatedCurrentOperationAsync(fixture, raw, locator);
+        await fixture.AssertUnrelatedCurrentOperationAsync(raw, locator);
     }
 }

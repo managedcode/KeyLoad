@@ -9,7 +9,7 @@ internal static class AnnPublicSearchExecutor
 {
     private const string Missing = "The native ANN dependency history is unavailable; explicitly rebuild the generation.";
 
-    internal static async Task<AnnSearchPage> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
+    internal static Task<AnnSearchPage> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, ApproximateSearchRequest request, IOptions<QueryExecutionOptions> configured,
         CancellationToken cancellationToken)
     {
@@ -23,11 +23,10 @@ internal static class AnnPublicSearchExecutor
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => Execute(database, projection, principalId, request, budget, execution),
-            cancellationToken).ConfigureAwait(false);
+        return Task.FromResult(Execute(database, projection, principalId, request, budget, execution));
     }
 
-    internal static async Task<AnnSearchPage> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
+    internal static Task<AnnSearchPage> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, ApproximateSearchRequest request, IOptions<QueryExecutionOptions> configured,
         ReadExecutionBudget budget, CancellationToken cancellationToken, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
@@ -41,8 +40,7 @@ internal static class AnnPublicSearchExecutor
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => Execute(database, projection, principalId, request, budget, execution, sourceMetadata),
-            cancellationToken).ConfigureAwait(false);
+        return Task.FromResult(Execute(database, projection, principalId, request, budget, execution, sourceMetadata));
     }
 
     internal static AnnSearchPage Execute(DatabaseEngine database, IAnnProjection? projection,
@@ -98,7 +96,6 @@ internal static class AnnPublicSearchExecutor
     {
         AnnSearchMode.ExactSmallSet => AnnPageMode.Exact,
         AnnSearchMode.Approximate => AnnPageMode.Approximate,
-        AnnSearchMode.ExactAfterInsufficientCandidates => AnnPageMode.ExactFallback,
         _ => throw Errors.Fail(ErrorCode.Corruption, Missing)
     };
 

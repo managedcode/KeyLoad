@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -11,7 +12,7 @@ internal static class UserAnalyticsHostMutations
     {
         var bootstrap = new BootstrapPhysicalShardCatalogRequest(1, 0, fixture.Options.PhysicalShardId,
             host.Configuration.Incarnation, host.Configuration.VoterIds);
-        var operation = host.Database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
+        var operation = host.Database.CreateCommand(OperationKind.BootstrapPhysicalShardCatalog,
             PhysicalShardCatalogIdentity.CreateBootstrapCommandId(fixture.Options.PhysicalShardId),
             PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(bootstrap));
         await UserAnalyticsHostAssertions.SameAsync(true, host.Database.ApplyEmbedded(operation, token).Get<bool>());
@@ -19,24 +20,23 @@ internal static class UserAnalyticsHostMutations
         {
             AnalyticsSchema = new([P.Region], [P.Amount])
         };
-        var configure = host.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(),
+        var configure = host.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(),
             PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(
                 new ConfigureResourceRequest(P.Tenant, P.Database, definition)));
         await UserAnalyticsHostAssertions.SameAsync(definition,
             host.Database.ApplyEmbedded(configure, token).Get<ResourceDefinition>());
     }
 
-    internal static async Task<(ReplicatedOperation Original, CommitReceipt Receipt)> ApplyAsync(PartitionHost host,
+    internal static async Task<(Command<DatabaseCommand> Original, CommitReceipt Receipt)> ApplyAsync(PartitionHost host,
         Mutation mutation, string kind, string id, long generation)
     {
         var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions, host.Database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         var command = new CommandRequest(Guid.NewGuid(), P.Partition, [mutation]);
-        var operation = host.Database.CreateNativeOperation(OperationKind.Batch, command.CommandId,
+        var operation = host.Database.CreateCommand(OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(command), work);
         var expected = new CommitReceipt(command.CommandId, new(host.Database.Store.Identity.Incarnation,
-            P.Partition.AtomicPartitionId, checked(host.Database.Store.Position + 1), 1),
-            [new(kind, P.Store, id, generation)], DurabilityProfile.QuorumProcessDurable);
+            P.Partition.AtomicPartitionId, checked(host.Database.Store.Position + 1)), [new(kind, P.Store, id, generation)], DurabilityProfile.ProcessDurable, 1);
         var actual = host.Database.Apply(operation).Get<CommitReceipt>();
         await UserAnalyticsHostAssertions.SameAsync(expected, actual);
         await Assert.That(actual.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();

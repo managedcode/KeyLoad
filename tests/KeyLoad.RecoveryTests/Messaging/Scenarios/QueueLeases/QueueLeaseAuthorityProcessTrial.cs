@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
@@ -13,14 +14,14 @@ internal static class QueueLeaseAuthorityProcessTrial
     {
         using var store = Open(root);
         var database = QueueLifecycleRecoveryAssertions.Open(store);
-        var original = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var original = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueOrderedRetryCrashProtocol.OperationFile), token));
         var delivery = NativeSerialization.Deserialize<Delivery>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueOrderedRetryCrashProtocol.DeliveryFile), token));
         await Assert.That(delivery).IsEqualTo(new Delivery(QueueOrderedRetryCrashProtocol.First,
             QueueOrderedRetryCrashProtocol.Payload, QueueOrderedRetryCrashProtocol.Headers, delivery.Token,
             1, delivery.LeaseUntil, 1, 1));
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(original.NativePayload.Span);
+        var payload = original.Value!;
         var decisions = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
         await QueueOrderedRetryRecoveryChoice.AssertAsync(store, original, payload, decisions);
         await Assert.That(OutcomeStoreOracle.Read(store, original)).IsNull();

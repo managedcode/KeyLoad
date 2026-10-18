@@ -41,7 +41,7 @@ internal sealed class RemoteTransferReceiptTests
             var rejected = fixture.Apply(OperationKind.Batch,
                 new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
                     [new CompleteQueueTransfer(fixture.SourceQueue, transferId, invalidToken)]));
-            await Assert.That(rejected.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+            await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
             await Assert.That(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
                 fixture.SourceQueue, transferId)!.State).IsEqualTo(QueueTransferState.OutputPending);
         }
@@ -49,7 +49,7 @@ internal sealed class RemoteTransferReceiptTests
         var wrongPrincipal = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
                 [new CompleteQueueTransfer(fixture.SourceQueue, transferId, target.ReceiptToken)]), Principal);
-        await Assert.That(wrongPrincipal.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(wrongPrincipal.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         var completed = fixture.Commit(fixture.SourcePartition,
             new CompleteQueueTransfer(fixture.SourceQueue, transferId, target.ReceiptToken));
         var delivered = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,

@@ -34,7 +34,7 @@ internal static class RemoteTransferAttemptCrashScenario
         var accept = new CommandRequest(RemoteTransferAttemptIdentity.AcceptId(hint, hint.AcceptGeneration),
             Destination.Partition, [new AcceptQueueTransfer(Destination, original.IntentToken)]);
         var failed = CrashDatabase.Submit(database, OperationKind.Batch, accept, accept.CommandId);
-        if (failed.Error != ErrorCode.ResourceExhausted)
+        if (Errors.Code(failed.Problem) != ErrorCode.ResourceExhausted)
         {
             throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
         }
@@ -48,7 +48,7 @@ internal static class RemoteTransferAttemptCrashScenario
         var claims = database.Verify<RemoteTransferAcceptFailureClaims>(witness, database.Limits.MaxBatchBytes);
         var advance = new CommandRequest(RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, claims.OutcomeDigest),
             Source.Partition, [new AdvanceQueueTransferAttempt(Source, transfer.TransferId, hint.AcceptGeneration, witness)]);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, advance, advance.CommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, advance, advance.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.OperationFile), JsonDefaults.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.AcceptFile), JsonDefaults.Serialize(accept));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.FailureFile), failureBytes);

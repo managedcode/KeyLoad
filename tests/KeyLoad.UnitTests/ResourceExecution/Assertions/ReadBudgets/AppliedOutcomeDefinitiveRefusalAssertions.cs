@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,8 +9,8 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class AppliedOutcomeDefinitiveRefusalAssertions
 {
-    internal static async Task ConflictAsync(DatabaseEngine db, ZoneTreeStore store, ReplicatedOperation original,
-        ReplicatedOperation changed, OperationResult committed)
+    internal static async Task ConflictAsync(DatabaseEngine db, ZoneTreeStore store, Command<DatabaseCommand> original,
+        Command<DatabaseCommand> changed, Result<object> committed)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -25,11 +27,11 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
         }
     }
 
-    internal static async Task BoundariesAsync(DatabaseEngine db, ZoneTreeStore store, PartitionRef partition, ReplicatedOperation original,
-        ReplicatedOperation changed, OperationResult committed)
+    internal static async Task BoundariesAsync(DatabaseEngine db, ZoneTreeStore store, PartitionRef partition, Command<DatabaseCommand> original,
+        Command<DatabaseCommand> changed, Result<object> committed)
     {
         var key = KeySpace.PartitionOutcome(partition,
-            AppliedOutcomeDefinitiveRefusalFlow.Worker, original.Id);
+            AppliedOutcomeDefinitiveRefusalFlow.Worker, original.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The genuine original ACK outcome is absent.");
         var outcome = NativeSerialization.Deserialize<StoredOutcome>(saved);
@@ -61,7 +63,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
     }
 
     private static async Task ReadBoundaryAsync(DatabaseEngine db, ZoneTreeStore store,
-        ReplicatedOperation operation, ErrorCode code, string detail)
+        Command<DatabaseCommand> operation, ErrorCode code, string detail)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -71,7 +73,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
     }
 
     private static async Task FatalBoundaryAsync(DatabaseEngine db, ZoneTreeStore store,
-        ReplicatedOperation operation, ErrorCode code)
+        Command<DatabaseCommand> operation, ErrorCode code)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -81,24 +83,23 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }
 
-    private static async Task RefusalAsync(OperationResult result, ErrorCode code, string detail)
+    private static async Task RefusalAsync(Result<object> result, ErrorCode code, string detail)
     {
-        await Assert.That(result.Error).IsEqualTo(code);
-        await Assert.That(result.SafeDetail).IsEqualTo(detail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
+        
+        await Assert.That(result.Value).IsNull();
     }
 
     internal static CommitToken NextToken(DatabaseEngine db, ZoneTreeStore store, PartitionRef partition)
     {
         var placement = db.ReadAtomicPartitionPlacement("root", partition);
-        return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + 1), placement.PlacementEpoch);
+        return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + 1));
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, Guid id, CommitToken token, string message)
+    internal static async Task ReceiptAsync(Result<object> result, Guid id, CommitToken token, string message)
     {
-        var expected = new CommitReceipt(id, token,
-            [new("Ack", AppliedOutcomeDefinitiveRefusalFlow.Queue, message, 3L)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, token, [new("Ack", AppliedOutcomeDefinitiveRefusalFlow.Queue, message, 3L)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(NativeSerialization.Serialize(result.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
     }

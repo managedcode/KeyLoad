@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -5,9 +6,9 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private bool ObserveProjectionResourceEffects(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation)
+        Command<DatabaseCommand> operation)
     {
-        switch (operation.Kind)
+        switch (operation.Value!.Kind)
         {
             case OperationKind.PurgeOutbox:
                 ObservePurgedOutboxResources(view, Payload<PurgeOutboxRequest>(operation));

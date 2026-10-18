@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -24,8 +26,7 @@ internal static class DeniedCommandRepairContinuation
     {
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, fixture.Partition.TransactionDomainId);
         var request = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition);
-        var original = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, Root, default,
-            JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var original = fixture.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), Root, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
         var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
         var expected = new EntityRef(fixture.Partition, Collection, Document)
         {
@@ -40,7 +41,7 @@ internal static class DeniedCommandRepairContinuation
         => await ReceiptAsync(fixture.Store, fixture.Partition, receipt, commandId, previousPosition, NextPosition);
 
     internal static async Task RunAsync(TestDatabase fixture, PrincipalRecord writer,
-        ReplicatedOperation original, byte[] outcome, EntityRef expectedReference)
+        Command<DatabaseCommand> original, byte[] outcome, EntityRef expectedReference)
     {
         fixture.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(writer with
@@ -58,8 +59,8 @@ internal static class DeniedCommandRepairContinuation
         await ColdAsync(fixture, original, outcome, current, result, expectedReference);
     }
 
-    private static async Task ColdAsync(TestDatabase fixture, ReplicatedOperation original,
-        byte[] outcome, ReplicatedOperation current, OperationResult result, EntityRef expectedReference)
+    private static async Task ColdAsync(TestDatabase fixture, Command<DatabaseCommand> original,
+        byte[] outcome, Command<DatabaseCommand> current, Result<object> result, EntityRef expectedReference)
     {
         var identity = fixture.Store.Identity;
         var position = fixture.Store.Position;
@@ -86,7 +87,7 @@ internal static class DeniedCommandRepairContinuation
                 await OldDeniedAsync(database, reopened, fixture.Partition, original, outcome);
                 await ReplayAsync(database, reopened, current, result);
                 await DocumentAsync(database, fixture.Partition, RepairedRevision, RepairedJson, expectedReference);
-                await ColdHealthyAsync(database, reopened, fixture.Partition, original.PrincipalId, expectedReference);
+                await ColdHealthyAsync(database, reopened, fixture.Partition, original.UserId!, expectedReference);
             }
             catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
@@ -107,7 +108,7 @@ internal static class DeniedCommandRepairContinuation
         await ReplayAsync(database, store, fresh, result);
     }
 
-    private static ReplicatedOperation Fresh(DatabaseEngine database, PartitionRef partition,
+    private static Command<DatabaseCommand> Fresh(DatabaseEngine database, PartitionRef partition,
         string principal, long revision, string json)
     {
         var id = Guid.NewGuid();
@@ -118,33 +119,27 @@ internal static class DeniedCommandRepairContinuation
     }
 
     private static async Task OldDeniedAsync(DatabaseEngine database, ZoneTreeStore store,
-        PartitionRef partition, ReplicatedOperation original, byte[] outcome)
+        PartitionRef partition, Command<DatabaseCommand> original, byte[] outcome)
     {
         var position = store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(store);
-        var denied = database.Apply(original with
-        {
-            EvaluatedAt = database.EvaluationClock.GetUtcNow()
-        });
-        await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(denied.SafeDetail).IsEqualTo(ChangedPolicy);
-        await Assert.That(denied.Json).IsNull();
-        await Assert.That(denied.NativeValue).IsNull();
+        var denied = database.Apply(database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (database.EvaluationClock.GetUtcNow()).UtcDateTime, Value = original.Value }));
+        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(denied.Problem?.Detail).IsEqualTo(ChangedPolicy);
+        
+        await Assert.That(denied.Value).IsNull();
         await UnchangedAsync(store, position, bytes);
         var retained = store.Read(view => view.ReadOwnedValue(
-            OutcomeStoreOracle.PartitionKey(partition, original.PrincipalId, original.Id)));
+            OutcomeStoreOracle.PartitionKey(partition, original.UserId!, original.CommandId)));
         await Assert.That(retained is not null && retained.SequenceEqual(outcome)).IsTrue();
     }
 
     private static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation original, OperationResult expected)
+        Command<DatabaseCommand> original, Result<object> expected)
     {
         var position = store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(store);
-        var replay = database.Apply(original with
-        {
-            EvaluatedAt = database.EvaluationClock.GetUtcNow()
-        });
+        var replay = database.Apply(database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (database.EvaluationClock.GetUtcNow()).UtcDateTime, Value = original.Value }));
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await UnchangedAsync(store, position, bytes);
     }
@@ -152,9 +147,7 @@ internal static class DeniedCommandRepairContinuation
     private static async Task ReceiptAsync(ZoneTreeStore store, PartitionRef partition,
         CommitReceipt actual, Guid commandId, long previousPosition, long revision)
     {
-        var expected = new CommitReceipt(commandId,
-            new(store.Identity.Incarnation, partition.AtomicPartitionId, previousPosition + NextPosition, InitialOwnershipEpoch),
-            [new("putDocument", Collection, Document, revision)], store.Identity.Durability);
+        var expected = new CommitReceipt(commandId, new(store.Identity.Incarnation, partition.AtomicPartitionId, previousPosition + NextPosition), [new("putDocument", Collection, Document, revision)], store.Identity.Durability, (store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 

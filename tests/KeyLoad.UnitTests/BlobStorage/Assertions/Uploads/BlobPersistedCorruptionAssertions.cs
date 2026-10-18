@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Features.InternalSerialization;
@@ -72,9 +73,8 @@ internal static class BlobPersistedCorruptionAssertions
         await AssertHealthyBlobAsync(operations, fixture);
     }
 
-    private static OperationResult Apply<T>(TestDatabase database, OperationKind kind, Guid commandId, T request)
-        => database.Database.Apply(new(commandId, kind, PrincipalId, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request, JsonDefaults.Options)));
+    private static Result<object> Apply<T>(TestDatabase database, OperationKind kind, Guid commandId, T request)
+        => database.Database.Apply(database.Database.CreateCommand(kind, commandId, PrincipalId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
 
     private static async Task AssertUnchangedAsync(TestDatabase database, BlobPersistedCorruptionFixture fixture,
         BlobPersistedSnapshot before, Guid commandId)

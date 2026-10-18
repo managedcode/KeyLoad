@@ -68,7 +68,7 @@ internal static class NativeTextProtectedRebuildColdAssertions
         NativeTextProtectedRebuildColdOwner.Retained original, MutationReceipt[] mutations)
     {
         var receipt = original.Result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(original.Operation.Id);
+        await Assert.That(receipt.CommandId).IsEqualTo(original.Operation.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(owner.Source.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(NativeSerialization.Serialize(receipt.Mutations.ToArray()).SequenceEqual(

@@ -29,7 +29,7 @@ internal static class SparseCompositePrefixClusterCurrent
     private static async Task DocumentsAsync(RequestCqrsClusterCallers root, SparseCompositePrefixClusterState state, CancellationToken token)
     {
         var failures = new List<Exception>();
-        foreach (var collection in new[] { SparseCompositePrefixClusterData.Only, SparseCompositePrefixClusterData.Fallback })
+        foreach (var collection in new[] { SparseCompositePrefixClusterData.Only, SparseCompositePrefixClusterData.WithStatusIndex })
         {
             foreach (var row in SparseCompositePrefixClusterData.Rows)
             {

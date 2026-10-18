@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Validates the exact selected Aspire voter model and the original immutable native server image.</summary>
+/// <summary>Validates the exact selected Aspire silo model and the original immutable native server image.</summary>
 internal static class FunctionalGateImageModel
 {
     internal static Dictionary<string, string> ReadContainerNames(IDistributedApplicationTestingBuilder ownedBuilder,
@@ -17,7 +17,7 @@ internal static class FunctionalGateImageModel
         if (!resources.Select(resource => resource.Name).Order(StringComparer.Ordinal)
             .SequenceEqual(nodeNames.Order(StringComparer.Ordinal), StringComparer.Ordinal))
         {
-            throw new InvalidOperationException("The functional Aspire model must expose exactly its requested native voters.");
+            throw new InvalidOperationException("The functional Aspire model must expose exactly its requested native silos.");
         }
         return resources.ToDictionary(resource => resource.Name,
             resource => resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name, StringComparer.Ordinal);
@@ -36,7 +36,7 @@ internal static class FunctionalGateImageModel
                 || !resource.TryGetContainerImageName(out var reference)
                 || !string.Equals(reference, image.Reference, StringComparison.Ordinal))
             {
-                throw new InvalidOperationException("A functional voter does not use the verified immutable native server image.");
+                throw new InvalidOperationException("A functional silo does not use the verified immutable native server image.");
             }
         }
     }

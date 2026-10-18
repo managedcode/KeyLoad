@@ -25,7 +25,7 @@ internal static class CatalogRestoreCredentialFlow
                     () => CompleteAsync(fixture, capture, authority, backup, target, original, archive, token), failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
-        }, nativeAdmission: true);
+        });
     }
 
     private static async Task CompleteAsync(EventingArtifactFixture fixture,

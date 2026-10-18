@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -25,7 +26,7 @@ internal static class CommandObservedPolicyAssertions
         return JsonSerializer.SerializeToElement(value, JsonDefaults.Options);
     }
 
-    internal static OperationResult Outcome(CommandObservedPolicyScenario scenario, Guid commandId)
+    internal static Result<object> Outcome(CommandObservedPolicyScenario scenario, Guid commandId)
         => OutcomeStoreOracle.ReadPartition(scenario.Fixture.Database.Store,
             scenario.Fixture.Database.Partition, P.Worker, commandId)
             ?? throw new InvalidOperationException(P.Missing);
@@ -44,17 +45,17 @@ internal static class CommandObservedPolicyAssertions
         var entry = fixture.Source.Log.ReadEntry(actual.Token.Position)
             ?? throw new InvalidOperationException(P.Missing);
         var operation = entry.Operation ?? throw new InvalidOperationException(P.Missing);
-        await Assert.That(operation.Kind).IsEqualTo(OperationKind.Receive);
-        await Assert.That(operation.Id).IsEqualTo(request.RequestId);
-        await Assert.That(operation.PrincipalId).IsEqualTo(P.Worker);
-        _ = fixture.Source.Database.VerifyOperationAuthority(operation);
-        await EqualAsync(request, NativeCommandPayload.Read<ReceiveRequest>(operation));
+        await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Receive);
+        await Assert.That(operation.CommandId).IsEqualTo(request.RequestId);
+        await Assert.That(operation.UserId!).IsEqualTo(P.Worker);
+        _ = fixture.Source.Database.OwnCommand(operation);
+        await EqualAsync(request, NativeSerialization.Deserialize<ReceiveRequest>((operation).Value!.Input.Span));
         var expected = new ReceiveResult(request.RequestId,
             [new(messageId, P.Payload, P.Headers, delivery.Token, P.Initial,
-                operation.EvaluatedAt.AddSeconds(scenario.Resource.QueuePolicy.MaxLeaseSeconds),
+                new DateTimeOffset(operation.Timestamp).AddSeconds(scenario.Resource.QueuePolicy.MaxLeaseSeconds),
                 P.One, P.Initial)],
             new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId,
-                entry.Index, P.Initial));
+                entry.Index));
         await EqualAsync(expected, actual);
     }
 
@@ -75,14 +76,14 @@ internal static class CommandObservedPolicyAssertions
         var identity = NativeSerialization.Serialize(fixture.Database.Store.Identity);
         var position = fixture.Database.Store.Position;
         var applied = fixture.Database.Database.LastApplied;
-        var cut = fixture.Database.ReadJournalCut();
+        var cut = fixture.Database.ReadCanonicalCut();
         var outcome = OutcomeBytes(scenario, commandId);
         await execute();
         await Assert.That(TeamRowPolicyAssertions.Image(fixture.Database.Store).SequenceEqual(rows, StringComparer.Ordinal)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(fixture.Database.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(fixture.Database.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(fixture.Database.ReadJournalCut()).IsEqualTo(cut);
+        await Assert.That(fixture.Database.ReadCanonicalCut()).IsEqualTo(cut);
         await Assert.That(OutcomeBytes(scenario, commandId).SequenceEqual(outcome)).IsTrue();
     }
 }

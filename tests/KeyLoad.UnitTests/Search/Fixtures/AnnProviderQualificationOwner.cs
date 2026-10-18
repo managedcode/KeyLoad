@@ -1,4 +1,5 @@
-using KeyLoad.Clustering;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -6,97 +7,70 @@ using static KeyLoad.UnitTests.Features.Search.AnnProviderQualificationProtocol;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
+/// <summary>Uses the actual canonical store and reopens its original identity for provider qualification.</summary>
 internal sealed class AnnProviderQualificationOwner : IDisposable
 {
     internal TestDatabase Source { get; } = new();
-    internal ZoneTreeStore Store
-    {
-        get; private set;
-    }
-    internal DatabaseEngine Database
-    {
-        get => field ?? throw new InvalidOperationException(MissingOwner);
-        private set;
-    }
-    private TestDatabaseReplicaAdmission? native;
-    internal TestDatabaseReplicaAdmission Native => native ?? throw new InvalidOperationException(MissingOwner);
-    internal Guid OriginalJournalNodeId
-    {
-        get;
-    }
+    internal ZoneTreeStore Store { get; private set; }
+    internal DatabaseEngine Database { get; private set; }
     internal string SnapshotPath => Path.Combine(Source.Directory, SnapshotFile);
+    private bool originalJoined;
 
     internal AnnProviderQualificationOwner()
     {
         Store = Source.Store;
-        var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() =>
-        {
-            Database = Source.CreateConfiguredDatabase(Store);
-            native = new(Database, Store, Source.Directory, UnitExecutionOptions.ReplicaExecution());
-        }, failures);
-        if (failures.Count != NoFailures)
-        {
-            ServerFailureObserver.Observe(Source.Dispose, failures);
-            ServerFailureObserver.ThrowIfAny(failures);
-        }
-        OriginalJournalNodeId = Native.JournalNodeId;
+        Database = Source.Database;
     }
+
+    internal Result<object> Submit(Command<DatabaseCommand> command, bool explicitTime, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        return explicitTime ? Database.Apply(command) : Database.ApplyEmbedded(command, token);
+    }
+
+    internal StoredOutcome ReadStoredOutcome(Guid commandId)
+        => OutcomeStoreOracle.ReadStored(Database, commandId, TestContext.Current!.Execution.CancellationToken);
+
+    internal StoredOutcome ReadStoredOutcome(Command<DatabaseCommand> command)
+        => OutcomeStoreOracle.ReadStored(Store, command) ?? throw new InvalidOperationException(MissingOriginal);
+
+    internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
+        => Store.Read(_ => (Database.LastApplied, Store.Position));
 
     internal void Reopen()
     {
         AnnProviderQualificationCold.RequireOriginalRoot(Source.Directory);
-        AnnProviderQualificationCold.RequireOriginalRoot(Path.Combine(Source.Directory, JournalDirectory));
         var identity = Store.Identity;
         CloseCurrent();
         AnnProviderQualificationCold.RequireOriginalRoot(Source.Directory);
-        AnnProviderQualificationCold.RequireOriginalRoot(Path.Combine(Source.Directory, JournalDirectory));
-        Store = new(new(Source.Directory)
+        Store = ZoneTreeExistingStore.Open(new(Source.Directory)
         {
-            Incarnation = identity.Incarnation,
-            SigningKey = identity.SigningKey
-        }, Source.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            Incarnation = identity.Incarnation
+        }, identity.NodeId, Source.StorageExecution);
         Database = Source.CreateConfiguredDatabase(Store);
-        native = new(Database, Store, Source.Directory, UnitExecutionOptions.ReplicaExecution(),
-            originalNodeId: OriginalJournalNodeId);
     }
 
     private void CloseCurrent()
     {
-        var failures = new List<Exception>();
-        try
+        if (!originalJoined)
         {
-            native?.Dispose();
+            originalJoined = true;
+            Source.JoinOwnedResources();
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        else
         {
-            failures.Add(error);
+            Store.Dispose();
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        native = null;
-        ServerFailureObserver.Observe(Store.Dispose, failures);
-        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     public void Dispose()
     {
         var failures = new List<Exception>();
-        try
+        ServerFailureObserver.Observe(CloseCurrent, failures);
+        if (failures.Count == NoFailures)
         {
-            CloseCurrent();
+            ServerFailureObserver.Observe(Source.Dispose, failures);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        ServerFailureObserver.Observe(Source.Dispose, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

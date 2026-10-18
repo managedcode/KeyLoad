@@ -1,8 +1,8 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-[RequestCqrsDataSource]
+[RequestCqrsHostedDataSource]
 [NotInParallel(KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsFixtureScheduling.SharedSession)]
-internal sealed class RequestCqrsRoutingTests(RequestCqrsClusterFixture fixture)
+internal sealed class RequestCqrsRoutingTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     internal const string RootPrincipalId = "root";
     internal const string Collection = "request-cqrs-routes";

@@ -1,8 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterReplication;
 using K = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
-using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
+using P = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -10,25 +9,25 @@ internal static class NativeLocalChildLifetimeFlow
 {
     internal static async Task ExecuteAsync(CancellationToken token)
     {
-        var scenario = new P();
         var session = new NativeLocalChildLifetimeSession();
         var failures = new List<Exception>();
         CancellationTokenSource? bound = null;
         CancellationTokenSource? linked = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var fixture = new RequestCqrsCohortRuntimeFixture(barrierDeadline: scenario);
+            await using var fixture = new RequestCqrsHostedRuntimeFixture();
+            await using var other = new RequestCqrsHostedRuntimeFixture();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                bound = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.StartupBound, TimeProvider.System);
+                bound = new CancellationTokenSource(new NativeRuntimeTestOptions().StartupTimeout, TimeProvider.System);
                 linked = CancellationTokenSource.CreateLinkedTokenSource(token, bound.Token);
-                await fixture.InitializeAsync();
-                var seeded = await NativeLocalChildLifetimeSeed.CreateAsync(fixture, linked.Token);
+                await fixture.InitializeAsync(linked.Token);
+                await other.InitializeAsync(linked.Token);
+                var seeded = await NativeLocalChildLifetimeSeed.CreateAsync(fixture, other, linked.Token);
                 var operation = session.Initialize(seeded, linked.Token);
                 await ExerciseAsync(session, seeded, operation);
                 await NativeLocalChildLifetimeConservation.VerifyAsync(fixture, seeded, linked.Token);
             }, failures);
-            scenario.Release();
             await ServerFailureObserver.ObserveAsync(() =>
                 NativeLocalChildLifetimeCleanup.JoinAsync(session, failures), failures);
         }, failures);

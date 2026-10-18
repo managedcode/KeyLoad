@@ -145,28 +145,11 @@ internal static class CrashExecutionOptions
         settings.Validate();
         return Compose(settings, static value => value.Validate());
     }
-
-    internal static IOptions<ReplicaExecutionOptions> Replica(ReplicaExecutionOptions? configured = null)
-    {
-        var settings = configured ?? new ReplicaExecutionOptions();
-        settings.Validate();
-        return Compose(settings, static value => value.Validate());
-    }
-
-    internal static IOptions<ReplicaConfiguration> Configuration(ReplicaConfiguration configured)
-    {
-        configured.Validate();
-        return Compose(configured, static value => value.Validate());
-    }
     internal static IOptions<DatabaseLimits> DatabaseLimits(bool boundOutbox)
     {
         const int BoundOutboxRecords = 1;
         return DatabaseLimits(boundOutbox ? new DatabaseLimits { MaxOutboxRecords = BoundOutboxRecords } : null);
     }
-
-    internal static IOptions<ReplicaConfiguration> Configuration(string voter, string[] voters,
-        string directory, Guid incarnation)
-        => Configuration(new ReplicaConfiguration(voter, [.. voters], directory, incarnation));
 
     internal static IOptions<NodeOptions> Node(NodeOptions selected)
         => Compose(selected, static value => value.Validate());

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -32,15 +33,15 @@ internal static class QueueInvalidDeliveryActionTrial
                 await QueueOrderedRetryImage.SameAsync(fixture.Store, lane, before);
                 await RequireNoEffectsAsync(fixture, lane);
                 var image = QueueWholeFlowStorage.Bytes(fixture.Store);
-                var cut = fixture.ReadJournalCut();
-                var original = fixture.ReadRetainedEntry(id).Operation
+                var cut = fixture.ReadCanonicalCut();
+                var original = fixture.ReadStoredOutcome(id).PreparedCommand
                     ?? throw new InvalidOperationException("The actual native delivery command was not retained.");
                 var replay = fixture.SubmitIssued(original);
                 await RequireRefusalAsync(replay);
                 await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(replay)))
                     .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(rejected)));
                 await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-                await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
+                await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
                 token.ThrowIfCancellationRequested();
                 await CompleteAsync(fixture, lane, delivery, now, before);
             }, owningFailures);
@@ -72,12 +73,12 @@ internal static class QueueInvalidDeliveryActionTrial
         return (lane, delivery, now);
     }
 
-    private static async Task RequireRefusalAsync(OperationResult result)
+    private static async Task RequireRefusalAsync(Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(result.SafeDetail).IsEqualTo(Detail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(Detail);
+        
+        await Assert.That(result.Value).IsNull();
     }
 
     private static async Task RequireNoEffectsAsync(TestDatabase fixture, QueueLaneRef lane)
@@ -103,14 +104,14 @@ internal static class QueueInvalidDeliveryActionTrial
             principal: Worker, id: id, time: now).Get<CommitReceipt>();
         var terminal = QueueOrderedRetryImage.Capture(fixture.Store, lane);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var cut = fixture.ReadJournalCut();
-        var original = fixture.ReadRetainedEntry(id).Operation
+        var cut = fixture.ReadCanonicalCut();
+        var original = fixture.ReadStoredOutcome(id).PreparedCommand
             ?? throw new InvalidOperationException("The actual native Processing command was not retained.");
         var replayed = fixture.SubmitIssued(original).Get<CommitReceipt>();
         await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(replayed)))
             .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(completed)));
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
         var next = Guid.NewGuid();
         var sameHandler = fixture.Submit(OperationKind.Processing, processing with
         {

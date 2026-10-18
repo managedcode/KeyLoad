@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Diagnostics;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -87,21 +88,17 @@ internal sealed class ProjectionProcessRecoveryTests
         CancellationToken cancellationToken)
     {
         var commandPath = Path.Combine(root, "processing-command.json");
-        var original = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(commandPath, cancellationToken));
-        var recovered = database.Apply(original with
-        {
-            EvaluatedAt = TimeProvider.System.GetUtcNow()
-        }).Get<ProjectionBatchResult>();
+        var original = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(commandPath, cancellationToken));
+        var recovered = database.Apply(database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (TimeProvider.System.GetUtcNow()).UtcDateTime, Value = original.Value })).Get<ProjectionBatchResult>();
         await AssertRetryReceiptAsync(database, original, recovered);
     }
 
-    private static async Task AssertRetryReceiptAsync(DatabaseEngine database, ReplicatedOperation original,
+    private static async Task AssertRetryReceiptAsync(DatabaseEngine database, Command<DatabaseCommand> original,
         ProjectionBatchResult recovered)
     {
-        var request = JsonDefaults.Deserialize<CommitProjectionBatchRequest>(System.Text.Encoding.UTF8.GetBytes(original.PayloadJson));
+        var request = NativeSerialization.Deserialize<CommitProjectionBatchRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var retryId = Guid.NewGuid();
-        var retried = database.Apply(new(retryId, OperationKind.CommitProjectionBatch, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request with
+        var retried = database.Apply(database.CreateCommand(OperationKind.CommitProjectionBatch, retryId, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request with
             {
                 CommandId = retryId
             }, JsonDefaults.Options))).Get<ProjectionBatchResult>();

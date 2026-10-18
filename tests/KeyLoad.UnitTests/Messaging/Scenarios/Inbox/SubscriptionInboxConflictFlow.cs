@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -37,9 +39,9 @@ internal static class SubscriptionInboxConflictFlow
         var operation = Create(OperationKind.SubscriptionProcessing, request, request.CommandId, time.AddSeconds(1));
         var result = fixture.Database.Apply(operation);
         await SubscriptionProcessingAtomicAssertions.SuccessAsync(fixture.Database, group, request, result);
-        var history = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>
+        var history = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, operation.Id)) };
-        var claims = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>
+        var claims = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (claim, originalClaim, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, claim.Id)) };
         var inbox = SubscriptionInboxConflictAssertions.InboxBytes(fixture.Store, group);
         await SubscriptionInboxConflictAssertions.ReplayAsync(fixture.Database, fixture.Store, group, history[0]);
@@ -63,8 +65,8 @@ internal static class SubscriptionInboxConflictFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, SubscriptionRef group, SubscriptionProcessingRequest original,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> claims,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> claims,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history,
         byte[] inbox, string[] source, CancellationToken token)
     {
         var cut = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -108,15 +110,15 @@ internal static class SubscriptionInboxConflictFlow
             }, 2, index == 2 ? 1 : 3, 3, 3, false, null);
         }
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
-        var current = JsonSerializer.Deserialize<ReceiveSubscriptionRequest>(claims[1].Operation.PayloadJson, JsonDefaults.Options)
+        var current = NativeSerialization.Deserialize<ReceiveSubscriptionRequest>(claims[1].Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original current Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, cold, current, claims[1].Result, token);
         await SecondColdAsync(cold, fixture.Directory, group, claims, history, inbox, source, current, token);
     }
 
     private static async Task SecondColdAsync(ZoneTreeStore store, string directory, SubscriptionRef group,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> claims,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> claims,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history,
         byte[] inbox, string[] source, ReceiveSubscriptionRequest current, CancellationToken token)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
@@ -173,20 +175,20 @@ internal static class SubscriptionInboxConflictFlow
         await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(db, store, ack, receipt, token);
     }
 
-    private static void Add(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, ReplicatedOperation operation,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+    private static void Add(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, Command<DatabaseCommand> operation,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
         var result = db.Apply(operation);
         result.Get<SubscriptionInfo>();
-        history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id)));
+        history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)));
     }
 
-    private static ReplicatedOperation Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
+    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
         => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 
     private static async Task SeekAndResumeAsync(DatabaseEngine database, ZoneTreeStore store,
         SubscriptionRef group, DateTimeOffset time,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
         var seek = new SeekSubscriptionRequest(Guid.NewGuid(), group, 1, SubscriptionStart.FromBeginning);
         Add(database, store, group, Create(OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(2)), history);

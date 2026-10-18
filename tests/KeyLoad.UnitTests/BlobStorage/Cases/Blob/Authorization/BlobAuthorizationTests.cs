@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.BlobStorage;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
@@ -94,7 +95,7 @@ internal sealed class BlobAuthorizationTests
         database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal))
             .Get<PrincipalRecord>();
 
-    private static OperationResult Apply<T>(TestDatabase database, OperationKind kind,
+    private static Result<object> Apply<T>(TestDatabase database, OperationKind kind,
         string principalId, Guid commandId, T payload) =>
         database.Submit(kind, payload, principalId, commandId);
 }

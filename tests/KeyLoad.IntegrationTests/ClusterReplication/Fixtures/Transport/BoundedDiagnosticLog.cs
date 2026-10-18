@@ -10,11 +10,11 @@ internal static class BoundedDiagnosticLog
 
     /// <summary>Returns a prefix clipped to the existing line and encoded-byte budgets.</summary>
     /// <param name="source">The ordered resource, discovery and log lines.</param>
-    /// <returns>A bounded sequence suitable for the CLUSTER diagnostic artifact.</returns>
+    /// <returns>A bounded sequence suitable for the Orleans diagnostic artifact.</returns>
     internal static string[] Bound(IEnumerable<string> source)
         => BoundCore(source, MaximumLines, MaximumUtf8Bytes);
 
-    /// <summary>Reserves an equal unchanged-budget share for each CLUSTER node before concatenation.</summary>
+    /// <summary>Reserves an equal unchanged-budget share for each Orleans node before concatenation.</summary>
     internal static string[] BoundNodes(IEnumerable<IEnumerable<string>> nodes)
     {
         ArgumentNullException.ThrowIfNull(nodes);

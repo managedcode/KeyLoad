@@ -33,7 +33,8 @@ internal static class ModelRootClusterSeed
         await Assert.That(receipt.CommandId).IsEqualTo(seed.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync<MutationReceipt[]>([new(queue ? "enqueue" : "appendEvents", resource, ModelRootClusterState.Item, 1L)], receipt.Mutations.ToArray());
         var state = new ModelRootClusterState(partition, queue, headerRoot, resource, reader, key, seed, receipt, null!);
         await ConfigureAsync(root, state, 1L, false, false, token);

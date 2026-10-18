@@ -12,7 +12,7 @@ internal readonly record struct RequestCqrsLifecycleSnapshot(
     bool WaveCancellationRequested,
     bool CaptureCancellationRequested,
     bool DrainCancellationRequested,
-    bool CaptureFallbackRequested,
+    bool CaptureForcedCancellationRequested,
     bool ObserverCancellationRequested,
     bool ConsumerCancellationRequested,
     RequestCqrsNodeReadinessOutcome Node1Readiness,

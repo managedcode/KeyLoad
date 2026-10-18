@@ -4,7 +4,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Proves autonomous work rechecks persisted creator and caller authority on real CLUSTER.</summary>
+/// <summary>Proves autonomous work rechecks persisted creator and caller authority on real Orleans.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RecurringSchedulePolicyClusterTests(ClusterFixture fixture)

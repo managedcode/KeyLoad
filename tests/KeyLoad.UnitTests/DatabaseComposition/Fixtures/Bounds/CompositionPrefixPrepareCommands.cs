@@ -13,9 +13,9 @@ internal static class CompositionPrefixPrepareCommands
     {
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, owner.Token);
-        var original = owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, principal,
+        var original = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, principal,
             evaluatedAt ?? owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
-        var decoded = NativeCommandPayload.Read<CommandRequest>(original);
+        var decoded = NativeSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
         return new(decoded, original, NativeSerialization.Serialize(original), null, null, null, work);
     }
 
@@ -32,7 +32,7 @@ internal static class CompositionPrefixPrepareCommands
             await Assert.That(admission.Bindings.ToHashSet().SetEquals(new[] { D.From, D.To, D.Queue, D.Graph }
                 .Select(name => owner.Lifetimes[name]))).IsTrue();
         }
-        var expected = new CommitReceipt(issued.Original.Id, owner.NextToken(), receipts, DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(issued.Original.Id, owner.NextToken(), receipts, DurabilityProfile.ProcessDurable, 1);
         issued = issued with
         {
             Receipt = expected

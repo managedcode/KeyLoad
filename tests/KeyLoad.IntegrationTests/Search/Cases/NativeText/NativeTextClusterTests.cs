@@ -5,7 +5,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
-/// <summary>AC-FTS-001/002: actual CLUSTER text generations preserve canonical ranking and authorization.</summary>
+/// <summary>AC-FTS-001/002: actual Orleans text generations preserve canonical ranking and authorization.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class NativeTextClusterTests(ClusterFixture fixture)

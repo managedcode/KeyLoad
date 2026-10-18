@@ -11,8 +11,8 @@ internal static class FunctionalGateFileOwnershipLogs
 {
     internal static async Task<string> ReadAsync(FunctionalGateFixture fixture, string name, CancellationToken token)
     {
-        var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root);
-        string[] secrets = [profile.AdminKey, profile.SigningKey, profile.PeerSecret];
+        var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
+        string[] secrets = [profile.AdminKey, profile.SigningKey];
         var output = new StringBuilder();
         var logs = fixture.App.Services.GetRequiredService<ResourceLoggerService>();
         try

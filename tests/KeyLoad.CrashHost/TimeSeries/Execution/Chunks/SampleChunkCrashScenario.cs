@@ -60,7 +60,7 @@ internal static class SampleChunkCrashScenario
     {
         var request = new CommandRequest(SampleChunkCrashContract.InflightId, SampleChunkCrashContract.Partition,
             [SampleChunkCrashOperations.Intended(merge)]);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, request, request.CommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile),
             NativeSerialization.Serialize(operation)).ConfigureAwait(false);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);

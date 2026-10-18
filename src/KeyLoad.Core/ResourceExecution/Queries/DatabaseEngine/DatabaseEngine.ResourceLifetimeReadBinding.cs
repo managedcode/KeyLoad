@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     /// <summary>Resolves and binds a resource after the caller's fresh coarse authorization in this same cut.</summary>
-    internal ResourceDefinition BindAuthorizedReadResource(IKeyValueView view, PartitionRef partition,
+    internal static ResourceDefinition BindAuthorizedReadResource(IKeyValueView view, PartitionRef partition,
         string name, ResourceKind? kind = null)
     {
         ArgumentNullException.ThrowIfNull(view);
@@ -17,7 +17,7 @@ public sealed partial class DatabaseEngine
     }
 
     /// <summary>Binds an already authenticated source pair without substituting the target's local catalog.</summary>
-    internal void BindAuthenticatedReadResourceLifetime(IKeyValueView view, PartitionRef partition,
+    internal static void BindAuthenticatedReadResourceLifetime(IKeyValueView view, PartitionRef partition,
         ResourceDefinition definition, ResourceLifetimeV1 lifetime)
     {
         ArgumentNullException.ThrowIfNull(view);

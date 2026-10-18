@@ -1,5 +1,5 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.Core;
@@ -7,36 +7,36 @@ namespace KeyLoad.Core;
 /// <summary>Classifies only the exact bounded native runtime-journal identity bootstrap as control work.</summary>
 internal static class RuntimeJournalBootstrapAdmission
 {
-    internal static bool IsControl(ReplicatedOperation operation, int payloadJsonBytes, int maximumControlPayloadBytes)
+    internal static bool IsControl(Command<DatabaseCommand> operation, int payloadJsonBytes, int maximumControlPayloadBytes)
     {
         if (!IsRuntimeJournal(operation))
         {
-            return CommandAdmissionGovernor.IsControl(operation.Kind);
+            return CommandAdmissionGovernor.IsControl(operation.Value!.Kind);
         }
         if (!WithinOuterControlBound(operation, payloadJsonBytes, maximumControlPayloadBytes))
         {
             return false;
         }
 
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+        var payload = operation.Value!;
         return IsControl(operation, payload, payloadJsonBytes, maximumControlPayloadBytes);
     }
 
-    internal static bool IsControl(ReplicatedOperation operation, NativeCommandPayload inspectedPayload,
+    internal static bool IsControl(Command<DatabaseCommand> operation, DatabaseCommand inspectedPayload,
         int payloadJsonBytes, int maximumControlPayloadBytes)
     {
         if (!IsRuntimeJournal(operation))
         {
-            return CommandAdmissionGovernor.IsControl(operation.Kind);
+            return CommandAdmissionGovernor.IsControl(operation.Value!.Kind);
         }
         ArgumentNullException.ThrowIfNull(inspectedPayload);
         if (!WithinOuterControlBound(operation, payloadJsonBytes, maximumControlPayloadBytes)
-            || inspectedPayload.Value.Length > maximumControlPayloadBytes || inspectedPayload.Error is not null)
+            || inspectedPayload.Input.Length > maximumControlPayloadBytes)
         {
             return false;
         }
 
-        var mutation = NativeSerialization.Deserialize<RuntimeJournalMutation>(inspectedPayload.Value.Span,
+        var mutation = NativeSerialization.Deserialize<RuntimeJournalMutation>(inspectedPayload.Input.Span,
             NativeValidationProfile.PublicInputElements);
         if (mutation.Action != RuntimeJournalAction.BootstrapIdentity)
         {
@@ -55,10 +55,10 @@ internal static class RuntimeJournalBootstrapAdmission
         }
     }
 
-    private static bool IsRuntimeJournal(ReplicatedOperation operation) => operation.Kind == OperationKind.RuntimeJournal;
+    private static bool IsRuntimeJournal(Command<DatabaseCommand> operation) => operation.Value!.Kind == OperationKind.RuntimeJournal;
 
-    private static bool WithinOuterControlBound(ReplicatedOperation operation, int payloadJsonBytes,
+    private static bool WithinOuterControlBound(Command<DatabaseCommand> operation, int payloadJsonBytes,
         int maximumControlPayloadBytes)
         => payloadJsonBytes <= maximumControlPayloadBytes
-            && operation.NativePayload.Length <= maximumControlPayloadBytes;
+            && NativeSerialization.Measure(operation) <= maximumControlPayloadBytes;
 }

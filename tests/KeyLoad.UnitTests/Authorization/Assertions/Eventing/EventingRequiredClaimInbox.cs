@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -8,11 +9,11 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class EventingRequiredClaimInbox
 {
     internal static Task AssertAsync(RequiredProcessingPolicyFixture fixture, ZoneTreeStore store,
-        ReplicatedOperation operation, CommitReceipt receipt)
+        Command<DatabaseCommand> operation, CommitReceipt receipt)
         => RequiredProcessingPolicyAssertions.ObserveAsync(store, async () =>
         {
             const string handler = "throw new InvalidOperationException(\"HANDLER-INJECTION-CANARY\")";
-            var request = JsonSerializer.Deserialize<ProcessingRequest>(operation.PayloadJson, JsonDefaults.Options)!;
+            var request = NativeSerialization.Deserialize<ProcessingRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)!;
             await Assert.That(request.HandlerScope).IsEqualTo(handler);
             var key = KeySpace.Partition("inbox", fixture.Harness.Partition, RequiredProcessingPolicyFixture.Queue,
                 "first", handler, 1L);

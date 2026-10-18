@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -14,7 +15,7 @@ internal static class ProjectionConsumerIdentityFixture
     internal const string MissingRow = "The native projection flow requires its original committed consumer.";
     internal const string Detail = "The committed projection consumer does not match its canonical identity.";
 
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, Guid id, T request)
+    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T request)
         => new(id, kind, Root, default, global::System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
 
     internal static async Task<ProjectionConsumerIdentityState> SeedAsync(TestDatabase database, CancellationToken token)

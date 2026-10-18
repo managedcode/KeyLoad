@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
@@ -11,18 +12,18 @@ internal static class ResourceLifetimeIdentity
     private const string InvalidIdentity = "The persisted resource lifetime identity is invalid.";
     private const int DigestCharacters = 64;
 
-    internal static ResourceLifetimeV1 Create(ReplicatedOperation original, string tenantId,
+    internal static ResourceLifetimeV1 Create(Command<DatabaseCommand> original, string tenantId,
         string databaseId, ResourceDefinition definition)
     {
         RequireScope(tenantId, databaseId, definition);
-        if (original is null || original.Id == Guid.Empty
-            || original.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable)
-            || string.IsNullOrWhiteSpace(original.PayloadJson))
+        if (original is null || original.CommandId == Guid.Empty
+            || original.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable)
+            || original.Value.Input.IsEmpty)
         {
             throw Invalid();
         }
-        RequireIdentifier(original.PrincipalId);
-        var fingerprint = NativeOperationFingerprint.Compute(original);
+        RequireIdentifier(original.UserId!);
+        var fingerprint = DatabaseCommandFingerprint.Compute(original);
         var incarnation = Compute(tenantId, databaseId, definition.Name, fingerprint);
         return new(tenantId, databaseId, definition.Name, definition.TransactionDomainId,
             definition.Kind, new(incarnation), fingerprint);

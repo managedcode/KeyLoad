@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Globalization;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -48,7 +49,7 @@ internal static class RecurringScheduleCrashScenario
         var firstDue = TimeProvider.System.GetUtcNow().AddMinutes(DueOffsetMinutes);
         ConfigureSchedule(database, lane, firstDue);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, Partition).Head.Tail;
-        var operation = CreateEmitOperation(lane);
+        var operation = CreateEmitOperation(database, lane);
         await SaveOperationAsync(directory, tail, operation);
         ArmBoundary(store, boundary);
         _ = database.Apply(operation).Get<CommitReceipt>();
@@ -78,14 +79,14 @@ internal static class RecurringScheduleCrashScenario
         _ = CrashDatabase.Submit(database, OperationKind.Batch, command, ConfigureCommandId).Get<CommitReceipt>();
     }
 
-    private static ReplicatedOperation CreateEmitOperation(QueueLaneRef lane)
+    private static Command<DatabaseCommand> CreateEmitOperation(DatabaseEngine database, QueueLaneRef lane)
     {
         var command = new CommandRequest(EmitCommandId, Partition,
             [new EmitRecurringOccurrences(lane, Guid.Parse(ScheduleIdText), Generation, MaxOccurrences)]);
-        return CrashDatabase.Operation(OperationKind.Batch, command, EmitCommandId);
+        return CrashDatabase.Operation(database, OperationKind.Batch, command, EmitCommandId);
     }
 
-    private static async Task SaveOperationAsync(string directory, long tail, ReplicatedOperation operation)
+    private static async Task SaveOperationAsync(string directory, long tail, Command<DatabaseCommand> operation)
     {
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), JsonDefaults.Serialize(operation));
         await File.WriteAllTextAsync(Path.Combine(directory, SeedTailFile), tail.ToString(CultureInfo.InvariantCulture));

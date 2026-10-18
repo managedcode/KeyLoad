@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -38,7 +40,7 @@ public sealed partial class BlobStorageOperations(DatabaseEngine database, TimeP
     /// <param name="view">The existing gated command view.</param>
     /// <param name="principal">The current persisted principal.</param>
     /// <param name="operation">The trusted replicated command.</param>
-    public void Authorize(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    public void Authorize(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(principal);
@@ -51,7 +53,7 @@ public sealed partial class BlobStorageOperations(DatabaseEngine database, TimeP
     /// <param name="principal">The current persisted principal.</param>
     /// <param name="operation">The trusted command.</param>
     /// <returns>The candidate stamp, or null when no selected upload exists.</returns>
-    public BlobOutcomeAuthority? CaptureOutcomeAuthority(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    public BlobOutcomeAuthority? CaptureOutcomeAuthority(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(principal);
@@ -64,11 +66,10 @@ public sealed partial class BlobStorageOperations(DatabaseEngine database, TimeP
     /// <param name="operation">The trusted retry command.</param>
     /// <param name="result">The canonical stored result.</param>
     /// <param name="authority">The optional private successful-outcome stamp.</param>
-    public void ValidateOutcomeAuthority(IKeyValueView view, ReplicatedOperation operation, OperationResult result, BlobOutcomeAuthority? authority)
+    public void ValidateOutcomeAuthority(IKeyValueView view, Command<DatabaseCommand> operation, Result<object> result, BlobOutcomeAuthority? authority)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(operation);
-        ArgumentNullException.ThrowIfNull(result);
         new BlobOutcomeValidation(database).Validate(view, operation, result, authority);
     }
 
@@ -78,7 +79,7 @@ public sealed partial class BlobStorageOperations(DatabaseEngine database, TimeP
     /// <param name="operation">The trusted command and evaluated time.</param>
     /// <param name="position">The canonical applied commit position.</param>
     /// <returns>The bounded typed serialized feature result.</returns>
-    public OperationResult Execute(IAtomicTransaction transaction, PrincipalRecord principal, ReplicatedOperation operation, long position)
+    public Result<object> Execute(IAtomicTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation, long position)
     {
         ArgumentNullException.ThrowIfNull(transaction);
         ArgumentNullException.ThrowIfNull(principal);
@@ -87,31 +88,28 @@ public sealed partial class BlobStorageOperations(DatabaseEngine database, TimeP
         var scope = BlobCommandScope.From(operation);
         var upload = new BlobUploadCommands(database);
         var publication = new BlobPublicationCommands(database);
-        return operation.Kind switch
+        return operation.Value!.Kind switch
         {
             OperationKind.BeginBlobUpload => Result(transaction, operation, scope, position,
-                upload.Begin(transaction, principal, BlobCommandScope.Payload<BeginBlobUploadRequest>(operation), operation.EvaluatedAt)),
+                upload.Begin(transaction, principal, BlobCommandScope.Payload<BeginBlobUploadRequest>(operation), operation.Timestamp)),
             OperationKind.WriteBlobPart => Result(transaction, operation, scope, position,
-                upload.Write(transaction, BlobCommandScope.Payload<WriteBlobPartRequest>(operation), operation.EvaluatedAt)),
+                upload.Write(transaction, BlobCommandScope.Payload<WriteBlobPartRequest>(operation), operation.Timestamp)),
             OperationKind.CompleteBlobUpload => Result(transaction, operation, scope, position,
-                publication.Complete(transaction, BlobCommandScope.Payload<CompleteBlobUploadRequest>(operation), operation.EvaluatedAt)),
+                publication.Complete(transaction, BlobCommandScope.Payload<CompleteBlobUploadRequest>(operation), operation.Timestamp)),
             OperationKind.AbortBlobUpload => Result(transaction, operation, scope, position,
                 upload.Abort(transaction, BlobCommandScope.Payload<AbortBlobUploadRequest>(operation))),
             OperationKind.DeleteBlob => Result(transaction, operation, scope, position,
-                publication.Delete(transaction, BlobCommandScope.Payload<DeleteBlobRequest>(operation), operation.EvaluatedAt)),
+                publication.Delete(transaction, BlobCommandScope.Payload<DeleteBlobRequest>(operation), operation.Timestamp)),
             OperationKind.ReclaimBlob => Result(transaction, operation, scope, position,
-                new BlobReclaimCommand(database).Execute(transaction, BlobCommandScope.Payload<ReclaimBlobRequest>(operation), operation.EvaluatedAt)),
+                new BlobReclaimCommand(database).Execute(transaction, BlobCommandScope.Payload<ReclaimBlobRequest>(operation), operation.Timestamp)),
             _ => throw BlobErrors.Validation()
         };
     }
 
-    private OperationResult Result<T>(IKeyValueView view, ReplicatedOperation operation, BlobCommandScope scope, long position, T value)
+    private Result<object> Result<T>(IKeyValueView view, Command<DatabaseCommand> operation, BlobCommandScope scope, long position, T value)
     {
-        var receipt = new CommitReceipt(operation.Id, database.Token(view, scope.Blob.Partition, position), [], database.Durability, database.AcknowledgedPersistedCopies);
-        return new(null)
-        {
-            NativeValue = new BlobCommitResult<T>(receipt, value)
-        };
+        var receipt = new CommitReceipt(operation.CommandId, database.Token(view, scope.Blob.Partition, position), [], database.Durability, database.AcknowledgedPersistedCopies);
+        return ManagedCode.Communication.Result<object>.Succeed(new BlobCommitResult<T>(receipt, value));
     }
 
     /// <summary>Reads authorized current metadata from one bounded storage cut.</summary>

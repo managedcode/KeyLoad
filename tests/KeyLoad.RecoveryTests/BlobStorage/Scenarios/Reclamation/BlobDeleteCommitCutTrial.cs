@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -65,8 +67,8 @@ internal static class BlobDeleteCommitCutTrial
         await Assert.That(finalStore.Position).IsEqualTo(position);
     }
 
-    private static async Task<OperationResult> OriginalAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof,
-        ReplicatedOperation original, BlobCommitCutKind cut, string root, CancellationToken token)
+    private static async Task<Result<object>> OriginalAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof,
+        Command<DatabaseCommand> original, BlobCommitCutKind cut, string root, CancellationToken token)
     {
         var store = (ZoneTreeStore)owner.Store;
         var image = BlobCommitCutNativeProof.Image(store);
@@ -74,33 +76,32 @@ internal static class BlobDeleteCommitCutTrial
         var resolved = owner.ResolveOutcome(original);
         if (cut == BlobCommitCutKind.HeaderWritten)
         {
-            await Assert.That(resolved.Error).IsEqualTo(ErrorCode.RecoveryRequired);
-            await Assert.That(resolved.SafeDetail).IsEqualTo(MissingOutcome);
-            await Assert.That(resolved.Json).IsNull();
+            await Assert.That(Errors.Code(resolved.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
+            await Assert.That(resolved.Problem?.Detail).IsEqualTo(MissingOutcome);
+            
             await Assert.That(BlobCommitCutNativeProof.Image(store)).IsEqualTo(image);
             await Assert.That(store.Position).IsEqualTo(position);
         }
         else
         {
-            await Assert.That(resolved.Error).IsNull();
+            await Assert.That(Errors.Code(resolved.Problem)).IsNull();
             if (cut == BlobCommitCutKind.Acknowledged)
             {
                 await BlobDeleteCommitCutOracle.ExactAsync(resolved, await BlobCommitCutNativeProof.ReturnedAsync(root, token));
             }
         }
         var result = owner.Apply(original);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<BlobCommitResult<BlobMetadata>>().Receipt;
-        await BlobDeleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(original.Id,
-            new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId, proof.Position + 1, 1), [], DurabilityProfile.ProcessDurable));
-        await Assert.That(receipt.CommandId).IsEqualTo(original.Id);
+        await BlobDeleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(original.CommandId, new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId, proof.Position + 1), [], DurabilityProfile.ProcessDurable, 1));
+        await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(proof.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(BlobCommitCutProtocol.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(proof.Position + 1);
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();
         await BlobDeleteCommitCutOracle.ExactAsync(result.Get<BlobCommitResult<BlobMetadata>>().Value,
-            new BlobMetadata(BlobCommitCutProtocol.Blob, 2, null, 0, 0, null, new RowAccess(), original.EvaluatedAt, true));
+            new BlobMetadata(BlobCommitCutProtocol.Blob, 2, null, 0, 0, null, new RowAccess(), new DateTimeOffset(original.Timestamp), true));
         await Assert.That(store.Position).IsEqualTo(proof.Position + 1);
         if (cut != BlobCommitCutKind.HeaderWritten)
         {

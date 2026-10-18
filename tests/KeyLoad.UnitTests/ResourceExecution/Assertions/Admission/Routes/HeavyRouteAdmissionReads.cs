@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -31,8 +32,7 @@ internal static class HeavyRouteAdmissionReads
     internal static Task ReplayAsync(HeavyRouteAdmissionFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
         => ObserveAsync(store, async () =>
         {
-            var operation = new ReplicatedOperation(fixture.Seed.CommandId, OperationKind.Batch, "root", default,
-                System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
+            var operation = database.CreateCommand(OperationKind.Batch, fixture.Seed.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
             var replay = database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
             await EqualAsync(replay, fixture.Receipt);
             await HeavyRouteAdmissionFixture.NativeReceiptAsync(replay);

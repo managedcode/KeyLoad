@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
@@ -9,21 +11,21 @@ internal static class ProjectionConcurrentCommitAssertions
     internal const string Json = "{\"sourceCount\":2}";
     private const string ConflictDetail = "The projection batch was completed with different effects.";
 
-    internal static async Task<bool> OutcomesAsync(ReplicatedOperation first, OperationResult a,
-        ReplicatedOperation second, OperationResult b, bool changed)
+    internal static async Task<bool> OutcomesAsync(Command<DatabaseCommand> first, Result<object> a,
+        Command<DatabaseCommand> second, Result<object> b, bool changed)
     {
         bool winnerIsFirst;
         if (changed)
         {
-            await Assert.That((a.Error is null) != (b.Error is null)).IsTrue();
-            winnerIsFirst = a.Error is null;
+            await Assert.That((Errors.Code(a.Problem) is null) != (Errors.Code(b.Problem) is null)).IsTrue();
+            winnerIsFirst = Errors.Code(a.Problem) is null;
             await ProjectionConsumerIdentityAssertions.ExactAsync(winnerIsFirst ? b : a,
-                new OperationResult(null, ErrorCode.Conflict, ConflictDetail));
+                Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, ConflictDetail)));
         }
         else
         {
-            await Assert.That(a.Error).IsNull();
-            await Assert.That(b.Error).IsNull();
+            await Assert.That(Errors.Code(a.Problem)).IsNull();
+            await Assert.That(Errors.Code(b.Problem)).IsNull();
             await Assert.That(a.Get<ProjectionBatchResult>().AlreadyProcessed != b.Get<ProjectionBatchResult>().AlreadyProcessed).IsTrue();
             winnerIsFirst = !a.Get<ProjectionBatchResult>().AlreadyProcessed;
         }

@@ -6,5 +6,5 @@ internal readonly record struct RequestCqrsCaptureLifecycleSnapshot(
     TaskStatus? Node3,
     bool LifetimeCancellationRequested,
     bool DrainCancellationRequested,
-    bool FallbackRequested,
+    bool ForcedCancellationRequested,
     RequestCqrsCleanupCompletionSnapshot Completion);

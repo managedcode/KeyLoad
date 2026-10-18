@@ -6,10 +6,6 @@ internal sealed class IsolatedKeyLoadFaultChecksPhaseReceipt(int phase, int kill
     public int KilledNode { get; } = killedNode;
     public Guid CommandId { get; } = commandId;
     public string Kind { get; } = kind;
-    public bool NativeMcpAuthentication503
-    {
-        get; internal set;
-    }
     public string? WriteRejection
     {
         get; internal set;

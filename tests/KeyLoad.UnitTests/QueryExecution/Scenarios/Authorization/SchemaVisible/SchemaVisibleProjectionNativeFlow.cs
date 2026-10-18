@@ -21,8 +21,7 @@ internal static class SchemaVisibleProjectionNativeFlow
             [new PutDocument(Collection, DocumentId, BinderFieldLineageRequests.OriginalJson)]);
         var seed = SafeProjectorOperationSeed.Issue(owner, OperationKind.Batch, command.CommandId, command);
         var receipt = seed.Result.Get<CommitReceipt>();
-        await SafeProjectorOperationSeed.EqualAsync(receipt, new CommitReceipt(command.CommandId, seed.ExpectedToken,
-            [new(PutDocumentKind, Collection, DocumentId, OriginalRevision)], DurabilityProfile.ProcessDurable));
+        await SafeProjectorOperationSeed.EqualAsync(receipt, new CommitReceipt(command.CommandId, seed.ExpectedToken, [new(PutDocumentKind, Collection, DocumentId, OriginalRevision)], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(receipt.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();
         await SchemaVisibleProjectionNativeAuthority.InvalidAsync(fixture, resource);
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 
@@ -5,15 +6,14 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueDeadlineNativeOperations
 {
-    internal static OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, T payload,
+    internal static Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T payload,
         Guid id, DateTimeOffset time, string principal = QueueDeadlineNativeProtocol.Root)
     {
-        var operation = database.NormalizeOperation(new(id, kind, principal, time,
-            JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+        var operation = database.OwnCommand(database.CreateCommand(kind, id, principal, time, JsonSerializer.Serialize(payload, JsonDefaults.Options)));
         return database.Apply(database.PrepareQueueRetryOperation(operation));
     }
 
-    internal static OperationResult Batch(DatabaseEngine database, CommandRequest command,
+    internal static Result<object> Batch(DatabaseEngine database, CommandRequest command,
         DateTimeOffset time, string principal = QueueDeadlineNativeProtocol.Worker)
         => Apply(database, OperationKind.Batch, command, command.CommandId, time, principal);
 

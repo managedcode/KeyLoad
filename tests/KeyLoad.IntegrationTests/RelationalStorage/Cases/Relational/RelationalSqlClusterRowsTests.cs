@@ -5,7 +5,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>AC-AISQL-002–006: typed rows retain canonical CLUSTER schema, retry, patch and SELECT behavior.</summary>
+/// <summary>AC-AISQL-002–006: typed rows retain canonical Orleans schema, retry, patch and SELECT behavior.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
@@ -27,7 +27,8 @@ internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
         await SqlClusterProtocol.EqualAsync(first, nativeRetry);
         await SqlClusterProtocol.EqualAsync(first, sqlRetry);
         await Assert.That(first.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(first.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(first.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(first.PersistedCopies).IsEqualTo(3);
         var patch = scenario.Command(new PatchDocument(RelationalSqlClusterTokens.Table, RelationalSqlClusterTokens.FirstId,
             [new(RelationalSqlClusterTokens.CountPath, PatchKind.Set, RelationalSqlClusterTokens.PatchValue)], RelationalSqlClusterTokens.FirstRevision));
         var patched = await SqlClusterProtocol.McpAsync<CommitReceipt>(mcp,

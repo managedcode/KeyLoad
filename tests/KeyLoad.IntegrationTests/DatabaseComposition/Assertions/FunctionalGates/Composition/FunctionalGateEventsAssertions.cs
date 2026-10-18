@@ -7,14 +7,14 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateEventsAssertions
 {
-    internal static async Task ReceiptAsync(CommitReceipt receipt, CommandRequest command, StreamRef stream, long revision)
+    internal static async Task ReceiptAsync(FunctionalGateContext context, CommitReceipt receipt, CommandRequest command, StreamRef stream, long revision)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(stream.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(context.ReplicaCount);
         await Assert.That(receipt.Mutations.SequenceEqual(new[]
             { new MutationReceipt("appendEvents", stream.StreamSet, stream.StreamId, revision) })).IsTrue();
     }

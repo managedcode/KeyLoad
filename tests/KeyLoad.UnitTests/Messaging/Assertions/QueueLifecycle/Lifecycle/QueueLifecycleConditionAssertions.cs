@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -16,18 +18,18 @@ internal static class QueueLifecycleConditionAssertions
         await Assert.That(actual.Identity.SequenceEqual(expected.Identity)).IsTrue();
         await Assert.That(actual.Image).IsEquivalentTo(expected.Image, CollectionOrdering.Matching);
     }
-    internal static async Task Corrupt(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state, ReplicatedOperation operation)
+    internal static async Task Corrupt(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state, Command<DatabaseCommand> operation)
     {
         var before = Capture(store);
         await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Partition, QueueLifecycleTestProtocol.Administrator, operation.Id)))).IsNull();
+            state.Partition, QueueLifecycleTestProtocol.Administrator, operation.CommandId)))).IsNull();
         var error = Assert.ThrowsExactly<KeyLoadException>(() => owner.Apply(operation));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            state.Partition, QueueLifecycleTestProtocol.Administrator, operation.Id)))).IsNull();
+            state.Partition, QueueLifecycleTestProtocol.Administrator, operation.CommandId)))).IsNull();
         await Same(store, before);
     }
-    internal static async Task Replay(DatabaseEngine owner, ZoneTreeStore store, ReplicatedOperation operation, OperationResult original)
+    internal static async Task Replay(DatabaseEngine owner, ZoneTreeStore store, Command<DatabaseCommand> operation, Result<object> original)
     {
         var before = Capture(store);
         var replay = owner.Apply(operation);

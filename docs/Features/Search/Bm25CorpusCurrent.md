@@ -49,7 +49,7 @@ Portable RequireRecord validates strict native shape, complete canonical key and
 
 Fresh receipt authorization also requires exact current target-subject PolicyEpoch after current administrator/target capabilities. A higher-epoch restore does not revive an old subject-scoped receipt; mismatch refuses the existing safe PermissionDenied without effects. Source-tail/CAS/quota/inner expiry checks stay first-run only, so document changes alone do not invalidate an otherwise currently authorized original receipt. Existing executing-admin outcome epoch and schema stay unchanged.
 
-The explicit internal Server maintenance entry NativeBm25CorpusMaintenance.PublishAsync uses the actual PartitionHost Query capture, then Core CreateVerifiedBm25CorpusPublication outside the read callback, A's private codec and original OrleansNode.ExecuteAsync/native identity-context with joined streaming. It accepts actual server-authenticated administrator identity; no caller roles or fabricated system admin. Query capture happens once. A bounded original-operation overload accepts only the original verified private45 ReplicatedOperation, copies its original native body, uses fresh outer envelope expiry and the same real native route; retries retain that operation instead of recapturing/reconstructing from a head under the same ID. No public catalogue/read kind/SQL/config/scheduler trigger is added. A genuine private caller operation must invoke the entry; DI-only/dead factory is not evidence.
+The explicit internal Server maintenance entry NativeBm25CorpusMaintenance.PublishAsync uses the actual PartitionHost Query capture, then Core CreateVerifiedBm25CorpusPublication outside the read callback, A's private codec and original OrleansNode.ExecuteAsync/native identity-context with joined streaming. It accepts actual server-authenticated administrator identity; no caller roles or fabricated system admin. Query capture happens once. A bounded original-operation overload accepts only the original verified private45 Command<DatabaseCommand>, copies its original native body, uses fresh outer envelope expiry and the same real native route; retries retain that operation instead of recapturing/reconstructing from a head under the same ID. No public catalogue/read kind/SQL/config/scheduler trigger is added. A genuine private caller operation must invoke the entry; DI-only/dead factory is not evidence.
 
 ## Requirements and measurable acceptance
 
@@ -66,7 +66,7 @@ The explicit internal Server maintenance entry NativeBm25CorpusMaintenance.Publi
 ```mermaid
 flowchart LR
     Capture[Fresh authorized complete canonical corpus] --> Phase[Bounded private native phase]
-    Phase --> Apply[majority-acknowledged apply rechecks policy, source, CAS and limits]
+    Phase --> Apply[required-copy acknowledgementnowledged apply rechecks policy, source, CAS and limits]
     Apply --> Head[One current native statistics head]
     Read[Fresh scoped Search view] --> Validate[Exact Terms and current dependencies]
     Head --> Validate

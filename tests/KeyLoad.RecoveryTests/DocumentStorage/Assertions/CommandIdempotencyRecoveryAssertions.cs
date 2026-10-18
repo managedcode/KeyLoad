@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
@@ -14,7 +15,7 @@ internal static class CommandIdempotencyRecoveryAssertions
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         // This sidecar is the frozen client request only; recovered state comes solely from ZoneTree.
-        var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root,
+        var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<Command<DatabaseCommand>>(root,
             CommandIdempotencyCrashContract.CommandEvidenceFile, cancellationToken);
         var expected = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitReceipt>(root,
             CommandIdempotencyCrashContract.ReceiptEvidenceFile, cancellationToken);

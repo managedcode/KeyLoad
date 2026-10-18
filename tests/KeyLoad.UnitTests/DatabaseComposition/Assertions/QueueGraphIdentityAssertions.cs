@@ -70,13 +70,10 @@ internal static class QueueGraphIdentityAssertions
     internal static async Task HealthyAsync(QueueGraphIdentityState state, DatabaseEngine engine, ZoneTreeStore store)
     {
         var receipt = engine.Apply(state.Healthy).Get<CommitReceipt>();
-        var expected = new CommitReceipt(state.Healthy.Id,
-            new(store.Identity.Incarnation, state.Fixture.Partition.AtomicPartitionId,
-                store.Position, state.SeedReceipt.Token.OwnershipEpoch),
-            [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker, 1),
+        var expected = new CommitReceipt(state.Healthy.Id, new(store.Identity.Incarnation, state.Fixture.Partition.AtomicPartitionId,
+                store.Position), [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker, 1),
                 new("upsertEdge", QueueGraphIdentityState.Graph,
-                    QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)],
-            state.SeedReceipt.Durability);
+                    QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)], state.SeedReceipt.Durability, (state.SeedReceipt.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(receipt.Mutations[0].CompositionReferences).IsEmpty();
         await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.BoundFrom, state.BoundTo])).IsTrue();

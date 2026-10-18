@@ -23,7 +23,7 @@ internal sealed record FunctionalGateContext(
     internal string WriterPrincipalId { get; init; } = string.Empty;
     internal string ReaderPrincipalId { get; init; } = string.Empty;
     internal string MutableDocumentCollection { get; init; } = FunctionalGateProtocol.OpenDocumentCollection;
-    internal int VoterCount
+    internal int ReplicaCount
     {
         get; init;
     }

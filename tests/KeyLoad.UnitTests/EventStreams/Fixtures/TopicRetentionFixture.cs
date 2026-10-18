@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -110,9 +111,8 @@ internal sealed class TopicRetentionFixture : IDisposable
 
     internal CommandRequest Purge(long cut = 2, long generation = 1)
         => new(Guid.NewGuid(), Owner.Partition, [new PurgeTopic(Topic, cut, generation)]);
-    internal OperationResult Submit(CommandRequest command, string principal = "root")
-        => Database.ApplyEmbedded(new(command.CommandId, OperationKind.Batch, principal, default,
-            JsonSerializer.Serialize(command, JsonDefaults.Options)), cancellationToken: default);
+    internal Result<object> Submit(CommandRequest command, string principal = "root")
+        => Database.ApplyEmbedded(Database.CreateCommand(OperationKind.Batch, command.CommandId, principal, default, JsonSerializer.Serialize(command, JsonDefaults.Options)), cancellationToken: default);
     internal void ReleasePins()
     {
         SubscriptionTestActions.Complete(Owner, First, Claims.Deliveries[1]);

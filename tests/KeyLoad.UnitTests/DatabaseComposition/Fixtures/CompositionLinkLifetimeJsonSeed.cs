@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -31,18 +32,17 @@ internal static class CompositionLinkLifetimeJsonSeed
         var to = Reference(owner, P.To, P.Second);
         var seed = Issue(owner, [new PutDocument(P.From, P.First, P.FirstJson, 0),
             new PutDocument(P.To, P.Second, P.SecondJson, 0)], token);
-        await A.ReceiptAsync(new(seed.Id, owner.NextToken(),
-            [new("putDocument", P.From, P.First, 1), new("putDocument", P.To, P.Second, 1)], DurabilityProfile.ProcessDurable),
+        await A.ReceiptAsync(new(seed.Id, owner.NextToken(), [new("putDocument", P.From, P.First, 1), new("putDocument", P.To, P.Second, 1)], DurabilityProfile.ProcessDurable, 1),
             owner.Submit(seed).Get<CommitReceipt>());
         return new(from, to, seed);
     }
 
-    internal static ReplicatedOperation Issue(SafeProjectorOperationDatabase owner, ImmutableArray<Mutation> mutations,
+    internal static Command<DatabaseCommand> Issue(SafeProjectorOperationDatabase owner, ImmutableArray<Mutation> mutations,
         CancellationToken token)
     {
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
-        return owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, P.Root,
+        return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, P.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
     }
 

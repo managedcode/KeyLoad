@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -17,16 +18,16 @@ internal static class QueueExpiredReadyVersionExhaustionAssertions
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueClaimVersionExhaustionProtocol.Root, lane.Partition);
         await Assert.That(placement.Partition).IsEqualTo(lane.Partition);
-        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(store.Position + 1), placement.PlacementEpoch);
+        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(store.Position + 1));
     }
 
-    internal static async Task EmptyAsync(OperationResult result, Guid id, CommitToken expected)
+    internal static async Task EmptyAsync(Result<object> result, Guid id, CommitToken expected)
         => await QueueClaimVersionExhaustionAssertions.EqualAsync(result.Get<ReceiveResult>(), new ReceiveResult(id, [], expected));
 
-    internal static async Task ReceiptAsync(OperationResult result, Guid id, CommitToken token,
+    internal static async Task ReceiptAsync(Result<object> result, Guid id, CommitToken token,
         string kind, QueueLaneRef lane, string message, long revision)
     {
-        var expected = new CommitReceipt(id, token, [new(kind, lane.Queue, message, revision)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, token, [new(kind, lane.Queue, message, revision)], DurabilityProfile.ProcessDurable, 1);
         await QueueClaimVersionExhaustionAssertions.EqualAsync(result.Get<CommitReceipt>(), expected);
     }
 

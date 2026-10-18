@@ -1,12 +1,13 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 internal static class ResourceEffectAdmissionValidation
 {
-    internal static ResourceEffectAdmissionV1 Read(ReplicatedOperation operation, DatabaseLimits limits)
+    internal static ResourceEffectAdmissionV1 Read(Command<DatabaseCommand> operation, DatabaseLimits limits)
     {
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+        var payload = operation.Value!;
         if (payload.ResourceAdmission.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Unbound);
@@ -17,7 +18,7 @@ internal static class ResourceEffectAdmissionValidation
         }
         var value = NativeSerialization.Deserialize<ResourceEffectAdmissionV1>(payload.ResourceAdmission.Span);
         if (value is null || value.Version != ResourceEffectAdmissionProtocol.Version
-            || value.OperationFingerprint != NativeOperationFingerprint.Compute(operation)
+            || value.OperationFingerprint != DatabaseCommandFingerprint.Compute(operation)
             || value.Bindings.IsDefault
             || (value.Error is null) != (value.SafeDetail is null)
             || value.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(value.SafeDetail)

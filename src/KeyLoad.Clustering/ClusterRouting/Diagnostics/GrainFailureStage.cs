@@ -13,7 +13,7 @@ internal enum GrainFailureStage
     RequiredNullPayload,
     /// <summary>Atomic partition resolution rejected the request.</summary>
     PartitionResolution,
-    /// <summary>The operation could not establish a quorum read barrier.</summary>
+    /// <summary>The operation could not establish its canonical storage read cut.</summary>
     ReadBarrier,
     /// <summary>Persisted authorization rejected the request.</summary>
     Authorization,

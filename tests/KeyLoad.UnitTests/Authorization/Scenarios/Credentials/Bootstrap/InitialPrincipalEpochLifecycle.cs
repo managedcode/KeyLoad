@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
@@ -42,7 +44,7 @@ internal static class InitialPrincipalEpochLifecycle
                 database.EvaluationClock.GetUtcNow()), ErrorCode.Unauthenticated);
         });
     }
-    private static async Task KeyAsync(DatabaseEngine database, ReplicatedOperation operation, CancellationToken token)
+    private static async Task KeyAsync(DatabaseEngine database, Command<DatabaseCommand> operation, CancellationToken token)
         => await Assert.That(database.ApplyEmbedded(operation, token).Get<bool>()).IsTrue();
     private static async Task PrincipalAsync(InitialPrincipalEpochFixture fixture, long epoch, bool grant, bool revoked, CancellationToken token)
     {
@@ -53,7 +55,7 @@ internal static class InitialPrincipalEpochLifecycle
     private static async Task UpdateConflictAsync(InitialPrincipalEpochFixture fixture, CancellationToken token)
     {
         var operation = fixture.Configuration(0L);
-        var expected = new OperationResult(null, ErrorCode.RevisionConflict, "A policy update must advance its epoch.");
+        var expected = Result<object>.Fail(Errors.Problem(ErrorCode.RevisionConflict, "A policy update must advance its epoch."));
         await InitialPrincipalEpochAssertions.FailureAsync(fixture.Harness.Database.ApplyEmbedded(operation, token), expected);
         await InitialPrincipalEpochAssertions.EqualAsync(fixture.Harness.Store.Read(view =>
             view.GetRecord<PrincipalRecord>(KeySpace.Principal(InitialPrincipalEpochFixture.Reader))), fixture.Principal(1L));

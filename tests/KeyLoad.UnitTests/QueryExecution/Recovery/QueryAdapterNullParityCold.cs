@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class QueryAdapterNullParityCold
 {
     internal static async Task<(string[] Image, long Position, byte[] Identity)> RunAsync(TestDatabase fixture, int epoch,
-        List<(ReplicatedOperation Operation, byte[] Result)> originals,
+        List<(Command<DatabaseCommand> Operation, byte[] Result)> originals,
         (string[] Image, long Position, byte[] Identity) before)
     {
         var failures = new List<Exception>();

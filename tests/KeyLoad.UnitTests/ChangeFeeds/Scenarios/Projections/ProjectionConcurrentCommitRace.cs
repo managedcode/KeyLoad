@@ -1,11 +1,13 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ProjectionConcurrentCommitRace
 {
-    internal static async Task<(OperationResult First, OperationResult Second)> RunAsync(DatabaseEngine owner,
-        ReplicatedOperation first, ReplicatedOperation second, CancellationToken token)
+    internal static async Task<(Result<object> First, Result<object> Second)> RunAsync(DatabaseEngine owner,
+        Command<DatabaseCommand> first, Command<DatabaseCommand> second, CancellationToken token)
     {
         var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var firstTask = Task.Run(async () =>
@@ -20,8 +22,8 @@ internal static class ProjectionConcurrentCommitRace
         }, token);
         gate.SetResult();
         var failures = new List<Exception>();
-        OperationResult? firstResult = null;
-        OperationResult? secondResult = null;
+        Result<object>? firstResult = null;
+        Result<object>? secondResult = null;
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { firstResult = await firstTask; }, failures);
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { secondResult = await secondTask; }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

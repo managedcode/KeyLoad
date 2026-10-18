@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -5,13 +6,13 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class EventMessageSensitiveReplayAssertions
 {
-    internal static async Task DeniedAsync(OperationResult result, ErrorCode code)
+    internal static async Task DeniedAsync(Result<object> result, ErrorCode code)
     {
-        await Assert.That(result.Error).IsEqualTo(code);
-        await Assert.That(result.NativeValue).IsNull();
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.SafeDetail).DoesNotContain("SENSITIVE_BODY_NATIVE_CANARY");
-        await Assert.That(result.SafeDetail).DoesNotContain("SENSITIVE_HEADER_NATIVE_CANARY");
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(result.Value).IsNull();
+        
+        await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_BODY_NATIVE_CANARY");
+        await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_HEADER_NATIVE_CANARY");
     }
 
     internal static async Task RefusalAsync(DatabaseEngine database, ZoneTreeStore store,
@@ -28,7 +29,7 @@ internal static class EventMessageSensitiveReplayAssertions
         => state.Subscription ? NativeSerialization.Serialize(database.GetSubscription(EventMessageSensitiveReplayProtocol.Root, state.OriginalGroup))
             : NativeSerialization.Serialize(database.InspectMessage(EventMessageSensitiveReplayProtocol.Root, state.Lane, EventMessageSensitiveReplayProtocol.First)!);
 
-    internal static async Task FullAsync(OperationResult result, EventMessageSensitiveReplayState state)
+    internal static async Task FullAsync(Result<object> result, EventMessageSensitiveReplayState state)
     {
         string payload;
         string headers;

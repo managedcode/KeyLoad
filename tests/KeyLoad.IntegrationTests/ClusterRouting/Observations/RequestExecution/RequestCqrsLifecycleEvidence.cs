@@ -69,7 +69,7 @@ internal sealed class RequestCqrsLifecycleEvidence
             observerState?.PendingMove, consumerState?.PendingMove,
             callerToken.IsCancellationRequested, parentToken.IsCancellationRequested,
             waveToken.IsCancellationRequested, capture?.LifetimeCancellationRequested ?? false,
-            capture?.DrainCancellationRequested ?? false, capture?.FallbackRequested ?? false,
+            capture?.DrainCancellationRequested ?? false, capture?.ForcedCancellationRequested ?? false,
             observerState?.LifetimeCancellationRequested ?? false,
             consumerState?.LifetimeCancellationRequested ?? false,
             readiness[0], readiness[1], readiness[2], heldWriteObserved, persistedRevocationEntered,
@@ -161,7 +161,7 @@ internal sealed class RequestCqrsLifecycleEvidence
     }
 
     private static string Format(RequestCqrsLifecycleSnapshot value)
-        => $"s={value.Stage};c1={Status(value.CaptureNode1)};c2={Status(value.CaptureNode2)};c3={Status(value.CaptureNode3)};a={Status(value.AdmissionMove)};i={Status(value.IndependentConsumerMove)};caller={Bit(value.CallerCancellationRequested)};parent={Bit(value.ParentCancellationRequested)};wave={Bit(value.WaveCancellationRequested)};capture={Bit(value.CaptureCancellationRequested)};drain={Bit(value.DrainCancellationRequested)};fallback={Bit(value.CaptureFallbackRequested)};observer={Bit(value.ObserverCancellationRequested)};consumer={Bit(value.ConsumerCancellationRequested)};r1={value.Node1Readiness};r2={value.Node2Readiness};r3={value.Node3Readiness};held={Bit(value.HeldWriteObserved)};revoke={Bit(value.PersistedRevocationEntered)};{RequestCqrsResourceCompletionEvidence.Format(value.ScopeCompletion, value.CleanupCompletion)}";
+        => $"s={value.Stage};c1={Status(value.CaptureNode1)};c2={Status(value.CaptureNode2)};c3={Status(value.CaptureNode3)};a={Status(value.AdmissionMove)};i={Status(value.IndependentConsumerMove)};caller={Bit(value.CallerCancellationRequested)};parent={Bit(value.ParentCancellationRequested)};wave={Bit(value.WaveCancellationRequested)};capture={Bit(value.CaptureCancellationRequested)};drain={Bit(value.DrainCancellationRequested)};forcedCancellation={Bit(value.CaptureForcedCancellationRequested)};observer={Bit(value.ObserverCancellationRequested)};consumer={Bit(value.ConsumerCancellationRequested)};r1={value.Node1Readiness};r2={value.Node2Readiness};r3={value.Node3Readiness};held={Bit(value.HeldWriteObserved)};revoke={Bit(value.PersistedRevocationEntered)};{RequestCqrsResourceCompletionEvidence.Format(value.ScopeCompletion, value.CleanupCompletion)}";
 
     private static string Status(TaskStatus? status) => status switch
     {

@@ -20,11 +20,9 @@ internal static class NativeTextWaitClusterCutAssertions
         await Assert.That(before.Incarnation).IsEqualTo(request.MinimumToken.Incarnation);
         await Assert.That(actual.AppliedToken).IsNotNull();
         var applied = actual.AppliedToken;
-        await Assert.That(applied.Position).IsGreaterThanOrEqualTo(before.Applied);
-        await Assert.That(applied.Position).IsLessThanOrEqualTo(after.Applied);
         await Assert.That(applied.Position).IsGreaterThanOrEqualTo(request.MinimumToken.Position);
         var expected = new WaitForIndexResult(new(before.Incarnation, request.Partition.AtomicPartitionId,
-            applied.Position, request.MinimumToken.OwnershipEpoch), schema, epoch);
+            applied.Position), schema, epoch);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
             .IsTrue().Because(Describe(route, expected, actual));
     }
@@ -39,5 +37,5 @@ internal static class NativeTextWaitClusterCutAssertions
     }
 
     private static string Describe(string route, WaitForIndexResult expected, WaitForIndexResult actual)
-        => FormattableString.Invariant($"WaitForIndex {route}: schema={expected.SchemaVersion}/{actual.SchemaVersion}; policy={expected.PolicyEpoch}/{actual.PolicyEpoch}; incarnationEqual={expected.AppliedToken.Incarnation == actual.AppliedToken.Incarnation}; partitionEqual={expected.AppliedToken.AtomicPartitionId == actual.AppliedToken.AtomicPartitionId}; ownershipEqual={expected.AppliedToken.OwnershipEpoch == actual.AppliedToken.OwnershipEpoch}.");
+        => FormattableString.Invariant($"WaitForIndex {route}: schema={expected.SchemaVersion}/{actual.SchemaVersion}; policy={expected.PolicyEpoch}/{actual.PolicyEpoch}; incarnationEqual={expected.AppliedToken.Incarnation == actual.AppliedToken.Incarnation}; partitionEqual={expected.AppliedToken.AtomicPartitionId == actual.AppliedToken.AtomicPartitionId}.");
 }

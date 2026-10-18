@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
@@ -6,18 +7,18 @@ namespace KeyLoad.CrashHost.Features.EventStreams;
 
 internal static class SharedDomainCrashOperations
 {
-    internal static ReplicatedOperation Create<T>(OperationKind kind, Guid id, T payload, DateTimeOffset time, string principal = Writer)
-        => new(id, kind, principal, time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, Guid id, T payload, DateTimeOffset time, string principal = Writer)
+        => database.CreateCommand(kind, id, principal, time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 
-    internal static ReplicatedOperation[] Configure(DatabaseEngine database)
+    internal static Command<DatabaseCommand>[] Configure(DatabaseEngine database)
     {
         var scopes = SharedDomainCorpus.Create(Tenant, Database);
-        var creations = new List<ReplicatedOperation>();
+        var creations = new List<Command<DatabaseCommand>>();
         foreach (var scope in scopes)
         {
             foreach (var resource in scope.Resources)
             {
-                var original = CrashDatabase.Operation(OperationKind.ConfigureResource,
+                var original = CrashDatabase.Operation(database, OperationKind.ConfigureResource,
                     new ConfigureResourceRequest(Tenant, Database, resource), Guid.NewGuid());
                 _ = database.Apply(original).Get<ResourceDefinition>();
                 creations.Add(original);

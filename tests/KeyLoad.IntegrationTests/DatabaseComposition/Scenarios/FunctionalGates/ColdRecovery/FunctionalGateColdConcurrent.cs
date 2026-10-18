@@ -98,7 +98,7 @@ internal static class FunctionalGateColdConcurrent
                         WriterPrincipalId = identity.Principal.Id,
                         ReaderPrincipalId = identity.Principal.Id,
                         MutableDocumentCollection = original.MutableDocumentCollection,
-                        VoterCount = original.VoterCount
+                        ReplicaCount = original.ReplicaCount
                     };
                     try
                     {

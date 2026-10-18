@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -62,8 +64,8 @@ internal static class SubscriptionLeaseAuthorityFlow
     }
 
     private static async Task CompleteAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
-        SubscriptionRef group, DeliveryAction action, GroupDelivery row, byte[] key, ReplicatedOperation attempt,
-        SubscriptionDeliveryCommand command, ReplicatedOperation claim, OperationResult original,
+        SubscriptionRef group, DeliveryAction action, GroupDelivery row, byte[] key, Command<DatabaseCommand> attempt,
+        SubscriptionDeliveryCommand command, Command<DatabaseCommand> claim, Result<object> original,
         DateTimeOffset time, string[] source, CancellationToken token)
     {
         var result = db.Apply(attempt);
@@ -84,10 +86,10 @@ internal static class SubscriptionLeaseAuthorityFlow
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await Assert.That(store.Read(view => view.ReadOwnedValue(SubscriptionCheckpointAuthorityFlow.WindowKey(group, 99)))).IsNull();
-        var receipts = new List<(ReplicatedOperation Operation, OperationResult Result)> { (attempt, result) };
+        var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result)> { (attempt, result) };
         var second = original.Get<ReceiveSubscriptionResult>().Deliveries[1];
-        ReplicatedOperation? reclaimed = null;
-        OperationResult? reclaimResult = null;
+        Command<DatabaseCommand>? reclaimed = null;
+        Result<object>? reclaimResult = null;
         if (action == DeliveryAction.Nack)
         {
             var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 30);
@@ -115,8 +117,8 @@ internal static class SubscriptionLeaseAuthorityFlow
     }
 
     private static async Task ColdAsync(ZoneTreeStore store, string directory, SubscriptionRef group, string[] source,
-        ReplicatedOperation claim, OperationResult original, List<(ReplicatedOperation Operation, OperationResult Result)> receipts,
-        ReplicatedOperation? reclaimed, OperationResult? reclaimResult, CancellationToken token)
+        Command<DatabaseCommand> claim, Result<object> original, List<(Command<DatabaseCommand> Operation, Result<object> Result)> receipts,
+        Command<DatabaseCommand>? reclaimed, Result<object>? reclaimResult, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -134,7 +136,7 @@ internal static class SubscriptionLeaseAuthorityFlow
     }
 
     private static async Task AckAsync(DatabaseEngine db, SubscriptionRef group, string leaseToken, DateTimeOffset time,
-        long position, long leaseVersion, List<(ReplicatedOperation Operation, OperationResult Result)> receipts)
+        long position, long leaseVersion, List<(Command<DatabaseCommand> Operation, Result<object> Result)> receipts)
     {
         var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, leaseToken, DeliveryAction.Ack);
         var operation = Create(OperationKind.SubscriptionDelivery, command, command.CommandId, time);
@@ -143,6 +145,6 @@ internal static class SubscriptionLeaseAuthorityFlow
         receipts.Add((operation, result));
     }
 
-    private static ReplicatedOperation Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
+    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
         => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }

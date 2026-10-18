@@ -20,7 +20,7 @@ internal static class BlobPublishedLifetimeAssertions
         var cleanup = Assert.ThrowsExactly<KeyLoadException>(() => BlobPublishedLifetimeOperations.Send(owner, OperationKind.ReclaimBlob, reclaim.CommandId, reclaim));
         await Assert.That(cleanup.Code).IsEqualTo(ErrorCode.Corruption);
         var replay = owner.ResolveOutcome(BlobPublishedLifetimeOperations.Original(fixture.Commands[3]));
-        await Assert.That(replay.Error).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.Corruption);
         await BlobWholeFlowAssertions.Unchanged(store, position, image);
     }
 
@@ -37,7 +37,7 @@ internal static class BlobPublishedLifetimeAssertions
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var result = owner.ResolveOutcome(BlobPublishedLifetimeOperations.Original(command));
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await BlobWholeFlowAssertions.Unchanged(store, position, image);
     }
 

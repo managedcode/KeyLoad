@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
-/// <summary>AC-GSEARCH-006: direct graph operators execute through real CLUSTER SDK and official MCP callers.</summary>
+/// <summary>AC-GSEARCH-006: direct graph operators execute through real Orleans SDK and official MCP callers.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class GraphSearchClusterTests(ClusterFixture fixture)

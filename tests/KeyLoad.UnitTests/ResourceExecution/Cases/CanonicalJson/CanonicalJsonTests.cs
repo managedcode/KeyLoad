@@ -112,7 +112,7 @@ internal sealed class CanonicalJsonTests
         await Assert.That(retryPosition).IsEqualTo(position);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "one"))!.Json)
             .IsEqualTo("{\"z\":null,\"a\":1}");
-        await Assert.That(changed.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changed.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "two"))).IsNull();
     }
 }

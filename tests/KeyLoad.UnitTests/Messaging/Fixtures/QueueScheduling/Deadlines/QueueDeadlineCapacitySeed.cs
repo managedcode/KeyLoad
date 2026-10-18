@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
@@ -27,11 +29,10 @@ internal static class QueueDeadlineCapacitySeed
         var command = new CommandRequest(Guid.NewGuid(), lane.Partition, [input]);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(fixture.Database, OperationKind.Batch,
             command.CommandId, command, Root, start);
-        var expected = new CommitReceipt(command.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(fixture.Database, fixture.Store, lane),
-            [new(EnqueueReceipt, Queue, Message, InitialStateVersion)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(fixture.Database, fixture.Store, lane), [new(EnqueueReceipt, Queue, Message, InitialStateVersion)], DurabilityProfile.ProcessDurable, 1);
         var result = fixture.Database.Apply(operation);
         await QueueDeadlineCapacityOperations.ReceiptAsync(result, expected);
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes = [(operation, result)];
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes = [(operation, result)];
         var metadata = new MessageMetadata(Message, input.NotBefore is null ? MessageState.Ready : MessageState.Scheduled,
             NoAttempts, InitialStateVersion, input.NotBefore is null ? InitialReadySequence : NoReadySequence, input.NotBefore, input.ExpiresAt);
         if (kind == QueueDeadlineKind.ExpireLease)
@@ -40,10 +41,7 @@ internal static class QueueDeadlineCapacitySeed
                 [metadata], Root, start, token);
             var request = new ReceiveRequest(received.RequestId, lane, MaxMessages: SingleReceiveMessage);
             outcomes.Add((QueueDeadlinePoisonPrefixClaims.Operation(fixture.Database, OperationKind.Receive,
-                request.RequestId, request, Root, start), new(null)
-                {
-                    NativeValue = received
-                }));
+                request.RequestId, request, Root, start), Result<object>.Succeed(received)));
             metadata = metadata with
             {
                 State = MessageState.Leased,
@@ -64,7 +62,7 @@ internal static class QueueDeadlineCapacitySeed
 
     private static QueueDeadlineCapacityState Damage(TestDatabase fixture, QueueLaneRef lane, DateTimeOffset start,
         DateTimeOffset due, EnqueueMessage input, MessageMetadata original, QueueCounters counters, QueueDeadlineKind kind,
-        bool sweep, bool jitter, QueueDeadlineCapacityFault fault, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes)
+        bool sweep, bool jitter, QueueDeadlineCapacityFault fault, List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes)
     {
         var key = fault == QueueDeadlineCapacityFault.StateVersion
             ? KeySpace.Partition(Metadata, lane.Partition, Queue, Message) : KeySpace.Partition(Counters, lane.Partition, Queue);

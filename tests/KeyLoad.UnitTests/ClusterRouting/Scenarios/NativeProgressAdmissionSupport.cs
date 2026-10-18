@@ -19,7 +19,7 @@ internal static class NativeProgressAdmissionSupport
     private const string Field = "/text";
     private const byte TerminalMarker = 1;
 
-    internal static NativeCqrsStreamAdmission Admission(RequestCqrsClusterFixture fixture, Guid id,
+    internal static NativeCqrsStreamAdmission Admission(RequestCqrsHostedRuntimeFixture fixture, Guid id,
         OperationKind kind, object request, IOptions<GrainRoutingOptions>? options = null)
     {
         var command = request switch
@@ -33,19 +33,18 @@ internal static class NativeProgressAdmissionSupport
             new NativeCqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)));
     }
 
-    internal static OnlineTextIndexMaintenanceRequest Online(RequestCqrsClusterFixture fixture)
+    internal static OnlineTextIndexMaintenanceRequest Online(RequestCqrsHostedRuntimeFixture fixture)
     {
         var placement = fixture.Database.Database.ReadAtomicPartitionPlacement(Root, fixture.Database.Partition);
         return new(Guid.NewGuid(), new(fixture.Database.Partition, Consumer), Collection, Field, Step,
-            fixture.Database.Store.Identity.NodeId, new(placement.PhysicalShardId, placement.Incarnation,
-                placement.VoterIds, placement.PlacementEpoch));
+            fixture.Database.Store.Identity.NodeId, new(placement.PhysicalShardId, placement.Incarnation));
     }
 
     internal static CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> Terminal(long sequence)
         => RequestCqrsProtocolCases.CompletedChunk(new byte[] { TerminalMarker }, sequence);
 
-    internal static Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Serializer(RequestCqrsClusterFixture fixture)
-        => fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
+    internal static Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Serializer(RequestCqrsHostedRuntimeFixture fixture)
+        => fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
 
     internal static async Task RefusedAsync(Action operation, ErrorCode code)
     {

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -7,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueDeadlinePoisonPrefixSeed
 {
-    internal static async Task<List<(ReplicatedOperation Operation, OperationResult Result)>> RunAsync(DatabaseEngine database,
+    internal static async Task<List<(Command<DatabaseCommand> Operation, Result<object> Result)>> RunAsync(DatabaseEngine database,
         ZoneTreeStore store, QueueLaneRef lane, DateTimeOffset start, DateTimeOffset due, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -28,23 +30,18 @@ internal static class QueueDeadlinePoisonPrefixSeed
         return [original, additional];
     }
 
-    private static async Task<(ReplicatedOperation Operation, OperationResult Result)> ApplyAsync(DatabaseEngine database,
+    private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> ApplyAsync(DatabaseEngine database,
         ZoneTreeStore store, CommandRequest command, DateTimeOffset time)
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, command.Partition);
         var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
-            command.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First), placement.PlacementEpoch),
-            command.Mutations.Select(value => new MutationReceipt(QueueDeadlinePoisonPrefixProtocol.EnqueueReceipt, ((EnqueueMessage)value).Queue,
-                ((EnqueueMessage)value).MessageId, QueueDeadlinePoisonPrefixProtocol.First)).ToImmutableArray(), DurabilityProfile.ProcessDurable);
-        var operation = database.PrepareQueueRetryOperation(database.NormalizeOperation(new(command.CommandId,
-            OperationKind.Batch, QueueDeadlinePoisonPrefixProtocol.Root, time, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
+            command.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First)), command.Mutations.Select(value => new MutationReceipt(QueueDeadlinePoisonPrefixProtocol.EnqueueReceipt, ((EnqueueMessage)value).Queue,
+                ((EnqueueMessage)value).MessageId, QueueDeadlinePoisonPrefixProtocol.First)).ToImmutableArray(), DurabilityProfile.ProcessDurable, 1);
+        var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, QueueDeadlinePoisonPrefixProtocol.Root, time, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
         var result = database.Apply(operation);
-        await Assert.That(result.Error).IsNull();
-        await Assert.That(result.Json).IsNull();
-        await NativeReplayResultAssertions.Same<CommitReceipt>(result, new(null)
-        {
-            NativeValue = expected
-        });
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        
+        await NativeReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
         return (operation, result);
     }
 }

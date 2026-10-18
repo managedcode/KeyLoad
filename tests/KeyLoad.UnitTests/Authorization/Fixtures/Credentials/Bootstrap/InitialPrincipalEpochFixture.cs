@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -11,7 +12,7 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
     internal const string ReplacementSecret = "epoch-key.replacement-secret-at-least-32";
     internal const string InvalidDetail = "An initial principal policy epoch must be positive.";
     internal TestDatabase Harness { get; } = new();
-    internal ReplicatedOperation Seed { get; private set; } = null!;
+    internal Command<DatabaseCommand> Seed { get; private set; } = null!;
     internal CommitReceipt SeedReceipt { get; private set; } = null!;
     internal byte[] SeedOutcome { get; private set; } = null!;
     internal async Task SeedAsync(CancellationToken token)
@@ -21,9 +22,7 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
         Seed = Operation(OperationKind.Batch, command, id: command.CommandId);
         var before = Harness.Store.Position;
         SeedReceipt = Harness.Database.ApplyEmbedded(Seed, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(command.CommandId,
-            new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new("putDocument", Collection, "record", 1L)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [new("putDocument", Collection, "record", 1L)], DurabilityProfile.ProcessDurable, 1);
         await InitialPrincipalEpochAssertions.EqualAsync(SeedReceipt, expected);
         await Assert.That(SeedReceipt.Mutations.Single().CompositionReferences).IsEmpty();
         await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
@@ -40,13 +39,13 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
     internal static ApiKeyRecord Credential(bool replacement = false, bool expired = false)
         => DatabaseEngine.Credential(KeyId, Reader, replacement ? ReplacementSecret : OriginalSecret,
             expired ? DateTimeOffset.UnixEpoch : null);
-    internal ReplicatedOperation Configuration(long epoch)
+    internal Command<DatabaseCommand> Configuration(long epoch)
         => Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(Principal(epoch)));
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, T payload, string principal = "root", Guid? id = null)
+    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, string principal = "root", Guid? id = null)
         => new(id ?? Guid.NewGuid(), kind, principal, default,
             System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
     internal EntityRef Reference => new(Harness.Partition, Collection, "record");
-    internal static byte[] Outcome(ReplicatedOperation operation)
-        => KeySpace.GlobalOutcome(operation.PrincipalId, operation.Id);
+    internal static byte[] Outcome(Command<DatabaseCommand> operation)
+        => KeySpace.GlobalOutcome(operation.UserId!, operation.CommandId);
     public void Dispose() => Harness.Dispose();
 }

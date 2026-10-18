@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -16,7 +17,7 @@ internal static class QueueLifecycleConditionOperations
         state.Batch(fixture.Database, QueueLifecycleHealthy.Enqueue(Source)).Get<CommitReceipt>();
         return state;
     }
-    internal static ReplicatedOperation Cancel(QueueLifecycleTestState state, string id = Source, long version = 1, long generation = 1)
+    internal static Command<DatabaseCommand> Cancel(QueueLifecycleTestState state, string id = Source, long version = 1, long generation = 1)
     {
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, state.Partition,

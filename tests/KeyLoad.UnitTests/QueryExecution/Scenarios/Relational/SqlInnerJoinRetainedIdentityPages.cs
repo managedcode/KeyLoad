@@ -110,8 +110,7 @@ internal static class SqlInnerJoinRetainedIdentityPages
         await UnchangedAsync(store, before, position, identity);
         await ExactAsync(engine.ExecuteAst(Root, Ast(partition)), expected);
         await UnchangedAsync(store, before, position, identity);
-        var replay = owner.ApplyEmbedded(new(seed.CommandId, OperationKind.Batch, Root, default,
-                global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options)),
+        var replay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, Root, default, global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options)),
             cancellationToken: default).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await UnchangedAsync(store, before, position, identity);

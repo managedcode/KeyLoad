@@ -10,11 +10,11 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-/// <summary>Owns CLUSTER resource log capture and bounded signed-discovery failure artifacts.</summary>
+/// <summary>Owns Orleans resource log capture and bounded signed-discovery failure artifacts.</summary>
 internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
 {
     private const string ResourceStateUnavailable = "Resource state unavailable";
-    private const string DiagnosticMessage = "Bounded CLUSTER diagnostics saved to {OutputPath} ({LineCount} lines).";
+    private const string DiagnosticMessage = "Bounded Orleans diagnostics saved to {OutputPath} ({LineCount} lines).";
     private const string ResourceStateFormat = "Resource {0}, state {1}, exit {2}, health {3}";
     private const string DiagnosticLineFormat = "{0}: {1}";
     private const int SavedEventId = 100;
@@ -50,7 +50,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         this.app = app;
     }
 
-    /// <summary>Starts subscriptions to the three managed CLUSTER node resources.</summary>
+    /// <summary>Starts subscriptions to the three managed Orleans node resources.</summary>
     /// <param name="logs">Aspire's resource log subscription service.</param>
     internal void Start(ResourceLoggerService logs)
     {

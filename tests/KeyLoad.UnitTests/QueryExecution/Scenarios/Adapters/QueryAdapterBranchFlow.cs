@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server;
@@ -27,8 +28,7 @@ internal static class QueryAdapterBranchFlow
                     [new PutDocument(Collection, "a", "{\"number\":2,\"status\":\"open\"}"),
                     new PutDocument(Collection, "b", "{\"number\":4,\"status\":\"closed\"}"),
                     new PutDocument(Collection, "c", "{\"number\":1,\"status\":\"hold\"}")]);
-                var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, Principal,
-                    default, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
+                var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, Principal, default, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
                 var receipt = fixture.Database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
                 await Assert.That(receipt.CommandId).IsEqualTo(SeedId);
                 await WaveAsync(fixture.Database, fixture.Store, fixture.Partition, operation, receipt);
@@ -45,7 +45,7 @@ internal static class QueryAdapterBranchFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ColdAsync(TestDatabase fixture, ReplicatedOperation operation, CommitReceipt receipt,
+    private static async Task ColdAsync(TestDatabase fixture, Command<DatabaseCommand> operation, CommitReceipt receipt,
         string[] image, long position, byte[] identity)
     {
         var failures = new List<Exception>();
@@ -64,7 +64,7 @@ internal static class QueryAdapterBranchFlow
     }
 
     private static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        ReplicatedOperation operation, CommitReceipt receipt)
+        Command<DatabaseCommand> operation, CommitReceipt receipt)
     {
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         await QueryAdapterBranchPages.RunAsync(engine, store, partition);

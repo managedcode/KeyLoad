@@ -23,7 +23,7 @@ internal static class BlobPriorPublicationTrial
         await BlobPriorPublicationAssertions.HealthyAsync(reopened, seed);
         var reclaimed = await BlobPriorPublicationLifetime.CleanAsync(reopened, seed, fault.Delete, fault.Reclaim);
         var current = await BlobPriorPublicationCommands.PublishAsync(reopened, seed.Blob, seed.Upload,
-            [5, 6, 7, 8], 2, seed.Identity, seed.Catalog, seed.Principal);
+            [5, 6, 7, 8], 2, seed.Identity, seed.Principal);
         await BlobPriorPublicationLifetime.FinalAsync(reopened, cold, seed, current, reclaimed);
         await QueueLifecycleRecoveryImage.AssertAsync(reopened, cold, committed: false);
         var image = BlobPriorPublicationImage.Capture(cold);

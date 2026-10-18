@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -106,8 +107,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     {
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, Partition, [.. mutations]);
-        var operation = new ReplicatedOperation(id, OperationKind.Batch, RootId, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = database.CreateCommand(OperationKind.Batch, id, RootId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
         return database.Apply(operation).Get<CommitReceipt>();
     }
 
@@ -121,8 +121,7 @@ internal sealed class AggregateReplayFixture : IDisposable
         var command = new StoreAggregateSnapshot(StreamSet, StreamId, sourceRevision, reducer ?? Reducer,
             schemaVersion, stateJson ?? StateJson, expectedVersion, generation);
         var id = commandId ?? Guid.NewGuid();
-        var operation = new ReplicatedOperation(id, OperationKind.Batch, principal, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(new CommandRequest(id, Partition, [command]), JsonDefaults.Options));
+        var operation = database.CreateCommand(OperationKind.Batch, id, principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new CommandRequest(id, Partition, [command]), JsonDefaults.Options));
         return database.Apply(operation).Get<CommitReceipt>();
     }
 
@@ -215,6 +214,5 @@ internal sealed class AggregateReplayFixture : IDisposable
     }
 
     private void Submit<T>(OperationKind kind, T payload)
-        => database.Apply(new(Guid.NewGuid(), kind, RootId, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(payload, JsonDefaults.Options))).Get<object>();
+        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), RootId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options))).Get<object>();
 }

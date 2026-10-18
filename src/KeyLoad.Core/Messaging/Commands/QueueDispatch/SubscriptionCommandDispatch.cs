@@ -1,51 +1,53 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private OperationResult ExecuteConfigureSubscription(IAtomicTransaction transaction, PrincipalRecord principal, ReplicatedOperation operation)
+    private Result<object> ExecuteConfigureSubscription(IAtomicTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         var request = Payload<ConfigureSubscriptionRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
-        return Result(ConfigureSubscription(transaction, principal, request, operation.EvaluatedAt));
+        return Result(ConfigureSubscription(transaction, principal, request, operation.Timestamp));
     }
 
-    private OperationResult ExecuteSeekSubscription(IAtomicTransaction transaction, PrincipalRecord principal, ReplicatedOperation operation)
+    private Result<object> ExecuteSeekSubscription(IAtomicTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         var request = Payload<SeekSubscriptionRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
-        return Result(SeekSubscription(transaction, principal, request, operation.EvaluatedAt));
+        return Result(SeekSubscription(transaction, principal, request, operation.Timestamp));
     }
 
-    private OperationResult ExecutePauseSubscription(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private Result<object> ExecutePauseSubscription(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = Payload<SetSubscriptionPausedRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
         return Result(SetSubscriptionPaused(transaction, request));
     }
 
-    private OperationResult ExecuteReceiveSubscription(IAtomicTransaction transaction, PrincipalRecord principal,
-        ReplicatedOperation operation, long position)
+    private Result<object> ExecuteReceiveSubscription(IAtomicTransaction transaction, PrincipalRecord principal,
+        Command<DatabaseCommand> operation, long position)
     {
         var request = Payload<ReceiveSubscriptionRequest>(operation);
         RequireEnvelopeId(operation, request.RequestId);
-        return Result(ReceiveSubscription(transaction, principal, request, operation.EvaluatedAt, position));
+        return Result(ReceiveSubscription(transaction, principal, request, operation.Timestamp, position));
     }
 
-    private OperationResult ExecuteSubscriptionDelivery(IAtomicTransaction transaction, PrincipalRecord principal,
-        ReplicatedOperation operation, long position)
+    private Result<object> ExecuteSubscriptionDelivery(IAtomicTransaction transaction, PrincipalRecord principal,
+        Command<DatabaseCommand> operation, long position)
     {
         var request = Payload<SubscriptionDeliveryCommand>(operation);
         RequireEnvelopeId(operation, request.CommandId);
-        return Result(CompleteSubscriptionDelivery(transaction, principal, request, operation.EvaluatedAt, position));
+        return Result(CompleteSubscriptionDelivery(transaction, principal, request, operation.Timestamp, position));
     }
 
-    private OperationResult ExecuteSubscriptionProcessing(IAtomicTransaction transaction, PrincipalRecord principal,
-        ReplicatedOperation operation, long position)
+    private Result<object> ExecuteSubscriptionProcessing(IAtomicTransaction transaction, PrincipalRecord principal,
+        Command<DatabaseCommand> operation, long position)
     {
         var request = Payload<SubscriptionProcessingRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
-        return Result(CompleteSubscriptionProcessing(transaction, principal, request, operation.EvaluatedAt, position));
+        return Result(CompleteSubscriptionProcessing(transaction, principal, request, operation.Timestamp, position));
     }
 }

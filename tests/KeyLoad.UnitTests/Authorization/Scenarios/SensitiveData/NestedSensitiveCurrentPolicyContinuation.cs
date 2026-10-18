@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Query;
@@ -67,8 +68,7 @@ internal static class NestedSensitiveCurrentPolicyContinuation
     {
         var image = TeamRowPolicyAssertions.Image(store);
         var cut = store.Position;
-        var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, Root, default,
-            JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = database.CreateCommand(OperationKind.Batch, command.CommandId, Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(original))).IsTrue();
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);

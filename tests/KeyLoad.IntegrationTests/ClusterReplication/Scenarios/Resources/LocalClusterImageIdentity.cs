@@ -60,7 +60,7 @@ internal static class LocalClusterImageIdentity
         ArgumentNullException.ThrowIfNull(app);
         ArgumentNullException.ThrowIfNull(selection);
         var identity = await ReadVerifiedAsync(root, selection, cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidOperationException("The local CLUSTER image identity is invalid.");
+            ?? throw new InvalidOperationException("The local Orleans image identity is invalid.");
         VerifyModel(app, identity, expectedNames);
         return identity;
     }
@@ -80,7 +80,7 @@ internal static class LocalClusterImageIdentity
             || containerNames.Any(pair => !expected.Contains(pair.Key, StringComparer.Ordinal)
                 || string.IsNullOrWhiteSpace(pair.Value)))
         {
-            throw new InvalidOperationException("The local CLUSTER container model is invalid.");
+            throw new InvalidOperationException("The local Orleans container model is invalid.");
         }
         foreach (var node in expected)
         {
@@ -89,7 +89,7 @@ internal static class LocalClusterImageIdentity
             if (!string.Equals(actual.ImageId, identity.ImageConfigId, StringComparison.Ordinal)
                 || !string.Equals(actual.ConfigImage, identity.Reference, StringComparison.Ordinal))
             {
-                throw new InvalidOperationException("A started CLUSTER container does not use the verified local image.");
+                throw new InvalidOperationException("A started Orleans container does not use the verified local image.");
             }
         }
     }
@@ -104,7 +104,7 @@ internal static class LocalClusterImageIdentity
         if (!nodes.Select(resource => resource.Name).Order(StringComparer.Ordinal)
                 .SequenceEqual(expected, StringComparer.Ordinal))
         {
-            throw new InvalidOperationException("The local CLUSTER container model is invalid.");
+            throw new InvalidOperationException("The local Orleans container model is invalid.");
         }
         foreach (var node in nodes)
         {
@@ -113,7 +113,7 @@ internal static class LocalClusterImageIdentity
                 || !node.TryGetContainerImageName(out var actual)
                 || !string.Equals(actual, identity.Reference, StringComparison.Ordinal))
             {
-                throw new InvalidOperationException("The local CLUSTER container model is invalid.");
+                throw new InvalidOperationException("The local Orleans container model is invalid.");
             }
         }
     }
@@ -127,7 +127,7 @@ internal static class LocalClusterImageIdentity
             || expected.Any(string.IsNullOrWhiteSpace)
             || expected.Distinct(StringComparer.Ordinal).Count() != expected.Length)
         {
-            throw new InvalidOperationException("The local CLUSTER container model is invalid.");
+            throw new InvalidOperationException("The local Orleans container model is invalid.");
         }
         return expected;
     }
@@ -158,7 +158,7 @@ internal static class LocalClusterImageIdentity
         start.ArgumentList.Add(tag);
         start.ArgumentList.Add(receipt);
         using var process = Process.Start(start)
-            ?? throw new InvalidOperationException("The local CLUSTER image verifier could not start.");
+            ?? throw new InvalidOperationException("The local Orleans image verifier could not start.");
         var output = LocalImageOwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, MaximumOutputBytes);
         var error = LocalImageOwnedProcessLifetime.ReadBoundedAsync(process.StandardError, MaximumOutputBytes);
         var exit = process.WaitForExitAsync(CancellationToken.None);
@@ -168,7 +168,7 @@ internal static class LocalClusterImageIdentity
             var streams = await Task.WhenAll(output, error).ConfigureAwait(false);
             if (process.ExitCode != 0 || streams[1].Length != 0)
             {
-                throw new InvalidOperationException("The local CLUSTER image could not be verified.");
+                throw new InvalidOperationException("The local Orleans image could not be verified.");
             }
             return streams[0];
         }
@@ -183,7 +183,7 @@ internal static class LocalClusterImageIdentity
                 throw;
             }
 
-            throw new AggregateException("Local CLUSTER image verification and process settlement failed.", failures);
+            throw new AggregateException("Local Orleans image verification and process settlement failed.", failures);
         }
     }
 
@@ -199,12 +199,12 @@ internal static class LocalClusterImageIdentity
             || !IsSha256(root.GetProperty(InputDigestField).GetString())
             || !IsSha256(root.GetProperty(ImageConfigIdField).GetString()))
         {
-            throw new InvalidOperationException("The local CLUSTER image receipt is invalid.");
+            throw new InvalidOperationException("The local Orleans image receipt is invalid.");
         }
         var invocation = root.GetProperty(InvocationIdField).GetString();
         if (invocation is not { Length: 32 } || tag != "local-" + invocation)
         {
-            throw new InvalidOperationException("The local CLUSTER image receipt is invalid.");
+            throw new InvalidOperationException("The local Orleans image receipt is invalid.");
         }
         return new(reference, tag, invocation, root.GetProperty(ImageConfigIdField).GetString()!,
             root.GetProperty(InputDigestField).GetString()!);

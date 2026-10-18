@@ -2,7 +2,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-/// <summary>Retains bounded closed rejection records for one actual CLUSTER node.</summary>
+/// <summary>Retains bounded closed rejection records for one actual Orleans node.</summary>
 internal sealed class RequestCqrsClusterMcpRejectionNodeCapture(string name)
 {
     internal const string MessagePrefix = "MCP transport rejected at ";

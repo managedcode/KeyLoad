@@ -38,7 +38,8 @@ internal static class SeriesUtcTiePublicSeed
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Scenario.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(new[] { new MutationReceipt(expire ? ExpireKind : AppendKind,
             TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, sequence) }, receipt.Mutations.ToArray());
         state.Receipts.Add((command, receipt));

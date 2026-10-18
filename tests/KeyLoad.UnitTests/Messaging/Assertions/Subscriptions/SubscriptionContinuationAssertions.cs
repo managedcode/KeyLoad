@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -9,7 +10,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class SubscriptionContinuationAssertions
 {
     internal static async Task ClaimAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReceiveSubscriptionRequest request, OperationResult actual, SourceEventRecord source,
+        ReceiveSubscriptionRequest request, Result<object> actual, SourceEventRecord source,
         int attempt, long version, DateTimeOffset time, long checkpoint, long issued, long tail, CommitToken token)
     {
         var claims = new GroupClaims(Purpose, store.Identity.Incarnation, group, Generation, OwnershipEpoch,
@@ -27,7 +28,7 @@ internal static class SubscriptionContinuationAssertions
         var expected = new ReceiveSubscriptionResult(request.RequestId, [delivery], status, token);
         await EqualAsync(actual.Get<ReceiveSubscriptionResult>(), expected);
         await EqualAsync(db.Verify<GroupClaims>(actual.Get<ReceiveSubscriptionResult>().Deliveries.Single().Token), claims);
-        await Assert.That(actual.Error).IsNull();
+        await Assert.That(Errors.Code(actual.Problem)).IsNull();
         var row = store.Read(view => view.ReadOwnedValue(
             SubscriptionCheckpointAuthorityFlow.WindowKey(group, source.Position)));
         await Assert.That(row).IsNotNull();
@@ -37,10 +38,10 @@ internal static class SubscriptionContinuationAssertions
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, checkpoint, issued, tail);
     }
 
-    internal static async Task ReceiptAsync(OperationResult actual, Guid id, CommitToken token, MutationReceipt mutation)
+    internal static async Task ReceiptAsync(Result<object> actual, Guid id, CommitToken token, MutationReceipt mutation)
     {
-        await Assert.That(actual.Error).IsNull();
-        await EqualAsync(actual.Get<CommitReceipt>(), new CommitReceipt(id, token, [mutation], DurabilityProfile.ProcessDurable));
+        await Assert.That(Errors.Code(actual.Problem)).IsNull();
+        await EqualAsync(actual.Get<CommitReceipt>(), new CommitReceipt(id, token, [mutation], DurabilityProfile.ProcessDurable, 1));
     }
 
     internal static async Task ReplayAsync(DatabaseEngine db, ZoneTreeStore store,
@@ -51,13 +52,13 @@ internal static class SubscriptionContinuationAssertions
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var actual = QueueWholeFlowStorage.Apply(db, entry.Kind, entry.Request, entry.Id, time);
-        if (entry.Result.Error is not null)
+        if (Errors.Code(entry.Result.Problem) is not null)
         {
             await Assert.That(actual).IsEqualTo(entry.Result);
-            await Assert.That(actual.Json).IsNull();
-            await Assert.That(actual.NativeValue).IsNull();
+            
+            await Assert.That(actual.Value).IsNull();
         }
-        else if (entry.Result.NativeValue is CommitReceipt)
+        else if (entry.Result.Value is CommitReceipt)
         {
             await NativeReplayResultAssertions.Same<CommitReceipt>(actual, entry.Result);
         }
@@ -157,10 +158,10 @@ internal static class SubscriptionContinuationAssertions
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var refused = QueueWholeFlowStorage.Apply(db, entry.Kind, entry.Request, entry.Id, time);
-        await Assert.That(refused.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(refused.SafeDetail).IsEqualTo(StaleDetail);
-        await Assert.That(refused.Json).IsNull();
-        await Assert.That(refused.NativeValue).IsNull();
+        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(refused.Problem?.Detail).IsEqualTo(StaleDetail);
+        
+        await Assert.That(refused.Value).IsNull();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
     }
 

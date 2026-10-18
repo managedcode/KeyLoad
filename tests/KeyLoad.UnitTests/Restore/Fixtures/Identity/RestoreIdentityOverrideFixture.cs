@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 
@@ -26,7 +27,7 @@ internal sealed class RestoreIdentityOverrideFixture
         Source = new(directory: Path.Combine(root, "source"));
     }
 
-    internal ReplicatedOperation Batch(DatabaseEngine database, Guid id, params Mutation[] mutations)
+    internal Command<DatabaseCommand> Batch(DatabaseEngine database, Guid id, params Mutation[] mutations)
         => new(id, OperationKind.Batch, RestoreIdentityOverrideState.Principal, database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new CommandRequest(id, Partition, [.. mutations]), JsonDefaults.Options));
 

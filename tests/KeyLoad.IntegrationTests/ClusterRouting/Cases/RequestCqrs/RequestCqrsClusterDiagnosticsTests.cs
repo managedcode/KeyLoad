@@ -165,7 +165,7 @@ internal sealed class RequestCqrsClusterDiagnosticsTests
         var beforeCleanup = lifecycle.FirstFailureSnapshot
             ?? throw new InvalidOperationException("The native early-completion failure snapshot was absent.");
         await Assert.That(beforeCleanup.Stage).IsEqualTo(RequestCqrsLifecycleStage.CaptureJoin);
-        await Assert.That(beforeCleanup.CaptureFallbackRequested).IsFalse();
+        await Assert.That(beforeCleanup.CaptureForcedCancellationRequested).IsFalse();
         await Assert.That(beforeCleanup.CaptureNode1.HasValue
             && beforeCleanup.CaptureNode2.HasValue && beforeCleanup.CaptureNode3.HasValue).IsTrue();
         await Assert.That(beforeCleanup.CaptureNode2).IsNotEqualTo(TaskStatus.RanToCompletion);

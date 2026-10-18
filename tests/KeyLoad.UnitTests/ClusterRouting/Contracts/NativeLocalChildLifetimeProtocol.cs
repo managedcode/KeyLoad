@@ -1,4 +1,3 @@
-using KeyLoad.UnitTests.Features.ClusterReplication;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -21,6 +20,8 @@ internal static class NativeLocalChildLifetimeProtocol
     internal const int NextIndex = 1;
     internal const int GrantDivisor = 4;
     internal const int Empty = 0;
-    internal static readonly string[] Voters = [RequestCqrsCohortScenario.LocalVoter,
-        RequestCqrsCohortScenario.FirstRemote, RequestCqrsCohortScenario.SecondRemote];
+    internal const string Root = "root";
+    internal const string Collection = "local-child-documents";
+    internal static readonly PartitionRef Partition = new(RequestCqrsHostedProtocol.Tenant,
+        RequestCqrsHostedProtocol.Database, RequestCqrsHostedProtocol.Domain, RequestCqrsHostedProtocol.Partition);
 }

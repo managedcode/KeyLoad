@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
@@ -109,10 +110,10 @@ public sealed partial class DatabaseEngine
         });
     }
 
-    private void Sweep(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now, ReplicatedOperation operation)
+    private void Sweep(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now, Command<DatabaseCommand> operation)
         => SweepDueEntries(tx, lane, policy, now, operation);
 
-    private ReceiveResult Receive(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request, DateTimeOffset now, long position, ReplicatedOperation operation)
+    private ReceiveResult Receive(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request, DateTimeOffset now, long position, Command<DatabaseCommand> operation)
     {
         var resource = Resource(tx, request.Lane.Partition, request.Lane.Queue, ResourceKind.WorkQueue);
         var policy = resource.QueuePolicy;
@@ -175,7 +176,7 @@ public sealed partial class DatabaseEngine
         RequireQueueLeaseAuthority(view, lane, claims.MessageId, metadata, body.Body);
         return new(claims, metadata, body.Bytes);
     }
-    private CommitReceipt CompleteDelivery(IAtomicTransaction tx, PrincipalRecord principal, DeliveryCommand command, DateTimeOffset now, long position, ReplicatedOperation operation)
+    private CommitReceipt CompleteDelivery(IAtomicTransaction tx, PrincipalRecord principal, DeliveryCommand command, DateTimeOffset now, long position, Command<DatabaseCommand> operation)
     {
         var resource = Resource(tx, command.Lane.Partition, command.Lane.Queue, ResourceKind.WorkQueue);
         var lease = Lease(tx, principal, command.Lane, command.Token, now);

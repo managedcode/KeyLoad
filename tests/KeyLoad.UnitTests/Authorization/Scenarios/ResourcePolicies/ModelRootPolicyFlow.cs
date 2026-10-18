@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -31,8 +32,7 @@ internal static class ModelRootPolicyFlow
     internal static Task ReplayAsync(ModelRootPolicyFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
         => ModelRootPolicyLifetime.ObserveAsync(store, async () =>
         {
-            var operation = new ReplicatedOperation(fixture.Seed.CommandId, OperationKind.Batch, "root", default,
-                System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
+            var operation = database.CreateCommand(OperationKind.Batch, fixture.Seed.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
             var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
             await ModelRootPolicyAssertions.EqualAsync(replay, fixture.Receipt);
             foreach (var mutation in replay.Mutations)

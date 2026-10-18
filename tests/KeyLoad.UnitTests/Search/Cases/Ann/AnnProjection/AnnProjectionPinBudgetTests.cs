@@ -32,7 +32,7 @@ internal sealed class AnnProjectionPinBudgetTests
         var rejectedConsumer = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(excessId, excess,
                 new(1, [AnnProjectionPinTestSupport.Collection], [AnnProjectionPinTestSupport.VectorMutation]), start), id: excessId);
-        await Assert.That(rejectedConsumer.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejectedConsumer.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Consumers.Length).IsEqualTo(2);
 
         AnnProjectionPinTestSupport.PutVector(database, FirstValues);

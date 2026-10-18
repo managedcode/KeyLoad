@@ -24,13 +24,11 @@ internal static class CompositionBoundReferenceNativeAssertions
     internal static async Task OriginalAsync(SafeProjectorOperationDatabase owner, CompositionBoundReferenceNativeState state,
         CompositionBoundReferenceNativeCommand command)
     {
-        var retained = owner.Entry(command.Operation).Operation!;
-        await Assert.That(retained.Id).IsEqualTo(command.Operation.Id);
-        await Assert.That(retained.PayloadJson).IsEqualTo(command.Operation.PayloadJson);
-        await Assert.That(retained.NativePayload.Span.SequenceEqual(command.Operation.NativePayload.Span)).IsTrue();
-        await Assert.That(NativeOperationFingerprint.Compute(retained)).IsEqualTo(NativeOperationFingerprint.Compute(command.Operation));
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(retained.NativePayload.Span);
-        var request = NativeSerialization.Deserialize<CommandRequest>(payload.Value.Span);
+        var retained = owner.Entry(command.Operation).PreparedCommand!;
+        await Assert.That(retained.CommandId).IsEqualTo(command.Operation.CommandId);
+        await Assert.That(retained.Value!.Input.Span.SequenceEqual(command.Operation.Value!.Input.Span)).IsTrue();
+        await Assert.That(DatabaseCommandFingerprint.Compute(retained)).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Operation));
+        var request = NativeSerialization.Deserialize<CommandRequest>(retained.Value!.Input.Span);
         await EqualAsync(command.Request, request);
         if (!command.Derived)
         {
@@ -55,12 +53,12 @@ internal static class CompositionBoundReferenceNativeAssertions
         var identity = NativeSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.JournalCut();
+        var journal = owner.ReadCut();
         await operation();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+        await Assert.That(owner.ReadCut()).IsEqualTo(journal);
     }
 }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
 
@@ -9,11 +10,11 @@ internal static class QueueDeadlineRecoveryAssertions
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
-        var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueDeadlineCrashProtocol.OperationFile), token));
-        var original = JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson);
+        var original = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var condition = (AdvanceQueueDeadline)original.Mutations.Single();
-        await Assert.That(operation.EvaluatedAt >= condition.ExpectedDeadline).IsTrue();
+        await Assert.That(new DateTimeOffset(operation.Timestamp) >= condition.ExpectedDeadline).IsTrue();
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;
         if (stage >= CommitStage.JournalFlushed)

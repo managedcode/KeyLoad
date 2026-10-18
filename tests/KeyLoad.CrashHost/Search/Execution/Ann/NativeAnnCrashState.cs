@@ -59,7 +59,7 @@ internal static class NativeAnnCrashState
         {
             Token = ChangedToken
         };
-        if (NativeAnnCrashOperations.Apply(commands, OperationKind.CommitProjectionBatch, changed, intent.CommandId).Error != ErrorCode.Conflict
+        if (Errors.Code(NativeAnnCrashOperations.Apply(commands, OperationKind.CommitProjectionBatch, changed, intent.CommandId).Problem) != ErrorCode.Conflict
             || Raw(database) != before || database.Store.Position != position)
         {
             throw new InvalidOperationException(NativeAnnCrashContract.Invalid);

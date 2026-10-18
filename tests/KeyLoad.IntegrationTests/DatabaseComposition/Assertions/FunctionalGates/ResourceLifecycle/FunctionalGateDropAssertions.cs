@@ -7,18 +7,18 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateDropAssertions
 {
-    internal static async Task ResultAsync(Guid parentId, DropTableRequest request, DropTableResult actual)
+    internal static async Task ResultAsync(FunctionalGateContext context, Guid parentId, DropTableRequest request, DropTableResult actual)
     {
         await Assert.That(actual.Receipt.CommandId).IsNotEqualTo(parentId);
         await Assert.That(actual.Receipt.CommandId).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Receipt.Token.Position).IsGreaterThan(P.Absent);
-        await Assert.That(actual.Receipt.Token.OwnershipEpoch).IsGreaterThan(P.Absent);
+        await Assert.That(actual.Receipt.PersistedCopies).IsEqualTo(context.ReplicaCount);
         await SqlClusterProtocol.EqualAsync(new DropTableResult(request.TenantId, request.DatabaseId,
             request.ResourceName, new(actual.Receipt.CommandId, actual.Receipt.Token, [],
-                DurabilityProfile.QuorumProcessDurable)), actual);
+                DurabilityProfile.ProcessDurable, context.ReplicaCount)), actual);
         await NativeSubmissionColdAssertions.ReceiptAsync(actual.Receipt,
-            new(actual.Receipt.CommandId, actual.Receipt.Token, [], DurabilityProfile.QuorumProcessDurable));
+            new(actual.Receipt.CommandId, actual.Receipt.Token, [], DurabilityProfile.ProcessDurable, context.ReplicaCount));
     }
 
     internal static async Task FreshAsync(FunctionalGateContext context, FunctionalGateDropState state,

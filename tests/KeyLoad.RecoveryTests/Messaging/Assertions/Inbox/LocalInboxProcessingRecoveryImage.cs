@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.Messaging;
@@ -35,17 +37,17 @@ internal static class LocalInboxProcessingRecoveryImage
         }
     }
 
-    internal static async Task ResultAsync(OperationResult actual, OperationResult expected)
+    internal static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
         await Assert.That(actual.Json).IsEqualTo(expected.Json);
-        await Assert.That(actual.Error).IsEqualTo(expected.Error);
-        await Assert.That(actual.SafeDetail).IsEqualTo(expected.SafeDetail);
-        await Assert.That(actual.NativeValue?.GetType()).IsEqualTo(expected.NativeValue?.GetType());
-        await ExactAsync(actual.NativeValue, expected.NativeValue);
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
+        await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());
+        await ExactAsync(actual.Value, expected.Value);
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, OperationResult expected)
+        Command<DatabaseCommand> operation, Result<object> expected)
     {
         var image = All(store);
         var position = store.Position;
@@ -54,7 +56,7 @@ internal static class LocalInboxProcessingRecoveryImage
         await Assert.That(All(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }
 
-    internal static async Task CutAsync(DatabaseEngine database, ZoneTreeStore store, ReplicatedOperation original,
+    internal static async Task CutAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> original,
         MessageInspection input, long seedPosition, long seedTail, bool committed)
     {
         await Assert.That(store.Position).IsEqualTo(seedPosition + (committed ? 1L : 0L));
@@ -75,7 +77,7 @@ internal static class LocalInboxProcessingRecoveryImage
         } : input;
         await ExactAsync(database.InspectMessage(CrashFixtureValues.Principal,
             LocalInboxProcessingCrashContract.InputLane, LocalInboxProcessingCrashContract.Message), expectedInput);
-        await LocalInboxProcessingRecoveryModels.RequireAsync(database, original.EvaluatedAt, committed);
+        await LocalInboxProcessingRecoveryModels.RequireAsync(database, new DateTimeOffset(original.Timestamp), committed);
         var head = database.GetOutboxStatus(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.Partition).Head;
         await Assert.That(head.Tail).IsEqualTo(seedTail + (committed ? LocalInboxProcessingCrashContract.MutationCount : 0));
         for (var ordinal = 0; ordinal < LocalInboxProcessingCrashContract.MutationCount; ordinal++)

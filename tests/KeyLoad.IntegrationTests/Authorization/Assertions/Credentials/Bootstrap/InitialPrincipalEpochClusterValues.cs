@@ -13,7 +13,8 @@ internal static class InitialPrincipalEpochClusterValues
         await Assert.That(actual.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync<MutationReceipt[]>([new("putDocument", InitialPrincipalEpochClusterState.Collection, "record", revision)],
             actual.Mutations.ToArray());
     }

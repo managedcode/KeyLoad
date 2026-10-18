@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server;
@@ -17,17 +18,15 @@ internal static class QueryAdapterNullParityFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 fixture.Configure(QueryAdapterNullParityProtocol.Collection, ResourceKind.Collection);
-                var originals = new List<(ReplicatedOperation Operation, byte[] Result)>();
+                var originals = new List<(Command<DatabaseCommand> Operation, byte[] Result)>();
                 var before = fixture.Store.Position;
                 var identity = fixture.Store.Identity;
                 var command = new CommandRequest(QueryAdapterNullParityProtocol.SeedId, fixture.Partition,
                     [.. QueryAdapterNullParityProtocol.Seed]);
                 var receipt = QueryAdapterNullParityReplay.Apply(fixture.Database, OperationKind.Batch,
                     command.CommandId, command, originals).Get<CommitReceipt>();
-                var expected = new CommitReceipt(command.CommandId,
-                    new(identity.Incarnation, fixture.Partition.AtomicPartitionId, before + 1, 1),
-                    [new("putDocument", "orders", "null", 1), new("putDocument", "orders", "missing", 1),
-                     new("putDocument", "orders", "value", 1)], identity.Durability);
+                var expected = new CommitReceipt(command.CommandId, new(identity.Incarnation, fixture.Partition.AtomicPartitionId, before + 1), [new("putDocument", "orders", "null", 1), new("putDocument", "orders", "missing", 1),
+                     new("putDocument", "orders", "value", 1)], identity.Durability, (identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
                 await Assert.That(JsonDefaults.Serialize(receipt)).IsEquivalentTo(JsonDefaults.Serialize(expected), CollectionOrdering.Matching);
                 await WaveAsync(fixture.Database, fixture.Store, fixture.Partition, 1, originals);
                 var retained = (SqlInnerJoinRetainedIdentityFlow.Image(fixture.Store), fixture.Store.Position,
@@ -42,7 +41,7 @@ internal static class QueryAdapterNullParityFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
     internal static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        int epoch, List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        int epoch, List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         var failures = new List<Exception>();

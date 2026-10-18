@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
@@ -32,13 +33,12 @@ internal static class EventAppendDedupAssertions
             }
             var command = new CommandRequest(id, EventAppendCrashContract.Partition,
                 [new AppendEvents(EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, [item], ExpectedStreamRevision.Any)]);
-            var original = new ReplicatedOperation(id, OperationKind.Batch, EventAppendCrashContract.Principal,
-                time, JsonSerializer.Serialize(command, JsonDefaults.Options));
+            var original = database.CreateCommand(OperationKind.Batch, id, EventAppendCrashContract.Principal, time, JsonSerializer.Serialize(command, JsonDefaults.Options));
             var beforePosition = database.Store.Position;
             var rejected = database.Apply(original);
             await Assert.That(database.Store.Position).IsEqualTo(beforePosition + 1);
-            await Assert.That(rejected.Error).IsEqualTo(changed ? ErrorCode.Conflict : ErrorCode.DuplicateEventId);
-            await Assert.That(rejected.SafeDetail).IsEqualTo(changed ? ConflictDetail : DuplicateDetail);
+            await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(changed ? ErrorCode.Conflict : ErrorCode.DuplicateEventId);
+            await Assert.That(rejected.Problem?.Detail).IsEqualTo(changed ? ConflictDetail : DuplicateDetail);
             var afterRejectionPosition = database.Store.Position;
             var rejectedBytes = EventAppendStateAssertions.Bytes(database.Store);
             await EventAppendReceiptAssertions.SameResultAsync(rejected, database.Apply(original));

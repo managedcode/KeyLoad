@@ -43,7 +43,6 @@ internal static class StrongReadSessionRefusals
     internal static (CommitToken Token, string Detail)[] Invalid(CommitToken original) =>
         [(original with { Incarnation = Guid.NewGuid() }, WrongIncarnation),
          (original with { AtomicPartitionId = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat) }, WrongScope),
-         (original with { OwnershipEpoch = checked(original.OwnershipEpoch + OwnershipEpochStep) }, WrongScope),
          (original with { Position = InvalidCut }, InvalidPosition),
          (original with { Position = long.MaxValue }, FuturePosition)];
 }

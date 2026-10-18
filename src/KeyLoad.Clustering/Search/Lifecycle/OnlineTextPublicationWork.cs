@@ -1,14 +1,16 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.Clustering;
 
 internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
 {
     private readonly Lock gate = new();
-    private Task<OperationResult>? original;
+    private Task<Result<object>>? original;
     private bool closed;
     internal Guid SessionId { get; } = sessionId;
     internal Guid CommandId { get; } = commandId;
 
-    internal Task<OperationResult> AdmitOriginal(Func<Task<OperationResult>> admit)
+    internal Task<Result<object>> AdmitOriginal(Func<Task<Result<object>>> admit)
     {
         ArgumentNullException.ThrowIfNull(admit);
         lock (gate)
@@ -25,7 +27,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal Task<OperationResult>? CloseAdmissionAndCaptureOriginal()
+    internal Task<Result<object>>? CloseAdmissionAndCaptureOriginal()
     {
         lock (gate)
         {
@@ -34,7 +36,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal Task<OperationResult>? CapturedOriginal()
+    internal Task<Result<object>>? CapturedOriginal()
     {
         lock (gate)
         {
@@ -42,7 +44,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal Task<OperationResult> RequireOriginal()
+    internal Task<Result<object>> RequireOriginal()
     {
         lock (gate)
         {
@@ -50,7 +52,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal async Task<OperationResult> AwaitCallerAsync(CancellationToken token)
+    internal async Task<Result<object>> AwaitCallerAsync(CancellationToken token)
     {
         try
         {

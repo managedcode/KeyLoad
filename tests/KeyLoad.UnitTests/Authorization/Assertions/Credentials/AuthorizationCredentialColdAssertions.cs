@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -9,7 +10,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class AuthorizationCredentialColdAssertions
 {
     internal static async Task RunAsync(AuthorizationTelemetryHttpFixture fixture,
-        (Guid Id, ConfigureApiKeyRequest Request, OperationResult Result) repair,
+        (Guid Id, ConfigureApiKeyRequest Request, Result<object> Result) repair,
         CancellationToken cancellationToken)
     {
         var original = AuthorizationTelemetryPolicyRepair.Capture(fixture.Database);
@@ -28,7 +29,7 @@ internal static class AuthorizationCredentialColdAssertions
     }
 
     private static async Task VerifyAsync(AuthorizationTelemetryHttpFixture fixture,
-        (Guid Id, ConfigureApiKeyRequest Request, OperationResult Result) repair,
+        (Guid Id, ConfigureApiKeyRequest Request, Result<object> Result) repair,
         (string[] Bytes, long Position) original, global::KeyLoad.Storage.StoreIdentity identity,
         long applied, ZoneTreeStore store, CancellationToken cancellationToken)
     {
@@ -37,9 +38,7 @@ internal static class AuthorizationCredentialColdAssertions
         await ImageAsync(store, original);
         var database = fixture.Database.CreateConfiguredDatabase(store);
         await Assert.That(database.LastApplied).IsEqualTo(applied);
-        var replay = database.ApplyEmbedded(new(repair.Id, OperationKind.ConfigureApiKey,
-            AuthorizationCredentialHttpExportProtocol.RootPrincipal, default,
-            JsonSerializer.Serialize(repair.Request, JsonDefaults.Options)), cancellationToken);
+        var replay = database.ApplyEmbedded(database.CreateCommand(OperationKind.ConfigureApiKey, repair.Id, AuthorizationCredentialHttpExportProtocol.RootPrincipal, default, JsonSerializer.Serialize(repair.Request, JsonDefaults.Options)), cancellationToken);
         await Assert.That(NativeSerialization.Serialize(replay).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(repair.Result))).IsTrue();
         await ImageAsync(store, original);

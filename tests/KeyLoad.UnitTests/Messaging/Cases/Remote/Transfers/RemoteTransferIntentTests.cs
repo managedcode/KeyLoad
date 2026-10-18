@@ -27,13 +27,13 @@ internal sealed class RemoteTransferIntentTests
         await Assert.That(after!.IntentToken).IsEqualTo(before.IntentToken);
         await Assert.That(after.State).IsEqualTo(QueueTransferState.OutputPending);
 
-        var changedBody = fixture.Apply(OperationKind.Batch,
+        var changedBody = Errors.Code(fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
-                [create with { Message = message with { PayloadJson = ChangedPayload } }])).Error;
+                [create with { Message = message with { PayloadJson = ChangedPayload } }])).Problem);
         await Assert.That(changedBody).IsEqualTo(ErrorCode.Conflict);
-        var changedDestination = fixture.Apply(OperationKind.Batch,
+        var changedDestination = Errors.Code(fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
-                [create with { Destination = alternate, Message = message with { Queue = alternate.Queue } }])).Error;
+                [create with { Destination = alternate, Message = message with { Queue = alternate.Queue } }])).Problem);
         await Assert.That(changedDestination).IsEqualTo(ErrorCode.Conflict);
         var preserved = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal, fixture.SourceQueue, transferId);
         await Assert.That(preserved!.Destination).IsEqualTo(fixture.DestinationQueue);
@@ -52,7 +52,7 @@ internal sealed class RemoteTransferIntentTests
                 new(fixture.DestinationQueue.Queue, "rolled-back", "{}")),
             new EnqueueMessage(RemoteTransferDatabase.SourceQueueName, "occupied", "{}")
         ]));
-        await Assert.That(rollback.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(rollback.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
             fixture.SourceQueue, rolledBackId)).IsNull();
 

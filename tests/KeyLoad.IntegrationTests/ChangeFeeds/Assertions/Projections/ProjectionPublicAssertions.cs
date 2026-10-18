@@ -27,7 +27,8 @@ internal static class ProjectionPublicAssertions
     {
         await global::TUnit.Assertions.Assert.That(receipt.CommandId).IsEqualTo(id);
         await ExactAsync(global::System.Collections.Immutable.ImmutableArray.CreateRange(mutations), receipt.Mutations);
-        await global::TUnit.Assertions.Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await global::TUnit.Assertions.Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
     }
 
     internal static async Task<OutboxStatus> PhaseAsync(KeyLoadClient root, ProjectionPublicState state,

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
@@ -56,6 +57,6 @@ internal static class SqlTypedInsertLiteral
         return SqlOperationCompiler.Compile(new(partition, sql, parameters, CommandId: id), limits,
             limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
     }
-    internal static OperationResult Apply(DatabaseEngine database, McpDecodedOperation command, DateTimeOffset at)
-        => database.Apply(database.CreateNativeOperation(OperationKind.Batch, command.CommandId, Writer, at, command.Payload));
+    internal static Result<object> Apply(DatabaseEngine database, McpDecodedOperation command, DateTimeOffset at)
+        => database.Apply(database.CreateCommand(OperationKind.Batch, command.CommandId, Writer, at, command.Payload));
 }

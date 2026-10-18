@@ -9,30 +9,30 @@ internal static class SparseCompositePrefixClusterOperations
     internal static async Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         SparseCompositePrefixClusterState state, bool denied, CancellationToken token)
     {
-        foreach (var fallback in new[] { false, true })
+        foreach (var includeStatusIndex in new[] { false, true })
         {
-            var collection = fallback ? SparseCompositePrefixClusterData.Fallback : SparseCompositePrefixClusterData.Only;
-            await CollectionAsync(root, reader, state, collection, fallback, denied, token);
+            var collection = includeStatusIndex ? SparseCompositePrefixClusterData.WithStatusIndex : SparseCompositePrefixClusterData.Only;
+            await CollectionAsync(root, reader, state, collection, includeStatusIndex, denied, token);
         }
     }
     private static async Task CollectionAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
-        SparseCompositePrefixClusterState state, string collection, bool fallback, bool denied, CancellationToken token)
+        SparseCompositePrefixClusterState state, string collection, bool includeStatusIndex, bool denied, CancellationToken token)
     {
         foreach (var shape in new[] { 0, 1, 2 })
         {
             foreach (var reference in new[] { false, true })
             {
                 var path = reference ? SparseCompositePrefixClusterData.Scan
-                    : SparseCompositePrefixClusterData.Path(state.IncludeNull, state.IncludeMissing, fallback, shape);
+                    : SparseCompositePrefixClusterData.Path(state.IncludeNull, state.IncludeMissing, includeStatusIndex, shape);
                 await RoutesAsync(root, reader, state, collection, shape, reference, path, denied ? ErrorCode.PermissionDenied : null,
                     consent: true, token);
             }
         }
         if (!denied)
         {
-            var indexed = state.IncludeNull && state.IncludeMissing || fallback;
+            var indexed = state.IncludeNull && state.IncludeMissing || includeStatusIndex;
             await RoutesAsync(root, reader, state, collection, 0, false,
-                SparseCompositePrefixClusterData.Path(state.IncludeNull, state.IncludeMissing, fallback, 0),
+                SparseCompositePrefixClusterData.Path(state.IncludeNull, state.IncludeMissing, includeStatusIndex, 0),
                 indexed ? null : ErrorCode.UnsupportedCapability, consent: false, token);
         }
     }

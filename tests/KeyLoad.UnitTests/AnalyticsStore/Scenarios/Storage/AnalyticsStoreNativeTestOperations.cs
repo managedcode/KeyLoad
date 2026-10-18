@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using System.Text.Json.Nodes;
 using KeyLoad.Core;
@@ -27,12 +28,11 @@ internal static class AnalyticsStoreNativeTestOperations
         var work = new ReadExecutionBudget(db.Database.OperationLimitsOptions, db.Database.EvaluationClock, token);
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, db.Partition, [mutation]);
-        var issued = db.Database.CreateNativeOperation(OperationKind.Batch, id, D.Root,
+        var issued = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
             TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(request), work);
-        var next = checked(db.ReadJournalCut().LastIndex + 1);
+        var next = checked(db.ReadCanonicalCut().AppliedPosition + 1);
         var result = db.SubmitIssuedEmbedded(issued, token);
-        var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, next, 1),
-            [new(kind, D.Store, lastId, generation)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, next), [new(kind, D.Store, lastId, generation)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(expected, result.Get<CommitReceipt>());
         await Assert.That(result.Get<CommitReceipt>().Mutations.Single().CompositionReferences.IsEmpty).IsTrue();
         return new(issued, expected);
@@ -43,12 +43,11 @@ internal static class AnalyticsStoreNativeTestOperations
         var before = db.Database.GetOutboxStatus(D.Root, db.Partition);
         var work = new ReadExecutionBudget(db.Database.OperationLimitsOptions, db.Database.EvaluationClock, token);
         var id = Guid.NewGuid();
-        var issued = db.Database.CreateNativeOperation(OperationKind.Batch, id, D.Root,
+        var issued = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
             TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(new CommandRequest(id, db.Partition, [mutation])), work);
         var result = db.SubmitIssuedEmbedded(issued, token);
-        await EqualAsync(new OperationResult(null, ErrorCode.RevisionConflict,
-            "The expected analytics event revision does not match."), result);
-        await Assert.That(result.NativeValue).IsNull();
+        await EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.RevisionConflict, "The expected analytics event revision does not match.")), result);
+        await Assert.That(result.Value).IsNull();
         await EqualAsync(before, db.Database.GetOutboxStatus(D.Root, db.Partition));
     }
 

@@ -14,8 +14,8 @@ internal static class ColdBootstrapSdkAssertions
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(receipt.Token.Position).IsGreaterThan(ZeroPosition);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(ZeroPosition);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(OneMutation);
         var expected = new MutationReceipt(PutKind, ColdBootstrapSdkFlow.Collection,
             ColdBootstrapSdkFlow.Document, ColdBootstrapSdkFlow.FirstRevision);
@@ -28,10 +28,9 @@ internal static class ColdBootstrapSdkAssertions
     {
         await Assert.That(actual.Token.Position).IsGreaterThan(previousPosition);
         var expected = new CommitReceipt(command.CommandId,
-            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position,
-                actual.Token.OwnershipEpoch),
+            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position),
             [new(PutKind, ColdBootstrapSdkFlow.Collection, ColdBootstrapSdkFlow.Document, revision)],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 

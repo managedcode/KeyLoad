@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -11,8 +13,8 @@ internal sealed class CompetingInboxState(PartitionRef partition, DateTimeOffset
     internal QueueLaneRef Lane { get; } = new(partition, Queue);
     internal DateTimeOffset Time { get; } = time;
     internal bool Equivalent { get; } = equivalent;
-    internal ReplicatedOperation[] Competitors { get; set; } = [];
-    internal OperationResult[] Results { get; set; } = [];
+    internal Command<DatabaseCommand>[] Competitors { get; set; } = [];
+    internal Result<object>[] Results { get; set; } = [];
     internal int Winner
     {
         get; set;
@@ -27,6 +29,6 @@ internal sealed class CompetingInboxState(PartitionRef partition, DateTimeOffset
     internal Mutation[] Effects(int index) => [new PutDocument(Documents, "effect", Json(index), 0),
         new AppendEvents(Streams, "effect", [new("effect", "Completed", Json(index))], ExpectedStreamRevision.NoStream),
         new EnqueueMessage(Output, "effect", Json(index))];
-    internal ReplicatedOperation Operation<T>(OperationKind kind, T request, Guid id)
+    internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T request, Guid id)
         => new(id, kind, "root", Time, System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
 }

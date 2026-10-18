@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.Server;
@@ -19,10 +18,7 @@ internal static class AnalyticsBoundCoreOwner
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
-            var actual = fixture.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)?.DefaultShard)
-                ?? throw new InvalidOperationException("The actual analytics physical owner is absent.");
-            owner.BindPhysicalOwner(actual);
-            owner.AttachResourceLifetimeWorkFence(fixture.Database, fixture.ReadJournalCut().LastIndex);
+            owner.BindPhysicalOwner(new(fixture.Store.Identity.NodeId, fixture.Store.Identity.Incarnation));
             await ServerFailureObserver.ObserveAsync(() => body(fixture, owner, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

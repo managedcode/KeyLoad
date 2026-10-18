@@ -59,7 +59,7 @@ internal static class Bm25PortableFamilyBackupSeed
             source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
         var receipt = source.SubmitIssued(operation).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
-        await Assert.That(source.ReadRetainedEntry(operation.Id).Operation!.Kind)
+        await Assert.That(source.ReadStoredOutcome(operation.Id).PreparedCommand!.Value!.Kind)
             .IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
         var bytes = source.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(
             Bm25CorpusProtocol.CurrentFamily, source.Partition, Collection, Field,

@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 
@@ -10,25 +12,19 @@ internal static class QueueViewLeaseIsolationOperations
         => await SendAsync(state, kind, request, id, _ => expected);
 
     internal static async Task<QueueViewLeaseIsolationHistory> SendAsync<T>(QueueViewLeaseIsolationState state,
-        OperationKind kind, T request, Guid id, Func<ReplicatedOperation, object> expected)
+        OperationKind kind, T request, Guid id, Func<Command<DatabaseCommand>, object> expected)
     {
         state.Token.ThrowIfCancellationRequested();
         var owner = state.Owner;
-        var index = checked(owner.JournalCut().LastIndex + QueueViewLeaseIsolationProtocol.One);
-        var operation = owner.Database.CreateNativeOperation(kind, id, QueueViewLeaseIsolationProtocol.Root,
+        var index = checked(owner.ReadCut().AppliedPosition + QueueViewLeaseIsolationProtocol.One);
+        var operation = owner.Database.CreateCommand(kind, id, QueueViewLeaseIsolationProtocol.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
-        operation = operation with
-        {
-            NativePayload = operation.NativePayload.ToArray()
-        };
+        operation = owner.Database.OwnCommand(operation);
         var predicted = expected(operation);
         var result = owner.Submit(operation);
         var entry = owner.Entry(operation);
-        await Assert.That(entry.Index).IsEqualTo(index);
-        await QueueViewLeaseIsolationResults.SameAsync(result, new(null)
-        {
-            NativeValue = predicted
-        });
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(index);
+        await QueueViewLeaseIsolationResults.SameAsync(result, Result<object>.Succeed(predicted));
         var global = kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;
         var key = global ? KeySpace.GlobalOutcome(QueueViewLeaseIsolationProtocol.Root, id)
             : KeySpace.PartitionOutcome(state.Partition, QueueViewLeaseIsolationProtocol.Root, id);
@@ -53,23 +49,23 @@ internal static class QueueViewLeaseIsolationOperations
     {
         var placement = state.Owner.Database.ReadAtomicPartitionPlacement(QueueViewLeaseIsolationProtocol.Root,
             state.Partition);
-        return new(id, NextToken(state, placement.Incarnation, placement.PlacementEpoch),
-            mutations, state.Owner.Database.Durability);
+        return new(id, NextToken(state, placement.Incarnation), mutations, state.Owner.Database.Durability,
+            state.Owner.Database.Durability == DurabilityProfile.Buffered ? 0 : 1);
     }
 
     internal static CommitToken NextToken(QueueViewLeaseIsolationState state)
     {
         var placement = state.Owner.Database.ReadAtomicPartitionPlacement(QueueViewLeaseIsolationProtocol.Root,
             state.Partition);
-        return NextToken(state, placement.Incarnation, placement.PlacementEpoch);
+        return NextToken(state, placement.Incarnation);
     }
 
-    private static CommitToken NextToken(QueueViewLeaseIsolationState state, Guid incarnation, long epoch)
+    private static CommitToken NextToken(QueueViewLeaseIsolationState state, Guid incarnation)
         => new(incarnation, state.Partition.AtomicPartitionId,
-            checked(state.Owner.JournalCut().LastIndex + QueueViewLeaseIsolationProtocol.One), epoch);
+            checked(state.Owner.ReadCut().AppliedPosition + QueueViewLeaseIsolationProtocol.One));
 
-    internal static ReplicatedOperation Original(QueueViewLeaseIsolationHistory history)
-        => history.Entry.Operation ?? throw new InvalidOperationException(QueueViewLeaseIsolationProtocol.Absent);
+    internal static Command<DatabaseCommand> Original(QueueViewLeaseIsolationHistory history)
+        => history.Entry.PreparedCommand;
 
     internal static async Task BytesAsync(byte[]? actual, byte[]? expected)
     {

@@ -7,7 +7,7 @@
 - This helper is test infrastructure invoked by `RecoveryTests`; it does not own production storage or declare a durability guarantee.
 - Feature-specific scenarios should be colocated under `<SliceName>/` when moved, while reusable process-host infrastructure remains shared test infrastructure. Preserve the exact crash scenario contract used by the invoking recovery tests.
 - Process termination is not power-loss testing. Do not label these cases as power-loss durability proof, add mocks/fakes, or weaken cleanup and recovery assertions.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.
 - Preserve real process boundaries and artifacts. Report exact Actions run/SHA/artifacts for qualification; local Aspire process checks remain development evidence and do not qualify power-loss or endurance.
 
 ## Boundaries and protected risks

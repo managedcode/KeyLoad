@@ -57,9 +57,7 @@ internal static class CursorExpiryBoundaryAssertions
     internal static async Task ReceiptAsync(TestDatabase db, CommandRequest command, CommitReceipt receipt, long seedCut)
     {
         var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation,
-            db.Partition.AtomicPartitionId, seedCut + Revision, OwnershipEpoch),
-            [new(PutKind, "orders", FirstId, Revision), new(PutKind, "orders", SecondId, Revision)],
-            DurabilityProfile.ProcessDurable);
+            db.Partition.AtomicPartitionId, seedCut + Revision), [new(PutKind, "orders", FirstId, Revision), new(PutKind, "orders", SecondId, Revision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 

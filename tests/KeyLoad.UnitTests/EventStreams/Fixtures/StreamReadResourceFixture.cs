@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -118,7 +120,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
         => database.ReadEventSource(AdministratorId,
             new(new(Partition, StreamSetName, EventSourceKind.Stream, StreamId))).Head;
 
-    internal OperationResult Apply(ReplicatedOperation operation) => database.Apply(operation);
+    internal Result<object> Apply(Command<DatabaseCommand> operation) => database.Apply(operation);
 
     public void Reopen(DatabaseLimits limits)
     {
@@ -213,8 +215,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private void Submit<T>(OperationKind kind, T payload)
     {
         var id = kind == OperationKind.Batch && payload is CommandRequest command ? command.CommandId : Guid.NewGuid();
-        var operation = new ReplicatedOperation(id, kind, AdministratorId, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        var operation = database.CreateCommand(kind, id, AdministratorId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
         database.Apply(operation).Get<object>();
     }
 }

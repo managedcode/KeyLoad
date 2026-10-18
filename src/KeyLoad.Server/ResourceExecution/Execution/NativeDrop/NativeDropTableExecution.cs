@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 
@@ -9,7 +10,7 @@ internal sealed class NativeDropTableExecution(PartitionHostApplicationOwner own
 {
     private const string InvalidRequest = "The table deletion request identity or deadline is invalid.";
 
-    public async Task<OperationResult> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
+    public async Task<Result<object>> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
         DropTableRequest request, DateTimeOffset originalExpiry, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

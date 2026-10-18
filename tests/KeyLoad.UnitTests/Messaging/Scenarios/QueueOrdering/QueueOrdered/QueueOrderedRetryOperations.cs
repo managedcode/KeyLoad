@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -20,30 +22,30 @@ internal static class QueueOrderedRetryOperations
         await Assert.That(actual.HeadersJson).IsEqualTo(QueueOrderedRetryProtocol.Headers);
         return actual;
     }
-    internal static OperationResult Complete(DatabaseEngine database, QueueOrderedRetryState state, Delivery lease, DeliveryAction action)
+    internal static Result<object> Complete(DatabaseEngine database, QueueOrderedRetryState state, Delivery lease, DeliveryAction action)
     {
         var request = new DeliveryCommand(Guid.NewGuid(), state.Lane, lease.Token, action);
         return state.Execute(database, OperationKind.Delivery, request, request.CommandId);
     }
     internal static async Task ReplayAsync(DatabaseEngine database, QueueOrderedRetryState state)
     {
-        foreach (var item in state.Outcomes.Where(item => item.Operation.Kind != OperationKind.Receive))
+        foreach (var item in state.Outcomes.Where(item => item.Operation.Value!.Kind != OperationKind.Receive))
         {
             await ReplayResultAsync(database, item.Operation, item.Result);
         }
     }
-    private static async Task ReplayResultAsync(DatabaseEngine database, ReplicatedOperation operation, OperationResult original)
+    private static async Task ReplayResultAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> original)
     {
         var actual = database.Apply(operation);
-        if (original.Error is not null)
+        if (Errors.Code(original.Problem) is not null)
         {
-            await Assert.That(actual.Error).IsEqualTo(original.Error);
-            await Assert.That(actual.SafeDetail).IsEqualTo(original.SafeDetail);
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Problem));
+            await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
             await Assert.That(actual.Json).IsEqualTo(original.Json);
-            await Assert.That(actual.NativeValue).IsNull();
+            await Assert.That(actual.Value).IsNull();
             return;
         }
-        switch (operation.Kind)
+        switch (operation.Value!.Kind)
         {
             case OperationKind.ConfigureResource:
                 await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, original);
@@ -59,13 +61,13 @@ internal static class QueueOrderedRetryOperations
                 break;
         }
     }
-    private static async Task DispatchReplayAsync(OperationResult actual, OperationResult expected)
+    private static async Task DispatchReplayAsync(Result<object> actual, Result<object> expected)
     {
         await Assert.That(actual.Json).IsEqualTo(expected.Json);
-        await Assert.That(actual.Error).IsEqualTo(expected.Error);
-        await Assert.That(actual.SafeDetail).IsEqualTo(expected.SafeDetail);
-        await Assert.That(actual.NativeValue?.GetType()).IsEqualTo(typeof(bool));
-        await Assert.That(expected.NativeValue?.GetType()).IsEqualTo(typeof(bool));
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
+        await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(bool));
+        await Assert.That(expected.Value?.GetType()).IsEqualTo(typeof(bool));
         await Assert.That(actual.Get<bool>()).IsEqualTo(expected.Get<bool>());
     }
 }

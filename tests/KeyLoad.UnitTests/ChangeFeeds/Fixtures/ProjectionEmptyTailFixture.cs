@@ -1,12 +1,14 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ProjectionEmptyTailFixture
 {
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, Guid id, T request)
+    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T request)
         => new(id, kind, ProjectionEmptyTailAssertions.Root, default,
             global::System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
 
-    internal static ReplicatedOperation Complete(ProjectionConsumerRef consumer, string token, params Mutation[] effects)
+    internal static Command<DatabaseCommand> Complete(ProjectionConsumerRef consumer, string token, params Mutation[] effects)
     {
         var id = Guid.NewGuid();
         return Operation(OperationKind.CommitProjectionBatch, id, new CommitProjectionBatchRequest(id, consumer, token, [.. effects]));
@@ -51,15 +53,15 @@ internal static class ProjectionEmptyTailFixture
     }
 
     private static async Task<ProjectionEmptyTailState> ContinueAsync(TestDatabase database, ProjectionConsumerRef consumer,
-        ProjectionConsumerDefinition definition, ReplicatedOperation empty, OperationResult emptyResult,
-        ReplicatedOperation source, OperationResult sourceResult, CommitReceipt sourceReceipt,
-        ReplicatedOperation rejected, OperationResult rejection, CancellationToken token)
+        ProjectionConsumerDefinition definition, Command<DatabaseCommand> empty, Result<object> emptyResult,
+        Command<DatabaseCommand> source, Result<object> sourceResult, CommitReceipt sourceReceipt,
+        Command<DatabaseCommand> rejected, Result<object> rejection, CancellationToken token)
     {
         var fresh = database.Database.ReadProjectionBatch(ProjectionEmptyTailAssertions.Root, new(consumer));
         var mutation = new PutDocument(ProjectionEmptyTailAssertions.Source, "input", "{\"n\":1}", 0L);
-        var entry = new OutboxEntry(1L, 0, sourceReceipt.Token, source.EvaluatedAt, mutation,
+        var entry = new OutboxEntry(1L, 0, sourceReceipt.Token, new DateTimeOffset(source.Timestamp), mutation,
             new MutationReceipt("putDocument", ProjectionEmptyTailAssertions.Source, "input", 1L), null,
-            new(new(database.Partition, ProjectionEmptyTailAssertions.Source, "input"), 1L, mutation.Json, new RowAccess(), source.EvaluatedAt));
+            new(new(database.Partition, ProjectionEmptyTailAssertions.Source, "input"), 1L, mutation.Json, new RowAccess(), new DateTimeOffset(source.Timestamp)));
         await ProjectionEmptyTailAssertions.ExactAsync(fresh,
             new ProjectionBatch(new(consumer, definition, 0L, false), [entry], 1L, fresh.Token, false));
         var complete = Complete(consumer, fresh.Token, new PutDocument(ProjectionEmptyTailAssertions.Target, "effect", "{\"sourceCount\":1}", 0L));

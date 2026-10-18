@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Security.Cryptography;
 using KeyLoad.Core;
 
@@ -30,7 +31,7 @@ internal static class ChunkMultiblockCrashState
         await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), snapshot, database.Limits.MaxBatchBytes).ConfigureAwait(false);
     }
 
-    internal static string ReplayUnchanged(DatabaseEngine database, Func<OperationResult> replay)
+    internal static string ReplayUnchanged(DatabaseEngine database, Func<Result<object>> replay)
     {
         var before = SampleChunkCrashState.Complete(database);
         var position = database.Store.Position;

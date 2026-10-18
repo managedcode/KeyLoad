@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.CrashHost;
 
@@ -27,7 +28,7 @@ internal static class SampleChunkEarlyProcessAssertions
         {
             await Assert.That(recovered.RawImage).IsEqualTo(prepared.RawImage);
         }
-        var result = NativeSerialization.Deserialize<OperationResult>(Convert.FromHexString(recovered.OriginalInflightResult!));
+        var result = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(recovered.OriginalInflightResult!));
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
         await Assert.That(receipt.Token.Position).IsEqualTo(recovered.Position);
@@ -49,7 +50,7 @@ internal static class SampleChunkEarlyProcessAssertions
 
     private static async Task PreparedAsync(SampleChunkEarlyCrashSnapshot actual, SampleChunkEarlyCut cut)
     {
-        var original = NativeSerialization.Deserialize<OperationResult>(Convert.FromHexString(actual.OriginalAcknowledgedResult));
+        var original = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(actual.OriginalAcknowledgedResult));
         var expected = new ResourceDefinition(SampleChunkCrashContract.Set, ResourceKind.TimeSeries,
             SampleChunkCrashContract.Partition.TransactionDomainId);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(original.Get<ResourceDefinition>())))

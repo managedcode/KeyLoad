@@ -5,7 +5,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Checks CLUSTER joined pairs while real atomic commands change both linked rows.</summary>
+/// <summary>Checks Orleans joined pairs while real atomic commands change both linked rows.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixture)

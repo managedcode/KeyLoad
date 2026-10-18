@@ -1,4 +1,5 @@
+using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal sealed record PartitionStorageNativeCommit(CommitReceipt Receipt, ReplicaEntry Entry, byte[] Bytes);
+internal sealed record PartitionStorageNativeCommit(CommitReceipt Receipt, StoredOutcome Entry, byte[] Bytes);

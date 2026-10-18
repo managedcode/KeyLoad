@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -14,22 +16,22 @@ internal static class SeriesPortableBackupSeed
     internal static SampleData Data(int id, int seconds, double value)
         => new(EventPrefix + id, Start.AddSeconds(seconds), value);
 
-    internal static ReplicatedOperation Batch(DatabaseEngine database, PartitionRef partition, params Mutation[] mutations)
+    internal static Command<DatabaseCommand> Batch(DatabaseEngine database, PartitionRef partition, params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
-        return database.CreateNativeOperation(OperationKind.Batch, id, Root, database.EvaluationClock.GetUtcNow(),
+        return database.CreateCommand(OperationKind.Batch, id, Root, database.EvaluationClock.GetUtcNow(),
             NativeSerialization.Serialize(new CommandRequest(id, partition, [.. mutations])));
     }
 
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result)[]> RunAsync(
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)[]> RunAsync(
         BackupIndexedDocumentDedupFixture fixture, CancellationToken token)
     {
         var database = fixture.Source.Database;
         var resource = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId,
             new ResourceDefinition(Set, ResourceKind.TimeSeries, fixture.Partition.TransactionDomainId));
-        var configured = database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), Root,
+        var configured = database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), Root,
             database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(resource));
-        await Assert.That(database.ApplyEmbedded(configured, token).Error).IsNull();
+        await Assert.That(Errors.Code(database.ApplyEmbedded(configured, token).Problem)).IsNull();
         var appended = Batch(database, fixture.Partition,
             new AppendSamples(Set, Series, [Data(1, 0, 1), Data(2, 1, 2), Data(3, 2, 3), Data(4, 3, 4)]));
         var appendResult = database.ApplyEmbedded(appended, token);

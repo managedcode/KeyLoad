@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Storage;
@@ -7,9 +8,9 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     /// <summary>Declines speculative eligibility failures without replacing original admission.</summary>
-    internal CommandRequest? TryReadOrdinaryDocumentSubmission(ReplicatedOperation operation)
+    internal static CommandRequest? TryReadOrdinaryDocumentSubmission(Command<DatabaseCommand> operation)
     {
-        if (operation.Kind != OperationKind.Batch)
+        if (operation.Value!.Kind != OperationKind.Batch)
         {
             return null;
         }
@@ -21,16 +22,16 @@ public sealed partial class DatabaseEngine
     }
 
     /// <summary>Normalizes eligible direct calls; production passes its already verified candidate.</summary>
-    internal void ValidateSubmissionAdmission(ReplicatedOperation operation)
+    internal void ValidateSubmissionAdmission(Command<DatabaseCommand> operation)
     {
-        if (operation.Kind != OperationKind.Batch)
+        if (operation.Value!.Kind != OperationKind.Batch)
         {
             return;
         }
-        ReplicatedOperation normalized;
+        Command<DatabaseCommand> normalized;
         try
         {
-            normalized = NormalizeOperation(operation);
+            normalized = OwnCommand(operation);
         }
         catch (KeyLoadException) { return; }
         if (TryReadOrdinaryDocumentSubmission(normalized) is not null)
@@ -40,11 +41,11 @@ public sealed partial class DatabaseEngine
     }
 
     /// <summary>Checks authorized changed identity using the original verified operation.</summary>
-    internal void ValidateVerifiedSubmissionAdmission(ReplicatedOperation operation)
+    internal void ValidateVerifiedSubmissionAdmission(Command<DatabaseCommand> operation)
         => ValidateSubmissionAdmissionCore(operation, null);
 
     /// <summary>Checks authorized changed identity using the original verified operation and bounded work.</summary>
-    internal void ValidateSubmissionAdmission(ReplicatedOperation operation, ReadExecutionBudget work)
+    internal void ValidateSubmissionAdmission(Command<DatabaseCommand> operation, ReadExecutionBudget work)
     {
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
@@ -52,7 +53,7 @@ public sealed partial class DatabaseEngine
         work.Check();
     }
 
-    private void ValidateSubmissionAdmissionCore(ReplicatedOperation operation, ReadExecutionBudget? work)
+    private void ValidateSubmissionAdmissionCore(Command<DatabaseCommand> operation, ReadExecutionBudget? work)
     {
         _ = Store.Read(raw =>
         {
@@ -68,7 +69,7 @@ public sealed partial class DatabaseEngine
                 return false;
             }
             var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-            var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+            var selection = CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
             if (selection.Outcome is not { } outcome || outcome.PolicyEpoch != principal.PolicyEpoch
                 || outcome.Incarnation != Store.Identity.Incarnation
                 || outcome.Fingerprint == CommandFingerprint(operation))
@@ -80,14 +81,14 @@ public sealed partial class DatabaseEngine
         });
     }
 
-    private bool TryAuthorizeOrdinaryDocumentSubmission(IKeyValueView view, ReplicatedOperation operation,
+    private bool TryAuthorizeOrdinaryDocumentSubmission(IKeyValueView view, Command<DatabaseCommand> operation,
         out PrincipalRecord? principal, out KeyLoadException? denial, bool bounded = false)
     {
         principal = null;
         denial = null;
         try
         {
-            principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
+            principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Unauthenticated) { throw; }
         catch (KeyLoadException error) when (CanDeclineDocumentAdmission(error, bounded)) { return false; }
@@ -107,7 +108,7 @@ public sealed partial class DatabaseEngine
     }
 
     private bool HasChangedRetainedDocumentDenial(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, KeyLoadException denial, bool bounded)
+        Command<DatabaseCommand> operation, KeyLoadException denial, bool bounded)
     {
         try
         {
@@ -116,7 +117,7 @@ public sealed partial class DatabaseEngine
                 return false;
             }
             var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-            var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+            var selection = CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
             if (selection.Outcome is not { } outcome || outcome.PolicyEpoch != principal.PolicyEpoch
                 || outcome.Incarnation != Store.Identity.Incarnation || string.IsNullOrEmpty(outcome.Fingerprint)
                 || outcome.Fingerprint == CommandFingerprint(operation))
@@ -124,9 +125,10 @@ public sealed partial class DatabaseEngine
                 return false;
             }
             CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
-            return outcome.Result is { } result && result.Error == denial.Code
-                && string.Equals(result.SafeDetail, denial.Message, StringComparison.Ordinal)
-                && result.Json is null && result.NativeValue is null
+            var result = outcome.Result;
+            return Errors.Code(result.Problem) == denial.Code
+                && string.Equals(result.Problem?.Detail, denial.Message, StringComparison.Ordinal)
+                && result.Value is null
                 && outcome.BlobAuthority is null && outcome.CompositionAuthority is null
                 && outcome.OnlineTextAuthority is null && outcome.RemoteTransferFailureAuthority is null
                 ;
@@ -138,9 +140,9 @@ public sealed partial class DatabaseEngine
         => !bounded || error.Code is not (ErrorCode.BudgetExceeded or ErrorCode.Corruption
             or ErrorCode.FormatUnsupported or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome);
 
-    private CommandRequest? ReadOrdinaryDocumentSubmission(ReplicatedOperation operation)
+    private static CommandRequest? ReadOrdinaryDocumentSubmission(Command<DatabaseCommand> operation)
     {
-        if (operation.Kind != OperationKind.Batch)
+        if (operation.Value!.Kind != OperationKind.Batch)
         {
             return null;
         }

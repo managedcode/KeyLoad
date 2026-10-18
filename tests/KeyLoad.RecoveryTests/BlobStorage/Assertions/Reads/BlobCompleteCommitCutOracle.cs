@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -45,27 +46,27 @@ internal static class BlobCompleteCommitCutOracle
         return Hash(transcript);
     }
 
-    internal static ReplicatedOperation Begin(BlobCommitCutSeedProof proof, Guid upload)
-        => proof.Operations.Select(static bytes => NativeSerialization.Deserialize<ReplicatedOperation>(bytes))
+    internal static Command<DatabaseCommand> Begin(BlobCommitCutSeedProof proof, Guid upload)
+        => proof.Operations.Select(static bytes => NativeSerialization.Deserialize<Command<DatabaseCommand>>(bytes))
             .Single(operation => operation.Kind == OperationKind.BeginBlobUpload
-                && NativeCommandPayload.Read<BeginBlobUploadRequest>(operation).UploadId == upload);
+                && NativeSerialization.Deserialize<BeginBlobUploadRequest>((operation).Value!.Input.Span).UploadId == upload);
 
-    internal static ReplicatedOperation PriorComplete(BlobCommitCutSeedProof proof)
-        => proof.Operations.Select(static bytes => NativeSerialization.Deserialize<ReplicatedOperation>(bytes))
+    internal static Command<DatabaseCommand> PriorComplete(BlobCommitCutSeedProof proof)
+        => proof.Operations.Select(static bytes => NativeSerialization.Deserialize<Command<DatabaseCommand>>(bytes))
             .Single(operation => operation.Kind == OperationKind.CompleteBlobUpload);
 
-    internal static BlobMetadata Metadata(BlobCommitCutSeedProof proof, ReplicatedOperation complete, Guid upload,
+    internal static BlobMetadata Metadata(BlobCommitCutSeedProof proof, Command<DatabaseCommand> complete, Guid upload,
         byte[] bytes, long revision)
         => new(BlobCommitCutProtocol.Blob, revision, upload, bytes.Length,
             bytes.Length == MultipartBytes ? 2 : 1,
-            Chain(proof.Incarnation, BlobCommitCutProtocol.Blob, upload, bytes), new RowAccess(), complete.EvaluatedAt);
+            Chain(proof.Incarnation, BlobCommitCutProtocol.Blob, upload, bytes), new RowAccess(), new DateTimeOffset(complete.Timestamp));
 
-    internal static async Task RequireSelectedAsync(BlobCommitCutSeedProof proof, ReplicatedOperation operation)
+    internal static async Task RequireSelectedAsync(BlobCommitCutSeedProof proof, Command<DatabaseCommand> operation)
     {
-        await Assert.That(operation.Id).IsEqualTo(BlobCommitCutProtocol.CompleteId);
-        await Assert.That(operation.Kind).IsEqualTo(OperationKind.CompleteBlobUpload);
-        await Assert.That(operation.PrincipalId).IsEqualTo(BlobCommitCutProtocol.Principal);
-        await ExactAsync(NativeCommandPayload.Read<CompleteBlobUploadRequest>(operation),
+        await Assert.That(operation.CommandId).IsEqualTo(BlobCommitCutProtocol.CompleteId);
+        await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.CompleteBlobUpload);
+        await Assert.That(operation.UserId!).IsEqualTo(BlobCommitCutProtocol.Principal);
+        await ExactAsync(NativeSerialization.Deserialize<CompleteBlobUploadRequest>((operation).Value!.Input.Span),
             new CompleteBlobUploadRequest(BlobCommitCutProtocol.CompleteId, BlobCommitCutProtocol.Blob,
                 BlobCommitCutProtocol.NewUpload, Chain(proof.Incarnation, BlobCommitCutProtocol.Blob,
                     BlobCommitCutProtocol.NewUpload, MultipartPayload())));

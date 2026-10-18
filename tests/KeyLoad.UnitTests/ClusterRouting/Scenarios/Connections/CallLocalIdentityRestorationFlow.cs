@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using System.Security.Claims;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
@@ -84,8 +85,8 @@ internal static class CallLocalIdentityRestorationFlow
         CommitToken token, string json, long sequence)
     {
         var put = (PutDocument)command.Mutations.Single();
-        var retained = scenario.Fixture.Database.ReadRetainedEntry(command.CommandId);
-        var time = retained.Operation!.EvaluatedAt;
+        var retained = scenario.Fixture.Database.ReadStoredOutcome(command.CommandId);
+        var time = new DateTimeOffset(retained.PreparedCommand!.Timestamp);
         return new(sequence, 0, token, time, put,
             new(PutKind, ConnectionNativeProtocol.Collection, put.Id, 1),
             After: new(scenario.Reference(put.Id), 1, json, new RowAccess(), time));
@@ -94,21 +95,20 @@ internal static class CallLocalIdentityRestorationFlow
     private static CommitToken NextToken(ConnectionNativeScenario scenario)
         => new(scenario.Fixture.Database.Store.Identity.Incarnation,
             scenario.Fixture.Database.Partition.AtomicPartitionId,
-            checked(scenario.Fixture.Database.ReadJournalCut().LastIndex + 1), 1);
+            checked(scenario.Fixture.Database.ReadCanonicalCut().AppliedPosition + 1));
 
     private static async Task ReceiptAsync(ConnectionNativeScenario scenario, CommandRequest command,
         CommitToken token, GrainOperationReply reply, string json)
     {
         await Assert.That(reply.Error).IsNull();
         var id = ((PutDocument)command.Mutations.Single()).Id;
-        var expected = new CommitReceipt(command.CommandId, token,
-            [new(PutKind, ConnectionNativeProtocol.Collection, id, 1)], DurabilityProfile.QuorumProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, token, [new(PutKind, ConnectionNativeProtocol.Collection, id, 1)], DurabilityProfile.ProcessDurable, 1);
         await SafeProjectorOperationSeed.EqualAsync(ConnectionNativeAssertions.Value<CommitReceipt>(reply), expected);
         await SafeProjectorOperationSeed.EqualAsync(scenario.Stored(id),
             new DocumentResult(scenario.Reference(id), 1, json, false, []));
-        var entry = scenario.Fixture.Database.ReadRetainedEntry(command.CommandId);
-        await Assert.That(entry.Index).IsEqualTo(token.Position);
-        await Assert.That(entry.Operation!.Id).IsEqualTo(command.CommandId);
+        var entry = scenario.Fixture.Database.ReadStoredOutcome(command.CommandId);
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(token.Position);
+        await Assert.That(entry.PreparedCommand!.CommandId).IsEqualTo(command.CommandId);
     }
 
     private static async Task SameIdentityAsync(ConnectionNativeScenario scenario, Guid requestId,

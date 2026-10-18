@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -43,8 +45,8 @@ internal static class QueueStoredCapacityWholeFlow
     {
         var laneImage = QueueEnqueueColdAssertions.LaneBytes(cold, fixture.Partition);
         var rejected = owner.Apply(state.Enqueue);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(rejected.NativeValue).IsNull();
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(rejected.Value).IsNull();
         await Assert.That(owner.GetDocument(QueueEnqueueColdProtocol.Root, new(fixture.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument), cancellationToken: token)).IsNull();
         await Assert.That(QueueEnqueueColdAssertions.LaneBytes(cold, fixture.Partition)).IsEquivalentTo(laneImage, CollectionOrdering.Matching);
         await QueueStoredCapacityReceipts.FailureAsync(owner, cold, fixture.Partition, state.Enqueue, rejected);
@@ -83,8 +85,8 @@ internal static class QueueStoredCapacityWholeFlow
     }
 
     private static async Task SecondColdAsync(TestDatabase fixture, ZoneTreeStore cold, QueueStoredCapacityState state,
-        StoreIdentity identity, OperationResult rejected, ReplicatedOperation healthyOperation, OperationResult healthyResult,
-        ReplicatedOperation ackOperation, OperationResult acknowledgement, CancellationToken token)
+        StoreIdentity identity, Result<object> rejected, Command<DatabaseCommand> healthyOperation, Result<object> healthyResult,
+        Command<DatabaseCommand> ackOperation, Result<object> acknowledgement, CancellationToken token)
     {
         var finalImage = QueueWholeFlowStorage.Bytes(cold);
         var finalPosition = cold.Position;

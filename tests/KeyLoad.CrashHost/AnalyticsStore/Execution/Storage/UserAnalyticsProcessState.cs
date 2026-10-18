@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Security.Cryptography;
 using KeyLoad.Server;
 using P = KeyLoad.CrashHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
@@ -11,7 +12,7 @@ internal static class UserAnalyticsProcessState
     private const int MaximumEvidenceBytes = 1_048_576;
     private const string Separator = ":";
 
-    internal static UserAnalyticsProcessOriginal Capture(PartitionHost host, ReplicatedOperation operation, CommitReceipt receipt)
+    internal static UserAnalyticsProcessOriginal Capture(PartitionHost host, Command<DatabaseCommand> operation, CommitReceipt receipt)
     {
         var store = host.Database.Store;
         var identity = store.Identity;

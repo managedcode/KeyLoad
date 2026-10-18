@@ -11,9 +11,9 @@ internal static class SampleChunkSubnormalClusterReceipts
         var minimum = previous?.Token.Position ?? SampleChunkSubnormalClusterCorpus.EmptySequence;
         await Assert.That(actual.Token.Position > minimum).IsTrue();
         var expected = new CommitReceipt(original.CommandId, new CommitToken(actual.Token.Incarnation,
-            original.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
+            original.Partition.AtomicPartitionId, actual.Token.Position),
             [new MutationReceipt(kind, TimeSeriesClusterScenario.Set, series, revision)],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SampleChunkRetentionClusterReadOracle.EqualAsync(actual, expected);
     }
 

@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -13,7 +15,7 @@ public sealed partial class DatabaseEngine
     /// <summary>Atomically applies one stable command or returns its freshly authorized persisted outcome.</summary>
     /// <param name="operation">The original command and evaluated business time.</param>
     /// <returns>The actual persisted command result.</returns>
-    public OperationResult Apply(ReplicatedOperation operation)
+    public Result<object> Apply(Command<DatabaseCommand> operation)
         => ApplyCore(operation, null, selectEmbeddedClock: false, cancellationToken: default).Result;
 
     /// <summary>Applies the next canonical sequence selected by the native Orleans database grain.</summary>
@@ -21,11 +23,11 @@ public sealed partial class DatabaseEngine
     /// <param name="sequence">The next canonical sequence; retries return the original stored sequence.</param>
     /// <param name="cancellationToken">Bounds the actual storage commit.</param>
     /// <returns>The original sequence and freshly authorized command result.</returns>
-    public StorageOperationResult ApplyStorageOperation(ReplicatedOperation operation, long sequence,
+    public StorageOperationResult ApplyStorageOperation(Command<DatabaseCommand> operation, long sequence,
         CancellationToken cancellationToken)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sequence);
-        var verified = VerifyOperationAuthority(operation);
+        var verified = OwnCommand(operation);
         if (IsSiloLocalOperation(verified))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidStorageOperationScope);
@@ -37,9 +39,9 @@ public sealed partial class DatabaseEngine
     /// <param name="operation">The original verified node-bound operation.</param>
     /// <param name="cancellationToken">Bounds the actual storage commit.</param>
     /// <returns>The actual local command result.</returns>
-    public OperationResult ApplyLocalStorageOperation(ReplicatedOperation operation, CancellationToken cancellationToken)
+    public Result<object> ApplyLocalStorageOperation(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
-        var verified = VerifyOperationAuthority(operation);
+        var verified = OwnCommand(operation);
         if (!IsSiloLocalOperation(verified))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidStorageOperationScope);
@@ -47,7 +49,7 @@ public sealed partial class DatabaseEngine
         return ApplyCore(verified, null, selectEmbeddedClock: false, cancellationToken).Result;
     }
 
-    internal OperationResult ApplyEmbedded(ReplicatedOperation operation, CancellationToken cancellationToken)
+    internal Result<object> ApplyEmbedded(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
         => ApplyCore(operation, null, selectEmbeddedClock: true, cancellationToken).Result;
 
     private static long ReadCanonicalSequence(IKeyValueView view)

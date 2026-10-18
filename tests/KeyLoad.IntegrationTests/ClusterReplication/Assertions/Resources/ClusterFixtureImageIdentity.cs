@@ -10,7 +10,7 @@ internal static class ClusterFixtureImageIdentity
 {
     private const string ReceiptEnvironment = "KEYLOAD_IMAGE_RECEIPT";
     private const string SourceEnvironment = "GITHUB_SHA";
-    private const string MissingIdentity = "Actual GitHub CLUSTER image identity is required.";
+    private const string MissingIdentity = "Actual GitHub Orleans image identity is required.";
     private const string ReceiptSchema = "schemaVersion";
     private const string SourceProperty = "sourceRevision";
     private const string ImagesProperty = "images";
@@ -28,7 +28,7 @@ internal static class ClusterFixtureImageIdentity
     private const int MaximumReceiptBytes = 65_536;
     private const int MaximumManifestBytes = 1_048_576;
 
-    /// <summary>AC-IMAGE-002/003 checks actual immutable manifest bytes and all three CLUSTER resources before start.</summary>
+    /// <summary>AC-IMAGE-002/003 checks actual immutable manifest bytes and all three Orleans resources before start.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, CancellationToken cancellationToken)
     {
         var reference = await ReadVerifiedReferenceAsync(cancellationToken);

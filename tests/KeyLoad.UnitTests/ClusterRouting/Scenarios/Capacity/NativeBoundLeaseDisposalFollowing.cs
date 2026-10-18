@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -10,7 +11,7 @@ internal static class NativeBoundLeaseDisposalFollowing
     internal static async Task ExecuteAsync(NativeLocalChildLifetimeSeeded state,
         NativeLocalChildLifetimeOperation previous, CancellationToken token)
     {
-        var database = state.Leader.Journal.Database;
+        var database = state.Leader.Database.Database;
         using var ledger = new ResourceLifetimeWorkResultRetention(database.OperationLimitsOptions);
         NativeRequestWorkLease? parent = null;
         NativeRequestWorkChildReservation? reservation = null;
@@ -25,7 +26,7 @@ internal static class NativeBoundLeaseDisposalFollowing
             var operation = new NativeLocalChildLifetimeOperation(previous.Owner, ledger, parent, budget,
                 previous.Codec, previous.Expiry, token);
             var input = NativeLocalChildLifetimePayload.Create(state, operation);
-            reservation = parent.ReserveLocalChild(input.Verified, state.PhysicalOwner, state.Leader.Discovery.Read());
+            reservation = parent.ReserveLocalChild(input.Verified, state.PhysicalOwner, state.Leader.Services.GetRequiredService<SiloStorageIdentityProvider>().Read());
             var child = NativeLocalChildLifetimeExecution.Consume(state, operation, input);
             var result = NativeLocalChildLifetimeExecution.Read(state, operation, input, child);
             child.AdmitPublication();

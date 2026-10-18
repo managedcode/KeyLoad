@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 using TUnit.Assertions.Enums;
@@ -9,10 +10,10 @@ internal static class MixedEventingFailurePostimage
     private const long SingleFailureCommit = 1;
 
     internal static async Task RequireAsync(TestDatabase source, QueueLifecycleTestState state,
-        ReplicatedOperation operation, string[] corruptRaw, byte[] restoredKey, byte[] restoredValue,
+        Command<DatabaseCommand> operation, string[] corruptRaw, byte[] restoredKey, byte[] restoredValue,
         byte[] outcomeKey, long repairedCut, long appliedIndex)
     {
-        var locator = KeySpace.OutcomeLocatorV2(state.Partition, operation.PrincipalId, operation.Id);
+        var locator = KeySpace.OutcomeLocatorV2(state.Partition, operation.UserId!, operation.CommandId);
         var admitted = new[] { outcomeKey, locator, KeySpace.AppliedBytes, KeySpace.ClockBytes }
             .Select(static key => Convert.ToHexString(key) + ":").ToArray();
         var original = corruptRaw.Append(Convert.ToHexString(restoredKey) + ":" + Convert.ToHexString(restoredValue));
@@ -23,7 +24,7 @@ internal static class MixedEventingFailurePostimage
             .IsEquivalentTo(outcomeKey, CollectionOrdering.Matching);
         await Assert.That(source.Store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)!)))
             .IsEqualTo(appliedIndex);
-        await Assert.That(QueueWholeFlowStorage.Clock(source.Store)).IsEqualTo(operation.EvaluatedAt);
+        await Assert.That(QueueWholeFlowStorage.Clock(source.Store)).IsEqualTo(new DateTimeOffset(operation.Timestamp));
     }
 
     private static string[] WithoutMetadata(IEnumerable<string> rows, string[] admitted)

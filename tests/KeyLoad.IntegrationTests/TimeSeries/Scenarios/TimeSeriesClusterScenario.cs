@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
-/// <summary>Creates caller-visible TimeSeries state on the actual Docker CLUSTER cluster.</summary>
+/// <summary>Creates caller-visible TimeSeries state on the actual Docker Orleans cluster.</summary>
 internal sealed record TimeSeriesClusterScenario(PartitionRef Partition)
 {
     internal const string Set = "metrics";

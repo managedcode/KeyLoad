@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
 
@@ -5,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal ReplicatedOperation CreateOnlineTextPublicationOperation(string principalId,
+    internal Command<DatabaseCommand> CreateOnlineTextPublicationOperation(string principalId,
         DateTimeOffset evaluatedAt, OnlineTextPreparedPublication prepared, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(prepared);
@@ -32,8 +33,9 @@ public sealed partial class DatabaseEngine
             budget.Check();
             var payload = NativeSerialization.Serialize(command);
             RequireNativeBudget(payload.Length);
-            return IssueNativeOperation(new(command.Request.CommandId, OperationKind.OnlineTextPublicationPhase,
-                principalId, evaluatedAt, Identity<OnlineTextPublicationPhaseCommand>(payload)), new NativeCommandPayload(payload));
+            return CreatePreparedCommand(OperationKind.OnlineTextPublicationPhase, command.Request.CommandId,
+                principalId, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(command.Request.CommandId,
+                    OperationKind.OnlineTextPublicationPhase, principalId, Identity<OnlineTextPublicationPhaseCommand>(payload)), budget);
         });
     }
 }

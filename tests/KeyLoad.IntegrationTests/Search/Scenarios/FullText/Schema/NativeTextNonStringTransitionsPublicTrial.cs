@@ -44,7 +44,7 @@ internal static class NativeTextNonStringTransitionsPublicTrial
                     var current = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token));
                     await Assert.That(current.NodeId).IsEqualTo(prepared.Status.NodeId);
                     await Assert.That(current.Incarnation).IsEqualTo(prepared.Status.Incarnation);
-                    await Assert.That(current.Applied).IsGreaterThanOrEqualTo(prepared.Status.Applied);
+                    await Assert.That(current.Position).IsGreaterThanOrEqualTo(prepared.Status.Position);
                     await Assert.That(current.ReadGeneration).IsGreaterThanOrEqualTo(prepared.Status.ReadGeneration);
                     await NativeTextNonStringTransitionsPublicAssertions.ReplayAsync(caller, prepared.Partition,
                         originals, 1, prepared.Outbox, token);
@@ -70,7 +70,8 @@ internal static class NativeTextNonStringTransitionsPublicTrial
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
         var request = new WaitForIndexRequest(command.Partition, Collection, "/text", receipt.Token);
         foreach (var wait in new[] { await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.WaitForIndexAsync(request, token)),
@@ -79,7 +80,6 @@ internal static class NativeTextNonStringTransitionsPublicTrial
             await Assert.That(wait.SchemaVersion).IsEqualTo(1L);
             await Assert.That(wait.PolicyEpoch).IsGreaterThan(0L);
             await Assert.That(wait.AppliedToken.Incarnation).IsEqualTo(receipt.Token.Incarnation);
-            await Assert.That(wait.AppliedToken.OwnershipEpoch).IsEqualTo(receipt.Token.OwnershipEpoch);
             await Assert.That(wait.AppliedToken.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
             await Assert.That(wait.AppliedToken.Position).IsGreaterThanOrEqualTo(receipt.Token.Position);
         }

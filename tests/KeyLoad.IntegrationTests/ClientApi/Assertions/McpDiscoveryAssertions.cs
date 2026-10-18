@@ -18,7 +18,7 @@ internal static class McpDiscoveryAssertions
     }
 
     /// <summary>Requires the actual tool's canonical required fields, wrapper schema and explicit effect hints.</summary>
-    /// <param name="tool">The real native tool decoded from a real CLUSTER response.</param>
+    /// <param name="tool">The real native tool decoded from a real Orleans response.</param>
     /// <returns>The completed observable contract assertions.</returns>
     internal static async Task VerifyAsync(Tool tool)
     {

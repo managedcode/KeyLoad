@@ -6,7 +6,7 @@ internal static class ResourceLifetimeLedgerNativeFlow
     {
         var state = await SafeProjectorOperationSeed.CreateAsync(owner);
         var other = ResourceLifetimeLedgerNativeData.OtherResource(owner, state.Resource);
-        await Assert.That(other.Result.Error).IsNull();
+        await Assert.That(Errors.Code(other.Result.Problem)).IsNull();
         var lifetime = ResourceLifetimeLedgerNativeData.Lifetime(owner, state.ResourceCommand, state.Resource);
         var otherDefinition = other.Result.Get<ResourceDefinition>();
         var otherLifetime = ResourceLifetimeLedgerNativeData.Lifetime(owner, other, otherDefinition);
@@ -16,7 +16,7 @@ internal static class ResourceLifetimeLedgerNativeFlow
             await ResourceLifetimeLedgerNativeBusiness.InitialAsync(owner, workOwner, ledger,
                 parent, budget, expiry, lifetime);
             repair = ResourceLifetimeLedgerNativeData.Repair(owner, state.Reader);
-            await Assert.That(repair.Result.Error).IsNull();
+            await Assert.That(Errors.Code(repair.Result.Problem)).IsNull();
             await ResourceLifetimeLedgerNativeBusiness.RepairedAsync(owner, workOwner, ledger,
                 parent, budget, expiry, lifetime, otherLifetime);
         });

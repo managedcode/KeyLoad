@@ -91,7 +91,7 @@ internal static class StreamCatchupColdClusterFlow
     {
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
-        await Assert.That(after.Voters).IsEqualTo(before.Voters);
+        await Assert.That(after.SiloCount).IsEqualTo(before.SiloCount);
         await Assert.That(after.RoutingReady).IsTrue();
         await Assert.That(after.ReadGeneration).IsGreaterThanOrEqualTo(before.ReadGeneration);
     }

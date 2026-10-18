@@ -31,7 +31,7 @@ internal sealed class AdminDashboardClusterTests(ClusterFixture fixture)
         await Assert.That(queue.Counters).IsEqualTo(queueMcp.Value.Counters);
         await Assert.That(queue.Items.SequenceEqual(queueMcp.Value.Items)).IsTrue();
         // Cut positions are node-local applied positions of two independent gated reads on different physical nodes;
-        // concurrent CLUSTER writes legitimately separate them. The contract is identical persisted data at a real cut.
+        // concurrent Orleans writes legitimately separate them. The contract is identical persisted data at a real cut.
         await Assert.That(queue.CutPosition).IsGreaterThan(0);
         await Assert.That(queueMcp.Value.CutPosition).IsGreaterThan(0);
         await Assert.That(queue.Items[0].State).IsEqualTo(MessageState.Ready);
@@ -54,11 +54,12 @@ internal sealed class AdminDashboardClusterTests(ClusterFixture fixture)
             await Assert.That(first.Node.NodeId).IsEqualTo(status.NodeId);
             await Assert.That(Guid.TryParse(first.Node.NodeId, out var nodeIdentity) && nodeIdentity != Guid.Empty).IsTrue();
             await Assert.That(first.Node.Incarnation).IsEqualTo(status.Incarnation);
-            await Assert.That(first.Node.Voters).IsEqualTo(3);
-            await Assert.That(first.Voters.Length).IsEqualTo(first.Node.Voters);
-            await Assert.That(first.Voters.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(first.Voters.Length);
-            await Assert.That(first.LocalVoter is not null && first.Voters.Contains(first.LocalVoter, StringComparer.Ordinal)).IsTrue();
-            await Assert.That(first.Node.Leader is null || first.Voters.Contains(first.Node.Leader, StringComparer.Ordinal)).IsTrue();
+            await Assert.That(first.Node.SiloCount).IsEqualTo(3);
+            await Assert.That(first.Node.ReplicaCount).IsEqualTo(3);
+            await Assert.That(first.SiloName).IsEqualTo(node);
+            await Assert.That(first.ActiveSilos.Length).IsEqualTo(first.Node.SiloCount);
+            await Assert.That(first.ActiveSilos.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(first.ActiveSilos.Length);
+            await Assert.That(first.SiloName is not null && first.ActiveSilos.Contains(first.SiloName, StringComparer.Ordinal)).IsTrue();
             await Assert.That(first.Http.ProcessInstance).IsEqualTo(second.Http.ProcessInstance);
             await Assert.That(first.Http.CompletedRequests).IsEqualTo(second.Http.CompletedRequests);
             await Assert.That(first.Storage.Files.Length).IsLessThanOrEqualTo(200);
@@ -70,8 +71,8 @@ internal sealed class AdminDashboardClusterTests(ClusterFixture fixture)
             await Assert.That(native.Value.Node.NodeId).IsEqualTo(first.Node.NodeId);
             await Assert.That(native.Value.Node.Incarnation).IsEqualTo(first.Node.Incarnation);
             await Assert.That(native.Value.Http.ProcessInstance).IsEqualTo(first.Http.ProcessInstance);
-            await Assert.That(native.Value.LocalVoter).IsEqualTo(first.LocalVoter);
-            await Assert.That(native.Value.Voters.SequenceEqual(first.Voters)).IsTrue();
+            await Assert.That(native.Value.SiloName).IsEqualTo(first.SiloName);
+            await Assert.That(native.Value.ActiveSilos.SequenceEqual(first.ActiveSilos)).IsTrue();
         }
     }
 

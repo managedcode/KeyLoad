@@ -1,6 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Storage;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -10,7 +8,7 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Verifies and bootstraps private journal authority before provider admission.</summary>
 internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainRequestCodec codec,
-    DatabaseEngine database, ICommitCoordinator coordinator, IServiceProvider services, TimeProvider clock,
+    IServiceProvider services, TimeProvider clock,
     IOptions<GrainRoutingOptions> routingOptions)
 {
     private const string InvalidCatalogReply = "The runtime journal catalog reply is invalid.";
@@ -20,23 +18,17 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
     private const long InitialContentRevision = 0;
     internal async Task<bool> TryVerifyAsync(CancellationToken cancellationToken)
     {
-        await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
-        var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(
-            KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
-        if (principal is null)
-        {
-            return false;
-        }
-        RuntimeJournalIdentity.RequireProtected(principal);
         var requestId = Guid.NewGuid();
         var signed = codec.CreateRuntimeJournalRead(requestId, GrainReadKind.RuntimeJournalCatalog,
             NativeSerialization.Serialize(GrainNativeContracts.NoDtoMarker));
-        var reply = await SendAsync(principal, requestId, Guid.Empty, signed, cancellationToken).ConfigureAwait(false);
-        if (GrainNativePayload.Read<GrainValue>(reply.Payload).Value is not RuntimeJournalCatalog)
+        var reply = await SendAsync(null, requestId, Guid.Empty, signed, cancellationToken).ConfigureAwait(false);
+        var value = GrainNativePayload.Read<GrainValue>(reply.Payload).Value;
+        return value switch
         {
-            throw Errors.Fail(ErrorCode.Corruption, InvalidCatalogReply);
-        }
-        return true;
+            null => false,
+            RuntimeJournalCatalog => true,
+            _ => throw Errors.Fail(ErrorCode.Corruption, InvalidCatalogReply)
+        };
     }
 
     internal async Task BootstrapAsync(PrincipalRecord administrator, Guid commandId,
@@ -54,11 +46,14 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
         }
     }
 
-    private async Task<GrainOperationReply> SendAsync(PrincipalRecord principal, Guid requestId,
+    private async Task<GrainOperationReply> SendAsync(PrincipalRecord? principal, Guid requestId,
         Guid commandId, string signed, CancellationToken cancellationToken)
     {
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
-        using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken, connectionId: connectionId);
+        using var identity = principal is null
+            ? GrainRequestIdentityScope.ForRuntimeJournal(services, requestId, commandId, cancellationToken, connectionId)
+            : new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken,
+                connectionId: connectionId);
         var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var reply = await GrainRequestStreamConsumer.DrainAsync(
             createStream: token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, token), serializer: serializer,

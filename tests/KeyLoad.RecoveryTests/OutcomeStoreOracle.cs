@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -12,19 +14,19 @@ internal static class OutcomeStoreOracle
     private const string GlobalOutcomeScope = "global";
     private const string UnknownOutcomeScope = "unknown";
 
-    internal static byte[] Key(IAtomicStore store, ReplicatedOperation operation)
+    internal static byte[] Key(IAtomicStore store, Command<DatabaseCommand> operation)
     {
-        if (!HasNativePayload(store, operation))
+        if (operation.Value is null || operation.Value.Input.IsEmpty)
         {
-            return UnknownKey(operation.PrincipalId, operation.Id);
+            return UnknownKey(operation.UserId!, operation.CommandId);
         }
         var scope = ReadExpectedScope(operation);
         return scope.Partition is { } partition
             ? KeyCodec.Encode(ScopedOutcomeSpace, partition.TenantId, partition.DatabaseId,
-                partition.TransactionDomainId, partition.PartitionKey, operation.PrincipalId, operation.Id)
+                partition.TransactionDomainId, partition.PartitionKey, operation.UserId!, operation.CommandId)
             : scope.IsGlobal
-                ? GlobalKey(operation.PrincipalId, operation.Id)
-                : UnknownKey(operation.PrincipalId, operation.Id);
+                ? KeyCodec.Encode(ScopedOutcomeSpace, "global", operation.UserId!, operation.CommandId)
+                : KeyCodec.Encode(ScopedOutcomeSpace, "unknown", operation.UserId!, operation.CommandId);
     }
 
     internal static byte[] PartitionKey(PartitionRef partition, string principalId, Guid commandId)
@@ -37,23 +39,43 @@ internal static class OutcomeStoreOracle
     internal static byte[] UnknownKey(string principalId, Guid commandId)
         => KeyCodec.Encode(ScopedOutcomeSpace, UnknownOutcomeScope, principalId, commandId);
 
-    internal static OperationResult? Read(IAtomicStore store, ReplicatedOperation operation)
+    internal static Result<object>? Read(IAtomicStore store, Command<DatabaseCommand> operation)
         => ReadStored(store, operation)?.Result;
 
-    internal static StoredOutcome? ReadStored(IAtomicStore store, ReplicatedOperation operation)
+    internal static StoredOutcome? ReadStored(IAtomicStore store, Command<DatabaseCommand> operation)
     {
         var key = Key(store, operation);
         return store.Read(view => view.GetRecord<StoredOutcome>(key));
     }
 
-    internal static OperationResult? ReadPartition(IAtomicStore store, PartitionRef partition, string principalId, Guid commandId)
+    internal static Result<object>? ReadPartition(IAtomicStore store, PartitionRef partition, string principalId, Guid commandId)
         => store.Read(view => view.GetRecord<StoredOutcome>(PartitionKey(partition, principalId, commandId))?.Result);
 
-    private static (PartitionRef? Partition, bool IsGlobal) ReadExpectedScope(ReplicatedOperation operation)
+    internal static StoredOutcome ReadStored(DatabaseEngine database, Guid commandId, CancellationToken token)
+    {
+        var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        return database.Store.Read(raw =>
+        {
+            var page = work.CreateView(raw).Scan(KeyCodec.Encode(ScopedOutcomeSpace), database.Limits.MaxScanRecords);
+            if (page.HasMore)
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, "The outcome oracle scan exceeded its record bound.");
+            }
+            var matches = page.Records.Select(row => NativeSerialization.Deserialize<StoredOutcome>(row.Value.Span))
+                .Where(outcome => outcome.PreparedCommand.CommandId == commandId).ToArray();
+            if (matches.Length != 1)
+            {
+                throw new InvalidOperationException("The exact stored test outcome is missing or ambiguous.");
+            }
+            return matches.Single();
+        });
+    }
+
+    private static (PartitionRef? Partition, bool IsGlobal) ReadExpectedScope(Command<DatabaseCommand> operation)
     {
         try
         {
-            var partition = operation.Kind switch
+            var partition = operation.Value!.Kind switch
             {
                 OperationKind.Batch => Partition<CommandRequest>(operation, static request => request.Partition),
                 OperationKind.Receive => Partition<ReceiveRequest>(operation, static request => request.Lane?.Partition),
@@ -81,47 +103,43 @@ internal static class OutcomeStoreOracle
             {
                 return (partition, false);
             }
-            var global = operation.Kind switch
-            {
-                OperationKind.ConfigureResource => IsNonNull<ConfigureResourceRequest>(operation),
-                OperationKind.ConfigurePrincipal => IsNonNull<ConfigurePrincipalRequest>(operation),
-                OperationKind.ConfigureApiKey => IsNonNull<ConfigureApiKeyRequest>(operation),
-                OperationKind.BootstrapPhysicalShardCatalog => IsNonNull<BootstrapPhysicalShardCatalogRequest>(operation),
-                OperationKind.SetDispatch => IsBoolean(operation.PayloadJson),
-                _ => false
-            };
-            return (null, global);
+            return (null, IsGlobalOperation(operation));
         }
-        catch (JsonException) { return (null, false); }
-        catch (KeyLoadException) { return (null, false); }
-    }
-
-    private static bool HasNativePayload(IAtomicStore store, ReplicatedOperation operation)
-    {
-        try
+        catch (JsonException)
         {
-            var normalized = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution()).NormalizeOperation(operation);
-            var payload = NativeSerialization.Deserialize<NativeCommandPayload>(normalized.NativePayload.Span);
-            return payload.Error is null && !payload.Value.IsEmpty;
+            return (null, false);
         }
-        catch (KeyLoadException) { return false; }
+        catch (KeyLoadException)
+        {
+            return (null, false);
+        }
     }
 
-    private static PartitionRef? Partition<T>(ReplicatedOperation operation, Func<T, PartitionRef?> select)
+    private static bool IsGlobalOperation(Command<DatabaseCommand> operation)
+        => operation.Value!.Kind switch
+        {
+            OperationKind.ConfigureResource => IsNonNull<ConfigureResourceRequest>(operation),
+            OperationKind.ConfigurePrincipal => IsNonNull<ConfigurePrincipalRequest>(operation),
+            OperationKind.ConfigureApiKey => IsNonNull<ConfigureApiKeyRequest>(operation),
+            OperationKind.SetDispatch => IsBoolean(operation.Value!.Input),
+            _ => false
+        };
+
+    private static bool IsBoolean(ReadOnlyMemory<byte> input)
+    {
+        _ = NativeSerialization.Deserialize<bool>(input.Span);
+        return true;
+    }
+
+    private static PartitionRef? Partition<T>(Command<DatabaseCommand> operation, Func<T, PartitionRef?> select)
         where T : class
     {
-        var request = JsonSerializer.Deserialize<T>(operation.PayloadJson, JsonDefaults.Options);
+        var request = NativeSerialization.Deserialize<T>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         return request is null ? null : select(request);
     }
 
-    private static bool IsNonNull<T>(ReplicatedOperation operation) where T : class
-        => JsonSerializer.Deserialize<T>(operation.PayloadJson, JsonDefaults.Options) is not null;
-
-    private static bool IsBoolean(string json)
-    {
-        using var document = JsonDocument.Parse(json);
-        return document.RootElement.ValueKind is JsonValueKind.True or JsonValueKind.False;
-    }
+    private static bool IsNonNull<T>(Command<DatabaseCommand> operation) where T : class
+        => NativeSerialization.Deserialize<T>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements) is not null;
 
     private static bool Valid(PartitionRef? partition)
         => partition is not null && !string.IsNullOrWhiteSpace(partition.TenantId)

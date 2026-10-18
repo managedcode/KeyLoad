@@ -46,7 +46,8 @@ internal sealed record NativeTextNestedWildcardPublicScenario(PartitionRef Parti
         await SqlClusterProtocol.EqualAsync(new[] { new MutationReceipt("putDocument", Collection, "a", 1L) },
             receipt.Mutations.ToArray());
         await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         return new(partition, original, receipt, identity);
     }
 }

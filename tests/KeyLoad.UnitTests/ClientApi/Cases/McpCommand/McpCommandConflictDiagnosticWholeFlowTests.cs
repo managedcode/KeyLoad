@@ -36,10 +36,10 @@ internal sealed class McpCommandConflictDiagnosticWholeFlowTests
             Mutations = [new PutDocument(Collection, Document, ChangedJson, ExpectedRevision: First)]
         };
         var rejected = database.Submit(OperationKind.Batch, changed, id: command.CommandId);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(rejected.SafeDetail).IsEqualTo(Conflict);
-        await Assert.That(rejected.Json).IsNull();
-        await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Conflict, rejected.SafeDetail!, Conflict);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(rejected.Problem?.Detail).IsEqualTo(Conflict);
+        
+        await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Conflict, rejected.Problem?.Detail!, Conflict);
         await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Conflict,
             Conflict + McpOwnedDiagnosticAssertions.PrivateCanary, McpOwnedDiagnosticAssertions.Generic);
         await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Validation, Conflict, McpOwnedDiagnosticAssertions.Generic);

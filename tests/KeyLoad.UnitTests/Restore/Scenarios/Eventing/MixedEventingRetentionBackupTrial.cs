@@ -35,13 +35,13 @@ internal static class MixedEventingRetentionBackupTrial
         await EventingArtifactHealthyAssertions.CompletedAfterNaturalExpiryAsync(fixture, fixture.Database);
         await MixedEventingRetentionBackupTopic.RequireAsync(fixture.Database, state);
         await TargetInboxNativeAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.ReceiptCapacity);
-        await Assert.That(TargetInboxNativeSetup.Apply(fixture.Database, state.Inbox, token).Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(TargetInboxNativeSetup.Apply(fixture.Database, state.Inbox, token).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await MixedEventingRetentionBackupTopic.EqualAsync(state.HealthyInboxResult,
             fixture.ApplyInbox(fixture.Database, state.HealthyInbox, token).Get<CommitInboxResult>());
         await MixedEventingRetentionBackupPrivacy.RequireAsync(fixture.Database, state);
         await ColdHealthyAsync(fixture);
         await MixedEventingRetentionBackupArchive.SourceAsync(fixture, state, token);
-    }, nativeAdmission: true);
+    });
 
     private static async Task ColdHealthyAsync(EventingArtifactFixture fixture)
     {

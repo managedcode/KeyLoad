@@ -49,8 +49,8 @@ internal static class EventMessageSensitivePublicSeed
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(default(long));
-        await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(default(long));
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         var mutation = await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(mutation).IsEqualTo(new MutationReceipt(subscription ? EventMessageSensitivePublicProtocol.PublishKind
             : EventMessageSensitivePublicProtocol.EnqueueKind, resource.Name, EventMessageSensitivePublicProtocol.Message,

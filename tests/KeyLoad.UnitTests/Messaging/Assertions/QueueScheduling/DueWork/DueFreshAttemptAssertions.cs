@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
@@ -36,14 +37,14 @@ internal static class DueFreshAttemptAssertions
         => new(commandId, fixture.Partition,
             [new EmitRecurringOccurrences(fixture.Queue, scheduleId, 1, 1)]);
 
-    internal static OperationResult Apply(RecurringSagaDatabase fixture, CommandRequest command,
+    internal static Result<object> Apply(RecurringSagaDatabase fixture, CommandRequest command,
         Guid commandId, DateTimeOffset evaluatedAt)
         => fixture.Apply(OperationKind.Batch, command, CreatorId, commandId, evaluatedAt);
 
     internal static async Task AssertDeniedAsync(RecurringSagaDatabase fixture, Guid commandId,
-        OperationResult result)
+        Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         var stored = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, CreatorId, commandId);
         await Assert.That(stored).IsNotNull();
         await Assert.That(stored!.Error).IsEqualTo(ErrorCode.PermissionDenied);
@@ -65,9 +66,9 @@ internal static class DueFreshAttemptAssertions
     }
 
     internal static async Task<byte[]> AssertOneEmissionAsync(RecurringSagaDatabase fixture, Guid scheduleId,
-        DateTimeOffset firstDue, OperationResult result, OutboxHead expectedOutbox, byte[]? storedSnapshot = null)
+        DateTimeOffset firstDue, Result<object> result, OutboxHead expectedOutbox, byte[]? storedSnapshot = null)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(receipt.Mutations[0].Kind).IsEqualTo(EmitMutationKind);
@@ -144,9 +145,9 @@ internal static class DueFreshAttemptAssertions
         await Assert.That(actual.After).IsNull();
     }
 
-    internal static async Task AssertReplayAsync(OperationResult original, OperationResult replay)
+    internal static async Task AssertReplayAsync(Result<object> original, Result<object> replay)
     {
-        await Assert.That(replay.Error).IsNull();
+        await Assert.That(Errors.Code(replay.Problem)).IsNull();
         var first = original.Get<CommitReceipt>();
         var again = replay.Get<CommitReceipt>();
         await Assert.That(again.Token).IsEqualTo(first.Token);

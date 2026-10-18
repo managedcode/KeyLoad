@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json.Nodes;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -12,10 +13,10 @@ internal static class ConfigureResourceOriginalLifetimeAssertions
             fixture.Partition.DatabaseId, definition.Name, definition))
             ?? throw new InvalidOperationException("The configured resource has no actual persisted lifetime.");
 
-    internal static byte[] Outcome(TestDatabase fixture, ReplicatedOperation operation)
+    internal static byte[] Outcome(TestDatabase fixture, Command<DatabaseCommand> operation)
     {
         // Both tested catalog commands have the original global outcome scope.
-        var key = OutcomeStoreOracle.GlobalKey(operation.PrincipalId, operation.Id);
+        var key = OutcomeStoreOracle.GlobalKey(operation.UserId!, operation.CommandId);
         return fixture.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original configure outcome is absent.");
     }
@@ -37,14 +38,14 @@ internal static class ConfigureResourceOriginalLifetimeAssertions
         var identity = NativeSerialization.Serialize(fixture.Store.Identity);
         var position = fixture.Store.Position;
         var applied = fixture.Database.LastApplied;
-        var journal = fixture.ReadJournalCut();
+        var journal = fixture.ReadCanonicalCut();
         var outbox = fixture.Database.GetOutboxStatus("root", fixture.Partition);
         await read();
         await Assert.That(TeamRowPolicyAssertions.Image(fixture.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(fixture.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(fixture.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(journal);
         await EqualAsync(outbox, fixture.Database.GetOutboxStatus("root", fixture.Partition));
     }
 }

@@ -48,8 +48,8 @@ internal static class AggregateSnapshotRaceClusterSeed
         Guid id, MutationReceipt mutation)
     {
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(id, new(actual.Token.Incarnation,
-            state.Scenario.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
-            [mutation], DurabilityProfile.QuorumProcessDurable), actual);
+            state.Scenario.Partition.AtomicPartitionId, actual.Token.Position),
+            [mutation], DurabilityProfile.ProcessDurable, 3), actual);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
     }
     private static EventData Data(int index)

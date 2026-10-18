@@ -10,7 +10,7 @@ internal static class RequestCqrsRoutingCases
     private const string ForgedPrefix = "request-route-forged-";
 
     internal static async Task AcCrs001NativeRequestRoutesAStableBatchThroughItsCommandGrain(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         fixture.Database.Configure(RequestCqrsRoutingTests.Collection, ResourceKind.Collection);
         var writer = PersistWriter(fixture, WriterPrefix);
@@ -56,7 +56,7 @@ internal static class RequestCqrsRoutingCases
     }
 
     internal static async Task AcCrs003RevokedCommandFailsSafelyAndFollowingRequestSucceeds(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         fixture.Database.Configure(RequestCqrsRoutingTests.Collection, ResourceKind.Collection);
         var writer = PersistWriter(fixture, WriterPrefix);
@@ -95,7 +95,7 @@ internal static class RequestCqrsRoutingCases
     }
 
     internal static async Task AcCrs006MissingAndForgedContextFailBeforeCommandEffects(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         fixture.Database.Configure(RequestCqrsRoutingTests.Collection, ResourceKind.Collection);
         var writer = PersistWriter(fixture, WriterPrefix);
@@ -133,7 +133,7 @@ internal static class RequestCqrsRoutingCases
     private static string DocumentId(string purpose)
         => purpose + "-" + Guid.NewGuid().ToString("N");
 
-    private static PrincipalRecord PersistWriter(RequestCqrsClusterFixture fixture, string idPrefix)
+    private static PrincipalRecord PersistWriter(RequestCqrsHostedRuntimeFixture fixture, string idPrefix)
     {
         var record = new PrincipalRecord(idPrefix + Guid.NewGuid().ToString("N"), fixture.Database.Partition.TenantId,
             [new ScopeGrant(fixture.Database.Partition.DatabaseId, RequestCqrsRoutingTests.Collection,
@@ -150,14 +150,14 @@ internal static class RequestCqrsRoutingCases
         => NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as CommitReceipt
             ?? throw new InvalidOperationException("The command reply did not contain its canonical CommitReceipt.");
 
-    private static async Task AssertDocumentMissingAsync(RequestCqrsClusterFixture fixture, string id)
+    private static async Task AssertDocumentMissingAsync(RequestCqrsHostedRuntimeFixture fixture, string id)
     {
         var document = fixture.Database.Database.GetDocument(RequestCqrsRoutingTests.RootPrincipalId,
             new EntityRef(fixture.Database.Partition, RequestCqrsRoutingTests.Collection, id));
         await Assert.That(document).IsNull();
     }
 
-    private static async Task AssertDocumentRevisionAsync(RequestCqrsClusterFixture fixture, string id,
+    private static async Task AssertDocumentRevisionAsync(RequestCqrsHostedRuntimeFixture fixture, string id,
         long expectedRevision)
     {
         var document = fixture.Database.Database.GetDocument(RequestCqrsRoutingTests.RootPrincipalId,

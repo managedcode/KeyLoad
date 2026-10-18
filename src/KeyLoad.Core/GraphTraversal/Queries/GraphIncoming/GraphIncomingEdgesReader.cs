@@ -19,7 +19,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
     {
         targetGraph = RequireGraphRead(request.Target.Partition);
         AuthorizationRequire(request.Target.Partition, Capability.DocumentsRead, request.Target.Collection);
-        targetCollection = GraphIncomingReadScope.ReadCollection(database, view, grant,
+        targetCollection = GraphIncomingReadScope.ReadCollection(view, grant,
             request.Target.Partition, request.Target.Collection, budget);
         request = request with
         {
@@ -123,7 +123,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
     private ResourceDefinition RequireGraphRead(PartitionRef partition)
     {
         AuthorizationRequire(partition, Capability.GraphRead);
-        return GraphIncomingReadScope.ReadGraphResource(database, view, grant, partition, request.Graph, budget);
+        return GraphIncomingReadScope.ReadGraphResource(view, grant, partition, request.Graph, budget);
     }
 
     private ResourceDefinition? TryRequireSourceGraphRead(PartitionRef partition)
@@ -153,7 +153,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         try
         {
             AuthorizationRequire(entity.Partition, Capability.DocumentsRead, entity.Collection);
-            var definition = GraphIncomingReadScope.ReadCollection(database, view, grant, entity.Partition, entity.Collection, budget);
+            var definition = GraphIncomingReadScope.ReadCollection(view, grant, entity.Partition, entity.Collection, budget);
             EntityReferenceLifetime.RequireStored(budget.CreateView(view, grant), entity, definition);
             var document = GraphIncomingReadScope.ReadDocument(view, grant, entity);
             return document is not null && !document.Deleted

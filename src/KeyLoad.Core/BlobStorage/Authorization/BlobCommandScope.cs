@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.InternalSerialization;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core.Features.BlobStorage;
 
@@ -9,14 +9,14 @@ internal sealed record BlobCommandScope(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobCommandScopeFields.Blob)] BlobRef Blob,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobCommandScopeFields.UploadId)] Guid? UploadId)
 {
-    internal static T Payload<T>(ReplicatedOperation operation) => NativeCommandPayload.Read<T>(operation);
+    internal static T Payload<T>(Command<DatabaseCommand> operation) => DatabaseEngine.Payload<T>(operation);
     internal static Capability RequiredCapability(OperationKind kind) => kind switch
     {
         OperationKind.DeleteBlob => Capability.BlobDelete,
         OperationKind.ReclaimBlob => Capability.BlobManage,
         _ => Capability.BlobWrite
     };
-    internal static BlobCommandScope From(ReplicatedOperation operation) => operation.Kind switch
+    internal static BlobCommandScope From(Command<DatabaseCommand> operation) => operation.Value!.Kind switch
     {
         OperationKind.BeginBlobUpload => Begin(Payload<BeginBlobUploadRequest>(operation)),
         OperationKind.WriteBlobPart => Write(Payload<WriteBlobPartRequest>(operation)),

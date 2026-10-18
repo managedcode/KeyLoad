@@ -20,8 +20,8 @@ internal static class StrongReadSessionSetup
         await Assert.That(receipt.Token.Position).IsGreaterThan(InvalidCut);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(command.CommandId,
-            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position, receipt.Token.OwnershipEpoch),
-            [new(PutKind, Collection, SentinelId, CreatedRevision)], DurabilityProfile.QuorumProcessDurable), receipt);
+            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position),
+            [new(PutKind, Collection, SentinelId, CreatedRevision)], DurabilityProfile.ProcessDurable, 3), receipt);
         var outbox = await QueryCursorRequestIdentityR47Current.OutboxAsync(root, partition, token);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, Collection, Capability.DocumentsRead, token);
         var state = new StrongReadSessionState(partition, identity, [new(command, receipt)], outbox, null);

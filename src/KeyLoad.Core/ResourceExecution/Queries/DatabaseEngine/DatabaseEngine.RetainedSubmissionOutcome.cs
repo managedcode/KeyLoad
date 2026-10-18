@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Storage;
@@ -7,26 +9,26 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     /// <summary>Reads an actual retained result after the owner's committed database cut without changing new-command denials.</summary>
-    internal OperationResult? ReadRetainedSubmissionOutcome(ReplicatedOperation operation)
+    internal Result<object>? ReadRetainedSubmissionOutcome(Command<DatabaseCommand> operation)
         => ReadRetainedSubmissionOutcomeCore(operation, null);
 
     /// <summary>Charges retained lookup to the same original admission work without changing canonical denial semantics.</summary>
     /// <param name="operation">Unchanged original native identity and payload.</param>
     /// <param name="work">Required original admission budget, cancellation and lifetime.</param>
     /// <returns>The actual retained result, or null only at the existing absent-outcome boundary.</returns>
-    internal OperationResult? ReadRetainedSubmissionOutcome(ReplicatedOperation operation, ReadExecutionBudget work)
+    internal Result<object>? ReadRetainedSubmissionOutcome(Command<DatabaseCommand> operation, ReadExecutionBudget work)
     {
         ArgumentNullException.ThrowIfNull(work);
         return ReadRetainedSubmissionOutcomeCore(operation, work);
     }
 
-    private OperationResult? ReadRetainedSubmissionOutcomeCore(ReplicatedOperation operation, ReadExecutionBudget? work)
+    private Result<object>? ReadRetainedSubmissionOutcomeCore(Command<DatabaseCommand> operation, ReadExecutionBudget? work)
     {
         ArgumentNullException.ThrowIfNull(operation);
         work?.Check();
-        var normalized = work is null ? NormalizeOperation(operation) : VerifyOperationAuthority(operation);
+        var normalized = OwnCommand(operation);
         work?.Check();
-        var result = Store.Read<OperationResult?>(raw =>
+        var result = Store.Read<Result<object>?>(raw =>
         {
             var view = work is null ? raw : work.CreateView(raw);
             try
@@ -56,13 +58,13 @@ public sealed partial class DatabaseEngine
         return result;
     }
 
-    private static bool HasRetainedSubmissionOutcome(IKeyValueView view, ReplicatedOperation operation)
+    private static bool HasRetainedSubmissionOutcome(IKeyValueView view, Command<DatabaseCommand> operation)
     {
         byte[] key;
         try
         {
             var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-            key = CommandOutcomeKeyResolver.ForNew(operation.PrincipalId, operation.Id, scope).Key;
+            key = CommandOutcomeKeyResolver.ForNew(operation.UserId!, operation.CommandId, scope).Key;
         }
         catch (KeyLoadException)
         {

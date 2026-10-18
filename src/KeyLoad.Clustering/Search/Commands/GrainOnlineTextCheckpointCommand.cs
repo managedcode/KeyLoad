@@ -1,10 +1,12 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 
 namespace KeyLoad.Clustering;
 
 internal static class GrainOnlineTextCheckpointCommand
 {
-    internal static Task<OperationResult>? TrySubmit(DatabaseEngine database, ICommitCoordinator coordinator,
+    internal static Task<Result<object>>? TrySubmit(DatabaseEngine database, ICommitCoordinator coordinator,
         DecodedGrainRequest request, PrincipalRecord principal, INativeOnlineTextMaintenance? maintenance,
         TimeProvider clock, CancellationToken cancellationToken)
     {
@@ -22,7 +24,7 @@ internal static class GrainOnlineTextCheckpointCommand
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
-        var operation = database.CreateNativeOperation(OperationKind.CommitProjectionBatch, checkpoint.CommandId,
+        var operation = database.CreateCommand(OperationKind.CommitProjectionBatch, checkpoint.CommandId,
             principal.Id, clock.GetUtcNow(), request.Payload);
         _ = work.AdmitOriginal(() => coordinator.SubmitVerifiedAsync(operation, cancellationToken));
         return work.AwaitCallerAsync(cancellationToken);

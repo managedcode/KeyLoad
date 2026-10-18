@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -34,9 +36,9 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<stri
         => DispatchAsync<ProjectionBatchResult>((actor, principal) => codec.CreateOnlineTextCheckpoint(actor,
             principal, request, parent.Envelope.ExpiresAt), request.CommandId, token);
 
-    internal Task<OnlineTextIndexMaintenanceResult> PublishAsync(ReplicatedOperation original, CancellationToken token)
+    internal Task<OnlineTextIndexMaintenanceResult> PublishAsync(Command<DatabaseCommand> original, CancellationToken token)
         => DispatchAsync<OnlineTextIndexMaintenanceResult>((actor, _) => codec.CreateOnlineTextPublication(actor,
-            original, parent.Envelope.ExpiresAt), original.Id, token);
+            original, parent.Envelope.ExpiresAt), original.CommandId, token);
 
     internal Task AbortAsync() => borrowNative().AbortAsync(SessionId);
 

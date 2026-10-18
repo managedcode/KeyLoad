@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -24,7 +26,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
     }
 
     internal static async Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store, QueuePendingAuthorityState state,
-        ReplicatedOperation equivalent, QueuePendingAuthorityCut damaged)
+        Command<DatabaseCommand> equivalent, QueuePendingAuthorityCut damaged)
     {
         await Assert.That(Outcome(store, state, equivalent)).IsNull();
         var error = Assert.ThrowsExactly<KeyLoadException>(() => owner.Apply(equivalent));
@@ -37,7 +39,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
     }
 
     internal static async Task EquivalentAsync(DatabaseEngine owner, ZoneTreeStore store, QueuePendingAuthorityState state,
-        ReplicatedOperation equivalent, QueuePendingAuthorityProcessed history, byte[] key, byte[] exact)
+        Command<DatabaseCommand> equivalent, QueuePendingAuthorityProcessed history, byte[] key, byte[] exact)
     {
         var lane = QueueLifecycleImage.Capture(store, state.Flow.Lane);
         var before = store.Position;
@@ -54,16 +56,16 @@ internal static class QueueRetainedInboxAuthorityAssertions
         await QueuePendingAuthorityHistory.ReplayAsync(owner, store, state);
     }
 
-    internal static async Task<OperationResult> NewGenerationAsync(DatabaseEngine owner, ZoneTreeStore store,
-        QueuePendingAuthorityState state, ReplicatedOperation operation)
+    internal static async Task<Result<object>> NewGenerationAsync(DatabaseEngine owner, ZoneTreeStore store,
+        QueuePendingAuthorityState state, Command<DatabaseCommand> operation)
     {
         var lane = QueueLifecycleImage.Capture(store, state.Flow.Lane);
         var before = store.Position;
         var failed = owner.Apply(operation);
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(failed.SafeDetail).IsEqualTo(StaleDelivery);
-        await Assert.That(failed.Json).IsNull();
-        await Assert.That(failed.NativeValue).IsNull();
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(failed.Problem?.Detail).IsEqualTo(StaleDelivery);
+        
+        await Assert.That(failed.Value).IsNull();
         await Assert.That(store.Position).IsEqualTo(before + 1);
         await QueueLifecycleImage.SameAsync(store, state.Flow.Lane, lane);
         await QueuePendingAuthorityImage.RequireAsync(owner, store, state, QueuePendingAuthorityPhase.Pending);
@@ -72,7 +74,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
     }
 
     internal static async Task FailureReplayAsync(DatabaseEngine owner, ZoneTreeStore store, QueuePendingAuthorityState state,
-        ReplicatedOperation operation, OperationResult failed)
+        Command<DatabaseCommand> operation, Result<object> failed)
     {
         var before = QueuePendingAuthorityHistory.Capture(store);
         var saved = Outcome(store, state, operation)!;
@@ -85,7 +87,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
             QueuePendingAuthorityProtocol.Inbox, history.Id, history.Request.HandlerScope, 2)))).IsNull();
     }
 
-    private static StoredOutcome? Outcome(ZoneTreeStore store, QueuePendingAuthorityState state, ReplicatedOperation operation)
+    private static StoredOutcome? Outcome(ZoneTreeStore store, QueuePendingAuthorityState state, Command<DatabaseCommand> operation)
         => store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(state.Flow.Partition,
-            QueueLifecycleTestProtocol.Administrator, operation.Id)));
+            QueueLifecycleTestProtocol.Administrator, operation.CommandId)));
 }

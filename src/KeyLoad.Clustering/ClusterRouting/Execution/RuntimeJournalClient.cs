@@ -12,7 +12,6 @@ internal sealed class RuntimeJournalClient(
     IGrainFactory grains,
     Func<GrainRequestCodec> codecFactory,
     Func<DatabaseEngine> databaseFactory,
-    Func<ICommitCoordinator> coordinatorFactory,
     IServiceProvider services,
     TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
@@ -77,13 +76,12 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var prepared = await PrepareAsync(payload, token).ConfigureAwait(false);
-        var principal = prepared.Principal;
+        var codec = await PrepareAsync(payload, token).ConfigureAwait(false);
         var requestId = Guid.NewGuid();
-        var signed = prepared.Codec.CreateRuntimeJournalRead(requestId, kind, payload);
+        var signed = codec.CreateRuntimeJournalRead(requestId, kind, payload);
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
-        using var identity = new GrainRequestIdentityScope(services, principal, requestId,
-            Guid.Empty, token, connectionId: connectionId);
+        using var identity = GrainRequestIdentityScope.ForRuntimeJournal(services, requestId,
+            Guid.Empty, token, connectionId);
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         var reply = await DrainAsRuntimeJournalCallerAsync(ReadCoreCallerMethod, () =>
             GrainRequestStreamConsumer.DrainAsync(
@@ -98,12 +96,11 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var prepared = await PrepareAsync(payload, token).ConfigureAwait(false);
-        var principal = prepared.Principal;
+        var codec = await PrepareAsync(payload, token).ConfigureAwait(false);
         var requestId = Guid.NewGuid();
-        var signed = prepared.Codec.CreateRuntimeJournalCommand(requestId, principal.Id, commandId, payload);
+        var signed = codec.CreateRuntimeJournalCommand(requestId, RuntimeJournalIdentity.ProtectedPrincipalId, commandId, payload);
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
-        using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, token, connectionId: connectionId);
+        using var identity = GrainRequestIdentityScope.ForRuntimeJournal(services, requestId, commandId, token, connectionId);
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         return await DrainAsRuntimeJournalCallerAsync(SendCommandCallerMethod, () =>
             GrainRequestStreamConsumer.DrainAsync(
@@ -121,24 +118,13 @@ internal sealed class RuntimeJournalClient(
         return result;
     }
 
-    private async Task<(PrincipalRecord Principal, GrainRequestCodec Codec)> PrepareAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+    private async Task<GrainRequestCodec> PrepareAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         await admission.WaitAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var database = databaseFactory();
         ValidateDatabaseLimits(database, payload);
-        await coordinatorFactory().ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
-        cancellationToken.ThrowIfCancellationRequested();
-        var principal = ReadProtectedPrincipal(database);
-        return (principal, codecFactory());
-    }
-
-    private PrincipalRecord ReadProtectedPrincipal(DatabaseEngine database)
-    {
-        var principal = database.Store.Read(view =>
-            database.Principal(view, RuntimeJournalIdentity.ProtectedPrincipalId, clock.GetUtcNow()));
-        RuntimeJournalIdentity.RequireProtected(principal);
-        return principal;
+        return codecFactory();
     }
 
     private static T? Decode<T>(GrainOperationReply reply, bool allowNull = false) where T : class

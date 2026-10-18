@@ -24,7 +24,7 @@ internal static class LocalClusterImageSelection
     private const string PublicCohortFilterArgument = "--KeyLoadTests:Filter=/*/*/(BlobBoundedRetirementPublicTests|BlobListRowPolicyPublicTests|BlobPartialReadBoundaryPublicTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRowCreatorPublicTests|BlobSupersessionPublicTests|DeclarativeCompositionReverseQuotaClusterTests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNormalizationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|PostgresNativeSessionClusterTests|PostgresPortalOwnershipClusterTests|PostgresPositiveExecuteClusterTests|ProjectionPublicColdTests|QueueLeaseFencingClusterTests|QueueLifecyclePublicClusterTests|SqlFetchCountClusterWholeFlowTests|SqlNullOrderingClusterWholeFlowTests|SqlOffsetClusterWholeFlowTests|SubscriptionPhasePublicColdTests|TypedEndpointJoinClusterTests)/*";
     private const string StandardFilterArgument = "--KeyLoadTests:Filter=/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlClusterJoinTests|RelationalSqlClusterJoinAuthorizationTests|RelationalSqlClusterJoinBudgetTests|RelationalSqlClusterJoinCancellationTests|RelationalSqlClusterJoinReadCutTests)/*";
     private const string RetainedSnapshotFilterArgument = "--KeyLoadTests:Filter=/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes";
-    private const string NativeTextFilterArgument = "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncClusterTests)|(NativeTextClusterLeaderLossTests)|(NativeTextClusterTests)|(NativeTextWaitClusterTests)/*";
+    private const string NativeTextFilterArgument = "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncClusterTests)|(NativeTextClusterSiloRestartTests)|(NativeTextClusterTests)|(NativeTextWaitClusterTests)/*";
     private const string GraphIncomingFilterArgument = "--KeyLoadTests:Filter=/*/*/GraphIncomingClusterTests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit";
     private const string NullQueueDeadlineFilterArgument = "--KeyLoadTests:Filter=/*/*/QueueDeadlineAutonomousClusterTests/NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck";
     private const string ResourcePolicyFilterArgument = "--KeyLoadTests:Filter=/*/*/ResourcePolicyUpdateClusterTests/AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossCluster";
@@ -33,7 +33,7 @@ internal static class LocalClusterImageSelection
     private const string McpInitialCredentialFilterArgument = "--KeyLoadTests:Filter=/*/*/McpCredentialLifecycleTests/AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials";
     private const string ProjectionReplayFilterArgument = "--KeyLoadTests:Filter=/*/*/EventProjectionClusterTests/AcLineage001ExactReplayConflictAndStaleInputPreserveOnlyTheCommittedProjection";
     private const string ProjectionPolicyFilterArgument = "--KeyLoadTests:Filter=/*/*/EventProjectionClusterTests/AcLineage002SourceHiddenFromPersistedReaderCannotProduceVisibleDerivedVector";
-    private const string ProjectionColdFilterArgument = "--KeyLoadTests:Filter=/*/*/EventProjectionClusterTests/AcLineage003CommittedProjectionReceiptAndLiveVectorSurviveLeaderLossAndRestart";
+    private const string ProjectionColdFilterArgument = "--KeyLoadTests:Filter=/*/*/EventProjectionClusterTests/AcLineage003CommittedProjectionReceiptAndLiveVectorSurviveSiloLossAndRejoin";
     private const string GraphEventLineageAuthenticationFilterArgument = "--KeyLoadTests:Filter=/*/*/(AuthenticationExecutionTests*)|(EventReferenceSelectClusterTests*)|(ComposedProjectionLineageClusterTests*)/(RealHttpSdkAndOfficialMcpAuthenticateOncePerRequestThenFreshPolicyRefusalRepairReplayAndTwoColdCuts)|(EventReferenceSelectRepairsPersistedUseAndMissingTargetThenReplaysLiteralSdkMcpRowsAcrossTwoColdCuts)|(GenuineSixOwnerCurrentSourceRightsRefusalRestoresOriginalGraphRequestThenFullReceiptsSurviveTwoColdReopens)|(ComposedSourceProjectionAndPredicateUseRevokeRepairPreserveSdkMcpRowsAndReceiptsAcrossTwoColdCuts)";
     private const string OriginalRefusalCompositionFilterArgument = "--KeyLoadTests:Filter=/*/*/(AuthenticationExecutionTests*)|(EventReferenceSelectClusterTests*)|(ComposedProjectionLineageClusterTests*)|(CrossTenantClusterWholeFlowTests)/(RealHttpSdkAndOfficialMcpAuthenticateOncePerRequestThenFreshPolicyRefusalRepairReplayAndTwoColdCuts)|(EventReferenceSelectRepairsPersistedUseAndMissingTargetThenReplaysLiteralSdkMcpRowsAcrossTwoColdCuts)|(GenuineSixOwnerCurrentSourceRightsRefusalRestoresOriginalGraphRequestThenFullReceiptsSurviveTwoColdReopens)|(ComposedSourceProjectionAndPredicateUseRevokeRepairPreserveSdkMcpRowsAndReceiptsAcrossTwoColdCuts)|(ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable)|(SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects)|(OfficialMcpWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects)";
     private const string ReleaseEarlyAdmissionQualificationFilterArgument = "--KeyLoadTests:Filter=/*/*/EarlyAdmissionQualificationTests/*";
@@ -58,7 +58,7 @@ internal static class LocalClusterImageSelection
     private const string FoundationAdmissionAuthorityFilterArgument = "--KeyLoadTests:Filter=/*/*/(SlowBodyAdmissionReturnTests|RowRevisionInferenceClusterTests|CatalogBootstrapAuthorityClusterTests)/*";
     private const string FoundationTelemetryFilterArgument = "--KeyLoadTests:Filter=/*/*/FoundationOtlpClusterTests/NativeDashboardReceivesActualClusterSdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs";
     private const string AspireFaultFilterArgument = "--KeyLoadTests:Filter=/*/*/AspireContainerFaultCommandTests/WrongStaleAndForeignIdsRefuseWithoutEffectsBeforeHealthySdkMcpRestart";
-    private const string AcceptedRestartCancellationFilterArgument = "--KeyLoadTests:Filter=/*/*/AggregateReplayClusterLeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay";
+    private const string AcceptedRestartCancellationFilterArgument = "--KeyLoadTests:Filter=/*/*/AggregateReplayClusterSiloRestartTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay";
     private const string FunctionalSingleFilterArgument = "--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers";
     private const string FunctionalClusterFilterArgument = "--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql";
     private const string PartitionQueryValidationFilterArgument = "--KeyLoadTests:Filter=/*/*/PartitionQueryPublicValidationTests/*";
@@ -106,7 +106,7 @@ internal static class LocalClusterImageSelection
         }
         if (value.Length is 0 or > MaximumNativeArgumentCharacters)
         {
-            throw new InvalidOperationException("The local CLUSTER image selection is invalid.");
+            throw new InvalidOperationException("The local Orleans image selection is invalid.");
         }
         var arguments = JsonSerializer.Deserialize<string[]>(value);
         if (arguments is not [ClusterSuiteArgument, StandardFilterArgument or RejectionFilterArgument or NativeTextFilterArgument
@@ -128,7 +128,7 @@ internal static class LocalClusterImageSelection
             || Environment.GetEnvironmentVariable(ReferenceEnvironment) is not null
             || Environment.GetEnvironmentVariable(ChildEnvironment) is not null)
         {
-            throw new InvalidOperationException("The local CLUSTER image selection is invalid.");
+            throw new InvalidOperationException("The local Orleans image selection is invalid.");
         }
         return arguments;
     }
@@ -144,7 +144,7 @@ internal static class LocalClusterImageSelection
             || values.TryGetValue(GitHubRevisionEnvironment, out var githubRevision) && !string.IsNullOrWhiteSpace(githubRevision)
             || values.TryGetValue(GitHubActionsEnvironment, out var githubActions) && !string.IsNullOrWhiteSpace(githubActions))
         {
-            throw new InvalidOperationException("The local CLUSTER image identity is invalid.");
+            throw new InvalidOperationException("The local Orleans image identity is invalid.");
         }
         return CreateSelection(provenance, reference, receipt, child, requireChild: true, rejectAmbientGithub: false);
     }
@@ -159,7 +159,7 @@ internal static class LocalClusterImageSelection
             || receipt.Contains('\\', StringComparison.Ordinal) || !reference.StartsWith(Repository + ":local-", StringComparison.Ordinal)
             || !LocalClusterImageReferenceValidation.IsCanonicalReferenceAndReceipt(reference, receipt))
         {
-            throw new InvalidOperationException("The local CLUSTER image identity is invalid.");
+            throw new InvalidOperationException("The local Orleans image identity is invalid.");
         }
         var tag = reference[(reference.IndexOf(':', StringComparison.Ordinal) + 1)..];
         return new(reference, tag, receipt, child ?? EnabledValue);

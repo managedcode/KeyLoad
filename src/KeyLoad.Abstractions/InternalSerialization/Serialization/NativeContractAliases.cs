@@ -111,7 +111,6 @@ internal static class NativeContractAliases
     internal const string NodeStatus = "keyload.contract.node-status.v1";
     internal const string NullTest = "keyload.contract.null-test.v1";
     internal const string Operand = "keyload.contract.operand.v1";
-    internal const string OperationResult = "keyload.contract.operation-result.v1";
     internal const string Ordering = "keyload.contract.ordering.v1";
     internal const string OutboxEntry = "keyload.contract.outbox-entry.v1";
     internal const string OutboxHead = "keyload.contract.outbox-head.v1";
@@ -158,7 +157,6 @@ internal static class NativeContractAliases
     internal const string RelationalColumn = "keyload.contract.relational-column.v1";
     internal const string RelationalSchema = "keyload.contract.relational-schema.v1";
     internal const string ReleaseProjectionConsumerRequest = "keyload.contract.release-projection-consumer-request.v1";
-    internal const string ReplicatedOperation = "keyload.contract.replicated-operation.v1";
     internal const string ResourceDefinition = "keyload.contract.resource-definition.v1";
     internal const string RowAccess = "keyload.contract.row-access.v1";
     internal const string SampleAggregate = "keyload.contract.sample-aggregate.v1";

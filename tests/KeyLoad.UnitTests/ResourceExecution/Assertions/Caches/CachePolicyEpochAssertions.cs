@@ -50,9 +50,7 @@ internal static class CachePolicyEpochAssertions
     internal static async Task ReceiptAsync(CachePolicyEpochState state, CommandRequest command,
         CommitReceipt actual, long before, string kind, long revision)
     {
-        CommitReceipt expected = new(command.CommandId,
-            new(state.Store.Identity.Incarnation, state.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new(kind, P.Collection, P.Document, revision)], DurabilityProfile.ProcessDurable);
+        CommitReceipt expected = new(command.CommandId, new(state.Store.Identity.Incarnation, state.Partition.AtomicPartitionId, before + 1L), [new(kind, P.Collection, P.Document, revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(expected, actual);
         await Assert.That(actual.Mutations.All(mutation => mutation.CompositionReferences.IsEmpty)).IsTrue();
     }

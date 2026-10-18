@@ -13,16 +13,16 @@ internal static class RequestCqrsTextResource
         var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId,
             new(NativeTextBilingualAudit.Collection, ResourceKind.Collection, partition.TransactionDomainId));
         var id = Guid.NewGuid();
-        var original = database.Database.CreateNativeOperation(OperationKind.ConfigureResource, id,
+        var original = database.Database.CreateCommand(OperationKind.ConfigureResource, id,
             RequestCqrsHostedProfile.Root, database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var configured = (await database.Coordinator.SubmitVerifiedAsync(original, token).ConfigureAwait(false))
             .Get<ResourceDefinition>();
         await Assert.That(JsonDefaults.Serialize(configured).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(request.Definition))).IsTrue();
-        await Assert.That(original.Id).IsEqualTo(id);
-        await Assert.That(original.Kind).IsEqualTo(OperationKind.ConfigureResource);
-        await Assert.That(original.PrincipalId).IsEqualTo(RequestCqrsHostedProfile.Root);
-        await Assert.That(JsonDefaults.Serialize(NativeCommandPayload.Read<ConfigureResourceRequest>(original)).AsSpan()
+        await Assert.That(original.CommandId).IsEqualTo(id);
+        await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
+        await Assert.That(original.UserId!).IsEqualTo(RequestCqrsHostedProfile.Root);
+        await Assert.That(JsonDefaults.Serialize(NativeSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span)).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(request))).IsTrue();
         return ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
     }

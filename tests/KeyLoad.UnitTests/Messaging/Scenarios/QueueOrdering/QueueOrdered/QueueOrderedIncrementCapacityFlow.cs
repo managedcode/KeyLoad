@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -41,7 +42,7 @@ internal static class QueueOrderedIncrementCapacityFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueOrderedRetryState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, OperationResult failed,
+        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         string[] original, long originalPosition, QueueLifecycleCeilingFault fault, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -73,7 +74,7 @@ internal static class QueueOrderedIncrementCapacityFlow
     }
 
     private static async Task FinalAsync(ZoneTreeStore store, string directory, QueueOrderedRetryState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, OperationResult failed,
+        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         QueueLifecycleCeilingFault fault, CancellationToken token)
     {
         await TerminalAsync(recorder.Database, state, fault);

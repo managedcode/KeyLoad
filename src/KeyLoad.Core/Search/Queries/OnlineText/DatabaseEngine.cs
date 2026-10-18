@@ -32,7 +32,7 @@ public sealed partial class DatabaseEngine
         var stored = CommandOutcomeKeyResolver.Select(view, principal.Id, current.CommandId, scope).Outcome
             ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         ValidateOnlineTextStoredOutcome(view, principal, originalRequest, stored, budget);
-        if (stored.Result.Error is not null || stored.OnlineTextAuthority is null
+        if (Errors.Code(stored.Result.Problem) is not null || stored.OnlineTextAuthority is null
             || current.ParentFingerprint != stored.OnlineTextAuthority.ParentFingerprint)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);

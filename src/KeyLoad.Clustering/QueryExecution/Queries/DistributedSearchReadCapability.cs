@@ -1,25 +1,32 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Query;
+using KeyLoad.Query.Features.QueryExecution;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 internal static class DistributedSearchReadCapability
 {
-    private const string NotConfigured = "The distributed canonical search owner route is not configured.";
-
-    internal static Task<DistributedSearchPageV1> ExecuteAsync(IServiceProvider services, PrincipalRecord principal,
+    internal static Task<DistributedSearchPageV1> ExecuteAsync(DatabaseEngine database,
+        IServiceProvider services, PrincipalRecord principal,
         DecodedGrainRequest request, Guid requestId, GrainRequestCodec codec, IGrainContext context,
-        IResourceLifetimeWorkBinding binding, CancellationToken token)
+        TimeProvider clock, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        var router = services.GetService<IRemoteDistributedSearchRouter>()
-            ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, NotConfigured);
+        var options = services.GetRequiredService<IOptions<QueryExecutionOptions>>();
+        var execution = new DistributedSearchLocalExecution(database, principal.Id,
+            services.GetRequiredService<PhysicalShardRecord>(), options, clock,
+            request.Envelope.ExpiresAt, binding);
         Func<CancellationToken, Task>? observed = null;
         if (codec.HasPhaseObserver)
         {
             observed = new DistributedSearchStatisticsObservation(codec, request, requestId, context).ObserveAsync;
         }
-        return router.ReadAsync(request.Envelope, principal,
-            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), observed, binding, token);
+        return DistributedSearchCoordinator.ExecuteBoundAsync(database,
+            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), options, execution.Prepare,
+            services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync,
+            clock, request.Envelope.ExpiresAt, observed, binding, token);
     }
 }

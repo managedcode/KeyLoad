@@ -18,7 +18,7 @@ internal sealed class RequestCqrsClusterDiagnostics : IAsyncDisposable
     private const string ArtifactSuffix = ".json";
     private const string ArtifactDataKey = "KeyLoad.RequestCqrsCluster.McpRejectionArtifact";
     private const string InvalidWaveIdMessage = "The C1 diagnostics wave identifier must be nonempty.";
-    private const string InvalidNodesMessage = "C1 diagnostics require the three actual CLUSTER node resources.";
+    private const string InvalidNodesMessage = "C1 diagnostics require the three actual Orleans node resources.";
     private const string OversizedArtifactMessage = "The bounded C1 MCP rejection artifact exceeded its byte limit.";
     private const string IncompleteSubscriptionMessage = "C1 diagnostics cannot be saved before every original subscription joins.";
     private const int MaximumArtifactBytes = 16 * 1_024;

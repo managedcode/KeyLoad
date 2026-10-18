@@ -21,7 +21,7 @@ internal sealed class NativeTextWaitObservedWorkTests
     public async Task ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(bool cancel)
     {
         var clock = new QueryObservedWorkClock();
-        await using var fixture = new ReplicaAppliedPositionWaitFixture(
+        using var fixture = new CanonicalReadCutFixture(
             new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
         var database = fixture.Canonical;
         database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);

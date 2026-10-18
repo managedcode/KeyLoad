@@ -57,7 +57,7 @@ internal sealed class RelationalLinkageTests
         var id = Guid.NewGuid();
         var denied = database.Submit(OperationKind.Batch, new CommandRequest(id, database.Partition,
             [new PatchDocument(RelationalTestData.Table, RelationalTestData.First, [new(RelationalTestData.NamePath, PatchKind.Set, ChangedName)], 1)]), Reader, id);
-        await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(database.Database.GetDocument(RelationalTestData.Root,
             new(database.Partition, RelationalTestData.Table, RelationalTestData.First))!.Revision).IsEqualTo(1);
     }

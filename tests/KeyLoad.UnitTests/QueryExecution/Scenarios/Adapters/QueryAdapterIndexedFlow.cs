@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -24,8 +25,7 @@ internal static class QueryAdapterIndexedFlow
                     indexes: [new(QueryAdapterTestTokens.Status, [QueryAdapterTestTokens.StatusPath])]);
                 var seed = QueryAdapterIndexedCorpus.Seed();
                 var command = new CommandRequest(SeedId, fixture.Partition, [.. seed.Documents]);
-                var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, QueryAdapterIndexedCorpus.Principal,
-                    default, JsonSerializer.Serialize(command, JsonDefaults.Options));
+                var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, QueryAdapterIndexedCorpus.Principal, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
                 var receipt = fixture.Database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
                 await Assert.That(receipt.CommandId).IsEqualTo(SeedId);
                 await QueryWorkloadCoverageAssertions.AssertDocumentCoverage(seed.Coverage,
@@ -44,7 +44,7 @@ internal static class QueryAdapterIndexedFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ColdAsync(TestDatabase fixture, ReplicatedOperation operation, CommitReceipt receipt,
+    private static async Task ColdAsync(TestDatabase fixture, Command<DatabaseCommand> operation, CommitReceipt receipt,
         string[] image, long position, byte[] identity)
     {
         var failures = new List<Exception>();
@@ -63,7 +63,7 @@ internal static class QueryAdapterIndexedFlow
     }
 
     private static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        ReplicatedOperation operation, CommitReceipt receipt)
+        Command<DatabaseCommand> operation, CommitReceipt receipt)
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;

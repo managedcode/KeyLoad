@@ -68,9 +68,9 @@ internal static class ConfiguredVectorProfileFlow
         var model = ModelBytes(database, command);
         var position = database.Store.Position;
         var rejected = database.Submit(OperationKind.Batch, command, id: command.CommandId);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(rejected.SafeDetail).IsEqualTo(Mismatch);
-        await Assert.That(rejected.Json).IsNull();
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(rejected.Problem?.Detail).IsEqualTo(Mismatch);
+        
         await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
         await Assert.That(ModelBytes(database, command)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var complete = QueueWholeFlowStorage.Bytes(database.Store);

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
 
@@ -6,11 +8,11 @@ namespace KeyLoad.Clustering;
 internal static class OnlineTextRequestEnvelopes
 {
     internal static GrainRequestEnvelope Publication(DatabaseEngine database, DateTimeOffset now,
-        TimeSpan lifetime, Guid requestId, ReplicatedOperation operation, DateTimeOffset expiry)
+        TimeSpan lifetime, Guid requestId, Command<DatabaseCommand> operation, DateTimeOffset expiry)
     {
         RequireExpiry(now, lifetime, expiry);
-        var verified = database.VerifyOperationAuthority(operation);
-        if (verified.Kind != OperationKind.OnlineTextPublicationPhase)
+        var verified = database.OwnCommand(operation);
+        if (verified.Value!.Kind != OperationKind.OnlineTextPublicationPhase)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
         }
@@ -19,9 +21,9 @@ internal static class OnlineTextRequestEnvelopes
             Purpose = OnlineTextRequestScope.Purpose,
             RequestId = requestId,
             Incarnation = database.Store.Identity.Incarnation,
-            PrincipalId = verified.PrincipalId,
-            CommandKind = verified.Kind,
-            CommandId = verified.Id,
+            PrincipalId = verified.UserId,
+            CommandKind = verified.Value!.Kind,
+            CommandId = verified.CommandId,
             Payload = GrainNativePayload.Copy(NativeSerialization.Serialize(verified), database.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };

@@ -30,10 +30,8 @@ internal static class QueueDeadlineSignedRetry
         var request = new CommandRequest(Guid.NewGuid(), lane.Partition, [new AdvanceQueueDeadline(lane.Queue,
             delivery.Id, MessageState.Leased, QueueDeadlineNativeProtocol.Second, delivery.LeaseVersion,
             delivery.LeaseUntil, QueueDeadlineKind.ExpireLease)]);
-        var operation = fixture.Database.PrepareQueueRetryOperation(fixture.Database.NormalizeOperation(new(request.CommandId,
-            OperationKind.Batch, QueueDeadlineNativeProtocol.Worker, delivery.LeaseUntil,
-            JsonSerializer.Serialize(request, JsonDefaults.Options))));
-        var wrapper = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+        var operation = fixture.Database.PrepareQueueRetryOperation(fixture.Database.OwnCommand(fixture.Database.CreateCommand(OperationKind.Batch, request.CommandId, QueueDeadlineNativeProtocol.Worker, delivery.LeaseUntil, JsonSerializer.Serialize(request, JsonDefaults.Options))));
+        var wrapper = operation.Value!;
         var choices = NativeSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span);
         var choice = choices.Items.Single();
         await Assert.That(choice.DueIndexKey.ToArray()).IsEquivalentTo(KeySpace.Partition(

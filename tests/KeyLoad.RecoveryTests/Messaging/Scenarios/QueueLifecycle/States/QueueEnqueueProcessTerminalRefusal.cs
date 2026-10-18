@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
@@ -7,7 +9,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class QueueEnqueueProcessTerminalRefusal
 {
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result)> RunAsync(DatabaseEngine owner,
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> RunAsync(DatabaseEngine owner,
         ZoneTreeStore store, CancellationToken token)
     {
         const string refused = "refused";
@@ -15,13 +17,13 @@ internal static class QueueEnqueueProcessTerminalRefusal
             [new PutDocument(QueueEnqueueCrashProtocol.Collection, refused, QueueEnqueueCrashProtocol.HealthyPayload),
                 new EnqueueMessage(QueueEnqueueCrashProtocol.Queue, QueueEnqueueCrashProtocol.Ready,
                     QueueEnqueueCrashProtocol.HealthyPayload, QueueEnqueueCrashProtocol.Headers)]);
-        var operation = owner.NormalizeOperation(CrashDatabase.Operation(OperationKind.Batch, command, command.CommandId));
+        var operation = owner.OwnCommand(CrashDatabase.Operation(owner, OperationKind.Batch, command, command.CommandId));
         var domain = Domain(store);
         var result = owner.Apply(operation);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(result.SafeDetail).IsEqualTo(QueueEnqueueCrashProtocol.ExpectedDuplicateMessageDetail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(QueueEnqueueCrashProtocol.ExpectedDuplicateMessageDetail);
+        
+        await Assert.That(result.Value).IsNull();
         await Assert.That(Domain(store)).IsEquivalentTo(domain, CollectionOrdering.Matching);
         await Assert.That(owner.GetDocument(CrashFixtureValues.Principal, new(command.Partition, QueueEnqueueCrashProtocol.Collection, refused), cancellationToken: token)).IsNull();
         var retained = OutcomeStoreOracle.ReadPartition(store, command.Partition, CrashFixtureValues.Principal, command.CommandId)!;

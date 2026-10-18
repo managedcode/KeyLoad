@@ -44,9 +44,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
         var id = Guid.NewGuid();
         var request = new ProcessingRequest(id, fixture.Lane, claim.Deliveries.Single().Token, Handler, InitialGeneration,
             [new PutDocument(Documents, Processed, Payload, NoUsage)]);
-        var expected = new CommitReceipt(id, NextToken(fixture),
-            [new(PutMutation, Documents, Processed, InitialRevision), new(nameof(DeliveryAction.Ack), Queue, Item, ReadyAckVersion)],
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, NextToken(fixture), [new(PutMutation, Documents, Processed, InitialRevision), new(nameof(DeliveryAction.Ack), Queue, Item, ReadyAckVersion)], DurabilityProfile.ProcessDurable, 1);
         _ = await SubmitAsync(fixture, sample, OperationKind.Processing, id, request, fixture.At, expected);
         sample.InboxBytes = Required(fixture, InboxKey(fixture));
         sample.Processing = request;
@@ -59,8 +57,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
         var claim = sample.ScheduledClaim ?? throw new InvalidOperationException(MissingReceive);
         var id = Guid.NewGuid();
         var request = new DeliveryCommand(id, fixture.Lane, claim.Deliveries.Single().Token, DeliveryAction.Ack);
-        var expected = new CommitReceipt(id, NextToken(fixture),
-            [new(nameof(DeliveryAction.Ack), Queue, Scheduled, ScheduledAckVersion)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, NextToken(fixture), [new(nameof(DeliveryAction.Ack), Queue, Scheduled, ScheduledAckVersion)], DurabilityProfile.ProcessDurable, 1);
         _ = await SubmitAsync(fixture, sample, OperationKind.Delivery, id, request, fixture.ScheduledAt, expected);
         ConsumeReceive(sample, claim.RequestId);
     }
@@ -100,7 +97,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
 
     internal static void ConsumeReceive(EventQueueStateEnvelopeSample sample, Guid id)
     {
-        var entry = sample.History.Single(value => value.Operation.Id == id);
+        var entry = sample.History.Single(value => value.Operation.CommandId == id);
         var index = sample.History.IndexOf(entry);
         sample.History[index] = entry with
         {

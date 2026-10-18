@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.Messaging;
@@ -9,8 +10,8 @@ internal static class TargetInboxProcessRecovery
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(Path.Combine(root, TargetInboxCrashProtocol.OperationFile), token));
-        var request = JsonDefaults.Deserialize<CommitInboxRequest>(System.Text.Encoding.UTF8.GetBytes(operation.PayloadJson));
+        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, TargetInboxCrashProtocol.OperationFile), token));
+        var request = NativeSerialization.Deserialize<CommitInboxRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var delivery = JsonDefaults.Deserialize<Delivery>(await File.ReadAllBytesAsync(Path.Combine(root, TargetInboxCrashProtocol.DeliveryFile), token));
         CommitInboxResult? original = null;
         var failures = new List<Exception>();
@@ -28,13 +29,11 @@ internal static class TargetInboxProcessRecovery
                 {
                     CommandId = Guid.NewGuid()
                 };
-                var replay = database.ApplyEmbedded(new(duplicate.CommandId, OperationKind.CommitInbox, CrashFixtureValues.Principal,
-                    default, JsonSerializer.Serialize(duplicate, JsonDefaults.Options)), token).Get<CommitInboxResult>();
+                var replay = database.ApplyEmbedded(database.CreateCommand(OperationKind.CommitInbox, duplicate.CommandId, CrashFixtureValues.Principal, default, JsonSerializer.Serialize(duplicate, JsonDefaults.Options)), token).Get<CommitInboxResult>();
                 await Assert.That(replay.AlreadyProcessed).IsTrue();
                 await Assert.That(replay.OriginalEffectsToken).IsEqualTo(original.OriginalEffectsToken);
                 var ack = new DeliveryCommand(Guid.NewGuid(), request.Source, delivery.Token, DeliveryAction.Ack);
-                _ = database.ApplyEmbedded(new(ack.CommandId, OperationKind.Delivery, CrashFixtureValues.Principal,
-                    default, JsonSerializer.Serialize(ack, JsonDefaults.Options)), token).Get<CommitReceipt>();
+                _ = database.ApplyEmbedded(database.CreateCommand(OperationKind.Delivery, ack.CommandId, CrashFixtureValues.Principal, default, JsonSerializer.Serialize(ack, JsonDefaults.Options)), token).Get<CommitReceipt>();
                 await Assert.That(database.InspectMessage(CrashFixtureValues.Principal, request.Source, request.MessageId)!.Metadata.State).IsEqualTo(MessageState.Acked);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

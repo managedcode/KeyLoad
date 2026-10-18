@@ -9,9 +9,8 @@ internal static class FunctionalGateStorageOwnership
     {
         foreach (var node in fixture.NodeNames)
         {
-            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(fixture.Root, node, "node.owner.lock"));
-            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(fixture.Root, node, "database", "owner.lock"));
-            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(fixture.Root, node, "replica", "owner.lock"));
+            StorageOwnershipFiles.AssertExclusive(Path.Combine(fixture.Root, node, "node.owner.lock"));
+            StorageOwnershipFiles.AssertExclusive(Path.Combine(fixture.Root, node, "database", "owner.lock"));
         }
     }
 }

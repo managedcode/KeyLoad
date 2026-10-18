@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -19,8 +21,8 @@ internal sealed class SubscriptionOldCutState(PartitionRef partition)
     {
         PolicyEpoch = epoch
     };
-    internal Dictionary<ReplicatedOperation, OperationResult> Successes { get; } = [];
-    internal ReplicatedOperation? DeniedOperation
+    internal Dictionary<Command<DatabaseCommand>, Result<object>> Successes { get; } = [];
+    internal Command<DatabaseCommand>? DeniedOperation
     {
         get; set;
     }
@@ -29,19 +31,19 @@ internal sealed class SubscriptionOldCutState(PartitionRef partition)
     internal ReceiveSubscriptionRequest OriginalReceive { get; set; } = null!;
     internal ReceiveSubscriptionResult OriginalClaim { get; set; } = null!;
     internal SubscriptionProcessingResult OriginalProcessing { get; set; } = null!;
-    internal ReplicatedOperation OriginalProcessingOperation { get; set; } = null!;
+    internal Command<DatabaseCommand> OriginalProcessingOperation { get; set; } = null!;
     internal CommitReceipt Producer { get; set; } = null!;
     internal CommitReceipt FreshProducer { get; set; } = null!;
     internal CommitReceipt FreshProcessing { get; set; } = null!;
-    internal ReplicatedOperation Create<T>(OperationKind kind, T payload, Guid id, string principal = "root")
+    internal Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, string principal = "root")
         => new(id, kind, principal, Clock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
-    internal OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, string principal = "root")
+    internal Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, string principal = "root")
     {
         var operation = Create(kind, payload, id, principal);
         var result = database.Apply(operation);
-        if (result.Error is { } code)
+        if (Errors.Code(result.Problem) is { } code)
         {
-            throw Errors.Fail(code, result.SafeDetail ?? "The owned operation failed.");
+            throw Errors.Fail(code, result.Problem?.Detail ?? "The owned operation failed.");
         }
         Successes.Add(operation, result);
         return result;

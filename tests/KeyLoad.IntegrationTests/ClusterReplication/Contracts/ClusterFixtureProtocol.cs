@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-/// <summary>Stable fixture-only names and profile keys used by the Aspire CLUSTER test environment.</summary>
+/// <summary>Stable fixture-only names and profile keys used by the Aspire Orleans test environment.</summary>
 internal static class ClusterFixtureProtocol
 {
     internal const int FirstNodeNumber = 1;
@@ -19,13 +19,10 @@ internal static class ClusterFixtureProtocol
     internal const string ProfileFileName = "local-profile.json";
     internal const int MaximumProfileBytes = 8192;
     internal const string AdminKeyProperty = "AdminKey";
-    internal const string PeerSecretProperty = "PeerSecret";
-    internal const string PhysicalShardIdProperty = "PhysicalShardId";
-    internal const string PhysicalShardIdSetting = "KeyLoad__PhysicalShardId";
     internal const string DataRootArgument = "--KeyLoad:DataRoot=";
     internal const string EphemeralArgument = "--KeyLoad:Ephemeral=true";
-    internal const string SnapshotThresholdArgumentPrefix = "--KeyLoad:SnapshotThreshold=";
-    internal const string SnapshotThresholdArgument = "--KeyLoad:SnapshotThreshold=16";
+    internal const string SiloCountArgument = "--KeyLoad:SiloCount=3";
+    internal const string ReplicaCountArgument = "--KeyLoad:ReplicaCount=3";
     internal const string CommandBytesSetting = "KeyLoad__CommandAdmission__MaxRetainedBytes";
     internal const string DatabaseLimitsSettingPrefix = "KeyLoad__DatabaseLimits__";
     internal const string HttpBodyBytesSetting = "KeyLoad__HttpAdmission__MaxBodyBytes";
@@ -51,7 +48,7 @@ internal static class ClusterFixtureProtocol
     internal static bool IsNodeName(string resourceName) => resourceName is Node1Name or Node2Name or Node3Name;
 
     /// <summary>Creates the unchanged Aspire node resource name for an ordinal.</summary>
-    /// <param name="number">A one-based CLUSTER node number.</param>
+    /// <param name="number">A one-based Orleans node number.</param>
     /// <returns>The corresponding node1, node2, or node3 resource name.</returns>
     internal static string NodeName(int number) => number is >= FirstNodeNumber and <= NodeCount
         ? NodePrefix + number.ToString(System.Globalization.CultureInfo.InvariantCulture)

@@ -12,4 +12,5 @@ internal static class StorageCopyContract
     internal const string WriteUncertain = "The write did not receive every required persistence acknowledgement.";
     internal const string OwnersUnavailable = "The required Orleans storage services are unavailable.";
     internal const string RecoveryRequired = "The storage copies require recovery before another operation.";
+    internal const string SequenceExhausted = "The canonical storage sequence is exhausted.";
 }

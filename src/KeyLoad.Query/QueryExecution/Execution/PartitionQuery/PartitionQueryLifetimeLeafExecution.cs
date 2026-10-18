@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Query.Features.QueryExecution;
@@ -31,10 +30,8 @@ internal static class PartitionQueryLifetimeLeafExecution
         }
         var original = request.Original;
         PartitionQueryOwnedLeafValidation.Validate(original, database.Limits, engine.Execution);
-        PartitionControlLifetimeCoverage.Require(request.Coverage, original.Plan.Partition,
-            [request.Definition], database.Limits.MaxBatchBytes);
-        if (!PhysicalOwnerEntryValidation.SameOwner(original.Owner, actualOwner)
-            || database.Store.Identity.Incarnation != actualOwner.Incarnation)
+        database.VerifyStorageOwner(actualOwner, token);
+        if (original.Owner != actualOwner)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChanged);
         }

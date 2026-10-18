@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.BlobStorage;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
@@ -83,7 +84,7 @@ internal sealed class BlobQuotaIsolationTests
             .Get<ResourceDefinition>();
     }
 
-    private static OperationResult Begin(TestDatabase database, BlobRef blob, long length, Guid uploadId)
+    private static Result<object> Begin(TestDatabase database, BlobRef blob, long length, Guid uploadId)
     {
         var id = Guid.NewGuid();
         return database.Submit(OperationKind.BeginBlobUpload,

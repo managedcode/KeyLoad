@@ -101,8 +101,7 @@ internal static class FeedVertexAuthorityAssertions
     {
         var image = Image(store);
         var position = store.Position;
-        var result = owner.ApplyEmbedded(new(command.CommandId, OperationKind.Batch, FeedVertexAuthorityFixture.Root,
-            time, global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)), token).Get<CommitReceipt>();
+        var result = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, command.CommandId, FeedVertexAuthorityFixture.Root, time, global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)), token).Get<CommitReceipt>();
         await ExactAsync(result, receipt);
         await SameImageAsync(store, image, position);
     }

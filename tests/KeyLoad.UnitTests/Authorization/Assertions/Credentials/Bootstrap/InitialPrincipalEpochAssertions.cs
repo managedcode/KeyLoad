@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -48,10 +49,10 @@ internal static class InitialPrincipalEpochAssertions
         await EqualAsync(store.Read(view => view.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(InitialPrincipalEpochFixture.KeyId))),
             InitialPrincipalEpochFixture.Credential(replacement: true));
     }
-    internal static async Task FailureAsync(OperationResult actual, OperationResult expected)
+    internal static async Task FailureAsync(Result<object> actual, Result<object> expected)
     {
         await EqualAsync(actual, expected);
-        await Assert.That(actual.NativeValue).IsNull();
+        await Assert.That(actual.Value).IsNull();
     }
 
 }

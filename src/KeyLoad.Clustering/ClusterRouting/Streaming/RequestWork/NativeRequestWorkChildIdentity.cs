@@ -7,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal sealed record NativeRequestWorkChildIdentity(Guid RequestId, ImmutableArray<byte> Fingerprint)
 {
     internal static bool IsSelectedPurpose(string? purpose)
-        => purpose is QueryLifetimeReadProtocol.Purpose or DocumentLifetimeReadScope.Purpose
+        => purpose is QueryLifetimeReadProtocol.Purpose
             or AnnProjectionLifetimeObservationScope.Purpose
             or AnnMaintenanceChildScope.Purpose or AnnProjectionJobChildScope.Purpose
             or TextMaintenanceChildScope.Purpose or OnlineTextRequestScope.Purpose or MultiLaneReceiveChildScope.Purpose;
@@ -17,7 +17,6 @@ internal sealed record NativeRequestWorkChildIdentity(Guid RequestId, ImmutableA
         {
             QueryLifetimeReadProtocol.Purpose => request.Envelope.ReadKind is
                 GrainReadKind.PartitionQueryLeafV2 or GrainReadKind.DistributedSearchLeafV2,
-            DocumentLifetimeReadScope.Purpose => request.Envelope.ReadKind is GrainReadKind.OwnedDocumentV2,
             AnnProjectionLifetimeObservationScope.Purpose =>
                 request.Envelope.ReadKind == GrainReadKind.AnnProjectionObservationV2,
             AnnMaintenanceChildScope.Purpose => AnnMaintenanceChildScope.IsSelected(request.Envelope),

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -54,20 +56,20 @@ internal sealed class TestDatabase : IDisposable
         }
     }
 
-    public OperationResult Submit<T>(OperationKind kind, T payload, string principal = RootPrincipalId,
+    public Result<object> Submit<T>(OperationKind kind, T payload, string principal = RootPrincipalId,
         Guid? id = null, DateTimeOffset? time = null)
     {
-        var operation = new ReplicatedOperation(id ?? Guid.NewGuid(), kind, principal,
+        var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal,
             time ?? default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
         return time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
     }
 
-    internal OperationResult SubmitIssued(ReplicatedOperation operation)
-        => Database.ApplyEmbedded(Database.VerifyOperationAuthority(operation), CancellationToken.None);
+    internal Result<object> SubmitIssued(Command<DatabaseCommand> operation)
+        => Database.ApplyEmbedded(Database.OwnCommand(operation), CancellationToken.None);
 
-    internal OperationResult SubmitIssuedEmbedded(ReplicatedOperation operation, CancellationToken cancellationToken)
+    internal Result<object> SubmitIssuedEmbedded(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
-        var verified = Database.VerifyOperationAuthority(operation);
+        var verified = Database.OwnCommand(operation);
         return Database.ApplyEmbedded(verified, cancellationToken);
     }
 
@@ -81,7 +83,16 @@ internal sealed class TestDatabase : IDisposable
         });
     }
 
+    internal StoredOutcome ReadStoredOutcome(Guid commandId)
+        => OutcomeStoreOracle.ReadStored(Database, commandId, CancellationToken.None);
+
+    internal StoredOutcome ReadStoredOutcome(Command<DatabaseCommand> command)
+        => OutcomeStoreOracle.ReadStored(Store, command)
+            ?? throw new InvalidOperationException("The exact stored test outcome is missing.");
+
     internal DatabaseEngine CreateConfiguredDatabase(ZoneTreeStore ownedStore) => createDatabase(ownedStore);
+    internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
+        => Store.Read(_ => (Database.LastApplied, Store.Position));
     internal ReadExecutionBudget CreateReadWork(CancellationToken cancellationToken)
         => new(limits, Database.EvaluationClock, cancellationToken);
 

@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core.Features.DatabaseComposition;
@@ -13,11 +15,11 @@ public sealed partial class DatabaseEngine
     private const string MissingCompositionAuthority = "The composition outcome has no saved row authority.";
     private const string InvalidCompositionAuthority = "The composition outcome row authority is invalid.";
     private CompositionOutcomeAuthority? CaptureCompositionOutcome(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, OperationResult result)
+        Command<DatabaseCommand> operation, Result<object> result)
     {
         const int EmptyReverseLength = 0;
 
-        if (result.Error is not null || !TryCompositionInput(operation, out var partition, out var mutations))
+        if (Errors.Code(result.Problem) is not null || !TryCompositionInput(operation, out var partition, out var mutations))
         {
             return null;
         }
@@ -82,9 +84,9 @@ public sealed partial class DatabaseEngine
     }
 
     private void ValidateCompositionOutcome(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, StoredOutcome previous)
+        Command<DatabaseCommand> operation, StoredOutcome previous)
     {
-        if (previous.Result.Error is not null || !TryCompositionInput(operation, out var partition, out var mutations)
+        if (Errors.Code(previous.Result.Problem) is not null || !TryCompositionInput(operation, out var partition, out var mutations)
             || !mutations.Any(mutation => mutation is QueueToGraph or GraphToQueueMutation))
         {
             return;
@@ -113,10 +115,10 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private static bool TryCompositionInput(ReplicatedOperation operation, out PartitionRef partition,
+    private static bool TryCompositionInput(Command<DatabaseCommand> operation, out PartitionRef partition,
         out ImmutableArray<Mutation> mutations)
     {
-        if (operation.Kind == OperationKind.Batch)
+        if (operation.Value!.Kind == OperationKind.Batch)
         {
             var batch = Payload<CommandRequest>(operation);
             partition = batch.Partition;

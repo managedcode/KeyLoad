@@ -13,10 +13,9 @@ internal static class GraphReferenceLifetimeNativeReceipt
     {
         var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(profile.Source, original.CommandId, token);
         await Assert.That(entry.Operation).IsNotNull();
-        await Assert.That(entry.Operation!.NativePayload.Span.SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
-        var expected = new CommitReceipt(original.CommandId,
-            new(profile.Source.Store.Identity.Incarnation, NativeDropRuntimeProtocol.Partition.AtomicPartitionId,
-                entry.Index, Revision), [new(UpsertMutation, graph, EdgeId, Revision)], DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(entry.Operation!.Value!.Input.Span.SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        var expected = new CommitReceipt(original.CommandId, new(profile.Source.Store.Identity.Incarnation, NativeDropRuntimeProtocol.Partition.AtomicPartitionId,
+                entry.Index), [new(UpsertMutation, graph, EdgeId, Revision)], DurabilityProfile.ProcessDurable, 1);
         await NativeDropRuntimeAssertions.SameAsync(expected, actual);
     }
 }

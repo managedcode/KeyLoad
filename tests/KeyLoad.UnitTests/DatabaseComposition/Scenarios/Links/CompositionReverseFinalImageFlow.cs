@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionBoundReferenceNativeAssertions;
@@ -16,20 +17,17 @@ internal static class CompositionReverseFinalImageFlow
         var seedRequest = new CommandRequest(Guid.NewGuid(), owner.Source.Partition,
             [new PutDocument(D.Collection, D.Id, D.Json, 0)]);
         var seed = Issue(owner, seedRequest, token, out _);
-        var seedReceipt = new CommitReceipt(seed.Id, owner.NextToken(),
-            [new("putDocument", D.Collection, D.Id, 1)], DurabilityProfile.ProcessDurable);
+        var seedReceipt = new CommitReceipt(seed.Id, owner.NextToken(), [new("putDocument", D.Collection, D.Id, 1)], DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(seedReceipt, owner.Submit(seed).Get<CommitReceipt>());
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition,
             [new GraphToQueueMutation(D.Queue, D.Graph, bound with { Lifetime = null }, D.Prefix),
              new DeleteDocument(D.Collection, D.Id, 1)]);
         var original = Issue(owner, request, token, out var work);
-        var receipt = new CommitReceipt(original.Id, owner.NextToken(),
-            [new("deleteDocument", D.Collection, D.Id, 2)], DurabilityProfile.ProcessDurable);
+        var receipt = new CommitReceipt(original.Id, owner.NextToken(), [new("deleteDocument", D.Collection, D.Id, 2)], DurabilityProfile.ProcessDurable, 1);
         var position = owner.Store.Position;
         await CompositionReverseFinalImageAssertions.RefusalAsync(owner.Submit(original));
         await Assert.That(owner.Store.Position).IsEqualTo(position + 1);
-        await Assert.That(owner.JournalCut().LastIndex).IsEqualTo(receipt.Token.Position);
-        await Assert.That(owner.JournalCut().CommittedIndex).IsEqualTo(receipt.Token.Position);
+        await Assert.That(owner.ReadCut().AppliedPosition).IsEqualTo(receipt.Token.Position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(receipt.Token.Position);
         var state = new CompositionReverseFinalImageState(bound, request, original, receipt, seed, seedReceipt);
         await A.UnchangedAsync(owner, async () =>
@@ -51,11 +49,11 @@ internal static class CompositionReverseFinalImageFlow
         }
     }, token);
 
-    private static ReplicatedOperation Issue(SafeProjectorOperationDatabase owner, CommandRequest request,
+    private static Command<DatabaseCommand> Issue(SafeProjectorOperationDatabase owner, CommandRequest request,
         CancellationToken token, out ReadExecutionBudget work)
     {
         work = new(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
-        return owner.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, D.Root,
+        return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
     }
 

@@ -28,11 +28,9 @@ internal static class SampleChunkSignedMinimumSeed
         foreach (var mutation in mutations)
         {
             var command = new CommandRequest(Guid.NewGuid(), owner.Partition, [mutation]);
-            var position = checked(owner.ReadJournalCut().LastIndex + NextPosition);
-            var expected = new CommitReceipt(command.CommandId,
-                new(owner.Store.Identity.Incarnation, owner.Partition.AtomicPartitionId, position, InitialEpoch),
-                [new MutationReceipt(kinds[commands.Count], SampleChunkCanonicalFixture.Set,
-                    SampleChunkCanonicalFixture.Series, revisions[commands.Count])], DurabilityProfile.QuorumProcessDurable);
+            var position = checked(owner.ReadCanonicalCut().AppliedPosition + NextPosition);
+            var expected = new CommitReceipt(command.CommandId, new(owner.Store.Identity.Incarnation, owner.Partition.AtomicPartitionId, position), [new MutationReceipt(kinds[commands.Count], SampleChunkCanonicalFixture.Set,
+                    SampleChunkCanonicalFixture.Series, revisions[commands.Count])], DurabilityProfile.ProcessDurable, 1);
             var actual = owner.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
             await SampleChunkExplicitMinimumUnitReads.EqualAsync(expected, actual);
             commands.Add((command, expected));

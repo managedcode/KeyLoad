@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -25,8 +26,6 @@ internal sealed class BackupIndexedDocumentDedupCases
         var firstOperation = await SeedAndMutate(fixture);
         await BackupIndexedDocumentDedupAssertions.AssertPreRestoreContent(fixture.Source.Database, fixture.Partition);
         var sourceIdentity = fixture.Source.Store.Identity;
-        var sourcePhysicalShardId = fixture.Source.Database.ReadPhysicalShardCatalog(RootPrincipal)
-            .DefaultShard.PhysicalShardId;
         var sourceCut = fixture.CreateBackup();
         var manifest = await MetadataTestFiles.ReadManifestAsync(fixture.BackupDirectory);
         var archive = await fixture.CaptureArchiveAsync();
@@ -36,7 +35,7 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourceCut);
         var restoredIdentity = fixture.Restore();
         var database = fixture.OpenRestored();
-        await AssertRestoreAuthority(fixture, restoredIdentity, sourceIdentity, sourcePhysicalShardId,
+        await AssertRestoreAuthority(fixture, restoredIdentity, sourceIdentity,
             sourceCut, manifest.Position);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
             fixture.Partition, SeedCommandId, originalOutcome);
@@ -56,7 +55,7 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourceCut);
     }
 
-    private static async Task<ReplicatedOperation> SeedAndMutate(BackupIndexedDocumentDedupFixture fixture)
+    private static async Task<Command<DatabaseCommand>> SeedAndMutate(BackupIndexedDocumentDedupFixture fixture)
     {
         fixture.Source.Configure(BackupIndexedDocumentDedupFixture.Collection, ResourceKind.Collection,
             indexes: [new(BackupIndexedDocumentDedupFixture.IndexName,
@@ -97,17 +96,17 @@ internal sealed class BackupIndexedDocumentDedupCases
                 [new(BackupIndexedDocumentDedupFixture.LabelPath, PatchKind.Set, BackupIndexedDocumentDedupFixture.ReplacedLabelJson)],
                 BackupIndexedDocumentDedupFixture.FirstRevision));
         var rejected = fixture.Source.Database.Apply(conflict);
-        if (rejected.Error != ErrorCode.Conflict)
+        if (Errors.Code(rejected.Problem) != ErrorCode.Conflict)
         {
             throw new InvalidOperationException("The real unique-index conflict batch was not rejected.");
         }
-        BackupIndexedDocumentDedupFixture.RequireSuccess(fixture.SeedReplicaAuthority());
+        BackupIndexedDocumentDedupFixture.RequireSuccess(fixture.SeedCanonicalAuthority());
         fixture.AssertSourceAuthority();
         return seed;
     }
 
     private static async Task AssertRestoreAuthority(BackupIndexedDocumentDedupFixture fixture,
-        StoreIdentity restored, StoreIdentity source, Guid physicalShardId, long sourceCut, long manifestPosition)
+        StoreIdentity restored, StoreIdentity source, long sourceCut, long manifestPosition)
     {
         await Assert.That(fixture.TargetStore.Identity.NodeId).IsEqualTo(restored.NodeId);
         await Assert.That(fixture.TargetStore.Identity.Incarnation).IsEqualTo(restored.Incarnation);
@@ -115,9 +114,6 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(restored.NodeId).IsNotEqualTo(source.NodeId);
         await Assert.That(restored.Incarnation).IsNotEqualTo(source.Incarnation);
         await Assert.That(restored.DispatchPaused).IsTrue();
-        var catalog = fixture.RestoredDatabase.ReadPhysicalShardCatalog(RootPrincipal);
-        await Assert.That(catalog.DefaultShard.PhysicalShardId).IsEqualTo(physicalShardId);
-        await Assert.That(catalog.DefaultShard.Incarnation).IsEqualTo(source.Incarnation);
         await Assert.That(manifestPosition).IsEqualTo(sourceCut);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(sourceCut + AuthorityResetCommits);
         await Assert.That(ReadSystem(fixture.TargetStore, ZoneTreePersistenceFormat.LastAppliedKey)).IsNull();
@@ -136,11 +132,11 @@ internal sealed class BackupIndexedDocumentDedupCases
         => store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, key)));
 
     private static async Task AssertPreRestoreReplayFence(BackupIndexedDocumentDedupFixture fixture,
-        DatabaseEngine database, ReplicatedOperation original, long expectedPosition, byte[] originalOutcome)
+        DatabaseEngine database, Command<DatabaseCommand> original, long expectedPosition, byte[] originalOutcome)
     {
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(expectedPosition);
         var rejected = database.Apply(original);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(expectedPosition);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
             fixture.Partition, SeedCommandId, originalOutcome);
@@ -153,12 +149,12 @@ internal sealed class BackupIndexedDocumentDedupCases
             new PutDocument(BackupIndexedDocumentDedupFixture.Collection, BackupIndexedDocumentDedupFixture.RestoredId,
                 BackupIndexedDocumentDedupFixture.RestoredJson, BackupIndexedDocumentDedupFixture.NoPriorRevision));
         var firstResult = database.Apply(restored);
-        await Assert.That(firstResult.Error).IsNull();
+        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
         var firstBytes = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.TargetStore,
             fixture.Partition, RootPrincipal, RestoredCommandId);
         var position = fixture.TargetStore.Position;
         var replay = database.Apply(restored);
-        await Assert.That(replay.Error).IsNull();
+        await Assert.That(Errors.Code(replay.Problem)).IsNull();
         await NativeReplayResultAssertions.Same<CommitReceipt>(replay, firstResult);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(position);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
@@ -168,6 +164,6 @@ internal sealed class BackupIndexedDocumentDedupCases
         var healthy = fixture.Batch(database, HealthyCommandId,
             new PutDocument(BackupIndexedDocumentDedupFixture.Collection, BackupIndexedDocumentDedupFixture.HealthyId,
                 BackupIndexedDocumentDedupFixture.HealthyJson, BackupIndexedDocumentDedupFixture.NoPriorRevision));
-        await Assert.That(database.Apply(healthy).Error).IsNull();
+        await Assert.That(Errors.Code(database.Apply(healthy).Problem)).IsNull();
     }
 }

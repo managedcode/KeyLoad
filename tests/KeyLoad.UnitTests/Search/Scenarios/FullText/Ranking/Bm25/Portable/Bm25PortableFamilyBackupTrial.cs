@@ -74,13 +74,13 @@ internal static class Bm25PortableFamilyBackupTrial
             var before = Bm25PortableFamilyBytes.Complete(fixture.Source.Store,
                 fixture.Source.Database.EvaluationClock, token);
             var position = fixture.Source.Store.Position;
-            var journal = fixture.Source.ReadJournalCut();
+            var journal = fixture.Source.ReadCanonicalCut();
             var rejected = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() =>
                 MixedEventingCatalogRestore.Capture(fixture.Source,
                     Path.Combine(fixture.Root, "bm25-refused-backup"), token), token));
             await Assert.That(rejected!.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(fixture.Source.Store.Position).IsEqualTo(position);
-            await Assert.That(fixture.Source.ReadJournalCut()).IsEqualTo(journal);
+            await Assert.That(fixture.Source.ReadCanonicalCut()).IsEqualTo(journal);
             await Bm25PortableFamilyBytes.SameAsync(before,
                 Bm25PortableFamilyBytes.Complete(fixture.Source.Store, fixture.Source.Database.EvaluationClock, token));
         }, failures);

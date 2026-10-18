@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
@@ -25,10 +26,6 @@ internal static class PartitionQueryMcpTestData
     internal static void Seed(TestDatabase fixture, PartitionQueryRequestV1 request,
         string entityId = EntityId)
     {
-        var owner = PartitionQueryPublicTestSupport.ExpectedOwner;
-        _ = fixture.Submit(OperationKind.BootstrapPhysicalShardCatalog,
-            new BootstrapPhysicalShardCatalogRequest(1, 0, owner.PhysicalShardId, owner.Incarnation,
-                owner.VoterIds)).Get<bool>();
         var partition = request.Partitions.Single();
         var resource = new ResourceDefinition(request.Query.Collection, ResourceKind.Collection,
             partition.TransactionDomainId);
@@ -60,7 +57,7 @@ internal static class PartitionQueryMcpTestData
     {
         var position = fixture.Store.Position;
         var page = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(Root, request,
-            PartitionQueryPublicTestSupport.ExpectedOwner);
+            Owner(fixture.Database));
         await VerifyPageAsync(fixture, request, page, position, entityId);
         return page;
     }
@@ -92,4 +89,7 @@ internal static class PartitionQueryMcpTestData
         await Assert.That(stored.Json).IsEqualTo(Json);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
     }
+
+    internal static PhysicalShardRecord Owner(DatabaseEngine database)
+        => new(database.Store.Identity.NodeId, database.Store.Identity.Incarnation);
 }

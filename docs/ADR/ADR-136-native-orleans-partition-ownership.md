@@ -37,9 +37,9 @@ flowchart LR
 
 ## Rules
 
-1. KeyLoad does not implement clustering. There is no KeyLoad consensus, term, vote or leader protocol; no membership table, discovery service, peer transport or peer authentication protocol; no physical owner directory, shard catalog, placement manager, capacity packing, partition movement/split/merge protocol, ownership epoch, session token or coordination-only silo role.
+1. Native Orleans APIs own every cluster responsibility in the table above. KeyLoad code uses their membership snapshots, grain addresses and lifecycle directly.
 2. Storage files never move. The ZoneTree owner opens the node's files once in its Grain Service initialization through the native silo lifecycle and closes them once at silo shutdown, after the grains that use them have drained. Grain activations may migrate; a migrated grain simply calls the ZoneTree owners again through Orleans.
-3. Writes: the partition grain applies a command in order, sends it to the ZoneTree owners of its ReplicaCount copies through Orleans and returns success after a majority of copies confirm durable local apply (ADR-003). A copy that was offline catches up by reading committed records from another copy through Orleans calls.
+3. Writes: the database grain sends one prepared native command in canonical order to its ReplicaCount ZoneTree owners through Orleans and returns success after every configured copy confirms persisted apply (ADR-003). Receipts report the actual persisted copy count separately from durability. An unavailable required copy prevents a successful write.
 4. Reads: grains read from the ZoneTree owner of the relevant node through Orleans; a read that spans partitions is fanned out by the connection grain and merged within the operation's bounds.
 5. Grains that need locality use the native `[Immovable]` attribute; all other grains keep native migration.
 6. Every operation still checks fresh persisted authorization, runs within bounded admission and cancellation, keeps idempotent command outcomes and emits OpenTelemetry through the native integrations.
@@ -58,4 +58,4 @@ power-loss durability.
 
 The design is small enough to read in one sitting. Availability and placement of activations follow Orleans behaviour. Physical file rebalancing, split and merge are outside this design.
 
-Open question for the owner: which silos store the copies of a partition when `SiloCount` is larger than `ReplicaCount`. Today the copies live on the configured replica silos (by default all three silos of a three-silo cluster, see ADR-143). Any answer must stay inside Orleans and must not reintroduce a placement or movement protocol.
+The current implementation reads native active membership, orders native silo names and selects ReplicaCount addresses. Equal-cut reads prefer their executing silo. This is not a file-rebalancing or general empty-copy recovery mechanism; those runtime guarantees remain unqualified. See [ClusterReplication](../Features/ClusterReplication.md) for the actual retry and recovery limits.

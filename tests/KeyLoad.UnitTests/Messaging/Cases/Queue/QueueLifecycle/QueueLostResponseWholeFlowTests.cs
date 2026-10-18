@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -90,7 +91,7 @@ internal sealed class QueueLostResponseWholeFlowTests
 
     private static async Task CompleteHealthyColdAsync(DatabaseEngine database, ZoneTreeStore store,
         string directory, QueueLaneRef lane, Delivery healthy, DeliveryCommand originalAck,
-        OperationResult originalReceipt, DateTimeOffset time, byte[] identity)
+        Result<object> originalReceipt, DateTimeOffset time, byte[] identity)
     {
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, healthy.Token, DeliveryAction.Ack);
         var receipt = QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, ack, ack.CommandId, time);

@@ -14,7 +14,7 @@ internal static class FunctionalGateBlobLinks
         var request = new CommandRequest(Guid.NewGuid(), context.Partition,
             [new PutDocument(reference.Collection, reference.Id, json, 0L, new RowAccess())]);
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(request, token));
-        await ReceiptAsync(receipt, request, reference, "putDocument", 1L);
+        await ReceiptAsync(context, receipt, request, reference, "putDocument", 1L);
         reference = await FunctionalGateEntityReferences.CaptureAsync(context, context.Reader,
             new DocumentResult(reference, 1L, json, false, []), token);
         var expected = new DocumentResult(reference, 1L, json, false, []);
@@ -34,7 +34,7 @@ internal static class FunctionalGateBlobLinks
         var request = new CommandRequest(Guid.NewGuid(), context.Partition,
             [new PutDocument(reference.Collection, reference.Id, json, 1L, new RowAccess())]);
         var receipt = await context.McpAsync<CommitReceipt>(context.Writer, McpCallerTools.DocumentsCommit, request, token);
-        await ReceiptAsync(receipt, request, reference, "putDocument", 2L);
+        await ReceiptAsync(context, receipt, request, reference, "putDocument", 2L);
         var expected = new DocumentResult(reference, 2L, json, false, []);
         await SqlClusterProtocol.EqualAsync(expected,
             (await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, receipt.Token, token))).Document);
@@ -70,7 +70,7 @@ internal static class FunctionalGateBlobLinks
         var request = new CommandRequest(Guid.NewGuid(), context.Partition,
             [new DeleteDocument(reference.Collection, reference.Id, 2L)]);
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(request, token));
-        await ReceiptAsync(receipt, request, reference, "deleteDocument", 3L);
+        await ReceiptAsync(context, receipt, request, reference, "deleteDocument", 3L);
         await SqlClusterProtocol.EqualAsync<DocumentResult?>(null,
             (await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, receipt.Token, token))).Document);
         await SqlClusterProtocol.EqualAsync<DocumentResult?>(null, (await context.McpAsync<DocumentReadResult>(
@@ -81,13 +81,14 @@ internal static class FunctionalGateBlobLinks
             (await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, receipt.Token, token))).Document);
     }
 
-    private static async Task ReceiptAsync(CommitReceipt receipt, CommandRequest request,
+    private static async Task ReceiptAsync(FunctionalGateContext context, CommitReceipt receipt, CommandRequest request,
         EntityRef reference, string kind, long revision)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(request.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(reference.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(context.ReplicaCount);
         await SqlClusterProtocol.EqualAsync<System.Collections.Immutable.ImmutableArray<MutationReceipt>>(
             [new(kind, reference.Collection, reference.Id, revision)], receipt.Mutations);
     }

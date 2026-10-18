@@ -5,7 +5,7 @@ using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-/// <summary>Owns real CLUSTER seed data and the independent leaf/row oracle.</summary>
+/// <summary>Owns real Orleans seed data and the independent leaf/row oracle.</summary>
 internal sealed record PartitionQueryClusterScenario(
     ImmutableArray<PartitionRef> Partitions,
     ImmutableArray<PartitionQueryClusterInputRow> Inputs,
@@ -69,7 +69,7 @@ internal sealed record PartitionQueryClusterScenario(
         var run = Guid.NewGuid().ToString(GuidFormat);
         return ImmutableArray.Create(
             new PartitionRef(Tenant + "-" + run, Database, Domain, PartitionQueryClusterProtocol.BoundPartition),
-            new PartitionRef(Tenant + "-" + run, Database, Domain, PartitionQueryClusterProtocol.FallbackPartition),
+            new PartitionRef(Tenant + "-" + run, Database, Domain, PartitionQueryClusterProtocol.SecondPartition),
             new PartitionRef(Tenant + "-" + run, Database, Domain, PartitionQueryClusterProtocol.EmptyPartition));
     }
 
@@ -78,9 +78,9 @@ internal sealed record PartitionQueryClusterScenario(
             new PartitionQueryClusterInputRow(partitions[0], "first-bound", 1, "bound-first"),
             new PartitionQueryClusterInputRow(partitions[0], PartitionQueryClusterProtocol.DuplicateTextId, 2, "bound-same"),
             new PartitionQueryClusterInputRow(partitions[0], "z-bound", 2, "bound-z"),
-            new PartitionQueryClusterInputRow(partitions[1], "first-fallback", 1, "fallback-first"),
-            new PartitionQueryClusterInputRow(partitions[1], "a-fallback", 2, "fallback-a"),
-            new PartitionQueryClusterInputRow(partitions[1], PartitionQueryClusterProtocol.DuplicateTextId, 2, "fallback-same"));
+            new PartitionQueryClusterInputRow(partitions[1], "first-second", 1, "second-first"),
+            new PartitionQueryClusterInputRow(partitions[1], "a-second", 2, "second-a"),
+            new PartitionQueryClusterInputRow(partitions[1], PartitionQueryClusterProtocol.DuplicateTextId, 2, "second-same"));
 
     private static SelectQuery CreateQuery()
         => new(PartitionQueryClusterProtocol.Collection, null,

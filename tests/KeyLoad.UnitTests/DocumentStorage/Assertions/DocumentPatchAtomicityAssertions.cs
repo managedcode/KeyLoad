@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using ManagedCode.Communication;
 using KeyLoad.Query;
 using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentPatchAtomicityContract;
 
@@ -8,38 +10,38 @@ internal static class DocumentPatchAtomicityAssertions
     internal static async Task BytesAsync(byte[] expected, byte[] actual)
         => await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();
 
-    internal static async Task FailureAsync(OperationResult result, int fault)
+    internal static async Task FailureAsync(Result<object> result, int fault)
     {
-        await Assert.That(result.Error).IsEqualTo(fault == 0 ? ErrorCode.Validation : ErrorCode.UnsupportedCapability);
-        await Assert.That(result.SafeDetail).IsEqualTo(fault == 0 ? MissingDetail : ArrayDetail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(fault == 0 ? ErrorCode.Validation : ErrorCode.UnsupportedCapability);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(fault == 0 ? MissingDetail : ArrayDetail);
+        
+        await Assert.That(result.Value).IsNull();
     }
 
     internal static async Task ReplayAsync(DocumentPatchAtomicityOwner owner,
-        ReplicaEntry original, OperationResult result)
+        StoredOutcome original, Result<object> result)
     {
-        var operation = original.Operation
+        var operation = original.PreparedCommand
             ?? throw new InvalidOperationException("The retained document command is missing.");
         var before = DocumentPatchAtomicityState.Read(owner);
-        var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, Root, operation.Id)
+        var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, Root, operation.CommandId)
             ?? throw new InvalidOperationException("The original scoped native outcome is missing.");
         await BytesAsync(NativeSerialization.Serialize(result), NativeSerialization.Serialize(stored));
-        await Assert.That(stored.Error).IsEqualTo(result.Error);
-        await Assert.That(stored.SafeDetail).IsEqualTo(result.SafeDetail);
-        if (result.Error is null)
+        await Assert.That(stored.Error).IsEqualTo(Errors.Code(result.Problem));
+        await Assert.That(stored.SafeDetail).IsEqualTo(result.Problem?.Detail);
+        if (Errors.Code(result.Problem) is null)
         {
             await BytesAsync(NativeSerialization.Serialize(result.Get<CommitReceipt>()), NativeSerialization.Serialize(stored.Get<CommitReceipt>()));
         }
         else
         {
-            await Assert.That(stored.NativeValue).IsNull();
+            await Assert.That(stored.Value).IsNull();
         }
         var entryBytes = NativeSerialization.Serialize(original);
         var resultBytes = NativeSerialization.Serialize(result);
         await BytesAsync(resultBytes, NativeSerialization.Serialize(owner.Submit(operation)));
         await BytesAsync(resultBytes, NativeSerialization.Serialize(owner.Database.ResolveOutcome(operation)));
-        await BytesAsync(entryBytes, NativeSerialization.Serialize(owner.Entry(operation.Id)));
+        await BytesAsync(entryBytes, NativeSerialization.Serialize(owner.Entry(operation.CommandId)));
         await before.RequireAsync(DocumentPatchAtomicityState.Read(owner));
     }
 
@@ -64,14 +66,14 @@ internal static class DocumentPatchAtomicityAssertions
     }
 
     internal static async Task HealthyAsync(DocumentPatchAtomicityOwner owner, int fault,
-        ReplicaEntry original, OperationResult result, long outboxTail)
+        StoredOutcome original, Result<object> result, long outboxTail)
     {
-        var operation = original.Operation
+        var operation = original.PreparedCommand
             ?? throw new InvalidOperationException("The retained document command is missing.");
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
-        await Assert.That(receipt.Token.Position).IsEqualTo(original.Index);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
+        await Assert.That(receipt.Token.Position).IsEqualTo(original.CanonicalSequence);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(owner.Source.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(owner.Database.Durability);

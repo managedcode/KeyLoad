@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -51,7 +52,7 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         first.Commit((tx, _) => { tx.Put(key, saved); return true; });
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, originalBytes, originalPosition + 2, identity);
         var result = Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, token);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(result.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
         await SubscriptionReceiveSlotAuthorityAssertions.ReplayEmptyAsync(db, first, request, result, token);
@@ -68,9 +69,9 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
     }
 
     private static async Task ContinueAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
-        SubscriptionRef group, string[] source, ReceiveSubscriptionRequest request, OperationResult result,
-        ReceiveSubscriptionRequest claimRequest, OperationResult original,
-        (SubscriptionDeliveryCommand Command, OperationResult Result)[] receipts, CancellationToken token)
+        SubscriptionRef group, string[] source, ReceiveSubscriptionRequest request, Result<object> result,
+        ReceiveSubscriptionRequest claimRequest, Result<object> original,
+        (SubscriptionDeliveryCommand Command, Result<object> Result)[] receipts, CancellationToken token)
     {
         await SubscriptionReceiveSlotAuthorityAssertions.SettledAsync(db, store, group, request, result,
             claimRequest, original, receipts, token);
@@ -94,6 +95,6 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         await SubscriptionReceiveSlotAuthorityAssertions.HealthyAsync(cold, second, group, token);
     }
 
-    internal static OperationResult Apply<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id,
+    internal static Result<object> Apply<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id,
         CancellationToken token) => SubscriptionCheckpointAuthorityFlow.Apply(db, kind, payload, id, token);
 }

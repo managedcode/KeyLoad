@@ -1,10 +1,12 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed record Bm25ConfiguredQuotaRetainedEntries(byte[][] Entries)
 {
-    internal static Bm25ConfiguredQuotaRetainedEntries Read(TestDatabase database, ReplicatedOperation[] publications)
+    internal static Bm25ConfiguredQuotaRetainedEntries Read(TestDatabase database, Command<DatabaseCommand>[] publications)
     {
-        var cut = database.ReadJournalCut();
+        var cut = database.ReadCanonicalCut();
         if (publications.Length == 0 || publications.Length > Bm25ConfiguredQuotaFlow.HeadCount
             || publications.Select(operation => operation.Id).Distinct().Count() != publications.Length
             || cut.LastIndex > database.Database.Limits.MaxScanRecords)
@@ -16,9 +18,9 @@ internal sealed record Bm25ConfiguredQuotaRetainedEntries(byte[][] Entries)
         for (var index = 0; index < publications.Length; index++)
         {
             var original = publications[index];
-            var entry = database.ReadRetainedEntry(original.Id);
+            var entry = database.ReadStoredOutcome(original.Id);
             if (original.Kind != OperationKind.Bm25CorpusPublicationPhase
-                || entry.Operation is not { } operation || operation.Id != original.Id
+                || entry.PreparedCommand is not { } operation || operation.Id != original.Id
                 || operation.Kind != original.Kind
                 || !operation.NativePayload.Span.SequenceEqual(original.NativePayload.Span))
             {
@@ -30,7 +32,7 @@ internal sealed record Bm25ConfiguredQuotaRetainedEntries(byte[][] Entries)
         return new(entries);
     }
 
-    internal async Task RequireAsync(TestDatabase database, ReplicatedOperation[] publications)
+    internal async Task RequireAsync(TestDatabase database, Command<DatabaseCommand>[] publications)
     {
         var current = Read(database, publications);
         await Assert.That(current.Entries.Length).IsEqualTo(Entries.Length);

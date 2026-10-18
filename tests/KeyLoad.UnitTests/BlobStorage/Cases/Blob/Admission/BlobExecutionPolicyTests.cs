@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
@@ -18,7 +19,7 @@ internal sealed class BlobExecutionPolicyTests
         var rejected = fixture.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId,
                 new("blob-policy", ResourceKind.BlobStore, fixture.Partition.TransactionDomainId)));
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
         var catalogKey = KeySpace.Resource(fixture.Partition.TenantId, fixture.Partition.DatabaseId, "blob-policy");
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(catalogKey))).IsNull();
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(KeyCodec.Encode("blob-global-v1")))).IsNull();
@@ -32,8 +33,7 @@ internal sealed class BlobExecutionPolicyTests
             }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var request = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId,
             new("blob-policy", ResourceKind.BlobStore, fixture.Partition.TransactionDomainId));
-        var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, "root",
-            TimeProvider.System.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = healthy.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), "root", TimeProvider.System.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
         var result = healthy.Apply(operation).Get<ResourceDefinition>();
         await Assert.That(result.Name).IsEqualTo("blob-policy");
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(catalogKey))).IsNotNull();

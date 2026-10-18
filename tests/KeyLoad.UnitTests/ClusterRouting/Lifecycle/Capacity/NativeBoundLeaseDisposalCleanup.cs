@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterReplication;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -13,7 +12,7 @@ internal static class NativeBoundLeaseDisposalCleanup
         foreach (var producer in session.Producers)
         {
             await ServerFailureObserver.ObserveAsync(() =>
-                producer.WaitAsync(RequestCqrsCohortRuntimeFixture.ShutdownBound), errors);
+                producer.WaitAsync(new NativeRuntimeTestOptions().ShutdownTimeout), errors);
         }
         foreach (var reservation in session.Reservations)
         {

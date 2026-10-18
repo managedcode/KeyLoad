@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.Messaging;
@@ -7,13 +8,10 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 internal static class LocalInboxProcessingRecoveryHealthy
 {
     internal static async Task RequireAsync(DatabaseEngine database, KeyLoad.Storage.ZoneTree.ZoneTreeStore store,
-        ReplicatedOperation operation, CommitReceipt receipt, long position)
+        Command<DatabaseCommand> operation, CommitReceipt receipt, long position)
     {
-        await LocalInboxProcessingRecoveryImage.ExactAsync(receipt, new CommitReceipt(operation.Id,
-            new(store.Identity.Incarnation, LocalInboxProcessingCrashContract.Partition.AtomicPartitionId, position, 1L),
-            [new("putDocument", LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Healthy, 1L),
-             new("Ack", LocalInboxProcessingCrashContract.Output, LocalInboxProcessingCrashContract.Message, LocalInboxProcessingCrashContract.FinalVersion)],
-            store.Identity.Durability));
+        await LocalInboxProcessingRecoveryImage.ExactAsync(receipt, new CommitReceipt(operation.CommandId, new(store.Identity.Incarnation, LocalInboxProcessingCrashContract.Partition.AtomicPartitionId, position), [new("putDocument", LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Healthy, 1L),
+             new("Ack", LocalInboxProcessingCrashContract.Output, LocalInboxProcessingCrashContract.Message, LocalInboxProcessingCrashContract.FinalVersion)], store.Identity.Durability, (store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1)));
         await ModelsAsync(database);
     }
 

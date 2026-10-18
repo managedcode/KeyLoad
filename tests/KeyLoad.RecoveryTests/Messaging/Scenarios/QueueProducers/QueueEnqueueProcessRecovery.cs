@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
@@ -10,10 +12,10 @@ internal static class QueueEnqueueProcessRecovery
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var owner = QueueLifecycleRecoveryAssertions.Open(store);
-        var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.OperationFile), token));
+        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.OperationFile), token));
         var target = NativeSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.TargetFile), token));
         var baseline = NativeSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.BaselineFile), token));
-        var command = JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson);
+        var command = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var due = command.Mutations.OfType<EnqueueMessage>().Single(message => message.MessageId == QueueEnqueueCrashProtocol.Scheduled).NotBefore;
         await QueueEnqueueProcessValueAssertions.EqualAsync(command, new CommandRequest(QueueEnqueueCrashProtocol.OperationId,
             QueueEnqueueCrashProtocol.Partition,
@@ -21,16 +23,15 @@ internal static class QueueEnqueueProcessRecovery
                 new EnqueueMessage(QueueEnqueueCrashProtocol.Queue, QueueEnqueueCrashProtocol.Ready, QueueEnqueueCrashProtocol.Payload, QueueEnqueueCrashProtocol.Headers),
                 new EnqueueMessage(QueueEnqueueCrashProtocol.Queue, QueueEnqueueCrashProtocol.Scheduled, QueueEnqueueCrashProtocol.Payload,
                     QueueEnqueueCrashProtocol.Headers, NotBefore: due)]));
-        await Assert.That(due!.Value).IsGreaterThan(operation.EvaluatedAt);
-        await Assert.That(operation.Id).IsEqualTo(QueueEnqueueCrashProtocol.OperationId);
-        await Assert.That(operation.PrincipalId).IsEqualTo(CrashFixtureValues.Principal);
-        await Assert.That(operation.Kind).IsEqualTo(OperationKind.Batch);
-        await QueueClaimAckRecoveryAssertions.EqualAsync(owner.NormalizeOperation(operation), operation);
+        await Assert.That(due!.Value).IsGreaterThan(new DateTimeOffset(operation.Timestamp));
+        await Assert.That(operation.CommandId).IsEqualTo(QueueEnqueueCrashProtocol.OperationId);
+        await Assert.That(operation.UserId!).IsEqualTo(CrashFixtureValues.Principal);
+        await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
+        await QueueClaimAckRecoveryAssertions.EqualAsync(owner.OwnCommand(operation), operation);
         var placement = owner.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal, command.Partition);
         await Assert.That(target.Incarnation).IsEqualTo(placement.Incarnation);
-        await Assert.That(target.OwnershipEpoch).IsEqualTo(placement.PlacementEpoch);
         await Assert.That(target.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
-        var outcome = OutcomeStoreOracle.ReadPartition(store, command.Partition, CrashFixtureValues.Principal, operation.Id);
+        var outcome = OutcomeStoreOracle.ReadPartition(store, command.Partition, CrashFixtureValues.Principal, operation.CommandId);
         await Assert.That(store.Position).IsEqualTo(outcome is null ? target.Position - QueueEnqueueCrashProtocol.First : target.Position);
         if (outcome is null)
         {
@@ -57,8 +58,8 @@ internal static class QueueEnqueueProcessRecovery
         await ColdAsync(root, store, operation, result, command, token);
     }
 
-    private static async Task ColdAsync(string root, ZoneTreeStore store, ReplicatedOperation operation,
-        OperationResult result, CommandRequest command, CancellationToken token)
+    private static async Task ColdAsync(string root, ZoneTreeStore store, Command<DatabaseCommand> operation,
+        Result<object> result, CommandRequest command, CancellationToken token)
     {
         var image = QueueClaimAckRecoveryAssertions.Capture(store);
         var position = store.Position;

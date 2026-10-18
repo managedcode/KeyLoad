@@ -17,7 +17,7 @@ internal static class AggregateSnapshotRaceFlow
             var position = fixture.Store.Position;
             await AggregateSnapshotRaceCompetitors.RunAsync(fixture, token);
             await Assert.That(fixture.Store.Position).IsEqualTo(position + 2);
-            var winner = fixture.Outcomes.Single(outcome => outcome.Result.Error is null);
+            var winner = fixture.Outcomes.Single(outcome => Errors.Code(outcome.Result.Problem) is null);
             await AggregateSnapshotRaceValues.ReceiptAsync(fixture, fixture.Winner!, winner.Result, position + 1, 1);
             await ServerFailureObserver.ObserveAsync(() => ObserveAsync(fixture,
                 () => AggregateSnapshotRaceModel.RequireAsync(fixture, false)), failures);

@@ -31,7 +31,7 @@ internal static class RemoteTransferCapacityAuthorityImages
     {
         var transfer = item.Transfer;
         var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, fixture.DestinationPartition);
-        var maximum = new CommitToken(placement.Incarnation, fixture.DestinationPartition.AtomicPartitionId, long.MaxValue, placement.PlacementEpoch);
+        var maximum = new CommitToken(placement.Incarnation, fixture.DestinationPartition.AtomicPartitionId, long.MaxValue);
         var fingerprint = JsonData.Fingerprint(transfer.Mutation.Message);
         var verified = fixture.Database.Verify<RemoteTransferIntentClaims>(transfer.Intent.IntentToken);
         var maximumClaims = new RemoteTransferReceiptClaims(RemoteTransferProtocol.ReceiptPurpose, fixture.Store.Identity.Incarnation,

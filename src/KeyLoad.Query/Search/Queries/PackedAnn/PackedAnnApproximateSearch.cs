@@ -3,12 +3,12 @@ namespace KeyLoad.Query.Features.Search;
 internal static class PackedAnnApproximateSearch
 {
     private const int EmptyElementCount = 0;
-    private const int InitialSequence = 0;
     private const int CandidateComparisonWork = 2;
     private const int FirstElementIndex = 0;
     private const int SingleWorkUnit = 1;
 
     private const string EligibilityChanged = "The admitted ANN result count changed during candidate materialization.";
+    private const string InsufficientCandidates = "The bounded ANN graph did not supply the requested eligible candidates.";
 
     internal static PackedAnnApproximateResult Run(PackedAnnState state, PreparedSimilarity similarity,
         ulong[]? eligibility, FilteredVectorPlan plan, AnnWorkBudget budget)
@@ -28,25 +28,14 @@ internal static class PackedAnnApproximateSearch
             {
                 var candidates = CopyLayerCandidates(state, buffers, found, eligibility,
                     plan.ResultCount, budget);
-                return new(candidates, AnnSearchMode.Approximate, expansionPasses, InitialSequence);
+                return new(candidates, expansionPasses);
             }
             if (breadth == plan.Capacity)
             {
-                return RunExactFallback(state, similarity, eligibility, plan, expansionPasses, budget);
+                throw Errors.Fail(ErrorCode.BudgetExceeded, InsufficientCandidates);
             }
             breadth = Math.Min(plan.Capacity, checked(breadth * CandidateComparisonWork));
         }
-    }
-
-    private static PackedAnnApproximateResult RunExactFallback(PackedAnnState state,
-        PreparedSimilarity similarity, ulong[]? eligibility, FilteredVectorPlan plan,
-        int expansionPasses, AnnWorkBudget budget)
-    {
-        var startedDistances = budget.DistanceEvaluations;
-        var candidates = PackedAnnExactSearch.Run(state, similarity, eligibility, plan.ResultCount, budget);
-        var fallbackDistances = checked(budget.DistanceEvaluations - startedDistances);
-        return new(candidates, AnnSearchMode.ExactAfterInsufficientCandidates,
-            expansionPasses, fallbackDistances);
     }
 
     private static int GreedyEntry(PackedAnnState state, PreparedSimilarity similarity, AnnWorkBudget budget)

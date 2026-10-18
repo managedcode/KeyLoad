@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.GraphTraversal;
@@ -18,7 +19,7 @@ internal static class ScriptDomOrdinalWriteAdmission
             var before = JsonDefaults.Serialize(values);
             var limits = UnitExecutionOptions.DatabaseLimits();
             McpDecodedOperation? partial = null;
-            OperationResult? outcome = null;
+            Result<object>? outcome = null;
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             {
                 partial = SqlOperationCompiler.Compile(new(fixture.Partition, SqlTypedInsertLiteral.Sql, values,

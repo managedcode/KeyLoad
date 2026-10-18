@@ -52,7 +52,7 @@ internal static class DistributedTextStatisticsLeaf
             throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged);
         }
         DistributedSearchFieldAuthorization.Require(database, principal, resource, request, metadata);
-        var placement = DatabaseEngine.ReadAtomicPartitionPlacementForAuthorizedQuery(view, request.Partition, grant);
+        var placement = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, request.Partition, grant);
         PartitionQueryPlacementValidation.Validate(placement, request.Partition, owner);
         if (request.Text is not null)
         {

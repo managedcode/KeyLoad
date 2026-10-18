@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text;
 using KeyLoad.Storage;
 
@@ -14,8 +15,8 @@ internal static class RemoteTransferStorage
 
     private const string CorruptCapacityMessage = "Persisted queue transfer capacity is inconsistent.";
 
-    internal static bool IsCapacityFailure(OperationResult result)
-        => result.Error == ErrorCode.ResourceExhausted && result.SafeDetail == RetainedQueueTransferCapacityIsExhaustedDetail;
+    internal static bool IsCapacityFailure(Result<object> result)
+        => Errors.Code(result.Problem) == ErrorCode.ResourceExhausted && result.Problem?.Detail == RetainedQueueTransferCapacityIsExhaustedDetail;
 
     internal static byte[] IntentKey(QueueLaneRef source, Guid transferId)
         => KeySpace.Partition(RemoteTransferProtocol.IntentSpace, source.Partition, source.Queue,

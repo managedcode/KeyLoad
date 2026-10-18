@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using ManagedCode.Orleans.Identity.Core.Constants;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,9 +19,22 @@ internal sealed class GrainRequestIdentityScope : IDisposable
     internal GrainRequestIdentityScope(IServiceProvider runtimeServices, PrincipalRecord? principal,
         Guid requestId, Guid commandId, CancellationToken cancellationToken,
         global::Orleans.Runtime.SiloAddress? placement = null, Guid connectionId = default)
+        : this(runtimeServices, principal?.Id, requestId, commandId, cancellationToken, placement, connectionId)
     {
-        var state = new GrainRequestContextState(requestId, commandId, connectionId);
-        var claims = principal is null ? null : GrainIdentityContext.CreatePrincipal(principal.Id);
+    }
+
+    internal static GrainRequestIdentityScope ForRuntimeJournal(IServiceProvider runtimeServices,
+        Guid requestId, Guid commandId, CancellationToken cancellationToken, Guid connectionId)
+        => new(runtimeServices, RuntimeJournalIdentity.ProtectedPrincipalId, requestId, commandId,
+            cancellationToken, null, connectionId);
+
+    private GrainRequestIdentityScope(IServiceProvider runtimeServices, string? subject,
+        Guid requestId, Guid commandId, CancellationToken cancellationToken,
+        global::Orleans.Runtime.SiloAddress? placement, Guid connectionId)
+    {
+        var state = new GrainRequestContextState(requestId, commandId, connectionId,
+            runtimeServices.GetService<ILocalSiloDetails>()?.SiloAddress);
+        var claims = subject is null ? null : GrainIdentityContext.CreatePrincipal(subject);
         NativeRequestContextAdmission.Admit(runtimeServices, claims, state, cancellationToken, placement);
         placementSelected = placement is not null;
         previousPlacement = RequestContext.Get(PlacementKey);

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
@@ -31,7 +32,7 @@ internal static class CommandOutcomeKeyResolver
         return new(scopedKey, scoped);
     }
 
-    internal static void ValidateSelectedScope(IKeyValueView view, ReplicatedOperation operation,
+    internal static void ValidateSelectedScope(IKeyValueView view, Command<DatabaseCommand> operation,
         CommandOutcomeSelection selection)
     {
         if (selection.Outcome is not { } outcome)
@@ -40,7 +41,7 @@ internal static class CommandOutcomeKeyResolver
         }
 
         var expected = CommandOutcomePartitionIdentity.Resolve(operation);
-        ValidateScoped(view, outcome, expected, operation.PrincipalId, operation.Id);
+        ValidateScoped(view, outcome, expected, operation.UserId!, operation.CommandId);
     }
 
     private static byte[] KeyFor(string principalId, Guid commandId, CommandOutcomePartitionScope scope)

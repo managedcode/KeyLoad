@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -66,12 +67,12 @@ internal sealed class RemoteTransferDatabase : IDisposable
         return Apply(OperationKind.Batch, request, id: id).Get<CommitReceipt>();
     }
 
-    internal OperationResult Apply<T>(OperationKind kind, T payload, string principal = RootPrincipal,
+    internal Result<object> Apply<T>(OperationKind kind, T payload, string principal = RootPrincipal,
         Guid? id = null, DateTimeOffset? time = null)
     {
         var commandId = id ?? (payload is CommandRequest command ? command.CommandId : Guid.NewGuid());
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
-        return Database.Apply(new(commandId, kind, principal, time ?? (timeProvider ?? TimeProvider.System).GetUtcNow(), json));
+        return Database.Apply(Database.CreateCommand(kind, commandId, principal, time ?? (timeProvider ?? TimeProvider.System).GetUtcNow(), json));
     }
 
     internal void AddPrincipal(PrincipalRecord principal)

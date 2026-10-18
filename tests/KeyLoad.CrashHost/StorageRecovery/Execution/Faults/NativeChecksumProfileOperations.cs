@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.DocumentStorage;
 using KeyLoad.Storage;
@@ -10,7 +11,7 @@ internal static class NativeChecksumProfileOperations
     internal static async Task RequireOriginalAsync(string root, DatabaseEngine database, ZoneTreeStore store,
         int appends, bool replay)
     {
-        var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, CommandIdempotencyCrashContract.CommandEvidenceFile);
+        var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<Command<DatabaseCommand>>(root, CommandIdempotencyCrashContract.CommandEvidenceFile);
         var receipt = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitReceipt>(root, CommandIdempotencyCrashContract.ReceiptEvidenceFile);
         var tail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, CommandIdempotencyCrashContract.SeedTailEvidenceFile);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(database.ResolveOutcome(operation).Get<CommitReceipt>(), receipt);
@@ -25,11 +26,11 @@ internal static class NativeChecksumProfileOperations
 
     internal static async Task AppendAsync(string root, DatabaseEngine database, ZoneTreeStore store, int append)
     {
-        var operation = Create(append);
+        var operation = Create(database, append);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         RequireReceipt(receipt, append);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(database.Apply(operation).Get<CommitReceipt>(), receipt);
-        if (database.Apply(CommandIdempotencyCrashData.CreateChangedOperation(operation)).Error != ErrorCode.Conflict)
+        if (Errors.Code(database.Apply(CommandIdempotencyCrashData.CreateChangedOperation(database, operation)).Problem) != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
         }
@@ -40,7 +41,7 @@ internal static class NativeChecksumProfileOperations
 
     internal static async Task RequireAppendAsync(string root, DatabaseEngine database, ZoneTreeStore store, int append)
     {
-        var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, CommandFile(append));
+        var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<Command<DatabaseCommand>>(root, CommandFile(append));
         var receipt = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitReceipt>(root, ReceiptFile(append));
         CommandIdempotencyCrashAssertions.RequireSameReceipt(database.ResolveOutcome(operation).Get<CommitReceipt>(), receipt);
         RequireReceipt(receipt, append);
@@ -48,7 +49,7 @@ internal static class NativeChecksumProfileOperations
             CrashFixtureValues.Principal, CommandId(append))))?.Result.Get<CommitReceipt>()
             ?? throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(retained, receipt);
-        var reference = CommandIdempotencyCrashData.ExpectedDocumentReference(DocumentId(append));
+        var reference = CommandIdempotencyCrashData.ExpectedDocumentReference(database, DocumentId(append));
         CommandIdempotencyCrashAssertions.RequireDocument(database.GetDocument(CrashFixtureValues.Principal, reference),
             reference, NativeChecksumProfileProtocol.InitialRevision, Json(append));
         var seedTail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, CommandIdempotencyCrashContract.SeedTailEvidenceFile);
@@ -84,12 +85,12 @@ internal static class NativeChecksumProfileOperations
         }
     }
 
-    private static ReplicatedOperation Create(int append)
+    private static Command<DatabaseCommand> Create(DatabaseEngine database, int append)
     {
         var id = CommandId(append);
         var request = new CommandRequest(id, CommandIdempotencyCrashContract.Partition,
             [new PutDocument(CommandIdempotencyCrashContract.Collection, DocumentId(append), Json(append), NativeChecksumProfileProtocol.EmptyRevision)]);
-        return CrashDatabase.Operation(OperationKind.Batch, request, id);
+        return CrashDatabase.Operation(database, OperationKind.Batch, request, id);
     }
 
     private static Guid CommandId(int append) => append == NativeChecksumProfileProtocol.OneAppend

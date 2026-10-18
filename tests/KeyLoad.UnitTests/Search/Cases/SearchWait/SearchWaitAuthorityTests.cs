@@ -11,13 +11,6 @@ internal sealed class SearchWaitAuthorityTests
         }, TestContext.Current!.Execution.CancellationToken);
 
     [Test]
-    public Task ChangedPlacementEpochCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy()
-        => SearchWaitAuthorityTrial.TokenAsync(static token => token with
-        {
-            OwnershipEpoch = checked(token.OwnershipEpoch + SearchWaitAuthorityState.DifferentEpoch)
-        }, TestContext.Current!.Execution.CancellationToken);
-
-    [Test]
     public Task ZeroMinimumPositionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy()
         => SearchWaitAuthorityTrial.TokenAsync(static token => token with
         {

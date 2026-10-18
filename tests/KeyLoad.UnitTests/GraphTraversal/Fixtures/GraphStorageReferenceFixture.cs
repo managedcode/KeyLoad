@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -47,9 +48,8 @@ internal static class GraphStorageReferenceFixture
     internal static EntityRef Vertex(PartitionRef partition, string id) => new(partition, Nodes, id);
     internal static CommandRequest Command(PartitionRef partition, params Mutation[] mutations)
         => new(Guid.NewGuid(), partition, [.. mutations]);
-    internal static OperationResult Submit(DatabaseEngine owner, CommandRequest command)
-        => owner.Apply(new(command.CommandId, OperationKind.Batch, Root, owner.EvaluationClock.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)));
+    internal static Result<object> Submit(DatabaseEngine owner, CommandRequest command)
+        => owner.Apply(owner.CreateCommand(OperationKind.Batch, command.CommandId, Root, owner.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)));
 
     internal static DatabaseEngine ReopenedOwner(ZoneTreeStore store)
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),

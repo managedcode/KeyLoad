@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -22,8 +23,7 @@ internal static class DocumentIndexCommittedScanOperations
         var command = new CommandRequest(commandId, partition, [new PutDocument(
             DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.HealthyId,
             DocumentIndexCommittedScanOracle.HealthyJson, InitialDocumentRevision)]);
-        var operation = new ReplicatedOperation(commandId, OperationKind.Batch, RootPrincipal,
-            engine.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = engine.CreateCommand(OperationKind.Batch, commandId, RootPrincipal, engine.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options));
         return engine.Apply(operation).Get<CommitReceipt>();
     }
 }

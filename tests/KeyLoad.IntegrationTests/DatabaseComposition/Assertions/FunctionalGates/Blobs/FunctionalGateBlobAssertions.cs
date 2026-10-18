@@ -8,13 +8,14 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateBlobAssertions
 {
-    internal static async Task ReceiptAsync(CommitReceipt receipt, Guid command, BlobRef blob)
+    internal static async Task ReceiptAsync(FunctionalGateContext context, CommitReceipt receipt, Guid command, BlobRef blob)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(command);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(blob.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Token.Incarnation == Guid.Empty).IsFalse();
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(context.ReplicaCount);
         await Assert.That(receipt.Mutations).IsEmpty();
     }
 

@@ -29,8 +29,8 @@ internal sealed class OutboxPurgeTests
         database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(configureId, consumer, new(1, [], [])), id: configureId);
         var deniedId = Guid.NewGuid();
-        await Assert.That(database.Submit(OperationKind.PurgeOutbox,
-            new PurgeOutboxRequest(deniedId, database.Partition, 1), id: deniedId).Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(database.Submit(OperationKind.PurgeOutbox,
+            new PurgeOutboxRequest(deniedId, database.Partition, 1), id: deniedId).Problem)).IsEqualTo(ErrorCode.Conflict);
 
         var releaseId = Guid.NewGuid();
         database.Submit(OperationKind.ReleaseProjectionConsumer,
@@ -105,8 +105,8 @@ internal sealed class OutboxPurgeTests
         var commandId = Guid.NewGuid();
         var payload = System.Text.Json.JsonSerializer.Serialize(new CommandRequest(commandId, database.Partition,
             [new PutDocument("orders", "three", "{}")]), JsonDefaults.Options);
-        var outcome = reopenedDatabase.Apply(new(commandId, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(), payload));
-        await Assert.That(outcome.Error).IsNull();
+        var outcome = reopenedDatabase.Apply(reopenedDatabase.CreateCommand(OperationKind.Batch, commandId, "root", TimeProvider.System.GetUtcNow(), payload));
+        await Assert.That(Errors.Code(outcome.Problem)).IsNull();
         await Assert.That(reopenedDatabase.GetOutboxStatus("root", database.Partition).Head.Tail).IsEqualTo(3);
     }
 

@@ -28,7 +28,6 @@ internal static class QueryEquivalentIntegerClusterDecimalProtocol
     internal const int Limit = 100;
     internal const int ColdCuts = 2;
     internal const long Revision = 1;
-    internal const long OwnershipEpoch = 1;
     internal const long InitialEpoch = 1;
     internal const long DeniedEpoch = 2;
     internal const long RepairEpoch = 3;

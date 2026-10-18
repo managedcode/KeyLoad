@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -35,6 +36,6 @@ internal static class QueueStoredCapacitySetup
             Operation(OperationKind.Receive, receive, receive.RequestId, time));
     }
 
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
+    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
         => new(id, kind, QueueEnqueueColdProtocol.Root, time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }

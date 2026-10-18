@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -84,15 +85,12 @@ internal static class SampleRangeBudgetAssertions
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, cut);
     }
 
-    internal static async Task AppendReceiptAsync(SampleRawIntegrityFixture fixture, ReplicatedOperation operation,
+    internal static async Task AppendReceiptAsync(SampleRawIntegrityFixture fixture, Command<DatabaseCommand> operation,
         CommitReceipt receipt, long previousPosition)
     {
         var nextPosition = checked(previousPosition + 1);
         await Assert.That(fixture.Store.Position).IsEqualTo(nextPosition);
-        var expected = new CommitReceipt(operation.Id,
-            new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, nextPosition, 1),
-            [new(AppendKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, AppendedMaximumSequence)],
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(operation.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, nextPosition), [new(AppendKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, AppendedMaximumSequence)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(NativeSerialization.Serialize(receipt).SequenceEqual(
             NativeSerialization.Serialize(expected))).IsTrue();
     }

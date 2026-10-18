@@ -8,8 +8,8 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class SampleRetentionClusterRestartWorkflow
 {
-    private const string FailureScenario = "series-retention-follower-restart";
-    private const string FollowerRestoreFailureKey = "KeyLoad.RetentionFollowerRestoreFailure";
+    private const string FailureScenario = "series-retention-silo-restart";
+    private const string SiloRestoreFailureKey = "KeyLoad.RetentionFollowerRestoreFailure";
     private const int NodeCount = TimeSeriesClusterScenario.NodeCount;
     private const int FirstNode = TimeSeriesClusterScenario.FirstNode;
     private const int McpNodeIndex = 1;
@@ -21,13 +21,13 @@ internal static class SampleRetentionClusterRestartWorkflow
         var cancellationToken = linked.Token;
         var clients = CreateClients(fixture);
         var scenario = await PrepareAsync(fixture, cancellationToken);
-        var leader = await SelectLeaderIndexAsync(clients, cancellationToken);
-        var follower = await SelectRestartableFollowerAsync(clients, leader, cancellationToken);
-        var node = ClusterReplicationTestSupport.NodeName(follower + FirstNode);
+        var writer = await SelectWriterIndexAsync(clients, cancellationToken);
+        var selectedSilo = await SelectRestartableSiloAsync(clients, writer, cancellationToken);
+        var node = ClusterReplicationTestSupport.NodeName(selectedSilo + FirstNode);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture,
             ClusterReplicationTestSupport.NodeName(McpNodeIndex + FirstNode), fixture.AdminKey, cancellationToken);
         await ExecuteWithRestartCleanupAsync(fixture,
-            new(clients, scenario, leader, follower, node, mcp), cancellationToken);
+            new(clients, scenario, writer, selectedSilo, node, mcp), cancellationToken);
     }
 
     private static async Task ExecuteWithRestartCleanupAsync(ClusterFixture fixture, RestartContext context,
@@ -39,12 +39,15 @@ internal static class SampleRetentionClusterRestartWorkflow
         try
         {
             await ApplyFirstPageAsync(fixture, context, cancellationToken);
-            stoppedNode = context.FollowerNode;
+            stoppedNode = context.SelectedSiloNode;
             await fixture.KillContainerAsync(stoppedNode, FailureScenario, cancellationToken);
-            await ApplyQuorumPageAsync(context, cancellationToken);
+            var command = ExpireCommand(context, 2);
+            await ClusterReplicationTestSupport.MissingCopiesAsync(await context.Clients[context.Writer]
+                .CommitAsync(command, cancellationToken));
             await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
             restarted = true;
             await WaitForNodeAsync(fixture, context, cancellationToken);
+            await ApplyCopiedPageAsync(context, command, cancellationToken);
             await SampleRetentionClusterRecoveryAssertions.VerifyAllNodesAsync(context.Clients,
                 context.Mcp, context.Scenario, new(context.Cutoff, 3, false),
                 ["retention-3", "at-retention-floor"], cancellationToken);
@@ -59,7 +62,7 @@ internal static class SampleRetentionClusterRestartWorkflow
         {
             if (!restarted && stoppedNode is not null)
             {
-                await RestoreFollowerAsync(fixture, context, stoppedNode, activeFailure);
+                await RestoreSiloAsync(fixture, context, stoppedNode, activeFailure);
             }
         }
     }
@@ -68,9 +71,9 @@ internal static class SampleRetentionClusterRestartWorkflow
         CancellationToken cancellationToken)
     {
         var command = ExpireCommand(context, 1);
-        var first = ClusterReplicationTestSupport.Success(await context.Clients[context.Leader]
+        var first = ClusterReplicationTestSupport.Success(await context.Clients[context.Writer]
             .CommitAsync(command, cancellationToken));
-        var replay = ClusterReplicationTestSupport.Success(await context.Clients[(context.Leader + 1) % NodeCount]
+        var replay = ClusterReplicationTestSupport.Success(await context.Clients[(context.Writer + 1) % NodeCount]
             .CommitAsync(command, cancellationToken));
         await Assert.That(replay.Token).IsEqualTo(first.Token);
         await VerifyAllNodesAsync(context, new(context.Cutoff, 1, true), cancellationToken);
@@ -80,17 +83,19 @@ internal static class SampleRetentionClusterRestartWorkflow
             context.Scenario, context.Cutoff, cancellationToken);
     }
 
-    private static async Task ApplyQuorumPageAsync(RestartContext context, CancellationToken cancellationToken)
+    private static async Task ApplyCopiedPageAsync(RestartContext context, CommandRequest command,
+        CancellationToken cancellationToken)
     {
-        var command = ExpireCommand(context, 2);
-        var result = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringElectionAsync(
-            () => context.Clients[context.Leader].CommitAsync(command, cancellationToken), cancellationToken));
+        var result = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringSiloRecoveryAsync(
+            () => context.Clients[context.Writer].CommitAsync(command, cancellationToken), cancellationToken));
         await Assert.That(result.Mutations).HasSingleItem();
-        var replay = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringElectionAsync(
-            () => context.Clients[context.Leader].CommitAsync(command, cancellationToken), cancellationToken));
+        await Assert.That(result.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(result.PersistedCopies).IsEqualTo(NodeCount);
+        var replay = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringSiloRecoveryAsync(
+            () => context.Clients[context.Writer].CommitAsync(command, cancellationToken), cancellationToken));
         await Assert.That(replay.Token).IsEqualTo(result.Token);
         await SampleRetentionClusterRecoveryAssertions.VerifyActiveNodesAsync(context.Clients,
-            context.Follower, context.Mcp, context.Scenario, new(context.Cutoff, 3, false),
+            context.SelectedSilo, context.Mcp, context.Scenario, new(context.Cutoff, 3, false),
             ["retention-3", "at-retention-floor"], cancellationToken);
     }
 
@@ -115,42 +120,39 @@ internal static class SampleRetentionClusterRestartWorkflow
         => Enumerable.Range(FirstNode, NodeCount)
             .Select(number => fixture.Client(ClusterReplicationTestSupport.NodeName(number))).ToArray();
 
-    private static async Task<int> SelectLeaderIndexAsync(KeyLoadClient[] clients,
+    private static async Task<int> SelectWriterIndexAsync(KeyLoadClient[] clients,
         CancellationToken cancellationToken)
     {
         var statuses = (await Task.WhenAll(clients.Select(client => client.StatusAsync(cancellationToken))))
             .Select(ClusterReplicationTestSupport.Success).ToArray();
-        await Assert.That(statuses.All(status => status.Voters == NodeCount)).IsTrue();
-        await Assert.That(statuses.All(status => string.Equals(status.Leader, statuses[0].Leader,
-            StringComparison.Ordinal))).IsTrue();
-        var leader = new Uri(statuses[0].Leader ?? throw new InvalidOperationException(
-            "The initialized CLUSTER status omitted its leader URI."));
-        return Enumerable.Range(0, NodeCount).Single(index => string.Equals(leader.Host,
-            ClusterReplicationTestSupport.NodeName(index + FirstNode), StringComparison.Ordinal));
+        await Assert.That(statuses.All(status => status.RoutingReady && status.SiloCount == NodeCount
+            && status.ReplicaCount == NodeCount)).IsTrue();
+        await Assert.That(statuses.Select(status => status.NodeId).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(NodeCount);
+        return 0;
     }
 
-    private static async Task<int> SelectRestartableFollowerAsync(KeyLoadClient[] clients, int leader,
+    private static async Task<int> SelectRestartableSiloAsync(KeyLoadClient[] clients, int writer,
         CancellationToken cancellationToken)
     {
-        var follower = Enumerable.Range(0, NodeCount)
-            .First(index => index != leader && index != McpNodeIndex);
-        await Assert.That((await clients[follower].StatusAsync(cancellationToken)).IsSuccess).IsTrue();
-        return follower;
+        var selectedSilo = Enumerable.Range(0, NodeCount)
+            .First(index => index != writer && index != McpNodeIndex);
+        await Assert.That((await clients[selectedSilo].StatusAsync(cancellationToken)).IsSuccess).IsTrue();
+        return selectedSilo;
     }
 
     private static async Task WaitForNodeAsync(ClusterFixture fixture, RestartContext context,
         CancellationToken cancellationToken)
     {
-        await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(context.FollowerNode,
+        await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(context.SelectedSiloNode,
             WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
         await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
-            var status = await context.Clients[context.Follower].StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value!.RoutingReady && status.Value.Voters == NodeCount;
+            var status = await context.Clients[context.SelectedSilo].StatusAsync(cancellationToken);
+            return status.IsSuccess && status.Value!.RoutingReady && status.Value.SiloCount == NodeCount;
         }, cancellationToken);
     }
 
-    private static async Task RestoreFollowerAsync(ClusterFixture fixture, RestartContext context,
+    private static async Task RestoreSiloAsync(ClusterFixture fixture, RestartContext context,
         string node, Exception? activeFailure)
     {
         using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
@@ -163,7 +165,7 @@ internal static class SampleRetentionClusterRestartWorkflow
         {
             if (activeFailure is not null)
             {
-                activeFailure.Data[FollowerRestoreFailureKey] = cleanupFailure;
+                activeFailure.Data[SiloRestoreFailureKey] = cleanupFailure;
                 return;
             }
             throw;
@@ -197,7 +199,7 @@ internal static class SampleRetentionClusterRestartWorkflow
     };
 
     private sealed record RestartContext(KeyLoadClient[] Clients, TimeSeriesClusterScenario Scenario,
-        int Leader, int Follower, string FollowerNode, McpOfficialClient Mcp)
+        int Writer, int SelectedSilo, string SelectedSiloNode, McpOfficialClient Mcp)
     {
         internal DateTimeOffset Cutoff { get; } = TimeSeriesClusterScenario.Start.AddMinutes(3);
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.Search;
@@ -30,6 +31,6 @@ internal sealed partial class NativeTextOnlineSession
         commandsJoined = true;
     }
 
-    private void RequirePublicationReceipt(OperationResult original)
+    private void RequirePublicationReceipt(Result<object> original)
         => JoinedPublicationReceipt = NativeTextOnlineSessionWork.RequireReceipt(original, ref expectedPublication, Request.CommandId);
 }

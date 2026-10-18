@@ -22,7 +22,8 @@ internal static class McpDocumentCrudParityAssertions
         await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(receipt.Mutations[0]).IsEqualTo(
             new MutationReceipt(kind, McpDocumentProtocol.Collection, McpDocumentProtocol.Entity, revision));
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
     }
 
     internal static async Task AssertDocumentAsync(KeyLoadClient sdk, McpOfficialClient mcp,

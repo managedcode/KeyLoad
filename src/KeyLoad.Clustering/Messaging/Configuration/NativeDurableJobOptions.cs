@@ -45,7 +45,7 @@ public sealed record NativeDurableJobOptions
     public int MaximumClaimBudget { get; init; } = CatalogLimit;
     /// <summary>Gets the bounded orphan claim ramp-up duration.</summary>
     public TimeSpan ClaimRampUpDuration { get; init; } = TimeSpan.FromMilliseconds(DefaultCheckMilliseconds);
-    /// <summary>Gets the cadence for waiting on all configured startup voters.</summary>
+    /// <summary>Gets the cadence for retrying unavailable native storage during bounded startup.</summary>
     public TimeSpan BootstrapPollInterval { get; init; } = TimeSpan.FromMilliseconds(DefaultPollMilliseconds);
 
     /// <summary>Checks native execution and discovery settings before any ownership begins.</summary>

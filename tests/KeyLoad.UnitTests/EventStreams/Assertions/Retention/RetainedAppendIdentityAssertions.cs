@@ -13,8 +13,7 @@ internal static class RetainedAppendIdentityAssertions
     internal static async Task ReceiptAsync(CommitReceipt actual, Guid id, Guid incarnation,
         PartitionRef partition, long position, MutationReceipt[] effects)
     {
-        await SameAsync(actual, new CommitReceipt(id, new(incarnation, partition.AtomicPartitionId, position, 1),
-            [.. effects], DurabilityProfile.ProcessDurable));
+        await SameAsync(actual, new CommitReceipt(id, new(incarnation, partition.AtomicPartitionId, position), [.. effects], DurabilityProfile.ProcessDurable, 1));
         foreach (var effect in actual.Mutations)
         {
             await Assert.That(effect.CompositionReferences).IsEmpty();

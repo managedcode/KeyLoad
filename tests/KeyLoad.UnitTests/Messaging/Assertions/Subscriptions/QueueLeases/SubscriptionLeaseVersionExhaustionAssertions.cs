@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
@@ -10,16 +11,16 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
     private const string Subject = "root";
     private const long NextPosition = 1;
 
-    internal static async Task<OperationResult> FailAsync(DatabaseEngine db, ZoneTreeStore store,
+    internal static async Task<Result<object>> FailAsync(DatabaseEngine db, ZoneTreeStore store,
         ReceiveSubscriptionRequest request, DateTimeOffset due, string detail)
     {
         var image = Domain(store, request);
         var position = store.Position;
         var result = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, due);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(result.SafeDetail).IsEqualTo(detail);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
+        
+        await Assert.That(result.Value).IsNull();
         await Assert.That(store.Position).IsEqualTo(position + NextPosition);
         await RequireLocatorAsync(store, request);
         await Assert.That(Domain(store, request)).IsEquivalentTo(image, CollectionOrdering.Matching);
@@ -31,7 +32,7 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine db, ZoneTreeStore store,
-        ReceiveSubscriptionRequest request, OperationResult original, DateTimeOffset due)
+        ReceiveSubscriptionRequest request, Result<object> original, DateTimeOffset due)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;

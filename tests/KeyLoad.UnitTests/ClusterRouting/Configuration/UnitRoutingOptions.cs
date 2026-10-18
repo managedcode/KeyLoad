@@ -6,12 +6,6 @@ namespace KeyLoad.UnitTests;
 /// <summary>Explicit validated native options for actual Orleans routing regression fixtures.</summary>
 internal static class UnitRoutingOptions
 {
-    internal static IOptions<ReplicaPeerOptions> Peers(ReplicaConfiguration configuration, ReplicaPeerOptions value)
-    {
-        value.Validate(configuration);
-        return Options.Create(value);
-    }
-
     internal static IOptions<GrainRoutingOptions> Routing(GrainRoutingOptions? configured = null)
     {
         var value = configured ?? new GrainRoutingOptions();
@@ -29,20 +23,4 @@ internal static class UnitRoutingOptions
         return Options.Create(value);
     }
 
-    internal static IOptions<ReplicaReplayLimits> Replay(ReplicaReplayLimits? configured = null)
-    {
-        var value = configured ?? new ReplicaReplayLimits();
-        value.Validate(3);
-        return Options.Create(value);
-    }
-
-    internal static IOptions<ReplicaTransportOptions> Transport(ReplicaTransportOptions? configured = null)
-    {
-        var value = configured ?? new ReplicaTransportOptions();
-        if (!value.IsValid())
-        {
-            throw new OptionsValidationException(Options.DefaultName, typeof(ReplicaTransportOptions), [ReplicaTransportOptions.ValidationMessage]);
-        }
-        return Options.Create(value);
-    }
 }

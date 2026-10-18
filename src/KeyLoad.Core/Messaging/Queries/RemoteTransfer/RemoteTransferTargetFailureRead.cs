@@ -45,8 +45,8 @@ public sealed partial class DatabaseEngine
         RemoteTransferIntentClaims intent, RemoteTransferCoordinationReadRequest request)
     {
         var stamp = outcome.RemoteTransferFailureAuthority;
-        if (stamp is null || outcome.Result is null || !RemoteTransferDependencyShape.Valid(stamp.Dependency)
-            || !HasRemoteTransferCapacityFailure(outcome.Result) || (outcome.Result.Json is not null || outcome.Result.NativeValue is not null))
+        if (stamp is null || !RemoteTransferDependencyShape.Valid(stamp.Dependency)
+            || !HasRemoteTransferCapacityFailure(outcome.Result) || (outcome.Result.Value is not null))
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferAttemptProtocol.Unavailable);
         }

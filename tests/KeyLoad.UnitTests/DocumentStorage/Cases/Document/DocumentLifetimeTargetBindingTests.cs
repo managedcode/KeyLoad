@@ -1,100 +1,56 @@
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage;
-using C = KeyLoad.UnitTests.Features.DocumentStorage.RemoteDocumentNativeFixture;
+using KeyLoad.UnitTests.Features.Messaging;
+using A = KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionAuthorityColdAssertions;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
 internal sealed class DocumentLifetimeTargetBindingTests
 {
-    private const string MissingRecord = "The original native destination document is absent.";
+    private const string OtherCollection = "other-lifetime-documents";
     private const int ColdReopens = 2;
 
     [Test]
-    public Task ValidSourceCreationCannotReplaceTargetStoredBindingThenExactRepairReplaysAcrossTwoColdOwners()
-        => RemoteDocumentNativeAssertions.RunAsync(async fixture =>
+    public Task OtherResourceCreationCannotReplaceStoredBindingThenExactRepairReplaysAcrossCold()
+        => DocumentPatchAtomicityOwner.RunAsync(async fixture =>
         {
-            fixture.Seed();
-            fixture.GrantDestination();
-            await Assert.That(fixture.SourceCreation.Incarnation).IsNotEqualTo(fixture.DestinationCreation.Incarnation);
-            var key = DocumentStorageKeys.RecordKey(C.Reference);
-            var original = fixture.Destination.Store.Read(view => view.ReadOwnedValue(key))
-                ?? throw new InvalidOperationException(MissingRecord);
+            fixture.Source.Configure(A.Collection, ResourceKind.Collection);
+            fixture.Source.Configure(OtherCollection, ResourceKind.Collection);
+            var receipt = fixture.Source.Commit(new PutDocument(A.Collection, A.Id, A.Json, 0),
+                new PutDocument(OtherCollection, A.Id, A.Json, 0));
+            var issued = fixture.Entry(receipt.CommandId).PreparedCommand;
+            var other = fixture.Database.GetDocument(A.Root, new(fixture.Source.Partition, OtherCollection, A.Id))!
+                .Reference.Lifetime;
+            var key = DocumentStorageKeys.RecordKey(A.Reference(fixture));
+            var original = fixture.Store.Read(view => view.ReadOwnedValue(key))
+                ?? throw new InvalidOperationException(A.Collection);
             var record = NativeSerialization.Deserialize<DocumentRecord>(original);
-            await Assert.That(record.Reference).IsEqualTo(fixture.ExpectedDestinationReference);
-            await Assert.That(record.Revision).IsEqualTo(C.First);
-            await Assert.That(record.Json).IsEqualTo(C.OriginalJson);
-            var transplanted = record with
+            await Assert.That(record.Reference.Lifetime).IsNotEqualTo(other);
+            fixture.Store.Commit((tx, _) =>
             {
-                Reference = C.Reference with
-                {
-                    Lifetime = new(fixture.SourceCreation.Incarnation.Value)
-                }
-            };
-            fixture.Destination.Store.Commit((transaction, _) =>
-            {
-                transaction.PutRecord(key, transplanted);
+                tx.PutRecord(key, record with { Reference = record.Reference with { Lifetime = other } });
                 return true;
             });
             try
             {
-                await RefuseUnchangedAsync(fixture);
+                var image = QueueWholeFlowStorage.Bytes(fixture.Store);
+                var position = fixture.Store.Position;
+                var failure = Assert.ThrowsExactly<KeyLoadException>(() => A.Read(fixture, receipt.Token));
+                await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);
+                await A.UnchangedAsync(fixture, image, position);
             }
             finally
             {
-                fixture.Destination.Store.Commit((transaction, _) =>
-                {
-                    transaction.Put(key, original);
-                    return true;
-                });
+                fixture.Store.Commit((tx, _) => { tx.Put(key, original); return true; });
             }
-            var restored = fixture.Destination.Store.Read(view => view.ReadOwnedValue(key))
-                ?? throw new InvalidOperationException(MissingRecord);
-            await Assert.That(restored.AsSpan().SequenceEqual(original)).IsTrue();
-            await HealthyAcrossColdAsync(fixture);
-        });
-
-    private static async Task RefuseUnchangedAsync(RemoteDocumentNativeFixture fixture)
-    {
-        var frame = DocumentLifetimeNativeRead.Capture(fixture);
-        var source = RemoteDocumentNativeAssertions.Image(fixture.Source);
-        var target = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-        var sourcePosition = fixture.Source.Store.Position;
-        var targetPosition = fixture.Destination.Store.Position;
-        OwnedDocumentReadResultV1? published = null;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            published = DocumentLifetimeNativeRead.Read(fixture, frame));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);
-        await Assert.That(published).IsNull();
-        await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourcePosition);
-        await Assert.That(fixture.Destination.Store.Position).IsEqualTo(targetPosition);
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(source)).IsTrue();
-        await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(target)).IsTrue();
-    }
-
-    private static async Task HealthyAcrossColdAsync(RemoteDocumentNativeFixture fixture)
-    {
-        for (var cold = default(int); cold <= ColdReopens; cold++)
-        {
-            fixture.RequireOriginalResourceBindings();
-            var frame = DocumentLifetimeNativeRead.Capture(fixture);
-            var position = fixture.Destination.Store.Position;
-            var result = DocumentLifetimeNativeRead.Read(fixture, frame);
-            await RemoteDocumentNativeAssertions.DocumentAsync(result, fixture, position);
-            await DocumentLifetimePublicBoundaryAssertions.RequireAsync(fixture, frame, result);
-            fixture.Source.Database.ValidateRemoteDocumentReadV2(frame, DocumentLifetimeNativeRead.Work(fixture.Source.Database));
-            await RemoteDocumentNativeAssertions.ReceiptAsync(fixture);
-            var replay = fixture.Destination.Database.Apply(fixture.Write).Get<CommitReceipt>();
-            await Assert.That(NativeSerialization.Serialize(replay).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(fixture.Receipt))).IsTrue();
-            if (cold < ColdReopens)
+            for (var cold = 0; cold <= ColdReopens; cold++)
             {
-                var source = RemoteDocumentNativeAssertions.Image(fixture.Source);
-                var target = RemoteDocumentNativeAssertions.Image(fixture.Destination);
-                fixture.Source.Reopen();
-                fixture.Destination.Reopen();
-                await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Source).SequenceEqual(source)).IsTrue();
-                await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(target)).IsTrue();
+                await A.LiteralAsync(fixture, receipt.Token, 1);
+                await A.ReplayAsync(fixture, issued, receipt);
+                if (cold < ColdReopens)
+                {
+                    await fixture.ReopenAsync();
+                }
             }
-        }
-    }
+        });
 }

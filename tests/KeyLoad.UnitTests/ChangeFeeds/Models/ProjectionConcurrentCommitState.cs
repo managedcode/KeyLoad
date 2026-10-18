@@ -1,5 +1,7 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal sealed record ProjectionConcurrentCommitState(ProjectionConsumerIdentityState Source,
-    ReplicatedOperation First, OperationResult FirstResult, ReplicatedOperation Second, OperationResult SecondResult,
-    bool WinnerIsFirst, ReplicatedOperation Filtered, OperationResult Advanced, string[] Image, long Position);
+    Command<DatabaseCommand> First, Result<object> FirstResult, Command<DatabaseCommand> Second, Result<object> SecondResult,
+    bool WinnerIsFirst, Command<DatabaseCommand> Filtered, Result<object> Advanced, string[] Image, long Position);

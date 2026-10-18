@@ -7,7 +7,6 @@ internal sealed class QueryRuleOptimizationFixture(bool includeNull, bool includ
     private const long InitialRevision = 1L;
     private const long UpdatedRevision = 2L;
     private const long InitialPolicyEpoch = 1L;
-    private const long InitialOwnershipEpoch = 1L;
     private const long JournalAdvance = 1L;
 
     internal TestDatabase Harness
@@ -34,11 +33,8 @@ internal sealed class QueryRuleOptimizationFixture(bool includeNull, bool includ
     private async Task CommitAsync(CommandRequest command, long revision)
     {
         var db = Harness;
-        var position = db.ReadJournalCut().LastIndex + JournalAdvance;
-        var expected = new CommitReceipt(command.CommandId,
-            new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, position, InitialOwnershipEpoch),
-            [.. command.Mutations.Cast<PutDocument>().Select(row => new MutationReceipt("putDocument", row.Resource, row.Id, revision))],
-            DurabilityProfile.ProcessDurable);
+        var position = db.ReadCanonicalCut().AppliedPosition + JournalAdvance;
+        var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, position), [.. command.Mutations.Cast<PutDocument>().Select(row => new MutationReceipt("putDocument", row.Resource, row.Id, revision))], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, db.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>());
         Originals.Add((command, expected, RequiredProcessingPolicyAssertions.Outcome(db.Store, db.Partition, "root", command.CommandId)));
     }

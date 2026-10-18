@@ -10,7 +10,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>Creates real Aspire HTTP clients owned and disposed by each calling test scope.</summary>
 internal static class McpCallerHttp
 {
-    /// <summary>Uses the actual CLUSTER endpoint while leaving request deadlines with the caller's token.</summary>
+    /// <summary>Uses the actual Orleans endpoint while leaving request deadlines with the caller's token.</summary>
     /// <param name="fixture">The initialized real Docker/Aspire cluster.</param>
     /// <param name="node">The native Aspire resource name.</param>
     /// <returns>The disposable actual HTTP client, with no substituted handler.</returns>

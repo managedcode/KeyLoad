@@ -38,14 +38,12 @@ timeProvider: new ControlledReadClock(Epoch));
     internal async Task InitializeAsync()
     {
         const long ResourceConfigurationsAndSeed = 3L;
-        var next = Harness.ReadJournalCut().LastIndex + ResourceConfigurationsAndSeed;
+        var next = Harness.ReadCanonicalCut().AppliedPosition + ResourceConfigurationsAndSeed;
         var seeded = SqlOffsetFixture.Seed(Harness);
         Seed = seeded.Seed;
-        Receipt = new(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, next, 1L),
-            [.. Seed.Mutations.Cast<PutDocument>().Select(value => new MutationReceipt("putDocument", value.Collection, value.Id, 1L))],
-            DurabilityProfile.ProcessDurable);
+        Receipt = new(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, next), [.. Seed.Mutations.Cast<PutDocument>().Select(value => new MutationReceipt("putDocument", value.Collection, value.Id, 1L))], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(Receipt, seeded.Receipt);
-        await Assert.That(Harness.ReadJournalCut().LastIndex).IsEqualTo(next);
+        await Assert.That(Harness.ReadCanonicalCut().AppliedPosition).IsEqualTo(next);
         Outcome = RequiredProcessingPolicyAssertions.Outcome(Harness.Store, Harness.Partition, "root", Seed.CommandId);
         await SqlParserAdmissionModels.ConfigureAsync(this);
         await PolicyAsync(1L, true);

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -70,8 +71,7 @@ internal static class GraphIncomingRowAuthorityCold
         {
             var image = GraphShortestPathFullStoreImage.Bytes(store);
             var cut = store.Position;
-            var operation = new ReplicatedOperation(repair.Request.CommandId, OperationKind.Batch, Root, default,
-                JsonSerializer.Serialize(repair.Request, JsonDefaults.Options));
+            var operation = engine.CreateCommand(OperationKind.Batch, repair.Request.CommandId, Root, default, JsonSerializer.Serialize(repair.Request, JsonDefaults.Options));
             var replay = engine.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
             await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(repair.Receipt, JsonDefaults.Options));

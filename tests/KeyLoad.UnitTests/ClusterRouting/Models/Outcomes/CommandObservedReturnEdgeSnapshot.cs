@@ -13,7 +13,7 @@ internal sealed record CommandObservedReturnEdgeSnapshot(string[] Rows, byte[] I
         await fixture.Database.Coordinator.ReadBarrierAsync(token);
         return new(TeamRowPolicyAssertions.Image(fixture.Database.Store),
             NativeSerialization.Serialize(fixture.Database.Store.Identity), fixture.Database.Store.Position,
-            fixture.Database.Database.LastApplied, fixture.Database.ReadJournalCut());
+            fixture.Database.Database.LastApplied, fixture.Database.ReadCanonicalCut());
     }
 
     internal async Task RequireSameAsync(CommandObservedPolicyScenario scenario, CancellationToken token)

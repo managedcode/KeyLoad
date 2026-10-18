@@ -6,7 +6,7 @@ using KeyLoad.IntegrationTests.Features.DocumentStorage;
 namespace KeyLoad.IntegrationTests.Features.BackupRestore;
 
 /// <summary>AC-CLIENT-004/006: admin backup has typed parity across the real public callers.</summary>
-/// <param name="fixture">The actual Aspire-owned Docker CLUSTER application.</param>
+/// <param name="fixture">The actual Aspire-owned Docker Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class AdminBackupClientParityTests(ClusterFixture fixture)
@@ -21,12 +21,14 @@ internal sealed class AdminBackupClientParityTests(ClusterFixture fixture)
         var seed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(
             scenario.Command(Guid.NewGuid()), deadline.Token));
         await Assert.That(seed.Token.Position).IsGreaterThan(0);
+        await Assert.That(seed.PersistedCopies).IsEqualTo(3);
         var seededMutation = seed.Mutations.Single(mutation => mutation.Resource == McpDocumentProtocol.Collection
             && mutation.Id == McpDocumentProtocol.Entity);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             fixture.AdminKey, deadline.Token);
         var tool = await mcp.Client.DiscoverKeyLoadToolAsync(McpCallerTools.AdminBackup, deadline.Token);
         await McpDiscoveryAssertions.VerifyAsync(tool);
+        var local = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(deadline.Token));
         var sdkReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.BackupAsync(deadline.Token));
         var mcpReceipt = await McpCallerAssertions.SuccessAsync<BackupReceipt>(
             await mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.AdminBackup, cancellationToken: deadline.Token));
@@ -34,9 +36,9 @@ internal sealed class AdminBackupClientParityTests(ClusterFixture fixture)
         await VerifyReceiptAsync(mcpReceipt.Value);
         await Assert.That(sdkReceipt.Id).IsNotEqualTo(mcpReceipt.Value.Id);
         await AdminBackupArchiveVerifier.VerifyRestoreAsync(fixture, sdkReceipt, scenario.Reference,
-            McpDocumentProtocol.InitialJson, seededMutation.Revision, seed.Token.Position, deadline.Token);
+            McpDocumentProtocol.InitialJson, seededMutation.Revision, local.Position, deadline.Token);
         await AdminBackupArchiveVerifier.VerifyRestoreAsync(fixture, mcpReceipt.Value, scenario.Reference,
-            McpDocumentProtocol.InitialJson, seededMutation.Revision, seed.Token.Position, deadline.Token);
+            McpDocumentProtocol.InitialJson, seededMutation.Revision, local.Position, deadline.Token);
     }
 
     private static async Task VerifyReceiptAsync(BackupReceipt receipt)

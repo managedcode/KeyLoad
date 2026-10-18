@@ -27,7 +27,13 @@ internal static class PolicyEpochAuthorityOutage
                 stopped.Add(node);
                 await fixture.KillContainerAsync(node, Scenario, token);
             }
-            await PolicyEpochAuthorityRefusals.AllAsync(reader, state, cursors, token);
+            await ReadAvailableAsync(reader, state, cursors, token);
+            await ClusterReplicationTestSupport.MissingCopiesAsync(await root.CommitAsync(state.Seed, token));
+            var available = await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
+            await SqlClusterProtocol.EqualAsync(before.Rows.ToArray(), available.Rows.ToArray());
+            await Assert.That(available.CutPosition).IsGreaterThanOrEqualTo(before.CutPosition);
+            await SqlClusterProtocol.EqualAsync(outbox,
+                await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Scenario.Partition, token)));
         }, failures);
         using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
         await RestoreAsync(fixture, stopped, failures, cleanup.Token);
@@ -42,6 +48,22 @@ internal static class PolicyEpochAuthorityOutage
         await PolicyEpochPublicPolicy.ReplayAsync(root, state, token);
         await SqlClusterProtocol.EqualAsync(outbox,
             await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Scenario.Partition, token)));
+    }
+
+    private static async Task ReadAvailableAsync(RequestCqrsClusterCallers reader, PolicyEpochPublicState state,
+        string[] cursors, CancellationToken token)
+    {
+        for (var route = 0; route < PolicyEpochPublicProtocol.RouteCount; route++)
+        {
+            var request = PolicyEpochPublicProtocol.Request(state.Scenario.Partition, cursors[route]);
+            var page = await PolicyEpochPublicCalls.ReadAsync(reader, request, route, token);
+            QueryRow[] expected = [new(PolicyEpochPublicProtocol.SecondId, PolicyEpochPublicProtocol.SeedRevision,
+                PolicyEpochPublicProtocol.SecondJson, false, [])];
+            await SqlClusterProtocol.EqualAsync(expected, page.Rows.ToArray());
+            await Assert.That(page.Cursor).IsNull();
+            await Assert.That(page.AccessPath).IsEqualTo(PolicyEpochPublicProtocol.Scan);
+            await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(state.Receipt.Token.Position);
+        }
     }
 
     private static async Task RestoreAsync(ClusterFixture fixture, HashSet<string> stopped,

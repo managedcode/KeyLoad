@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 
@@ -51,9 +52,9 @@ internal sealed class NativeDropCommandPhaseObserver : IGrainRequestPhaseObserve
         await hold.Released.Task.WaitAsync(cancellationToken).ConfigureAwait(true);
     }
 
-    public void ObserveNativeOperation(GrainRequestProbeIdentity identity, ReplicatedOperation original)
+    public void ObserveNativeOperation(GrainRequestProbeIdentity identity, Command<DatabaseCommand> original)
     {
-        if (identity.CommandId != original.Id || identity.PrincipalId != original.PrincipalId)
+        if (identity.CommandId != original.CommandId || identity.PrincipalId != original.UserId!)
         {
             throw new InvalidOperationException(NativeDropRuntimeProtocol.IdentityChanged);
         }

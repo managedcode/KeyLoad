@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.DocumentStorage;
 using KeyLoad.Storage;
@@ -35,20 +37,20 @@ internal static class TopicPurgeCrashScenario
             [new PutDocument(TopicPurgeCrashContract.Documents, RetainedEntity, TopicPurgeCrashContract.DocumentJson, InitialDocumentRevision),
              new EnqueueMessage(TopicPurgeCrashContract.Queue, RetainedEntity, TopicPurgeCrashContract.QueueJson, TopicPurgeCrashContract.HeadersJson),
              new PublishTopic(TopicPurgeCrashContract.Topic, [TopicPurgeCrashContract.Event(FirstPublishedPosition), TopicPurgeCrashContract.Event(SecondPublishedPosition), TopicPurgeCrashContract.Event(ThirdPublishedPosition)])]);
-        var publish = CrashDatabase.Operation(OperationKind.Batch, publication, publication.CommandId);
+        var publish = CrashDatabase.Operation(database, OperationKind.Batch, publication, publication.CommandId);
         var publishResult = database.Apply(publish);
         publishResult.Get<CommitReceipt>();
         var cursor = database.ReadEventSource(CrashFixtureValues.Principal, new(TopicPurgeCrashContract.Source, Limit: InitialEventReadLimit)).Cursor;
-        var seed = CrashDatabase.Operation(OperationKind.Batch, TopicPurgeCrashContract.Purge(TopicPurgeCrashContract.SeedId, FirstPublishedPosition), TopicPurgeCrashContract.SeedId);
+        var seed = CrashDatabase.Operation(database, OperationKind.Batch, TopicPurgeCrashContract.Purge(TopicPurgeCrashContract.SeedId, FirstPublishedPosition), TopicPurgeCrashContract.SeedId);
         var seedResult = database.Apply(seed);
         seedResult.Get<CommitReceipt>();
         ConfigurePin(database, pinned);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, TopicPurgeCrashContract.Purge(TopicPurgeCrashContract.PurgeId, SecondPublishedPosition), TopicPurgeCrashContract.PurgeId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, TopicPurgeCrashContract.Purge(TopicPurgeCrashContract.PurgeId, SecondPublishedPosition), TopicPurgeCrashContract.PurgeId);
         await SaveAsync(directory, publish, publishResult, seed, seedResult, operation, store, pinned, cursor);
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         var result = database.Apply(operation);
-        if (pinned ? result.Error != ErrorCode.ResourceExhausted : result.Error is not null)
+        if (pinned ? Errors.Code(result.Problem) != ErrorCode.ResourceExhausted : Errors.Code(result.Problem) is not null)
         {
             throw new InvalidOperationException(InvalidOutcome);
         }
@@ -74,8 +76,8 @@ internal static class TopicPurgeCrashScenario
         CrashDatabase.Submit(database, OperationKind.SetSubscriptionPaused,
             new SetSubscriptionPausedRequest(id, TopicPurgeCrashContract.Subscription, SourceGeneration, true), id).Get<SubscriptionInfo>();
     }
-    private static async Task SaveAsync(string directory, ReplicatedOperation publish, OperationResult publishResult,
-        ReplicatedOperation seed, OperationResult seedResult, ReplicatedOperation operation, ZoneTreeStore store, bool pinned, string cursor)
+    private static async Task SaveAsync(string directory, Command<DatabaseCommand> publish, Result<object> publishResult,
+        Command<DatabaseCommand> seed, Result<object> seedResult, Command<DatabaseCommand> operation, ZoneTreeStore store, bool pinned, string cursor)
     {
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.PublishOperationFile, publish);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.PublishReceiptFile, publishResult);

@@ -34,7 +34,7 @@ internal static class FunctionalGateColdSeed
             var reference = context.Bind(new(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id));
             var insert = FunctionalGateColdProtocol.Insert(context.Partition, index, reference);
             var inserted = await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context, context.Writer, insert, token);
-            await FunctionalGateRelationalAssertions.ReceiptAsync(inserted, insert.CommandId!.Value, context.Partition,
+            await FunctionalGateRelationalAssertions.ReceiptAsync(context, inserted, insert.CommandId!.Value, context.Partition,
                 [new("putDocument", table, FunctionalGateColdProtocol.Id, 1)]);
             var stream = await context.SdkAsync(context.Reader.Sdk.ReadStreamAsync(new(new(context.Partition,
                 FunctionalGateColdProtocol.Resource("events", index), FunctionalGateColdProtocol.Id), Limit: 2), token));

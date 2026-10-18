@@ -20,7 +20,7 @@ internal static class FunctionalGateDropReplay
             {
                 var actual = await FunctionalGateDropCalls.InvokeAsync(context, table.ParentId,
                     table.Request, route, token);
-                await FunctionalGateDropAssertions.ResultAsync(table.ParentId, table.Request, actual);
+                await FunctionalGateDropAssertions.ResultAsync(context, table.ParentId, table.Request, actual);
                 await SqlClusterProtocol.EqualAsync(table.OriginalDrop, actual);
                 await FunctionalGateDropAssertions.FreshAsync(context, state, token);
             }

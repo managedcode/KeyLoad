@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,7 +8,7 @@ namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 internal static class BlobPriorPublicationRefusal
 {
     internal static async Task AssertAsync(DatabaseEngine owner, ZoneTreeStore store, BlobPriorPublicationState seed,
-        ReplicatedOperation delete, ReplicatedOperation reclaim, string[] image, long position)
+        Command<DatabaseCommand> delete, Command<DatabaseCommand> reclaim, string[] image, long position)
     {
         var operations = new BlobStorageOperations(owner);
         await ErrorAsync(() => operations.Metadata("root", new(seed.Blob)));
@@ -17,10 +18,10 @@ internal static class BlobPriorPublicationRefusal
         await Assert.That(OutcomeStoreOracle.Read(store, delete)).IsNull();
         await Assert.That(OutcomeStoreOracle.Read(store, reclaim)).IsNull();
         var replay = owner.ResolveOutcome(seed.Commands[2].Operation);
-        await Assert.That(replay.Error).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(replay.SafeDetail).IsEqualTo("The persisted blob records are inconsistent.");
-        await Assert.That(replay.Json).IsNull();
-        await Assert.That(replay.NativeValue).IsNull();
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(replay.Problem?.Detail).IsEqualTo("The persisted blob records are inconsistent.");
+        
+        await Assert.That(replay.Value).IsNull();
         await BlobPriorPublicationImage.SameAsync(store, image, position, seed.Identity);
         await BlobPriorPublicationAssertions.AuthorityAsync(owner, seed);
     }
@@ -35,9 +36,9 @@ internal static class BlobPriorPublicationRefusal
     internal static async Task InvalidatedAsync(DatabaseEngine owner, BlobPriorPublicationCommand command)
     {
         var result = owner.ResolveOutcome(command.Operation);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(result.SafeDetail).IsEqualTo("The selected upload lifetime is unavailable.");
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The selected upload lifetime is unavailable.");
+        
+        await Assert.That(result.Value).IsNull();
     }
 }

@@ -1,19 +1,8 @@
-using KeyLoad.Core.Features.DocumentStorage;
-
 namespace KeyLoad.Clustering;
 
 /// <summary>Builds the versioned lifetime read envelopes before the original codec signs them.</summary>
 internal static class GrainLifetimeReadCodec
 {
-    internal static string CreateOwnedDocumentReadV2(this GrainRequestCodec codec, Guid requestId,
-        string principalId, OwnedDocumentReadRequestV2 request)
-    {
-        var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestEnvelopeConstruction.MovementRead(context.Database, context.Now, context.Lifetime,
-            requestId, principalId, GrainReadKind.OwnedDocumentV2, DocumentLifetimeReadScope.Purpose,
-            NativeSerialization.Serialize(request), request.Frame.ExpiresAt));
-    }
-
     internal static string CreatePartitionQueryLeafV2(this GrainRequestCodec codec, Guid requestId, string principalId,
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
     {

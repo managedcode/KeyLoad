@@ -48,12 +48,14 @@ internal static class BlobBoundedRetirementPublicTrial
         };
         await SqlClusterProtocol.EqualAsync(tombstone, deleted.Value);
         await Assert.That(deleted.Receipt.CommandId).IsEqualTo(delete.CommandId);
-        await Assert.That(deleted.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(deleted.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(deleted.Receipt.PersistedCopies).IsEqualTo(3);
         var first = new ReclaimBlobRequest(Guid.NewGuid(), blob, old.Begin.UploadId, 1);
         var reclaimed = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReclaimBlobAsync(first, token));
         await SqlClusterProtocol.EqualAsync(new BlobReclaimResult(old.Begin.UploadId, 1, 1, (long)BlobLimits.RawPartBytes, false), reclaimed.Value);
         await Assert.That(reclaimed.Receipt.CommandId).IsEqualTo(first.CommandId);
-        await Assert.That(reclaimed.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(reclaimed.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(reclaimed.Receipt.PersistedCopies).IsEqualTo(3);
         var remaining = old.Written[1].Value with
         {
             Status = BlobUploadStatus.Complete,
@@ -99,6 +101,7 @@ internal static class BlobBoundedRetirementPublicTrial
             ct => callers.Sdk.ReclaimBlobAsync(final, ct), ObserveHealthy, token);
         await BlobBoundedRetirementPublicReplay.PublicationAsync(callers, healthy, ObserveHealthy, token);
         await Assert.That(finished.Receipt.CommandId).IsEqualTo(final.CommandId);
-        await Assert.That(finished.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(finished.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(finished.Receipt.PersistedCopies).IsEqualTo(3);
     }
 }

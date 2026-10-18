@@ -83,7 +83,7 @@ internal sealed class BlobRowAccessValidationTests
         var stateKey = KeySpace.Partition(StateSpace, blob.Partition, blob.Resource, blob.Id,
             uploadId.ToString(GuidFormat));
 
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Read(database, headKey)).IsNull();
         await Assert.That(Read(database, stateKey)).IsNull();
     }

@@ -20,7 +20,7 @@ internal static class SqlNullOrderingClusterAssertions
         var expected = new CommitReceipt(original.CommandId, actual.Token,
             [.. SqlNullOrderingClusterState.Rows.Select(row => new MutationReceipt(PutKind,
                 SqlNullOrderingClusterProtocol.Collection, row.Id, SqlNullOrderingClusterProtocol.SeedRevision))],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         await global::TUnit.Assertions.Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(original.Partition.AtomicPartitionId);
         await global::TUnit.Assertions.Assert.That(actual.Token.Position).IsGreaterThan(default(long));

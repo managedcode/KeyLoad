@@ -14,6 +14,6 @@ internal static class DocumentSessionReadClusterProtocol
     internal const int Zero = 0;
     internal const string WrongIncarnation = "The document session token belongs to another incarnation.";
     internal const string OutOfScope = "The document session token belongs to another atomic partition or placement.";
-    internal const string Future = "The document session token is beyond the current quorum-applied cut.";
+    internal const string Future = "The document session token is beyond the current committed storage cut.";
     internal const string Invalid = "The document session token position must be positive.";
 }

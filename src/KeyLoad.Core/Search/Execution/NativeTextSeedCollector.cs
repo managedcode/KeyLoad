@@ -92,7 +92,7 @@ internal static partial class NativeTextSeedCollector
         }
         RequireOwner(database, view, principalId, pin);
         database.Authorization.Require(principal, partition, pin.Collection, Capability.Query | Capability.DocumentsRead);
-        var resource = database.BindAuthorizedReadResource(view, partition, pin.Collection, ResourceKind.Collection);
+        var resource = DatabaseEngine.BindAuthorizedReadResource(view, partition, pin.Collection, ResourceKind.Collection);
         database.Authorization.RequireFieldUse(principal, resource, pin.Field);
         var head = database.ReadOutboxHead(view, partition);
         DatabaseEngine.RequireNativeTextProjectionHistory(head, consumer.Checkpoint);
@@ -126,7 +126,7 @@ internal static partial class NativeTextSeedCollector
             RequireOwner(database, bounded, principalId, pin);
             if (bounded is KeyLoad.Core.Features.ResourceExecution.IResourceLifetimeReadBindingView)
             {
-                _ = database.BindAuthorizedReadResource(bounded, pin.Consumer.Partition, pin.Collection, ResourceKind.Collection);
+                _ = DatabaseEngine.BindAuthorizedReadResource(bounded, pin.Consumer.Partition, pin.Collection, ResourceKind.Collection);
             }
             budget.Check();
             return true;

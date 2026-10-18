@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -62,7 +63,6 @@ internal static class SubscriptionFilterColdTrial
         await SubscriptionFilterTailFlow.RunAsync(cold, group.Source, token);
     }
 
-    internal static OperationResult Apply<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id, CancellationToken token)
-        => db.ApplyEmbedded(new(id, kind, SubscriptionFilterProtocol.Root, default,
-            JsonSerializer.Serialize(payload, JsonDefaults.Options)), token);
+    internal static Result<object> Apply<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id, CancellationToken token)
+        => db.ApplyEmbedded(db.CreateCommand(kind, id, SubscriptionFilterProtocol.Root, default, JsonSerializer.Serialize(payload, JsonDefaults.Options)), token);
 }

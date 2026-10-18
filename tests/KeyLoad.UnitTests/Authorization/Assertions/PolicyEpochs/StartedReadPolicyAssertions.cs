@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using System.Text;
 using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.ClusterRouting;
@@ -16,10 +17,8 @@ internal static class StartedReadPolicyAssertions
         await Assert.That(reply.Error).IsNull();
         var receipt = ConnectionNativeAssertions.Value<CommitReceipt>(reply);
         var store = scenario.Fixture.Database.Store;
-        var entry = scenario.Fixture.Database.ReadRetainedEntry(command.CommandId);
-        CommitReceipt expected = new(command.CommandId,
-            new(store.Identity.Incarnation, command.Partition.AtomicPartitionId, entry.Index, P.PlacementEpoch),
-            [new(P.Put, ConnectionNativeProtocol.Collection, P.Document, P.Revision)], DurabilityProfile.QuorumProcessDurable);
+        var entry = scenario.Fixture.Database.ReadStoredOutcome(command.CommandId);
+        CommitReceipt expected = new(command.CommandId, new(store.Identity.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(P.Put, ConnectionNativeProtocol.Collection, P.Document, P.Revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(expected, receipt);
         await Assert.That(receipt.Token.Position).IsGreaterThan(P.EmptyPosition);
         await Assert.That(receipt.Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();

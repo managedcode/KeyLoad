@@ -33,8 +33,7 @@ internal static class SqlJoinAliasCollisionCold
                     await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     var owner = database.CreateConfiguredDatabase(reopened);
                     await SqlJoinAliasCollisionFlow.RunAsync(owner, reopened, database.Partition, repaired: true);
-                    var replay = owner.ApplyEmbedded(new(seed.CommandId, OperationKind.Batch, "root", default,
-                        JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
+                    var replay = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, "root", default, JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
                     await Assert.That(JsonDefaults.Serialize(replay)).IsEquivalentTo(JsonDefaults.Serialize(original), global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     await Assert.That(reopened.Position).IsEqualTo(position);

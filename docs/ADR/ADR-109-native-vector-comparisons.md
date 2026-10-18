@@ -46,7 +46,7 @@ parameter warning in OrleansNode; recheck the current snapshot before tests.
 ## Boundaries, rollout and risks
 
 This changes benchmark adapters, report/configuration contracts and publication,
-not KeyLoad product storage or majority-acknowledged authority. Reuse central package pins and
+not KeyLoad product storage or required-copy acknowledgementnowledged authority. Reuse central package pins and
 Aspire resources. Native external APIs are researched from official source;
 unqualified/unsupported community topologies carry an explicit unavailable
 receipt. SurrealDB experimental TiKV clustering must not be advertised as a

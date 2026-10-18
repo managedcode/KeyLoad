@@ -36,10 +36,10 @@ internal sealed class DocumentRowTenantMutationAuthorizationTests
             new DeleteDocument(Collection, "alice-row", FirstRevision));
         var forgedOwner = DocumentCrudFixture.Submit(database, OwnerPrincipal,
             new PutDocument(Collection, "forged-owner", EmptyObject, 0, new(OwnerBob)));
-        await Assert.That(deniedPatch.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(deniedReplacement.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(deniedDelete.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(forgedOwner.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedPatch.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedReplacement.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedDelete.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(forgedOwner.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)).IsEqualTo(original);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, "forged-owner"))).IsNull();
@@ -56,11 +56,11 @@ internal sealed class DocumentRowTenantMutationAuthorizationTests
 
         var ownerPatch = DocumentCrudFixture.Submit(database, OwnerPrincipal,
             new PatchDocument(Collection, "alice-row", [new("/value", PatchKind.Set, "1")], FirstRevision));
-        await Assert.That(ownerPatch.Error).IsNull();
+        await Assert.That(Errors.Code(ownerPatch.Problem)).IsNull();
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)!.Revision).IsEqualTo(SecondRevision);
         var ownerDelete = DocumentCrudFixture.Submit(database, OwnerPrincipal,
             new DeleteDocument(Collection, "alice-row", SecondRevision));
-        await Assert.That(ownerDelete.Error).IsNull();
+        await Assert.That(Errors.Code(ownerDelete.Problem)).IsNull();
         var tombstone = DocumentCrudFixture.ReadRecord(database, reference)!;
         await Assert.That(tombstone.Revision).IsEqualTo(ThirdRevision);
         await Assert.That(tombstone.Deleted).IsTrue();

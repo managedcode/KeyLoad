@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -58,8 +59,8 @@ internal static class SubscriptionCheckpointAuthorityFlow
 
     private static async Task ContinueAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
         SubscriptionRef group, SubscriptionDeliveryCommand second, SubscriptionDeliveryCommand first,
-        OperationResult firstResult, SubscriptionDeliveryCommand third, OperationResult thirdResult,
-        ReceiveSubscriptionRequest request, OperationResult original, byte[] saved, byte[] key,
+        Result<object> firstResult, SubscriptionDeliveryCommand third, Result<object> thirdResult,
+        ReceiveSubscriptionRequest request, Result<object> original, byte[] saved, byte[] key,
         byte[] identity, string[] source, CancellationToken token)
     {
         store.Commit((tx, _) => { tx.Put(key, saved); return true; });
@@ -116,7 +117,7 @@ internal static class SubscriptionCheckpointAuthorityFlow
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, request, result, token);
     }
 
-    internal static OperationResult Apply<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id, CancellationToken token)
+    internal static Result<object> Apply<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id, CancellationToken token)
         => SubscriptionFilterColdTrial.Apply(db, kind, payload, id, token);
 
     internal static byte[] WindowKey(SubscriptionRef group, long? position)

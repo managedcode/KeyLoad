@@ -11,7 +11,7 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.CommitReceipt)]
 public sealed record CommitReceipt([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] CommitToken Token, [property: Orleans.Id(2)] ImmutableArray<MutationReceipt> Mutations, [property: Orleans.Id(3)] DurabilityProfile Durability,
-    [property: Orleans.Id(4)] int PersistedCopies = CommitReceipt.LocalCopyCount)
+    [property: Orleans.Id(4)] int PersistedCopies)
 {
     internal const int LocalCopyCount = 1;
 }

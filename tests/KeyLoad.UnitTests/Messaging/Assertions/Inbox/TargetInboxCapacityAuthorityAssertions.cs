@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -18,7 +19,7 @@ internal static class TargetInboxCapacityAuthorityAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        OperationResult? result = null;
+        Result<object>? result = null;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             result = TargetInboxNativeSetup.Apply(database, request, token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -30,7 +31,7 @@ internal static class TargetInboxCapacityAuthorityAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, CommitInboxRequest request,
-        OperationResult expected, CancellationToken token)
+        Result<object> expected, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;

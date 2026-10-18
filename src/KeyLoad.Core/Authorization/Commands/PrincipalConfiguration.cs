@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -11,7 +13,7 @@ public sealed partial class DatabaseEngine
     private const string CredentialSha256RequiredMessage = "An API key requires a SHA-256 verifier.";
     private const string InvalidConfiguredCredentialVerifierMessage = "The credential verifier is invalid.";
 
-    private static OperationResult ExecuteConfigurePrincipal(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private static Result<object> ExecuteConfigurePrincipal(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var principal = Payload<ConfigurePrincipalRequest>(operation).Principal;
         global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireMutablePrincipal(principal.Id);
@@ -31,7 +33,7 @@ public sealed partial class DatabaseEngine
         return Result(principal);
     }
 
-    private OperationResult ExecuteConfigureApiKey(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private Result<object> ExecuteConfigureApiKey(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var credential = Payload<ConfigureApiKeyRequest>(operation).ApiKey;
         global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequirePublicCredential(credential.PrincipalId);
@@ -40,7 +42,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, CredentialSha256RequiredMessage);
         }
         JsonData.Identifier(credential.Id);
-        Principal(transaction, credential.PrincipalId, operation.EvaluatedAt);
+        Principal(transaction, credential.PrincipalId, operation.Timestamp);
         if (credential.Verifier.Length != CredentialVerifierCharacters || !credential.Verifier.All(Uri.IsHexDigit))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidConfiguredCredentialVerifierMessage);

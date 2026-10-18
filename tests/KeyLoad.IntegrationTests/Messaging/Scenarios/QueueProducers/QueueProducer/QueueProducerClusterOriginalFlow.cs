@@ -22,7 +22,8 @@ internal static class QueueProducerClusterOriginalFlow
         {
             var receipt = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
                 McpCallerTools.DocumentsCommit, seed.Original, token))).Value;
-            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+            await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
             await Assert.That(receipt.CommandId).IsEqualTo(seed.Original.CommandId);
             await Assert.That(receipt.Mutations.Length).IsEqualTo(QueueProducerClusterProtocol.OriginalMutationCount);
             if (returned is not null)

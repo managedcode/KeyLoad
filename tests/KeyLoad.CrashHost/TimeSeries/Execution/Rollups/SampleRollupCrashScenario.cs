@@ -46,7 +46,7 @@ internal static class SampleRollupCrashScenario
         await SampleRollupCrashState.WriteAsync(directory, SampleRollupCrashContract.BeforeFile, database);
         var request = new CommandRequest(SampleRollupCrashContract.InflightId, SampleRollupCrashContract.Partition,
             [SampleRollupCrashOperations.Inflight(drop)]);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, request, SampleRollupCrashContract.InflightId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SampleRollupCrashContract.InflightId);
         await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.OperationFile), NativeSerialization.Serialize(operation));
         boundary.Position = checked(database.Store.Position + SampleRollupCrashContract.PositionStep);
         boundary.Armed = true;

@@ -31,10 +31,9 @@ internal sealed record EventProjectionClusterScenario(PartitionRef Partition, St
     internal const string Secret = "projection-source-private-canary";
     internal const string EventId = "source-event-1";
     internal const string EventType = "SourceDocumentUpdated";
-    internal const string FailureScenario = "event-projection-lineage-leader-loss";
+    internal const string FailureScenario = "event-projection-lineage-silo-restart";
     internal const string RestartFailureKey = "eventProjectionRestartFailure";
     internal const string DiagnosticsFailureKey = "eventProjectionDiagnosticsFailure";
-    internal const string MissingLeader = "The CLUSTER cluster did not advertise a leader.";
     internal const int Revision = 1;
     internal const long Generation = 1;
     internal const int NodeCount = 3;

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
@@ -64,7 +65,7 @@ internal static class ScalarIndexCrashOperations
                 ScalarIndexCrashContract.ConflictJson, EmptyRevision),
             new PatchDocument(ScalarIndexCrashContract.Collection, ScalarIndexCrashContract.SecondId,
                 [new(ScalarIndexCrashContract.LabelPath, PatchKind.Set, JsonSerializer.Serialize(ScalarIndexCrashContract.ValueDelta))], SecondRevision));
-        if (result.Error != ErrorCode.Conflict)
+        if (Errors.Code(result.Problem) != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(ConflictOutcomeMessage);
         }
@@ -159,10 +160,10 @@ internal static class ScalarIndexCrashOperations
         => database.Store.Read(view => view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(
             new EntityRef(partition, ScalarIndexCrashContract.Collection, id))));
 
-    private static OperationResult Submit(DatabaseEngine database, string commandId, params Mutation[] mutations)
+    private static Result<object> Submit(DatabaseEngine database, string commandId, params Mutation[] mutations)
         => Apply(database, ScalarIndexCrashContract.Partition, commandId, mutations);
 
-    private static OperationResult Apply(DatabaseEngine database, PartitionRef partition, string commandId,
+    private static Result<object> Apply(DatabaseEngine database, PartitionRef partition, string commandId,
         params Mutation[] mutations)
     {
         var id = Guid.Parse(commandId);

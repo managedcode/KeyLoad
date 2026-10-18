@@ -63,8 +63,7 @@ internal sealed class ConfiguredVectorProfileTests
         await ConfiguredVectorProfileFlow.HealthyAsync(owner, database.Partition, token);
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(reopened.Position).IsEqualTo(position);
-        var restoredReceipt = owner.ApplyEmbedded(new(healthy.CommandId, OperationKind.Batch, Root, default,
-            JsonSerializer.Serialize(healthy, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
+        var restoredReceipt = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, healthy.CommandId, Root, default, JsonSerializer.Serialize(healthy, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
         await Assert.That(NativeSerialization.Serialize(restoredReceipt).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(reopened.Position).IsEqualTo(position);
@@ -83,8 +82,8 @@ internal sealed class ConfiguredVectorProfileTests
             {
                 VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space with { Model = ChangedModel })]
             }));
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(rejected.SafeDetail).IsEqualTo(UnsupportedDefinition);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(rejected.Problem?.Detail).IsEqualTo(UnsupportedDefinition);
         var restored = database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))!;
         await Assert.That(NativeSerialization.Serialize(restored).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);
@@ -102,9 +101,9 @@ internal sealed class ConfiguredVectorProfileTests
         var command = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: true);
         var model = ConfiguredVectorProfileFlow.ModelBytes(database, command, Reader);
         var error = database.Submit(OperationKind.Batch, command, principal: Reader, id: command.CommandId);
-        await Assert.That(error.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(error.SafeDetail).IsEqualTo(Denied);
-        await Assert.That(error.Json).IsNull();
+        await Assert.That(Errors.Code(error.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(error.Problem?.Detail).IsEqualTo(Denied);
+        
         await Assert.That(ConfiguredVectorProfileFlow.ModelBytes(database, command, Reader)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);
         database.Submit(OperationKind.Batch, healthy, id: healthy.CommandId).Get<CommitReceipt>();

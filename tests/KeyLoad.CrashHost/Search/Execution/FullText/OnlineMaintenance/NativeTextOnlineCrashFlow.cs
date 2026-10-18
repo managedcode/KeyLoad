@@ -55,9 +55,8 @@ internal static class NativeTextOnlineCrashFlow
             var original = await work.AdmitOriginal(async () =>
             {
                 _ = await runtime.Canonical.CommitAsync<ProjectionBatchResult>(OperationKind.CommitProjectionBatch, intent, id, token);
-                return runtime.Canonical.Database.ResolveOutcome(runtime.Canonical.Database.NormalizeOperation(
-                    new(id, OperationKind.CommitProjectionBatch, CrashFixtureValues.Principal,
-                        runtime.Canonical.Database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(intent, JsonDefaults.Options))));
+                return runtime.Canonical.Database.ResolveOutcome(runtime.Canonical.Database.OwnCommand(
+                    runtime.Canonical.Database.CreateCommand(OperationKind.CommitProjectionBatch, id, CrashFixtureValues.Principal, runtime.Canonical.Database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(intent, JsonDefaults.Options))));
             });
             state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.SettleCheckpoint,
                 expiry, token, receipt: original.Get<ProjectionBatchResult>());

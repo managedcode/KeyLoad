@@ -38,7 +38,7 @@ flowchart LR
 | Feature | Contract |
 |---|---|
 | [ClusterRouting](Features/ClusterRouting.md) | Orleans does all clustering: one grain per connection, partition grains, calls to the silo-local ZoneTree owner on any node, stateless workers for background work |
-| [ClusterReplication](Features/ClusterReplication.md) | Copies through Orleans Grain Service calls to `ReplicaCount` silos found through native membership, majority acknowledgement, catch-up through Orleans |
+| [ClusterReplication](Features/ClusterReplication.md) | Copies through Orleans Grain Service calls to `ReplicaCount` silos found through native membership, acknowledgement from every configured copy, catch-up through Orleans |
 | [StorageRecovery](Features/StorageRecovery.md) | The silo-local ZoneTree owner: stores, journals, locks, ordered apply, read lifetimes and process recovery |
 | [BackupRestore](Features/BackupRestore.md) | Verified backup of a node's ZoneTree files and clean-target restore |
 | [InternalSerialization](Features/InternalSerialization.md) | Generated Orleans serialization and the current internal binary formats |

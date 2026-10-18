@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -5,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private ReplicatedOperation RequireRemoteTransferRepairOriginal(IKeyValueView view, PrincipalRecord principal,
+    private Command<DatabaseCommand> RequireRemoteTransferRepairOriginal(IKeyValueView view, PrincipalRecord principal,
         RemoteTransferCoordinationReadRequest request, RemoteTransferIntentClaims intent)
     {
         var stage = request.RepairStage ?? throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid);
@@ -22,7 +23,7 @@ public sealed partial class DatabaseEngine
             ? new AcceptQueueTransfer(intent.Destination, request.IntentToken)
             : new CompleteQueueTransfer(intent.Source, intent.TransferId, request.ReceiptToken!);
         var command = new CommandRequest(request.AcceptCommandId, partition, [mutation]);
-        var original = CreateNativeOperation(OperationKind.Batch, command.CommandId, principal.Id,
+        var original = CreateCommand(OperationKind.Batch, command.CommandId, principal.Id,
             Clock.GetUtcNow(), NativeSerialization.Serialize(command));
         _ = AuthorizeOperation(view, principal, original);
         if (stage == QueueTransferRepairStage.Complete)

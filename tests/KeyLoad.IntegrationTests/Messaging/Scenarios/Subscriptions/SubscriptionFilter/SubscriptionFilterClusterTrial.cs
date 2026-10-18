@@ -18,7 +18,7 @@ internal static class SubscriptionFilterClusterTrial
                 var seed = await SubscriptionFilterClusterSetup.CreateAsync(fixture, deadline.Token);
                 var original = await SubscriptionFilterClusterOriginalFlow.RunAsync(fixture, seed, deadline.Token);
                 var independent = await SubscriptionIndependentCheckpointR52Flow.StartAsync(fixture, seed, deadline.Token);
-                await SubscriptionGroupLeaderFailoverFlow.RunAsync(fixture, independent, deadline.Token);
+                await SubscriptionGroupSiloRestartFlow.RunAsync(fixture, independent, deadline.Token);
                 await SubscriptionFilterClusterCold.RestartAsync(fixture, deadline.Token);
                 var updated = await SubscriptionFilterClusterUpdate.RunAsync(fixture, original, deadline.Token);
                 await SubscriptionIndependentCheckpointR52Flow.FirstColdAsync(fixture, independent, deadline.Token);

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Globalization;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -82,7 +83,7 @@ internal sealed class RecurringOccurrenceTests
         return fixture.Apply(OperationKind.Batch, command, id: idempotency, time: now).Get<CommitReceipt>();
     }
 
-    private static OperationResult EmitInvalidMaximum(RecurringSagaDatabase fixture, Guid id, int maximum)
+    private static Result<object> EmitInvalidMaximum(RecurringSagaDatabase fixture, Guid id, int maximum)
         => fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new EmitRecurringOccurrences(fixture.Queue, id, 1, maximum)]));
 

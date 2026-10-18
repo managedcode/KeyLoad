@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
@@ -46,16 +48,16 @@ internal sealed class Bm25ConfiguredQuotaFlow(TestDatabase database)
         }
     }
 
-    internal ReplicatedOperation Capture(int index, Guid? expected = null, string text = Text)
+    internal Command<DatabaseCommand> Capture(int index, Guid? expected = null, string text = Text)
         => Bm25CorpusCapture.Create(database.Database, "root", Subject(index),
             new(database.Partition, Collection, "/text", text), Guid.NewGuid(), expected,
             database.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
             database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
-    internal static Bm25CorpusPublicationPhaseCommand Phase(ReplicatedOperation operation)
-        => NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(operation);
+    internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)
+        => NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
 
-    internal OperationResult Publish(ReplicatedOperation operation) => database.SubmitIssued(operation);
+    internal Result<object> Publish(Command<DatabaseCommand> operation) => database.SubmitIssued(operation);
 
     internal static string Subject(int index) => "bm25-quota-subject-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

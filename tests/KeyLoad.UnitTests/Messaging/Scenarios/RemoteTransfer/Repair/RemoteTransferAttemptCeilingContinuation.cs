@@ -1,16 +1,17 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class RemoteTransferAttemptCeilingContinuation
 {
     internal static async Task RunAsync(RemoteTransferDatabase fixture, CreateQueueTransfer transfer,
-        QueueTransferInspection original, CommandRequest firstAccept, OperationResult failed, byte[] bytes,
+        QueueTransferInspection original, CommandRequest firstAccept, Result<object> failed, byte[] bytes,
         CommandRequest advance)
     {
         var state = RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId);
         var refused = fixture.Apply(OperationKind.Batch, advance);
-        await Assert.That(refused.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(refused.Json).IsNull();
-        await Assert.That(refused.NativeValue).IsNull();
+        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        
+        await Assert.That(refused.Value).IsNull();
         var refusedBytes = RemoteTransferAttemptColdNative.Outcome(fixture, advance.CommandId, fixture.SourcePartition);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId), state);
         await RemoteTransferAttemptColdNative.AccountingAsync(fixture, transfer.TransferId, RemoteTransferAttemptColdProtocol.FirstGeneration);

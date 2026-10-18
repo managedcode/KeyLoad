@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
@@ -31,8 +33,8 @@ internal sealed class NativeJournalPrincipalAuthorizationTests
         var administratorResult = Apply(database.Database, OperationKind.RuntimeJournal,
             NativeJournalAuthorityTestBootstrap.CreateMutation(), RootPrincipalId);
 
-        await Assert.That(ordinaryResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(administratorResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(ordinaryResult.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(administratorResult.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         var catalog = database.Database.ReadRuntimeJournalCatalog(RuntimeJournalIdentity.ProtectedPrincipalId);
         await Assert.That(catalog.Journals).IsEmpty();
     }
@@ -65,9 +67,9 @@ internal sealed class NativeJournalPrincipalAuthorizationTests
             new ConfigureApiKeyRequest(new ApiKeyRecord(ForbiddenCredentialId, RootPrincipalId, ValidVerifier)),
             RuntimeJournalIdentity.ProtectedPrincipalId);
 
-        await Assert.That(batchResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(principalResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(credentialResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(batchResult.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(principalResult.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(credentialResult.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         var document = database.Database.Store.Read(view => view.GetRecord<DocumentRecord>(KeySpace.Partition(
             DocumentStorageSpace, database.Partition, CollectionName, ProtectedDocumentId)));
         var unchangedPrincipal = database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(
@@ -91,11 +93,11 @@ internal sealed class NativeJournalPrincipalAuthorizationTests
                 Revoked = true,
                 PolicyEpoch = root.PolicyEpoch + 1
             }), RootPrincipalId, 1);
-        await Assert.That(revokeResult.Error).IsNull();
+        await Assert.That(Errors.Code(revokeResult.Problem)).IsNull();
 
         var journalResult = Apply(database.Database, OperationKind.RuntimeJournal,
             NativeJournalAuthorityTestBootstrap.CreateMutation(), RuntimeJournalIdentity.ProtectedPrincipalId, 2);
-        await Assert.That(journalResult.Error).IsNull();
+        await Assert.That(Errors.Code(journalResult.Problem)).IsNull();
         await Assert.That(journalResult.Get<RuntimeJournalMutationResult>().Applied).IsTrue();
 
         var catalog = database.Database.ReadRuntimeJournalCatalog(RuntimeJournalIdentity.ProtectedPrincipalId);
@@ -107,8 +109,7 @@ internal sealed class NativeJournalPrincipalAuthorizationTests
         await Assert.That(revokedRoot!.Revoked).IsTrue();
     }
 
-    private static OperationResult Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
+    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
         long replicationIndex = 0)
-        => database.Apply(new ReplicatedOperation(Guid.NewGuid(), kind, principalId, OperationTime,
-            JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
+        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
 }

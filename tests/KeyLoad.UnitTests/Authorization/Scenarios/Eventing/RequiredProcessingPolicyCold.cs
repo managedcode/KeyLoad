@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.GraphTraversal;
@@ -7,9 +8,9 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class RequiredProcessingPolicyCold
 {
     internal static async Task RunAsync(RequiredProcessingPolicyFixture fixture,
-        (ReplicatedOperation Operation, byte[] Outcome) refused,
-        (ReplicatedOperation Operation, CommitReceipt Receipt, byte[] Outcome) original,
-        (ReplicatedOperation Operation, CommitReceipt Receipt, byte[] Outcome) healthy, CancellationToken token)
+        (Command<DatabaseCommand> Operation, byte[] Outcome) refused,
+        (Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome) original,
+        (Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome) healthy, CancellationToken token)
     {
         var db = fixture.Harness;
         var image = GraphShortestPathFullStoreImage.Bytes(db.Store);

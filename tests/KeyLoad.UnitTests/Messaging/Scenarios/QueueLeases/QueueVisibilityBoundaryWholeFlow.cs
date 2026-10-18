@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -15,7 +17,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
     {
         token.ThrowIfCancellationRequested();
         var lane = new QueueLaneRef(fixture.Partition, Queue);
-        var outcomes = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        var outcomes = new List<(Command<DatabaseCommand> Operation, Result<object> Result)>();
         var originalRow = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition("message-meta",
             fixture.Partition, Queue, "input"))) ?? throw new InvalidOperationException("The original terminal input is absent.");
         var (original, originalBody) = await BeginAsync(fixture.Database, fixture.Store, lane, start, outcomes);
@@ -47,7 +49,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
     }
 
     private static async Task<(Delivery Delivery, byte[] Body)> BeginAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane,
-        DateTimeOffset start, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes)
+        DateTimeOffset start, List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes)
     {
         Batch(owner, lane, start, outcomes, new EnqueueMessage(Queue, Message, "{}")).Get<CommitReceipt>();
         var originalBody = store.Read(view => view.ReadOwnedValue(KeySpace.Partition("message-body", lane.Partition, Queue, Message)))
@@ -78,7 +80,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
     }
 
     private static async Task FinishAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane,
-        Delivery original, DateTimeOffset boundary, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes,
+        Delivery original, DateTimeOffset boundary, List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes,
         byte[] originalRow, byte[] originalBody)
     {
         var current = await ReceiveAsync(owner, store, lane, boundary, outcomes, Message, seconds: 10, attempt: 2, version: 2);
@@ -101,7 +103,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
     }
 
     private static async Task SecondColdAsync(TestDatabase fixture, QueueLaneRef lane,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, (long Position, byte[] Identity, string[] Bytes) cut,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, (long Position, byte[] Identity, string[] Bytes) cut,
         byte[] originalRow)
     {
         var failures = new List<Exception>();
@@ -125,31 +127,31 @@ internal static class QueueVisibilityBoundaryWholeFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static OperationResult Submit<T>(DatabaseEngine owner, OperationKind kind, T payload,
-        Guid id, DateTimeOffset time, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes)
+    internal static Result<object> Submit<T>(DatabaseEngine owner, OperationKind kind, T payload,
+        Guid id, DateTimeOffset time, List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes)
     {
-        var operation = new ReplicatedOperation(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        var operation = owner.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
         var result = owner.Apply(operation);
         outcomes.Add((operation, result));
         return result;
     }
 
-    private static OperationResult Batch(DatabaseEngine owner, QueueLaneRef lane, DateTimeOffset time,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, Mutation mutation)
+    private static Result<object> Batch(DatabaseEngine owner, QueueLaneRef lane, DateTimeOffset time,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, Mutation mutation)
     {
         var id = Guid.NewGuid();
         return Submit(owner, OperationKind.Batch, new CommandRequest(id, lane.Partition, [mutation]), id, time, outcomes);
     }
 
     private static ReceiveResult Receive(DatabaseEngine owner, QueueLaneRef lane, DateTimeOffset time,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, int seconds)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, int seconds)
     {
         var id = Guid.NewGuid();
         return Submit(owner, OperationKind.Receive, new ReceiveRequest(id, lane, LeaseSeconds: seconds), id, time, outcomes).Get<ReceiveResult>();
     }
 
     private static async Task<Delivery> ReceiveAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane, DateTimeOffset time,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, string id, int seconds,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, string id, int seconds,
         int attempt = 1, int version = 1)
     {
         var delivery = await Assert.That(Receive(owner, lane, time, outcomes, seconds).Deliveries).HasSingleItem();
@@ -167,8 +169,8 @@ internal static class QueueVisibilityBoundaryWholeFlow
         return delivery;
     }
 
-    private static OperationResult Complete(DatabaseEngine owner, QueueLaneRef lane, Delivery delivery, DateTimeOffset time,
-        List<(ReplicatedOperation Operation, OperationResult Result)> outcomes, DeliveryAction action, int? seconds = null)
+    private static Result<object> Complete(DatabaseEngine owner, QueueLaneRef lane, Delivery delivery, DateTimeOffset time,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes, DeliveryAction action, int? seconds = null)
     {
         var id = Guid.NewGuid();
         return Submit(owner, OperationKind.Delivery, new DeliveryCommand(id, lane, delivery.Token, action, seconds),

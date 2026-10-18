@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -40,7 +41,7 @@ internal static class ResourceIncarnationFlow
         await ResourceIncarnationCold.RunAsync(fixture, state, token);
     }
 
-    private static async Task PrincipalCreationAsync(TestDatabase first, ReplicatedOperation original,
+    private static async Task PrincipalCreationAsync(TestDatabase first, Command<DatabaseCommand> original,
         ResourceDefinition definition, CancellationToken token)
         => await ResourceIncarnationOwner.RunAsync(async second =>
         {
@@ -51,8 +52,7 @@ internal static class ResourceIncarnationFlow
                 ClusterAdministrator = true
             };
             second.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
-            var independent = new ReplicatedOperation(original.Id, original.Kind, principal.Id,
-                second.Database.EvaluationClock.GetUtcNow(), original.PayloadJson);
+            var independent = second.Database.CreateCommand(original.Value!.Kind, original.CommandId, principal.Id, second.Database.EvaluationClock.GetUtcNow(), original.PayloadJson);
             await ResourceIncarnationAssertions.EqualAsync(definition, second.Database.ApplyEmbedded(independent, token).Get<ResourceDefinition>());
             var left = ResourceIncarnationAssertions.Lifetime(first.Store, first.Partition);
             var right = ResourceIncarnationAssertions.Lifetime(second.Store, second.Partition);
@@ -61,15 +61,14 @@ internal static class ResourceIncarnationFlow
             await ResourceIncarnationAssertions.WriteAsync(second.Database, second.Partition, 1);
         });
 
-    private static async Task AgreementAsync(TestDatabase originalOwner, ReplicatedOperation original,
+    private static async Task AgreementAsync(TestDatabase originalOwner, Command<DatabaseCommand> original,
         ResourceDefinition definition, CancellationToken token)
         => await ResourceIncarnationOwner.RunAsync(async replica =>
         {
             token.ThrowIfCancellationRequested();
             await Assert.That(replica.Store.Identity.NodeId).IsNotEqualTo(originalOwner.Store.Identity.NodeId);
             // Native authority is issued locally from the same original public envelope, not borrowed from another owner.
-            var local = new ReplicatedOperation(original.Id, original.Kind, original.PrincipalId,
-                replica.Database.EvaluationClock.GetUtcNow(), original.PayloadJson);
+            var local = replica.Database.CreateCommand(original.Value!.Kind, original.CommandId, original.UserId!, replica.Database.EvaluationClock.GetUtcNow(), original.PayloadJson);
             await ResourceIncarnationAssertions.EqualAsync(definition, replica.Database.ApplyEmbedded(local, token).Get<ResourceDefinition>());
             await Assert.That(ResourceIncarnationAssertions.Bytes(replica.Store, ResourceIncarnationLiteral.LifetimeKey(replica.Partition)))
                 .IsEquivalentTo(ResourceIncarnationAssertions.Bytes(originalOwner.Store, ResourceIncarnationLiteral.LifetimeKey(originalOwner.Partition)),

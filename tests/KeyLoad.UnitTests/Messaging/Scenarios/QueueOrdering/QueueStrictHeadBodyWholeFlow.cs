@@ -61,8 +61,7 @@ internal static class QueueStrictHeadBodyWholeFlow
             literal.OrderingKey, JsonData.Fingerprint(literal));
         await Assert.That(row.SequenceEqual(NativeSerialization.Serialize(expectedBody))).IsTrue();
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1, LeaseSeconds: 30);
-        var operation = fixture.Database.NormalizeOperation(new(request.RequestId, OperationKind.Receive, state.Principal,
-            state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        var operation = fixture.Database.OwnCommand(fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId, state.Principal, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         operation = fixture.Database.PrepareQueueRetryOperation(operation);
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         QueueLifecycleConditionOperations.Restore(fixture.Store, key,

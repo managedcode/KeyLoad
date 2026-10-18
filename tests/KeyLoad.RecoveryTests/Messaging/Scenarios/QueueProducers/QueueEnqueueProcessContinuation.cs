@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage;
@@ -9,7 +11,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 internal static class QueueEnqueueProcessContinuation
 {
     internal static async Task RunAsync(string root, DatabaseEngine owner, ZoneTreeStore store,
-        ReplicatedOperation original, OperationResult originalResult, CommandRequest command, CancellationToken token)
+        Command<DatabaseCommand> original, Result<object> originalResult, CommandRequest command, CancellationToken token)
     {
         var delivery = await ClaimAckAsync(owner, store, QueueEnqueueCrashProtocol.Ready,
             QueueEnqueueCrashProtocol.Payload, QueueEnqueueCrashProtocol.First, token);
@@ -17,7 +19,7 @@ internal static class QueueEnqueueProcessContinuation
         var message = new EnqueueMessage(QueueEnqueueCrashProtocol.Queue, QueueEnqueueCrashProtocol.Healthy,
             QueueEnqueueCrashProtocol.HealthyPayload, QueueEnqueueCrashProtocol.Headers);
         var healthy = new CommandRequest(Guid.NewGuid(), command.Partition, [message]);
-        var operation = owner.NormalizeOperation(CrashDatabase.Operation(OperationKind.Batch, healthy, healthy.CommandId));
+        var operation = owner.OwnCommand(CrashDatabase.Operation(owner, OperationKind.Batch, healthy, healthy.CommandId));
         var target = QueueEnqueueProcessAssertions.Next(owner, store);
         var result = owner.Apply(operation);
         await QueueEnqueueProcessAssertions.ReceiptAsync(result, healthy, target);
@@ -44,22 +46,21 @@ internal static class QueueEnqueueProcessContinuation
         string id, string payload, long sequence, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), QueueEnqueueCrashProtocol.Lane, MaxMessages: QueueEnqueueCrashProtocol.First, LeaseSeconds: QueueEnqueueCrashProtocol.LeaseSeconds);
-        var claim = owner.NormalizeOperation(CrashDatabase.Operation(OperationKind.Receive, request, request.RequestId));
+        var claim = owner.OwnCommand(CrashDatabase.Operation(owner, OperationKind.Receive, request, request.RequestId));
         var expected = QueueEnqueueProcessAssertions.Next(owner, store);
         var result = owner.Apply(claim);
         var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await QueueEnqueueProcessValueAssertions.EqualAsync(result.Get<ReceiveResult>(), new ReceiveResult(request.RequestId,
-            [new(id, payload, QueueEnqueueCrashProtocol.Headers, delivery.Token, QueueEnqueueCrashProtocol.First, claim.EvaluatedAt.AddSeconds(QueueEnqueueCrashProtocol.LeaseSeconds), QueueEnqueueCrashProtocol.First, QueueEnqueueCrashProtocol.First)], expected));
+            [new(id, payload, QueueEnqueueCrashProtocol.Headers, delivery.Token, QueueEnqueueCrashProtocol.First, new DateTimeOffset(claim.Timestamp).AddSeconds(QueueEnqueueCrashProtocol.LeaseSeconds), QueueEnqueueCrashProtocol.First, QueueEnqueueCrashProtocol.First)], expected));
         await Assert.That(delivery.Token).IsNotEqualTo(string.Empty);
         await QueueEnqueueProcessValueAssertions.EqualAsync(owner.Verify<DeliveryClaims>(delivery.Token),
             new DeliveryClaims(QueueEnqueueCrashProtocol.Lane, id, CrashFixtureValues.Principal, QueueEnqueueCrashProtocol.First, QueueEnqueueCrashProtocol.First, expected.Incarnation));
         await QueueClaimAckRecovery.ReplayAsync(owner, store, claim, result, token);
         var ack = new DeliveryCommand(Guid.NewGuid(), request.Lane, delivery.Token, DeliveryAction.Ack);
-        var completion = owner.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, ack, ack.CommandId));
+        var completion = owner.OwnCommand(CrashDatabase.Operation(owner, OperationKind.Delivery, ack, ack.CommandId));
         var target = QueueEnqueueProcessAssertions.Next(owner, store);
         var receipt = owner.Apply(completion);
-        await QueueEnqueueProcessValueAssertions.EqualAsync(receipt.Get<CommitReceipt>(), new CommitReceipt(ack.CommandId,
-            target, [new(nameof(DeliveryAction.Ack), request.Lane.Queue, id, QueueEnqueueCrashProtocol.Settled)], DurabilityProfile.ProcessDurable));
+        await QueueEnqueueProcessValueAssertions.EqualAsync(receipt.Get<CommitReceipt>(), new CommitReceipt(ack.CommandId, target, [new(nameof(DeliveryAction.Ack), request.Lane.Queue, id, QueueEnqueueCrashProtocol.Settled)], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(owner.InspectMessage(CrashFixtureValues.Principal, request.Lane, id))
             .IsEqualTo(new MessageInspection(new(id, MessageState.Acked, QueueEnqueueCrashProtocol.First, QueueEnqueueCrashProtocol.Settled, sequence, null, null, LeaseVersion: QueueEnqueueCrashProtocol.First), null, null));
         await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.Partition(QueueEnqueueCrashProtocol.BodyFamily, request.Lane.Partition, request.Lane.Queue, id)))).IsNull();

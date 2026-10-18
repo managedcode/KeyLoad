@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -8,16 +9,16 @@ internal static class SafeProjectorOperationHistoryImages
     private const string Missing = "The original safe projector history bytes are absent.";
     private const string Unsupported = "The safe projector history contains an unsupported original operation.";
 
-    internal static SafeProjectorOperationOutcomeImage Capture(SafeProjectorOperationDatabase owner, ReplicatedOperation operation)
+    internal static SafeProjectorOperationOutcomeImage Capture(SafeProjectorOperationDatabase owner, Command<DatabaseCommand> operation)
     {
         var global = Global(operation);
-        var key = global ? KeySpace.GlobalOutcome(operation.PrincipalId, operation.Id)
-            : KeySpace.PartitionOutcome(owner.Source.Partition, operation.PrincipalId, operation.Id);
+        var key = global ? KeySpace.GlobalOutcome(operation.UserId!, operation.CommandId)
+            : KeySpace.PartitionOutcome(owner.Source.Partition, operation.UserId!, operation.CommandId);
         return owner.Store.Read(view =>
         {
             var outcome = view.ReadOwnedValue(key) ?? throw new InvalidOperationException(Missing);
             var locator = view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
-                owner.Source.Partition, operation.PrincipalId, operation.Id));
+                owner.Source.Partition, operation.UserId!, operation.CommandId));
             var validLocator = global ? locator is null : locator is not null && locator.AsSpan().SequenceEqual(key);
             if (!validLocator)
             {
@@ -36,7 +37,7 @@ internal static class SafeProjectorOperationHistoryImages
             : expectedLocator is not null && actual.Locator.AsSpan().SequenceEqual(expectedLocator)).IsTrue();
     }
 
-    private static bool Global(ReplicatedOperation operation) => operation.Kind switch
+    private static bool Global(Command<DatabaseCommand> operation) => operation.Value!.Kind switch
     {
         OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal => true,
         OperationKind.Batch => false,

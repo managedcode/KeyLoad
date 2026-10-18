@@ -39,7 +39,7 @@ internal sealed class NativeComparisonDiagnosticProjectionTests
     }
 
     [Test]
-    public async Task RedisConfiguredProjectionCapKeepsNativeWhitelistAndExactFallback()
+    public async Task RedisConfiguredProjectionCapKeepsNativeWhitelistAndExactOverflowResult()
     {
         var primary = new DnsEndPoint("primary.dev.internal", 6379);
         var replica = new DnsEndPoint("replica1", 6379);

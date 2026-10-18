@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -11,7 +13,7 @@ internal static class TopicPurgeRecoveryOracle
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
-        var operation = await ReadAsync<ReplicatedOperation>(root, TopicPurgeCrashContract.OperationFile, cancellationToken);
+        var operation = await ReadAsync<Command<DatabaseCommand>>(root, TopicPurgeCrashContract.OperationFile, cancellationToken);
         var seedPosition = await ReadAsync<long>(root, TopicPurgeCrashContract.PositionFile, cancellationToken);
         var pinned = await ReadAsync<bool>(root, TopicPurgeCrashContract.PinnedFile, cancellationToken);
         var cursor = await ReadAsync<string>(root, TopicPurgeCrashContract.CursorFile, cancellationToken);
@@ -27,7 +29,7 @@ internal static class TopicPurgeRecoveryOracle
             {
                 await Assert.That(recovered).IsNotNull();
             }
-            await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<ReplicatedOperation>(root,
+            await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<Command<DatabaseCommand>>(root,
                 TopicPurgeCrashContract.PublishOperationFile, cancellationToken), pinned || recovered is null ? 2 : 3, pinned, cursor);
             await Assert.That(TopicPurgeCrashScenario.ProtectedBytes(store)).IsEquivalentTo(protectedBytes, CollectionOrdering.Matching);
             var outcome = database.Apply(operation);
@@ -36,7 +38,7 @@ internal static class TopicPurgeRecoveryOracle
             {
                 await EventAppendReceiptAssertions.SameResultAsync(recovered, outcome);
             }
-            await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<ReplicatedOperation>(root,
+            await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<Command<DatabaseCommand>>(root,
                 TopicPurgeCrashContract.PublishOperationFile, cancellationToken), pinned ? 2 : 3, pinned, cursor);
             await Assert.That(TopicPurgeCrashScenario.ProtectedBytes(store)).IsEquivalentTo(protectedBytes, CollectionOrdering.Matching);
             await ReplaySeedAsync(root, database, cancellationToken);
@@ -57,17 +59,14 @@ internal static class TopicPurgeRecoveryOracle
         await Assert.That(finalStore.Position).IsEqualTo(position);
         await EventAppendStateAssertions.SameBytesAsync(settled, finalStore);
     }
-    private static async Task ContentConflictAsync(DatabaseEngine database, ReplicatedOperation operation, OperationResult outcome)
+    private static async Task ContentConflictAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> outcome)
     {
         var bytes = EventAppendStateAssertions.Bytes(database.Store);
         var position = database.Store.Position;
-        var changed = TopicPurgeCrashContract.Purge(operation.Id, 3);
-        var result = database.Apply(operation with
-        {
-            PayloadJson = JsonSerializer.Serialize(changed, JsonDefaults.Options)
-        });
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(result.SafeDetail).IsEqualTo("The command ID was already used with different content.");
+        var changed = TopicPurgeCrashContract.Purge(operation.CommandId, 3);
+        var result = database.Apply(database.CreateCommand(operation.Value!.Kind, operation.CommandId, operation.UserId!, new DateTimeOffset(operation.Timestamp), JsonSerializer.Serialize(changed, JsonDefaults.Options)));
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await EventAppendStateAssertions.SameBytesAsync(bytes, database.Store);
         await TopicPurgeReceiptAssertions.StableReplayAsync(database, operation, outcome);
@@ -77,8 +76,8 @@ internal static class TopicPurgeRecoveryOracle
         foreach (var pair in new[] { (TopicPurgeCrashContract.SeedOperationFile, TopicPurgeCrashContract.SeedReceiptFile),
             (TopicPurgeCrashContract.PublishOperationFile, TopicPurgeCrashContract.PublishReceiptFile) })
         {
-            var original = await ReadAsync<ReplicatedOperation>(root, pair.Item1, token);
-            var receipt = await ReadAsync<OperationResult>(root, pair.Item2, token);
+            var original = await ReadAsync<Command<DatabaseCommand>>(root, pair.Item1, token);
+            var receipt = await ReadAsync<Result<object>>(root, pair.Item2, token);
             await TopicPurgeReceiptAssertions.StableReplayAsync(database, original, receipt);
         }
     }

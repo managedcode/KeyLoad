@@ -3,7 +3,7 @@ using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
-// Invoked through the existing signed connection capability after quorum and persisted authority reload.
+// Invoked through the connection capability after a canonical read cut and current persisted authorization.
 internal interface INativeAnnMaintenance
 {
     Task<AnnProjectionEnrollment?> ReadEnrollmentAsync(PrincipalRecord principal,

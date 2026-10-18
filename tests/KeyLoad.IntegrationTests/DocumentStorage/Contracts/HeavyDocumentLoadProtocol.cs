@@ -11,7 +11,6 @@ internal static class HeavyDocumentLoadProtocol
     internal const int RecordsPerWriter = Records / Writers;
     internal const int ReaderLanes = 3;
     internal const int PageSize = 128;
-    internal const int SnapshotThreshold = 2_000_000;
     internal const long QueryReadBytes = 2_147_483_648;
     internal const long CreatedRevision = 1;
     internal const int PayloadCharacters = 960;

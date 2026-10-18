@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -67,7 +68,7 @@ internal static class EventingArtifactState
         }
         return page.Records.Select(item => Convert.ToHexString(item.Key.Span) + Separator + Convert.ToHexString(item.Value.Span)).ToArray();
     });
-    internal static async Task SameResultAsync(OperationResult expected, OperationResult actual)
+    internal static async Task SameResultAsync(Result<object> expected, Result<object> actual)
         => await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(actual)))
             .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(expected)));
 }

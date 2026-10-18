@@ -3,7 +3,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Stable caller-chosen command IDs for recurring schedule CLUSTER cases.</summary>
+/// <summary>Stable caller-chosen command IDs for recurring schedule Orleans cases.</summary>
 internal static class DueCommandClusterIdentity
 {
     private const string Domain = "keyload-due-command-v1";

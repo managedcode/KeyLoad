@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
@@ -8,7 +10,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal OperationResult? ReadOnlineTextOriginalOutcome(string principalId,
+    internal Result<object>? ReadOnlineTextOriginalOutcome(string principalId,
         OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
         => Store.Read(raw =>
         {
@@ -17,7 +19,7 @@ public sealed partial class DatabaseEngine
             return ReadOnlineTextOriginalOutcome(view, principal, request, budget);
         });
 
-    internal OperationResult? ReadOnlineTextOriginalOutcome(IKeyValueView view, PrincipalRecord principal,
+    internal Result<object>? ReadOnlineTextOriginalOutcome(IKeyValueView view, PrincipalRecord principal,
         OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
     {
         RequireOnlineTextOriginalAuthority(view, principal, request);
@@ -54,9 +56,9 @@ public sealed partial class DatabaseEngine
         });
 
     private void ValidateOnlineTextCachedOutcome(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, StoredOutcome previous)
+        Command<DatabaseCommand> operation, StoredOutcome previous)
     {
-        if (operation.Kind != OperationKind.OnlineTextPublicationPhase)
+        if (operation.Value!.Kind != OperationKind.OnlineTextPublicationPhase)
         {
             return;
         }
@@ -82,7 +84,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.MissingAuthority);
         }
-        if (previous.Result.Error is not null)
+        if (Errors.Code(previous.Result.Problem) is not null)
         {
             return;
         }

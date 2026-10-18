@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.Clustering;
 
 /// <summary>Executes the native retirement protocol for an already authenticated connection-owned DROP request.</summary>
@@ -11,6 +13,6 @@ public interface INativeDropTableExecution
     /// <param name="originalExpiry">The unchanged signed request expiry; native stages cannot renew it.</param>
     /// <param name="cancellationToken">The original request cancellation and deadline.</param>
     /// <returns>The original native operation result; successful JSON contains DropTableResult.</returns>
-    Task<OperationResult> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
+    Task<Result<object>> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
         DropTableRequest request, DateTimeOffset originalExpiry, CancellationToken cancellationToken);
 }

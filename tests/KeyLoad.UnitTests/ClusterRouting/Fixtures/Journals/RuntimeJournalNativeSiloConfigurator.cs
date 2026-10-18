@@ -48,7 +48,7 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
             .ValidateOnStart();
         siloBuilder.Services.AddSingleton(services => new RuntimeJournalClient(
             services.GetRequiredService<IGrainFactory>(), () => fixture.Codec, () => fixture.Database.Database,
-            services.GetRequiredService<Func<ICommitCoordinator>>(), services,
+            services,
             services.GetRequiredService<TimeProvider>(),
             services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             services.GetRequiredService<IOptions<GrainRoutingOptions>>(), fixture.JournalOptions,

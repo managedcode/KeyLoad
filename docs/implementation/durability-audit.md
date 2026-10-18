@@ -1,6 +1,6 @@
 # Kernel durability boundary
 
-This audit describes the initial format, not power-loss qualification. Package versions are pinned centrally in `Directory.Packages.props`. The server is a replicated cluster from its first implementation (`KeyLoad:ReplicaCount` copies, default 3); the embedded adapter is used for local testing, administrative tools and benchmarks.
+This audit describes the initial format, not power-loss qualification. Package versions are pinned centrally in `Directory.Packages.props`. The server uses independent `KeyLoad:SiloCount` and `KeyLoad:ReplicaCount` startup options; the embedded adapter is used for local testing, administrative tools and benchmarks.
 
 ## Canonical storage
 
@@ -16,7 +16,7 @@ Format 2 adds a checkpoint prefix with ordered live records, per-frame SHA-256 c
 
 ## Replicated acknowledgement
 
-Orleans does all clustering ([ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md)). Each silo's silo-local Grain Service maintains that node's ZoneTree. The writer finds the target silos through native Orleans membership, sends the write as Grain Service calls to the `ReplicaCount` target silos; the write is acknowledged after a majority of those copies confirm durable local apply ([ClusterReplication](../Features/ClusterReplication.md), [ADR-003](../ADR/ADR-003-durability-ack-barrier.md)). Cancellation or response loss after admission has an unknown write outcome; retries must retain the command ID. A minority cannot acknowledge writes.
+Orleans does all clustering ([ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md)). Each silo's silo-local Grain Service maintains that node's ZoneTree. The writer finds the target silos through native Orleans membership, sends the write as Grain Service calls to the `ReplicaCount` target silos; the write is acknowledged after every configured copy confirms durable local apply ([ClusterReplication](../Features/ClusterReplication.md), [ADR-003](../ADR/ADR-003-durability-ack-barrier.md)). Cancellation or response loss after admission has an unknown write outcome; retries must retain the command ID. Every configured copy must acknowledge before a write succeeds.
 
 Per-source subscriptions journal bounded delivery references, contiguous checkpoints and signed lease generations. Processing effects, inbox receipts, ACK and the command outcome share one compiled redo frame. Seven process-kill scenarios reopen the real store before retrying a processing command and require the effect and checkpoint to agree; a second inbox retry must not apply the effect twice. Seek is an explicit generation fence. Retained topic quotas fail the producer batch before publication; reclamation and cross-partition coverage are separate pending work.
 
@@ -32,10 +32,15 @@ Public HTTP requests reserve node capacity before deserialization and reads; aut
 
 Grains route commands; the silo-local Grain Service that maintains the node's ZoneTree owns files and durability.
 
-## Verified and outstanding qualification
+## Outstanding qualification
 
-Local tests run on macOS arm64 with .NET SDK 10.0.401. The recovery suite executes 1000 seeded real-process kills before/after journal flush and at partial materialization points, verifies atomic recovery, rejects complete-frame corruption and restores a verified backup. The Aspire replicated-cluster suite owns three independent node processes, kills one node process, retries a committed command, checks inbox/effects/ACK, rejects minority operations and restarts nodes.
+The current source is under development verification. Original Linux reports for
+the delivered revision must establish local process recovery, actual Aspire
+SDK/MCP faults, complete unit coverage and endurance separately. The presence of
+fault stages or scenarios in source does not establish that they passed.
 
-Each trial writes its seed, fault stage, mutation index, recovered values and platform to `artifacts/qualification/crash-trials-*.jsonl`; CI retains these as run artifacts.
-
-The advertised profiles remain `ProcessDurable` and `QuorumProcessDurable`. These tests do not establish filesystem directory-entry persistence, storage-controller guarantees, real power-cut behavior or every operating system/filesystem combination. Linux CI qualification and broader network faults are tracked separately. Automatic canonical compaction, power-loss qualification, network partitions, long histories and the 72-hour endurance gate remain required for the broader architecture's durable release profile.
+The runtime distinguishes `Buffered`, `ProcessDurable` and `LocalDurable`, with
+actual persisted copy counts reported independently. Device flush, directory
+persistence, storage-controller behavior and power-loss guarantees remain
+unqualified by process-kill tests. See [status.json](status.json) for the open
+gates; original evidence belongs to its exact GitHub source and run.

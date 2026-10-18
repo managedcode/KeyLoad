@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -85,7 +87,7 @@ internal static class QueueStrictHeadBodyContinuation
     }
 
     private static async Task CurrentAsync(DatabaseEngine owner, ZoneTreeStore store, QueueOrderedRetryState queue,
-        ReplicatedOperation operation, OperationResult result)
+        Command<DatabaseCommand> operation, Result<object> result)
     {
         var before = QueueLifecycleConditionAssertions.Capture(store);
         await QueueReceiveReplayAssertions.SameAsync(store, queue.Partition, operation, result, true,

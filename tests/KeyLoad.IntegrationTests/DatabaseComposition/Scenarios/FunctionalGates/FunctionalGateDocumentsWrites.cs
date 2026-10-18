@@ -47,9 +47,9 @@ internal static class FunctionalGateDocumentsWrites
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(context.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Token.Position).IsGreaterThan(0);
-        await Assert.That(actual.Token.OwnershipEpoch).IsGreaterThan(0);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(context.ReplicaCount);
         await FunctionalGateDocumentsReads.EqualAsync(new CommitReceipt(command.CommandId, actual.Token,
-            expected, DurabilityProfile.QuorumProcessDurable), actual);
+            expected, DurabilityProfile.ProcessDurable, context.ReplicaCount), actual);
         var replay = official
             ? await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token))
             : await context.McpAsync<CommitReceipt>(context.Writer, McpCallerTools.DocumentsCommit, command, token);

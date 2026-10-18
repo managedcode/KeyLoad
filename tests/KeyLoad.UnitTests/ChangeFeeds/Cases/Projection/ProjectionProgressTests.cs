@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -191,16 +192,15 @@ internal sealed class ProjectionProgressTests
         using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().LastProgressReservationCut).IsEqualTo(1);
-        OperationResult Submit(ProjectionBatch batch, Mutation[] effects)
+        Result<object> Submit(ProjectionBatch batch, Mutation[] effects)
         {
             var id = Guid.NewGuid();
-            return engine.Apply(new(id, OperationKind.CommitProjectionBatch, "root", TimeProvider.System.GetUtcNow(),
-                JsonSerializer.Serialize(new CommitProjectionBatchRequest(id, consumer, batch.Token, [.. effects]), JsonDefaults.Options)));
+            return engine.Apply(engine.CreateCommand(OperationKind.CommitProjectionBatch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new CommitProjectionBatchRequest(id, consumer, batch.Token, [.. effects]), JsonDefaults.Options)));
         }
         var replay = Submit(first, [new PutDocument("derived", "a", "{}", 0)]).Get<ProjectionBatchResult>();
         await Assert.That(replay.AlreadyProcessed).IsTrue();
         await Assert.That(replay.Receipt.Token).IsEqualTo(original.Receipt.Token);
-        await Assert.That(Submit(engine.ReadProjectionBatch("root", new(consumer, Limit: 1)),
-            [new PutDocument("derived", "b", "{}")]).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(Submit(engine.ReadProjectionBatch("root", new(consumer, Limit: 1)),
+            [new PutDocument("derived", "b", "{}")]).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 }

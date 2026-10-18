@@ -1,10 +1,12 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private OperationResult ExecuteConfigureProjection(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private Result<object> ExecuteConfigureProjection(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = Payload<ConfigureProjectionConsumerRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
@@ -12,22 +14,22 @@ public sealed partial class DatabaseEngine
         return Result(ConfigureProjectionConsumer(transaction, request, authority));
     }
 
-    private OperationResult ExecuteProjectionBatch(IAtomicTransaction transaction, PrincipalRecord principal,
-        ReplicatedOperation operation, long position)
+    private Result<object> ExecuteProjectionBatch(IAtomicTransaction transaction, PrincipalRecord principal,
+        Command<DatabaseCommand> operation, long position)
     {
         var request = Payload<CommitProjectionBatchRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
-        return Result(CommitProjectionBatch(transaction, principal, request, operation.EvaluatedAt, position));
+        return Result(CommitProjectionBatch(transaction, principal, request, operation.Timestamp, position));
     }
 
-    private static OperationResult ExecuteReleaseProjection(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private static Result<object> ExecuteReleaseProjection(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = Payload<ReleaseProjectionConsumerRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
         return Result(ReleaseProjectionConsumer(transaction, request));
     }
 
-    private OperationResult ExecutePurgeOutbox(IAtomicTransaction transaction, ReplicatedOperation operation)
+    private Result<object> ExecutePurgeOutbox(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = Payload<PurgeOutboxRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);

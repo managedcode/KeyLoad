@@ -1,5 +1,7 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed record VerifiedBackupCutSnapshot(string Path, NativeCatalogBackupCapture Capture,
     string[] PartitionRows, IReadOnlyDictionary<string, byte[]> Archive,
-    ReplicatedOperation? SecondOperation = null, OperationResult? SecondResult = null);
+    Command<DatabaseCommand>? SecondOperation = null, Result<object>? SecondResult = null);

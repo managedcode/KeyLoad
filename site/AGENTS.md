@@ -7,7 +7,7 @@
 - The site MUST display only the complete authenticated current Benchmarks cohort, preserve exact original source/run/attempt/artifact links and pass all publication gates. No fabricated, local-only, durability or production-readiness claims.
 - Do not introduce a backend, credentials, or a second source of truth for benchmark measurements.
 - Preserve the official Three.js 0.186.1 vendor files byte-for-byte against their local manifest and license. `.gitattributes` excludes only upstream `space-before-tab` findings for those exact two files so generic diff checks do not require mutating vendor bytes; authored site files retain normal whitespace checks.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.
 - Preserve accessible rendering, provenance links and strict input validation. Never include credentials or claim site publication until the Pages workflow succeeds.
 
 The primary hero is the existing animated Three.js composition with a central database, eight connected data models and the agent above it. Preserve the artwork fallback and accessible model labels. Bounds are 120,000 triangles, 30 draw calls, 1,000,000 pixels and DPR 1.5. Preserve official vendor files, manifests and licenses byte-for-byte. Product content may publish without benchmark figures; displayed figures require authenticated original GitHub artifacts.

@@ -1,15 +1,15 @@
 namespace KeyLoad.Server.Features.Search;
 
+/// <summary>Bounds actual asynchronous publication and joins accepted work during owner shutdown.</summary>
 internal sealed class NativeTextOnlineWorker : IAsyncDisposable
 {
     private readonly Lock gate = new();
-    private Task? active;
-    private Task? disposal;
+    private TaskCompletionSource? active;
     private bool closed;
 
     internal async Task<T> RunAsync<T>(Func<Task<T>> operation)
     {
-        Task<T> original;
+        TaskCompletionSource original;
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
@@ -17,21 +17,19 @@ internal sealed class NativeTextOnlineWorker : IAsyncDisposable
             {
                 throw NativeTextErrors.Busy();
             }
-            original = operation();
+            original = new(TaskCreationOptions.RunContinuationsAsynchronously);
             active = original;
         }
         try
         {
-            return await original.ConfigureAwait(false);
+            return await operation().ConfigureAwait(false);
         }
         finally
         {
             lock (gate)
             {
-                if (ReferenceEquals(active, original))
-                {
-                    active = null;
-                }
+                original.TrySetResult();
+                active = null;
             }
         }
     }
@@ -41,11 +39,7 @@ internal sealed class NativeTextOnlineWorker : IAsyncDisposable
         lock (gate)
         {
             closed = true;
-            disposal ??= JoinAsync(active ?? Task.CompletedTask);
-            return new(disposal);
+            return new(active?.Task ?? Task.CompletedTask);
         }
     }
-
-    private static async Task JoinAsync(Task original)
-        => await original.ConfigureAwait(false);
 }

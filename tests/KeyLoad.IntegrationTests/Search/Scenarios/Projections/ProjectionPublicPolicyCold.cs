@@ -18,7 +18,7 @@ internal static class ProjectionPublicPolicyCold
             await Assert.That(after[node].Node.NodeId).IsEqualTo(before[node].Node.NodeId);
             await Assert.That(after[node].Node.Incarnation).IsEqualTo(before[node].Node.Incarnation);
             await Assert.That(after[node].Node.ReadGeneration).IsGreaterThanOrEqualTo(before[node].Node.ReadGeneration);
-            await Assert.That(after[node].Node.Applied).IsGreaterThanOrEqualTo(before[node].Node.Applied);
+            await Assert.That(after[node].Node.Position).IsGreaterThanOrEqualTo(before[node].Node.Position);
             await Assert.That(after[node].PhysicalCut).IsGreaterThanOrEqualTo(before[node].PhysicalCut);
         }
         await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,

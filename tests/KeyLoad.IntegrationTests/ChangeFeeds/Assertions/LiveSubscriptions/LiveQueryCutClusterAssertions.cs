@@ -9,7 +9,7 @@ internal static class LiveQueryCutClusterAssertions
 {
     internal const string QueryTool = "keyload_query_ast";
     private const string FullScanPath = "bounded-full-scan";
-    private const int VoterCount = 3;
+    private const int SiloCount = 3;
 
     internal static async Task<Func<Task<long>>> CreateAsync(RequestCqrsClusterCallers administrator,
         RequestCqrsClusterCallers reader, FeedLiveClusterScenario scenario, CommitReceipt receipt,
@@ -27,10 +27,11 @@ internal static class LiveQueryCutClusterAssertions
                 [FeedLiveClusterProtocol.SecretField]);
             await SqlClusterProtocol.EqualAsync(expected, document.Document);
             var page = await query();
+            await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(receipt.Token.Position);
             await SqlClusterProtocol.EqualAsync(new QueryPage(rows, null, page.CutPosition, FullScanPath), page);
             var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));
             await OwnerAsync(after, owner, receipt);
-            await Assert.That(after.Applied).IsGreaterThanOrEqualTo(before.Applied);
+            await Assert.That(after.Position).IsGreaterThanOrEqualTo(before.Position);
             await Assert.That(after.ReadGeneration).IsGreaterThanOrEqualTo(before.ReadGeneration);
             return page.CutPosition;
         };
@@ -49,9 +50,8 @@ internal static class LiveQueryCutClusterAssertions
         await Assert.That(actual.Incarnation).IsEqualTo(owner.Incarnation);
         await Assert.That(actual.Incarnation).IsEqualTo(receipt.Token.Incarnation);
         await Assert.That(actual.RoutingReady).IsTrue();
-        await Assert.That(actual.Voters).IsEqualTo(VoterCount);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await Assert.That(actual.Applied).IsGreaterThanOrEqualTo(receipt.Token.Position);
+        await Assert.That(actual.SiloCount).IsEqualTo(SiloCount);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(actual.ReadGeneration).IsGreaterThanOrEqualTo(owner.ReadGeneration);
     }
 }

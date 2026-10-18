@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -12,7 +13,7 @@ internal static class ProjectionCancelledCommitAssertions
         var position = store.Position;
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         await cancellation.CancelAsync();
-        OperationResult? partial = null;
+        Result<object>? partial = null;
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             partial = owner.ApplyEmbedded(state.Complete, cancellation.Token));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);

@@ -12,7 +12,7 @@ internal static class FunctionalGateColdBlobUpload
         var bytes = FunctionalGateBlobUpload.Content(context, blob, index);
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, Guid.NewGuid(), bytes.Length, 0, new RowAccess());
         var begun = await context.SdkAsync(context.Writer.Sdk.BeginBlobUploadAsync(begin, token));
-        await FunctionalGateBlobAssertions.ReceiptAsync(begun.Receipt, begin.CommandId, blob);
+        await FunctionalGateBlobAssertions.ReceiptAsync(context, begun.Receipt, begin.CommandId, blob);
         var current = new BlobUploadInfo(blob, begin.UploadId, bytes.Length, 0, 0, 0, begun.Value.ExpiresAt,
             BlobUploadStatus.Active, BlobIntegrity.InitialHash(begun.Receipt.Token.Incarnation, blob, begin.UploadId, bytes.Length));
         await SqlClusterProtocol.EqualAsync(current, begun.Value);
@@ -25,7 +25,7 @@ internal static class FunctionalGateColdBlobUpload
             var request = new WriteBlobPartRequest(Guid.NewGuid(), blob, begin.UploadId, ordinal, part, hash);
             var result = await context.McpAsync<BlobCommitResult<BlobUploadInfo>>(context.Writer,
                 "keyload_blobs_write_part", request, token);
-            await FunctionalGateBlobAssertions.ReceiptAsync(result.Receipt, request.CommandId, blob);
+            await FunctionalGateBlobAssertions.ReceiptAsync(context, result.Receipt, request.CommandId, blob);
             current = current with
             {
                 NextOrdinal = ordinal + 1,
@@ -37,7 +37,7 @@ internal static class FunctionalGateColdBlobUpload
         }
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, begin.UploadId, current.IntegrityHash);
         var published = await context.SdkAsync(context.Writer.Sdk.CompleteBlobUploadAsync(complete, token));
-        await FunctionalGateBlobAssertions.ReceiptAsync(published.Receipt, complete.CommandId, blob);
+        await FunctionalGateBlobAssertions.ReceiptAsync(context, published.Receipt, complete.CommandId, blob);
         await SqlClusterProtocol.EqualAsync(new BlobMetadata(blob, 1, begin.UploadId, bytes.Length, 2,
             current.IntegrityHash, new RowAccess(), published.Value.UpdatedAt), published.Value);
         return new(begin, begun, [.. parts], complete, published, bytes);

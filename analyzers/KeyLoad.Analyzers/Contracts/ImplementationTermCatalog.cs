@@ -29,6 +29,8 @@ internal static class ImplementationTermCatalog
     internal const string MatchingWord = "compatible";
     internal const string SampleFieldsType = "KeyLoad.Core.Features.InternalSerialization.SampleReadScopeFields";
     internal const string DataAssembly = "KeyLoad.Abstractions";
+    internal const string DataCoreAssembly = "KeyLoad.Core";
+    internal const string DataRecordFamiliesType = "KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies";
     internal const string DataNamespace = "KeyLoad";
     internal const string DataFeatureNamespaceSuffix = ".Features.TimeSeries";
     internal static readonly string[] NativeNamespaces =
@@ -50,6 +52,11 @@ internal static class ImplementationTermCatalog
         "ReadSampleChunkWindowRequest", "DropSampleChunkWindow", "SampleRetentionDefaults",
         "ReadLatestSampleRequest", "SampleAggregateWindowsResult", "SampleChunkWindowResult"
     ];
+    internal static readonly string[] DataRecordFamilyFields =
+    [
+        "Sample", "SampleChunkBlock", "SampleChunkCorrection", "SampleChunkManifest", "SampleChunkWindow",
+        "SampleIdentity", "SampleRetention", "SampleRollup", "SampleSequence"
+    ];
     internal static readonly string[] NativeModelContracts =
     [
         "Orleans.Serialization.Codecs.IFieldCodec`1", "Orleans.Serialization.Cloning.IDeepCopier`1",
@@ -61,6 +68,8 @@ internal static class ImplementationTermCatalog
         "KeyLoad.Comparisons.Measurement", "KeyLoad.Comparisons.ClientResources",
         "KeyLoad.Comparisons.ComparisonCase", "KeyLoad.Comparisons.BenchmarkSessionLaneReport",
         "KeyLoad.Comparisons.ClientResourceSampler",
+        "KeyLoad.AdminNodeSnapshot", "KeyLoad.OperationalAnalyticsCounters",
+        "KeyLoad.OperationalAnalyticsReport", "KeyLoad.OperationalAnalyticsRow",
         "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFixture"
     ];
 

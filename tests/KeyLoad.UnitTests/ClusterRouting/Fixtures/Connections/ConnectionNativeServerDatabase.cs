@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -23,7 +24,7 @@ internal sealed class ConnectionNativeServerDatabase(Func<ControlledPartitionMov
     internal PartitionRef Partition { get; } = new(Tenant, DatabaseName, Domain, PartitionKey);
     internal ICommitCoordinator Coordinator => source().Partition.Coordinator;
 
-    internal OperationResult Submit<T>(OperationKind kind, T payload,
+    internal Result<object> Submit<T>(OperationKind kind, T payload,
         string principal = ConnectionNativeProtocol.Root, Guid? id = null, DateTimeOffset? time = null)
     {
         if (time is not null)
@@ -60,13 +61,13 @@ internal sealed class ConnectionNativeServerDatabase(Func<ControlledPartitionMov
             .Get<CommitReceipt>();
     }
 
-    internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()
+    internal (long LastIndex, long CommittedIndex, long Term) ReadCanonicalCut()
     {
         var actual = source().Log.State;
         return (actual.LastIndex, actual.CommittedIndex, actual.Term);
     }
 
-    internal ReplicaEntry ReadRetainedEntry(Guid id)
+    internal StoredOutcome ReadStoredOutcome(Guid id)
     {
         var log = source().Log;
         var limits = Database.Limits;
@@ -79,7 +80,7 @@ internal sealed class ConnectionNativeServerDatabase(Func<ControlledPartitionMov
             {
                 throw new InvalidOperationException(MissingEntry);
             }
-            var entries = new List<ReplicaEntry>();
+            var entries = new List<StoredOutcome>();
             for (var index = FirstEntry; index <= last; index++)
             {
                 token.ThrowIfCancellationRequested();
@@ -103,11 +104,11 @@ internal sealed class ConnectionNativeServerDatabase(Func<ControlledPartitionMov
     {
         var expected = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
             new(collection, ResourceKind.Collection, Partition.TransactionDomainId));
-        var original = ReadRetainedEntry(creation).Operation
+        var original = ReadStoredOutcome(creation).PreparedCommand
             ?? throw new InvalidOperationException(MissingEntry);
-        var body = NativeCommandPayload.Read<ConfigureResourceRequest>(original);
-        if (original.Id != creation || original.Kind != OperationKind.ConfigureResource
-            || original.PrincipalId != ConnectionNativeProtocol.Root
+        var body = NativeSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span);
+        if (original.CommandId != creation || original.Value!.Kind != OperationKind.ConfigureResource
+            || original.UserId! != ConnectionNativeProtocol.Root
             || !JsonDefaults.Serialize(body).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
         {
             throw new InvalidOperationException(MissingEntry);

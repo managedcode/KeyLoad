@@ -7,5 +7,5 @@ internal sealed class DocumentSessionAuthorityColdTests
     [Arguments(1)]
     [Arguments(2)]
     public Task OriginalMinimumTokenRefusesDamagedColdAuthorityThenExactRepairReplayAndFreshWorkContinue(int damage)
-        => RemoteDocumentNativeAssertions.RunAsync(fixture => DocumentSessionAuthorityColdTrial.RunAsync(fixture, damage));
+        => DocumentSessionAuthorityColdTrial.RunAsync(damage);
 }

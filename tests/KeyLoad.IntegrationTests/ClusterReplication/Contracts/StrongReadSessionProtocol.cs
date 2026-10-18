@@ -15,12 +15,11 @@ internal static class StrongReadSessionProtocol
     internal const string DeleteKind = "deleteDocument";
     internal const string DocumentField = "document";
     internal const string KillScenario = "strong-session-absence-failover";
-    internal const string MissingLeader = "The original leader is not an owned CLUSTER resource.";
     internal const string MissingState = "The original acknowledged session state is unavailable.";
     internal const string WrongIncarnation = "The document session token belongs to another incarnation.";
     internal const string WrongScope = "The document session token belongs to another atomic partition or placement.";
     internal const string InvalidPosition = "The document session token position must be positive.";
-    internal const string FuturePosition = "The document session token is beyond the current quorum-applied cut.";
+    internal const string FuturePosition = "The document session token is beyond the current committed storage cut.";
     internal const string ScopeDenied = "The principal cannot perform this operation in this scope.";
     internal const string Star = "*";
     internal const string IdPath = "/@id";
@@ -29,7 +28,6 @@ internal static class StrongReadSessionProtocol
     internal const int ColdCuts = 2;
     internal const int AuthorityPrecedenceVariants = 1;
     internal const long CreatedRevision = 1;
-    internal const long OwnershipEpochStep = 1;
     internal const long DeletedRevision = 2;
     internal const long InvalidCut = 0;
     internal const long DeniedEpoch = 2;

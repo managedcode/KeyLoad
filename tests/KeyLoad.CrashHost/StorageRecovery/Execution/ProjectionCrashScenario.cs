@@ -23,7 +23,7 @@ internal static class ProjectionCrashScenario
         var batch = database.ReadProjectionBatch(CrashFixtureValues.Principal, new(Consumer));
         var request = new CommitProjectionBatchRequest(CommandId, Consumer, batch.Token,
             [new PutDocument(CrashFixtureValues.Projection, CrashFixtureValues.Effect, CrashFixtureValues.EffectJson, ExpectedRevisionEmptyCount)]);
-        var operation = CrashDatabase.Operation(OperationKind.CommitProjectionBatch, request, request.CommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.CommitProjectionBatch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), JsonDefaults.Serialize(operation));
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;

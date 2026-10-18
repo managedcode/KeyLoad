@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueClaimVersionExhaustionColdRepair
 {
     internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore store, string root,
-        QueueClaimVersionExhaustionState state, OperationResult failed, byte[] identity, CancellationToken token)
+        QueueClaimVersionExhaustionState state, Result<object> failed, byte[] identity, CancellationToken token)
     {
         await QueueClaimVersionExhaustionAssertions.ReadyAsync(database, store, state);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, failed);
@@ -20,7 +21,7 @@ internal static class QueueClaimVersionExhaustionColdRepair
             .IsEqualTo(new MessageInspection(new(state.Body.Id, MessageState.Ready, 0, 1, 1, null, null), state.Body.PayloadJson, state.Body.HeadersJson));
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, failed);
         var fresh = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var operation = database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, fresh, fresh.RequestId, state.Time));
+        var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive, fresh, fresh.RequestId, state.Time));
         var result = database.Apply(operation);
         var delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await QueueClaimVersionExhaustionAssertions.EqualAsync(delivery, new Delivery(state.Body.Id,

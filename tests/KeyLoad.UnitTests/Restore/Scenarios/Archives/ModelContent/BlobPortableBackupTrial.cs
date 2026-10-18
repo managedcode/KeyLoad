@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Server;
@@ -37,7 +39,7 @@ internal static class BlobPortableBackupTrial
             new BeginBlobUploadRequest(id, active, upload, bytes.Length, 0), token);
         var beginClock = source.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
             view.ReadOwnedValue(KeySpace.ClockBytes) ?? throw new InvalidOperationException(MissingBeginClock)));
-        await Assert.That(beginClock).IsGreaterThanOrEqualTo(begin.Operation.EvaluatedAt);
+        await Assert.That(beginClock).IsGreaterThanOrEqualTo(new DateTimeOffset(begin.Operation.Timestamp));
         await BlobPortableBackupAssertions.ReceiptAsync(source, active,
             begin.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, id);
         var accepted = bytes.AsMemory(0, BlobLimits.RawPartBytes).ToArray();
@@ -55,7 +57,7 @@ internal static class BlobPortableBackupTrial
         await BlobPortableBackupAssertions.ReplayAsync(source, [.. published.Originals, begin, part], token);
         var originals = new[] { begin, part }.Concat(published.Originals).ToArray();
         var outcomes = originals.Select(original => BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(
-            source.Store, fixture.Partition, BlobPortableBackupSeed.Root, original.Operation.Id)).ToArray();
+            source.Store, fixture.Partition, BlobPortableBackupSeed.Root, original.Operation.CommandId)).ToArray();
         var sourceCut = BackupPersistedPolicyAssertions.Capture(source.Store);
         await Assert.That(fixture.CreateBackup()).IsEqualTo(sourceCut.Position);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
@@ -119,12 +121,12 @@ internal static class BlobPortableBackupTrial
     }
 
     private static async Task OutcomesAsync(BackupIndexedDocumentDedupFixture fixture,
-        (ReplicatedOperation Operation, OperationResult Result)[] originals, byte[][] outcomes)
+        (Command<DatabaseCommand> Operation, Result<object> Result)[] originals, byte[][] outcomes)
     {
         for (var index = 0; index < originals.Length; index++)
         {
             var actual = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.TargetStore,
-                fixture.Partition, BlobPortableBackupSeed.Root, originals[index].Operation.Id);
+                fixture.Partition, BlobPortableBackupSeed.Root, originals[index].Operation.CommandId);
             await Assert.That(actual.AsSpan().SequenceEqual(outcomes[index])).IsTrue();
         }
     }
@@ -145,7 +147,7 @@ internal static class BlobPortableBackupTrial
     }
 
     private static async Task ColdAsync(BackupIndexedDocumentDedupFixture fixture,
-        (BlobMetadata Metadata, (ReplicatedOperation Operation, OperationResult Result)[] Originals) fresh,
+        (BlobMetadata Metadata, (Command<DatabaseCommand> Operation, Result<object> Result)[] Originals) fresh,
         BlobMetadata published, BlobUploadInfo active, byte[] payload, byte[] accepted, CancellationToken token)
     {
         var database = fixture.RestoredDatabase;

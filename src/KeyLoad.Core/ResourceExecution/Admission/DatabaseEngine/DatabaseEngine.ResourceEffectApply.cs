@@ -1,7 +1,7 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -10,21 +10,15 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private void RequireOriginalEffectAdmission(AtomicPartitionRosterTransaction transaction,
-        PrincipalRecord principal, ReplicatedOperation operation)
+        PrincipalRecord principal, Command<DatabaseCommand> operation)
         => RequireResourceEffectAdmission(transaction, principal, operation);
 
     private void RequireResourceEffectAdmission(AtomicPartitionRosterTransaction transaction,
-        PrincipalRecord principal, ReplicatedOperation operation)
+        PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         var admission = ResourceEffectAdmissionValidation.Read(operation, Limits);
         if (admission.Error is { } error)
         {
-            var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
-            if (payload.Error == error && payload.SafeDetail == admission.SafeDetail)
-            {
-                // The authenticated decode marker belongs to the original domain call after the clock check.
-                return;
-            }
             throw Errors.Fail(error, admission.SafeDetail!);
         }
         var observed = new ResourceEffectObservationView(transaction, transaction.EffectAdmission);
@@ -36,39 +30,39 @@ public sealed partial class DatabaseEngine
         }
         else
         {
-            transaction.EffectAdmission.Activate(observed, admission);
+            transaction.EffectAdmission.Activate(admission);
         }
     }
 
-    internal void ValidateResourceEffectSubmission(ReplicatedOperation operation, DateTimeOffset admittedAt,
+    internal void ValidateResourceEffectSubmission(Command<DatabaseCommand> operation, DateTimeOffset admittedAt,
         IResourceLifetimeWorkBinding? binding = null)
         => ValidateResourceEffectSubmissionCore(operation, admittedAt, binding, null);
 
-    internal void ValidateResourceEffectSubmission(ReplicatedOperation operation, DateTimeOffset admittedAt,
+    internal void ValidateResourceEffectSubmission(Command<DatabaseCommand> operation, DateTimeOffset admittedAt,
         IResourceLifetimeWorkBinding? binding, ReadExecutionBudget work)
     {
         ArgumentNullException.ThrowIfNull(work);
         ValidateResourceEffectSubmissionCore(operation, admittedAt, binding, work);
     }
 
-    private void ValidateResourceEffectSubmissionCore(ReplicatedOperation operation, DateTimeOffset admittedAt,
+    private void ValidateResourceEffectSubmissionCore(Command<DatabaseCommand> operation, DateTimeOffset admittedAt,
         IResourceLifetimeWorkBinding? binding, ReadExecutionBudget? work)
     {
         work?.Check();
-        operation = VerifyOperationAuthority(operation);
+        operation = OwnCommand(operation);
         work?.Check();
         _ = Store.Read(raw =>
         {
             var view = work is null ? raw : work.CreateView(raw);
             var current = new ResourceEffectBindingScope(OperationLimitsOptions);
             var observed = new ResourceEffectObservationView(view, current);
-            var principal = Principal(observed, operation.PrincipalId, admittedAt);
+            var principal = Principal(observed, operation.UserId!, admittedAt);
             if (!AuthorizeResourceEffectSubmission(observed, principal, operation))
             {
                 return true;
             }
             var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-            var selected = CommandOutcomeKeyResolver.Select(observed, operation.PrincipalId, operation.Id, scope);
+            var selected = CommandOutcomeKeyResolver.Select(observed, operation.UserId!, operation.CommandId, scope);
             if (selected.Outcome is not null)
             {
                 _ = ReadValidatedSubmissionOutcome(observed, operation);
@@ -103,7 +97,7 @@ public sealed partial class DatabaseEngine
             }
             else
             {
-                current.Activate(observed, admission);
+                current.Activate(admission);
                 binding?.Bind(current.Capture());
             }
             return true;
@@ -112,7 +106,7 @@ public sealed partial class DatabaseEngine
     }
 
     private bool AuthorizeResourceEffectSubmission(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation)
+        Command<DatabaseCommand> operation)
     {
         try
         {

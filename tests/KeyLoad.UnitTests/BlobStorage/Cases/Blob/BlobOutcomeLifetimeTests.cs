@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.BlobStorage;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
@@ -66,9 +67,9 @@ internal sealed class BlobOutcomeLifetimeTests
         T payload, OperationKind kind)
     {
         var result = Apply(database, kind, commandId, payload);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 
-    private static OperationResult Apply<T>(TestDatabase database, OperationKind kind, Guid commandId, T payload)
+    private static Result<object> Apply<T>(TestDatabase database, OperationKind kind, Guid commandId, T payload)
         => database.Submit(kind, payload, id: commandId);
 }

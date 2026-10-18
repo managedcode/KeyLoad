@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -14,7 +15,7 @@ public sealed partial class DatabaseEngine
     private const string InvalidQueueDeliveryAction = "Queue delivery action is invalid.";
 
     private CommitReceipt ApplyDeliveryTransition(IAtomicTransaction tx, DeliveryCommand command,
-        ResourceDefinition resource, ValidatedQueueLease lease, DateTimeOffset now, long position, ReplicatedOperation? operation = null)
+        ResourceDefinition resource, ValidatedQueueLease lease, DateTimeOffset now, long position, Command<DatabaseCommand>? operation = null)
     {
         if (command.Action is not (DeliveryAction.Ack or DeliveryAction.Nack or DeliveryAction.Renew))
         {
@@ -64,7 +65,7 @@ public sealed partial class DatabaseEngine
 
     private MessageMetadata CompleteDeliveryAction(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
         DeliveryAction action, MessageMetadata metadata, long bodyBytes, DateTimeOffset now, ref QueueCounters counters,
-        ReplicatedOperation? operation, QueueDeadLetterAdmissionPlan? deadLetter = null)
+        Command<DatabaseCommand>? operation, QueueDeadLetterAdmissionPlan? deadLetter = null)
     {
         if (action == DeliveryAction.Ack)
         {

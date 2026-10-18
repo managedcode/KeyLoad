@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 
@@ -28,9 +29,8 @@ internal static class AtomicPartitionScopeLifecycleCommands
     internal static CommandRequest Unique(PartitionRef partition)
         => new(Guid.NewGuid(), partition, [new AppendEvents(Events, "refused", [new("refused", "Created", HealthyJson)], ExpectedStreamRevision.NoStream),
             new EnqueueMessage(Queue, "refused", HealthyJson), new PutDocument(Documents, "refused", FirstJson, 0)]);
-    internal static OperationResult Apply(DatabaseEngine database, CommandRequest request, CancellationToken token)
-        => database.ApplyEmbedded(new(request.CommandId, OperationKind.Batch, "root", default,
-            JsonSerializer.Serialize(request, JsonDefaults.Options)), token);
+    internal static Result<object> Apply(DatabaseEngine database, CommandRequest request, CancellationToken token)
+        => database.ApplyEmbedded(database.CreateCommand(OperationKind.Batch, request.CommandId, "root", default, JsonSerializer.Serialize(request, JsonDefaults.Options)), token);
     internal static void Configure(TestDatabase fixture)
     {
         fixture.Configure(Documents, ResourceKind.Collection, indexes: [new("number", ["/number"], true)]);

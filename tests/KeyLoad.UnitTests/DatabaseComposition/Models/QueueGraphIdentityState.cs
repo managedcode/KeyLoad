@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal sealed record QueueGraphIdentityState(
@@ -8,10 +9,10 @@ internal sealed record QueueGraphIdentityState(
     DocumentRecord First,
     DocumentRecord Second,
     MessageInspection Source,
-    ReplicatedOperation Seed,
+    Command<DatabaseCommand> Seed,
     CommitReceipt SeedReceipt,
-    ReplicatedOperation Failed,
-    ReplicatedOperation Healthy,
+    Command<DatabaseCommand> Failed,
+    Command<DatabaseCommand> Healthy,
     byte[] EndpointKey,
     byte[] OriginalEndpoint,
     EntityRef BoundFrom,

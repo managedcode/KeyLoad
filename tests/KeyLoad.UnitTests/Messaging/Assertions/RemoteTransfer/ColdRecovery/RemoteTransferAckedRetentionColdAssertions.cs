@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -7,7 +8,7 @@ internal static class RemoteTransferAckedRetentionColdAssertions
     internal static async Task RequireAsync(RemoteTransferDatabase fixture, CreateQueueTransfer original,
         CreateQueueTransfer refusedTransfer, QueueTransferInspection source, QueueTransferInspection refusedSource,
         QueueTransferReceiptInspection proof, MessageInspection message, RemoteTransferCapacity capacity,
-        CommandRequest accept, CommitReceipt accepted, CommandRequest refused, OperationResult failure,
+        CommandRequest accept, CommitReceipt accepted, CommandRequest refused, Result<object> failure,
         byte[] originalBytes, byte[] failureBytes)
     {
         await Assert.That(RemoteTransferStorage.IsCapacityFailure(failure)).IsTrue();

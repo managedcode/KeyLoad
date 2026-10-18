@@ -6,22 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Explicit native options composition for standalone database and query regression fixtures.</summary>
+/// <summary>Explicit native options composition for standalone database and query fixtures.</summary>
 internal static class IntegrationExecutionOptions
 {
-    internal static IOptions<ReplicaConfiguration> ReplicaConfiguration(ReplicaConfiguration value)
-    {
-        value.Validate();
-        return Options.Create(value);
-    }
-
-    internal static IOptions<ReplicaExecutionOptions> ReplicaExecution(ReplicaExecutionOptions? value = null)
-    {
-        var configured = value ?? new ReplicaExecutionOptions();
-        configured.Validate();
-        return Options.Create(configured);
-    }
-
     internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution(ZoneTreeStorageExecutionOptions? configured = null)
     {
         var value = configured ?? new ZoneTreeStorageExecutionOptions();

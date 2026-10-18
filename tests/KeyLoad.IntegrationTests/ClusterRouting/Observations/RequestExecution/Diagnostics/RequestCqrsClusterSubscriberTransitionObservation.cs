@@ -19,11 +19,11 @@ internal sealed class RequestCqrsClusterSubscriberTransitionObservation
     private const string FalseFlag = "0";
     private int admissionNodeMask;
     private int completionNodeMask;
-    private int preFallbackNodeMask;
+    private int beforeForcedCancellationNodeMask;
     private int terminalNodeMask;
     private int unknownEventCount;
     private bool completionObservationStarted;
-    private bool preFallbackObserved;
+    private bool beforeForcedCancellationObserved;
     private bool terminalObserved;
     private bool eventLimitReached;
     private CancellationToken callerToken;
@@ -161,16 +161,16 @@ internal sealed class RequestCqrsClusterSubscriberTransitionObservation
         }
         else
         {
-            preFallbackNodeMask = completionNodeMask;
-            preFallbackObserved = true;
+            beforeForcedCancellationNodeMask = completionNodeMask;
+            beforeForcedCancellationObserved = true;
         }
     }
 
     internal string Format()
         => string.Format(System.Globalization.CultureInfo.InvariantCulture, CachedObservationFormat,
-            ObservationPrefix, BitCount(admissionNodeMask), BitCount(preFallbackNodeMask), BitCount(terminalNodeMask),
-            Flag(preFallbackObserved), Flag(terminalObserved), Flag(admissionNodeMask == ExpectedNodeMask),
-            Flag(preFallbackObserved && admissionNodeMask == preFallbackNodeMask),
+            ObservationPrefix, BitCount(admissionNodeMask), BitCount(beforeForcedCancellationNodeMask), BitCount(terminalNodeMask),
+            Flag(beforeForcedCancellationObserved), Flag(terminalObserved), Flag(admissionNodeMask == ExpectedNodeMask),
+            Flag(beforeForcedCancellationObserved && admissionNodeMask == beforeForcedCancellationNodeMask),
             Flag(terminalObserved && admissionNodeMask == terminalNodeMask),
             System.Threading.Volatile.Read(ref unknownEventCount),
             Flag(eventLimitReached));

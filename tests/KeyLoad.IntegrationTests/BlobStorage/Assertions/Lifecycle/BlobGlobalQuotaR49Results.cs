@@ -11,7 +11,8 @@ internal static class BlobGlobalQuotaR49Results
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations.IsEmpty).IsTrue();
     }
     internal static async Task ReplayAsync<T>(RequestCqrsClusterCallers callers, string tool, object request,

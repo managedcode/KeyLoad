@@ -1,8 +1,9 @@
-using KeyLoad.UnitTests.Features.ClusterReplication;
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-internal sealed record NativeLocalChildLifetimeSeeded(RequestCqrsCohortNativeNode Leader,
-    RequestCqrsCohortNativeNode Other, PhysicalShardRecord PhysicalOwner,
-    ReplicatedOperation Write, CommitReceipt Receipt,
-    Dictionary<string, (long Position, string[] Records)> Images);
+internal sealed record NativeLocalChildLifetimeSeeded(RequestCqrsHostedRuntimeFixture Leader,
+    RequestCqrsHostedRuntimeFixture Other, PhysicalShardRecord PhysicalOwner,
+    Command<DatabaseCommand> ResourceCreation, Command<DatabaseCommand> Write, CommitReceipt Receipt,
+    Dictionary<RequestCqrsHostedRuntimeFixture, (long Position, string[] Records)> Images);

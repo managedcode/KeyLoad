@@ -53,12 +53,12 @@ internal static class CompositionLinkLifetimeJsonAssertions
         var identity = NativeSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.JournalCut();
+        var journal = owner.ReadCut();
         await body();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+        await Assert.That(owner.ReadCut()).IsEqualTo(journal);
     }
 }

@@ -20,7 +20,7 @@ internal static class TypedEndpointJoinReverseAssertions
         var id = (repaired ? RepairedPrefix : Prefix) + TypedEndpointJoinProtocol.Prefix + TypedEndpointJoinProtocol.MatchedMessage;
         var expected = new CommitReceipt(command.CommandId, actual.Token,
             [new(EnqueueKind, TypedEndpointJoinProtocol.EmptyQueue, id, InitialVersion)],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
     }

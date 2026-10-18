@@ -9,6 +9,7 @@ internal static class QueueDeadlineDiscovery
     private const int LookaheadRecord = 1;
     private const int Initial = 0;
     private const int IndexedReadWithLookahead = 3;
+    private const string IndexedPageBudgetRequired = "The queue deadline page budget must admit an indexed record, its metadata and lookahead.";
 
     internal static QueueDeadlinePage ReadPage(DatabaseEngine database, QueueDeadlineCursor? previous,
         DateTimeOffset now, CancellationToken cancellationToken)
@@ -16,6 +17,10 @@ internal static class QueueDeadlineDiscovery
         if (now.Offset != TimeSpan.Zero)
         {
             throw Errors.Fail(ErrorCode.Validation, DueWorkProtocol.InvalidWakeInstant);
+        }
+        if (database.DueExecution.MaximumRecordsPerPage < IndexedReadWithLookahead)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, IndexedPageBudgetRequired);
         }
         var page = new DuePageState(database.OperationLimitsOptions, now, database.EvaluationClock,
             database.DueDiscoveryDeadline, database.DueExecution.MaximumRecordsPerPage,
@@ -29,12 +34,6 @@ internal static class QueueDeadlineDiscovery
         QueueDeadlineCursor cursor, DuePageState page)
     {
         page.Check();
-        if (page.MaximumRecordsPerPage < IndexedReadWithLookahead
-            && cursor.Next != QueueDeadlineCursor.MetadataIndex)
-        {
-            return new([], [], cursor.Advance(DuePrefixCursor.Empty),
-                page.ExaminedRecords, page.ExaminedBytes);
-        }
         var prefix = KeyCodec.Encode(cursor.Space);
         var bounds = cursor.Bounds;
         if (!bounds.HasUpperBound)

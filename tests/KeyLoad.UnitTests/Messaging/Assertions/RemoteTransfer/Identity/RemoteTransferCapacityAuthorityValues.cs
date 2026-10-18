@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.Messaging.RemoteTransferCapacityAuthorityProtocol;
@@ -9,19 +10,15 @@ internal static class RemoteTransferCapacityAuthorityValues
     internal static async Task EqualAsync<T>(T actual, T expected)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 
-    internal static async Task<OperationResult> SubmitAsync(RemoteTransferDatabase fixture, CommandRequest request,
+    internal static async Task<Result<object>> SubmitAsync(RemoteTransferDatabase fixture, CommandRequest request,
         long? originalAcceptPosition = null)
     {
         var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, request.Partition);
         var token = new CommitToken(placement.Incarnation, request.Partition.AtomicPartitionId,
-            checked(fixture.Store.Position + First), placement.PlacementEpoch);
-        var expected = new CommitReceipt(request.CommandId, token,
-            [.. request.Mutations.Select(mutation => ExpectedMutation(fixture, mutation, token, originalAcceptPosition))], DurabilityProfile.ProcessDurable);
+            checked(fixture.Store.Position + First));
+        var expected = new CommitReceipt(request.CommandId, token, [.. request.Mutations.Select(mutation => ExpectedMutation(fixture, mutation, token, originalAcceptPosition))], DurabilityProfile.ProcessDurable, 1);
         var result = fixture.Apply(OperationKind.Batch, request);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(result, new(null)
-        {
-            NativeValue = expected
-        });
+        await NativeReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
         return result;
     }
 
@@ -39,7 +36,7 @@ internal static class RemoteTransferCapacityAuthorityValues
             _ => throw new InvalidOperationException(MissingNativeRow)
         };
 
-    internal static async Task ReplayAsync(RemoteTransferDatabase fixture, CommandRequest request, OperationResult original)
+    internal static async Task ReplayAsync(RemoteTransferDatabase fixture, CommandRequest request, Result<object> original)
     {
         var image = RemoteTransferCapacityAuthorityStorage.Capture(fixture);
         var position = fixture.Store.Position;

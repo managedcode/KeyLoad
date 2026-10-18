@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -36,11 +38,10 @@ internal sealed class EventProjectionHarness : IDisposable
         bootstrapped = true;
     }
 
-    internal OperationResult Submit<T>(OperationKind kind, T payload, string principal = RootId, Guid? id = null)
+    internal Result<object> Submit<T>(OperationKind kind, T payload, string principal = RootId, Guid? id = null)
     {
         var requestId = id ?? Guid.NewGuid();
-        var operation = new ReplicatedOperation(requestId, kind, principal, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        var operation = Database.CreateCommand(kind, requestId, principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
         return Database.Apply(operation);
     }
 

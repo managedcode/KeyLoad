@@ -7,15 +7,15 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateRelationalAssertions
 {
-    internal static async Task ReceiptAsync(CommitReceipt actual, Guid id, PartitionRef partition,
+    internal static async Task ReceiptAsync(FunctionalGateContext context, CommitReceipt actual, Guid id, PartitionRef partition,
         ImmutableArray<MutationReceipt> expected)
     {
         await Assert.That(actual.CommandId).IsEqualTo(id);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(actual.Token.Incarnation == Guid.Empty).IsFalse();
         await Assert.That(actual.Token.Position).IsGreaterThan(P.Absent);
-        await Assert.That(actual.Token.OwnershipEpoch).IsGreaterThan(P.Absent);
-        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(context.ReplicaCount);
         await SqlClusterProtocol.EqualAsync(expected, actual.Mutations);
     }
 

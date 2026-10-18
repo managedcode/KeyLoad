@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-DSTORE-001: successful document CRUD has the same real CLUSTER outcome through both public clients.</summary>
+/// <summary>AC-DSTORE-001: successful document CRUD has the same real Orleans outcome through both public clients.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)

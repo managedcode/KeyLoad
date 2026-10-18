@@ -72,5 +72,5 @@ internal sealed class PartitionQueryPublicBudgetTests
     private static PartitionQueryPageV1 Run(PartitionQueryPublicTestSupport fixture,
         PartitionQueryRequestV1 request)
         => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", request,
-            PartitionQueryPublicTestSupport.ExpectedOwner);
+            fixture.ExpectedOwner);
 }

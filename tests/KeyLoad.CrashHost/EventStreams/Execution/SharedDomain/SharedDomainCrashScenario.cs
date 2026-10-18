@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Security.Cryptography;
 using KeyLoad.CrashHost.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -16,13 +18,13 @@ internal static class SharedDomainCrashScenario
         var creations = SharedDomainCrashOperations.Configure(database);
         var scopes = SharedDomainCorpus.Create(Tenant, Database);
         var time = TimeProvider.System.GetUtcNow();
-        List<ReplicatedOperation> operations = [];
-        List<OperationResult> results = [];
+        List<Command<DatabaseCommand>> operations = [];
+        List<Result<object>> results = [];
         foreach (var scope in scopes.Skip(SecondIndex))
         {
             progress.Record(SharedDomainChildProgressPhase.SeedProducer, operations.Count + SecondIndex);
             var command = SharedDomainCorpus.Producer(scope, CommandId, Item);
-            var operation = SharedDomainCrashOperations.Create(OperationKind.Batch, command.CommandId, command, time);
+            var operation = SharedDomainCrashOperations.Create(database, OperationKind.Batch, command.CommandId, command, time);
             var result = database.Apply(operation);
             _ = result.Get<CommitReceipt>();
             operations.Add(operation);
@@ -30,21 +32,21 @@ internal static class SharedDomainCrashScenario
         }
         var lane = new QueueLaneRef(scopes[SecondIndex].Partition, SecondQueue);
         var receive = new ReceiveRequest(Guid.NewGuid(), lane);
-        var receivedOperation = SharedDomainCrashOperations.Create(OperationKind.Receive, receive.RequestId, receive, time);
+        var receivedOperation = SharedDomainCrashOperations.Create(database, OperationKind.Receive, receive.RequestId, receive, time);
         progress.Record(SharedDomainChildProgressPhase.QueueReceive);
         var received = database.Apply(receivedOperation);
         var delivery = received.Get<ReceiveResult>().Deliveries.Single();
         operations.Add(receivedOperation);
         results.Add(received);
         var acknowledgement = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
-        var acknowledgedOperation = SharedDomainCrashOperations.Create(OperationKind.Delivery, acknowledgement.CommandId, acknowledgement, time);
+        var acknowledgedOperation = SharedDomainCrashOperations.Create(database, OperationKind.Delivery, acknowledgement.CommandId, acknowledgement, time);
         progress.Record(SharedDomainChildProgressPhase.QueueAcknowledgement);
         var acknowledged = database.Apply(acknowledgedOperation);
         _ = acknowledged.Get<CommitReceipt>();
         operations.Add(acknowledgedOperation);
         results.Add(acknowledged);
         var original = SharedDomainCorpus.Producer(scopes[FirstIndex], CommandId, Item);
-        var originalOperation = SharedDomainCrashOperations.Create(OperationKind.Batch, original.CommandId, original, time);
+        var originalOperation = SharedDomainCrashOperations.Create(database, OperationKind.Batch, original.CommandId, original, time);
         await SaveAsync(directory, store, progress, originalOperation, operations.ToArray(), results.ToArray(), creations);
         progress.Record(SharedDomainChildProgressPhase.ArmingOriginalBoundary);
         boundary.Position = store.Position + FirstRevision;
@@ -54,8 +56,8 @@ internal static class SharedDomainCrashScenario
     }
 
     private static async Task SaveAsync(string directory, ZoneTreeStore store, SharedDomainChildProgress progress,
-        ReplicatedOperation original,
-        ReplicatedOperation[] operations, OperationResult[] results, ReplicatedOperation[] creations)
+        Command<DatabaseCommand> original,
+        Command<DatabaseCommand>[] operations, Result<object>[] results, Command<DatabaseCommand>[] creations)
     {
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, SharedDomainCrashProtocol.ResourceCreationsFile, creations);
         progress.Record(SharedDomainChildProgressPhase.SaveOriginalOperation);

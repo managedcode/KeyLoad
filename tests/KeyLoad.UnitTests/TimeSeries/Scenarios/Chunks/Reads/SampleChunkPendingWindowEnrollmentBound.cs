@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Server;
@@ -10,26 +12,25 @@ internal static class SampleChunkPendingWindowEnrollmentBound
     private const string Exhausted = "The native series chunk window exceeds its admitted bound.";
 
     internal static async Task RefuseAsync(SampleChunkCanonicalFixture fixture, SampleChunkPendingBoundTrial trial,
-        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)
     {
         var from = SampleChunkCanonicalFixture.Until.AddHours(SampleChunkPendingBoundProtocol.WindowHours);
         var until = from.AddHours(SampleChunkPendingBoundProtocol.WindowHours);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition,
             [new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
                 trial.ExcessWindow, from, until)]);
-        var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch,
-            SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = fixture.Owner.Database.CreateCommand(OperationKind.Batch, command.CommandId, SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var raw = fixture.Raw();
-        OperationResult? rejected = null;
+        Result<object>? rejected = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             rejected = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
             originals.Add((operation, rejected));
-            var expected = new OperationResult(null, ErrorCode.ResourceExhausted, Exhausted);
+            var expected = Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, Exhausted));
             await Assert.That(SampleRollupWholeFlow.Outcome(rejected)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
-            await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(rejected.Json).IsNull();
+            await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(fixture.Raw()).IsEqualTo(raw), failures);

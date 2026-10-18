@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
@@ -14,10 +16,10 @@ internal static class SharedDomainHistoryOperations
     private const string StaleLeaseDetail = "The delivery lease is stale.";
 
     internal static async Task SaveAsync(IAtomicStore store, SharedDomainState state, PartitionRef partition,
-        ReplicatedOperation operation, OperationResult result)
+        Command<DatabaseCommand> operation, Result<object> result)
     {
-        var key = KeySpace.PartitionOutcome(partition, Writer, operation.Id);
-        var locator = KeySpace.OutcomeLocatorV2(partition, Writer, operation.Id);
+        var key = KeySpace.PartitionOutcome(partition, Writer, operation.CommandId);
+        var locator = KeySpace.OutcomeLocatorV2(partition, Writer, operation.CommandId);
         var bytes = SharedDomainNativeImage.Required(store, key);
         var pointer = SharedDomainNativeImage.Required(store, locator);
         await Assert.That(pointer.AsSpan().SequenceEqual(key)).IsTrue();
@@ -32,11 +34,11 @@ internal static class SharedDomainHistoryOperations
         await Assert.That(outcome.OnlineTextAuthority).IsNull();
         await Assert.That(outcome.RemoteTransferAuthority).IsNull();
         await Assert.That(outcome.RemoteTransferFailureAuthority).IsNull();
-        if (result.NativeValue is ReceiveResult)
+        if (result.Value is ReceiveResult)
         {
             await NativeReplayResultAssertions.Same<ReceiveResult>(outcome.Result, result);
         }
-        else if (result.Error is null)
+        else if (Errors.Code(result.Problem) is null)
         {
             await NativeReplayResultAssertions.Same<CommitReceipt>(outcome.Result, result);
         }
@@ -69,7 +71,7 @@ internal static class SharedDomainHistoryOperations
             await SharedDomainValueAssertions.FailureAsync(database.ResolveOutcome(item.Operation), ErrorCode.PermissionDenied, ScopeDenied);
             return;
         }
-        if (item.Result.Error is not null)
+        if (Errors.Code(item.Result.Problem) is not null)
         {
             await SameResultAsync(SharedDomainOperations.Apply(database, item.Operation, token), item.Result);
             await SameResultAsync(database.ResolveOutcome(item.Operation), item.Result);
@@ -80,7 +82,7 @@ internal static class SharedDomainHistoryOperations
             await SharedDomainValueAssertions.FailureAsync(database.ResolveOutcome(item.Operation), ErrorCode.PermissionDenied, EpochDenied);
             return;
         }
-        if (item.Result.NativeValue is ReceiveResult)
+        if (item.Result.Value is ReceiveResult)
         {
             await SharedDomainValueAssertions.FailureAsync(database.ResolveOutcome(item.Operation), ErrorCode.StaleLease, StaleLeaseDetail);
             return;
@@ -89,9 +91,9 @@ internal static class SharedDomainHistoryOperations
         await SameResultAsync(database.ResolveOutcome(item.Operation), item.Result);
     }
 
-    private static async Task SameResultAsync(OperationResult actual, OperationResult expected)
+    private static async Task SameResultAsync(Result<object> actual, Result<object> expected)
     {
-        if (expected.Error is null)
+        if (Errors.Code(expected.Problem) is null)
         {
             await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);
         }

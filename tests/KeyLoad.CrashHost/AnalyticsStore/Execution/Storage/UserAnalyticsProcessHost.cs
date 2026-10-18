@@ -1,69 +1,63 @@
-using KeyLoad.Clustering;
-using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
+using System.Net;
+using System.Net.Sockets;
 using KeyLoad.Server;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using P = KeyLoad.CrashHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
 
 namespace KeyLoad.CrashHost.Features.AnalyticsStore;
 
+/// <summary>Uses the production silo and Grain Service owner for local generation process recovery.</summary>
 internal static class UserAnalyticsProcessHost
 {
-    internal static async Task RunAsync(string root, Func<PartitionHost, ServerRuntimeOptions, Task> body)
+    private const int DynamicPort = 0;
+
+    internal static async Task RunAsync(string root, Func<PartitionHost, ServerRuntimeOptions, Task> body,
+        CancellationToken token)
     {
-        var registrations = new ServiceCollection().AddRuntimeOptions(new ConfigurationBuilder().Build());
-        registrations.AddSingleton(UserAnalyticsProcessOptions.Create(root));
+        using var reservation = new TcpListener(IPAddress.Loopback, DynamicPort);
+        reservation.Start();
+        var endpoint = (IPEndPoint)reservation.LocalEndpoint;
         var failures = new List<Exception>();
-        try
+        WebApplication? application = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var logging = LoggerFactory.Create(_ => { });
-            try
-            {
-                using var services = registrations.BuildServiceProvider();
-                await ServerFailureObserver.ObserveAsync(() => RunHostAsync(services, logging, body, failures), failures);
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            application = await ServerConfiguration.BuildAsync(UserAnalyticsProcessOptions.Arguments(root, endpoint.Port),
+                localhostClustering: new(endpoint), startupCancellation: token).ConfigureAwait(false);
+            reservation.Stop();
+            await application.StartAsync(token).ConfigureAwait(false);
+            var host = application.Services.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+            await body(host, application.Services.GetRequiredService<ServerRuntimeOptions>()).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        if (application is not null)
         {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
+            await CloseAsync(application, failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RunHostAsync(IServiceProvider services, ILoggerFactory logging,
-        Func<PartitionHost, ServerRuntimeOptions, Task> body, List<Exception> failures)
+    private static async Task CloseAsync(WebApplication app, List<Exception> failures)
     {
-        var runtime = services.GetRequiredService<ServerRuntimeOptions>();
-        var ownership = new PartitionHostOwnership();
-        PartitionHost? host = null;
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            host = await PartitionHost.OpenAsync(runtime, new AuthorizationPolicy(),
-                new CommandAdmissionGovernor(runtime.CommandAdmission), TimeProvider.System,
-                logging.CreateLogger<ReplicaConsensus>(), ownership);
-            await body(host, runtime);
-        }, failures);
-        if (host is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => host.DisposeAsync().AsTask(), failures);
-        }
-        if (!ownership.CanReleaseRoot)
+        var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();
+        using var deadline = new CancellationTokenSource(runtime.ServerExecution.Value.ShutdownTimeout, TimeProvider.System);
+        var connections = app.Services.GetRequiredService<ServerConnectionRegistry>();
+        await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        var node = app.Services.GetRequiredService<OrleansNode>();
+        await ServerFailureObserver.ObserveAsync(() => node.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        if (!node.HasJoinedRequestWork)
         {
             failures.Add(new IOException(P.Invalid));
+            return;
         }
+        await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => app.Services.GetRequiredService<PartitionStorageLifecycle>()
+            .StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        var owner = app.Services.GetRequiredService<PartitionHostApplicationOwner>();
+        if (owner.Closing is not { IsCompleted: true } || !owner.CanReleaseRoot)
+        {
+            failures.Add(new IOException(P.Invalid));
+            return;
+        }
+        await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
     }
 }

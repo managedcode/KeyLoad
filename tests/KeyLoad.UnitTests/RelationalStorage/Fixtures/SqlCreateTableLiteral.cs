@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
@@ -30,8 +31,8 @@ internal static class SqlCreateTableLiteral
         return SqlOperationCompiler.Compile(new(partition, sql, CommandId: id), limits,
             limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
     }
-    internal static OperationResult Apply(DatabaseEngine database, McpDecodedOperation decoded, DateTimeOffset issued)
+    internal static Result<object> Apply(DatabaseEngine database, McpDecodedOperation decoded, DateTimeOffset issued)
         => Apply(database, decoded, issued, Root);
-    internal static OperationResult Apply(DatabaseEngine database, McpDecodedOperation decoded, DateTimeOffset issued, string principal)
-        => database.Apply(database.CreateNativeOperation(OperationKind.CreateTable, decoded.CommandId, principal, issued, decoded.Payload));
+    internal static Result<object> Apply(DatabaseEngine database, McpDecodedOperation decoded, DateTimeOffset issued, string principal)
+        => database.Apply(database.CreateCommand(OperationKind.CreateTable, decoded.CommandId, principal, issued, decoded.Payload));
 }

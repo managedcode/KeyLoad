@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ResourceExecution;
 using A = KeyLoad.UnitTests.Features.ClusterRouting.ConfigureResourceOriginalLifetimeAssertions;
@@ -57,10 +58,10 @@ internal static class ConfigureResourceOriginalLifetimeFlow
         await A.EqualAsync(created.Lifetime, healthy.Lifetime);
     }, token);
 
-    private static async Task<(ReplicatedOperation Operation, ResourceLifetimeV1 Lifetime)> ConfigureAsync(
+    private static async Task<(Command<DatabaseCommand> Operation, ResourceLifetimeV1 Lifetime)> ConfigureAsync(
         TestDatabase fixture, NativeRequestWorkOwner owner, ResourceDefinition expected, ResourceDefinition? previous, CancellationToken token, bool createTable = false)
     {
-        ReplicatedOperation? original = null;
+        Command<DatabaseCommand>? original = null;
         ResourceLifetimeV1? lifetime = null;
         await O.LeaseAsync(fixture, owner, Guid.NewGuid(), async (lease, work) =>
         {
@@ -71,11 +72,11 @@ internal static class ConfigureResourceOriginalLifetimeFlow
             var payload = createTable
                 ? NativeSerialization.Serialize(new CreateTableRequest(request.TenantId, request.DatabaseId, expected))
                 : NativeSerialization.Serialize(request);
-            original = fixture.Database.CreateNativeOperation(createTable ? OperationKind.CreateTable : OperationKind.ConfigureResource,
+            original = fixture.Database.CreateCommand(createTable ? OperationKind.CreateTable : OperationKind.ConfigureResource,
                 Guid.NewGuid(), Subject, fixture.Database.EvaluationClock.GetUtcNow(), payload, work);
             var admitted = ResourceEffectAdmissionValidation.Read(original, fixture.Database.OperationLimitsOptions.Value);
             await Assert.That(admitted.Bindings.Length).IsEqualTo(previous is null ? 0 : 1);
-            fixture.Database.ValidateResourceEffectSubmission(original, original.EvaluatedAt, lease, work);
+            fixture.Database.ValidateResourceEffectSubmission(original, new DateTimeOffset(original.Timestamp), lease, work);
             await Assert.That(lease.Dependencies.Count).IsEqualTo(previous is null ? 0 : 1);
             await A.EqualAsync(expected, fixture.SubmitIssued(original).Get<ResourceDefinition>());
             lifetime = A.Lifetime(fixture, expected);
@@ -91,7 +92,7 @@ internal static class ConfigureResourceOriginalLifetimeFlow
             lifetime ?? throw new InvalidOperationException("The native configure lifetime was not created."));
     }
 
-    private static Task ReplayAsync(TestDatabase fixture, NativeRequestWorkOwner owner, ReplicatedOperation original,
+    private static Task ReplayAsync(TestDatabase fixture, NativeRequestWorkOwner owner, Command<DatabaseCommand> original,
         ResourceDefinition expected, ResourceLifetimeV1 lifetime, CancellationToken token)
         => O.LeaseAsync(fixture, owner, Guid.NewGuid(), async (lease, work) =>
         {
@@ -104,7 +105,7 @@ internal static class ConfigureResourceOriginalLifetimeFlow
         }, token);
 
     private static Task RefusedAsync(TestDatabase fixture, NativeRequestWorkOwner owner,
-        ReplicatedOperation original, CancellationToken token)
+        Command<DatabaseCommand> original, CancellationToken token)
         => O.LeaseAsync(fixture, owner, Guid.NewGuid(), async (lease, work) =>
         {
             await A.UnchangedAsync(fixture, async () =>

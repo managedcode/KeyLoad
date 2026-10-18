@@ -11,7 +11,7 @@ internal static class RequestCqrsScopeCases
     private const string ProjectedRoleName = "administrator";
 
     internal static async Task AcCrs006ScopePublishesOnlyPersistedIdentityAndRestoresEveryPriorKey(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         var principal = PersistPrincipal(fixture, PersistedPrefix + Guid.NewGuid().ToString("N"));
         var userSlot = RequestCqrsContextSlot.Capture(OrleansIdentityConstants.USER_CLAIMS);
@@ -37,7 +37,7 @@ internal static class RequestCqrsScopeCases
     }
 
     internal static async Task AcCrs006FailedNativeAdmissionLeavesBothRequestContextKeysUntouched(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         var principal = PersistPrincipal(fixture, PersistedPrefix + Guid.NewGuid().ToString("N"));
         var userSlot = RequestCqrsContextSlot.Capture(OrleansIdentityConstants.USER_CLAIMS);
@@ -49,7 +49,7 @@ internal static class RequestCqrsScopeCases
             userSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousUser);
             stateSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousState);
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-                _ = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+                _ = new GrainRequestIdentityScope(fixture.Services, principal,
                     Guid.Empty, Guid.Empty, CancellationToken.None, connectionId: fixture.ConnectionId));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             await userSlot.AssertPriorAsync(RequestCqrsPriorContextValue.Object, previousUser);
@@ -63,7 +63,7 @@ internal static class RequestCqrsScopeCases
     }
 
     internal static async Task AcCrs006AuthenticationPublisherClearsPriorPrincipalAndRestoresIt(
-        RequestCqrsClusterFixture fixture)
+        RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var previousUser = new ClaimsPrincipal();
@@ -74,7 +74,7 @@ internal static class RequestCqrsScopeCases
         {
             userSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousUser);
             stateSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousState);
-            using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, null,
+            using (new GrainRequestIdentityScope(fixture.Services, null,
                 requestId, Guid.Empty, CancellationToken.None, connectionId: fixture.ConnectionId))
             {
                 await Assert.That(RequestContext.Keys.Contains(OrleansIdentityConstants.USER_CLAIMS,
@@ -83,7 +83,7 @@ internal static class RequestCqrsScopeCases
                     .IsEqualTo(new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId));
                 var signed = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
                     NativeSerialization.Serialize(0));
-                var result = await fixture.Cluster.Client.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
+                var result = await fixture.Grains.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
                     .ValidateAsync(signed, requestId);
                 await Assert.That(result.Accepted).IsTrue();
                 await Assert.That(result.Subject).IsNull();
@@ -99,7 +99,7 @@ internal static class RequestCqrsScopeCases
         }
     }
 
-    private static PrincipalRecord PersistPrincipal(RequestCqrsClusterFixture fixture, string subject)
+    private static PrincipalRecord PersistPrincipal(RequestCqrsHostedRuntimeFixture fixture, string subject)
     {
         var record = new PrincipalRecord(subject, fixture.Database.Partition.TenantId,
             [new ScopeGrant(fixture.Database.Partition.DatabaseId, "*", Capability.All)], ["*"]);
@@ -107,7 +107,7 @@ internal static class RequestCqrsScopeCases
             .Get<PrincipalRecord>();
     }
 
-    private static async Task AssertRestorePairAsync(RequestCqrsClusterFixture fixture, PrincipalRecord principal,
+    private static async Task AssertRestorePairAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
         RequestCqrsContextSlot userSlot, RequestCqrsContextSlot stateSlot,
         RequestCqrsPriorContextValue userPrior, RequestCqrsPriorContextValue statePrior)
     {
@@ -120,7 +120,7 @@ internal static class RequestCqrsScopeCases
         RequestContext.Set(UnrelatedKey, graphContext);
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
-        using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
+        using (new GrainRequestIdentityScope(fixture.Services, principal,
             requestId, commandId, CancellationToken.None, connectionId: fixture.ConnectionId))
         {
             var published = (ClaimsPrincipal?)RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS);

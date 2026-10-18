@@ -1,7 +1,7 @@
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>
-/// Cumulative logical read work for one open ZoneTree store. Fields are sampled independently,
+/// Cumulative logical read work for one open ZoneTree store. Fields are read independently,
 /// so exact multi-field deltas require an isolated, quiescent store.
 /// </summary>
 /// <param name="SessionId">Fresh, nonpersisted identity for this store opening.</param>

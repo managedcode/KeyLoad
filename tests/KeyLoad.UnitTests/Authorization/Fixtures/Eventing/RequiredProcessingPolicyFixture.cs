@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -14,7 +16,7 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
     internal const string Unavailable = "The credential is unavailable or expired.";
     internal TestDatabase Harness { get; } = new();
     internal ResourceDefinition Resource { get; private set; } = null!;
-    internal List<(ReplicatedOperation Operation, CommitReceipt Receipt, byte[] Outcome)> Producers { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome)> Producers { get; } = [];
     internal QueueLaneRef Lane => new(Harness.Partition, Queue);
     internal string Payload => header ? "{\"value\":1}" : "{\"secret\":\"BODY-PROCESSING-CANARY\",\"value\":1}";
     internal string Headers => header ? "{\"secret\":\"HEADER-PROCESSING-CANARY\",\"trace\":\"one\"}" : "{\"trace\":\"one\"}";
@@ -22,9 +24,9 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
     internal static string EffectJson(string id) => id == "first" ? "{\"processed\":1}" : "{\"processed\":2}";
     internal ProcessingRequest Processing(Guid id, Delivery delivery, string document)
         => new(id, Lane, delivery.Token, "required-handler", 1L, [new PutDocument(Derived, document, EffectJson(document), 0L)]);
-    internal static ReplicatedOperation Operation(OperationKind kind, object request, Guid id, string principal = Worker)
+    internal static Command<DatabaseCommand> Operation(OperationKind kind, object request, Guid id, string principal = Worker)
         => new(id, kind, principal, default, JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options));
-    internal OperationResult Apply(OperationKind kind, object request, Guid id, string principal = Worker, CancellationToken token = default)
+    internal Result<object> Apply(OperationKind kind, object request, Guid id, string principal = Worker, CancellationToken token = default)
         => Harness.Database.ApplyEmbedded(Operation(kind, request, id, principal), token);
     internal async Task InitializeAsync(CancellationToken token)
     {
@@ -76,8 +78,7 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
         var operation = Operation(OperationKind.Batch, request, request.CommandId, "root");
         var position = Harness.Store.Position + 1L;
         var receipt = Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-        var expected = new CommitReceipt(request.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, position, 1L),
-            [new("enqueue", Queue, id, 1L)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(request.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, position), [new("enqueue", Queue, id, 1L)], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, receipt);
         Producers.Add((operation, expected, RequiredProcessingPolicyAssertions.Outcome(Harness.Store, Harness.Partition, "root", request.CommandId)));
     }

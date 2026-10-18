@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Globalization;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -57,7 +58,7 @@ internal static class SagaTimeoutCrashScenario
         ConfigureSaga(database, lane, timeoutLane, deadline);
         await WaitUntilDueAsync(deadline);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, Partition).Head.Tail;
-        var operation = CreateExpiryOperation(lane);
+        var operation = CreateExpiryOperation(database, lane);
         await SaveOperationAsync(directory, tail, operation);
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
@@ -99,14 +100,14 @@ internal static class SagaTimeoutCrashScenario
         }
     }
 
-    private static ReplicatedOperation CreateExpiryOperation(QueueLaneRef lane)
+    private static Command<DatabaseCommand> CreateExpiryOperation(DatabaseEngine database, QueueLaneRef lane)
     {
         var command = new CommandRequest(ExpireCommandId, Partition,
             [new ExpireSaga(lane, Guid.Parse(SagaIdText), ExpectedRevision)]);
-        return CrashDatabase.Operation(OperationKind.Batch, command, ExpireCommandId);
+        return CrashDatabase.Operation(database, OperationKind.Batch, command, ExpireCommandId);
     }
 
-    private static async Task SaveOperationAsync(string directory, long tail, ReplicatedOperation operation)
+    private static async Task SaveOperationAsync(string directory, long tail, Command<DatabaseCommand> operation)
     {
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), JsonDefaults.Serialize(operation));
         await File.WriteAllTextAsync(Path.Combine(directory, SeedTailFile), tail.ToString(CultureInfo.InvariantCulture));

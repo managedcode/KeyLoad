@@ -27,7 +27,7 @@ internal sealed class AnalyticsSharedIntegrationTests
         {
             ExpectedSchemaVersion = before.SchemaVersion
         });
-        await Assert.That(actual.Error).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
         await AnalyticsSharedAssertions.SameAsync(before,
             fixture.Store.Read(view => fixture.Database.Resource(view, fixture.Partition, P.Store)));
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
 
@@ -28,12 +29,11 @@ internal static class TransactionalReadViewCommands
              new DeleteDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.DeleteId, 1L),
              new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.InsertId,
                 DocumentIndexCommittedScanOracle.InsertedJson, 0L)]));
-        state.WriterReceipt = new(id, new(state.Identity.Incarnation, fixture.Partition.AtomicPartitionId, state.OldPosition + 1L, 1L),
-            [new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.ReplaceId, 2L),
+        state.WriterReceipt = new(id, new(state.Identity.Incarnation, fixture.Partition.AtomicPartitionId, state.OldPosition + 1L), [new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.ReplaceId, 2L),
              new("deleteDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.DeleteId, 2L),
-             new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.InsertId, 1L)], DurabilityProfile.ProcessDurable);
+             new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.InsertId, 1L)], DurabilityProfile.ProcessDurable, 1);
     }
-    internal static ReplicatedOperation Operation(Guid id, CommandRequest request)
+    internal static Command<DatabaseCommand> Operation(Guid id, CommandRequest request)
         => new(id, OperationKind.Batch, "root", default, System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
     internal static string[] QueueImage(global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store)
         => store.Read(view =>
@@ -45,7 +45,7 @@ internal static class TransactionalReadViewCommands
             }
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
         });
-    internal static byte[] Outcome(TransactionalReadViewState state, ReplicatedOperation operation)
-        => state.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Harness.Partition, "root", operation.Id)))
+    internal static byte[] Outcome(TransactionalReadViewState state, Command<DatabaseCommand> operation)
+        => state.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Harness.Partition, "root", operation.CommandId)))
             ?? throw new InvalidOperationException("The original transactional read-view outcome is missing.");
 }

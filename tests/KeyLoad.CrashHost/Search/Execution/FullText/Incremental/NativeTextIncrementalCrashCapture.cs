@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Clustering;
 
@@ -9,9 +10,7 @@ internal static class NativeTextIncrementalCrashCapture
         NativeTextIncrementalCrashOriginal original,
         (TextMaintenanceCapabilityResult State, ProjectionBatchResult? Receipt) completed)
     {
-        var operation = runtime.Database.NormalizeOperation(new ReplicatedOperation(original.Mutation.CommandId,
-            OperationKind.Batch, CrashFixtureValues.Principal, runtime.Database.EvaluationClock.GetUtcNow(),
-            JsonSerializer.Serialize(original.Mutation, JsonDefaults.Options)));
+        var operation = runtime.Database.OwnCommand(runtime.Database.CreateCommand(OperationKind.Batch, original.Mutation.CommandId, CrashFixtureValues.Principal, runtime.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(original.Mutation, JsonDefaults.Options)));
         var replay = runtime.Database.ResolveOutcome(operation).Get<CommitReceipt>();
         if (!NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(original.Receipt)))
         {

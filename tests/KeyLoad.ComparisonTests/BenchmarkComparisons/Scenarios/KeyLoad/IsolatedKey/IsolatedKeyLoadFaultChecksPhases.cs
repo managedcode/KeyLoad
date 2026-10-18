@@ -51,8 +51,7 @@ internal static class IsolatedKeyLoadFaultChecksPhases
     {
         var rejected = await IsolatedKeyLoadFaultChecksCopyAvailability.RejectAsync(
             app, live, admin, seed, command, nodes > 1, token);
-        receipt.NativeMcpAuthentication503 = rejected.NativeMcpAuthentication503;
-        receipt.WriteRejection = rejected.WriteCode;
+        receipt.WriteRejection = rejected;
     }
 
     private static async Task<CommitReceipt> ResolveAsync(KeyLoadClient sdk, int nodes, CommandRequest command,

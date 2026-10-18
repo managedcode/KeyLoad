@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server;
@@ -14,7 +15,7 @@ internal static class NativeDropPageRecoveryAssertions
     }
 
     internal static async Task RetainedAsync(NativeDropPageAttemptState state, ResourceRetirementAttemptV1 attempt,
-        ReplicatedOperation original, ResourceRetirementPreparedOperationStage stage)
+        Command<DatabaseCommand> original, ResourceRetirementPreparedOperationStage stage)
     {
         var source = state.Profile.Source;
         var current = source.Database.ReadResourceRetirementAttempt(state.Context.PrincipalId, state.Scope,
@@ -25,8 +26,8 @@ internal static class NativeDropPageRecoveryAssertions
         await Assert.That(prepared.Stage).IsEqualTo(stage);
         if (stage == ResourceRetirementPreparedOperationStage.Persisted)
         {
-            await Assert.That(prepared.Original!.NativePayload.Span.SequenceEqual(original.NativePayload.Span)).IsTrue();
-            var absent = source.Store.Read(view => view.ReadOwnedValue(KeySpace.GlobalOutcome(original.PrincipalId, original.Id)) is null);
+            await Assert.That(prepared.Original!.NativePayload.Span.SequenceEqual(original.Value!.Input.Span)).IsTrue();
+            var absent = source.Store.Read(view => view.ReadOwnedValue(KeySpace.GlobalOutcome(original.UserId!, original.CommandId)) is null);
             await Assert.That(absent).IsTrue();
         }
         else

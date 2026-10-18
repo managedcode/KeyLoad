@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -32,7 +33,7 @@ internal static class GraphTraversalRowContinuation
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(db.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(db.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(db.Store.Position);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(OriginalOwnershipEpoch);
+
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         MutationReceipt[] mutations = [new("putDocument", Collection, Intermediate, UpdatedRevision)];
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(mutations))).IsTrue();
@@ -74,8 +75,7 @@ internal static class GraphTraversalRowContinuation
     {
         var image = GraphShortestPathFullStoreImage.Bytes(store);
         var cut = store.Position;
-        var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, Root, default,
-            JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = engine.CreateCommand(OperationKind.Batch, command.CommandId, Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var replay = engine.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await Assert.That(Outcome(store, command).AsSpan().SequenceEqual(outcome)).IsTrue();

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -6,15 +8,13 @@ using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepar
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
-// Real ordered native admission, with the original canonical and replica directories joined before reopen.
+// Reopens the actual canonical ZoneTree owner only after its original file lifetime has joined.
 internal sealed class CompositionPrefixPrepareOwner
 {
     private readonly StoreIdentity identity;
-    private readonly StoreIdentity replicaIdentity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
     private DatabaseEngine? coldDatabase;
-    private TestDatabaseReplicaAdmission? coldAdmission;
     internal TestDatabase Source
     {
         get;
@@ -35,19 +35,7 @@ internal sealed class CompositionPrefixPrepareOwner
         var directory = Path.Combine(Path.GetTempPath(), D.DirectoryPrefix + Guid.NewGuid().ToString(D.GuidFormat));
         Source = new(limits, directory);
         identity = Source.Store.Identity;
-        try
-        {
-            var storage = Source.StorageExecution.Value;
-            replicaIdentity = ZoneTreeIdentityFile.Read(Path.Combine(directory + TestDatabaseReplicaDirectory.Suffix,
-                ZoneTreePersistenceFormat.IdentityFileName), storage.MaximumIdentityFileBytes, storage.StreamBufferBytes);
-        }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            ServerFailureObserver.Observe(Source.JoinOwnedResources, failures);
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
+
     }
 
     internal static async Task RunAsync(DatabaseLimits? limits,
@@ -65,31 +53,30 @@ internal sealed class CompositionPrefixPrepareOwner
             ServerFailureObserver.Observe(owner.Join, failures);
             if (failures.Count == D.Absent)
             {
-                ServerFailureObserver.Observe(() => Directory.Delete(owner.Source.Directory + TestDatabaseReplicaDirectory.Suffix, true), failures);
                 ServerFailureObserver.Observe(() => Directory.Delete(owner.Source.Directory, true), failures);
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal OperationResult Submit(ReplicatedOperation original)
+    internal Result<object> Submit(Command<DatabaseCommand> original)
     {
         Token.ThrowIfCancellationRequested();
-        return originalJoined ? coldAdmission!.Submit(original, explicitTime: true, cancellationToken: Token)
+        return originalJoined ? Database.Apply(original)
             : Source.SubmitIssued(original);
     }
 
-    internal (long LastIndex, long CommittedIndex, long Term) Cut() => originalJoined
-        ? coldAdmission!.ReadJournalCut() : Source.ReadJournalCut();
+    internal (long AppliedPosition, long StorePosition) Cut()
+        => Store.Read(_ => (Database.LastApplied, Store.Position));
 
-    internal ReplicatedOperation Retained(ReplicatedOperation original) => (originalJoined
-        ? coldAdmission!.ReadRetainedEntry(original) : Source.ReadRetainedEntry(original)).Operation!;
+    internal Command<DatabaseCommand> Retained(Command<DatabaseCommand> original) => (originalJoined
+        ? OutcomeStoreOracle.ReadStored(Store, original) ?? throw new InvalidOperationException("The exact stored command is missing.") : Source.ReadStoredOutcome(original)).PreparedCommand;
 
     internal CommitToken NextToken()
     {
         var placement = Database.ReadAtomicPartitionPlacement(D.Root, Source.Partition);
         return new(placement.Incarnation, Source.Partition.AtomicPartitionId,
-            checked(Cut().LastIndex + D.FirstRevision), placement.PlacementEpoch);
+            checked(Cut().AppliedPosition + D.FirstRevision));
     }
 
     internal async Task ReopenAsync()
@@ -101,13 +88,7 @@ internal sealed class CompositionPrefixPrepareOwner
         },
             identity.NodeId, Source.StorageExecution);
         await CompositionPrefixPrepareAssertions.EqualAsync(identity, coldStore.Identity);
-        var storage = Source.StorageExecution.Value;
-        var currentReplica = ZoneTreeIdentityFile.Read(Path.Combine(Source.Directory + TestDatabaseReplicaDirectory.Suffix,
-            ZoneTreePersistenceFormat.IdentityFileName), storage.MaximumIdentityFileBytes, storage.StreamBufferBytes);
-        await CompositionPrefixPrepareAssertions.EqualAsync(replicaIdentity, currentReplica);
         coldDatabase = Source.CreateConfiguredDatabase(coldStore);
-        coldAdmission = Source.CreateTargetAdmission(coldDatabase, coldStore, Source.Directory,
-            Source.Directory + TestDatabaseReplicaDirectory.Suffix, replicaIdentity.NodeId);
     }
 
     private void Join()
@@ -118,16 +99,10 @@ internal sealed class CompositionPrefixPrepareOwner
             Source.JoinOwnedResources();
             return;
         }
-        var admission = coldAdmission;
         var store = coldStore;
-        coldAdmission = null;
         coldStore = null;
         coldDatabase = null;
         var failures = new List<Exception>();
-        if (admission is not null)
-        {
-            ServerFailureObserver.Observe(admission.Dispose, failures);
-        }
         if (store is not null)
         {
             ServerFailureObserver.Observe(store.Dispose, failures);

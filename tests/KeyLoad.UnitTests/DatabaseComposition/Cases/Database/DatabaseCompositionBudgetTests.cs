@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -28,8 +29,7 @@ internal sealed class DatabaseCompositionBudgetTests
             MaxQueryReadBytes = TinyByteBudget
         }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var request = new CommandRequest(Guid.NewGuid(), db.Partition, [new QueueToGraph(Graph, Queue, Prefix)]);
-        var operation = new ReplicatedOperation(request.CommandId, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var operation = limited.CreateCommand(OperationKind.Batch, request.CommandId, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => limited.Apply(operation).Get<CommitReceipt>());
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -57,7 +57,7 @@ internal sealed class DatabaseCompositionBudgetTests
             var request = new CommandRequest(Guid.NewGuid(), db.Partition,
                 [new QueueToGraph(Graph, Queue, prefix + "a-"), new QueueToGraph(Graph, Queue, prefix + "b-")]);
             // Prepare the genuine original through the fixture before measuring deterministic apply's source ledger.
-            var operation = db.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, "root",
+            var operation = db.Database.CreateCommand(OperationKind.Batch, request.CommandId, "root",
                 TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(request));
             return engine.Apply(operation).Get<CommitReceipt>();
         }

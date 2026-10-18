@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using static KeyLoad.UnitTests.Features.Messaging.SubscriptionContinuationProtocol;
@@ -23,10 +24,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
         retained.Add(new(OperationKind.ReceiveSubscription, request, request.RequestId, result));
         var initial = new ReceiveSubscriptionRequest(original.RequestId, group, MaxEvents: Window);
         retained.Add(new(OperationKind.ReceiveSubscription, initial, initial.RequestId,
-            new(null)
-            {
-                NativeValue = original
-            }));
+            Result<object>.Succeed(original)));
         var delivery = result.Get<ReceiveSubscriptionResult>().Deliveries.Single();
         var remaining = new List<SubscriptionDelivery>
         {
@@ -106,7 +104,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
         await SubscriptionContinuationAssertions.TerminalAsync(db, cold, group, original, time);
         foreach (var entry in retained)
         {
-            if (entry.Result.NativeValue is ReceiveSubscriptionResult { Deliveries.IsEmpty: false })
+            if (entry.Result.Value is ReceiveSubscriptionResult { Deliveries.IsEmpty: false })
             {
                 await SubscriptionContinuationAssertions.SettledAsync(db, cold, entry, time, token);
             }

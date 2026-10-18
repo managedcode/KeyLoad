@@ -1,3 +1,6 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -15,19 +18,19 @@ internal static class Bm25ConfiguredQuotaBytes
             return page.Records.Sum(row => checked((long)row.Key.Length + row.Value.Length));
         });
 
-    internal static long Candidate(ReplicatedOperation operation)
+    internal static long Candidate(Command<DatabaseCommand> operation)
     {
         var current = Bm25ConfiguredQuotaFlow.Phase(operation).Current;
         return checked((long)Bm25CorpusKeys.Current(current).Length + NativeSerialization.Serialize(current).Length);
     }
 
-    internal static async Task RequireStoredAsync(TestDatabase database, ReplicatedOperation operation, OperationResult result)
+    internal static async Task RequireStoredAsync(TestDatabase database, Command<DatabaseCommand> operation, Result<object> result)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var phase = Bm25ConfiguredQuotaFlow.Phase(operation);
         var receipt = result.Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.ReadRetainedEntry(operation.Id).Index);
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
+        await Assert.That(receipt.Token.Position).IsEqualTo(database.ReadStoredOutcome(operation.CommandId).CanonicalSequence);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);
@@ -35,6 +38,6 @@ internal static class Bm25ConfiguredQuotaBytes
             ?? throw new InvalidOperationException("The genuinely published corpus head is missing.");
         await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(phase.Current), actual);
         await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(
-            database.ReadRetainedEntry(operation.Id).Operation!));
+            database.ReadStoredOutcome(operation.CommandId).PreparedCommand!));
     }
 }

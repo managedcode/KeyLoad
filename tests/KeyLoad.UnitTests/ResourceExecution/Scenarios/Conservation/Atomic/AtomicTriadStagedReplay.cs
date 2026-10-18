@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 
@@ -5,17 +7,17 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class AtomicTriadStagedReplay
 {
-    internal static void Retain(AtomicTriadStagedFixture state, ReplicatedOperation operation, OperationResult result)
+    internal static void Retain(AtomicTriadStagedFixture state, Command<DatabaseCommand> operation, Result<object> result)
     {
         state.Produced.Add((operation, result));
         var bytes = state.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition,
-            operation.PrincipalId, operation.Id))) ?? throw new InvalidOperationException(AtomicTriadStagedProtocol.Missing);
+            operation.UserId!, operation.CommandId))) ?? throw new InvalidOperationException(AtomicTriadStagedProtocol.Missing);
         state.Originals.Add((operation, result, bytes));
     }
 
-    internal static async Task OriginalBytesAsync(AtomicTriadStagedFixture state, ReplicatedOperation operation, byte[] bytes)
+    internal static async Task OriginalBytesAsync(AtomicTriadStagedFixture state, Command<DatabaseCommand> operation, byte[] bytes)
         => await Assert.That(state.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition,
-            operation.PrincipalId, operation.Id)))).IsEquivalentTo(bytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            operation.UserId!, operation.CommandId)))).IsEquivalentTo(bytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
 
     internal static async Task CancelAsync(AtomicTriadStagedFixture state)
     {
@@ -54,20 +56,20 @@ internal static class AtomicTriadStagedReplay
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RequireAsync(AtomicTriadStagedFixture state, ReplicatedOperation operation,
-        OperationResult original, byte[] bytes, bool repaired)
+    private static async Task RequireAsync(AtomicTriadStagedFixture state, Command<DatabaseCommand> operation,
+        Result<object> original, byte[] bytes, bool repaired)
     {
         var actual = state.Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => OriginalBytesAsync(state, operation, bytes), failures);
-        var expected = repaired && original.Error is not null
-            ? new OperationResult(null, ErrorCode.PermissionDenied, AtomicTriadStagedProtocol.PolicyDetail) : original;
+        var expected = repaired && Errors.Code(original.Problem) is not null
+            ? Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, AtomicTriadStagedProtocol.PolicyDetail)) : original;
         await ServerFailureObserver.ObserveAsync(() => AtomicTriadStagedCurrent.EqualAsync(actual, expected), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            if (actual.Error is not null)
+            if (Errors.Code(actual.Problem) is not null)
             {
-                await Assert.That(actual.NativeValue).IsNull();
+                await Assert.That(actual.Value).IsNull();
             }
             else
             {

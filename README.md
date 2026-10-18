@@ -169,7 +169,7 @@ flowchart LR
 
 Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests native deactivation.
 
-Orleans does all of the clustering: membership, discovery, placement, activation migration, communication between silos and scaling. Every silo has its own ZoneTree that owns its files; partition grains reach it on their own node or on other nodes through Orleans calls, and a write is copied to the configured number of replicas and acknowledged by a majority. Storage files never move with grain activations. Background work (queues, ANN, time series) runs in Orleans stateless workers that buffer events and flush them on a timer. See [ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md) and the [architecture map](docs/Architecture.md).
+Orleans does all of the clustering: membership, discovery, placement, activation migration, communication between silos and scaling. Every silo has its own ZoneTree that owns its files; database grains reach it on their own node or on other nodes through Orleans calls, and a write is copied to the configured number of replicas and acknowledged only after every configured copy persists it. Receipts report the actual persisted copy count separately from durability. Storage files never move with grain activations. Background work (queues, ANN, time series) runs in Orleans stateless workers that buffer events and flush them on a timer. See [ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md) and the [architecture map](docs/Architecture.md).
 
 ## Why .NET, Orleans and ZoneTree
 
@@ -219,10 +219,10 @@ KeyLoad__SiloCount=5 KeyLoad__ReplicaCount=3 aspire start --apphost build/KeyLoa
 ```
 
 `SiloCount` is the number of Orleans silos. `ReplicaCount` is the number of
-copies of the data and must be between one and `SiloCount`. A write requires a
-majority of copies: one of one, both of two, two of three, or three of five.
-One copy has no fault tolerance; with two copies a write cannot be acknowledged
-while either is unavailable.
+copies of the data and must be between one and `SiloCount`. A write requires
+every configured copy: one of one, both of two, all three of three, or all five
+of five. A missing required copy blocks successful writes; available owners can
+still serve earlier committed data after native Orleans membership settles.
 
 Both values are read at startup; there is no live resizing or data movement.
 Node data and private development credentials remain in `data/cluster/`.

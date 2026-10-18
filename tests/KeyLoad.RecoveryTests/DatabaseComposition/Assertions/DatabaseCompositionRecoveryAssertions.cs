@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
@@ -52,7 +53,7 @@ internal static class DatabaseCompositionRecoveryAssertions
             .IsEqualTo(seedTail + 2);
     }
 
-    internal static async Task AssertStableReplayAsync(DatabaseEngine database, ReplicatedOperation operation,
+    internal static async Task AssertStableReplayAsync(DatabaseEngine database, Command<DatabaseCommand> operation,
         CommitReceipt first)
     {
         var partition = DatabaseCompositionCrashScenario.Partition;

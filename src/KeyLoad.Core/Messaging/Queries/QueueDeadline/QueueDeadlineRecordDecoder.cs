@@ -20,7 +20,6 @@ internal static class QueueDeadlineRecordDecoder
     private const int LastField = 1;
     private const int Initial = 0;
     private const int PointRecordCount = 1;
-    private const int IndexedReadWithLookahead = 3;
 
     internal static QueueDeadlineHint? Read(DatabaseEngine database, IKeyValueView view,
         ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, DuePageState page)
@@ -58,8 +57,7 @@ internal static class QueueDeadlineRecordDecoder
                 throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
             }
         }
-        return Select(lane, metadata, space, page.WakeAt,
-            page.MaximumRecordsPerPage < IndexedReadWithLookahead);
+        return Select(lane, metadata, space, page.WakeAt);
     }
 
     private static MessageMetadata ReadMetadata(DatabaseEngine database, IKeyValueView view, QueueLaneRef lane,
@@ -100,7 +98,7 @@ internal static class QueueDeadlineRecordDecoder
     }
 
     private static QueueDeadlineHint? Select(QueueLaneRef lane, MessageMetadata metadata, string space,
-        DateTimeOffset now, bool metadataDeadlineFallback)
+        DateTimeOffset now)
     {
         if (metadata.State is not (MessageState.Scheduled or MessageState.Ready or MessageState.Leased))
         {
@@ -112,16 +110,7 @@ internal static class QueueDeadlineRecordDecoder
             {
                 return Create(lane, metadata, QueueDeadlineKind.ExpireMessage, expires);
             }
-            if (!metadataDeadlineFallback)
-            {
-                return null;
-            }
-            if (metadata.State == MessageState.Scheduled && metadata.NotBefore is { } scheduled && scheduled <= now)
-            {
-                return Create(lane, metadata, QueueDeadlineKind.PromoteScheduled, scheduled);
-            }
-            return metadata.State == MessageState.Leased && metadata.LeaseUntil is { } lease && lease <= now
-                ? Create(lane, metadata, QueueDeadlineKind.ExpireLease, lease) : null;
+            return null;
         }
         var leased = space == Leased;
         var state = leased ? MessageState.Leased : MessageState.Scheduled;

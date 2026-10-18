@@ -1,4 +1,6 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed record QueueDeliveryVersionExhaustionState(QueueClaimVersionExhaustionState Data,
-    ReplicatedOperation Claim, OperationResult Claimed, Delivery Delivery, MessageMetadata RepairedMetadata);
+    Command<DatabaseCommand> Claim, Result<object> Claimed, Delivery Delivery, MessageMetadata RepairedMetadata);

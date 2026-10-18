@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
@@ -35,14 +36,14 @@ internal static class SqlCreateTablePolicy
         var denied = SqlCreateTableLiteral.Compile(fixture.Partition, Guid.NewGuid(), RepairSql, token);
         var issued = fixture.Database.EvaluationClock.GetUtcNow();
         var before = fixture.Database.GetOutboxStatus(SqlCreateTableLiteral.Root, fixture.Partition);
-        await Assert.That(SqlCreateTableLiteral.Apply(fixture.Database, denied, issued, state.Principal.Id).Error)
+        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, denied, issued, state.Principal.Id).Problem))
             .IsEqualTo(ErrorCode.PermissionDenied);
         await SqlCreateTableAssertions.SameAsync(before, fixture.Database.GetOutboxStatus(SqlCreateTableLiteral.Root, fixture.Partition));
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
-        await Assert.That(SqlCreateTableLiteral.Apply(fixture.Database, state.Created, state.CreatedAt, state.Principal.Id).Error)
+        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, state.Created, state.CreatedAt, state.Principal.Id).Problem))
             .IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(SqlCreateTableLiteral.Apply(fixture.Database, state.Duplicate, state.DuplicateAt, state.Principal.Id).Error)
+        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, state.Duplicate, state.DuplicateAt, state.Principal.Id).Problem))
             .IsEqualTo(ErrorCode.PermissionDenied);
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlCreateTableOutcomeBytes.RequireAsync(fixture.Store, state);
@@ -57,13 +58,13 @@ internal static class SqlCreateTablePolicy
         image = QueueWholeFlowStorage.Bytes(fixture.Store);
         cut = fixture.Store.Position;
         await ReplayAsync(fixture.Database, state);
-        await SqlCreateTableAssertions.SameAsync(new OperationResult(null, ErrorCode.PermissionDenied, EpochChanged),
+        await SqlCreateTableAssertions.SameAsync(Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, EpochChanged)),
             SqlCreateTableLiteral.Apply(fixture.Database, denied, issued, state.Principal.Id));
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
         var healthy = SqlCreateTableLiteral.Compile(fixture.Partition, Guid.NewGuid(), RepairSql, token);
         var healthyAt = fixture.Database.EvaluationClock.GetUtcNow();
         var result = SqlCreateTableLiteral.Apply(fixture.Database, healthy, healthyAt, state.Principal.Id);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         await SqlCreateTableAssertions.SameAsync(SqlCreateTableLiteral.Definition(fixture.Partition) with
         {
             Name = RepairTable
@@ -85,7 +86,7 @@ internal static class SqlCreateTablePolicy
     }
     internal static async Task ReplayAsync(DatabaseEngine database, SqlCreateTableState state)
     {
-        var expected = new OperationResult(null, ErrorCode.PermissionDenied, EpochChanged);
+        var expected = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, EpochChanged));
         await SqlCreateTableAssertions.SameAsync(state.EpochChanged ? expected : state.Original,
             SqlCreateTableLiteral.Apply(database, state.Created, state.CreatedAt, state.Principal.Id));
         await SqlCreateTableAssertions.SameAsync(state.EpochChanged ? expected : state.Failed,

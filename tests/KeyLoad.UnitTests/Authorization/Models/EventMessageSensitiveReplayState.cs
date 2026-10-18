@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal sealed class EventMessageSensitiveReplayState(PartitionRef partition, ResourceDefinition resource,
@@ -14,19 +15,19 @@ internal sealed class EventMessageSensitiveReplayState(PartitionRef partition, R
     internal EventSourceRef Source => new(Partition, Resource.Name, EventSourceKind.Topic);
     internal SubscriptionRef OriginalGroup => new(Source, EventMessageSensitiveReplayProtocol.Group);
     internal CommandRequest Producer { get; set; } = null!;
-    internal OperationResult Produced { get; set; } = null!;
+    internal Result<object> Produced { get; set; } = null!;
     internal Guid OriginalId
     {
         get; set;
     }
     internal object OriginalRequest { get; set; } = null!;
-    internal OperationResult Original { get; set; } = null!;
+    internal Result<object> Original { get; set; } = null!;
     internal byte[] OriginalOutcome { get; set; } = [];
     internal Guid HealthyId
     {
         get; set;
     }
     internal object HealthyRequest { get; set; } = null!;
-    internal OperationResult Healthy { get; set; } = null!;
+    internal Result<object> Healthy { get; set; } = null!;
     internal OperationKind ReceiveKind => Subscription ? OperationKind.ReceiveSubscription : OperationKind.Receive;
 }

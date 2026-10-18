@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -7,7 +8,7 @@ public sealed partial class DatabaseEngine
 {
     private QueueDueTransitionPlan PrepareQueueDueTransition(IKeyValueView view, QueueLaneRef lane,
         QueuePolicy policy, DateTimeOffset now, MessageMetadata metadata, MessageBody body, long bodyBytes,
-        QueueCounters counters, ReplicatedOperation operation, ReadOnlySpan<byte> dueKey)
+        QueueCounters counters, Command<DatabaseCommand> operation, ReadOnlySpan<byte> dueKey)
     {
         if (metadata.ExpiresAt <= now)
         {

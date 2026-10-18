@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 
@@ -16,7 +17,7 @@ internal static class AggregateSnapshotRaceCompetitors
             return fixture.Database.Apply(operation);
         }, CancellationToken.None)).ToArray();
         start.SetResult();
-        var results = new OperationResult?[tasks.Length];
+        var results = new Result<object>?[tasks.Length];
         var failures = new List<Exception>();
         for (var index = 0; index < tasks.Length; index++)
         {
@@ -37,7 +38,7 @@ internal static class AggregateSnapshotRaceCompetitors
         fixture.Winner = fixture.Commands[winner];
         var loser = results[1 - winner]!;
         await Assert.That(loser.Json).IsNull();
-        await Assert.That(loser.NativeValue).IsNull();
+        await Assert.That(loser.Value).IsNull();
         await Assert.That(loser.Error).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(loser.SafeDetail).IsEqualTo("The aggregate snapshot version has changed.");
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using A = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeAssertions;
 using P = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeProtocol;
 
@@ -14,7 +15,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
         await fixture.PolicyAsync(repaired: false);
         await A.UnchangedAsync(fixture, async () =>
         {
-            OperationResult? published = null;
+            Result<object>? published = null;
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             {
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent,
@@ -46,7 +47,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
         {
             var exhausted = fixture.Database.CreateReadWork(token);
             exhausted.ChargeBytes(fixture.Database.Database.OperationLimitsOptions.Value.MaxQueryReadBytes);
-            OperationResult? published = null;
+            Result<object>? published = null;
             var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             {
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, exhausted);
@@ -61,7 +62,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
             using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
             var work = fixture.Database.CreateReadWork(cancellation.Token);
             await cancellation.CancelAsync();
-            OperationResult? published = null;
+            Result<object>? published = null;
             var cancelled = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() =>
             {
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, work);
@@ -82,8 +83,8 @@ internal static class BudgetedQueueReceiveOutcomeFlow
         {
             var work = fixture.Database.CreateReadWork(token);
             work.ConstrainResultBytes(P.ConstrainedResultBytes);
-            await Assert.That(fixture.Result.NativeValue is ReceiveResult).IsTrue();
-            OperationResult? published = null;
+            await Assert.That(fixture.Result.Value is ReceiveResult).IsTrue();
+            Result<object>? published = null;
             var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             {
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, work);
@@ -109,7 +110,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
             var elapsed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             using var registration = deadline.Token.Register(() => elapsed.TrySetResult());
             await elapsed.Task.WaitAsync(token);
-            OperationResult? published = null;
+            Result<object>? published = null;
             var expired = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             {
                 published = fixture.Database.Database.ResolveSubmissionOutcome(fixture.OriginalIntent, work);
@@ -127,13 +128,11 @@ internal static class BudgetedQueueReceiveOutcomeFlow
         token.ThrowIfCancellationRequested();
         var delivery = fixture.Result.Get<ReceiveResult>().Deliveries.Single();
         var request = new DeliveryCommand(Guid.NewGuid(), fixture.Lane, delivery.Token, DeliveryAction.Ack);
-        var index = checked(fixture.Database.ReadJournalCut().LastIndex + P.Step);
-        var operation = fixture.Database.Database.CreateNativeOperation(OperationKind.Delivery, request.CommandId,
+        var index = checked(fixture.Database.ReadCanonicalCut().AppliedPosition + P.Step);
+        var operation = fixture.Database.Database.CreateCommand(OperationKind.Delivery, request.CommandId,
             P.Worker, fixture.Database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var receipt = fixture.Database.SubmitIssued(operation).Get<CommitReceipt>();
-        await A.EqualAsync(new CommitReceipt(request.CommandId,
-            new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId, index, P.Initial),
-            [new(P.AckKind, P.Queue, P.First, P.Acknowledged)], DurabilityProfile.ProcessDurable), receipt);
+        await A.EqualAsync(new CommitReceipt(request.CommandId, new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId, index), [new(P.AckKind, P.Queue, P.First, P.Acknowledged)], DurabilityProfile.ProcessDurable, 1), receipt);
         var following = fixture.Receive();
         await A.ReceiveAsync(fixture, following.Operation, following.Result, P.Second);
         await A.UnchangedAsync(fixture, async () =>

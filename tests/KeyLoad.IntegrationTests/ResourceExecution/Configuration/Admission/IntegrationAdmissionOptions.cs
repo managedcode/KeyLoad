@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Explicit validated native options for admission and cache policy regression fixtures.</summary>
+/// <summary>Explicit validated native options for admission and cache policy checks fixtures.</summary>
 internal static class IntegrationAdmissionOptions
 {
     internal static IOptions<CommandAdmissionLimits> Command(CommandAdmissionLimits? configured = null)

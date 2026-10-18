@@ -1,34 +1,44 @@
 # ADR-003: Durability profile and acknowledgement barrier
 
-Status: Accepted; exact profile qualification pending. Related product source: [architecture sections 5–6, 14, and 37–45](../design/product-specification.md); source enum: `DurabilityProfile` in `src/KeyLoad.Abstractions/Contracts.cs`.
+Status: accepted contract; exact-source qualification pending. Source enum:
+`src/KeyLoad.Abstractions/DurabilityProfile.cs`. Related specification:
+[ClusterReplication](../Features/ClusterReplication.md),
+[StorageRecovery](../Features/StorageRecovery.md) and
+[ADR-143](ADR-143-independent-silo-replica-topology.md).
 
-## Context and decision
+## Decision
 
-An acknowledgement is meaningful only relative to an explicit persistence and replication profile. The current contract names `Buffered`, `ProcessDurable`, `LocalDurable`, `QuorumProcessDurable`, and `QuorumDurable`. A quorum profile means a majority of the `KeyLoad:ReplicaCount` copies, written through ordinary Orleans calls to the silo-local ZoneTree owners, confirmed durable local apply. The write path must report the selected profile and must cross that profile's declared barrier before returning committed success. ProcessDurable and QuorumProcessDurable describe process-recovery scope; they do not prove survival of power loss. LocalDurable/QuorumDurable must not be advertised as qualified until filesystem/device flush semantics and fault evidence support them.
+The current profiles are `Buffered`, `ProcessDurable` and `LocalDurable`.
+`CommitReceipt.Durability` describes the persistence barrier and
+`CommitReceipt.PersistedCopies` independently records the number of copies that
+actually acknowledged the operation. A profile name never implies extra copies.
 
-## Rationale, alternatives, consequences
+`Buffered` permits loss of acknowledged work and reports zero persisted copies.
+`ProcessDurable` describes recovery from process termination after the local
+barrier. `LocalDurable` may be advertised only after filesystem/device flush
+semantics and the required fault evidence establish its stronger contract.
 
-One generic “durable” label would conceal materially different failure models. Separate acknowledgement contracts let callers choose and compare guarantees. Every profile increases latency/resource cost and needs direct failure evidence; source enums alone do not establish the barrier. No claim of power-loss safety follows from process-kill tests.
+The database grain sends the original native command through Orleans to the
+configured silo-local ZoneTree owners. Success requires every configured owner
+to confirm ordered persisted apply; the returned copy count must match those
+actual acknowledgements. Missing copies refuse success. A timeout after possible
+effects is an unknown outcome and retains the stable command ID for retry.
 
-## Related requirements
+## Implementation and evidence
 
-`REQ-MSG-001`/`AC-MSG-001`, `REQ-MSG-005`/`AC-MSG-005`, and EventStreams `REQ-EVENT-004`/`AC-EVENT-004`. Cross-link [Messaging](../Features/Messaging.md), [EventStreams](../Features/EventStreams.md), and [ADR-143](ADR-143-independent-silo-replica-topology.md) for the ReplicaCount copies.
+Each local atomic transaction records the canonical sequence, native result,
+original prepared command and business mutations together. Duplicate submission
+checks fresh persisted authorization and original content, then returns the
+retained outcome without repeating effects. Local derived-index maintenance does
+not advance the canonical command cut.
 
-## Implementation contract
+Tests must independently verify records, receipts, copy counts, original outcomes,
+resource bounds and healthy follow-up through local process recovery and actual
+Aspire SDK/MCP operations. Build, coverage, network faults and endurance remain
+separate gates. A process kill establishes no power-loss or storage-controller
+guarantee.
 
-1. Freeze per-profile acknowledged record, local persistence, majority acknowledgement, and response semantics; keep unsupported profiles unavailable in the capability manifest.
-2. Add TUnit state-machine and real-process interruption cases at every barrier, including write/ACK response loss and restart. Power-loss/endurance tests remain separate required evidence for local/quorum durable claims.
-3. Implement local persistence and read-lifetime barriers under `src/KeyLoad.Storage.ZoneTree/StorageRecovery/`, majority acknowledgement across the ReplicaCount copies through Orleans calls, and shared receipt contracts in the existing Abstractions durability contract. Preserve silo-local ZoneTree owner ownership of files; do not add standalone Durability or Commit slices.
-4. Validate profile metadata explicitly. Advertise only profiles proven by the active deployment; rollback disables stronger profiles before changing barriers and never relabels receipts.
-5. GitHub CI runs build, TUnit, process recovery, and real replicated-cluster .NET/MCP operations; power-loss and endurance require their own CI/environment evidence before qualification.
-
-Dependencies: [ADR-004](ADR-004-committed-read-views.md) and [ADR-008](ADR-008-backup-log-retention.md). No test run is implied by source presence. Escalate if the actual flush/majority-acknowledgement barrier cannot be identified; never infer power-loss durability from an enum or process kill.
-
-```mermaid
-flowchart LR
-    Mutation[Validated mutation] --> Ordered[Ordered local apply]
-    Ordered --> Barrier[Selected persistence and majority barrier]
-    Barrier --> Receipt[Receipt includes durability profile]
-    Barrier --> Recovery[Restart and failover evidence]
-    Recovery --> Claim[Only evidence-backed guarantee advertised]
-```
+Related requirements: Messaging REQ-MSG-001/005, EventStreams REQ-EVENT-004 and
+ClusterReplication REQ-REP-002/003. Committed read cuts follow
+[ADR-004](ADR-004-committed-read-views.md); backup retention follows
+[ADR-008](ADR-008-backup-log-retention.md).

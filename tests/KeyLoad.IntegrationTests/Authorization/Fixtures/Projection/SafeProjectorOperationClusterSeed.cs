@@ -54,7 +54,7 @@ internal static class SafeProjectorOperationClusterSeed
                 SafeProjectorOperationClusterProtocol.InitialRevision),
             new(SafeProjectorOperationClusterProtocol.PutKind, collection, SafeProjectorOperationClusterProtocol.Second,
                 SafeProjectorOperationClusterProtocol.InitialRevision)
-        ], DurabilityProfile.QuorumProcessDurable), receipt);
+        ], DurabilityProfile.ProcessDurable, 3), receipt);
         return new(partition, collection, reader, key, resource, resourceId, principalId, principal,
             credentialId, credential, seed, receipt);
     }

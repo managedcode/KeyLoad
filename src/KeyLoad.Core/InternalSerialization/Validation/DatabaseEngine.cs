@@ -1,4 +1,6 @@
+using System.Text;
 using System.Text.Json;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
@@ -6,67 +8,67 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    /// <summary>Converts public operation JSON once before internal persistence or replication.</summary>
-    /// <param name="operation">Trusted envelope retaining exact public identity material.</param>
-    /// <returns>The same envelope with native typed payload or a native decode-failure marker.</returns>
-    public ReplicatedOperation NormalizeOperation(ReplicatedOperation operation)
+    private const string UnsupportedDatabaseCommand = "The operation is unsupported.";
+    private const string InvalidDatabaseCommandJson = "The operation contains invalid protocol JSON.";
+
+    /// <summary>Parses public JSON once at the trusted boundary and creates an owned native command.</summary>
+    /// <param name="kind">The supported database operation.</param>
+    /// <param name="id">Original stable command identity.</param>
+    /// <param name="principalId">The server-verified subject.</param>
+    /// <param name="evaluatedAt">The server-evaluated business time.</param>
+    /// <param name="payloadJson">Exact original public input.</param>
+    /// <returns>The native communication command containing generated database input.</returns>
+    public Command<DatabaseCommand> CreateCommand(OperationKind kind, Guid id, string principalId,
+        DateTimeOffset evaluatedAt, string payloadJson)
     {
-        ArgumentNullException.ThrowIfNull(operation);
-        if (!operation.NativePayload.IsEmpty)
+        ArgumentNullException.ThrowIfNull(payloadJson);
+        RequireNativeBudget(Encoding.UTF8.GetByteCount(payloadJson));
+        var payload = kind switch
         {
-            return VerifyOperationAuthority(operation);
-        }
-        var payload = operation.Kind switch
-        {
-            OperationKind.Batch => NormalizePayload<CommandRequest>(operation.PayloadJson),
-            OperationKind.Receive => NormalizePayload<ReceiveRequest>(operation.PayloadJson),
-            OperationKind.Delivery => NormalizePayload<DeliveryCommand>(operation.PayloadJson),
-            OperationKind.Processing => NormalizePayload<ProcessingRequest>(operation.PayloadJson),
-            OperationKind.CommitInbox => NormalizePayload<CommitInboxRequest>(operation.PayloadJson),
-            OperationKind.ConfigureResource => NormalizePayload<ConfigureResourceRequest>(operation.PayloadJson),
-            OperationKind.CreateTable => NormalizePayload<CreateTableRequest>(operation.PayloadJson),
-            OperationKind.DropTable => NormalizePayload<DropTableRequest>(operation.PayloadJson),
-            OperationKind.SetQueueDispatch => NormalizePayload<QueueDispatchControlRequest>(operation.PayloadJson),
-            OperationKind.ConfigurePrincipal => NormalizePayload<ConfigurePrincipalRequest>(operation.PayloadJson),
-            OperationKind.ConfigureApiKey => NormalizePayload<ConfigureApiKeyRequest>(operation.PayloadJson),
-            OperationKind.SetDispatch => NormalizePayload<bool>(operation.PayloadJson),
-            OperationKind.RuntimeJournal => NormalizePayload<RuntimeJournalMutation>(operation.PayloadJson),
-            OperationKind.ConfigureSubscription => NormalizePayload<ConfigureSubscriptionRequest>(operation.PayloadJson),
-            OperationKind.SeekSubscription => NormalizePayload<SeekSubscriptionRequest>(operation.PayloadJson),
-            OperationKind.ReceiveSubscription => NormalizePayload<ReceiveSubscriptionRequest>(operation.PayloadJson),
-            OperationKind.SubscriptionDelivery => NormalizePayload<SubscriptionDeliveryCommand>(operation.PayloadJson),
-            OperationKind.SubscriptionProcessing => NormalizePayload<SubscriptionProcessingRequest>(operation.PayloadJson),
-            OperationKind.SetSubscriptionPaused => NormalizePayload<SetSubscriptionPausedRequest>(operation.PayloadJson),
-            OperationKind.ConfigureProjectionConsumer => NormalizePayload<ConfigureProjectionConsumerRequest>(operation.PayloadJson),
-            OperationKind.CommitProjectionBatch => NormalizePayload<CommitProjectionBatchRequest>(operation.PayloadJson),
-            OperationKind.ReleaseProjectionConsumer => NormalizePayload<ReleaseProjectionConsumerRequest>(operation.PayloadJson),
-            OperationKind.PurgeOutbox => NormalizePayload<PurgeOutboxRequest>(operation.PayloadJson),
-            OperationKind.BeginBlobUpload => NormalizePayload<BeginBlobUploadRequest>(operation.PayloadJson),
-            OperationKind.WriteBlobPart => NormalizePayload<WriteBlobPartRequest>(operation.PayloadJson),
-            OperationKind.CompleteBlobUpload => NormalizePayload<CompleteBlobUploadRequest>(operation.PayloadJson),
-            OperationKind.AbortBlobUpload => NormalizePayload<AbortBlobUploadRequest>(operation.PayloadJson),
-            OperationKind.DeleteBlob => NormalizePayload<DeleteBlobRequest>(operation.PayloadJson),
-            OperationKind.ReclaimBlob => NormalizePayload<ReclaimBlobRequest>(operation.PayloadJson),
-            _ => new NativeCommandPayload(ReadOnlyMemory<byte>.Empty, ErrorCode.UnsupportedCapability, NativeCommandContract.Unsupported)
+            OperationKind.Batch => NormalizePayload<CommandRequest>(payloadJson),
+            OperationKind.Receive => NormalizePayload<ReceiveRequest>(payloadJson),
+            OperationKind.Delivery => NormalizePayload<DeliveryCommand>(payloadJson),
+            OperationKind.Processing => NormalizePayload<ProcessingRequest>(payloadJson),
+            OperationKind.CommitInbox => NormalizePayload<CommitInboxRequest>(payloadJson),
+            OperationKind.ConfigureResource => NormalizePayload<ConfigureResourceRequest>(payloadJson),
+            OperationKind.CreateTable => NormalizePayload<CreateTableRequest>(payloadJson),
+            OperationKind.DropTable => NormalizePayload<DropTableRequest>(payloadJson),
+            OperationKind.SetQueueDispatch => NormalizePayload<QueueDispatchControlRequest>(payloadJson),
+            OperationKind.ConfigurePrincipal => NormalizePayload<ConfigurePrincipalRequest>(payloadJson),
+            OperationKind.ConfigureApiKey => NormalizePayload<ConfigureApiKeyRequest>(payloadJson),
+            OperationKind.SetDispatch => NormalizePayload<bool>(payloadJson),
+            OperationKind.RuntimeJournal => NormalizePayload<RuntimeJournalMutation>(payloadJson),
+            OperationKind.ConfigureSubscription => NormalizePayload<ConfigureSubscriptionRequest>(payloadJson),
+            OperationKind.SeekSubscription => NormalizePayload<SeekSubscriptionRequest>(payloadJson),
+            OperationKind.ReceiveSubscription => NormalizePayload<ReceiveSubscriptionRequest>(payloadJson),
+            OperationKind.SubscriptionDelivery => NormalizePayload<SubscriptionDeliveryCommand>(payloadJson),
+            OperationKind.SubscriptionProcessing => NormalizePayload<SubscriptionProcessingRequest>(payloadJson),
+            OperationKind.SetSubscriptionPaused => NormalizePayload<SetSubscriptionPausedRequest>(payloadJson),
+            OperationKind.ConfigureProjectionConsumer => NormalizePayload<ConfigureProjectionConsumerRequest>(payloadJson),
+            OperationKind.CommitProjectionBatch => NormalizePayload<CommitProjectionBatchRequest>(payloadJson),
+            OperationKind.ReleaseProjectionConsumer => NormalizePayload<ReleaseProjectionConsumerRequest>(payloadJson),
+            OperationKind.PurgeOutbox => NormalizePayload<PurgeOutboxRequest>(payloadJson),
+            OperationKind.BeginBlobUpload => NormalizePayload<BeginBlobUploadRequest>(payloadJson),
+            OperationKind.WriteBlobPart => NormalizePayload<WriteBlobPartRequest>(payloadJson),
+            OperationKind.CompleteBlobUpload => NormalizePayload<CompleteBlobUploadRequest>(payloadJson),
+            OperationKind.AbortBlobUpload => NormalizePayload<AbortBlobUploadRequest>(payloadJson),
+            OperationKind.DeleteBlob => NormalizePayload<DeleteBlobRequest>(payloadJson),
+            OperationKind.ReclaimBlob => NormalizePayload<ReclaimBlobRequest>(payloadJson),
+            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand)
         };
-        return IssueNativeOperation(operation, payload);
+        return CreatePreparedCommand(kind, id, principalId, evaluatedAt, payload,
+            DatabaseCommandFingerprint.Compute(id, kind, principalId, payloadJson), null);
     }
 
-    private static NativeCommandPayload NormalizePayload<T>(string json)
+    private static byte[] NormalizePayload<T>(string json)
     {
-        T value;
         try
         {
-            value = JsonDefaults.Deserialize<T>(json);
+            return NativeSerialization.Serialize(JsonDefaults.Deserialize<T>(json), NativeValidationProfile.PublicInputElements);
         }
         catch (JsonException)
         {
-            return new(ReadOnlyMemory<byte>.Empty, ErrorCode.Validation, NativeCommandContract.InvalidJson);
+            throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommandJson);
         }
-        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
-        {
-            return new(ReadOnlyMemory<byte>.Empty, error.Code, error.Message);
-        }
-        return new(NativeSerialization.Serialize(value, NativeValidationProfile.PublicInputElements));
     }
 }

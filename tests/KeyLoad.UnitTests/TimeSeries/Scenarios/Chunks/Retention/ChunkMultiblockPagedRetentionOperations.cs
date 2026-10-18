@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class ChunkMultiblockPagedRetentionOperations
@@ -23,7 +24,7 @@ internal static class ChunkMultiblockPagedRetentionOperations
             fixture.WindowId, CorrectedRevision));
     }
 
-    internal static (ReplicatedOperation Operation, CommitReceipt Receipt) Expire(SampleChunkPartialRetentionFixture fixture)
+    internal static (Command<DatabaseCommand> Operation, CommitReceipt Receipt) Expire(SampleChunkPartialRetentionFixture fixture)
     {
         var operation = fixture.Operation(new ExpireSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, SampleChunkCanonicalFixture.Late.Timestamp, DeletePage));

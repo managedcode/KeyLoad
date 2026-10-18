@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -22,9 +24,9 @@ internal static class CrashDatabase
         return database;
     }
 
-    internal static ReplicatedOperation Operation<T>(OperationKind kind, T payload, Guid id)
-        => new(id, kind, CrashFixtureValues.Principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
+        => database.CreateCommand(kind, id, CrashFixtureValues.Principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
 
-    internal static OperationResult Submit<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
-        => database.Apply(Operation(kind, payload, id));
+    internal static Result<object> Submit<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
+        => database.Apply(Operation(database, kind, payload, id));
 }

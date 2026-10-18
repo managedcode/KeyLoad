@@ -21,7 +21,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
     private readonly RequestCqrsClusterSubscriberTransitionHooks? subscriberTransitions;
     private readonly RequestCqrsResourceCompletionEvidence completionEvidence = new();
     private Task? disposalTask;
-    private bool fallbackRequested;
+    private bool forcedCancellationRequested;
 
     internal RequestCqrsClusterDiagnosticsCleanup(Guid waveId, ResourceLoggerService logger,
         ContainerResource[] resources, RequestCqrsClusterMcpRejectionNodeCapture[] nodes,
@@ -43,7 +43,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
     internal RequestCqrsCaptureLifecycleSnapshot ReadLifecycleSnapshot()
         => new(StatusFor(RequestCqrsClusterProtocol.Node1), StatusFor(RequestCqrsClusterProtocol.Node2),
             StatusFor(RequestCqrsClusterProtocol.Node3),
-            lifetime.IsCancellationRequested, cleanupDeadline.IsCancellationRequested, fallbackRequested,
+            lifetime.IsCancellationRequested, cleanupDeadline.IsCancellationRequested, forcedCancellationRequested,
             completionEvidence.Snapshot());
 
     private TaskStatus? StatusFor(string node)
@@ -110,14 +110,14 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
         }
         finally
         {
-            await JoinFallbackAsync(drain, failures).ConfigureAwait(false);
+            await CancelAndJoinDrainAsync(drain, failures).ConfigureAwait(false);
             RequestCqrsClusterSubscriberTransitionHooks.Observe(() => subscriberTransitions?.Drain(true), failures, failureObserver,
-                fallbackRequested ? RequestCqrsLifecycleStage.CaptureFallbackJoin : RequestCqrsLifecycleStage.CaptureDrain);
-            if (fallbackRequested)
+                forcedCancellationRequested ? RequestCqrsLifecycleStage.CaptureForcedJoin : RequestCqrsLifecycleStage.CaptureDrain);
+            if (forcedCancellationRequested)
             {
                 RequestCqrsClusterSubscriberTransitionHooks.Observe(() => subscriberTransitions?.WriteDiagnostic(subscriptions.Count(subscription =>
                     subscription.Status == TaskStatus.RanToCompletion)), failures, failureObserver,
-                    RequestCqrsLifecycleStage.CaptureFallbackJoin);
+                    RequestCqrsLifecycleStage.CaptureForcedJoin);
             }
             var lifetimeDisposal = DisposeLifetimeAsync();
             await ObserveCleanupAsync(() => lifetimeDisposal, failures,
@@ -141,7 +141,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
         cleanupDeadline.Dispose();
     }
 
-    private async Task JoinFallbackAsync(Task drain, List<Exception> failures)
+    private async Task CancelAndJoinDrainAsync(Task drain, List<Exception> failures)
     {
         if (drain.IsCompleted)
         {
@@ -149,16 +149,16 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
                 failureObserver, RequestCqrsLifecycleStage.CaptureDrain);
             return;
         }
-        fallbackRequested = true;
-        RequestCqrsLifecycleFailureObserver.Observe(() => completionEvidence.EnterFallback(
+        forcedCancellationRequested = true;
+        RequestCqrsLifecycleFailureObserver.Observe(() => completionEvidence.EnterForcedCancellation(
             lifetime.IsCancellationRequested), failures, failureObserver,
-            RequestCqrsLifecycleStage.CaptureFallbackCancellation);
+            RequestCqrsLifecycleStage.CaptureForcedCancellation);
         await ObserveCleanupAsync(lifetime.CancelAsync, failures,
-            RequestCqrsLifecycleStage.CaptureFallbackCancellation).ConfigureAwait(false);
+            RequestCqrsLifecycleStage.CaptureForcedCancellation).ConfigureAwait(false);
         await ObserveCleanupAsync(() => drain, failures,
-            RequestCqrsLifecycleStage.CaptureFallbackJoin).ConfigureAwait(false);
+            RequestCqrsLifecycleStage.CaptureForcedJoin).ConfigureAwait(false);
         completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, StatusFor, failures,
-            failureObserver, RequestCqrsLifecycleStage.CaptureFallbackJoin);
+            failureObserver, RequestCqrsLifecycleStage.CaptureForcedJoin);
     }
 
     private async Task CaptureNodeAsync(ResourceLoggerService resourceLogger, ContainerResource resource,

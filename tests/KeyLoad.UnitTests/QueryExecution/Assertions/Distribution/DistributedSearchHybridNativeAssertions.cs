@@ -1,4 +1,3 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -9,16 +8,15 @@ internal static class DistributedSearchHybridNativeAssertions
     private const double IndependentTextWeight = 2;
     private const double IndependentVectorWeight = 1;
 
-    internal static async Task RequireAsync(RemoteDocumentNativeFixture fixture, CancellationToken token)
+    internal static async Task RequireAsync(QueryNativeFixture fixture, CancellationToken token)
     {
         RankedDocument[] expected =
         [
-            new(new(RemoteDocumentNativeFixture.Reference, RemoteDocumentNativeFixture.First,
-                RemoteDocumentNativeFixture.ProjectedJson, true, [RemoteDocumentNativeFixture.Secret]),
+            new(new(fixture.ExpectedDestinationReference, QueryNativeFixture.First,
+                QueryNativeFixture.ProjectedJson, true, [QueryNativeFixture.Secret]),
                 IndependentTextWeight / FirstDenominator + IndependentVectorWeight / SecondDenominator),
-            new(new(new(RemotePartitionQueryNativeFlow.Local, RemoteDocumentNativeFixture.Collection,
-                RemoteDocumentNativeFixture.DocumentId), RemoteDocumentNativeFixture.First,
-                RemotePartitionQueryNativeFlow.SourceProjected, true, [RemoteDocumentNativeFixture.Secret]),
+            new(new(fixture.ExpectedSourceReference, QueryNativeFixture.First,
+                QueryNativePartitionFlow.SourceProjected, true, [QueryNativeFixture.Secret]),
                 IndependentTextWeight / SecondDenominator + IndependentVectorWeight / FirstDenominator)
         ];
         var actual = DistributedSearchHybridNativeFlow.Execute(fixture, token);

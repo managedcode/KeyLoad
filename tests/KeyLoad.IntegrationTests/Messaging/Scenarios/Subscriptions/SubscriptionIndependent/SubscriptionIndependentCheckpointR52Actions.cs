@@ -70,7 +70,8 @@ internal static class SubscriptionIndependentCheckpointR52Actions
         await SubscriptionPhasePublicAssertions.ReceiptAsync(result, request, delivery.Event.Position);
         await Assert.That(result.Token.AtomicPartitionId).IsEqualTo(group.Source.Partition.AtomicPartitionId);
         await Assert.That(result.Token.Position).IsGreaterThan(0L);
-        await Assert.That(result.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(result.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(result.PersistedCopies).IsEqualTo(3);
         state.Receipts.Add((request, result, state.PolicyEpoch));
         await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
         await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
@@ -89,7 +90,8 @@ internal static class SubscriptionIndependentCheckpointR52Actions
         await Assert.That(receipt.CommandId).IsEqualTo(publish.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(publish.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SubscriptionFilterClusterAssertions.EqualAsync(receipt.Mutations.ToArray(), new MutationReceipt[]
         { new(SubscriptionIndependentCheckpointR52Protocol.PublishKind, state.Seed.Group.Source.Resource,
             SubscriptionIndependentCheckpointR52Protocol.HealthyEvent, 6L) });

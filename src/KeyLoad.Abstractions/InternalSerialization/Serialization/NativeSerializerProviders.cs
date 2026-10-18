@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using ManagedCode.Communication.Orleans.Surrogates;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Codecs;
@@ -32,6 +33,7 @@ internal static class NativeSerializerProviders
         services.AddSerializer(builder =>
         {
             builder.AddAssembly(SharedAssembly);
+            builder.AddAssembly(typeof(ResultTSurrogate<>).Assembly);
             if (assembly != SharedAssembly)
             {
                 builder.AddAssembly(assembly);

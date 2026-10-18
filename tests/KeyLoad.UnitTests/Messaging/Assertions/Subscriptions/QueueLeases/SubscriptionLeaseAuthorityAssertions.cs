@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -9,19 +11,18 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class SubscriptionLeaseAuthorityAssertions
 {
     internal static async Task RefusalAsync(DatabaseEngine db, ZoneTreeStore store,
-        ReplicatedOperation claim, OperationResult original, ReplicatedOperation attempt)
+        Command<DatabaseCommand> claim, Result<object> original, Command<DatabaseCommand> attempt)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var outcomeKey = KeySpace.PartitionOutcome(original.Get<ReceiveSubscriptionResult>().Status.Subscription.Source.Partition,
-            "root", claim.Id);
+            "root", claim.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(outcomeKey))
             ?? throw new InvalidOperationException("The genuine original claim history is absent.");
         var subscription = original.Get<ReceiveSubscriptionResult>().Status.Subscription;
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), subscription);
-        var freshClaim = new ReplicatedOperation(receive.RequestId, OperationKind.ReceiveSubscription,
-            "root", claim.EvaluatedAt, JsonSerializer.Serialize(receive, JsonDefaults.Options));
+        var freshClaim = db.CreateCommand(OperationKind.ReceiveSubscription, receive.RequestId, "root", new DateTimeOffset(claim.Timestamp), JsonSerializer.Serialize(receive, JsonDefaults.Options));
         for (var repeat = 0; repeat < 2; repeat++)
         {
             foreach (var operation in new[] { claim, attempt, freshClaim })
@@ -32,20 +33,20 @@ internal static class SubscriptionLeaseAuthorityAssertions
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
             }
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
-                KeySpace.PartitionOutcome(subscription.Source.Partition, "root", freshClaim.Id)))).IsNull();
+                KeySpace.PartitionOutcome(subscription.Source.Partition, "root", freshClaim.CommandId)))).IsNull();
             await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
                 NativeSerialization.Deserialize<StoredOutcome>(saved).Result, original);
             await Assert.That(store.Read(view => view.ReadOwnedValue(outcomeKey))!.AsSpan().SequenceEqual(saved)).IsTrue();
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
                 KeySpace.PartitionOutcome(original.Get<ReceiveSubscriptionResult>().Status.Subscription.Source.Partition,
-                    "root", attempt.Id)))).IsNull();
+                    "root", attempt.CommandId)))).IsNull();
         }
     }
 
-    internal static async Task ReceiptAsync(OperationResult result, SubscriptionDeliveryCommand command,
+    internal static async Task ReceiptAsync(Result<object> result, SubscriptionDeliveryCommand command,
         long position, long leaseVersion)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[]
@@ -54,8 +55,8 @@ internal static class SubscriptionLeaseAuthorityAssertions
     }
 
     internal static async Task SettledAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReplicatedOperation claim, OperationResult original, List<(ReplicatedOperation Operation, OperationResult Result)> receipts,
-        ReplicatedOperation? reclaimed, OperationResult? reclaimResult)
+        Command<DatabaseCommand> claim, Result<object> original, List<(Command<DatabaseCommand> Operation, Result<object> Result)> receipts,
+        Command<DatabaseCommand>? reclaimed, Result<object>? reclaimResult)
     {
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
@@ -79,9 +80,9 @@ internal static class SubscriptionLeaseAuthorityAssertions
     }
 
     private static async Task SettledClaimAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReplicatedOperation claim, OperationResult original)
+        Command<DatabaseCommand> claim, Result<object> original)
     {
-        var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", claim.Id);
+        var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", claim.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original successful Receive history is absent.");
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
@@ -90,10 +91,10 @@ internal static class SubscriptionLeaseAuthorityAssertions
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var replay = db.Apply(claim);
-        await Assert.That(replay.Error).IsEqualTo(ErrorCode.StaleLease);
-        await Assert.That(replay.SafeDetail).IsEqualTo("The subscription delivery lease is stale.");
-        await Assert.That(replay.Json).IsNull();
-        await Assert.That(replay.NativeValue).IsNull();
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription delivery lease is stale.");
+        
+        await Assert.That(replay.Value).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(saved)).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }

@@ -59,7 +59,8 @@ internal static class SampleChunkUtf16
         }
     }
 
-    internal static void ValidateFallback(ReadOnlySpan<byte> bytes, SampleChunkWork budget, int hashChunkBytes)
+    // Encoding tag 1 is canonical only for text containing unpaired UTF16 code units.
+    internal static void ValidateUnpairedCodeUnits(ReadOnlySpan<byte> bytes, SampleChunkWork budget, int hashChunkBytes)
     {
         const int EmptyTextBytes = 0;
         const int OddByteLengthMask = 1;

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Server;
 using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
 
@@ -35,7 +37,7 @@ internal static class RowRevisionInferenceFlow
         };
         var configured = db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
         await Assert.That(JsonDefaults.Serialize(configured).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
-        var failures = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Outcome)>();
+        var failures = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome)>();
         foreach (var revision in new[] { P.WrongRevision, P.OriginalRevision, P.RepairRevision })
         {
             var request = RowRevisionInferenceRequests.Create(db.Partition, kind, P.Hidden, revision);

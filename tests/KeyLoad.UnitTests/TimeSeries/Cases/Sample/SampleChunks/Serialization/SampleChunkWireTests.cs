@@ -120,7 +120,7 @@ internal sealed class SampleChunkWireTests
     }
 
     [Test]
-    public async Task AcChunk004InvalidUtf8AndUnneededUtf16FallbackRejectWithValidChecksum()
+    public async Task AcChunk004InvalidUtf8AndNoncanonicalUtf16RejectWithValidChecksum()
     {
         var payload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded(
             [SampleChunkTestData.Row("wire-text", DateTimeOffset.UnixEpoch, 1, 1d, "{}")]));
@@ -133,10 +133,10 @@ internal sealed class SampleChunkWireTests
             Series = SampleChunkWireData.Memory([0x05, 0x61, 0x62])
         };
         var invalidFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(invalidUtf8));
-        var fallbackFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(unnecessaryUtf16));
+        var noncanonicalFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(unnecessaryUtf16));
 
         await Assert.That(invalidFailure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(fallbackFailure.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(noncanonicalFailure.Code).IsEqualTo(ErrorCode.Corruption);
     }
 
     [Test]

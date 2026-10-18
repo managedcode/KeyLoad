@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
@@ -67,19 +69,18 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     internal Task<T> CommitAsync<T>(OperationKind kind, object payload, Guid commandId, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var operation = new ReplicatedOperation(commandId, kind, CrashFixtureValues.Principal, default,
-            System.Text.Json.JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options));
+        var operation = Database.CreateCommand(kind, commandId, CrashFixtureValues.Principal, default, System.Text.Json.JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options));
         return Task.FromResult(Database.ApplyEmbedded(operation, token).Get<T>());
     }
 
-    internal Task<OperationResult> CommitIssuedAsync(ReplicatedOperation operation, CancellationToken token)
+    internal Task<Result<object>> CommitIssuedAsync(Command<DatabaseCommand> operation, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (operation.Kind != OperationKind.OnlineTextPublicationPhase || operation.Id == Guid.Empty)
+        if (operation.Value!.Kind != OperationKind.OnlineTextPublicationPhase || operation.CommandId == Guid.Empty)
         {
             throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
         }
-        return Task.FromResult(Database.ApplyEmbedded(Database.VerifyOperationAuthority(operation), token));
+        return Task.FromResult(Database.ApplyEmbedded(Database.OwnCommand(operation), token));
     }
 
     internal Task<TextMaintenanceCapabilityResult> PhaseAsync(TextIndexMaintenanceRequest request,

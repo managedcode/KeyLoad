@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
@@ -9,7 +10,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class Bm25RestoredEligibilityPolicy
 {
-    internal static async Task<(ReplicatedOperation Operation, CommitReceipt Receipt, Bm25CorpusCurrentV1 Head, byte[] Bytes)>
+    internal static async Task<(Command<DatabaseCommand> Operation, CommitReceipt Receipt, Bm25CorpusCurrentV1 Head, byte[] Bytes)>
         RepairAsync(EventingArtifactFixture fixture, Bm25CorpusCurrentV1 originalHead, CancellationToken token)
     {
         var original = fixture.Database.WithQueryView(Bm25PortableFamilyBackupSeed.FirstSubject,
@@ -22,7 +23,7 @@ internal static class Bm25RestoredEligibilityPolicy
         var before = Bm25RestoredEligibilityAssertions.Cut(fixture.Target!, fixture.Database,
             fixture.ReadTargetJournalCut(), token);
         var source = Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database,
-            fixture.Source.ReadJournalCut(), token);
+            fixture.Source.ReadCanonicalCut(), token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -34,7 +35,7 @@ internal static class Bm25RestoredEligibilityPolicy
             await Bm25RestoredEligibilityAssertions.SameAsync(before,
                 Bm25RestoredEligibilityAssertions.Cut(fixture.Target!, fixture.Database, fixture.ReadTargetJournalCut(), token));
             await Bm25RestoredEligibilityAssertions.SameAsync(source,
-                Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database, fixture.Source.ReadJournalCut(), token));
+                Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database, fixture.Source.ReadCanonicalCut(), token));
         }, failures);
         PrincipalRecord? restored = null;
         ServerFailureObserver.Observe(() => restored = Set(fixture,

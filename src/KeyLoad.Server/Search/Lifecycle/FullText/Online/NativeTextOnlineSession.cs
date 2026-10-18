@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
@@ -115,7 +116,7 @@ internal sealed partial class NativeTextOnlineSession
     {
         get; set;
     }
-    internal ReplicatedOperation? Issued
+    internal Command<DatabaseCommand>? Issued
     {
         get; set;
     }

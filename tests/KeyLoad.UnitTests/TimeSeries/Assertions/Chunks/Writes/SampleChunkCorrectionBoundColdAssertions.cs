@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Server;
@@ -57,7 +59,7 @@ internal static class SampleChunkCorrectionBoundColdAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        ReplicatedOperation operation, OperationResult original)
+        Command<DatabaseCommand> operation, Result<object> original)
     {
         var image = Image(store);
         var position = store.Position;

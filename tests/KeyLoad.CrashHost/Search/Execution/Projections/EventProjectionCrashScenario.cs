@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -79,7 +80,7 @@ internal static class EventProjectionCrashScenario
         var request = ProjectionRequest();
         var commandId = Guid.Parse(ProjectionCommandId);
         var command = new CommandRequest(commandId, Partition, [request]);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, command, commandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, commandId);
         await PreserveBeforeCutAsync(directory, store, operation);
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
@@ -152,7 +153,7 @@ internal static class EventProjectionCrashScenario
     }
 
     private static async Task PreserveBeforeCutAsync(string directory, ZoneTreeStore store,
-        ReplicatedOperation operation)
+        Command<DatabaseCommand> operation)
     {
         const string PreserveBeforeCutAsyncMessageText = "The projection target unexpectedly had a vector before the crash cut.";
 

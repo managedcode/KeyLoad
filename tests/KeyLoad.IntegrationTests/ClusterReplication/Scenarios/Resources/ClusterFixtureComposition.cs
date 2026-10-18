@@ -11,17 +11,15 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureComposition
 {
-    private const string InvalidContainerModel = "The Aspire model must expose exactly the three named CLUSTER container resources.";
-    private const int MinimumSnapshotThreshold = 1;
-    private const string SnapshotProfileConflict = "Heavy load snapshot settings cannot mix qualification profiles.";
+    private const string InvalidContainerModel = "The Aspire model must expose exactly the three named Orleans container resources.";
 
     internal static (string Root, string[] Arguments) PrepareArguments(
         string root, KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageClusterFixtureOwner? coverage,
-        LocalClusterImageSelection.Selection? localImage, int? snapshotThreshold)
+        LocalClusterImageSelection.Selection? localImage)
     {
         var arguments = coverage?.CreateArguments() ??
             [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
-                ClusterFixtureProtocol.SnapshotThresholdArgument];
+                ClusterFixtureProtocol.SiloCountArgument, ClusterFixtureProtocol.ReplicaCountArgument];
         arguments = [.. arguments, KeyLoad.AppHost.Features.ClusterReplication.ContainerFaultCommandProtocol.EnabledArgument];
         if (coverage is not null)
         {
@@ -31,8 +29,6 @@ internal static class ClusterFixtureComposition
         {
             arguments = [.. arguments, .. localImage.CreateWaveArguments()];
         }
-        arguments = ApplySnapshotThreshold(arguments, snapshotThreshold,
-            coverage is not null || localImage is not null);
         return (root, arguments);
     }
 
@@ -60,26 +56,6 @@ internal static class ClusterFixtureComposition
             return client;
         }
         finally { pending?.Dispose(); }
-    }
-
-    internal static int ValidateSnapshotThreshold(int threshold)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(threshold, MinimumSnapshotThreshold);
-        return threshold;
-    }
-
-    internal static string[] ApplySnapshotThreshold(string[] arguments, int? snapshotThreshold, bool conflictingProfile)
-    {
-        if (snapshotThreshold is not { } threshold)
-        {
-            return arguments;
-        }
-        if (conflictingProfile)
-        {
-            throw new InvalidOperationException(SnapshotProfileConflict);
-        }
-        return [.. arguments.Where(value => value != ClusterFixtureProtocol.SnapshotThresholdArgument),
-            ClusterFixtureProtocol.SnapshotThresholdArgumentPrefix + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture)];
     }
 
     internal static void ConfigureCommandAdmission(IDistributedApplicationTestingBuilder builder, long? commandBytes)

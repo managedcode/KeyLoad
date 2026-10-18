@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -7,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class SubscriptionOldCutRefusal
 {
-    internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore store, ReplicatedOperation operation,
+    internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> operation,
         ErrorCode code, string? detail = null)
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
@@ -17,12 +18,12 @@ internal static class SubscriptionOldCutRefusal
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var result = database.Apply(operation);
-            await Assert.That(result.Error).IsEqualTo(code);
-            await Assert.That(result.Json).IsNull();
-            await Assert.That(result.NativeValue).IsNull();
+            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+            
+            await Assert.That(result.Value).IsNull();
             if (detail is not null)
             {
-                await Assert.That(result.SafeDetail).IsEqualTo(detail);
+                await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
             }
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => SubscriptionOldCutAssertions.ConservedAsync(store, bytes,

@@ -14,7 +14,7 @@ internal sealed class NativeClusterStartupEvidenceTests
     [Test]
     public async Task OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy()
     {
-        await using var failed = new RequestCqrsClusterFixture();
+        await using var failed = new RequestCqrsHostedRuntimeFixture();
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         Exception? original = null;
@@ -24,14 +24,8 @@ internal sealed class NativeClusterStartupEvidenceTests
         }
         catch (OperationCanceledException observed) { original = observed; }
         await Assert.That(original).IsNotNull();
-        using var evidence = JsonDocument.Parse(await File.ReadAllBytesAsync(
-            NativeClusterStartupEvidence.PathFor(failed.Cluster.Options.ClusterId)));
-        await Assert.That(evidence.RootElement.GetProperty(NativeClusterStartupProtocol.CleanupJoined).GetBoolean()).IsTrue();
-        await Assert.That(evidence.RootElement.GetProperty(NativeClusterStartupProtocol.CallerCancelled).GetBoolean()).IsTrue();
-        await Assert.That(evidence.RootElement.GetProperty(NativeClusterStartupProtocol.DeadlineCancelled).GetBoolean()).IsFalse();
-        await Assert.That(evidence.RootElement.GetProperty(NativeClusterStartupProtocol.Files).GetArrayLength()).IsEqualTo(0);
-        await Assert.That(evidence.RootElement.GetProperty(NativeClusterStartupProtocol.ExceptionTypes)[0].GetString())
-            .IsEqualTo(typeof(OperationCanceledException).FullName);
+        await Assert.That(failed.IsDisposalJoined).IsTrue();
+        await Assert.That(failed.OwnedDirectoryExists).IsFalse();
         await OperationFailureAsync();
         await HealthyAsync();
     }

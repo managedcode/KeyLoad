@@ -59,7 +59,7 @@ internal static class SagaTimeoutClusterAssertions
             }
             await Task.Delay(PollInterval, TimeProvider.System, cancellationToken);
         }
-        throw new TimeoutException("The autonomous timeout did not commit within its bounded CLUSTER window.");
+        throw new TimeoutException("The autonomous timeout did not commit within its bounded Orleans window.");
     }
 
     internal static async Task AssertPhaseAsync(KeyLoadClient sdk, McpOfficialClient mcp,

@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     /// <summary>Binds actual authorized catalog metadata without inventing a data partition.</summary>
-    internal ResourceDefinition BindAuthorizedReadResourceMetadata(IKeyValueView alreadyChargedView,
+    internal static ResourceDefinition BindAuthorizedReadResourceMetadata(IKeyValueView alreadyChargedView,
         string tenantId, string databaseId, string transactionDomainId, string resourceName,
         ResourceKind expectedKind, ReadExecutionBudget work)
     {

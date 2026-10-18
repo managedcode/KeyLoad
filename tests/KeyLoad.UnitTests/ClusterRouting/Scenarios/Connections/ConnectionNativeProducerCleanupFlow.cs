@@ -12,7 +12,7 @@ internal static class ConnectionNativeProducerCleanupFlow
     private const int ExpectedFailures = 3;
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(10);
 
-    internal static async Task RunAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var requestId = Guid.NewGuid();
         var wrongStartedId = Guid.NewGuid();
@@ -47,7 +47,7 @@ internal static class ConnectionNativeProducerCleanupFlow
         }
         var stream = NativeCqrsStreamLifetime.RunWithAwaitedSettlement(
             execution => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(ProduceAsync, execution),
-            fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId, fixture.Clock, NotifyAsync, fixture.RoutingOptions, fixture.RequestWork,
             new NativeCqrsStreamPurpose(), token.Token);
         var original = DrainFailureAsync(stream, token.Token);

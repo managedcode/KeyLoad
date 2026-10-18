@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class SparseCompositePrefixOperations
 {
     internal static async Task RunAsync(DatabaseEngine owner, ZoneTreeStore store, PartitionRef partition,
-        bool includeNull, bool includeMissing, List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        bool includeNull, bool includeMissing, List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -23,7 +24,7 @@ internal static class SparseCompositePrefixOperations
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,
-        List<(ReplicatedOperation Operation, byte[] Result)> originals)
+        List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {
         foreach (var original in originals)
         {
@@ -32,7 +33,7 @@ internal static class SparseCompositePrefixOperations
                 var replay = owner.ApplyEmbedded(original.Operation, cancellationToken: default);
                 await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(replay)))
                     .IsEqualTo(Convert.ToHexString(original.Result));
-                if (original.Operation.Kind == OperationKind.Batch)
+                if (original.Operation.Value!.Kind == OperationKind.Batch)
                 {
                     await SparseCompositePrefixFixture.NoReferencesAsync(replay.Get<CommitReceipt>());
                 }

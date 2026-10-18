@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.UnitTests.Features.Authorization;
 using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonAssertions;
 using P = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
@@ -12,15 +14,14 @@ internal static class CompositionLinkLifetimeJsonFlow
         var state = await S.CreateAsync(owner, token);
         var payload = P.Payload(state.From, state.To, malformed);
         var enqueue = S.Issue(owner, [new EnqueueMessage(P.Queue, P.Message, payload)], token);
-        ReplicatedOperation failed;
+        Command<DatabaseCommand> failed;
         if (malformed == P.Duplicate)
         {
             failed = enqueue;
         }
         else
         {
-            await A.ReceiptAsync(new(enqueue.Id, owner.NextToken(), [new("enqueue", P.Queue, P.Message, 1)],
-                DurabilityProfile.ProcessDurable), owner.Submit(enqueue).Get<CommitReceipt>());
+            await A.ReceiptAsync(new(enqueue.Id, owner.NextToken(), [new("enqueue", P.Queue, P.Message, 1)], DurabilityProfile.ProcessDurable, 1), owner.Submit(enqueue).Get<CommitReceipt>());
             failed = S.Issue(owner, [new QueueToGraph(P.Graph, P.Queue, P.Prefix, 1, P.From, P.To)], token);
         }
         var saved = malformed == P.Duplicate ? null : payload;
@@ -34,21 +35,21 @@ internal static class CompositionLinkLifetimeJsonFlow
         await HealthyAsync(owner, state, saved, token);
     }, token);
 
-    private static async Task FailureAsync(SafeProjectorOperationDatabase owner, ReplicatedOperation operation, string detail)
+    private static async Task FailureAsync(SafeProjectorOperationDatabase owner, Command<DatabaseCommand> operation, string detail)
     {
         var failed = owner.Submit(operation);
-        await A.EqualAsync(new OperationResult(null, ErrorCode.Validation, detail), failed);
-        await Assert.That(failed.NativeValue).IsNull();
-        await Assert.That(failed.Json).IsNull();
+        await A.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.Validation, detail)), failed);
+        await Assert.That(failed.Value).IsNull();
+        
     }
 
-    private static Task ReplayFailureAsync(SafeProjectorOperationDatabase owner, ReplicatedOperation operation, string detail)
+    private static Task ReplayFailureAsync(SafeProjectorOperationDatabase owner, Command<DatabaseCommand> operation, string detail)
         => A.UnchangedAsync(owner, async () =>
         {
             await FailureAsync(owner, operation, detail);
             var resolved = owner.Database.ResolveOutcome(operation);
-            await A.EqualAsync(new OperationResult(null, ErrorCode.Validation, detail), resolved);
-            await Assert.That(resolved.NativeValue).IsNull();
+            await A.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.Validation, detail)), resolved);
+            await Assert.That(resolved.Value).IsNull();
         });
 
     private static async Task HealthyAsync(SafeProjectorOperationDatabase owner, CompositionLinkLifetimeJsonState state,
@@ -56,11 +57,9 @@ internal static class CompositionLinkLifetimeJsonFlow
     {
         var payload = P.Payload(state.From, state.To);
         var enqueue = S.Issue(owner, [new EnqueueMessage(P.HealthyQueue, P.Message, payload)], token);
-        await A.ReceiptAsync(new(enqueue.Id, owner.NextToken(), [new("enqueue", P.HealthyQueue, P.Message, 1)],
-            DurabilityProfile.ProcessDurable), owner.Submit(enqueue).Get<CommitReceipt>());
+        await A.ReceiptAsync(new(enqueue.Id, owner.NextToken(), [new("enqueue", P.HealthyQueue, P.Message, 1)], DurabilityProfile.ProcessDurable, 1), owner.Submit(enqueue).Get<CommitReceipt>());
         var forward = S.Issue(owner, [new QueueToGraph(P.Graph, P.HealthyQueue, P.Prefix, 1, P.From, P.To)], token);
-        var expected = new CommitReceipt(forward.Id, owner.NextToken(),
-            [new("upsertEdge", P.Graph, P.Edge, 1) { CompositionReferences = [state.From, state.To] }], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(forward.Id, owner.NextToken(), [new("upsertEdge", P.Graph, P.Edge, 1) { CompositionReferences = [state.From, state.To] }], DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(expected, owner.Submit(forward).Get<CommitReceipt>());
         await A.ModelsAsync(owner, state, saved, true, token);
         await A.UnchangedAsync(owner, async () =>

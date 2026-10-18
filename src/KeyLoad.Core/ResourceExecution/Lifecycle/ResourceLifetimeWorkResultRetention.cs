@@ -9,7 +9,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
     private const int Empty = 0;
     private const string Capacity = "The retained resource lifetimes exceed the operation result budget.";
     private const string Invalid = "The resource lifetime ledger input is invalid.";
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly HashSet<ResourceLifetimeV1> retained = [];
     private readonly DatabaseLimits limits;
     private long retainedBytes;

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
@@ -7,14 +8,11 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class RowRevisionBatchInferenceAssertions
 {
     internal static async Task HealthyAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
-        CommandRequest command, OperationResult actual, string kind, CancellationToken token)
+        CommandRequest command, Result<object> actual, string kind, CancellationToken token)
     {
         var receipt = actual.Get<CommitReceipt>();
-        CommitReceipt expected = new(command.CommandId,
-            new(store.Identity.Incarnation, partition.AtomicPartitionId, store.Position, P.OriginalRevision),
-            [new(P.PutReceipt, P.Collection, P.Own, P.RepairRevision),
-                new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)],
-            DurabilityProfile.ProcessDurable);
+        CommitReceipt expected = new(command.CommandId, new(store.Identity.Incarnation, partition.AtomicPartitionId, store.Position), [new(P.PutReceipt, P.Collection, P.Own, P.RepairRevision),
+                new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await CurrentAsync(database, partition, kind, token);
     }

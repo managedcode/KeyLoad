@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -28,8 +30,8 @@ internal static class QueueRetainedInboxAuthorityTrial
         await QueueRetainedInboxAuthorityAssertions.RefuseAsync(fixture.Database, fixture.Store, state, equivalent, damaged);
         fixture.Store.Dispose();
         QueuePendingAuthorityCut terminal;
-        ReplicatedOperation refusedGeneration;
-        OperationResult failedGeneration;
+        Command<DatabaseCommand> refusedGeneration;
+        Result<object> failedGeneration;
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
@@ -65,7 +67,7 @@ internal static class QueueRetainedInboxAuthorityTrial
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);
     }
 
-    private static ReplicatedOperation Operation(QueuePendingAuthorityState state, ProcessingRequest request)
+    private static Command<DatabaseCommand> Operation(QueuePendingAuthorityState state, ProcessingRequest request)
         => new(request.CommandId, OperationKind.Processing, QueueLifecycleTestProtocol.Administrator, state.Flow.Time,
             JsonSerializer.Serialize(request, JsonDefaults.Options));
 
@@ -73,7 +75,7 @@ internal static class QueueRetainedInboxAuthorityTrial
         => store.Commit((tx, _) => { tx.Put(key, value); return true; });
 
     private static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, QueuePendingAuthorityState state,
-        ReplicatedOperation refusal, OperationResult failed)
+        Command<DatabaseCommand> refusal, Result<object> failed)
     {
         await QueuePendingAuthorityHistory.ReplayAsync(owner, store, state);
         await QueueRetainedInboxAuthorityAssertions.FailureReplayAsync(owner, store, state, refusal, failed);

@@ -17,9 +17,9 @@ internal static class StrongReadSessionMutations
         var original = state.Commits.First().Receipt.Token;
         await Assert.That(receipt.Token.Position).IsGreaterThan(state.Commits.Last().Receipt.Token.Position);
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(command.CommandId,
-            new(original.Incarnation, state.Partition.AtomicPartitionId, receipt.Token.Position, original.OwnershipEpoch),
+            new(original.Incarnation, state.Partition.AtomicPartitionId, receipt.Token.Position),
             [new(delete ? DeleteKind : PutKind, Collection, TargetId, delete ? DeletedRevision : CreatedRevision)],
-            DurabilityProfile.QuorumProcessDurable), receipt);
+            DurabilityProfile.ProcessDurable, 3), receipt);
         var next = state with
         {
             Commits = [.. state.Commits, new(command, receipt)],

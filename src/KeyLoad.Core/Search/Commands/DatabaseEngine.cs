@@ -1,3 +1,5 @@
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
@@ -5,14 +7,14 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private OperationResult ExecuteBm25CorpusPublication(IAtomicTransaction transaction,
-        PrincipalRecord administrator, ReplicatedOperation operation, long position)
+    private Result<object> ExecuteBm25CorpusPublication(IAtomicTransaction transaction,
+        PrincipalRecord administrator, Command<DatabaseCommand> operation, long position)
     {
         var phase = Payload<Bm25CorpusPublicationPhaseCommand>(operation);
         RequireEnvelopeId(operation, phase.CommandId);
-        var principal = RequireBm25Subject(transaction, administrator, phase, operation.EvaluatedAt);
+        var principal = RequireBm25Subject(transaction, administrator, phase, operation.Timestamp);
         var current = phase.Current;
-        if (operation.EvaluatedAt >= phase.OriginalExpiry)
+        if (operation.Timestamp >= phase.OriginalExpiry)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Changed);
         }
@@ -31,6 +33,6 @@ public sealed partial class DatabaseEngine
         }
         Bm25CorpusFamilyAdmission.Require(transaction, key, current, Limits);
         transaction.PutRecord(key, current);
-        return Result(new CommitReceipt(operation.Id, Token(transaction, current.Partition, position), [], Durability, AcknowledgedPersistedCopies));
+        return Result(new CommitReceipt(operation.CommandId, Token(transaction, current.Partition, position), [], Durability, AcknowledgedPersistedCopies));
     }
 }

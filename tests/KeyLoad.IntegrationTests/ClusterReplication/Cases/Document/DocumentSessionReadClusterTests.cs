@@ -7,6 +7,6 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 internal sealed class DocumentSessionReadClusterTests(ClusterFixture fixture)
 {
     [Test]
-    public Task AcknowledgedDocumentTokenSurvivesElectedFailoverAndRejectsInvalidReads()
+    public Task AcknowledgedDocumentTokenSurvivesSiloRestartAndRejectsInvalidReads()
         => DocumentSessionReadClusterFlow.RunAsync(fixture);
 }

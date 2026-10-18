@@ -25,7 +25,6 @@ internal static class NativeJournalAuthorityTestBootstrap
     }
 
     internal static RuntimeJournalMutationResult Verify(DatabaseEngine database)
-        => database.Apply(new(Guid.NewGuid(), OperationKind.RuntimeJournal, PartitionStoreProtocol.AdministratorId,
-            OperationTime, JsonSerializer.Serialize(BootstrapMutation(), JsonDefaults.Options)))
+        => database.Apply(database.CreateCommand(OperationKind.RuntimeJournal, Guid.NewGuid(), PartitionStoreProtocol.AdministratorId, OperationTime, JsonSerializer.Serialize(BootstrapMutation(), JsonDefaults.Options)))
             .Get<RuntimeJournalMutationResult>();
 }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -34,9 +35,9 @@ internal static class EventProjectionRecoveryQueryOracle
     }
 
     internal static async Task AssertChangedPayloadConflictsAsync(ZoneTreeStore store, DatabaseEngine database,
-        ReplicatedOperation operation, CommitReceipt receipt)
+        Command<DatabaseCommand> operation, CommitReceipt receipt)
     {
-        var command = JsonDefaults.Deserialize<CommandRequest>(Encoding.UTF8.GetBytes(operation.PayloadJson));
+        var command = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var projection = (ApplyVectorProjection)command.Mutations.Single();
         var changed = projection with
         {
@@ -49,11 +50,8 @@ internal static class EventProjectionRecoveryQueryOracle
         {
             Mutations = [changed]
         };
-        var conflict = database.Apply(operation with
-        {
-            PayloadJson = JsonSerializer.Serialize(changedCommand, JsonDefaults.Options)
-        });
-        await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
+        var conflict = database.Apply(database.CreateCommand(operation.Value!.Kind, operation.CommandId, operation.UserId!, new DateTimeOffset(operation.Timestamp), JsonSerializer.Serialize(changedCommand, JsonDefaults.Options)));
+        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
         var durable = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         await Assert.That(durable is not null && JsonDefaults.Serialize(durable).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
@@ -69,7 +67,7 @@ internal static class EventProjectionRecoveryQueryOracle
         [new PatchDocument(EventProjectionCrashScenario.Collection, EventProjectionCrashScenario.SourceId,
             [new(EventProjectionCrashScenario.InputField, PatchKind.Set, InputReplacementJson)],
             EventProjectionCrashScenario.DocumentRevision)]);
-        var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.OperationFile), cancellationToken));
         var projection = EventProjectionRecoveryStoreOracle.ReadProjection(operation);
         var before = EventProjectionRecoveryStoreOracle.CaptureCommittedBytes(store, operation, projection);
@@ -78,7 +76,7 @@ internal static class EventProjectionRecoveryQueryOracle
         var projectionOutbox = store.Read(view => view.ReadOwnedValue(
             EventProjectionCrashScenario.OutboxEntryKey(baselineHead.Tail + 1)))
             ?? throw new InvalidOperationException("The committed projection outbox entry was missing.");
-        _ = database.Apply(CrashDatabase.Operation(OperationKind.Batch, command, commandId)).Get<CommitReceipt>();
+        _ = database.Apply(CrashDatabase.Operation(database, OperationKind.Batch, command, commandId)).Get<CommitReceipt>();
         var updated = store.Read(view => view.GetRecord<DocumentRecord>(EventProjectionCrashScenario.DocumentKey(
             EventProjectionCrashScenario.SourceId)));
         await Assert.That(updated?.Revision).IsEqualTo(EventProjectionCrashScenario.DocumentRevision + 1);

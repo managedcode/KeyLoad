@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
@@ -35,7 +36,7 @@ internal static class QueueExhaustedNackCapacityFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueLifecycleTestState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, OperationResult failed,
+        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         string[] original, long originalPosition, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -62,7 +63,7 @@ internal static class QueueExhaustedNackCapacityFlow
     }
 
     private static async Task TerminalAsync(DatabaseEngine database, QueueLifecycleTestState state,
-        QueueLifecycleCeilingRows rows, OperationResult failed, CancellationToken token)
+        QueueLifecycleCeilingRows rows, Result<object> failed, CancellationToken token)
     {
         await QueueFullDeadLetterControlAssertions.TerminalAsync(database, state, QueueLifecycleTestProtocol.Three);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(database, rows, failed,

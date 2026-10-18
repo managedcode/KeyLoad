@@ -18,7 +18,7 @@ internal static class BlobRetiredPartSeed
             Length = 0,
             PartCount = 0,
             IntegrityHash = null,
-            UpdatedAt = deletion.Operation.EvaluatedAt,
+            UpdatedAt = new DateTimeOffset(deletion.Operation.Timestamp),
             Deleted = true
         };
         await BlobPriorPublicationImage.ExactAsync(deletion.Result.Get<BlobCommitResult<BlobMetadata>>().Value, tombstone);

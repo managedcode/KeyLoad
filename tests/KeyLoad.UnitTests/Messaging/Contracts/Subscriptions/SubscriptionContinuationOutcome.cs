@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-internal sealed record SubscriptionContinuationOutcome(OperationKind Kind, object Request, Guid Id, OperationResult Result);
+internal sealed record SubscriptionContinuationOutcome(OperationKind Kind, object Request, Guid Id, Result<object> Result);

@@ -10,7 +10,7 @@ internal static class NativeRequestWorkKernelCases
     private const int SettlementSeconds = 10;
     private static readonly TimeSpan SettlementBound = TimeSpan.FromSeconds(SettlementSeconds);
 
-    internal static async Task AssertLazyStreamAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task AssertLazyStreamAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
@@ -29,7 +29,7 @@ internal static class NativeRequestWorkKernelCases
         });
     }
 
-    internal static async Task AssertHeldProducerJoinAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task AssertHeldProducerJoinAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
@@ -70,7 +70,7 @@ internal static class NativeRequestWorkKernelCases
             owner, probe, enumerator, firstMove, disposal, drain, observed));
     }
 
-    internal static async Task AssertCallbackFailureJoinAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task AssertCallbackFailureJoinAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
@@ -115,7 +115,7 @@ internal static class NativeRequestWorkKernelCases
             owner, probe, enumerator, firstMove, disposal, drain, observed));
     }
 
-    internal static async Task AssertRejectedAdmissionSettlesAsync(RequestCqrsClusterFixture fixture)
+    internal static async Task AssertRejectedAdmissionSettlesAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var held = new List<IDisposable>();
@@ -146,10 +146,10 @@ internal static class NativeRequestWorkKernelCases
     }
 
     internal static IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> CreateStream(
-        RequestCqrsClusterFixture fixture, NativeRequestWorkOwner owner, Guid requestId,
+        RequestCqrsHostedRuntimeFixture fixture, NativeRequestWorkOwner owner, Guid requestId,
         NativeRequestWorkProbe probe, bool throwOnCancellation = false)
     {
-        var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<
+        var serializer = fixture.Services.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         return NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => probe.HoldAsync(writer, requestId, throwOnCancellation), token), serializer, requestId, TimeProvider.System, probe.SettleActivation, options: fixture.RoutingOptions, owner: owner, cancellationToken: CancellationToken.None);

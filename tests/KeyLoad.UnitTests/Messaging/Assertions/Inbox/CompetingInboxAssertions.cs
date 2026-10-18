@@ -30,7 +30,7 @@ internal static class CompetingInboxAssertions
                 await Assert.That(actual.Error).IsEqualTo(ErrorCode.Conflict);
                 await Assert.That(actual.SafeDetail).IsEqualTo("The inbox input was already completed with different effects.");
                 await Assert.That(actual.Json).IsNull();
-                await Assert.That(actual.NativeValue).IsNull();
+                await Assert.That(actual.Value).IsNull();
             }
         }
         await ModelAsync(database, state);
@@ -74,8 +74,8 @@ internal static class CompetingInboxAssertions
             else
             {
                 await SubscriptionOldCutAssertions.SameAsync(replay, original);
-                await Assert.That(replay.NativeValue).IsNull();
-                await Assert.That(original.NativeValue).IsNull();
+                await Assert.That(replay.Value).IsNull();
+                await Assert.That(original.Value).IsNull();
             }
             await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition,
                 "root", operation.Id)))!.AsSpan().SequenceEqual(raw)).IsTrue();

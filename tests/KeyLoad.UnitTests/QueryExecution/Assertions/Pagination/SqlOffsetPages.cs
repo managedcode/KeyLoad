@@ -99,8 +99,7 @@ internal static class SqlOffsetPages
     }
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine owner, CommandRequest seed, CommitReceipt receipt)
     {
-        var actual = owner.ApplyEmbedded(new(seed.CommandId, OperationKind.Batch, SqlOffsetProtocol.Root, default,
-            global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
+        var actual = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, SqlOffsetProtocol.Root, default, global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
         await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
     }
 }

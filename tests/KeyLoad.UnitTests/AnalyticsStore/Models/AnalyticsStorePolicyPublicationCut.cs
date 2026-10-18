@@ -11,14 +11,14 @@ internal sealed record AnalyticsStorePolicyPublicationCut(string[] Image, long P
     internal static AnalyticsStorePolicyPublicationCut Capture(TestDatabase db)
     {
         var outbox = db.Database.GetOutboxStatus(D.Root, db.Partition);
-        var journal = db.ReadJournalCut();
+        var journal = db.ReadCanonicalCut();
         return new(ControlledPartitionMovementRawImage.Bytes(db.Store), db.Store.Position, db.Database.LastApplied,
             journal.LastIndex, journal.CommittedIndex, journal.Term, outbox);
     }
 
     internal async Task AssertUnchangedAsync(TestDatabase db)
     {
-        var journal = db.ReadJournalCut();
+        var journal = db.ReadCanonicalCut();
         await Assert.That(db.Store.Position).IsEqualTo(Position);
         await Assert.That(db.Database.LastApplied).IsEqualTo(Applied);
         await Assert.That(journal.LastIndex).IsEqualTo(LastIndex);

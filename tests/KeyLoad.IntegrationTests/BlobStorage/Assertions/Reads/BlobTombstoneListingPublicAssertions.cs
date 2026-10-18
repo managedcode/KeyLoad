@@ -63,7 +63,8 @@ internal static class BlobTombstoneListingPublicAssertions
     {
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations).IsEmpty();
     }
 }

@@ -43,7 +43,7 @@ tested through the actual replicated cluster.
 
 ## Closed phase inventory
 
-A replicated write is ordinary Orleans calls to the ZoneTree owners on ReplicaCount silos with majority acknowledgement after durable local apply; its profiling boundaries are not part of this inventory yet.
+A replicated write is ordinary Orleans calls to the ZoneTree owners on ReplicaCount silos with acknowledgement from every configured copy after durable local apply; its profiling boundaries are not part of this inventory yet.
 
 |ID/name|Actual timing boundary; preservation|
 |---|---|

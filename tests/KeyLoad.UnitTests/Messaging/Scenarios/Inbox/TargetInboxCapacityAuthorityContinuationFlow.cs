@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
@@ -35,10 +36,10 @@ internal static class TargetInboxCapacityAuthorityContinuationFlow
                 TargetInboxUnitProtocol.Payload, 0L)]
         };
         var failed = TargetInboxNativeSetup.Apply(database, quota, token);
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(failed.SafeDetail).IsEqualTo(QuotaDetail);
-        await Assert.That(failed.Json).IsNull();
-        await Assert.That(failed.NativeValue).IsNull();
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(failed.Problem?.Detail).IsEqualTo(QuotaDetail);
+        
+        await Assert.That(failed.Value).IsNull();
         await Assert.That(TargetInboxNativeAssertions.Image(store, state.Original.Source.Partition, state.Original.Target.Partition))
             .IsEquivalentTo(before, CollectionOrdering.Matching);
         await QuotaReplayAsync(database, store, quota, failed, token);
@@ -46,7 +47,7 @@ internal static class TargetInboxCapacityAuthorityContinuationFlow
     }
 
     internal static async Task QuotaReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        CommitInboxRequest request, OperationResult expected, CancellationToken token)
+        CommitInboxRequest request, Result<object> expected, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;

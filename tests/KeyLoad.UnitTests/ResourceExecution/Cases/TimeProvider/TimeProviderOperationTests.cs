@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Query;
@@ -108,7 +109,7 @@ internal sealed class TimeProviderOperationTests
         await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, Entity))!.Json).IsEqualTo(Json);
     }
 
-    private static Task<OperationResult> SubmitAsync(EmbeddedCoordinator coordinator, CommandRequest command, bool native)
+    private static Task<Result<object>> SubmitAsync(EmbeddedCoordinator coordinator, CommandRequest command, bool native)
         => native
             ? coordinator.SubmitNativeAsync(OperationKind.Batch, command.CommandId, Root, NativeSerialization.Serialize(command))
             : coordinator.SubmitAsync(OperationKind.Batch, command.CommandId, Root, JsonSerializer.Serialize(command, JsonDefaults.Options));

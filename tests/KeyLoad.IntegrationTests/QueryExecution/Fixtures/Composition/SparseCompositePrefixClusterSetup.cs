@@ -9,26 +9,26 @@ internal static class SparseCompositePrefixClusterSetup
         RequestCqrsClusterCallers root, bool includeNull, bool includeMissing, CancellationToken token)
     {
         var partition = new PartitionRef("sparse-prefix-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
-        foreach (var fallback in new[] { false, true })
+        foreach (var includeStatusIndex in new[] { false, true })
         {
-            var definition = new ResourceDefinition(fallback ? SparseCompositePrefixClusterData.Fallback : SparseCompositePrefixClusterData.Only,
+            var definition = new ResourceDefinition(includeStatusIndex ? SparseCompositePrefixClusterData.WithStatusIndex : SparseCompositePrefixClusterData.Only,
                 ResourceKind.Collection, partition.TransactionDomainId)
             {
-                Indexes = SparseCompositePrefixClusterData.Indexes(includeNull, includeMissing, fallback),
+                Indexes = SparseCompositePrefixClusterData.Indexes(includeNull, includeMissing, includeStatusIndex),
                 FieldPolicies = [new("/status", "restricted", SparseCompositePrefixClusterData.ReadGrant, SparseCompositePrefixClusterData.UseGrant)]
             };
             await SqlClusterProtocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
                 await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, definition), token)));
         }
         var command = new CommandRequest(Guid.NewGuid(), partition,
-            [.. new[] { SparseCompositePrefixClusterData.Only, SparseCompositePrefixClusterData.Fallback }.SelectMany(collection =>
+            [.. new[] { SparseCompositePrefixClusterData.Only, SparseCompositePrefixClusterData.WithStatusIndex }.SelectMany(collection =>
                 SparseCompositePrefixClusterData.Rows.Select(row => (Mutation)new PutDocument(collection, row.Id, SparseCompositePrefixClusterRequests.SeedJson(row.Id, row.Json))))]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(command, token));
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         var expected = new CommitReceipt(command.CommandId,
-            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position, receipt.Token.OwnershipEpoch),
+            new(receipt.Token.Incarnation, partition.AtomicPartitionId, receipt.Token.Position),
             [.. command.Mutations.Cast<PutDocument>().Select(row => new MutationReceipt("putDocument", row.Resource, row.Id, 1L))],
-            DurabilityProfile.QuorumProcessDurable);
+            DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, receipt);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, SparseCompositePrefixClusterData.Only,
             Capability.Query | Capability.DocumentsRead, token);
@@ -44,7 +44,7 @@ internal static class SparseCompositePrefixClusterSetup
         {
             PolicyEpoch = epoch,
             Grants = [new(state.Partition.DatabaseId, SparseCompositePrefixClusterData.Only, Capability.Query | Capability.DocumentsRead),
-                new(state.Partition.DatabaseId, SparseCompositePrefixClusterData.Fallback, Capability.Query | Capability.DocumentsRead)],
+                new(state.Partition.DatabaseId, SparseCompositePrefixClusterData.WithStatusIndex, Capability.Query | Capability.DocumentsRead)],
             FieldGrants = use ? [SparseCompositePrefixClusterData.ReadGrant, SparseCompositePrefixClusterData.UseGrant]
                 : [SparseCompositePrefixClusterData.ReadGrant]
         };

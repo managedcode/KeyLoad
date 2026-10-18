@@ -24,11 +24,11 @@ internal static class AnalyticsStoreNativeTestProjection
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             generation = new(snapshot, path);
-            await AnalyticsStoreNativeTestOperations.EqualAsync(expected, await generation.QueryAsync(token));
+            await AnalyticsStoreNativeTestOperations.EqualAsync(expected, generation.Query(token));
         }, failures);
         if (generation is not null)
         {
-            await ServerFailureObserver.ObserveAsync(() => generation.DisposeAsync().AsTask(), failures);
+            ServerFailureObserver.Observe(generation.Dispose, failures);
             if (generation.HasJoinedEngine && Directory.Exists(path))
             {
                 await ServerFailureObserver.ObserveAsync(() => { Directory.Delete(path, recursive: true); return Task.CompletedTask; }, failures);

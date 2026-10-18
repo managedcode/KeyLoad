@@ -1,3 +1,6 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.UnitTests.Features.Authorization;
 using P = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeProtocol;
 
@@ -9,23 +12,23 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
         => await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
 
     internal static async Task ReceiveAsync(BudgetedQueueReceiveOutcomeFixture fixture,
-        ReplicatedOperation operation, OperationResult result, string messageId)
+        Command<DatabaseCommand> operation, Result<object> result, string messageId)
     {
         var actual = result.Get<ReceiveResult>();
         var delivery = await Assert.That(actual.Deliveries).HasSingleItem();
         await Assert.That(delivery.Token).IsNotEmpty();
-        var entry = fixture.Database.ReadRetainedEntry(operation);
-        var appended = entry.Operation ?? throw new InvalidOperationException("The native receive entry is absent.");
-        await Assert.That(appended.Kind).IsEqualTo(operation.Kind);
-        await Assert.That(appended.PrincipalId).IsEqualTo(operation.PrincipalId);
+        var entry = fixture.Database.ReadStoredOutcome(operation);
+        var appended = entry.PreparedCommand ?? throw new InvalidOperationException("The native receive entry is absent.");
+        await Assert.That(appended.Value!.Kind).IsEqualTo(operation.Value!.Kind);
+        await Assert.That(appended.UserId!).IsEqualTo(operation.UserId!);
         await Assert.That(appended.PayloadJson).IsEqualTo(operation.PayloadJson);
         await Assert.That(delivery.HeadersJson).IsEqualTo(P.CanonicalHeaders);
-        var expected = new ReceiveResult(operation.Id,
+        var expected = new ReceiveResult(operation.CommandId,
             [new(messageId, P.Payload, P.CanonicalHeaders, delivery.Token, P.Initial,
-                appended.EvaluatedAt.AddSeconds(fixture.Resource.QueuePolicy.MaxLeaseSeconds),
+                new DateTimeOffset(appended.Timestamp).AddSeconds(fixture.Resource.QueuePolicy.MaxLeaseSeconds),
                 (int)P.Initial, P.Initial)],
             new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId,
-                entry.Index, P.Initial));
+                entry.CanonicalSequence));
         await EqualAsync(expected, actual);
     }
 
@@ -36,7 +39,7 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
         var rows = TeamRowPolicyAssertions.Image(database.Store);
         var position = database.Store.Position;
         var applied = database.Database.LastApplied;
-        var journal = database.ReadJournalCut();
+        var journal = database.ReadCanonicalCut();
         var outbox = database.Database.GetOutboxStatus(P.Root, database.Partition);
         var outcome = OutcomeBytes(fixture);
         await Assert.That(NativeSerialization.Serialize(fixture.OriginalIntent)
@@ -48,7 +51,7 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
         await Assert.That(TeamRowPolicyAssertions.Image(database.Store).SequenceEqual(rows, StringComparer.Ordinal)).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(database.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(database.ReadCanonicalCut()).IsEqualTo(journal);
         await EqualAsync(outbox, database.Database.GetOutboxStatus(P.Root, database.Partition));
         await Assert.That(OutcomeBytes(fixture).SequenceEqual(outcome)).IsTrue();
     }

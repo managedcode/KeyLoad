@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
@@ -6,19 +8,18 @@ namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
 internal static class BlobDeleteCommitCutContinuation
 {
-    internal static async Task<(ReplicatedOperation Operation, OperationResult Result)> ReclaimAsync(DatabaseEngine owner,
-        BlobCommitCutSeedProof proof, ReplicatedOperation selected)
+    internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> ReclaimAsync(DatabaseEngine owner,
+        BlobCommitCutSeedProof proof, Command<DatabaseCommand> selected)
     {
         var request = new ReclaimBlobRequest(Guid.NewGuid(), BlobCommitCutProtocol.Blob, BlobCommitCutProtocol.OriginalUpload, 1);
-        var operation = owner.CreateNativeOperation(OperationKind.ReclaimBlob, request.CommandId, BlobCommitCutProtocol.Principal,
+        var operation = owner.CreateCommand(OperationKind.ReclaimBlob, request.CommandId, BlobCommitCutProtocol.Principal,
             owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var cut = owner.Store.Position;
         var result = owner.Apply(operation);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var value = result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobDeleteCommitCutOracle.ExactAsync(value.Value, new BlobReclaimResult(BlobCommitCutProtocol.OriginalUpload, 1, 0, 4, true));
-        await BlobDeleteCommitCutOracle.ExactAsync(value.Receipt, new CommitReceipt(request.CommandId,
-            new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId, cut + 1, 1), [], DurabilityProfile.ProcessDurable));
+        await BlobDeleteCommitCutOracle.ExactAsync(value.Receipt, new CommitReceipt(request.CommandId, new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId, cut + 1), [], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(value.Receipt.CommandId).IsEqualTo(request.CommandId);
         await Assert.That(value.Receipt.Token.Position).IsEqualTo(cut + 1);
         await Assert.That(owner.Store.Position).IsEqualTo(cut + 1);
@@ -34,22 +35,22 @@ internal static class BlobDeleteCommitCutContinuation
         var position = store.Position;
         for (var index = 0; index < proof.Operations.Length; index++)
         {
-            var operation = NativeSerialization.Deserialize<ReplicatedOperation>(proof.Operations[index]);
-            if (operation.Kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal)
+            var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(proof.Operations[index]);
+            if (operation.Value!.Kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal)
             {
-                var original = NativeSerialization.Deserialize<OperationResult>(proof.Results[index]);
+                var original = NativeSerialization.Deserialize<Result<object>>(proof.Results[index]);
                 await ReplayAsync(owner, operation, original);
                 continue;
             }
             var result = owner.ResolveOutcome(operation);
-            await Assert.That(result.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-            await Assert.That(owner.Apply(operation).Error).IsEqualTo(ErrorCode.TokenInvalidated);
+            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            await Assert.That(Errors.Code(owner.Apply(operation).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         }
         await Assert.That(BlobCommitCutNativeProof.Image(store)).IsEqualTo(image);
         await Assert.That(store.Position).IsEqualTo(position);
     }
 
-    internal static async Task ReplayAsync(DatabaseEngine owner, ReplicatedOperation operation, OperationResult result)
+    internal static async Task ReplayAsync(DatabaseEngine owner, Command<DatabaseCommand> operation, Result<object> result)
     {
         var store = (ZoneTreeStore)owner.Store;
         var image = BlobCommitCutNativeProof.Image(store);

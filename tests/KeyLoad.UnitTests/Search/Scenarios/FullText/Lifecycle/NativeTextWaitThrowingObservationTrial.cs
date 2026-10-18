@@ -14,7 +14,7 @@ internal static class NativeTextWaitThrowingObservationTrial
         var failures = new List<Exception>();
         try
         {
-            await using var fixture = new ReplicaAppliedPositionWaitFixture();
+            using var fixture = new CanonicalReadCutFixture();
             NativeTextProjection? projection = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {

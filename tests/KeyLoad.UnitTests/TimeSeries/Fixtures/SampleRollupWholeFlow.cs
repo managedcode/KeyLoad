@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
@@ -14,9 +15,9 @@ internal static class SampleRollupWholeFlow
     internal const string StateBound = "The complete canonical state exceeds the fixture bound.";
     private const int MaximumRecords = 4096;
 
-    internal static string Outcome(OperationResult result) => Convert.ToHexString(NativeSerialization.Serialize(result));
+    internal static string Outcome(Result<object> result) => Convert.ToHexString(NativeSerialization.Serialize(result));
 
-    internal static OperationResult Commit(TestDatabase db, Guid id, Mutation mutation, string principal = Root)
+    internal static Result<object> Commit(TestDatabase db, Guid id, Mutation mutation, string principal = Root)
         => db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), principal, id);
     internal static RefreshSampleRollup Refresh(long revision, int max = TimeSeriesReadDefaults.MaxSamples)
         => new(Set, Series, Start, End, revision, max);

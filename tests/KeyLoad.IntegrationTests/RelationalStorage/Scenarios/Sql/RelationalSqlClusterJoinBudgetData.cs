@@ -7,7 +7,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Builds current typed rows through the actual SDK for the bounded CLUSTER join cases.</summary>
+/// <summary>Builds current typed rows through the actual SDK for the bounded Orleans join cases.</summary>
 internal static class RelationalSqlClusterJoinBudgetData
 {
     internal const string LeftCollection = "budgetorders";

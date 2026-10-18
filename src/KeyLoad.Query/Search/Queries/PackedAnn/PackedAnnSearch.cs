@@ -9,7 +9,6 @@ internal static class PackedAnnSearch
     private const int MinimumNonEmptyCapacity = 1;
     private const int EmptyElementCount = 0;
     private const int NoRetainedBytes = 0;
-    private const int InitialSequence = 0;
     private const int MinimumPositiveCount = 1;
     private const int FirstElementIndex = 0;
     private const int AdjacentElementOffset = 1;
@@ -39,7 +38,7 @@ internal static class PackedAnnSearch
         {
             var emptyReservation = PackedAnnReservations.ExactQueryScratch(initialBytes, NoRetainedBytes);
             PackedAnnReservations.RequireScratch(emptyReservation, state.Options.MaxScratchBytes);
-            return Result([], AnnSearchMode.ExactSmallSet, emptyReservation, plan, EmptyElementCount, InitialSequence,
+            return Result([], AnnSearchMode.ExactSmallSet, emptyReservation, plan, EmptyElementCount,
                 budget, startedWork, startedDistances, startedEdges);
         }
         if (plan.UseExact)
@@ -58,7 +57,7 @@ internal static class PackedAnnSearch
         var reservation = PackedAnnReservations.ExactQueryScratch(initialBytes, plan.ResultCount);
         PackedAnnReservations.RequireScratch(reservation, state.Options.MaxScratchBytes);
         var candidates = PackedAnnExactSearch.Run(state, similarity, eligibility, plan.ResultCount, budget);
-        return Result(candidates, AnnSearchMode.ExactSmallSet, reservation, plan, EmptyElementCount, InitialSequence,
+        return Result(candidates, AnnSearchMode.ExactSmallSet, reservation, plan, EmptyElementCount,
             budget, startedWork, startedDistances, startedEdges);
     }
 
@@ -71,8 +70,8 @@ internal static class PackedAnnSearch
             plan.Capacity, plan.ResultCount);
         PackedAnnReservations.RequireScratch(reservation, state.Options.MaxScratchBytes);
         var approximate = PackedAnnApproximateSearch.Run(state, similarity, eligibility, plan, budget);
-        return Result(approximate.Candidates, approximate.Mode, reservation, plan,
-            approximate.ExpansionPasses, approximate.FallbackDistanceEvaluations, budget,
+        return Result(approximate.Candidates, AnnSearchMode.Approximate, reservation, plan,
+            approximate.ExpansionPasses, budget,
             startedWork, startedDistances, startedEdges);
     }
 
@@ -135,14 +134,13 @@ internal static class PackedAnnSearch
     }
 
     private static AnnSearchResult Result(AnnCandidate[] candidates, AnnSearchMode mode, long reservation,
-        FilteredVectorPlan plan, int expansionPasses, long fallbackDistances, AnnWorkBudget budget,
+        FilteredVectorPlan plan, int expansionPasses, AnnWorkBudget budget,
         long startedWork, long startedDistances, long startedEdges)
         => new(candidates, mode, checked(budget.WorkUnits - startedWork),
             checked(budget.DistanceEvaluations - startedDistances), checked(budget.EdgeVisits - startedEdges))
         {
             ScratchBytesUpperBound = reservation,
             EligibleCount = plan.EligibleCount,
-            ExpansionPasses = expansionPasses,
-            FallbackDistanceEvaluations = fallbackDistances
+            ExpansionPasses = expansionPasses
         };
 }

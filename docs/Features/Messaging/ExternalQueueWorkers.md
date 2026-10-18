@@ -10,7 +10,7 @@ This Messaging child contract defines the finite .NET SDK ACK worker. The canoni
 flowchart TD
     Policy[Validate and snapshot typed caller policy] --> Receive[Original bounded Receive via native SDK]
     Receive --> Native[Connection-owned CQRS stream and Orleans routing]
-    Native --> Store[Node-local committed queue state and majority-acknowledged receipt]
+    Native --> Store[Node-local committed queue state and required-copy acknowledgementnowledged receipt]
     Store --> Check{Known page within available UTF8 budget?}
     Check -->|yes| Handler[Bounded application callback outside storage gate]
     Check -->|no or uncertain| Stop[Retain original identities and stop]

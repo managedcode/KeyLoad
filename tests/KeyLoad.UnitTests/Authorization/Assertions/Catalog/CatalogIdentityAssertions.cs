@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
@@ -88,9 +89,7 @@ internal static class CatalogIdentityAssertions
     internal static async Task ReceiptAsync(ZoneTreeStore store, CommandRequest command, CommitReceipt actual,
         long before, long revision, string kind)
     {
-        var expected = new CommitReceipt(command.CommandId,
-            new(store.Identity.Incarnation, command.Partition.AtomicPartitionId, before + 1L, 1L),
-            [new(kind, CatalogIdentityProtocol.Collection, CatalogIdentityProtocol.Row, revision)], DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, new(store.Identity.Incarnation, command.Partition.AtomicPartitionId, before + 1L), [new(kind, CatalogIdentityProtocol.Collection, CatalogIdentityProtocol.Row, revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(actual, expected);
         await Assert.That(store.Position).IsEqualTo(before + 1L);
     }
@@ -103,8 +102,7 @@ internal static class CatalogIdentityAssertions
         CommitReceipt receipt, byte[] outcome, string principal, CancellationToken token)
         => CatalogIdentityLifetime.ObserveAsync(store, async () =>
         {
-            var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, principal, default,
-                System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
+            var operation = database.CreateCommand(OperationKind.Batch, command.CommandId, principal, default, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
             await EqualAsync(database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>(), receipt);
             await Assert.That(Outcome(store, command, principal).AsSpan().SequenceEqual(outcome)).IsTrue();
         });

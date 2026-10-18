@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
@@ -12,8 +13,7 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         using var database = new TestDatabase();
         database.Configure(CommandOutcomePartitionScopeTestData.Resource, ResourceKind.Collection);
         var commandId = Guid.NewGuid();
-        var malformed = new ReplicatedOperation(commandId, OperationKind.ConfigureResource, "root",
-            database.Database.EvaluationClock.GetUtcNow(), "{");
+        var malformed = database.Database.CreateCommand(OperationKind.ConfigureResource, commandId, "root", database.Database.EvaluationClock.GetUtcNow(), "{");
         var malformedResult = database.Database.Apply(malformed);
         var unknownKey = KeySpace.UnknownOutcome("root", commandId);
 
@@ -26,17 +26,14 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         var firstResult = database.Database.Apply(first);
         var secondResult = database.Database.Apply(second);
         var unknownReplay = database.Database.Apply(malformed);
-        var changedMalformed = database.Database.Apply(malformed with
-        {
-            PayloadJson = "["
-        });
+        var changedMalformed = database.Database.Apply(database.Database.CreateCommand(malformed.Value!.Kind, malformed.CommandId, malformed.UserId!, new DateTimeOffset(malformed.Timestamp), "["));
 
-        await Assert.That(malformedResult.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(firstResult.Error).IsNull();
-        await Assert.That(secondResult.Error).IsNull();
-        await Assert.That(unknownReplay.Error).IsEqualTo(malformedResult.Error);
-        await Assert.That(unknownReplay.SafeDetail).IsEqualTo(malformedResult.SafeDetail);
-        await Assert.That(changedMalformed.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(malformedResult.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(secondResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(unknownReplay.Problem)).IsEqualTo(Errors.Code(malformedResult.Problem));
+        await Assert.That(unknownReplay.Problem?.Detail).IsEqualTo(malformedResult.Problem?.Detail);
+        await Assert.That(Errors.Code(changedMalformed.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(unknownKey))?.ScopeKind)
             .IsEqualTo(CommandOutcomeScopeKind.Unknown);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(

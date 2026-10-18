@@ -30,7 +30,7 @@ internal static class TargetInboxCapacityAuthorityHealthy
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(request.Target.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(expectedPosition);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialEpoch);
+
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         ImmutableArray<MutationReceipt> expected = [new("putDocument", TargetInboxUnitProtocol.Collection, TargetInboxCapacityAuthorityFixture.Healthy, 1L),
             new("appendEvents", TargetInboxUnitProtocol.Events, TargetInboxCapacityAuthorityFixture.Healthy, 1L),

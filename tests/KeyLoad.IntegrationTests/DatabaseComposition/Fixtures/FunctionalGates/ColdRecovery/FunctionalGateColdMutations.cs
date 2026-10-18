@@ -46,6 +46,6 @@ internal static class FunctionalGateColdMutations
             new("upsertEdge", FunctionalGateColdProtocol.Resource("graph", index), FunctionalGateColdProtocol.Edge, 1),
             new("appendSamples", FunctionalGateColdProtocol.Resource("series", index), FunctionalGateColdProtocol.Series, 2)
         ]);
-        await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, context.Partition, [.. expected]);
+        await FunctionalGateRelationalAssertions.ReceiptAsync(context, receipt, command.CommandId, context.Partition, [.. expected]);
     }
 }

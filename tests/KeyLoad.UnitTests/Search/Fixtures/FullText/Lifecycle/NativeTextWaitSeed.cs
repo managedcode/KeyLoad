@@ -1,17 +1,18 @@
+using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Text.Json;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>Seeds a real persisted log/materializer prefix for unit component checks; does not claim CLUSTER authority.</summary>
+/// <summary>Commits through the actual canonical engine and verifies its persisted outcome.</summary>
 internal static class NativeTextWaitSeed
 {
     private const string Root = "root";
-    private const long InitialTerm = 1;
     private const long FirstIndex = 1;
 
-    internal static async Task<CommitReceipt> CommitAsync(ReplicaAppliedPositionWaitFixture fixture,
+    internal static async Task<CommitReceipt> CommitAsync(CanonicalReadCutFixture fixture,
         CancellationToken cancellationToken)
     {
         var database = fixture.Canonical;
@@ -20,15 +21,12 @@ internal static class NativeTextWaitSeed
             [new PutDocument(NativeTextBilingualAudit.Collection, NativeTextBilingualAudit.UkrainianId,
                 NativeTextBilingualAudit.UkrainianJson), new PutDocument(NativeTextBilingualAudit.Collection,
                 NativeTextBilingualAudit.EnglishId, NativeTextBilingualAudit.EnglishJson)]);
-        var operation = database.Database.NormalizeOperation(new ReplicatedOperation(commandId, OperationKind.Batch,
-            Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
-        fixture.Log.SaveTermAndVote(InitialTerm, fixture.Configuration.LocalId);
-        fixture.Log.Append([new ReplicaEntry(FirstIndex, InitialTerm, operation)]);
-        fixture.Materializer.Commit(FirstIndex);
-        await fixture.Materializer.WaitForApplyAsync(FirstIndex, cancellationToken).ConfigureAwait(false);
-        var receipt = database.Database.ResolveOutcome(operation).Get<CommitReceipt>();
+        var operation = database.Database.OwnCommand(database.Database.CreateCommand(OperationKind.Batch, commandId, Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
+        cancellationToken.ThrowIfCancellationRequested();
+        var expectedPosition = checked(database.Database.LastApplied + 1);
+        var receipt = database.SubmitIssuedEmbedded(operation, cancellationToken).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(FirstIndex);
+        await Assert.That(receipt.Token.Position).IsEqualTo(expectedPosition);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);

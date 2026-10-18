@@ -71,8 +71,10 @@ internal static class BlobReservationQuotaPublicAssertions
             await callers.Mcp.CallAsync("keyload_blobs_abort_upload", abort, token))).Value);
         await Assert.That(state.Begun.Receipt.CommandId).IsEqualTo(state.First.CommandId);
         await Assert.That(aborted.Receipt.CommandId).IsEqualTo(abort.CommandId);
-        await Assert.That(state.Begun.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await Assert.That(aborted.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(state.Begun.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(state.Begun.Receipt.PersistedCopies).IsEqualTo(3);
+        await Assert.That(aborted.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(aborted.Receipt.PersistedCopies).IsEqualTo(3);
     }
 
     private static async Task AbortedAsync(RequestCqrsClusterCallers callers, BeginBlobUploadRequest first,

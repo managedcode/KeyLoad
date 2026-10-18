@@ -84,9 +84,7 @@ internal static class McpCanonicalTestData
     internal static ImmutableArray<McpDecodeCase> Reads() =>
     [
         Read(McpCatalogExpectations.DocumentsGet, new GetDocumentRequest(Reference)),
-        Read(McpCatalogExpectations.DocumentsReadFollower, new ReadFollowerDocumentRequestV1(ContractVersion, Reference,
-            "http://node2:8080", WaitMinimumPosition, new CommitToken(StableId, Partition.AtomicPartitionId,
-                WaitMinimumPosition, WaitPlacementEpoch))),
+
         Read(McpCatalogExpectations.StreamsRead, new ReadStreamRequest(new StreamRef(Partition, Resource, Entity))),
         Read(McpCatalogExpectations.StreamsReplay,
             new ReadAggregateReplayRequest(new StreamRef(Partition, Resource, Entity), "worker.v1")),
@@ -115,7 +113,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.QueryLiveRead, new ReadLiveQueryRequest(Ast(), Cursor)),
         Read(McpCatalogExpectations.OutboxStatus, new GetOutboxStatusRequest(Partition)),
         Read(McpCatalogExpectations.ProjectionsRead, new ReadProjectionBatchRequest(Consumer)),
-        Read(WaitForIndexProtocol.Tool, new WaitForIndexRequest(Partition, Resource, FieldPath, new CommitToken(StableId, Partition.AtomicPartitionId, WaitMinimumPosition, WaitPlacementEpoch))),
+        Read(WaitForIndexProtocol.Tool, new WaitForIndexRequest(Partition, Resource, FieldPath, new CommitToken(StableId, Partition.AtomicPartitionId, WaitMinimumPosition))),
         Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
         Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(1, new(Partition, Resource),
             Retriever: new(new(Resource, [Reference])))),

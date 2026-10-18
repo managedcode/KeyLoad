@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.CrashHost;
@@ -35,14 +37,14 @@ internal static class SubscriptionFilterProcessAssertions
         {
             await Assert.That(actual.Generation).IsEqualTo(UpdatedGeneration);
         }
-        var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(Path.Combine(path, SubscriptionFilterCrashScenario.OperationFile), token));
+        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(path, SubscriptionFilterCrashScenario.OperationFile), token));
         var first = db.ApplyEmbedded(operation, token).Get<SubscriptionInfo>();
         await Assert.That(first.Generation).IsEqualTo(UpdatedGeneration);
         var repeated = db.ApplyEmbedded(operation, token).Get<SubscriptionInfo>();
         await Assert.That(JsonDefaults.Serialize(repeated).AsSpan().SequenceEqual(JsonDefaults.Serialize(first))).IsTrue();
         var old = JsonDefaults.Deserialize<string>(await File.ReadAllBytesAsync(Path.Combine(path, SubscriptionFilterCrashScenario.OldTokenFile), token));
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, old, DeliveryAction.Ack);
-        await Assert.That(Submit(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, token).Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(Submit(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, token).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, UpdatedGeneration, false);
         Submit(db, OperationKind.SetSubscriptionPaused, resume, resume.CommandId, token).Get<SubscriptionInfo>();
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, SubscriptionFilterCrashScenario.WindowSize);
@@ -68,8 +70,8 @@ internal static class SubscriptionFilterProcessAssertions
         await Assert.That(db.GetSubscription(Root, group).Checkpoint).IsEqualTo(4);
     }
 
-    private static OperationResult Submit<T>(DatabaseEngine db, OperationKind kind, T request, Guid id, CancellationToken token)
-        => db.ApplyEmbedded(new(id, kind, Root, default, System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options)), token);
+    private static Result<object> Submit<T>(DatabaseEngine db, OperationKind kind, T request, Guid id, CancellationToken token)
+        => db.ApplyEmbedded(db.CreateCommand(kind, id, Root, default, System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options)), token);
 
     private static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(),
         RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(),

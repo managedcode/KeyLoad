@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using Microsoft.Extensions.Options;
@@ -74,7 +76,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         }
     }
 
-    private async Task<OperationResult> SubmitCommandAsync(OperationKind kind, DecodedGrainRequest request,
+    private async Task<Result<object>> SubmitCommandAsync(OperationKind kind, DecodedGrainRequest request,
         PrincipalRecord principal, CancellationToken operationToken)
     {
         return kind switch
@@ -95,12 +97,12 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         };
     }
 
-    private Task<OperationResult> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,
+    private Task<Result<object>> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken token)
         => coordinator.SubmitNativeAsync(OperationKind.Batch, request.Envelope.CommandId,
                 principal.Id, request.Payload, cancellationToken: token);
 
-    private Task<OperationResult> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
+    private Task<Result<object>> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken cancellationToken)
         => GrainOnlineTextCheckpointCommand.TrySubmit(database, coordinator, request, principal,
             onlineText, clock, cancellationToken)

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.CrashHost.Features.BlobStorage;
@@ -26,7 +28,7 @@ internal static class BlobCompleteCommitCutHealthy
         byte[] bytes = [101, 102, 103, 104];
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, upload, PayloadBytes, 0);
         var first = await SendAsync(owner, OperationKind.BeginBlobUpload, begin.CommandId, begin);
-        var expiry = first.Operation.EvaluatedAt.AddSeconds(BlobCompleteCommitCutOracle.UploadLifetimeSeconds);
+        var expiry = new DateTimeOffset(first.Operation.Timestamp).AddSeconds(BlobCompleteCommitCutOracle.UploadLifetimeSeconds);
         var initial = BlobCompleteCommitCutOracle.Initial(owner.Store.Identity.Incarnation, blob, upload, PayloadBytes);
         await BlobCompleteCommitCutOracle.ExactAsync(first.Result.Get<BlobCommitResult<BlobUploadInfo>>().Value,
             new BlobUploadInfo(blob, upload, PayloadBytes, 0, 0, 0, expiry, BlobUploadStatus.Active, initial));
@@ -37,7 +39,7 @@ internal static class BlobCompleteCommitCutHealthy
             new BlobUploadInfo(blob, upload, PayloadBytes, 0, 1, PayloadBytes, expiry, BlobUploadStatus.Active, hash));
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
         var third = await SendAsync(owner, OperationKind.CompleteBlobUpload, complete.CommandId, complete);
-        var metadata = new BlobMetadata(blob, 1, upload, PayloadBytes, 1, hash, new RowAccess(), third.Operation.EvaluatedAt);
+        var metadata = new BlobMetadata(blob, 1, upload, PayloadBytes, 1, hash, new RowAccess(), new DateTimeOffset(third.Operation.Timestamp));
         await BlobCompleteCommitCutOracle.ExactAsync(third.Result.Get<BlobCommitResult<BlobMetadata>>().Value, metadata);
         var incarnation = owner.Store.Identity.Incarnation;
         var state = new BlobState(1, incarnation, incarnation, begin.CommandId, BlobCommitCutProtocol.Principal,
@@ -48,22 +50,21 @@ internal static class BlobCompleteCommitCutHealthy
         return result;
     }
 
-    private static async Task<(ReplicatedOperation Operation, OperationResult Result)> SendAsync<T>(DatabaseEngine owner,
+    private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> SendAsync<T>(DatabaseEngine owner,
         OperationKind kind, Guid id, T command)
     {
-        var operation = owner.CreateNativeOperation(kind, id, BlobCommitCutProtocol.Principal,
+        var operation = owner.CreateCommand(kind, id, BlobCommitCutProtocol.Principal,
             owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(command));
         var position = owner.Store.Position;
         var result = owner.Apply(operation);
-        if (result.Error is not null)
+        if (Errors.Code(result.Problem) is not null)
         {
-            throw Errors.Fail(result.Error.Value, result.SafeDetail!);
+            throw Errors.Fail(Errors.Code(result.Problem).Value, result.Problem?.Detail!);
         }
         var receipt = kind == OperationKind.CompleteBlobUpload
             ? result.Get<BlobCommitResult<BlobMetadata>>().Receipt : result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt;
-        await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(id,
-            new CommitToken(owner.Store.Identity.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId,
-                position + 1, 1), [], DurabilityProfile.ProcessDurable));
+        await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(id, new CommitToken(owner.Store.Identity.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId,
+                position + 1), [], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(BlobCommitCutProtocol.Partition.AtomicPartitionId);

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
@@ -86,17 +87,15 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
     {
         var placement = db.ReadAtomicPartitionPlacement("root", group.Source.Partition);
         return new(placement.Incarnation, group.Source.Partition.AtomicPartitionId,
-            checked(store.Position + 1), placement.PlacementEpoch);
+            checked(store.Position + 1));
     }
 
-    internal static async Task ReceiptAsync(OperationResult actual, SubscriptionDeliveryCommand request,
+    internal static async Task ReceiptAsync(Result<object> actual, SubscriptionDeliveryCommand request,
         CommitToken expectedToken, long eventPosition)
     {
-        var expected = new CommitReceipt(request.CommandId, expectedToken,
-            [new("Ack", request.Subscription.Source.Resource,
-                eventPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), 1L)],
-            DurabilityProfile.ProcessDurable);
-        await Assert.That(actual.Error).IsNull();
+        var expected = new CommitReceipt(request.CommandId, expectedToken, [new("Ack", request.Subscription.Source.Resource,
+                eventPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), 1L)], DurabilityProfile.ProcessDurable, 1);
+        await Assert.That(Errors.Code(actual.Problem)).IsNull();
         await Assert.That(NativeSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
     }

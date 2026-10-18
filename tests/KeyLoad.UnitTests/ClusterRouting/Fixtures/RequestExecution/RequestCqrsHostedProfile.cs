@@ -15,7 +15,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<GrainRoutingOptions> routing,
     IGrainRequestPhaseObserver? observer, IGrainRequestPurposeObserver? purposeObserver,
-    bool nativeText, bool nativeAnn, DatabaseLimits? limits)
+    bool nativeText, bool nativeAnn, DatabaseLimits? limits, RequestCqrsHostedClusterNode? clusterNode = null)
 {
     internal const string Root = "root";
     private const string Credential = "root.unit-test-credential-32-characters";
@@ -35,19 +35,20 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     internal bool NativeText { get; } = nativeText;
     internal bool NativeAnn { get; } = nativeAnn;
     internal NativeRuntimeTestOptions Timing { get; } = new();
+    internal RequestCqrsHostedClusterNode? ClusterNode { get; } = clusterNode;
 
     internal string[] Arguments(string directory, int siloPort)
     {
-        var identity = SiloPrefix + Guid.NewGuid().ToString(GuidFormat);
+        var identity = ClusterNode?.SiloName ?? SiloPrefix + Guid.NewGuid().ToString(GuidFormat);
         return [PublicUrls, WarningLogLevel,
             Setting(nameof(NodeOptions.DataDirectory), directory),
             Setting(nameof(NodeOptions.SiloName), identity),
-            Setting(nameof(NodeOptions.ClusterId), identity),
+            Setting(nameof(NodeOptions.ClusterId), ClusterNode?.ClusterId ?? identity),
             Setting(nameof(NodeOptions.SiloPort), siloPort.ToString(CultureInfo.InvariantCulture)),
-            Setting(nameof(NodeOptions.SiloCount), OneSilo.ToString(CultureInfo.InvariantCulture)),
-            Setting(nameof(NodeOptions.ReplicaCount), OneSilo.ToString(CultureInfo.InvariantCulture)),
-            Setting(nameof(NodeOptions.Incarnation), Guid.NewGuid().ToString(GuidFormat)),
-            Setting(nameof(NodeOptions.SigningKey), Convert.ToBase64String(RandomNumberGenerator.GetBytes(SigningKeyBytes))),
+            Setting(nameof(NodeOptions.SiloCount), (ClusterNode?.SiloCount ?? OneSilo).ToString(CultureInfo.InvariantCulture)),
+            Setting(nameof(NodeOptions.ReplicaCount), (ClusterNode?.ReplicaCount ?? OneSilo).ToString(CultureInfo.InvariantCulture)),
+            Setting(nameof(NodeOptions.Incarnation), (ClusterNode?.Incarnation ?? Guid.NewGuid()).ToString(GuidFormat)),
+            Setting(nameof(NodeOptions.SigningKey), ClusterNode?.SigningKey ?? Convert.ToBase64String(RandomNumberGenerator.GetBytes(SigningKeyBytes))),
             Setting(nameof(NodeOptions.AdminKey), Credential)];
     }
 

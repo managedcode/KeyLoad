@@ -9,7 +9,7 @@ Current identity epoch7, WAL4 and checkpoint5 identifiers remain exact; this
 cleanup does not renumber bytes, aliases, field IDs, digests or signing purposes.
 Ordinary open, replay, checkpoint install and backup/restore reject unsupported or
 corrupt formats before publishing usable state. Keep atomic
-journals, owner locks, ordered apply, scoped read cuts and majority acknowledgement
+journals, owner locks, ordered apply, scoped read cuts and acknowledgement from every configured copy
 after durable local apply.
 No old-format reader, automatic conversion or runtime fallback is supported.
 New stores are born with the current required runtime-journal reader contract;

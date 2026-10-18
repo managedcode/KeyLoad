@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -15,7 +17,7 @@ internal static class SubscriptionPausedDrainFlow
         {
             MaxWindow = 3
         });
-        var history = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>();
+        var history = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>();
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event1", "Created", "{\"n\":1}"),
@@ -49,8 +51,8 @@ internal static class SubscriptionPausedDrainFlow
     }
 
     private static async Task FirstColdAsync(TestDatabase fixture, SubscriptionRef group, ReceiveSubscriptionRequest request,
-        OperationResult original, byte[] claimSaved, global::System.Collections.Immutable.ImmutableArray<SubscriptionDelivery> deliveries,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history, string[] source, CancellationToken token)
+        Result<object> original, byte[] claimSaved, global::System.Collections.Immutable.ImmutableArray<SubscriptionDelivery> deliveries,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history, string[] source, CancellationToken token)
     {
         var cut = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
@@ -80,8 +82,8 @@ internal static class SubscriptionPausedDrainFlow
     }
 
     private static async Task SecondColdAsync(ZoneTreeStore store, string directory, SubscriptionRef group,
-        ReceiveSubscriptionRequest request, OperationResult original, byte[] claimSaved,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history, string[] source,
+        ReceiveSubscriptionRequest request, Result<object> original, byte[] claimSaved,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history, string[] source,
         SourceEventRecord fourth, CancellationToken token)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
@@ -106,7 +108,7 @@ internal static class SubscriptionPausedDrainFlow
     }
 
     private static async Task<SourceEventRecord> HealthyAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, long number,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history, CancellationToken token)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var time = QueueWholeFlowStorage.Clock(store).AddSeconds(1);
@@ -131,7 +133,7 @@ internal static class SubscriptionPausedDrainFlow
     }
 
     private static async Task AckAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, SubscriptionDelivery delivery,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
         var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
         var result = Add(db, store, group, Create(OperationKind.SubscriptionDelivery, command, command.CommandId,
@@ -139,15 +141,15 @@ internal static class SubscriptionPausedDrainFlow
         await SubscriptionPausedDrainAssertions.ReceiptAsync(result, command, delivery.Event.Position);
     }
 
-    private static OperationResult Add(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, ReplicatedOperation operation,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+    private static Result<object> Add(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, Command<DatabaseCommand> operation,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
         var result = db.Apply(operation);
-        history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id)));
+        history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)));
         return result;
     }
 
-    private static ReplicatedOperation Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
+    private static Command<DatabaseCommand> Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
         => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }
 

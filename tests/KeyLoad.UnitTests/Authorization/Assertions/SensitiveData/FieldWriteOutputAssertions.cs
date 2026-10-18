@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -13,9 +14,7 @@ internal static class FieldWriteOutputAssertions
     internal static async Task ReceiptAsync(FieldWriteOutputState state, CommandRequest command,
         CommitReceipt actual, long before, string kind, long revision)
     {
-        CommitReceipt expected = new(command.CommandId,
-            new(state.Store.Identity.Incarnation, state.Owner.Partition.AtomicPartitionId, before + P.NextPosition, P.OwnershipEpoch),
-            [new(kind, P.Collection, P.Document, revision)], DurabilityProfile.ProcessDurable);
+        CommitReceipt expected = new(command.CommandId, new(state.Store.Identity.Incarnation, state.Owner.Partition.AtomicPartitionId, before + P.NextPosition), [new(kind, P.Collection, P.Document, revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(expected, actual);
         await Assert.That(actual.Mutations.All(mutation => mutation.CompositionReferences.IsEmpty)).IsTrue();
     }
@@ -37,10 +36,10 @@ internal static class FieldWriteOutputAssertions
         await UnchangedAsync(state, image, position);
     }
 
-    internal static async Task FailureAsync(OperationResult actual, string detail)
+    internal static async Task FailureAsync(Result<object> actual, string detail)
     {
-        await EqualAsync(new OperationResult(null, ErrorCode.PermissionDenied, detail), actual);
-        await Assert.That(actual.NativeValue).IsNull();
+        await EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, detail)), actual);
+        await Assert.That(actual.Value).IsNull();
     }
 
     internal static async Task UnchangedAsync(FieldWriteOutputState state, string[] image, long position)

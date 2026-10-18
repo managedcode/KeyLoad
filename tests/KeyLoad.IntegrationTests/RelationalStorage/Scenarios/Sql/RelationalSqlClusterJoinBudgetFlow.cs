@@ -6,7 +6,7 @@ using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Runs one rejection and healthy follow-up against an owned real Aspire CLUSTER fixture.</summary>
+/// <summary>Runs one rejection and healthy follow-up against an owned real Aspire Orleans fixture.</summary>
 internal static class RelationalSqlClusterJoinBudgetFlow
 {
     private const string NodeForSdk = McpCallerProtocol.Node1;

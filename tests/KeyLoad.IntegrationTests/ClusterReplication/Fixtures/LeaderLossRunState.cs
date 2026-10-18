@@ -1,8 +1,0 @@
-using KeyLoad.Client;
-using KeyLoad.Query;
-
-namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
-
-internal sealed record LeaderLossRunState(KeyLoadClient[] Clients, PartitionRef Partition,
-    ProjectionConsumerRef ProjectionConsumer, SubscriptionRef Subscription, CommandRequest Command,
-    CommitReceipt Receipt, AstQueryRequest LiveRequest, LiveQuerySnapshot LiveSnapshot, int[] Survivors);

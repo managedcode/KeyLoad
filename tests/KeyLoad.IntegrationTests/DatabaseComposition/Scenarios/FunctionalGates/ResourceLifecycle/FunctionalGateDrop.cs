@@ -28,7 +28,7 @@ internal static class FunctionalGateDrop
             var request = Request(context, index);
             drops[index] = await FunctionalGateDropCalls.InvokeAsync(context, parents[index], request,
                 (DropLifecycleClusterRoute)index, token);
-            await FunctionalGateDropAssertions.ResultAsync(parents[index], request, drops[index]);
+            await FunctionalGateDropAssertions.ResultAsync(context, parents[index], request, drops[index]);
         }
         var tables = ImmutableArray.CreateBuilder<FunctionalGateDropTable>();
         foreach (var index in Enumerable.Range(P.First, P.TableCount))

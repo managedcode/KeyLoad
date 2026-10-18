@@ -24,7 +24,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
         }
         else
         {
-            await QueueExpiredReadyVersionExhaustionAssertions.EmptyAsync(result, state.Operation.Id, expected);
+            await QueueExpiredReadyVersionExhaustionAssertions.EmptyAsync(result, state.Operation.CommandId, expected);
             await QueueExpiredReadyVersionExhaustionAssertions.CurrentAsync(fixture.Database, fixture.Store, state.Lane,
                 QueueExpiredReadyVersionExhaustionAssertions.Expired(state.DamagedMetadata), null, 1);
         }
@@ -79,7 +79,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
             return true;
         });
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: 1, LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
-        var operation = fixture.Database.NormalizeOperation(QueueLeaseAuthoritySetup.Create(OperationKind.Receive,
+        var operation = fixture.Database.OwnCommand(QueueLeaseAuthoritySetup.Create(OperationKind.Receive,
             request, request.RequestId, time.AddSeconds(2)));
         var body = new MessageBody(message.MessageId, message.PayloadJson, message.HeadersJson, message.OrderingKey, JsonData.Fingerprint(message));
         return new(lane, time.AddSeconds(2), producer, produced, key, row, maximum, body, operation);

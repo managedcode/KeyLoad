@@ -1,6 +1,6 @@
 # Retained remote-transfer capacity authority
 
-Applicable backend and native test surfaces are in this slice; frontend is N/A because this is a database admission invariant. Existing public SDK/official MCP, process recovery and Aspire replicated-cluster tests remain mandatory. Contracts: [Messaging](../Messaging.md), ADR-026, ADR-088, ADR-117 and ADR-125. Existing source intents, target dedup receipts, persisted authorization, stable command identities, node-local ownership and majority-acknowledged receipt authority are unchanged.
+Applicable backend and native test surfaces are in this slice; frontend is N/A because this is a database admission invariant. Existing public SDK/official MCP, process recovery and Aspire replicated-cluster tests remain mandatory. Contracts: [Messaging](../Messaging.md), ADR-026, ADR-088, ADR-117 and ADR-125. Existing source intents, target dedup receipts, persisted authorization, stable command identities, node-local ownership and required-copy acknowledgementnowledged receipt authority are unchanged.
 
 ```mermaid
 flowchart TD

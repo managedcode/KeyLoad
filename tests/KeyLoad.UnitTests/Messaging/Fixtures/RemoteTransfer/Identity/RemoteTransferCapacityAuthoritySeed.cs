@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using static KeyLoad.UnitTests.Features.Messaging.RemoteTransferCapacityAuthorityProtocol;
@@ -27,7 +28,7 @@ internal static class RemoteTransferCapacityAuthoritySeed
         return new(mutation, request, created, expected);
     }
 
-    internal static async Task<(CommandRequest Request, OperationResult Result, QueueTransferReceiptInspection Proof)> AcceptAsync(
+    internal static async Task<(CommandRequest Request, Result<object> Result, QueueTransferReceiptInspection Proof)> AcceptAsync(
         RemoteTransferDatabase fixture, RemoteTransferCapacityAuthorityTransfer transfer, CommandRequest? prepared = null)
     {
         var request = prepared ?? new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,

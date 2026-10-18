@@ -28,9 +28,9 @@ internal static class AnalyticsBoundsSourceFlow
         {
             await N.UnchangedAsync(db, async () =>
             {
-                await N.RefusedAsync(() => N.QueryAsync(engine, query, token));
+                await N.RefusedAsync(() => N.Query(engine, query, token));
                 await O.EqualAsync(new AnalyticsAggregateResult([P.Row(D.Alpha, 1, 7)], 1),
-                    await N.QueryAsync(engine, P.Query(db, P.HealthyStore), token));
+                    N.Query(engine, P.Query(db, P.HealthyStore), token));
             });
         }
     }

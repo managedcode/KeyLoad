@@ -40,7 +40,7 @@ internal static class NativeTextProviderAuditProducer
         var id = Guid.NewGuid();
         var placement = owner.Database.ReadAtomicPartitionPlacement(Root, owner.Source.Partition);
         var expected = new CommitReceipt(id, new(placement.Incarnation, owner.Source.Partition.AtomicPartitionId,
-            checked(owner.Store.Position + NextCommit), placement.PlacementEpoch), receipts, DurabilityProfile.ProcessDurable);
+            checked(owner.Store.Position + NextCommit)), receipts, DurabilityProfile.ProcessDurable, 1);
         var original = owner.Send(OperationKind.Batch, new CommandRequest(id, owner.Source.Partition, mutations), id);
         await NativeTextProviderAuditHistoryAssertions.SaveAsync(owner, state, original, expected);
     }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using TUnit.Assertions.Exceptions;
@@ -23,8 +24,8 @@ internal sealed class StreamCommandIdentityTests
 
         var result = fixture.Apply(operation);
 
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(result.SafeDetail).IsEqualTo("The envelope and command IDs differ.");
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The envelope and command IDs differ.");
         await Assert.That(fixture.EventSourceHead.TailPosition).IsEqualTo(0L);
         await Assert.That(fixture.Read().Events).IsEmpty();
     }
@@ -69,7 +70,7 @@ internal sealed class StreamCommandIdentityTests
             }, committed));
     }
 
-    private static ReplicatedOperation Operation(Guid envelopeId, CommandRequest command)
+    private static Command<DatabaseCommand> Operation(Guid envelopeId, CommandRequest command)
         => new(envelopeId, OperationKind.Batch, AdministratorId, TimeProvider.System.GetUtcNow(),
             JsonSerializer.Serialize(command, JsonDefaults.Options));
 

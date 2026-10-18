@@ -54,20 +54,16 @@ internal static class GraphSearchIntegrityRecipe
     }
 
     internal static CommitReceipt SeedReceipt(GraphTraversalIntegrityState state, Guid incarnation, long position)
-        => new(state.SeedCommand.CommandId,
-            new(incarnation, state.SeedCommand.Partition.AtomicPartitionId, position, PlacementEpoch),
-            [new(PutKind, P.Nodes, state.HealthyEdge.From.Id, P.InitialRevision),
+        => new(state.SeedCommand.CommandId, new(incarnation, state.SeedCommand.Partition.AtomicPartitionId, position), [new(PutKind, P.Nodes, state.HealthyEdge.From.Id, P.InitialRevision),
              new(PutKind, P.Nodes, state.HealthyEdge.To.Id, P.InitialRevision),
              new(PutKind, P.Nodes, state.DamagedEdge.To.Id, P.InitialRevision),
              new(EdgeKind, P.Graph, state.HealthyEdge.Id, P.InitialRevision),
-             new(EdgeKind, P.Graph, state.DamagedEdge.Id, P.InitialRevision)], DurabilityProfile.ProcessDurable);
+             new(EdgeKind, P.Graph, state.DamagedEdge.Id, P.InitialRevision)], DurabilityProfile.ProcessDurable, 1);
 
     internal static CommitReceipt ContinuedReceipt(GraphTraversalIntegrityContinuation continuation,
         Guid incarnation, long position)
-        => new(continuation.Command.CommandId,
-            new(incarnation, continuation.Command.Partition.AtomicPartitionId, position, PlacementEpoch),
-            [new(PutKind, P.Nodes, continuation.Edge.To.Id, P.InitialRevision),
-             new(EdgeKind, P.Graph, continuation.Edge.Id, P.InitialRevision)], DurabilityProfile.ProcessDurable);
+        => new(continuation.Command.CommandId, new(incarnation, continuation.Command.Partition.AtomicPartitionId, position), [new(PutKind, P.Nodes, continuation.Edge.To.Id, P.InitialRevision),
+             new(EdgeKind, P.Graph, continuation.Edge.Id, P.InitialRevision)], DurabilityProfile.ProcessDurable, 1);
 
     private static DocumentResult Document(EntityRef reference) => new(reference, P.InitialRevision, P.Attributes, false, []);
 }

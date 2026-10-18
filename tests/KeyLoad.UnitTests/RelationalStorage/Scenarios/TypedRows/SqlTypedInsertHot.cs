@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.UnitTests.Features.Messaging;
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
 
@@ -45,7 +46,7 @@ internal static class SqlTypedInsertHot
         var at = database.EvaluationClock.GetUtcNow();
         var placement = store.Read(view => global::KeyLoad.Core.DatabaseEngine.ReadPlacementWitness(view, partition));
         var expectedToken = new CommitToken(placement.Incarnation, partition.AtomicPartitionId,
-            checked(store.Position + NextCommit), placement.PlacementEpoch);
+            checked(store.Position + NextCommit));
         var result = SqlTypedInsertLiteral.Apply(database, command, at);
         return new(command, at, result, SqlTypedInsertAssertions.OutcomeBytes(store, partition, command.CommandId), expectedToken);
     }
@@ -61,7 +62,7 @@ internal static class SqlTypedInsertHot
             PrimaryFault => PrimaryDetail,
             _ => ExistingDetail
         };
-        await SqlTypedInsertAssertions.SameAsync(new OperationResult(null, expected, detail), execution.Result);
+        await SqlTypedInsertAssertions.SameAsync(Result<object>.Fail(Errors.Problem(expected, detail)), execution.Result);
         await SqlTypedInsertAssertions.SameAsync(before, fixture.Database.GetOutboxStatus(SqlTypedInsertLiteral.Root, fixture.Partition));
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: false);
         await ReplayAsync(fixture, execution);

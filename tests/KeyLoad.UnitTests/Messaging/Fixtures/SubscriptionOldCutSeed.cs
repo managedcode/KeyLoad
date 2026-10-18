@@ -12,7 +12,7 @@ internal static class SubscriptionOldCutSeed
         fixture.Configure(SubscriptionOldCutState.Collection, ResourceKind.Collection);
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(state.Principal(1, true)))
             .Get<PrincipalRecord>();
-        var producerIndex = checked(fixture.ReadJournalCut().LastIndex + 1L);
+        var producerIndex = checked(fixture.ReadCanonicalCut().AppliedPosition + 1L);
         state.Producer = fixture.Commit(new PublishTopic(SubscriptionOldCutState.Topic,
             [new("event1", "Created", "{\"n\":1}"), new("event2", "Created", "{\"n\":2}"), new("event3", "Created", "{\"n\":3}")]));
         await SubscriptionOldCutAssertions.ReceiptAsync(state.Producer, state.Producer.CommandId, fixture.Store,
@@ -45,7 +45,7 @@ internal static class SubscriptionOldCutSeed
         await SubscriptionOldCutAssertions.SameAsync(claim.Status, new SubscriptionInfo(state.Group, state.Definition,
             1, 1, 0, 3, 3, false, null));
         await Assert.That(claim.Token).IsEqualTo(new CommitToken(fixture.Store.Identity.Incarnation,
-            fixture.Partition.AtomicPartitionId, fixture.Store.Position, 1));
+            fixture.Partition.AtomicPartitionId, fixture.Store.Position));
         await Assert.That(claim.Deliveries.Length).IsEqualTo(3);
         for (var index = 0; index < claim.Deliveries.Length; index++)
         {

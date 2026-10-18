@@ -19,7 +19,7 @@ internal static class QueueViewLeaseIsolationReceipts
     {
         await Assert.That(actual.Token.Position).IsGreaterThan((long)QueueViewLeaseIsolationProtocol.Empty);
         await SqlClusterProtocol.EqualAsync(new CommitReceipt(command,
-            new(actual.Token.Incarnation, scenario.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
-            mutations, DurabilityProfile.QuorumProcessDurable), actual);
+            new(actual.Token.Incarnation, scenario.Partition.AtomicPartitionId, actual.Token.Position),
+            mutations, DurabilityProfile.ProcessDurable, 3), actual);
     }
 }

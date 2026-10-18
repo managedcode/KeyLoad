@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
@@ -11,22 +12,20 @@ internal static class NativeSuccessBodyAssertions
         AtomicPartitionPlacementResolution placement, CommitReceipt? sdk)
     {
         var database = state.Scenario.Fixture.Database;
-        var entry = database.ReadRetainedEntry(state.Endpoint.Healthy.CommandId);
-        var operation = entry.Operation ?? throw new InvalidOperationException(P.Failure);
-        await Assert.That(operation.Id).IsEqualTo(state.Endpoint.Healthy.CommandId);
-        await Assert.That(operation.Kind).IsEqualTo(OperationKind.Batch);
-        await Assert.That(operation.PrincipalId).IsEqualTo(state.Principal.Id);
+        var entry = database.ReadStoredOutcome(state.Endpoint.Healthy.CommandId);
+        var operation = entry.PreparedCommand ?? throw new InvalidOperationException(P.Failure);
+        await Assert.That(operation.CommandId).IsEqualTo(state.Endpoint.Healthy.CommandId);
+        await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
+        await Assert.That(operation.UserId!).IsEqualTo(state.Principal.Id);
         await DeclaredResponseEofAssertions.EqualAsync(state.Endpoint.Healthy,
-            global::KeyLoad.Core.Features.InternalSerialization.NativeCommandPayload.Read<CommandRequest>(operation));
-        var expected = new CommitReceipt(state.Endpoint.Healthy.CommandId,
-            new(placement.Incarnation, state.Endpoint.Healthy.Partition.AtomicPartitionId, entry.Index, placement.PlacementEpoch),
-            [new(D.PutKind, ConnectionNativeProtocol.Collection, D.Document, P.HealthyRevision)], DurabilityProfile.QuorumProcessDurable);
+            NativeSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
+        var expected = new CommitReceipt(state.Endpoint.Healthy.CommandId, new(placement.Incarnation, state.Endpoint.Healthy.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(D.PutKind, ConnectionNativeProtocol.Collection, D.Document, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
         await DeclaredResponseEofAssertions.EqualAsync(expected, state.Endpoint.HealthyReceipt);
         await DeclaredResponseEofAssertions.EqualAsync(expected, sdk);
         await Assert.That((state.Endpoint.HealthyReceipt ?? throw new InvalidOperationException(P.Failure))
             .Mutations.All(value => value.CompositionReferences.IsEmpty)).IsTrue();
         await DocumentSecondAsync(state);
-        await OutboxSecondAsync(state, expected, operation.EvaluatedAt);
+        await OutboxSecondAsync(state, expected, new DateTimeOffset(operation.Timestamp));
         return expected;
     }
 
@@ -34,16 +33,16 @@ internal static class NativeSuccessBodyAssertions
         DateTimeOffset now)
     {
         var database = state.Scenario.Fixture.Database;
-        var original = database.ReadRetainedEntry(state.Endpoint.Original.CommandId).Operation
+        var original = database.ReadStoredOutcome(state.Endpoint.Original.CommandId).PreparedCommand
             ?? throw new InvalidOperationException(P.Failure);
         var firstReceipt = state.FirstReceipt ?? throw new InvalidOperationException(P.Failure);
         var before = new DocumentRecord(state.Scenario.Reference(D.Document), D.Revision, D.OriginalJson,
-            new RowAccess(), original.EvaluatedAt);
+            new RowAccess(), new DateTimeOffset(original.Timestamp));
         var after = new DocumentRecord(state.Scenario.Reference(D.Document), P.HealthyRevision, P.HealthyJson,
             new RowAccess(), now);
         OutboxEntry[] entries =
         [
-            new(D.FirstSequence, D.OriginalOrdinal, firstReceipt.Token, original.EvaluatedAt,
+            new(D.FirstSequence, D.OriginalOrdinal, firstReceipt.Token, new DateTimeOffset(original.Timestamp),
                 state.Endpoint.Original.Mutations[D.OriginalOrdinal], firstReceipt.Mutations[D.OriginalOrdinal], null, before),
             new(P.TwoEntries, D.OriginalOrdinal, expected.Token, now,
                 state.Endpoint.Healthy.Mutations[D.OriginalOrdinal], expected.Mutations[D.OriginalOrdinal], before, after)

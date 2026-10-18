@@ -32,7 +32,7 @@ internal sealed class RemoteTransferRetentionTests
         var rejectedSource = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
                 [overflow]));
-        await Assert.That(rejectedSource.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejectedSource.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(fixture.SourceCapacity(fixture.SourceQueue).StoredRecords).IsEqualTo(MaxRetainedRecords);
         await Assert.That(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
             fixture.SourceQueue, first.TransferId)!.IntentToken)
@@ -47,7 +47,7 @@ internal sealed class RemoteTransferRetentionTests
         var rejectedTarget = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, secondIntent.IntentToken)]));
-        await Assert.That(rejectedTarget.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejectedTarget.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(fixture.TargetCapacity(fixture.DestinationQueue).StoredRecords).IsEqualTo(MaxRetainedRecords);
         await Assert.That(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, otherSource, second.TransferId)).IsNull();
@@ -80,7 +80,7 @@ internal sealed class RemoteTransferRetentionTests
         var failure = limited.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), limited.SourcePartition, [limitedIntent]));
 
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(limited.SourceCapacity(limited.SourceQueue).StoredRecords).IsEqualTo(0);
         await Assert.That(limited.SourceCapacity(limited.SourceQueue).StoredBytes).IsEqualTo(0);
         await Assert.That(limited.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
@@ -110,7 +110,7 @@ internal sealed class RemoteTransferRetentionTests
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.SourcePartition, [next]));
 
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(fixture.SourceCapacity(fixture.SourceQueue).StoredBytes).IsEqualTo(retainedBytes);
         await Assert.That(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
             fixture.SourceQueue, first.TransferId)!.IntentToken).IsEqualTo(firstIntent.IntentToken);
@@ -151,7 +151,7 @@ internal sealed class RemoteTransferRetentionTests
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, secondIntent.IntentToken)]));
 
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(fixture.TargetCapacity(fixture.DestinationQueue).StoredBytes).IsEqualTo(retainedBytes);
         await Assert.That(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, otherSource, second.TransferId)).IsNull();

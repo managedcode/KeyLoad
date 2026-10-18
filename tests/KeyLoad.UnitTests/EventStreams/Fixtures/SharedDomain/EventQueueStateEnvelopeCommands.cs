@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -13,7 +14,7 @@ internal static class EventQueueStateEnvelopeCommands
     {
         var placement = fixture.Database.ReadAtomicPartitionPlacement(Root, fixture.Partition);
         return new(placement.Incarnation, fixture.Partition.AtomicPartitionId,
-            checked(fixture.Store.Position + CommitPositionStep), placement.PlacementEpoch);
+            checked(fixture.Store.Position + CommitPositionStep));
     }
 
     internal static async Task<EventQueueStateEnvelopeHistory> SubmitAsync<TRequest, TResult>(
@@ -21,13 +22,9 @@ internal static class EventQueueStateEnvelopeCommands
         Guid id, TRequest request, DateTimeOffset time, TResult expected)
         where TResult : class
     {
-        var operation = fixture.Database.NormalizeOperation(new(id, kind, Root, time,
-            JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        var operation = fixture.Database.OwnCommand(fixture.Database.CreateCommand(kind, id, Root, time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         var result = fixture.Database.Apply(operation);
-        await NativeReplayResultAssertions.Same<TResult>(result, new(null)
-        {
-            NativeValue = expected
-        });
+        await NativeReplayResultAssertions.Same<TResult>(result, Result<object>.Succeed(expected));
         var outcome = Required(fixture, KeySpace.PartitionOutcome(fixture.Partition, Root, id));
         var stored = NativeSerialization.Deserialize<StoredOutcome>(outcome);
         await Assert.That(stored.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
@@ -48,7 +45,7 @@ internal static class EventQueueStateEnvelopeCommands
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, fixture.Partition, effects);
-        var expected = new CommitReceipt(id, NextToken(fixture), expectedEffects, DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(id, NextToken(fixture), expectedEffects, DurabilityProfile.ProcessDurable, 1);
         return SubmitAsync(fixture, sample, OperationKind.Batch, id, command, time, expected);
     }
 

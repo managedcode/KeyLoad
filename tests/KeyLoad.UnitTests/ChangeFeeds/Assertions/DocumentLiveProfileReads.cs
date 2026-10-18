@@ -78,7 +78,7 @@ internal static class DocumentLiveProfileReads
                     await Assert.That(effect.CompositionReferences).IsEmpty();
                 }
                 await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(fixture.Harness.Partition,
-                    "root", command.Operation.Id)))!.AsSpan().SequenceEqual(command.Outcome)).IsTrue();
+                    "root", command.Operation.CommandId)))!.AsSpan().SequenceEqual(command.Outcome)).IsTrue();
             }
         });
 }

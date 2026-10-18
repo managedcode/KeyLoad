@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
@@ -21,7 +23,6 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
 
     internal void Seed()
     {
-        owner.BindReplicaIdentity();
         owner.Source.Configure(Collection, ResourceKind.Collection);
         owner.Source.Commit(new PutDocument(Collection, "first", "{\"text\":\"needle\"}"));
         Administrator = Configure(new(Publisher, owner.Source.Partition.TenantId, [], [])
@@ -34,21 +35,21 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
 
     private ReadExecutionBudget Work() => owner.Source.CreateReadWork(Token);
 
-    internal ReplicatedOperation Capture(Guid? expectedGeneration)
+    internal Command<DatabaseCommand> Capture(Guid? expectedGeneration)
         => Bm25CorpusCapture.Create(owner.Database, Publisher, Subject,
             new(owner.Source.Partition, Collection, Field, Text), Guid.NewGuid(), expectedGeneration,
             owner.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
             Work(), UnitExecutionOptions.QueryExecution());
 
-    internal ReplicatedOperation Reissue(ReplicatedOperation original)
+    internal Command<DatabaseCommand> Reissue(Command<DatabaseCommand> original)
         => owner.Database.CreateVerifiedBm25CorpusPublication(Publisher,
-            NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(original), Work());
+            NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span), Work());
 
-    internal OperationResult Publish(ReplicatedOperation operation) => owner.Submit(operation);
+    internal Result<object> Publish(Command<DatabaseCommand> operation) => owner.Submit(operation);
 
     internal PrincipalRecord Configure(PrincipalRecord principal)
     {
-        var operation = owner.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), Root,
+        var operation = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
         return owner.Submit(operation).Get<PrincipalRecord>();
     }
@@ -77,7 +78,7 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
         Grants = [new(owner.Source.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)]
     });
 
-    internal async Task RequireDeniedAsync(ReplicatedOperation original, bool issuerMustDeny)
+    internal async Task RequireDeniedAsync(Command<DatabaseCommand> original, bool issuerMustDeny)
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         if (issuerMustDeny)
@@ -89,16 +90,16 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
         var result = Publish(submitted);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
-        await Assert.That(owner.Database.ResolveOutcome(submitted).Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(result.Value).IsNull();
+        await Assert.That(Errors.Code(owner.Database.ResolveOutcome(submitted).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
     }
 
-    internal async Task RequireHealthyAsync(ReplicatedOperation operation, OperationResult result)
+    internal async Task RequireHealthyAsync(Command<DatabaseCommand> operation, Result<object> result)
     {
-        await Assert.That(result.Error).IsNull();
-        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(operation);
-        await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(operation.Id);
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
+        await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(Reader.PolicyEpoch);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(1);
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(1L);

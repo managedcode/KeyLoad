@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>Checks exact two-source metadata on every page returned by an CLUSTER SQL join caller.</summary>
+/// <summary>Checks exact two-source metadata on every page returned by an Orleans SQL join caller.</summary>
 internal static class RelationalSqlClusterJoinPageAssertions
 {
     private const int SourceCount = 2;

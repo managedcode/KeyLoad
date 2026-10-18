@@ -73,7 +73,7 @@ internal static class BlobRangeIntegrityOperations
         Guid command, DateTimeOffset now)
     {
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
-        var result = database.Apply(new(command, kind, BlobRangeIntegrityFixture.Principal, now, json));
+        var result = database.Apply(database.CreateCommand(kind, command, BlobRangeIntegrityFixture.Principal, now, json));
         return new(kind, command, json, result);
     }
 }

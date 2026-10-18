@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.Server;
@@ -16,10 +15,7 @@ internal static class ConfigureResourceOriginalLifetimeOwner
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
-            var physical = fixture.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)?.DefaultShard)
-                ?? throw new InvalidOperationException("The original native physical catalog is absent.");
-            owner.BindPhysicalOwner(physical);
-            owner.AttachResourceLifetimeWorkFence(fixture.Database, fixture.ReadJournalCut().LastIndex);
+            owner.BindPhysicalOwner(new(fixture.Store.Identity.NodeId, fixture.Store.Identity.Incarnation));
             token.ThrowIfCancellationRequested();
             await ServerFailureObserver.ObserveAsync(() => body(fixture, owner), failures);
         }, failures);

@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
 
@@ -40,13 +41,13 @@ internal static class AnalyticsSharedFlow
         var failed = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [P.Upsert(upsert.Events.Single().Links, 1), new PutDocument(P.Documents, P.Effect, P.Json, 0)]);
         var result = fixture.Submit(OperationKind.Batch, failed, id: failed.CommandId);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.RevisionConflict);
-        await Assert.That(result.SafeDetail).IsEqualTo("The expected revision does not match.");
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
+        
+        await Assert.That(result.Value).IsNull();
         await AnalyticsSharedAssertions.PageAsync(fixture, upsert.Events.Single(), token);
-        var seedTime = fixture.ReadRetainedEntry(anchor.CommandId).Operation!.EvaluatedAt;
-        var commandTime = fixture.ReadRetainedEntry(command.CommandId).Operation!.EvaluatedAt;
+        var seedTime = new DateTimeOffset(fixture.ReadStoredOutcome(anchor.CommandId).PreparedCommand!.Timestamp);
+        var commandTime = new DateTimeOffset(fixture.ReadStoredOutcome(command.CommandId).PreparedCommand!.Timestamp);
         await SubscriptionOldCutOutbox.EntriesAsync(fixture.Database, fixture.Partition,
             [AnalyticsSharedAssertions.DocumentEntry(fixture, 1, P.Anchor, seed.Token, fixture.Partition, seedTime),
              new(2, 0, receipt.Token, commandTime, upsert, new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.EventId, 1)),
@@ -56,11 +57,9 @@ internal static class AnalyticsSharedFlow
     internal static async Task<CommitReceipt> CommitAsync(TestDatabase fixture, CommandRequest command,
         System.Collections.Immutable.ImmutableArray<MutationReceipt> mutations)
     {
-        var next = checked(fixture.ReadJournalCut().LastIndex + 1);
+        var next = checked(fixture.ReadCanonicalCut().AppliedPosition + 1);
         var result = fixture.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
-        var expected = new CommitReceipt(command.CommandId,
-            new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, next, 1), mutations,
-            DurabilityProfile.ProcessDurable);
+        var expected = new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, next), mutations, DurabilityProfile.ProcessDurable, 1);
         await AnalyticsSharedAssertions.SameAsync(expected, result);
         foreach (var mutation in result.Mutations)
         {

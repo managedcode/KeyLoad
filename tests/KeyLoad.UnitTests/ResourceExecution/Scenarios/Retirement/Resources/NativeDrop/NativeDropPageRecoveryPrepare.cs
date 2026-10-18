@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Server.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -18,7 +19,7 @@ internal static class NativeDropPageRecoveryPrepare
                 state.Context.Work, state.Context.Metadata, state.Context.Token).ConfigureAwait(false);
     }
 
-    internal static Task<ReplicatedOperation> IssueAsync(NativeDropPageAttemptState state,
+    internal static Task<Command<DatabaseCommand>> IssueAsync(NativeDropPageAttemptState state,
         ResourceRetirementAttemptV1 attempt, bool tiny)
     {
         var body = new ResourceRetirementCleanupPageBodyV1(state.OriginalState, state.Receiver,
@@ -32,7 +33,7 @@ internal static class NativeDropPageRecoveryPrepare
     }
 
     internal static Task<ResourceRetirementPreparedOperationV1> PersistAsync(NativeDropPageAttemptState state,
-        ResourceRetirementAttemptV1 attempt, ReplicatedOperation original)
+        ResourceRetirementAttemptV1 attempt, Command<DatabaseCommand> original)
         => state.Operations.PersistAsync(state.Scope, attempt, original, state.Receiver, state.Context.PrincipalId,
             state.Context.PolicyEpoch, attempt.ExpiresAt, state.Context.Work, state.Context.Metadata, state.Context.Token);
 

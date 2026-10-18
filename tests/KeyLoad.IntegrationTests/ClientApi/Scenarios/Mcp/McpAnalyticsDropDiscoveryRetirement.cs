@@ -63,8 +63,9 @@ internal static class McpAnalyticsDropDiscoveryRetirement
         await Assert.That(actual.Receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Receipt.Token.AtomicPartitionId).IsEqualTo(NativeCatalogRoute.PartitionId);
         await Assert.That(actual.Receipt.Token.Position).IsGreaterThan(0);
-        await Assert.That(actual.Receipt.Token.OwnershipEpoch).IsGreaterThan(0);
+        await Assert.That(actual.Receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(actual.Receipt.Mutations.IsEmpty).IsTrue();
-        await Assert.That(actual.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(actual.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(actual.Receipt.PersistedCopies).IsEqualTo(3);
     }
 }

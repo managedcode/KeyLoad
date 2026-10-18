@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -22,7 +23,7 @@ internal static class QueueLifecycleOperations
         return delivery;
     }
 
-    internal static OperationResult Complete(DatabaseEngine database, QueueLifecycleTestState state, Delivery delivery, DeliveryAction action)
+    internal static Result<object> Complete(DatabaseEngine database, QueueLifecycleTestState state, Delivery delivery, DeliveryAction action)
     {
         var command = new DeliveryCommand(Guid.NewGuid(), state.Lane, delivery.Token, action);
         return state.Execute(database, OperationKind.Delivery, command, command.CommandId);
@@ -38,7 +39,7 @@ internal static class QueueLifecycleOperations
             await Assert.That(actual.Error).IsEqualTo(result.Error);
             await Assert.That(actual.SafeDetail).IsEqualTo(result.SafeDetail);
             await Assert.That(actual.Json).IsEqualTo(result.Json);
-            await Assert.That(actual.NativeValue).IsNull();
+            await Assert.That(actual.Value).IsNull();
             await QueueLifecycleReplayCutAssertions.SameAsync(database.Store, before);
         }
         foreach (var (operation, result) in state.Successes)
@@ -68,13 +69,13 @@ internal static class QueueLifecycleOperations
         }
     }
 
-    private static async Task DispatchReplayAsync(OperationResult actual, OperationResult expected)
+    private static async Task DispatchReplayAsync(Result<object> actual, Result<object> expected)
     {
         await Assert.That(actual.Json).IsEqualTo(expected.Json);
-        await Assert.That(actual.Error).IsEqualTo(expected.Error);
-        await Assert.That(actual.SafeDetail).IsEqualTo(expected.SafeDetail);
-        await Assert.That(actual.NativeValue?.GetType()).IsEqualTo(typeof(bool));
-        await Assert.That(expected.NativeValue?.GetType()).IsEqualTo(typeof(bool));
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
+        await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(bool));
+        await Assert.That(expected.Value?.GetType()).IsEqualTo(typeof(bool));
         await Assert.That(actual.Get<bool>()).IsEqualTo(expected.Get<bool>());
     }
 }

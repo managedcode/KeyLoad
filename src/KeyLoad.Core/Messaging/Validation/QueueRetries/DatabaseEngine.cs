@@ -1,5 +1,5 @@
+using ManagedCode.Communication.Commands;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -7,9 +7,9 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private void ValidateQueueRetryDecisions(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    private void ValidateQueueRetryDecisions(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+        var payload = operation.Value!;
         var inputs = ReadQueueRetryInputs(view, principal, operation);
         if (inputs.Count == QueueRetryProtocol.Initial)
         {
@@ -30,21 +30,21 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private static QueueRetryDecisions ReadQueueRetryDecisions(ReplicatedOperation operation, NativeCommandPayload payload)
+    private static QueueRetryDecisions ReadQueueRetryDecisions(Command<DatabaseCommand> operation, DatabaseCommand payload)
     {
         if (payload.RetryDecisions.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.MissingDecision);
         }
         var choices = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
-        if (choices.Version != QueueRetryProtocol.Version || choices.EvaluatedAt != operation.EvaluatedAt || choices.Items.IsDefaultOrEmpty)
+        if (choices.Version != QueueRetryProtocol.Version || choices.EvaluatedAt != operation.Timestamp || choices.Items.IsDefaultOrEmpty)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.InvalidDecision);
         }
         return choices;
     }
 
-    private void RequireQueueRetryInput(ReplicatedOperation operation, QueueRetryDecision choice, QueueRetryInput input)
+    private void RequireQueueRetryInput(Command<DatabaseCommand> operation, QueueRetryDecision choice, QueueRetryInput input)
     {
         var metadata = input.Metadata;
         if (choice.Lane != input.Lane || choice.MessageId != metadata.Id || choice.ExpectedStateVersion != metadata.StateVersion
@@ -55,20 +55,20 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Conflict, QueueRetryProtocol.StaleDecision);
         }
         if (choice.DelayMilliseconds < QueueRetryProtocol.Positive || choice.DelayMilliseconds > QueueRetryCap(input.Policy, metadata.Attempts)
-            || choice.RetryAt != operation.EvaluatedAt.AddMilliseconds(choice.DelayMilliseconds))
+            || choice.RetryAt != operation.Timestamp.AddMilliseconds(choice.DelayMilliseconds))
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.InvalidDecision);
         }
     }
 
-    private DateTimeOffset QueueRetryAt(ReplicatedOperation operation, QueueLaneRef lane, QueuePolicy policy,
+    private DateTimeOffset QueueRetryAt(Command<DatabaseCommand> operation, QueueLaneRef lane, QueuePolicy policy,
         MessageMetadata metadata, ReadOnlySpan<byte> dueKey)
     {
         if (policy.RetryJitter == QueueRetryJitter.None)
         {
-            return operation.EvaluatedAt.AddMilliseconds(QueueRetryCap(policy, metadata.Attempts));
+            return operation.Timestamp.AddMilliseconds(QueueRetryCap(policy, metadata.Attempts));
         }
-        var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
+        var payload = operation.Value!;
         var choices = ReadQueueRetryDecisions(operation, payload);
         foreach (var choice in choices.Items)
         {

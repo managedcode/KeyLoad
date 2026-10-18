@@ -37,6 +37,6 @@ internal static class SharedDomainPublicValues
     {
         await Assert.That(receipt.Token.Position).IsGreaterThan(NoRevision);
         await EqualAsync(receipt, new CommitReceipt(id, new(receipt.Token.Incarnation, partition.AtomicPartitionId,
-            receipt.Token.Position, receipt.Token.OwnershipEpoch), [.. mutations], DurabilityProfile.QuorumProcessDurable));
+            receipt.Token.Position), [.. mutations], DurabilityProfile.ProcessDurable, 3));
     }
 }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -12,7 +13,7 @@ internal sealed class BlobAuthority(DatabaseEngine database)
         global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, OperationKind.BeginBlobUpload);
         database.Authorization.Require(principal, blob.Partition, blob.Resource, capability);
         var resource = read
-            ? database.BindAuthorizedReadResource(view, blob.Partition, blob.Resource, ResourceKind.BlobStore)
+            ? DatabaseEngine.BindAuthorizedReadResource(view, blob.Partition, blob.Resource, ResourceKind.BlobStore)
             : database.Resource(view, blob.Partition, blob.Resource, ResourceKind.BlobStore);
         BlobQuotaOperations.ValidatePolicy(resource);
         var quota = BlobQuotaOperations.Read(view, BlobKeys.Quota(blob), database.Store.Identity.Incarnation);
@@ -53,14 +54,14 @@ internal sealed class BlobAuthority(DatabaseEngine database)
         }
     }
 
-    internal void Authorize(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    internal void Authorize(IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         var scope = BlobCommandScope.From(operation);
-        if (scope.CommandId != operation.Id || scope.UploadId == Guid.Empty)
+        if (scope.CommandId != operation.CommandId || scope.UploadId == Guid.Empty)
         {
             throw BlobErrors.Validation();
         }
-        var capability = BlobCommandScope.RequiredCapability(operation.Kind);
+        var capability = BlobCommandScope.RequiredCapability(operation.Value!.Kind);
         _ = Scope(view, principal, scope.Blob, capability);
         var head = Reader.Head(view, scope.Blob);
         var state = scope.UploadId is { } upload ? Reader.State(view, scope.Blob, upload) : null;
@@ -68,12 +69,12 @@ internal sealed class BlobAuthority(DatabaseEngine database)
         {
             throw BlobErrors.Corruption();
         }
-        if (head is not null && operation.Kind is OperationKind.BeginBlobUpload
+        if (head is not null && operation.Value!.Kind is OperationKind.BeginBlobUpload
                 or OperationKind.CompleteBlobUpload or OperationKind.DeleteBlob)
         {
             database.Authorization.RequireWriteRow(principal, head.Metadata.Access);
         }
-        if (operation.Kind == OperationKind.BeginBlobUpload)
+        if (operation.Value!.Kind == OperationKind.BeginBlobUpload)
         {
             if (state is not null)
             {
@@ -84,7 +85,7 @@ internal sealed class BlobAuthority(DatabaseEngine database)
             BlobMetadataRules.Access(access, false);
             database.Authorization.RequireWriteRow(principal, access);
         }
-        else if (operation.Kind is not (OperationKind.DeleteBlob or OperationKind.ReclaimBlob) && state is null)
+        else if (operation.Value!.Kind is not (OperationKind.DeleteBlob or OperationKind.ReclaimBlob) && state is null)
         {
             throw BlobErrors.Token();
         }

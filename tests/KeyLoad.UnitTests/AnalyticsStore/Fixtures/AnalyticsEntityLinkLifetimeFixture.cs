@@ -69,7 +69,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
         var identity = NativeSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.JournalCut();
+        var journal = owner.ReadCanonicalCut();
         var failures = new List<Exception>();
         // Deliberate current-format row corruption, using the existing owned native-store fault/restore discipline.
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -84,7 +84,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
             await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
             await Assert.That(owner.Store.Position).IsEqualTo(position + 2);
             await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-            await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

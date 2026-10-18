@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
@@ -47,16 +48,16 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
     internal PrincipalRecord SetPrincipal(PrincipalRecord replacement)
         => database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(replacement)).Get<PrincipalRecord>();
 
-    internal ReplicatedOperation Capture(Guid id, Guid? expected, string text = Term, string subject = Subject)
+    internal Command<DatabaseCommand> Capture(Guid id, Guid? expected, string text = Term, string subject = Subject)
         => Bm25CorpusCapture.Create(database.Database, Root, subject,
             new(database.Partition, Collection, Field, text), id, expected,
             database.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
             database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
-    internal static Bm25CorpusPublicationPhaseCommand Phase(ReplicatedOperation operation)
-        => NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(operation);
+    internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)
+        => NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
 
-    internal CommitReceipt Publish(ReplicatedOperation operation) => database.SubmitIssued(operation).Get<CommitReceipt>();
+    internal CommitReceipt Publish(Command<DatabaseCommand> operation) => database.SubmitIssued(operation).Get<CommitReceipt>();
 
     internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsV1? Current(string term = Term)
         => database.Database.WithQueryView(Subject, database.Partition, Collection,

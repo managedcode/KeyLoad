@@ -11,7 +11,8 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(budget);
         ArgumentNullException.ThrowIfNull(binding);
         budget.AttachResourceLifetimeBinding(binding);
-        return ReadStreamTraversal(principalId, request, configuredOwner, budget);
+        VerifyStorageOwner(configuredOwner, budget, budget.Cancellation);
+        return ReadStreamTraversal(principalId, request, budget);
     }
 
     internal EventSourcePage ReadEventSourceBound(string principalId, ReadEventSourceRequest request,

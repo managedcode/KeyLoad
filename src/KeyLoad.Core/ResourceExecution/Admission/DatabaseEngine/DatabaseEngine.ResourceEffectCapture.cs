@@ -1,6 +1,6 @@
+using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.DatabaseComposition;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -8,51 +8,31 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private byte[] CaptureResourceEffectAdmission(ReplicatedOperation operation, NativeCommandPayload payload)
+    private byte[] CaptureResourceEffectAdmission(Command<DatabaseCommand> operation)
     {
-        var fingerprint = NativeOperationFingerprint.Compute(operation);
-        if (payload.Error is not null)
-        {
-            return EncodeResourceEffectAdmission(new(ResourceEffectAdmissionProtocol.Version,
-                fingerprint, [], payload.Error, payload.SafeDetail));
-        }
-        var candidate = operation with
-        {
-            NativePayload = NativeSerialization.Serialize(payload)
-        };
-        var captured = RequiresCompositionEffectCapture(candidate)
-            ? Store.Prepare((transaction, position) => CaptureResourceEffectAdmission(transaction, candidate,
+        var fingerprint = operation.Value!.Fingerprint;
+        var captured = RequiresCompositionEffectCapture(operation)
+            ? Store.Prepare((transaction, position) => CaptureResourceEffectAdmission(transaction, operation,
                 fingerprint, preparationPosition: position))
-            : Store.Read(raw => CaptureResourceEffectAdmission(raw, candidate, fingerprint));
+            : Store.Read(raw => CaptureResourceEffectAdmission(raw, operation, fingerprint));
         return EncodeResourceEffectAdmission(captured);
     }
 
-    private byte[] CaptureResourceEffectAdmission(ReplicatedOperation operation, NativeCommandPayload payload,
-        ReadExecutionBudget work)
+    private byte[] CaptureResourceEffectAdmission(Command<DatabaseCommand> operation, ReadExecutionBudget work)
     {
         work.Check();
-        var fingerprint = NativeOperationFingerprint.Compute(operation);
-        if (payload.Error is not null)
-        {
-            return EncodeResourceEffectAdmission(new(ResourceEffectAdmissionProtocol.Version,
-                fingerprint, [], payload.Error, payload.SafeDetail));
-        }
-
-        var candidate = operation with
-        {
-            NativePayload = NativeSerialization.Serialize(payload)
-        };
-        var captured = RequiresCompositionEffectCapture(candidate)
-            ? Store.Prepare((transaction, position) => CaptureResourceEffectAdmission(transaction, candidate,
+        var fingerprint = operation.Value!.Fingerprint;
+        var captured = RequiresCompositionEffectCapture(operation)
+            ? Store.Prepare((transaction, position) => CaptureResourceEffectAdmission(transaction, operation,
                 fingerprint, preserveBudgetFailure: true, preparationPosition: position, preparationWork: work))
-            : Store.Read(raw => CaptureResourceEffectAdmission(work.CreateView(raw), candidate,
+            : Store.Read(raw => CaptureResourceEffectAdmission(work.CreateView(raw), operation,
                 fingerprint, preserveBudgetFailure: true));
         work.Check();
         return EncodeResourceEffectAdmission(captured);
     }
 
     private ResourceEffectAdmissionV1 CaptureResourceEffectAdmission(IKeyValueView raw,
-        ReplicatedOperation operation, string fingerprint, bool preserveBudgetFailure = false,
+        Command<DatabaseCommand> operation, string fingerprint, bool preserveBudgetFailure = false,
         long? preparationPosition = null, ReadExecutionBudget? preparationWork = null)
     {
         var scope = new ResourceEffectBindingScope(OperationLimitsOptions);
@@ -67,7 +47,7 @@ public sealed partial class DatabaseEngine
             ? new ResourceEffectObservationView(raw, scope) : preparation;
         try
         {
-            var principal = Principal(view, operation.PrincipalId, operation.EvaluatedAt);
+            var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
             AuthorizeOperation(view, principal, operation);
             ObserveAdditionalResourceEffects(view, principal, operation);
             if (preparation is not null)
@@ -77,7 +57,7 @@ public sealed partial class DatabaseEngine
             }
             var admission = new ResourceEffectAdmissionV1(ResourceEffectAdmissionProtocol.Version,
                 fingerprint, scope.Capture(), null, null);
-            scope.Activate(view, admission);
+            scope.Activate(admission);
             return admission;
         }
         catch (KeyLoadException error) when (!preserveBudgetFailure || error.Code != ErrorCode.BudgetExceeded)

@@ -1,6 +1,6 @@
 namespace KeyLoad.Query.Features.Search;
 
-/// <summary>Flows one bounded fixture callback with its original call; never persists identity or results.</summary>
+/// <summary>Flows one bounded posting-observation callback within its original call.</summary>
 internal sealed class NativeTextPostingObservation : IDisposable
 {
     private const string NonCurrentScope = "The original native text observation scope is not current.";

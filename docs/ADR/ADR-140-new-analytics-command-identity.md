@@ -42,6 +42,6 @@ AC-ANALYTICS-ID-003: The existing FunctionalDatabaseGateTests normal and cold ca
 
 AC-ANALYTICS-ID-004: Original-budget cancellation/exhaustion/output-size negatives and healthy following commands must pass with the selected actual issuer. The issuer owner supplies these bound-specific regressions. Native immutable-map framing and same-root native journal cold tests remain independent required coverage.
 
-All these gates remain OPEN until Main adopts the complete coherent source, builds it and retains actual original TUnit/process/public results. This ADR, source inspection and same-process unit tests do not prove cross-process replay, majority acknowledgements, power-loss durability, performance or production readiness. No status or qualification claim is changed here.
+All these gates remain OPEN until Main adopts the complete coherent source, builds it and retains actual original TUnit/process/public results. This ADR, source inspection and same-process unit tests do not prove cross-process replay, acknowledgement from every configured copys, power-loss durability, performance or production readiness. No status or qualification claim is changed here.
 
 Related contracts: [node-owned derived Analytics](ADR-134-node-owned-derived-analytics.md), [native CreateTable identity](ADR-132-native-create-table-command-identity.md).

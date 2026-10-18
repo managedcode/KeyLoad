@@ -53,9 +53,9 @@ internal static class RecurringSagaSchemaCanonical
         var seed = state.Seed;
         var expected = new OutboxEntry[]
         {
-            new(One, Zero, seed.ExpectedToken, seed.Operation.EvaluatedAt, state.ScheduleMutation,
+            new(One, Zero, seed.ExpectedToken, new DateTimeOffset(seed.Operation.Timestamp), state.ScheduleMutation,
                 new(ScheduleKind, Queue, ScheduleId.ToString(Format), One)),
-            new(Two, One, seed.ExpectedToken, seed.Operation.EvaluatedAt, state.SagaMutation,
+            new(Two, One, seed.ExpectedToken, new DateTimeOffset(seed.Operation.Timestamp), state.SagaMutation,
                 new(SagaKind, Queue, SagaId.ToString(Format), One))
         };
         var partition = owner.Source.Partition;

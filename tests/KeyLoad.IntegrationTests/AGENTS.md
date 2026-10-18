@@ -6,7 +6,7 @@
 - Main suite files: `ClusterReplication/Cases/Cluster/ClusterTests.cs`, `ResourceExecution/Cases/AdmissionClusterTests.cs`; topology fixture: `ClusterFixture.cs`.
 - Test cases belong under canonical `<SliceName>/` paths; shared cluster/container fixtures remain test infrastructure. Keep each feature's tests aligned with its docs and public contracts.
 - Preserve node-local ZoneTree ownership (files never move with activations); use real Orleans routing and membership (ADR-136). Do not replace external dependencies with mocks, fakes or in-memory/single-node proofs.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Apply the installed Orleans skill for runtime decisions and the Aspire skill for fixture resource composition and lifecycle.
 - This suite crosses process, network, authorization and cluster boundaries. Process-kill results are not power-loss proof; do not report production readiness without all required fault and endurance gates.
 
 ## Boundaries and protected risks

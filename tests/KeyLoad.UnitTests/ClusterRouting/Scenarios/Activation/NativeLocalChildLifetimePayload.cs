@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using K = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
-using P = KeyLoad.UnitTests.Features.ClusterReplication.ReplicaBarrierDeadlineScenario;
+using P = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -11,7 +11,7 @@ internal static class NativeLocalChildLifetimePayload
     internal static NativeLocalChildLifetimeInput Create(NativeLocalChildLifetimeSeeded state,
         NativeLocalChildLifetimeOperation operation, int limit = K.RowCount)
     {
-        var database = state.Leader.Journal.Database;
+        var database = state.Leader.Database.Database;
         var budget = operation.Budget;
         var grant = budget.CreateReadGrant(database.Limits.MaxQueryReadBytes / K.GrantDivisor,
             database.Limits.MaxScanRecords / K.GrantDivisor);

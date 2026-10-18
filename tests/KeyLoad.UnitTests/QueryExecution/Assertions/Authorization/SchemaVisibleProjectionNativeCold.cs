@@ -16,14 +16,14 @@ internal static class SchemaVisibleProjectionNativeCold
             {
                 var rows = TeamRowPolicyAssertions.Image(owner.Store);
                 var cut = owner.Store.Position;
-                var journal = owner.JournalCut();
+                var journal = owner.ReadCut();
                 var applied = owner.Database.LastApplied;
                 await owner.ReopenAsync();
                 var checks = new List<Exception>();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await TeamRowPolicyAssertions.UnchangedAsync(owner.Store, rows, cut);
-                    await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+                    await Assert.That(owner.ReadCut()).IsEqualTo(journal);
                     await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
                 }, checks);
                 await ServerFailureObserver.ObserveAsync(() => SafeProjectorOperationImages.ObserveAsync(owner,
@@ -33,7 +33,7 @@ internal static class SchemaVisibleProjectionNativeCold
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await TeamRowPolicyAssertions.UnchangedAsync(owner.Store, rows, cut);
-                    await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+                    await Assert.That(owner.ReadCut()).IsEqualTo(journal);
                     await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
                 }, checks);
                 ServerFailureObserver.ThrowIfAny(checks);

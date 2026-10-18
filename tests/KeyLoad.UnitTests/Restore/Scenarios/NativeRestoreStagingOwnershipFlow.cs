@@ -37,7 +37,7 @@ internal static class NativeRestoreStagingOwnershipFlow
                 await CatalogRestoreCancellationFlow.SourceAsync(fixture, capture.Position, source, backup, archive);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
-        }, nativeAdmission: true);
+        });
     }
 
     private static async Task ReopenRetainedAsync(EventingArtifactFixture fixture, string staging,

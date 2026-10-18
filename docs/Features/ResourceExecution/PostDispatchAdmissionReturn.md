@@ -31,7 +31,7 @@ selected-cancellation tests without complete admission conservation.
 
 REQ-ADMISSION-POSTDISPATCH-003 / AC-ADMISSION-POSTDISPATCH-003:
 use the interrupted command's original GUID for the first healthy commit. Require
-its literal full mutation receipt, QuorumProcessDurable, actual signed incarnation,
+its literal full mutation receipt, ProcessDurable, actual signed incarnation,
 partition and positive opaque commit cut. Full document reads
 use that actual minimum token. SDK and official MCP replay must retain the full
 public receipt, complete document and exact outbox. A single original document

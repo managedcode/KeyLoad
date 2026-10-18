@@ -38,9 +38,10 @@ internal static class EventProjectionLineageR41Operations
     {
         await Assert.That(receipt.CommandId).IsEqualTo(request.CommandId);
         await SqlClusterProtocol.EqualAsync(new CommitToken(receipt.Token.Incarnation, state.Partition.AtomicPartitionId,
-         receipt.Token.Position, receipt.Token.OwnershipEpoch), receipt.Token);
+         receipt.Token.Position), receipt.Token);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(mutations, receipt.Mutations.ToArray());
     }
 }

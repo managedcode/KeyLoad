@@ -37,7 +37,8 @@ internal static class NativeTextRequestRefusalPublicAssertions
         await Assert.That(original.Receipt.CommandId).IsEqualTo(original.Command.CommandId);
         await Assert.That(original.Receipt.Token.AtomicPartitionId).IsEqualTo(original.Command.Partition.AtomicPartitionId);
         await Assert.That(original.Receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(original.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(original.Receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(original.Receipt.PersistedCopies).IsEqualTo(3);
         await SqlClusterProtocol.EqualAsync(new MutationReceipt[]
             { new("putDocument", NativeTextClusterScenario.Collection, NativeTextRequestRefusalPublicTrial.Id, 1L) },
             original.Receipt.Mutations.ToArray());

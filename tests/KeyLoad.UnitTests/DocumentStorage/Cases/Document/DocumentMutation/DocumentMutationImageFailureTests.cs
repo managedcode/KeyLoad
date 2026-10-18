@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -22,7 +23,7 @@ internal sealed class DocumentMutationImageFailureTests
         db.Commit(new PutDocument(Collection, FirstId, FirstJson));
         var failed = Submit(db, new PutDocument(Collection, SecondId, FirstJson));
 
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument(RootId, new(db.Partition, Collection, SecondId))).IsNull();
         await Assert.That(db.Database.GetOutboxStatus(RootId, db.Partition).Head.Tail).IsEqualTo(1);
         db.Commit(new PutDocument(Collection, SecondId, OtherJson));
@@ -41,7 +42,7 @@ internal sealed class DocumentMutationImageFailureTests
         var failed = Apply(bounded, db, new PutDocument(Collection, FirstId, FirstJson),
             new PutDocument(Collection, SecondId, OtherJson));
 
-        await Assert.That(failed.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(db.Database.GetOutboxStatus(RootId, db.Partition).Head.Tail).IsEqualTo(0);
         await Assert.That(db.Database.GetDocument(RootId, new(db.Partition, Collection, FirstId))).IsNull();
         Apply(bounded, db, new PutDocument(Collection, FirstId, FirstJson)).Get<CommitReceipt>();
@@ -57,23 +58,22 @@ internal sealed class DocumentMutationImageFailureTests
             [new("database", Collection, Capability.DocumentsRead)], []))).Get<PrincipalRecord>();
         var denied = Submit(db, new PutDocument(Collection, FirstId, FirstJson), ReaderId);
 
-        await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetOutboxStatus(RootId, db.Partition).Head.Tail).IsEqualTo(0);
         db.Commit(new PutDocument(Collection, FirstId, FirstJson));
         await Assert.That(db.Database.GetDocument(RootId, new(db.Partition, Collection, FirstId))!.Json).IsEqualTo(FirstJson);
     }
 
-    private static OperationResult Submit(TestDatabase db, Mutation mutation, string principal = RootId)
+    private static Result<object> Submit(TestDatabase db, Mutation mutation, string principal = RootId)
     {
         var id = Guid.NewGuid();
         return db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), principal, id);
     }
 
-    private static OperationResult Apply(DatabaseEngine engine, TestDatabase db, params Mutation[] mutations)
+    private static Result<object> Apply(DatabaseEngine engine, TestDatabase db, params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, db.Partition, [.. mutations]);
-        return engine.Apply(new(id, OperationKind.Batch, RootId, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        return engine.Apply(engine.CreateCommand(OperationKind.Batch, id, RootId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
     }
 }

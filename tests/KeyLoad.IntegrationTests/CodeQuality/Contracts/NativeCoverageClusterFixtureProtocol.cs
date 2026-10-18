@@ -47,7 +47,7 @@ internal static class NativeCoverageClusterFixtureProtocol
     internal const string ParentDirectory = "..";
     internal const string CurrentDirectory = ".";
     internal const string ParentDirectoryPrefix = "../";
-    internal const string InvalidContext = "The original CLUSTER coverage fixture context is invalid.";
+    internal const string InvalidContext = "The original Orleans coverage fixture context is invalid.";
     internal const string InvalidFixture = NativeCoverageClusterProtocol.InvalidFixture;
     internal const string InvalidRun = "The original coverage run manifest is invalid.";
     internal const string ClusterSuite = NativeCoverageClusterProtocol.ClusterSuite;

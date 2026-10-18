@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.BackupRestore;
@@ -54,7 +55,7 @@ internal static class Bm25PortableFamilyKeyBodyRefusal
         var identity = source.Store.Identity;
         var position = source.Store.Position;
         var applied = source.Database.LastApplied;
-        var journal = source.ReadJournalCut();
+        var journal = source.ReadCanonicalCut();
         var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() =>
             MixedEventingCatalogRestore.Capture(source, Path.Combine(fixture.Root, output), token), token));
         await Assert.That(refused!.Code).IsEqualTo(ErrorCode.Corruption);
@@ -64,7 +65,7 @@ internal static class Bm25PortableFamilyKeyBodyRefusal
         await Assert.That(source.Store.Identity).IsEqualTo(identity);
         await Assert.That(source.Store.Position).IsEqualTo(position);
         await Assert.That(source.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(source.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(source.ReadCanonicalCut()).IsEqualTo(journal);
     }
 
     private static byte[][] ReadEvidence(TestDatabase source, Bm25CorpusCurrentV1[] heads)
@@ -72,7 +73,7 @@ internal static class Bm25PortableFamilyKeyBodyRefusal
         var result = new List<byte[]>();
         foreach (var head in heads)
         {
-            result.Add(NativeSerialization.Serialize(source.ReadRetainedEntry(head.Generation)));
+            result.Add(NativeSerialization.Serialize(source.ReadStoredOutcome(head.Generation)));
             var outcome = OutcomeStoreOracle.ReadPartition(source.Store, source.Partition,
                 Bm25PortableFamilyBackupSeed.Root, head.Generation)
                 ?? throw new InvalidOperationException(OriginalRequired);

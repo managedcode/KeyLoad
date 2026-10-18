@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -18,13 +20,13 @@ internal static class ResourceIncarnationAssertions
         => await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected),
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
 
-    internal static async Task ResultAsync(OperationResult expected, OperationResult actual)
+    internal static async Task ResultAsync(Result<object> expected, Result<object> actual)
     {
-        await EqualAsync(expected.Error, actual.Error);
-        await EqualAsync(expected.SafeDetail, actual.SafeDetail);
+        await EqualAsync(Errors.Code(expected.Problem), Errors.Code(actual.Problem));
+        await EqualAsync(expected.Problem?.Detail, actual.Problem?.Detail);
         await EqualAsync(expected.Json, actual.Json);
-        await Assert.That(actual.NativeValue?.GetType()).IsEqualTo(expected.NativeValue?.GetType());
-        await EqualAsync(expected.NativeValue, actual.NativeValue);
+        await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());
+        await EqualAsync(expected.Value, actual.Value);
     }
 
     internal static async Task UnchangedAsync(ZoneTreeStore store, string[] image, long position)
@@ -34,14 +36,14 @@ internal static class ResourceIncarnationAssertions
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
-    internal static async Task IdentityAsync(ZoneTreeStore store, PartitionRef partition, ReplicatedOperation original,
+    internal static async Task IdentityAsync(ZoneTreeStore store, PartitionRef partition, Command<DatabaseCommand> original,
         ResourceDefinition definition, bool sql)
     {
         var fingerprint = JsonData.Fingerprint(new
         {
-            original.Id,
-            original.Kind,
-            original.PrincipalId,
+            original.CommandId,
+            original.Value!.Kind,
+            original.UserId!,
             original.PayloadJson
         });
         var incarnation = Convert.ToHexStringLower(SHA256.HashData(KeyCodec.Encode(
@@ -71,8 +73,7 @@ internal static class ResourceIncarnationAssertions
         var command = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(ResourceIncarnationLiteral.Table, ResourceIncarnationLiteral.RowId,
                 ResourceIncarnationLiteral.Row(revision), revision - 1)]);
-        var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, "root",
-            database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = database.CreateCommand(OperationKind.Batch, command.CommandId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await EqualAsync<System.Collections.Immutable.ImmutableArray<MutationReceipt>>(

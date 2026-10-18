@@ -17,7 +17,7 @@ internal static class NativeTextMaintenanceRequestFixture
             database.Partition);
         return new(Guid.NewGuid(), consumer, NativeTextBilingualAudit.Collection, NativeTextMaintenanceTestValues.Field,
             NativeTextMaintenanceTestValues.Generation, database.Store.Identity.NodeId,
-            new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),
+            new(placement.PhysicalShardId, placement.Incarnation),
             TextIndexMaintenanceMode.Build);
     }
 }

@@ -33,7 +33,6 @@ internal static class GrainRequestScope
             && !AnnMaintenanceChildScope.Validate(request)
             && !Bm25RequestScope.Validate(request) && !AnnProjectionObservationScope.Validate(request)
             && !OnlineTextRequestScope.Validate(request)
-            && !DocumentLifetimeReadScope.Validate(request)
             && !QueryLifetimeReadScope.Validate(request) && !AnnProjectionLifetimeObservationScope.Validate(request))
         {
             RuntimeJournalRequestScope.Validate(request);

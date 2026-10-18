@@ -11,7 +11,7 @@ using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFixture
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Owns the real Aspire CLUSTER application shared by public SDK integration scenarios.</summary>
+/// <summary>Owns the real Aspire Orleans application shared by public SDK integration scenarios.</summary>
 internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKeyedDataSource
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
@@ -22,7 +22,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     private readonly Features.QueryExecution.PostgresClusterFixtureOwnership nativeSql = new();
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
-    private readonly int? snapshotThreshold;
     private readonly QueryExecutionOptions? queryExecution;
     private ClusterFixtureDiagnostics? diagnostics;
     private ContainerRuntimeControl? containerRuntime;
@@ -33,7 +32,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     /// <summary>Receives the native keyed data-source identity before initialization.</summary>
     public string Key { get; set; } = string.Empty;
 
-    /// <summary>Creates the standard CLUSTER fixture for the shared TUnit class data source.</summary>
+    /// <summary>Creates the standard Orleans fixture for the shared TUnit class data source.</summary>
     public ClusterFixture()
     {
     }
@@ -50,30 +49,26 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     internal ClusterFixture(Features.QueryExecution.PostgresClusterSelection selection)
         => nativeSql = new(selection);
 
-    /// <summary>Creates an CLUSTER fixture with a smaller command admission budget.</summary>
+    /// <summary>Creates an Orleans fixture with a smaller command admission budget.</summary>
     /// <param name="commandBytes">The per-node retained command byte limit.</param>
     internal ClusterFixture(long commandBytes) => this.commandBytes = commandBytes;
 
-    /// <summary>Creates an CLUSTER fixture with explicit HTTP admission bounds.</summary>
+    /// <summary>Creates an Orleans fixture with explicit HTTP admission bounds.</summary>
     /// <param name="httpAdmission">The HTTP body and control-body limits for each node.</param>
     internal ClusterFixture(HttpAdmissionLimits httpAdmission)
         => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
 
-    /// <summary>Creates an CLUSTER fixture with the server's typed database execution limits.</summary>
-    /// <param name="databaseLimits">The validated limits applied to every Aspire CLUSTER node.</param>
+    /// <summary>Creates an Orleans fixture with the server's typed database execution limits.</summary>
+    /// <param name="databaseLimits">The validated limits applied to every Aspire Orleans node.</param>
     internal ClusterFixture(DatabaseLimits databaseLimits)
         => this.databaseLimits = ClusterFixtureDatabaseLimits.Validate(databaseLimits);
 
-    /// <summary>Creates an exclusive load fixture with an explicit positive snapshot cadence.</summary>
-    internal ClusterFixture(DatabaseLimits databaseLimits, int snapshotThreshold) : this(databaseLimits)
-        => this.snapshotThreshold = ClusterFixtureComposition.ValidateSnapshotThreshold(snapshotThreshold);
-
-    /// <summary>Creates an CLUSTER fixture with explicit database and additional query result bounds.</summary>
+    /// <summary>Creates an Orleans fixture with explicit database and additional query result bounds.</summary>
     internal ClusterFixture(DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
         : this(databaseLimits)
         => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
 
-    /// <summary>Composes validated HTTP admission and query capabilities in the same Aspire CLUSTER cohort.</summary>
+    /// <summary>Composes validated HTTP admission and query capabilities in the same Aspire Orleans cluster.</summary>
     internal ClusterFixture(HttpAdmissionLimits httpAdmission, DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
         : this(databaseLimits, queryExecution)
         => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
@@ -95,12 +90,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         get; private set;
     }
 
-    /// <summary>Gets the opaque physical-shard identity from the actual private shared V2 profile.</summary>
-    public Guid PhysicalShardId
-    {
-        get; private set;
-    }
-
     /// <summary>Starts all three genuine Aspire resources and waits for their health concurrently.</summary>
     /// <returns>A task that completes when each of the three resources is healthy.</returns>
     public async Task InitializeAsync()
@@ -113,8 +102,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
             coverage = await NativeCoverageClusterFixtureOwner.CreateAsync(coverageFixtureId, timeout.Token)
                 .ConfigureAwait(false);
-            var selection = ClusterFixtureComposition.PrepareArguments(Root, coverage, localImageSession?.Selection,
-                snapshotThreshold);
+            var selection = ClusterFixtureComposition.PrepareArguments(Root, coverage, localImageSession?.Selection);
             Root = selection.Root;
             var arguments = selection.Arguments;
             ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
@@ -130,7 +118,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             containerRuntime = new(App, containerNames, repository.FullName, localImageSession?.Selection);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-            (AdminKey, _, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
+            AdminKey = ClusterFixtureProfile.ReadProfile(Root).AdminKey;
             await ClusterFixtureApplicationStartup.StartAsync(App, repository.FullName, containerNames,
                 coverage, localImageSession?.Selection, timeout.Token).ConfigureAwait(false);
         }
@@ -150,7 +138,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     public KeyLoadClient Client(string node, string? key = null)
         => ClusterFixtureComposition.CreateClient(RequireApp(), node, key ?? AdminKey);
 
-    /// <summary>Writes bounded CLUSTER state, readiness and recent node-log diagnostics.</summary>
+    /// <summary>Writes bounded Orleans state, readiness and recent node-log diagnostics.</summary>
     /// <returns>A task that completes after the diagnostic artifact is written.</returns>
     public Task SaveFailureDiagnosticsAsync() => SaveFailureDiagnosticsAsync(RequireDiagnostics().LifetimeToken);
 

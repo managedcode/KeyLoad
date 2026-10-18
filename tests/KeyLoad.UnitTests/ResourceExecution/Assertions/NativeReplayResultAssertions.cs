@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -6,13 +7,12 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 // assuming ImmutableArray backing identity or equal native reference graphs.
 internal static class NativeReplayResultAssertions
 {
-    internal static async Task Same<T>(OperationResult actual, OperationResult expected) where T : class
+    internal static async Task Same<T>(Result<object> actual, Result<object> expected) where T : class
     {
-        await Assert.That(actual.Json).IsEqualTo(expected.Json);
-        await Assert.That(actual.Error).IsEqualTo(expected.Error);
-        await Assert.That(actual.SafeDetail).IsEqualTo(expected.SafeDetail);
-        await Assert.That(actual.NativeValue?.GetType()).IsEqualTo(typeof(T));
-        await Assert.That(expected.NativeValue?.GetType()).IsEqualTo(typeof(T));
+        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
+        await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(T));
+        await Assert.That(expected.Value?.GetType()).IsEqualTo(typeof(T));
         await Assert.That(Project(actual.Get<T>())).IsEqualTo(Project(expected.Get<T>()));
     }
 

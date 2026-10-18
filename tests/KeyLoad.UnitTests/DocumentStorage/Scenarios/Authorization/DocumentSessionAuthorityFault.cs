@@ -11,11 +11,11 @@ internal static class DocumentSessionAuthorityFault
     private const int RemovedByte = 1;
     private const string Invalid = "The original session authority fault selection is invalid.";
 
-    internal static byte[] Original(RemoteDocumentNativeFixture fixture)
-        => fixture.Destination.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
+    internal static byte[] Original(DocumentPatchAtomicityOwner fixture)
+        => fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
             ?? throw new InvalidOperationException(Invalid);
 
-    internal static void Damage(RemoteDocumentNativeFixture fixture, byte[] original, int kind)
+    internal static void Damage(DocumentPatchAtomicityOwner fixture, byte[] original, int kind)
     {
         var changed = kind switch
         {
@@ -24,7 +24,7 @@ internal static class DocumentSessionAuthorityFault
             Truncated => original[..^RemovedByte],
             _ => throw new InvalidOperationException(Invalid)
         };
-        fixture.Destination.Store.Commit((tx, _) =>
+        fixture.Store.Commit((tx, _) =>
         {
             if (changed is null)
             {
@@ -38,8 +38,8 @@ internal static class DocumentSessionAuthorityFault
         });
     }
 
-    internal static void Repair(RemoteDocumentNativeFixture fixture, byte[] original)
-        => fixture.Destination.Store.Commit((tx, _) => { tx.Put(KeySpace.AppliedBytes, original); return true; });
+    internal static void Repair(DocumentPatchAtomicityOwner fixture, byte[] original)
+        => fixture.Store.Commit((tx, _) => { tx.Put(KeySpace.AppliedBytes, original); return true; });
 
     internal static string Detail(int kind) => kind == Truncated
         ? "The internal binary payload is invalid." : "The canonical applied position is invalid.";

@@ -31,11 +31,11 @@ internal static class SafeProjectorOperationCanonical
         var second = new EntityRef(owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second);
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<DocumentRecord>(KeySpace.Partition(
             Documents, owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.First))),
-            new DocumentRecord(first, revision, json, new RowAccess(), active.Operation.EvaluatedAt));
+            new DocumentRecord(first, revision, json, new RowAccess(), new DateTimeOffset(active.Operation.Timestamp)));
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<DocumentRecord>(KeySpace.Partition(
             Documents, owner.Source.Partition, SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Second))),
             new DocumentRecord(second, SafeProjectorOperationProtocol.InitialRevision, SafeProjectorOperationProtocol.SecondJson,
-                new RowAccess(), state.Seed.Operation.EvaluatedAt));
+                new RowAccess(), new DateTimeOffset(state.Seed.Operation.Timestamp)));
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, SafeProjectorOperationProtocol.Collection))), state.Resource);
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<PrincipalRecord>(

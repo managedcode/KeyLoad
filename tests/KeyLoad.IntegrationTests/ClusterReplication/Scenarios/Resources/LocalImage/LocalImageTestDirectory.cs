@@ -28,7 +28,7 @@ internal static class LocalImageTestDirectory
     {
         if (primary is not null && cleanup is not null)
         {
-            throw new AggregateException("The local CLUSTER image test and its temporary-directory cleanup failed.",
+            throw new AggregateException("The local Orleans image test and its temporary-directory cleanup failed.",
                 primary, cleanup);
         }
         if (primary is not null)

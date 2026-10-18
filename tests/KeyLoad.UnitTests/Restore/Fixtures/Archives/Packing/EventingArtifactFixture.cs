@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -31,9 +33,6 @@ internal sealed class EventingArtifactFixture
         get; private set;
     }
     internal DatabaseEngine Database { get; private set; } = null!;
-    private TestDatabaseReplicaAdmission? targetAdmission;
-    private bool nativeAdmission;
-    private Guid? originalTargetJournalNodeId;
     internal EventSourceRef Events => new(Source.Partition, Topic, EventSourceKind.Topic);
     internal SubscriptionRef Group => new(Events, ProcessedGroup);
     internal SubscriptionRef Other => new(Events, UnreadGroup);
@@ -45,15 +44,12 @@ internal sealed class EventingArtifactFixture
     internal ReceiveSubscriptionResult Received { get; set; } = null!;
     internal ReceiveResult QueueClaim { get; set; } = null!;
     internal SubscriptionProcessingResult Processed { get; set; } = null!;
-    internal ReplicatedOperation Original { get; set; } = null!;
+    internal Command<DatabaseCommand> Original { get; set; } = null!;
     internal string Cursor { get; set; } = null!;
     internal static Mutation[] Effects => [new PutDocument(Documents, DocumentId, Json, 0), new EnqueueMessage(Queue, MessageId, Json)];
 
-    internal static Task RunAsync(Func<EventingArtifactFixture, Task> operation, bool nativeAdmission = false)
-        => EventingArtifactFixtureLifetime.RunAsync(new()
-        {
-            nativeAdmission = nativeAdmission
-        }, operation);
+    internal static Task RunAsync(Func<EventingArtifactFixture, Task> operation)
+        => EventingArtifactFixtureLifetime.RunAsync(new(), operation);
 
     internal void InitializeSource()
     {
@@ -64,22 +60,14 @@ internal sealed class EventingArtifactFixture
     internal void InitializeTime() => Time = Source.Database.EvaluationClock.GetUtcNow();
     internal void OpenTarget(string path)
     {
-        Target = new(new(path), nativeAdmission ? Source.StorageExecution : UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Database = nativeAdmission ? Source.CreateConfiguredDatabase(Target)
-            : BackupIndexedDocumentDedupFixture.CreateDatabase(Target);
-        if (nativeAdmission)
-        {
-            targetAdmission = Source.CreateTargetAdmission(Database, Target, path,
-            Path.Combine(Root, Path.GetFileName(path) + TestDatabaseReplicaDirectory.Suffix), originalTargetJournalNodeId);
-            originalTargetJournalNodeId ??= targetAdmission.JournalNodeId;
-        }
+        Target = new(new(path), Source.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        Database = Source.CreateConfiguredDatabase(Target);
     }
-    internal (long LastIndex, long CommittedIndex, long Term) ReadTargetJournalCut()
-        => targetAdmission?.ReadJournalCut() ?? throw new InvalidOperationException(OriginalEngineRequired);
+    internal (long AppliedPosition, long StorePosition) ReadTargetCut()
+        => Database.Store.Read(_ => (Database.LastApplied, Database.Store.Position));
 
-    internal ReplicatedOperation ReadTargetIssuedOperation(Guid originalId)
-        => targetAdmission?.ReadRetainedEntry(originalId).Operation
-            ?? throw new InvalidOperationException(OriginalEngineRequired);
+    internal Command<DatabaseCommand> ReadTargetIssuedOperation(Guid originalId)
+        => OutcomeStoreOracle.ReadStored(Database, originalId, CancellationToken.None).PreparedCommand;
 
     internal void ReopenTarget(string path)
     {
@@ -89,33 +77,25 @@ internal sealed class EventingArtifactFixture
     }
     internal void JoinTarget()
     {
-        var original = targetAdmission;
-        targetAdmission = null;
-        if (Target is { } target)
-        {
-            TestDatabaseJoinedLifetime.DisposeInOrder(original, target);
-        }
-        else
-        {
-            original?.Dispose();
-        }
+        Target?.Dispose();
     }
-    internal ReplicatedOperation Operation<T>(OperationKind kind, T value, Guid id, string principal = Principal)
-        => new(id, kind, principal, nativeAdmission && Target is not null
-            ? Database.EvaluationClock.GetUtcNow() : Time, JsonSerializer.Serialize(value, JsonDefaults.Options));
-    internal OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, T value, Guid id, string principal = Principal)
-        => SubmitIssued(database, Operation(kind, value, id, principal), explicitTime: !nativeAdmission || ReferenceEquals(database, Source.Database));
+    internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T value, Guid id, string principal = Principal)
+        => (Target is null ? Source.Database : Database).CreateCommand(kind, id, principal, Time,
+            JsonSerializer.Serialize(value, JsonDefaults.Options));
+    internal Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T value, Guid id, string principal = Principal)
+        => SubmitIssued(database, Operation(kind, value, id, principal), explicitTime: true);
 
-    internal OperationResult ApplyInbox(DatabaseEngine database, CommitInboxRequest request, CancellationToken token)
-        => SubmitIssued(database, new(request.CommandId, OperationKind.CommitInbox, Principal, default,
+    internal Result<object> ApplyInbox(DatabaseEngine database, CommitInboxRequest request, CancellationToken token)
+        => SubmitIssued(database, database.CreateCommand(OperationKind.CommitInbox, request.CommandId, Principal, default,
             JsonSerializer.Serialize(request, JsonDefaults.Options)), explicitTime: false, token);
 
-    internal OperationResult SubmitIssued(DatabaseEngine database, ReplicatedOperation operation,
+    internal Result<object> SubmitIssued(DatabaseEngine database, Command<DatabaseCommand> operation,
         bool explicitTime = true, CancellationToken cancellationToken = default)
-        => !nativeAdmission ? explicitTime ? database.Apply(operation) : database.ApplyEmbedded(operation, cancellationToken)
-            : ReferenceEquals(database, Source.Database)
-                ? explicitTime ? Source.SubmitIssued(operation) : Source.SubmitIssuedEmbedded(operation, cancellationToken)
-                : ReferenceEquals(database, Database) && targetAdmission is { } target
-                    ? target.Submit(operation, explicitTime, cancellationToken)
-                    : throw new InvalidOperationException(OriginalEngineRequired);
+    {
+        if (!ReferenceEquals(database, Source.Database) && !ReferenceEquals(database, Database))
+        {
+            throw new InvalidOperationException(OriginalEngineRequired);
+        }
+        return explicitTime ? database.Apply(operation) : database.ApplyEmbedded(operation, cancellationToken);
+    }
 }

@@ -74,7 +74,7 @@ internal static class VectorReferenceLifetimeNativeFlow
         var command = new CommandRequest(Guid.NewGuid(), NativeDropRuntimeProtocol.Partition, [request]);
         var denied = await profile.Source.SubmitAsync(OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, NativeSerialization.Serialize(command), token);
-        await Assert.That(denied.Error).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
+        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
         await Assert.That(denied.Payload.IsEmpty).IsTrue();
         await Assert.That(profile.Source.Store.Position).IsEqualTo(position);
         await Assert.That(ControlledPartitionMovementRawImage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();

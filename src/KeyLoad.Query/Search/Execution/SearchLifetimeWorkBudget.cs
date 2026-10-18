@@ -15,12 +15,4 @@ internal static class SearchLifetimeWorkBudget
         budget.Check();
         return budget;
     }
-
-    internal static async Task<T> RunNativeAsync<T>(DatabaseEngine database, QueryExecutionOptions execution,
-        IResourceLifetimeWorkBinding binding, Func<ReadExecutionBudget, T> read, CancellationToken token)
-    {
-        var budget = Create(database, execution, binding, token);
-        using var reservation = database.AdmitQuery(token);
-        return await Task.Run(() => read(budget), token).ConfigureAwait(false);
-    }
 }

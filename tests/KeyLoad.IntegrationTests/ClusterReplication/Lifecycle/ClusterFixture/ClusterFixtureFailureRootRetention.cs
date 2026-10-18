@@ -9,7 +9,7 @@ internal sealed class ClusterFixtureFailureRootRetention
 {
     private static readonly ConditionalWeakTable<ClusterFixture, ClusterFixtureFailureRootRetention> Owners = new();
     private const int NoFailures = 0;
-    private const string RetainedRoot = "Original CLUSTER failure evidence retained at ";
+    private const string RetainedRoot = "Original Orleans failure evidence retained at ";
     private bool enabled;
     private bool retain;
     private Func<Task>? deferredRelease;

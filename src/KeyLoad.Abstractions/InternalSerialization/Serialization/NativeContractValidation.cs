@@ -65,6 +65,10 @@ internal static class NativeContractValidation
     private static int VisitChildren(object value, Type type, NativeGraphValidationState state,
         NativeValueValidation? validation, NativeValidationProfile profile, int depth)
     {
+        if (NativeCommunicationContracts.TryProject(value, out var surrogate))
+        {
+            return Visit(surrogate, state, null, profile, depth);
+        }
         ValidateCollection(value, type);
         var height = LeafHeight;
         if (value is IDictionary dictionary)

@@ -6,5 +6,5 @@ internal sealed class CanonicalOutcomeReadBudgetTests
     [Arguments(true)]
     [Arguments(false)]
     public Task OriginalScopedOutcomeBudgetRefusalThenExactReplayAndTwoColdHealthyOperations(bool records)
-        => C1OutcomeInspectionFixture.RunOwnedAsync(fixture => CanonicalOutcomeReadBudgetFlow.RunAsync(fixture, records));
+        => CanonicalOutcomeFixture.RunOwnedAsync(fixture => CanonicalOutcomeReadBudgetFlow.RunAsync(fixture, records));
 }

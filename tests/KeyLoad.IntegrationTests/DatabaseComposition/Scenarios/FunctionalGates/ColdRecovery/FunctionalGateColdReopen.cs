@@ -9,7 +9,7 @@ internal static class FunctionalGateColdReopen
     {
         var native = fixture.ColdRuntime
             ?? throw new InvalidOperationException("The original functional runtime is unavailable.");
-        var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root);
+        var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
         var scenario = ContainerRuntimeOwnedReceipt.Scenario(profile.Incarnation, 1);
         var stopped = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(
             () => native.KillAsync(node, scenario, token)))).ConfigureAwait(false);
@@ -18,7 +18,7 @@ internal static class FunctionalGateColdReopen
         FunctionalGateStorageOwnership.RequireReleased(fixture);
         FunctionalGatePhysicalFileAssertions.RequireStopped(fixture, fixture.PhysicalFiles
             ?? throw new InvalidOperationException(FunctionalGatePhysicalFileProtocol.Failure));
-        // Start every original voter before any native health/quorum settlement.
+        // Start every original silo before any native health settlement.
         var begun = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(async () =>
         {
             _ = await native.BeginRestartAsync(node, token).ConfigureAwait(false);
@@ -26,7 +26,7 @@ internal static class FunctionalGateColdReopen
         var settled = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(
             () => native.RestartAsync(node, token)))).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny([.. begun.SelectMany(item => item), .. settled.SelectMany(item => item)]);
-        await Assert.That(ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root).Incarnation).IsEqualTo(profile.Incarnation);
+        await Assert.That(ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation).IsEqualTo(profile.Incarnation);
     }
 
     private static async Task<Exception[]> ObserveAsync(Func<Task> operation)

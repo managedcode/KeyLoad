@@ -15,13 +15,13 @@ internal static class GraphLabelUseClusterAssertions
                 new("putDocument", GraphLabelUseClusterProtocol.Collection, "b", 1L),
                 new("putDocument", GraphLabelUseClusterProtocol.Collection, "c", 1L),
                 new("upsertEdge", GraphLabelUseClusterProtocol.Graph, "ab", 1L),
-                new("upsertEdge", GraphLabelUseClusterProtocol.Graph, "bc", 1L)], DurabilityProfile.QuorumProcessDurable);
+                new("upsertEdge", GraphLabelUseClusterProtocol.Graph, "bc", 1L)], DurabilityProfile.ProcessDurable, 3);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
-        await Assert.That(actual.Token.OwnershipEpoch).IsEqualTo(1L);
+        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await Assert.That(actual.Token.Incarnation)
-            .IsEqualTo(ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root).Incarnation);
+            .IsEqualTo(ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation);
     }
 
     internal static async Task<string> ImageAsync(RequestCqrsClusterCallers admin, GraphLabelUseClusterState state,

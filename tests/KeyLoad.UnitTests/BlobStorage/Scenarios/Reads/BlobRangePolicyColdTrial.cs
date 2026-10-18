@@ -69,7 +69,7 @@ internal static class BlobRangePolicyColdTrial
     private static async Task ConfigureAsync(DatabaseEngine database, PrincipalRecord principal, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var operation = database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(),
+        var operation = database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(),
             BlobRangeIntegrityFixture.Principal, database.EvaluationClock.GetUtcNow(),
             NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
         var result = database.Apply(operation).Get<PrincipalRecord>();

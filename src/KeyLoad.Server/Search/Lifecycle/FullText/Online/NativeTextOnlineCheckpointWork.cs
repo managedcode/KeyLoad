@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 
@@ -68,7 +69,7 @@ internal sealed class NativeTextOnlineCheckpointWork
         return actual;
     }
 
-    internal ProjectionBatchResult RequireReceipt(OperationResult original)
+    internal ProjectionBatchResult RequireReceipt(Result<object> original)
     {
         var actual = original.Get<ProjectionBatchResult>();
         if (actual.Receipt is null || actual.Receipt.CommandId != Work.CommandId

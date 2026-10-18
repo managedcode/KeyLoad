@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -39,7 +40,7 @@ internal static class CompositionReplayFixture
     internal static string Link(TestDatabase db, string from, string to)
         => JsonSerializer.Serialize(new QueueGraphLink(Vertex(db, from), Vertex(db, to), Label), JsonDefaults.Options);
 
-    internal static ReplicatedOperation Forward(TestDatabase db, string principal = "root")
+    internal static Command<DatabaseCommand> Forward(TestDatabase db, string principal = "root")
     {
         var id = Guid.NewGuid();
         return new(id, OperationKind.Batch, principal, TimeProvider.System.GetUtcNow(),

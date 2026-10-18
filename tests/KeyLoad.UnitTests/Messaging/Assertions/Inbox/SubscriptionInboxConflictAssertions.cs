@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -46,10 +48,10 @@ internal static class SubscriptionInboxConflictAssertions
     }
 
     internal static async Task RefusalAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        ReplicatedOperation operation, byte[] inbox, string[] source,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+        Command<DatabaseCommand> operation, byte[] inbox, string[] source,
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
     {
-        var before = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, operation.Id);
+        var before = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, operation.CommandId);
         var position = store.Position;
         var failure = db.Apply(operation);
         await FailureAsync(failure);
@@ -59,16 +61,16 @@ internal static class SubscriptionInboxConflictAssertions
         {
             MaxWindow = 3
         }, 2, 0, 3, 3, false, null);
-        var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id);
+        var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
         history.Add((operation, failure, saved));
         await ReplayAsync(db, store, group, history[^1]);
         await ReplayAsync(db, store, group, history[^1]);
     }
 
     internal static async Task RepairedAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        SubscriptionProcessingRequest request, OperationResult result, OperationResult original, byte[] inbox, string[] source)
+        SubscriptionProcessingRequest request, Result<object> result, Result<object> original, byte[] inbox, string[] source)
     {
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var processing = result.Get<SubscriptionProcessingResult>();
         await Assert.That(processing.AlreadyProcessed).IsTrue();
         await Assert.That(processing.OriginalEffectsToken).IsEqualTo(original.Get<SubscriptionProcessingResult>().OriginalEffectsToken);
@@ -97,23 +99,23 @@ internal static class SubscriptionInboxConflictAssertions
     }
 
     internal static async Task ReplayAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        (ReplicatedOperation Operation, OperationResult Result, byte[] Saved) entry)
+        (Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved) entry)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var replay = db.Apply(entry.Operation);
-        if (entry.Result.Error is not null)
+        if (Errors.Code(entry.Result.Problem) is not null)
         {
             await FailureAsync(replay);
             await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(entry.Result, JsonDefaults.Options));
         }
-        else if (entry.Result.NativeValue is SubscriptionProcessingResult)
+        else if (entry.Result.Value is SubscriptionProcessingResult)
         {
             await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(replay, entry.Result);
         }
-        else if (entry.Result.NativeValue is SubscriptionInfo)
+        else if (entry.Result.Value is SubscriptionInfo)
         {
             await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
         }
@@ -121,35 +123,35 @@ internal static class SubscriptionInboxConflictAssertions
         {
             await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
         }
-        var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.Id);
+        var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.CommandId);
         await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
     }
 
     internal static async Task FencedOriginalProcessingAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        (ReplicatedOperation Operation, OperationResult Result, byte[] Saved) original)
+        (Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved) original)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var replay = db.Apply(original.Operation);
-        await Assert.That(replay.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(replay.SafeDetail).IsEqualTo("The subscription token scope or generation is invalid.");
-        await Assert.That(replay.Json).IsNull();
-        await Assert.That(replay.NativeValue).IsNull();
-        var retained = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, original.Operation.Id);
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription token scope or generation is invalid.");
+        
+        await Assert.That(replay.Value).IsNull();
+        var retained = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, original.Operation.CommandId);
         await Assert.That(retained.AsSpan().SequenceEqual(original.Saved)).IsTrue();
         await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(
             NativeSerialization.Deserialize<StoredOutcome>(retained).Result, original.Result);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
     }
 
-    private static async Task FailureAsync(OperationResult result)
+    private static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(result.SafeDetail).IsEqualTo("The subscription input was completed with different effects.");
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(result.Problem?.Detail).IsEqualTo("The subscription input was completed with different effects.");
+        
+        await Assert.That(result.Value).IsNull();
     }
 }
 

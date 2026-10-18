@@ -6,7 +6,7 @@ Status: Accepted; the native component is connected to the silo-local ZoneTree o
 
 The selected package is published ZoneTree.Analytics1.0.0, original MIT copyright2026 Ahmed Yasin Koculu and native ZoneTree2.0.1 dependency. The verified package archive SHA256 is `14254385f46a979ddbfee6c874833b4a3a5e754655bdc39b0525d99262370452`; its nuspec source commit is `f7511306bbf0c375a918fc8a93845b1f596777b7`. Existing central pins, package reference and unmodified license asset are retained. No new dependency, local package or source replacement is introduced.
 
-Derived analytics is disposable node-local operational history. Canonical ZoneTree models, database credentials, journals, majority acknowledgements and fresh persisted authorization remain authoritative. OpenTelemetry remains the native instrumentation baseline. TimeSeries aggregates are a separate database capability and do not prove that this package ran. Per-node rollups must never be summed into cluster transaction counts.
+Derived analytics is disposable node-local operational history. Canonical ZoneTree models, database credentials, journals, acknowledgement from every configured copys and fresh persisted authorization remain authoritative. OpenTelemetry remains the native instrumentation baseline. TimeSeries aggregates are a separate database capability and do not prove that this package ran. Per-node rollups must never be summed into cluster transaction counts.
 
 ```mermaid
 flowchart LR
@@ -39,7 +39,7 @@ Only fixed site `keyload-node`, fixed event `replica-state-sample`, actual Syste
 
 Raw events, sessions, visitor identification, geography, user-agent/version/query-string collection, web parsers/bot detection and custom dimensions remain disabled. Empty AllowedDimensions and zero custom dimensions are explicit. The query is native QuerySource.Rollups/FillMode.None, current UTC hour through next hour, Events plus the three fixed sums, without caller-shaped group/filter/metric expressions or raw fallback. Projection rejects unexpected plans/shapes, excessive rows and invalid numeric values, then checks serialized report size.
 
-Existing engineering bounds remain queue64, buffered rows128, native groups192, buckets168, rows192, report65536 UTF8 bytes, mutable store4096 items and disk segment/partition16384 items; one native worker and one admitted native query/flush. Hourly retention is7 days, native retention checks60 minutes, query/flush policy2 seconds. These settings are not a measured RSS/disk-byte ceiling or performance result. Counters reset on a new engine process; persisted hourly rows may predate those counters. NativePlanComplete describes only native query planning, never complete sampled history, zero loss, a database cut or a majority acknowledgement receipt.
+Existing engineering bounds remain queue64, buffered rows128, native groups192, buckets168, rows192, report65536 UTF8 bytes, mutable store4096 items and disk segment/partition16384 items; one native worker and one admitted native query/flush. Hourly retention is7 days, native retention checks60 minutes, query/flush policy2 seconds. These settings are not a measured RSS/disk-byte ceiling or performance result. Counters reset on a new engine process; persisted hourly rows may predate those counters. NativePlanComplete describes only native query planning, never complete sampled history, zero loss, a database cut or a acknowledgement from every configured copy receipt.
 
 ## Required execution and retained evidence
 

@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -26,7 +28,7 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
     }
     internal PartitionRef Partition => original.Partition;
     internal Guid WindowId { get; } = Guid.NewGuid();
-    internal List<(ReplicatedOperation Operation, OperationResult Result)> Outcomes { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result)> Outcomes { get; } = [];
 
     internal SampleChunkPartialRetentionFixture()
     {
@@ -47,14 +49,14 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
         }
     }
 
-    internal ReplicatedOperation Operation(Mutation mutation)
+    internal Command<DatabaseCommand> Operation(Mutation mutation)
     {
         var id = Guid.NewGuid();
         return new(id, OperationKind.Batch, SampleChunkCanonicalFixture.Principal, Clock.GetUtcNow(),
             JsonSerializer.Serialize(new CommandRequest(id, Partition, [mutation]), JsonDefaults.Options));
     }
 
-    internal OperationResult Apply(ReplicatedOperation operation)
+    internal Result<object> Apply(Command<DatabaseCommand> operation)
     {
         var result = Owner.Apply(operation);
         Outcomes.Add((operation, result));

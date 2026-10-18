@@ -26,13 +26,13 @@ internal static class SubscriptionFilterNativeAssertions
         }
         var result = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, request,
             request.CommandId, token);
-        await Assert.That(result.Error).IsEqualTo(expected);
-        await Assert.That(result.Json).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+        
         await Assert.That(Image(store, request.Subscription.Source.Partition)).IsEquivalentTo(before, CollectionOrdering.Matching);
         var replay = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, request,
             request.CommandId, token);
-        await Assert.That(replay.Error).IsEqualTo(expected);
-        await Assert.That(replay.SafeDetail).IsEqualTo(result.SafeDetail);
+        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(expected);
+        await Assert.That(replay.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
     }
 
     private static async Task CorruptionAsync(DatabaseEngine db, ZoneTreeStore store,

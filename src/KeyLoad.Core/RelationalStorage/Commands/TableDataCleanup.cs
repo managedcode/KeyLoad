@@ -49,7 +49,7 @@ internal static class TableDataCleanup
         List<PartitionRef> partitions, ReadExecutionBudget work, DatabaseLimits limits)
     {
         var keys = new List<byte[]>();
-        long retainedBytes = Empty;
+        var retainedBytes = Empty;
         foreach (var partition in partitions)
         {
             foreach (var family in Families)

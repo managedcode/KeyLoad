@@ -23,9 +23,9 @@ internal static class MixedEventingRetentionBackupTopic
             [new PurgeTopic(state.Topic.Resource, MixedEventingRetentionBackupProtocol.PurgePosition)]);
         var before = MixedEventingRetentionBackupOracle.Rows(owner.Store, owner.Partition, includeOutcomes: false);
         var result = owner.Submit(OperationKind.Batch, refused, id: refused.CommandId);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(result.Json).IsNull();
-        await Assert.That(result.NativeValue).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        
+        await Assert.That(result.Value).IsNull();
         await Assert.That(MixedEventingRetentionBackupOracle.Rows(owner.Store, owner.Partition, includeOutcomes: false))
             .IsEquivalentTo(before, CollectionOrdering.Matching);
         var seek = new SeekSubscriptionRequest(Guid.NewGuid(), state.Pin, 1, SubscriptionStart.FromNow);
@@ -37,16 +37,16 @@ internal static class MixedEventingRetentionBackupTopic
             CommandId = Guid.NewGuid()
         };
         var physicalBefore = owner.Store.Position;
-        var journalBefore = owner.ReadJournalCut();
+        var journalBefore = owner.ReadCanonicalCut();
         state.PurgeReceipt = owner.Submit(OperationKind.Batch, state.Purge, id: state.Purge.CommandId).Get<CommitReceipt>();
         await Assert.That(state.PurgeReceipt.CommandId).IsEqualTo(state.Purge.CommandId);
         await EqualAsync(new[] { new MutationReceipt("purgeTopic", state.Topic.Resource, "2", 2) },
             state.PurgeReceipt.Mutations.ToArray());
         await Assert.That(state.PurgeReceipt.Token.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
-        var originalPurge = owner.ReadRetainedEntry(state.Purge.CommandId);
-        await Assert.That(originalPurge.Index).IsEqualTo(checked(journalBefore.CommittedIndex + OriginalApplyStep));
-        await Assert.That(state.PurgeReceipt.Token.Position).IsEqualTo(originalPurge.Index);
-        await Assert.That(owner.Database.LastApplied).IsEqualTo(originalPurge.Index);
+        var originalPurge = owner.ReadStoredOutcome(state.Purge.CommandId);
+        await Assert.That(originalPurge.CanonicalSequence).IsEqualTo(checked(journalBefore.CommittedIndex + OriginalApplyStep));
+        await Assert.That(state.PurgeReceipt.Token.Position).IsEqualTo(originalPurge.CanonicalSequence);
+        await Assert.That(owner.Database.LastApplied).IsEqualTo(originalPurge.CanonicalSequence);
         await Assert.That(owner.Store.Position).IsEqualTo(checked(physicalBefore + OriginalApplyStep));
         await RequireAsync(owner.Database, state);
         var rows = QueueWholeFlowStorage.Bytes(owner.Store);

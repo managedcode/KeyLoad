@@ -1,3 +1,5 @@
+using ManagedCode.Communication.Commands;
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Features.InternalSerialization;
 using KeyLoad.Storage;
@@ -47,7 +49,7 @@ internal sealed class QueueDispatchCasFixture : IDisposable
         {
             var seed = new ConfigureResourceRequest(ResourcePolicyUpdateFixture.TenantId,
                 ResourcePolicyUpdateFixture.DatabaseId, Definition);
-            owner.Apply(owner.Database.CreateNativeOperation(OperationKind.ConfigureResource,
+            owner.Apply(owner.Database.CreateCommand(OperationKind.ConfigureResource,
                 Guid.NewGuid(), ResourcePolicyUpdateFixture.RootId, owner.Database.EvaluationClock.GetUtcNow(),
                 NativeSerialization.Serialize(seed, NativeValidationProfile.PublicInputElements))).Get<ResourceDefinition>();
             OriginalDocument = owner.DocumentBytes() ?? throw new InvalidOperationException();
@@ -64,17 +66,17 @@ internal sealed class QueueDispatchCasFixture : IDisposable
         }
     }
 
-    internal ReplicatedOperation Command(Guid id, long expected, bool paused,
+    internal Command<DatabaseCommand> Command(Guid id, long expected, bool paused,
         string principal = ResourcePolicyUpdateFixture.RootId, string queue = Queue)
     {
         var request = new QueueDispatchControlRequest(ResourcePolicyUpdateFixture.TenantId,
             ResourcePolicyUpdateFixture.DatabaseId, queue, expected, paused);
-        return owner.Database.CreateNativeOperation(OperationKind.SetQueueDispatch, id, principal,
+        return owner.Database.CreateCommand(OperationKind.SetQueueDispatch, id, principal,
             owner.Database.EvaluationClock.GetUtcNow(),
             NativeSerialization.Serialize(request, NativeValidationProfile.PublicInputElements));
     }
 
-    internal OperationResult Apply(ReplicatedOperation operation) => owner.Apply(operation);
+    internal Result<object> Apply(Command<DatabaseCommand> operation) => owner.Apply(operation);
     internal ResourceDefinition Current() => owner.Store.Read(view => view.GetRecord<ResourceDefinition>(
         KeySpace.Resource(ResourcePolicyUpdateFixture.TenantId, ResourcePolicyUpdateFixture.DatabaseId, Queue)))
         ?? throw new InvalidOperationException();
@@ -82,12 +84,12 @@ internal sealed class QueueDispatchCasFixture : IDisposable
     internal byte[]? Collection() => owner.ResourceBytes();
     internal byte[]? Outcome(Guid id) => owner.OutcomeBytes(id);
     internal void Reopen() => owner.Reopen();
-    internal OperationResult PolicyPauseAttempt() => owner.Apply(owner.ConfigureResource(
+    internal Result<object> PolicyPauseAttempt() => owner.Apply(owner.ConfigureResource(
         Current() with
         {
             Paused = true,
             SchemaVersion = Current().SchemaVersion + VersionStep
         }, Current().SchemaVersion));
-    internal static KeyLoadException Failure(OperationResult result) => ResourcePolicyUpdateFixture.Failure(result);
+    internal static KeyLoadException Failure(Result<object> result) => ResourcePolicyUpdateFixture.Failure(result);
     public void Dispose() => owner.Dispose();
 }

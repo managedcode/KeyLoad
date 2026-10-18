@@ -14,7 +14,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<ControlledPartitionMove
     internal PartitionRef Partition { get; } = P.Partition;
     internal ICommitCoordinator Coordinator => source().Partition.Coordinator;
 
-    internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()
+    internal (long LastIndex, long CommittedIndex, long Term) ReadCanonicalCut()
     {
         var state = source().Log.State;
         return (state.LastIndex, state.CommittedIndex, state.Term);

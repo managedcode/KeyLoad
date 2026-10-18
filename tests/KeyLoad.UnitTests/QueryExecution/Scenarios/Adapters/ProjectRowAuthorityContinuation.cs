@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Query;
@@ -21,7 +22,6 @@ internal static class ProjectRowAuthorityContinuation
     private const string MissingOutcome = "The acknowledged original project row repair outcome is absent.";
     private const long InitialRevision = 1;
     private const long UpdatedRevision = 2;
-    private const long InitialOwnershipEpoch = 1;
     private const long ProjectEpoch = 2;
     private const long RemovedEpoch = 3;
     private const long RevokedEpoch = 4;
@@ -38,7 +38,7 @@ internal static class ProjectRowAuthorityContinuation
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(db.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(db.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(db.Store.Position);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialOwnershipEpoch);
+
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         MutationReceipt[] mutations = [new(PutKind, Collection, HiddenId, UpdatedRevision)];
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(mutations))).IsTrue();
@@ -85,8 +85,7 @@ internal static class ProjectRowAuthorityContinuation
     {
         var image = GraphShortestPathFullStoreImage.Bytes(store);
         var cut = store.Position;
-        var operation = new ReplicatedOperation(command.CommandId, OperationKind.Batch, Root, default,
-            JsonSerializer.Serialize(command, JsonDefaults.Options));
+        var operation = engine.CreateCommand(OperationKind.Batch, command.CommandId, Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var replay = engine.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await Assert.That(Outcome(store, command).AsSpan().SequenceEqual(outcome)).IsTrue();

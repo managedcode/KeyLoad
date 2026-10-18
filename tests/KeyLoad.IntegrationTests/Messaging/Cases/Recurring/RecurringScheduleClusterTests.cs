@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Proves schedule CAS, catch-up identities and cross-client retry on the actual CLUSTER cluster.</summary>
+/// <summary>Proves schedule CAS, catch-up identities and cross-client retry on the actual Orleans cluster.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RecurringScheduleClusterTests(ClusterFixture fixture)

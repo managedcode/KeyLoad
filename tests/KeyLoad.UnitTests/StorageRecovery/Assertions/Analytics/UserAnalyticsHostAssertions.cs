@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Security.Cryptography;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -8,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class UserAnalyticsHostAssertions
 {
-    internal static UserAnalyticsHostCut Capture(PartitionHost host, ReplicatedOperation[] originals, CommitReceipt[] receipts)
+    internal static UserAnalyticsHostCut Capture(PartitionHost host, Command<DatabaseCommand>[] originals, CommitReceipt[] receipts)
         => new(host.Database.Store.Identity, host.Database.Store.Position,
             QueueWholeFlowStorage.Bytes((ZoneTreeStore)host.Database.Store), originals, receipts,
             Convert.ToHexString(host.Database.Store.Identity.SigningKey.Span));

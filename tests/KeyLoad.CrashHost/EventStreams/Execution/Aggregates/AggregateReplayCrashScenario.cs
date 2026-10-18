@@ -48,7 +48,7 @@ internal static class AggregateReplayCrashScenario
         await PreserveSourceBytesAsync(directory, store);
         var command = new StoreAggregateSnapshot(StreamSet, StreamId, EmptySourceRevision, Reducer, InitialStateSchemaVersion, StateJson, NoSnapshotVersion, InitialGeneration);
         var request = new CommandRequest(SnapshotCommandId, Partition, [command]);
-        var operation = CrashDatabase.Operation(OperationKind.Batch, request, SnapshotCommandId);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SnapshotCommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), NativeSerialization.Serialize(operation));
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;

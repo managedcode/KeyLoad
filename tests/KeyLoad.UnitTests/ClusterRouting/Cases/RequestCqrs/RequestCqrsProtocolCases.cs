@@ -39,9 +39,9 @@ internal static class RequestCqrsProtocolCases
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);
     }
 
-    internal static async Task AcCrs004ActualClientSerializerCounterIsInclusiveAndCancellationAware(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs004ActualClientSerializerCounterIsInclusiveAndCancellationAware(RequestCqrsHostedRuntimeFixture fixture)
     {
-        var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<string>>();
+        var serializer = fixture.Services.GetRequiredService<Serializer<string>>();
         var sample = new string('n', 8_192);
         var native = serializer.SerializeToArray(sample);
         await Assert.That(GrainNativeByteCounter.Measure(serializer, sample, native.Length, fixture.RoutingOptions, CancellationToken.None))
@@ -75,9 +75,9 @@ internal static class RequestCqrsProtocolCases
         await Assert.That(overScratch.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
-    internal static async Task AcCrs004NativeSixteenMiBReplyUsesActualRegisteredChunkSerializer(RequestCqrsClusterFixture fixture)
+    internal static async Task AcCrs004NativeSixteenMiBReplyUsesActualRegisteredChunkSerializer(RequestCqrsHostedRuntimeFixture fixture)
     {
-        var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<
+        var serializer = fixture.Services.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var payload = new byte[fixture.RoutingOptions.Value.MaximumReplyBytes];
         var chunk = CompletedChunk(payload);

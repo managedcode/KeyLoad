@@ -1,3 +1,4 @@
+using ManagedCode.Communication.Commands;
 using System.Text;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -5,7 +6,7 @@ using KeyLoad.Core.Features.InternalSerialization;
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 [NotInParallel]
-internal sealed class NativeOperationFingerprintTests
+internal sealed class DatabaseCommandFingerprintTests
 {
     private const string Escaped = "\"\\\b\f\n\r\t<>&+'界λ😀\u2028\u2029";
     private const string NumericJson = "{\"large\":12345678901234567890.00,\"small\":1e-20,\"null\":null}";
@@ -31,7 +32,7 @@ internal sealed class NativeOperationFingerprintTests
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly(int boundary)
+    public async Task LargeStringSegmentsPreserveEscapesAndSplitUnicodeExactly(int boundary)
     {
         var prefix = new string('x', SplitCodeUnits + boundary);
         await Check(OperationKind.Batch, prefix + Escaped + prefix);
@@ -41,16 +42,13 @@ internal sealed class NativeOperationFingerprintTests
 
     private static async Task Check(OperationKind kind, string payload)
     {
-        var operation = new ReplicatedOperation(Id, kind, Principal, DateTimeOffset.UnixEpoch, payload);
         var expected = JsonData.Fingerprint(new
         {
-            operation.Id,
-            operation.Kind,
-            operation.PrincipalId,
-            operation.PayloadJson
+            Id,
+            Kind = kind,
+            PrincipalId = Principal,
+            PayloadJson = payload
         });
-        // The four-argument primitive retains the frozen JSON hash shape for every kind, including unknown values.
-        await Assert.That(NativeOperationFingerprint.Compute(Id, kind, Principal, Encoding.UTF8.GetBytes(payload))).IsEqualTo(expected);
-        await Assert.That(NativeOperationFingerprint.Compute(operation)).IsEqualTo(expected);
+        await Assert.That(DatabaseCommandFingerprint.Compute(Id, kind, Principal, payload)).IsEqualTo(expected);
     }
 }

@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using P = KeyLoad.UnitTests.Features.ResourceExecution.CachePolicyEpochProtocol;
@@ -58,10 +59,9 @@ internal sealed class CachePolicyEpochState(CachePolicyEpochOwner owner)
         set;
     } = [];
 
-    internal OperationResult Submit<T>(OperationKind kind, T payload, CancellationToken token,
+    internal Result<object> Submit<T>(OperationKind kind, T payload, CancellationToken token,
         Guid? id = null, string principal = P.Root)
-        => Database.ApplyEmbedded(new(id ?? Guid.NewGuid(), kind, principal, default,
-            System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)), token);
+        => Database.ApplyEmbedded(Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal, default, System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)), token);
 
     internal byte[] Outcome(CommandRequest command)
         => Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Partition, P.Root, command.CommandId)))

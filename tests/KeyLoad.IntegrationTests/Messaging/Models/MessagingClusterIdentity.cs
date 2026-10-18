@@ -7,7 +7,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-/// <summary>Owns one actually persisted scoped principal and API credential for public CLUSTER callers.</summary>
+/// <summary>Owns one actually persisted scoped principal and API credential for public Orleans callers.</summary>
 internal sealed record MessagingClusterIdentity(PrincipalRecord Principal, ApiKeyRecord Credential, string Secret)
 {
     private const int SecretBytes = 32;

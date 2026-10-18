@@ -30,8 +30,8 @@ internal static class GraphSearchLineageClusterSetup
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(seed, token));
         await Assert.That(receipt.Token.Position > 0L).IsTrue();
         await SqlClusterProtocol.EqualAsync(receipt, new CommitReceipt(seed.CommandId, new(receipt.Token.Incarnation,
-            partition.AtomicPartitionId, receipt.Token.Position, receipt.Token.OwnershipEpoch), GraphSearchLineageClusterRecipe.Receipts,
-            DurabilityProfile.QuorumProcessDurable));
+            partition.AtomicPartitionId, receipt.Token.Position), GraphSearchLineageClusterRecipe.Receipts,
+            DurabilityProfile.ProcessDurable, 3));
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.OutboxStatusAsync(partition, token));
         await AtomicProducerClusterOutbox.LiteralAsync(outbox, seed.Mutations.Length);
         await Assert.That(seed.Mutations.Length).IsEqualTo(8);
