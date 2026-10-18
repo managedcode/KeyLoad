@@ -1,10 +1,19 @@
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
+using System.Net;
 using KeyLoad.Server;
+using KeyLoad.Storage;
+using KeyLoad.UnitTests.Features.ClusterRouting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Orleans.TestingHost;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageNativeFlow
 {
+    private const string DirectoryPrefix = "keyload-native-storage-";
+    private const string GuidFormat = "N";
+    private const string MissingReceipt = "The original native storage operation did not return its receipt.";
+    private const int OneSilo = 1;
     private const int FirstCold = 0;
     private const int ColdCount = 2;
     private const int NoFailures = 0;
@@ -12,50 +21,90 @@ internal static class PartitionStorageNativeFlow
     internal static async Task RunAsync(CancellationToken token)
     {
         var failures = new List<Exception>();
-        ControlledPartitionMovementNativeHostEndpoints? endpoints = null;
-        ControlledPartitionMovementNativeHosts? owners = null;
+        var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var ports = new TestClusterPortAllocator();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            endpoints = new();
-            var settings = new ControlledPartitionMovementNativeHostSettings(endpoints);
-            var localhost = new NativeLocalhostClusteringOptions(endpoints.Primary);
-            var partial = await PartitionStorageNativePartialTrial.RunAsync(settings, localhost, endpoints, token)
+            var port = ports.AllocateConsecutivePortPairs(OneSilo).Item1;
+            var profile = new RequestCqrsHostedProfile(TimeProvider.System, UnitRoutingOptions.Routing(),
+                null, null, false, false, null);
+            var arguments = profile.Arguments(directory, port);
+            var localhost = new NativeLocalhostClusteringOptions(new IPEndPoint(IPAddress.Loopback, port));
+            var partial = await PartitionStorageNativePartialTrial.RunAsync(arguments, localhost, profile, token)
                 .ConfigureAwait(false);
-            owners = new(settings, localhost);
-            await owners.CreateNodesAsync(token).ConfigureAwait(false);
-            var starting = Task.WhenAll(owners.Nodes.Select(node => node.StartAsync(token)));
-            await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(starting).ConfigureAwait(false);
-            await RequireIdentityAsync(partial, owners.Source).ConfigureAwait(false);
-            var receipt = await PartitionStorageNativeHealthy.ExecuteAsync(owners.Source, token).ConfigureAwait(false);
-            await PartitionStorageNativeHealthy.ReplayAsync(owners.Source, receipt, token).ConfigureAwait(false);
+            var released = new List<Exception>();
+            PartitionStorageNativeApplicationDisposeAssertions.RequireReleased(directory, released);
+            ServerFailureObserver.ThrowIfAny(released);
+            var original = await RunOwnerAsync(arguments, localhost, profile, partial.Identity!, null, token)
+                .ConfigureAwait(false);
             for (var cold = FirstCold; cold < ColdCount; cold++)
             {
-                await owners.RestartAsync(token).ConfigureAwait(false);
-                await RequireIdentityAsync(partial, owners.Source).ConfigureAwait(false);
-                await PartitionStorageNativeHealthy.ReplayAsync(owners.Source, receipt, token).ConfigureAwait(false);
+                _ = await RunOwnerAsync(arguments, localhost, profile, partial.Identity!, original, token)
+                    .ConfigureAwait(false);
             }
         }, failures).ConfigureAwait(false);
-        if (owners is not null)
+        if (failures.Count == NoFailures)
         {
-            if (failures.Count != NoFailures)
-            {
-                owners.RetainRoots();
-            }
-            await ServerFailureObserver.ObserveAsync(() => owners.DisposeAsync().AsTask(), failures)
-                .ConfigureAwait(false);
+            ServerFailureObserver.Observe(ports.Dispose, failures);
         }
-        if (endpoints is not null)
+        if (failures.Count == NoFailures && Directory.Exists(directory))
         {
-            ServerFailureObserver.Observe(endpoints.Dispose, failures);
+            ServerFailureObserver.Observe(() => Directory.Delete(directory, recursive: true), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RequireIdentityAsync(PartitionStorageNativePartialStart original,
-        ControlledPartitionMovementNativeHost source)
+    private static async Task<PartitionStorageNativeCommit> RunOwnerAsync(string[] arguments,
+        NativeLocalhostClusteringOptions localhost, RequestCqrsHostedProfile profile, StoreIdentity identity,
+        PartitionStorageNativeCommit? original, CancellationToken token)
     {
-        var actual = source.Store.Read(_ => source.Store.Identity);
-        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(original.Identity)))
-            .IsTrue();
+        var failures = new List<Exception>();
+        WebApplication? application = null;
+        PartitionHostApplicationOwner? owner = null;
+        OrleansNode? node = null;
+        string? directory = null;
+        Task? disposal = null;
+        var receipt = original;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var deadline = new CancellationTokenSource(profile.Timing.StartupTimeout, TimeProvider.System);
+            using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, token);
+            application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+                configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
+            owner = application.Services.GetRequiredService<PartitionHostApplicationOwner>();
+            node = application.Services.GetRequiredService<OrleansNode>();
+            await application.StartAsync(startup.Token).ConfigureAwait(false);
+            await node.StartAsync(startup.Token).ConfigureAwait(false);
+            var host = owner.Borrow();
+            directory = host.DirectoryPath;
+            await Assert.That(JsonDefaults.Serialize(host.Database.Store.Identity).AsSpan()
+                .SequenceEqual(JsonDefaults.Serialize(identity))).IsTrue();
+            if (original is null)
+            {
+                receipt = await PartitionStorageNativeHealthy.ExecuteAsync(application.Services, token).ConfigureAwait(false);
+            }
+            await PartitionStorageNativeHealthy.ReplayAsync(application.Services,
+                receipt ?? throw new InvalidOperationException(MissingReceipt), token).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        if (application is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => disposal = application.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
+        if (owner is not null && node is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await Assert.That(disposal is { IsCompletedSuccessfully: true }).IsTrue();
+                await Assert.That(owner.Closing is { IsCompletedSuccessfully: true }).IsTrue();
+                await Assert.That(owner.CanReleaseRoot).IsTrue();
+                await Assert.That(node.HasJoinedRequestWork).IsTrue();
+            }, failures).ConfigureAwait(false);
+        }
+        if (directory is not null && owner?.CanReleaseRoot == true)
+        {
+            PartitionStorageNativeApplicationDisposeAssertions.RequireReleased(directory, failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+        return receipt ?? throw new InvalidOperationException(MissingReceipt);
     }
 }

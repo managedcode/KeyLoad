@@ -4,6 +4,6 @@ internal sealed class PartitionStorageNativeTests
 {
     [Test]
     [NotInParallel]
-    public Task ActualNativeStoragePublicationThenLockFailureJoinsAndSameRootsRetainSignedReceiptThroughTwoColdStarts()
+    public Task ActualNativeStoragePublicationThenLockFailureJoinsAndSameRootsRetainCanonicalReceiptThroughTwoColdStarts()
         => PartitionStorageNativeFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

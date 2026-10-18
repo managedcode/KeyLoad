@@ -3,7 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
 {

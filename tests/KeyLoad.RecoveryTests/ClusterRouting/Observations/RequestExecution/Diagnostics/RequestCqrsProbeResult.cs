@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RequestCqrsTestProtocol.ObservationAlias)]
 internal sealed record RequestCqrsProbeResult(

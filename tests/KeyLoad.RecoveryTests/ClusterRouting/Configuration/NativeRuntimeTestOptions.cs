@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 /// <summary>Central timing profile shared by real native journal and job fixtures.</summary>
 [ConfigurationOptions]

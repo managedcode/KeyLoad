@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 using Orleans.TestingHost;
 using TUnit.Core.Interfaces;
 
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 /// <summary>Runs the production server composition with native Orleans membership and silo-local storage.</summary>
 internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyncDisposable
@@ -29,15 +29,17 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private int? reservedSiloPort;
     private Task? stopping;
     private Task? disposal;
+    private bool retainDirectory;
 
     internal RequestCqrsHostedRuntimeFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
         IGrainRequestPhaseObserver? observer = null, IGrainRequestPurposeObserver? purposeObserver = null,
         bool nativeTextMaintenance = false, bool nativeAnnMaintenance = false, DatabaseLimits? limits = null,
         RequestCqrsHostedClusterNode? clusterNode = null,
-        Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null)
+        Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
+        IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null)
     {
-        profile = new(clock ?? TimeProvider.System, UnitRoutingOptions.Routing(routing), observer, purposeObserver,
-            nativeTextMaintenance, nativeAnnMaintenance, limits, clusterNode, lifecycleParticipantFactory);
+        profile = new(clock ?? TimeProvider.System, RequestCqrsHostedProfile.ValidateRouting(routing), observer, purposeObserver,
+            nativeTextMaintenance, nativeAnnMaintenance, limits, clusterNode, lifecycleParticipantFactory, authenticationExecutionObserver);
     }
 
     internal IGrainFactory Grains => Services.GetRequiredService<IGrainFactory>();
@@ -54,6 +56,10 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     internal RequestCqrsHostedDatabase Database { get; private set; } = null!;
     internal bool IsDisposalJoined => disposal?.IsCompletedSuccessfully == true;
     internal bool OwnedDirectoryExists => Directory.Exists(directory);
+    internal bool IsStopJoined => stopping?.IsCompletedSuccessfully == true;
+    internal Uri PublicEndpoint => new((application ?? throw new InvalidOperationException(NotInitialized)).Urls.Single());
+    internal string AdminKey => Services.GetRequiredService<IOptions<NodeOptions>>().Value.AdminKey;
+    internal void RetainRoot() => Volatile.Write(ref retainDirectory, true);
 
     public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
 
@@ -118,6 +124,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         arguments ??= profile.Arguments(directory, siloPort);
         var primary = profile.ClusterNode?.PrimaryEndpoint ?? new IPEndPoint(IPAddress.Loopback, siloPort);
         application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: new(primary),
+            authenticationExecutionObserver: profile.AuthenticationExecutionObserver,
             lifecycleParticipantFactory: profile.LifecycleParticipantFactory,
             phaseObserver: profile.Observer, purposeObserver: profile.PurposeObserver,
             configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
@@ -143,7 +150,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         if (failures.Count == NoFailures)
         {
             ServerFailureObserver.Observe(ports.Dispose, failures);
-            if (Directory.Exists(directory))
+            if (!Volatile.Read(ref retainDirectory) && Directory.Exists(directory))
             {
                 ServerFailureObserver.Observe(() => Directory.Delete(directory, recursive: true), failures);
             }

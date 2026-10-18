@@ -33,7 +33,7 @@ internal sealed class ConnectionPostSubmitFailureObserver(ConnectionOperationObs
     }
 
     public async ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
-        ReplicaSiloDiscoveryState actualRuntime, CancellationToken token)
+        SiloStorageIdentityProvider actualRuntime, CancellationToken token)
     {
         await original.ObserveNativeAsync(identity, phase, actualRuntime, token).ConfigureAwait(false);
         if (identity.RequestId != RequestId || phase != GrainRequestPhase.SubmitReturned)

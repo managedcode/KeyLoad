@@ -87,7 +87,11 @@ internal static class ImplementationTermCatalog
         "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkCorpus",
         "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkManifest",
         "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkState",
-        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkSerializationBenchmarks"
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkSerializationBenchmarks",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.SampleChunkBenchmarkConsumerTests",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.SampleChunkBenchmarkRejectionOracle",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.SampleChunkBenchmarkRejectionMutations",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.SampleChunkBenchmarkRejectionProgram"
     ];
     internal static readonly string[] DataControlMembers =
     [
@@ -112,7 +116,9 @@ internal static class ImplementationTermCatalog
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerObservationPolicy",
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampleBudget",
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampler",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceEvidenceCollector"
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceEvidenceCollector",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.RawStorageReportData",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.NativeSerializationReportData"
     ];
     internal static readonly string[] MeasurementMembers =
     [
@@ -129,7 +135,15 @@ internal static class ImplementationTermCatalog
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.MinimumSamples",
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing",
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.ReadBoundedAsync(System.IO.Stream, int, int, System.Threading.CancellationToken)",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.DrainBoundedAsync(System.IO.Stream, int, System.Threading.CancellationToken)"
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.DrainBoundedAsync(System.IO.Stream, int, System.Threading.CancellationToken)",
+        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.Neo4jHarnessConstants.SamplesCsvFile",
+        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SamplingMissing",
+        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SampleCountField",
+        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.AdditionalSampleCount",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.ScaleServerResourceBoundsNativeFixture.OutputBoundMessage",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.ScaleServerResourceBoundsFlow.SampleByteGrant",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.ScaleServerResourceNodeProgram.Source",
+        "KeyLoad.UnitTests.Features.BenchmarkComparisons.ScaleServerResourceEvidenceParserTests.AcScale016RejectsMisboundOrIncomparableServerEvidence(string)"
     ];
 
     private static readonly Regex Words = new("[A-Z]?[a-z]+|[A-Z]+(?![a-z])", RegexOptions.CultureInvariant);

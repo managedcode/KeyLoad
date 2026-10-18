@@ -34,7 +34,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     }
 
     public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
-        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken)
+        SiloStorageIdentityProvider actualRuntime, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(actualRuntime);
         cancellationToken.ThrowIfCancellationRequested();

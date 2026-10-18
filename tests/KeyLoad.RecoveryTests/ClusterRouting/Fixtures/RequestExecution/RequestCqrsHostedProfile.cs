@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using KeyLoad.Server;
 using ManagedCode.Orleans.Graph;
 using ManagedCode.Orleans.Graph.Models;
@@ -11,12 +12,13 @@ using Orleans.Configuration;
 using Orleans.Metadata;
 using Orleans.Serialization;
 
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<GrainRoutingOptions> routing,
     IGrainRequestPhaseObserver? observer, IGrainRequestPurposeObserver? purposeObserver,
     bool nativeText, bool nativeAnn, DatabaseLimits? limits, RequestCqrsHostedClusterNode? clusterNode = null,
-    Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null)
+    Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
+    IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null)
 {
     internal const string Root = "root";
     private const string Credential = "root.unit-test-credential-32-characters";
@@ -38,6 +40,17 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     internal NativeRuntimeTestOptions Timing { get; } = new();
     internal RequestCqrsHostedClusterNode? ClusterNode { get; } = clusterNode;
     internal Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? LifecycleParticipantFactory { get; } = lifecycleParticipantFactory;
+    internal IDatabaseAuthenticationExecutionObserver? AuthenticationExecutionObserver { get; } = authenticationExecutionObserver;
+
+    internal static IOptions<GrainRoutingOptions> ValidateRouting(GrainRoutingOptions? configured)
+    {
+        var value = configured ?? new GrainRoutingOptions();
+        if (!value.IsValid())
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(GrainRoutingOptions), [GrainRoutingOptions.ValidationMessage]);
+        }
+        return Options.Create(value);
+    }
 
     internal string[] Arguments(string directory, int siloPort)
     {
@@ -59,8 +72,12 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
         _ = node;
         services.Replace(ServiceDescriptor.Singleton(Clock));
         services.Replace(ServiceDescriptor.Singleton(Routing));
-        services.Replace(ServiceDescriptor.Singleton(UnitExecutionOptions.DatabaseLimits(limits)));
-        services.Replace(ServiceDescriptor.Singleton(UnitExecutionOptions.Messaging()));
+        var configuredLimits = limits ?? new DatabaseLimits();
+        configuredLimits.Validate();
+        var messaging = new MessagingExecutionOptions();
+        messaging.Validate();
+        services.Replace(ServiceDescriptor.Singleton(Options.Create(configuredLimits)));
+        services.Replace(ServiceDescriptor.Singleton(Options.Create(messaging)));
         services.Configure<GrainCollectionOptions>(settings => settings.CollectionAge = Timing.OrdinaryCollectionAge);
         services.Configure<GrainTypeOptions>(settings => settings.Classes.Add(typeof(RequestCqrsIdentityProbeGrain)));
         services.AddSingleton<RequestCqrsCapabilityLedger>();

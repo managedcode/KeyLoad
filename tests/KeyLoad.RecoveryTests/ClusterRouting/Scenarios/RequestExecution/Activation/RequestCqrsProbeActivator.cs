@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsProbeActivator(DefaultGrainActivator disposalActivator) : IGrainActivator
 {

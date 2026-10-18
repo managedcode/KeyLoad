@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Explicit native options composition for standalone database and query regression fixtures.</summary>
+/// <summary>Explicit native options composition for standalone database and query fixtures.</summary>
 internal static partial class UnitExecutionOptions
 {
 

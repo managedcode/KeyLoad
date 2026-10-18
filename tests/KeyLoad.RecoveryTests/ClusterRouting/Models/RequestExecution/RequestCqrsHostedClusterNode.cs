@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 /// <summary>Native localhost settings for one production host in an owned two-silo test cluster.</summary>
 internal sealed class RequestCqrsHostedClusterNode(string clusterId, string siloName, Guid incarnation,

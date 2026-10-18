@@ -8,5 +8,6 @@ internal sealed class ResourcePairBindingWholeFlowTests
     [Arguments(ResourcePairBindingFault.ConflictingLifetime)]
     [Arguments(ResourcePairBindingFault.MissingDefinition)]
     public Task NativeMixedModelsBlobAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(ResourcePairBindingFault fault)
-        => ResourcePairBindingFixture.RunAsync(fault, TestContext.Current!.Execution.CancellationToken);
+        => ResourceIncarnationOwner.RunAsync(source => ResourcePairBindingFlow.RunAsync(new(source, fault),
+            TestContext.Current!.Execution.CancellationToken));
 }

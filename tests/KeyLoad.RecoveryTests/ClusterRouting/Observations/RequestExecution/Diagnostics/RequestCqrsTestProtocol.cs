@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 internal static class RequestCqrsTestProtocol
 {

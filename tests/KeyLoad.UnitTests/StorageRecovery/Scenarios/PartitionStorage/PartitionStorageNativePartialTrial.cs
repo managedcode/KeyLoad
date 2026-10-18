@@ -1,34 +1,35 @@
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageNativePartialTrial
 {
-    private const int FirstOwner = 0;
     private const int NoFailures = 0;
 
-    internal static async Task<PartitionStorageNativePartialStart> RunAsync(
-        ControlledPartitionMovementNativeHostSettings settings, NativeLocalhostClusteringOptions localhost,
-        ControlledPartitionMovementNativeHostEndpoints endpoints, CancellationToken token)
+    internal static async Task<PartitionStorageNativePartialStart> RunAsync(string[] arguments,
+        NativeLocalhostClusteringOptions localhost, RequestCqrsHostedProfile profile, CancellationToken token)
     {
         var failures = new List<Exception>();
-        ControlledPartitionMovementNativeHost? host = null;
+        WebApplication? application = null;
         PartitionHostApplicationOwner? owner = null;
         PartitionStorageNativePartialStart? observation = null;
         PartitionStorageLifecycle? lower = null;
+        OrleansNode? node = null;
         var refusalProved = false;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            host = await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(FirstOwner), localhost,
+            using var deadline = new CancellationTokenSource(profile.Timing.StartupTimeout, TimeProvider.System);
+            using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, token);
+            application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
                 lifecycleParticipantFactory: provider => observation = new(
                     provider.GetRequiredService<PartitionHostApplicationOwner>()),
-                startupCancellation: token).ConfigureAwait(false);
-            owner = host.Application.Services.GetRequiredService<PartitionHostApplicationOwner>();
-            lower = host.Application.Services.GetRequiredService<PartitionStorageLifecycle>();
-            endpoints.Dispose();
-            var originalStart = host.StartAsync(token);
+                configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
+            owner = application.Services.GetRequiredService<PartitionHostApplicationOwner>();
+            lower = application.Services.GetRequiredService<PartitionStorageLifecycle>();
+            node = application.Services.GetRequiredService<OrleansNode>();
+            var originalStart = application.StartAsync(startup.Token);
             var expected = new List<Exception>();
             await ServerFailureObserver.ObserveAsync(() => originalStart, expected).ConfigureAwait(false);
             var proof = new List<Exception>();
@@ -41,10 +42,10 @@ internal static class PartitionStorageNativePartialTrial
             }
             refusalProved = true;
         }, failures).ConfigureAwait(false);
-        if (host is not null)
+        if (application is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => PartitionStorageNativePartialClose.RunAsync(
-                host, owner, lower, refusalProved, failures), failures).ConfigureAwait(false);
+                application, node, owner, lower, refusalProved, failures), failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return observation!;

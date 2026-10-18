@@ -104,7 +104,7 @@ internal static class ImplementationTermSymbols
     }
 
     internal static bool Measurement(ISymbol? symbol) =>
-        symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" &&
+        symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" or "KeyLoad.ComparisonTests" &&
         Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
         symbol is IFieldSymbol { Name: "Samples", ContainingType: { } owner } &&
         owner.ToDisplayString() == "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFields" ||
@@ -128,7 +128,7 @@ internal static class ImplementationTermSymbols
          type.ContainingAssembly?.Name == ImplementationTermCatalog.DataRuntimeAssembly &&
          type.ContainingNamespace?.ToDisplayString() == ImplementationTermCatalog.DataRuntimeNamespace &&
          Array.Exists(ImplementationTermCatalog.DataRuntimeTypes, name => name == type.Name) ||
-         type.ContainingAssembly?.Name == "KeyLoad.BenchmarkScenarios" &&
+         type.ContainingAssembly?.Name is "KeyLoad.BenchmarkScenarios" or "KeyLoad.ComparisonTests" &&
          Array.Exists(ImplementationTermCatalog.DataControlTypes, name => name == type.ToDisplayString());
 
     private static bool TypeMeans(ITypeSymbol? type, Func<ITypeSymbol, bool> accepts, HashSet<ITypeSymbol> visited)

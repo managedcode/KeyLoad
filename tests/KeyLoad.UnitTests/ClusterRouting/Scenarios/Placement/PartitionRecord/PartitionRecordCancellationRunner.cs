@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Queries;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -6,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting.Helpers;
 
 internal static class PartitionRecordCancellationRunner
 {
-    internal static PartitionRecordCancellationRun Run(ZoneTreeStore store, PartitionRef partition,
+    internal static CancellationRun Run(ZoneTreeStore store, PartitionRef partition,
         string family, long separatelyMeasuredPageBytes, int maxRecords,
         long maxRetainedBytes, long maxExaminedBytes)
     {
@@ -36,4 +37,7 @@ internal static class PartitionRecordCancellationRunner
         return new(page.Value, PartitionRecordCancellationFailures.Single(readerFailures),
             PartitionRecordCancellationFailures.Single(observerFailures), examinedBytes, token);
     }
+
+    internal sealed record CancellationRun(PartitionRecordPage? Page, Exception? ReadFailure,
+        Exception? ObserverFailure, long ExaminedBytesBeyondBaseline, CancellationToken CancellationToken);
 }

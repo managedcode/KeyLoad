@@ -1,5 +1,5 @@
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
+using Microsoft.AspNetCore.Builder;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -11,15 +11,19 @@ internal static class PartitionStorageNativePartialClose
     internal const int OwnerCloseIndex = 2;
     private const int OriginalCloseCount = 3;
 
-    internal static async Task RunAsync(ControlledPartitionMovementNativeHost host,
+    internal static async Task RunAsync(WebApplication application, OrleansNode? node,
         PartitionHostApplicationOwner? owner, PartitionStorageLifecycle? lower, bool refusalProved,
         List<Exception> failures)
     {
+        if (node is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => node.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        }
         var originalFaults = new List<Exception>();
         var originals = new Task?[OriginalCloseCount];
         await ServerFailureObserver.ObserveAsync(() =>
         {
-            var original = host.DisposeAsync().AsTask();
+            var original = application.StopAsync(CancellationToken.None);
             originals[HostCloseIndex] = original;
             return original;
         }, originalFaults).ConfigureAwait(false);
@@ -41,12 +45,15 @@ internal static class PartitionStorageNativePartialClose
         if (refusalProved)
         {
             await ServerFailureObserver.ObserveAsync(() => PartitionStorageNativeStopAssertions.RequireAsync(
-                host, owner, lower, originals, originalFaults), proof).ConfigureAwait(false);
+                node, owner, lower, originals, originalFaults), proof).ConfigureAwait(false);
         }
-        if (!refusalProved || proof.Count != NoFailures)
+        var disposal = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => application.DisposeAsync().AsTask(), disposal).ConfigureAwait(false);
+        if (!refusalProved || proof.Count != NoFailures || disposal.Count != NoFailures)
         {
             failures.AddRange(originalFaults);
             failures.AddRange(proof);
+            failures.AddRange(disposal);
         }
     }
 }

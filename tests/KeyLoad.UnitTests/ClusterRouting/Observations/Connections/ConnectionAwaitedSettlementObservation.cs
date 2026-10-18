@@ -38,7 +38,7 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     }
 
     public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
-        ReplicaSiloDiscoveryState actualRuntime, CancellationToken token)
+        SiloStorageIdentityProvider actualRuntime, CancellationToken token)
         => original.ObserveNativeAsync(identity, phase, actualRuntime, token);
 
     public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)

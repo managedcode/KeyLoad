@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 [global::Orleans.Alias(RequestCqrsTestProtocol.ProbeAlias)]
 internal interface IRequestCqrsIdentityProbeGrain : IGrainWithGuidKey
